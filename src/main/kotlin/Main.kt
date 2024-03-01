@@ -2,6 +2,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -16,6 +17,7 @@ import java.awt.Shape
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.geom.*
+import java.nio.file.Paths
 
 var windowSize = IntSize(478, 192)
 
@@ -46,7 +48,7 @@ class RoundedRectShape(private val x: Double, private val y: Double, private val
 fun main() = application {
 
     // create the window
-    Window(onCloseRequest = ::exitApplication, resizable = false, transparent = true, title = "Oh Eek", alwaysOnTop = true, focusable = false, undecorated = true) {
+    Window(onCloseRequest = ::exitApplication, resizable = false, transparent = true, title = "Raid Framer", alwaysOnTop = true, focusable = false, undecorated = true) {
 
         window.size = Dimension(windowSize.width, windowSize.height)
 
@@ -80,6 +82,24 @@ fun main() = application {
         ) {
             RootLayout(RootLayoutModel())
         }
+    }
+
+    Window(onCloseRequest = ::exitApplication, resizable = false, title = "Raid Framer Settings", alwaysOnTop = true, focusable = true) {
+        window.size = Dimension(100, 100)
+        window.location = Point(100, 100)
+        window.isVisible = true
+
+        val combatInteractor: CombatEventInteractor = CombatEventInteractor() {
+            println(it)
+        }
+
+        fun exitApplication() {
+            combatInteractor.stop()
+            System.exit(0)
+        }
+
+        combatInteractor.start()
+        Box { Text("Hi") }
     }
 
 }
