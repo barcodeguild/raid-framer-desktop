@@ -11,17 +11,23 @@ import java.time.format.DateTimeFormatter
 import java.util.regex.Pattern
 import kotlin.io.path.pathString
 
-class CombatEventInteractor(private val onNewLines: (String) -> Unit) {
+object CombatEventInteractor {
   private val scope = CoroutineScope(Dispatchers.IO)
 
-  private var possiblePaths = mutableListOf<Path>()
+  var possiblePaths = mutableListOf<Path>()
+  var selectedPath: String? = null
 
-  companion object {
-    val ATTACK_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)\\|r attacked (\\w+)\\|r using \\|c[0-9a-fA-F]{8}(.*?)\\|r and caused \\|c[0-9a-fA-F]{8}(.*?)\\|r \\|c[0-9a-fA-F]{8}(.*?)\\|r")
-    val BUFF_END_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r's (.*)( buff ended)")
-    val DEBUFF_CLEAR_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r's (.*)( debuff cleared)")
-    val TARGET_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r targeted (.*) using (.*)( to restore (.*))?")
-  }
+  val ATTACK_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)\\|r attacked (\\w+)\\|r using \\|c[0-9a-fA-F]{8}(.*?)\\|r and caused \\|c[0-9a-fA-F]{8}(.*?)\\|r \\|c[0-9a-fA-F]{8}(.*?)\\|r")
+  val HEAL_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r targeted (\\w+)|r using |c[0-9a-fA-F]{8}(.?)|r to restore |c[0-9a-fA-F]{8}(.?)|r (\\w+).")
+  val IS_CASTING = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r is casting |c[0-9a-fA-F]{8}(.*?)|r")
+  val SUCCESSFUL_CAST = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)\\|r successfully cast \\|c[0-9a-fA-F]{8}(.*?)\\|r")
+  val BUFF_GAINED_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r gained the buff: |c[0-9a-fA-F]{8}(.*?)|r")
+  val BUFF_ENDED_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r's |c[0-9a-fA-F]{8}(.*?)|r buff ended.")
+  val DEBUFF_GAINED = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r was struck by a |c[0-9a-fA-F]{8}(.*?)|r debuff!")
+
+
+  val DEBUFF_CLEAR_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r's (.*)( debuff cleared)")
+  val TARGET_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r targeted (.*) using (.*)( to restore (.*))?")
 
   // called before the interactor event loop is started
   init {
@@ -55,27 +61,21 @@ class CombatEventInteractor(private val onNewLines: (String) -> Unit) {
     seek(baseDir)
   }
 
-  @Composable
   fun start() {
-    val showDialog = remember { mutableStateOf(true) }
-    val selectedItem = remember { mutableStateOf("") }
-    FileSelectionDialog(possiblePaths, showDialog, selectedItem)
-    LaunchedEffect(selectedItem.value) {
-      if (selectedItem.value.isNotEmpty()) {
-        val filePath = Paths.get(selectedItem.value)
-        scope.launch {
-          var lastIndex = 100000//Files.lines(Paths.get(selectedItem.value)).count().toInt()
-          while (isActive) {
-            val reader = Files.newBufferedReader(filePath)
-            val lines = reader.lines().skip(lastIndex.toLong()).iterator()
-            while (lines.hasNext()) {
-              val line = lines.next()
-              parseLines(listOf(line))
-              lastIndex++
-            }
-            reader.close()
-            delay(1000) // delay for a while before checking the file again
+    if (!selectedPath.isNullOrBlank()) {
+      val logPath = Paths.get(selectedPath!!)
+      scope.launch {
+        var lastIndex = Files.lines(logPath).count().toInt()
+        while (isActive) {
+          val reader = Files.newBufferedReader(logPath)
+          val lines = reader.lines().skip(lastIndex.toLong()).iterator()
+          while (lines.hasNext()) {
+            val line = lines.next()
+            parseLines(listOf(line))
+            lastIndex++
           }
+          reader.close()
+          delay(1000) // delay for a while before checking the file again
         }
       }
     }

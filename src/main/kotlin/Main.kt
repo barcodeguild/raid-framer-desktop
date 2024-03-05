@@ -1,79 +1,110 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import ui.CombatOverlayLayout
-import ui.RoundedRectShape
+import ui.FileSelectionDialog
+import ui.OverlayWindow
 import viewmodel.CombatOverlayModel
 import java.awt.Dimension
 import java.awt.Point
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
+import kotlin.system.exitProcess
 
 var windowSize = IntSize(478, 192)
 
 fun main() = application {
 
-    val icon = painterResource("desktop.ico")
+  val icon = painterResource("desktop.ico")
 
-    /* Main Overlay Window */
-    Window(onCloseRequest = ::exitApplication, resizable = false, transparent = true, title = "Raid Framer Overlay", alwaysOnTop = true, focusable = false, undecorated = true) {
+  /*
+   * Starts the application by attaching the interactors and listeners.
+   */
+  fun prepareApplication() {
+    CombatEventInteractor.start()
+  }
 
-        window.size = Dimension(windowSize.width, windowSize.height)
+  /*
+   * Performs tear-down and exits the application.
+   */
+  fun exitApplication() {
+    CombatEventInteractor.stop()
+    exitProcess(0)
+  }
 
-        // listen for window movement changes
-        val mouseListener = object : MouseAdapter() {
-            private val pressedAt = Point()
+  /* Shows combat-related statistics for the raid. */
+  OverlayWindow(
+    ".: Raid Framer Combat Overlay :.",
+    initialPosition = WindowPosition(0.dp, 0.dp),
+    initialSize = DpSize(200.dp, 120.dp),
+    ::exitApplication
+  ) {
+    CombatOverlayLayout(CombatOverlayModel())
+  }
 
-            override fun mousePressed(e: MouseEvent) {
-                if (e.isShiftDown) {
-                    pressedAt.x = e.x
-                    pressedAt.y = e.y
-                }
-            }
+  /* Shows who current has boss aggro. */
+  OverlayWindow(
+    ".: Raid Framer Boss Aggro Overlay :.",
+    initialPosition = WindowPosition(100.dp, 100.dp),
+    initialSize = DpSize(128.dp, 48.dp),
+    ::exitApplication
+  ) {
+    CombatOverlayLayout(CombatOverlayModel())
+  }
 
-            override fun mouseDragged(e: MouseEvent) {
-                if (e.isShiftDown) {
-                    window.location = Point(e.xOnScreen - pressedAt.x, e.yOnScreen - pressedAt.y)
-                }
-            }
-        }
-
-        window.addMouseListener(mouseListener)
-        window.addMouseMotionListener(mouseListener)
-
-        window.shape = RoundedRectShape(0.0, 0.0, windowSize.width.toDouble(), windowSize.height.toDouble(), 16.0, 16.0)
-        window.isVisible = true
-
-        Box(modifier = Modifier
-            .background(Color(0f, 0f, 0f, 0.43f))
-            .fillMaxSize()
+  /* Raid Framer settings window. */
+  Window(
+    onCloseRequest = ::exitApplication,
+    icon = icon,
+    resizable = false,
+    title = "Raid Framer Settings",
+    alwaysOnTop = true,
+    focusable = true
+  ) {
+    window.size = Dimension(1000, 1000)
+    window.location = Point(100, 100)
+    window.isVisible = true
+    Box(
+      modifier = Modifier
+        .background(Color(0f, 0f, 0f, 0.43f))
+        .fillMaxSize()
+    ) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(16.dp)
+      ) {
+        Text("Raid Framer Settings", color = Color.White)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Select the combat log file to use for raid statistics.", color = Color.White)
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+          onClick = { prepareApplication() },
+          modifier = Modifier.padding(16.dp),
+          colors = ButtonDefaults.buttonColors(Color(1f, 1f, 1f, 0.43f))
         ) {
-            CombatOverlayLayout(CombatOverlayModel())
+          Text("Select File")
         }
+      }
     }
+    val showDialog = remember { mutableStateOf(true) }
+    val selectedItem = remember { mutableStateOf("") }
 
-    Window(onCloseRequest = ::exitApplication, icon = icon, resizable = false, title = "Raid Framer Settings", alwaysOnTop = true, focusable = true) {
-        window.size = Dimension(1000, 1000)
-        window.location = Point(100, 100)
-        window.isVisible = true
-
-        val combatInteractor: CombatEventInteractor = CombatEventInteractor() {
-            //println(it)
-        }
-
-        fun exitApplication() {
-            combatInteractor.stop()
-            System.exit(0)
-        }
-
-        combatInteractor.start()
-        Box { Text("Hi") }
+    FileSelectionDialog(CombatEventInteractor.possiblePaths, showDialog, selectedItem)
+    LaunchedEffect(selectedItem.value) {
+      CombatEventInteractor.selectedPath = selectedItem.value
     }
-
+  }
 }
