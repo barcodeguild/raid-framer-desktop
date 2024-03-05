@@ -95,7 +95,7 @@ fun main() = application {
           modifier = Modifier.padding(16.dp),
           colors = ButtonDefaults.buttonColors(Color(1f, 1f, 1f, 0.43f))
         ) {
-          Text("Select File")
+          Text("Start Monitoring")
         }
       }
     }

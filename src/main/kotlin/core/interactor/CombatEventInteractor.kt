@@ -17,23 +17,19 @@ object CombatEventInteractor {
   var possiblePaths = mutableListOf<Path>()
   var selectedPath: String? = null
 
-  val ATTACK_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)\\|r attacked (\\w+)\\|r using \\|c[0-9a-fA-F]{8}(.*?)\\|r and caused \\|c[0-9a-fA-F]{8}(.*?)\\|r \\|c[0-9a-fA-F]{8}(.*?)\\|r")
-  val HEAL_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r targeted (\\w+)|r using |c[0-9a-fA-F]{8}(.?)|r to restore |c[0-9a-fA-F]{8}(.?)|r (\\w+).")
-  val IS_CASTING = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r is casting |c[0-9a-fA-F]{8}(.*?)|r")
-  val SUCCESSFUL_CAST = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)\\|r successfully cast \\|c[0-9a-fA-F]{8}(.*?)\\|r")
-  val BUFF_GAINED_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r gained the buff: |c[0-9a-fA-F]{8}(.*?)|r")
-  val BUFF_ENDED_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r's |c[0-9a-fA-F]{8}(.*?)|r buff ended.")
-  val DEBUFF_GAINED = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r was struck by a |c[0-9a-fA-F]{8}(.*?)|r debuff!")
-
-
-  val DEBUFF_CLEAR_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r's (.*)( debuff cleared)")
-  val TARGET_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r targeted (.*) using (.*)( to restore (.*))?")
+  val ATTACK_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
+  val HEAL_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r targeted (.*)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r to restore \\|c[0-9a-fA-F]{8}(.*)\\|r (\\w+).")
+  val IS_CASTING = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r is casting \\|c[0-9a-fA-F]{8}(.*)\\|r")
+  val SUCCESSFUL_CAST = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r successfully cast \\|c[0-9a-fA-F]{8}(.*)\\|r")
+  val BUFF_GAINED_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r gained the buff: \\|c[0-9a-fA-F]{8}(.*)\\|r")
+  val BUFF_ENDED_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r buff ended\\.")
+  val DEBUFF_GAINED = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r was struck by a \\|c[0-9a-fA-F]{8}(.*)\\|r debuff!")
+  val DEBUFF_ENDED = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r debuff cleared")
 
   // called before the interactor event loop is started
   init {
     locateCombatLog()
   }
-
   /*
    * Recursively searches for Combat.log files in the user's Documents folder and populates a
    * list of possible paths for the user to choose from.
@@ -51,7 +47,7 @@ object CombatEventInteractor {
         paths.forEach { path ->
           if (Files.isDirectory(path) && Files.isReadable(path)) {
             seek(path)
-          } else if (path.fileName.toString() == "Combat.log") {
+          } else if (path.fileName.toString() == "Combat.log" && !path.pathString.contains("LogBackups")) {
             possiblePaths.add(path)
           }
         }
@@ -68,7 +64,7 @@ object CombatEventInteractor {
         var lastIndex = Files.lines(logPath).count().toInt()
         while (isActive) {
           val reader = Files.newBufferedReader(logPath)
-          val lines = reader.lines().skip(lastIndex.toLong()).iterator()
+          val lines = reader.lines().skip(0).iterator()
           while (lines.hasNext()) {
             val line = lines.next()
             parseLines(listOf(line))
@@ -81,109 +77,178 @@ object CombatEventInteractor {
     }
   }
 
+  /*
+   * Turns log lines into CombatEvents.
+   */
   private fun parseLines(lines: List<String>): List<CombatEvent> {
     val events = mutableListOf<CombatEvent>()
 
     for (line in lines) {
+
+      // Build Attack Objects
       var matcher = ATTACK_PATTERN.matcher(line)
       if (matcher.find()) {
-        val event = CombatEvent(
+        val event = AttackEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toInstant(ZoneOffset.UTC).toEpochMilli(),
           caster = matcher.group(2),
           target = matcher.group(3),
           damage = matcher.group(5).toInt(),
-          state = CastState.STRUCK,
+          spell = matcher.group(4),
           critical = false,
-          spell = matcher.group(4)
         )
         println(event)
         continue
       }
-      matcher = BUFF_END_PATTERN.matcher(line)
-      if (matcher.find()) {
-        // handle buff end event
-        continue
-      }
-      matcher = DEBUFF_CLEAR_PATTERN.matcher(line)
-      if (matcher.find()) {
-        // handle debuff clear event
-        continue
-      }
-      matcher = TARGET_PATTERN.matcher(line)
-      if (matcher.find()) {
-        // handle target event
-        continue
-      }
-    }
 
+      // Build Heals Objects
+      matcher = HEAL_PATTERN.matcher(line)
+      if (matcher.find()) {
+        val event = HealEvent(
+          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toInstant(ZoneOffset.UTC).toEpochMilli(),
+          caster = matcher.group(2),
+          target = matcher.group(3),
+          amount = matcher.group(5).toInt(),
+          spell = matcher.group(4),
+          critical = false,
+        )
+        println(event)
+        continue
+      }
+
+      // Build Casting Objects
+      matcher = IS_CASTING.matcher(line)
+      if (matcher.find()) {
+        val event = CastingEvent(
+          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toInstant(ZoneOffset.UTC).toEpochMilli(),
+          caster = matcher.group(2),
+          spell = matcher.group(3),
+        )
+        println(event)
+        continue
+      }
+
+      // Build Successful Cast Objects
+      matcher = SUCCESSFUL_CAST.matcher(line)
+      if (matcher.find()) {
+        val event = SuccessfulCastEvent(
+          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toInstant(ZoneOffset.UTC).toEpochMilli(),
+          caster = matcher.group(2),
+          spell = matcher.group(3),
+        )
+        println(event)
+        continue
+      }
+
+      // Build Buff Objects
+      matcher = BUFF_GAINED_PATTERN.matcher(line)
+      if (matcher.find()) {
+        val event = BuffGainedEvent(
+          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toInstant(ZoneOffset.UTC).toEpochMilli(),
+          target = matcher.group(2),
+          buff = matcher.group(3),
+        )
+        println(event)
+        continue
+      }
+
+      // Build Buff Ended Objects
+      matcher = BUFF_ENDED_PATTERN.matcher(line)
+      if (matcher.find()) {
+        val event = BuffEndedEvent(
+          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toInstant(ZoneOffset.UTC).toEpochMilli(),
+          target = matcher.group(2),
+          buff = matcher.group(3),
+        )
+        println(event)
+        continue
+      }
+
+      // Build Struck by Debuff Objects
+      matcher = DEBUFF_GAINED.matcher(line)
+      if (matcher.find()) {
+        val event = DebuffGainedEvent(
+          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toInstant(ZoneOffset.UTC).toEpochMilli(),
+          target = matcher.group(2),
+          debuff = matcher.group(3),
+        )
+        println(event)
+        continue
+      }
+
+      // Build Debuff Ended Objects
+      matcher = DEBUFF_ENDED.matcher(line)
+      if (matcher.find()) {
+        val event = DebuffEndedEvent(
+          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toInstant(ZoneOffset.UTC).toEpochMilli(),
+          target = matcher.group(2),
+          debuff = matcher.group(3),
+        )
+        println(event)
+        continue
+      }
+
+    }
     return events
   }
-
-//  private fun parseLines(lines: List<String>): List<CombatEvent> {
-//    val events = mutableListOf<CombatEvent>()
-//
-//    val pattern = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\w+)|r(.*)")
-//    for (line in lines) {
-//      val matcher = pattern.matcher(line)
-//      if (matcher.find()) {
-//        if (matcher.groupCount() != 3) continue
-//        val timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-//        val caster = matcher.group(2)
-//        val eventDetail = matcher.group(3)
-//
-//        val event = when {
-//          eventDetail.contains("successfully cast") -> {
-//            val spell = eventDetail.substringAfter("successfully cast ").substringBefore("|r")
-//            CombatEvent(timestamp.toInstant(ZoneOffset.UTC).toEpochMilli(), caster, "", 0, CastState.CASTED, false, spell)
-//          }
-//          eventDetail.contains("attacked") -> {
-//            val target = eventDetail.substringAfter("attacked ").substringBefore("|r using")
-//            val spell = eventDetail.substringAfter("using ").substringBefore(" and caused")
-//            val damage = eventDetail.substringAfter("caused ").substringBefore(" |cffff0000Health").replace("|cffff0000-", "").toInt()
-//            val critical = eventDetail.contains("Critical damage")
-//            CombatEvent(timestamp.toInstant(ZoneOffset.UTC).toEpochMilli(), caster, target, damage, CastState.STRUCK, critical, spell)
-//          }
-//          eventDetail.contains("is casting") -> {
-//            val spell = eventDetail.substringAfter("is casting ").substringBefore("|r")
-//            CombatEvent(timestamp.toInstant(ZoneOffset.UTC).toEpochMilli(), caster, "", 0, CastState.CASTING, false, spell)
-//          }
-//          eventDetail.contains("to restore") -> {
-//            val target = eventDetail.substringAfter("targeted ").substringBefore("|r using")
-//            val spell = eventDetail.substringAfter("using ").substringBefore(" to restore")
-//            val spellEffect = eventDetail.substringAfter("to restore ").substringBefore(" health").replace("|cff00ff00", "").toInt()
-//            CombatEvent(timestamp.toInstant(ZoneOffset.UTC).toEpochMilli(), caster, target, 0, CastState.HEALED, false, spell, spellEffect)
-//          }
-//          else -> null
-//        }
-//
-//        if (event != null) {
-//          events.add(event)
-//        }
-//      }
-//    }
-//
-//    events.forEach { println(it) }
-//
-//    return events
-//  }
 
   fun stop() {
     scope.cancel()
   }
 
-  data class CombatEvent(
+  interface CombatEvent
+
+  data class AttackEvent(
     val timestamp: Long,
     val caster: String,
     val target: String,
     val damage: Int,
-    val state: CastState,
-    val critical: Boolean,
     val spell: String,
-    val spellEffect: Int? = null
-  )
+    val critical: Boolean,
+  ) : CombatEvent
 
-  enum class CastState {
-    CASTING, CASTED, STRUCK, MISSED, HEALED
-  }
+  data class HealEvent(
+    val timestamp: Long,
+    val caster: String,
+    val target: String,
+    val amount: Int,
+    val spell: String,
+    val critical: Boolean,
+  ) : CombatEvent
+
+  data class CastingEvent(
+    val timestamp: Long,
+    val caster: String,
+    val spell: String,
+  ) : CombatEvent
+
+  data class SuccessfulCastEvent(
+    val timestamp: Long,
+    val caster: String,
+    val spell: String,
+  ) : CombatEvent
+
+  data class BuffGainedEvent(
+    val timestamp: Long,
+    val target: String,
+    val buff: String,
+  ) : CombatEvent
+
+  data class BuffEndedEvent(
+    val timestamp: Long,
+    val target: String,
+    val buff: String,
+  ) : CombatEvent
+
+  data class DebuffGainedEvent(
+    val timestamp: Long,
+    val target: String,
+    val debuff: String,
+  ) : CombatEvent
+
+  data class DebuffEndedEvent(
+    val timestamp: Long,
+    val target: String,
+    val debuff: String,
+  ) : CombatEvent
 
 }
