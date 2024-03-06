@@ -41,21 +41,26 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
   val sortedHeals = healsByPlayer.toList().sortedByDescending { it.second }
 
   Column(
-    modifier = Modifier.fillMaxSize(),
+    modifier = Modifier
+      .fillMaxSize()
+      .wrapContentHeight(),
     verticalArrangement = Arrangement.Top,
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = Modifier
+      .fillMaxWidth()
+      .wrapContentHeight()
+    ) {
       Text(
         text = state?.text?.value ?: "",
         color = Color.White,
-        modifier = Modifier.align(Alignment.Center).padding(0.dp, 4.dp, 0.dp, 0.dp),
+        modifier = Modifier.align(Alignment.Center),
       )
       IconButton(
         onClick = { CombatEventInteractor.resetStats() },
         modifier = Modifier
           .align(Alignment.CenterEnd)
-          .size(48.dp)
+          .size(38.dp)
           .background(Color.Transparent, MaterialTheme.shapes.small)
           .shadow(
             elevation = 0.dp,
@@ -66,6 +71,7 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
       ) {
         Text("⟳", fontSize = 24.sp, color = Color.White, textAlign = TextAlign.Center)
       }
+      Spacer(modifier = Modifier.width(12.dp))
     }
 
     Row(
@@ -91,7 +97,7 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
               )
               Text(
                 text = sortedDamage[item].second.humanReadableAbbreviation(),
-                color = Color.Red
+                color = Color(249, 191, 59, 255)
               )
             }
           }

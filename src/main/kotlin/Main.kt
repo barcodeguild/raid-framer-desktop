@@ -47,7 +47,7 @@ fun main() = application {
   /* Shows combat-related statistics for the raid. */
   OverlayWindow(
     ".: Raid Framer Combat Overlay :.",
-    initialPosition = WindowPosition(0.dp, 0.dp),
+    initialPosition = WindowPosition(64.dp, 1024.dp),
     initialSize = DpSize(512.dp, 256.dp),
     ::exitApplication
   ) {
@@ -64,18 +64,12 @@ fun main() = application {
 //    //CombatOverlayLayout(CombatOverlayModel())
 //  }
 
-  /* Raid Framer settings window. */
-  Window(
-    onCloseRequest = ::exitApplication,
-    icon = icon,
-    resizable = false,
-    title = "Raid Framer Settings",
-    alwaysOnTop = true,
-    focusable = true
+  OverlayWindow(
+    ".: Raid Framer Combat Overlay :.",
+    initialPosition = WindowPosition(512.dp, 512.dp),
+    initialSize = DpSize(512.dp, 512.dp),
+    ::exitApplication
   ) {
-    window.size = Dimension(1000, 1000)
-    window.location = Point(100, 100)
-    window.isVisible = true
     Box(
       modifier = Modifier
         .background(Color(0f, 0f, 0f, 0.43f))
