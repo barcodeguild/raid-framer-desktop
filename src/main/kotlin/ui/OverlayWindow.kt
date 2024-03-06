@@ -37,7 +37,7 @@ fun OverlayWindow(
   Window(
     onCloseRequest = onCloseRequest,
     state = windowState,
-    resizable = true,
+    resizable = false,
     transparent = true,
     title = title,
     alwaysOnTop = true,
@@ -51,6 +51,7 @@ fun OverlayWindow(
         initialSize.width.roundToPx(),
         initialSize.height.roundToPx()
       )
+      window.shape = OverlayWindow(0.0, 0.0, initialSize.width.roundToPx().toDouble(),initialSize.height.roundToPx().toDouble(), 8.0, 8.0)
     }
     val mouseListener = createMouseListener(window)
     window.addMouseListener(mouseListener)

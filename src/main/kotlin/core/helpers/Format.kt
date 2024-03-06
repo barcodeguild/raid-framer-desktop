@@ -6,10 +6,12 @@ package core.helpers
 fun Long.humanReadableAbbreviation(): String {
   val value = this.toDouble()
   val suffixes = arrayOf("", "k", "M", "B", "T")
-  val suffixNum = (value.toString().length - 1) / 3
-  var shortValue = value / Math.pow(10.0, suffixNum * 3.toDouble())
-  if (shortValue % 1 != 0.0) {
-    shortValue = (shortValue * 10.0).toInt() / 10.0
+  val suffixNum = when {
+    value < 1_000_000 -> 1
+    value < 1_000_000_000 -> 2
+    else -> 3
   }
-  return shortValue.toString() + suffixes[suffixNum]
+  val divisor = Math.pow(10.0, suffixNum * 3.toDouble())
+  var shortValue = value / divisor
+  return String.format("%.1f", shortValue) + suffixes[suffixNum]
 }
