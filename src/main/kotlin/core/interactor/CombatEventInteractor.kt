@@ -1,15 +1,13 @@
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import kotlinx.coroutines.*
-import ui.FileSelectionDialog
 import java.nio.file.*
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.regex.Pattern
 import kotlin.io.path.pathString
+import kotlin.math.absoluteValue
 
 object CombatEventInteractor {
   private val scope = CoroutineScope(Dispatchers.IO)
@@ -25,6 +23,29 @@ object CombatEventInteractor {
   val BUFF_ENDED_PATTERN = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r buff ended\\.")
   val DEBUFF_GAINED = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r was struck by a \\|c[0-9a-fA-F]{8}(.*)\\|r debuff!")
   val DEBUFF_ENDED = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r debuff cleared")
+
+  // Track Damage Amounts and Heals by Player
+  val damageByPlayer: MutableState<Map<String, Long>> = mutableStateOf(emptyMap())
+  val healsByPlayer: MutableState<Map<String, Long>> = mutableStateOf(emptyMap())
+
+  fun postDamage(player: String, damage: Long) {
+    val currentDamage = damageByPlayer.value.toMutableMap()
+    val totalDamage = currentDamage[player]?.plus(damage) ?: damage
+    currentDamage[player] = totalDamage
+    damageByPlayer.value = currentDamage
+  }
+
+  fun postHeal(player: String, heal: Long) {
+    val currentHeals = healsByPlayer.value.toMutableMap()
+    val totalHeals = currentHeals[player]?.plus(heal) ?: heal
+    currentHeals[player] = totalHeals
+    healsByPlayer.value = currentHeals
+  }
+
+  fun resetStats() {
+    damageByPlayer.value = emptyMap()
+    healsByPlayer.value = emptyMap()
+  }
 
   // called before the interactor event loop is started
   init {
@@ -53,7 +74,6 @@ object CombatEventInteractor {
         }
       }
     }
-
     seek(baseDir)
   }
 
@@ -61,10 +81,10 @@ object CombatEventInteractor {
     if (!selectedPath.isNullOrBlank()) {
       val logPath = Paths.get(selectedPath!!)
       scope.launch {
-        var lastIndex = Files.lines(logPath).count().toInt()
+        var lastIndex = Files.lines(logPath).count()
         while (isActive) {
           val reader = Files.newBufferedReader(logPath)
-          val lines = reader.lines().skip(0).iterator()
+          val lines = reader.lines().skip(lastIndex).iterator()
           while (lines.hasNext()) {
             val line = lines.next()
             parseLines(listOf(line))
@@ -92,11 +112,11 @@ object CombatEventInteractor {
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toInstant(ZoneOffset.UTC).toEpochMilli(),
           caster = matcher.group(2),
           target = matcher.group(3),
-          damage = matcher.group(5).toInt(),
+          damage = matcher.group(5).toInt().absoluteValue,
           spell = matcher.group(4),
           critical = false,
         )
-        println(event)
+        postDamage(event.caster, event.damage.toLong())
         continue
       }
 
@@ -111,7 +131,7 @@ object CombatEventInteractor {
           spell = matcher.group(4),
           critical = false,
         )
-        println(event)
+        postHeal(event.caster, event.amount.toLong())
         continue
       }
 
@@ -123,7 +143,6 @@ object CombatEventInteractor {
           caster = matcher.group(2),
           spell = matcher.group(3),
         )
-        println(event)
         continue
       }
 
@@ -135,7 +154,6 @@ object CombatEventInteractor {
           caster = matcher.group(2),
           spell = matcher.group(3),
         )
-        println(event)
         continue
       }
 
@@ -147,7 +165,6 @@ object CombatEventInteractor {
           target = matcher.group(2),
           buff = matcher.group(3),
         )
-        println(event)
         continue
       }
 
@@ -159,7 +176,6 @@ object CombatEventInteractor {
           target = matcher.group(2),
           buff = matcher.group(3),
         )
-        println(event)
         continue
       }
 
@@ -171,7 +187,6 @@ object CombatEventInteractor {
           target = matcher.group(2),
           debuff = matcher.group(3),
         )
-        println(event)
         continue
       }
 
@@ -183,7 +198,6 @@ object CombatEventInteractor {
           target = matcher.group(2),
           debuff = matcher.group(3),
         )
-        println(event)
         continue
       }
 

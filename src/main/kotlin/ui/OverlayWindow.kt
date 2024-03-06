@@ -37,7 +37,7 @@ fun OverlayWindow(
   Window(
     onCloseRequest = onCloseRequest,
     state = windowState,
-    resizable = false,
+    resizable = true,
     transparent = true,
     title = title,
     alwaysOnTop = true,

@@ -48,7 +48,7 @@ fun main() = application {
   OverlayWindow(
     ".: Raid Framer Combat Overlay :.",
     initialPosition = WindowPosition(0.dp, 0.dp),
-    initialSize = DpSize(200.dp, 120.dp),
+    initialSize = DpSize(256.dp, 384.dp),
     ::exitApplication
   ) {
     CombatOverlayLayout(CombatOverlayModel())
@@ -58,10 +58,10 @@ fun main() = application {
   OverlayWindow(
     ".: Raid Framer Boss Aggro Overlay :.",
     initialPosition = WindowPosition(100.dp, 100.dp),
-    initialSize = DpSize(128.dp, 48.dp),
+    initialSize = DpSize(384.dp, 128.dp),
     ::exitApplication
   ) {
-    CombatOverlayLayout(CombatOverlayModel())
+    //CombatOverlayLayout(CombatOverlayModel())
   }
 
   /* Raid Framer settings window. */
