@@ -67,7 +67,7 @@ fun main() = application {
   OverlayWindow(
     ".: Raid Framer Combat Overlay :.",
     initialPosition = WindowPosition(512.dp, 512.dp),
-    initialSize = DpSize(512.dp, 512.dp),
+    initialSize = DpSize(480.dp, 512.dp),
     ::exitApplication
   ) {
     Box(

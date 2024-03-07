@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import core.helpers.humanReadableAbbreviation
@@ -71,7 +72,7 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
       ) {
         Text("⟳", fontSize = 24.sp, color = Color.White, textAlign = TextAlign.Center)
       }
-      Spacer(modifier = Modifier.width(12.dp))
+      Spacer(modifier = Modifier.width(16.dp))
     }
 
     Row(
@@ -84,20 +85,24 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
           .fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
-        Text(text = "\uD83D\uDD25 Total Damage  \uD83D\uDD25", color = Color.White, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 4.dp))
+        Text(text = "\uD83D\uDD25 Total Damage  \uD83D\uDD25", color = Color.White)
         LazyColumn(
           contentPadding = PaddingValues(4.dp),
-          modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
+          modifier = Modifier.padding(8.dp)
         ) {
           items(sortedDamage.size.coerceAtMost(50)) { item ->
-            Row {
+            Row(horizontalArrangement = Arrangement.Start) {
               Text(
                 text = "$item. ${sortedDamage[item].first}: ",
-                color = Color.White
+                color = Color.White,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                modifier = Modifier.weight(0.7f)
               )
               Text(
                 text = sortedDamage[item].second.humanReadableAbbreviation(),
-                color = Color(249, 191, 59, 255)
+                color = Color(249, 191, 59, 255),
+                modifier = Modifier.weight(0.2f)
               )
             }
           }
@@ -109,20 +114,24 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
           .fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
-        Text(text = "\uD83D\uDC89 Total Heals \uD83D\uDC89", color = Color.White, modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 4.dp))
+        Text(text = "\uD83D\uDC89 Total Heals \uD83D\uDC89", color = Color.White)
         LazyColumn(
           contentPadding = PaddingValues(4.dp),
-          modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
+          modifier = Modifier.padding(8.dp)
         ) {
           items(sortedHeals.size.coerceAtMost(50)) { item ->
-            Row {
+            Row(horizontalArrangement = Arrangement.Start) {
               Text(
                 text = "$item. ${sortedHeals[item].first}: ",
-                color = Color.White
+                color = Color.White,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                modifier = Modifier.weight(0.8f)
               )
               Text(
                 text = sortedHeals[item].second.humanReadableAbbreviation(),
-                color = Color.Green
+                color = Color.Green,
+                modifier = Modifier.weight(0.3f)
               )
             }
           }
