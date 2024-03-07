@@ -93,7 +93,7 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
           items(sortedDamage.size.coerceAtMost(50)) { item ->
             Row(horizontalArrangement = Arrangement.Start) {
               Text(
-                text = "$item. ${sortedDamage[item].first}: ",
+                text = "${item + 1}. ${sortedDamage[item].first}: ",
                 color = Color.White,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
@@ -107,7 +107,7 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
             }
           }
         }
-        }
+      }
       Column(
         modifier = Modifier
           .weight(1f)
@@ -122,7 +122,7 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
           items(sortedHeals.size.coerceAtMost(50)) { item ->
             Row(horizontalArrangement = Arrangement.Start) {
               Text(
-                text = "$item. ${sortedHeals[item].first}: ",
+                text = "${item + 1}. ${sortedHeals[item].first}: ",
                 color = Color.White,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
