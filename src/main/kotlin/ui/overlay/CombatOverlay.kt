@@ -1,23 +1,28 @@
-package ui
+package ui.overlay
 
+import AppState
 import CombatEventInteractor
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import core.helpers.humanReadableAbbreviation
-import viewmodel.CombatOverlayModel
+import ui.dialog.exitDialog
+import kotlin.system.exitProcess
 
 @Preview
 @Composable
@@ -27,12 +32,14 @@ fun PreviewCombatOverlay() {
       .fillMaxSize()
       .background(Color.Black)
   ) {
-    CombatOverlayLayout(CombatOverlayModel())
+    CombatOverlay()
   }
 }
 
 @Composable
-fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
+fun CombatOverlay() {
+
+  val shouldShowExitDialog = mutableStateOf(false)
 
   val damageByPlayer by CombatEventInteractor.damageByPlayer
   val healsByPlayer by CombatEventInteractor.healsByPlayer
@@ -41,6 +48,8 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
   val sortedDamage = damageByPlayer.toList().sortedByDescending { it.second }
   val sortedHeals = healsByPlayer.toList().sortedByDescending { it.second }
 
+  exitDialog(shouldShowExitDialog)
+
   Column(
     modifier = Modifier
       .fillMaxSize()
@@ -48,31 +57,81 @@ fun CombatOverlayLayout(state: CombatOverlayModel? = null) {
     verticalArrangement = Arrangement.Top,
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    Box(modifier = Modifier
-      .fillMaxWidth()
-      .wrapContentHeight()
+    Box(
+      modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentHeight()
     ) {
-      Text(
-        text = state?.text?.value ?: "",
-        color = Color.White,
-        modifier = Modifier.align(Alignment.Center),
-      )
-      IconButton(
-        onClick = { CombatEventInteractor.resetStats() },
-        modifier = Modifier
-          .align(Alignment.CenterEnd)
-          .size(38.dp)
-          .background(Color.Transparent, MaterialTheme.shapes.small)
-          .shadow(
-            elevation = 0.dp,
-            clip = true,
-            ambientColor = Color.Transparent,
-            spotColor = Color.Transparent
+      Row(Modifier.align(Alignment.TopStart).wrapContentSize()) {
+        IconButton(
+          onClick = { shouldShowExitDialog.value = true },
+          modifier = Modifier
+            .size(38.dp)
+            .background(Color.Transparent, MaterialTheme.shapes.small)
+            .shadow(
+              elevation = 0.dp,
+              clip = true,
+              ambientColor = Color.Transparent,
+              spotColor = Color.Transparent
+            )
+        ) {
+          val closeButtonInteractionSource = remember { MutableInteractionSource() }
+          Text(
+            text = "✕",
+            fontSize = 18.sp,
+            color = if (closeButtonInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.hoverable(interactionSource = closeButtonInteractionSource)
           )
-      ) {
-        Text("⟳", fontSize = 24.sp, color = Color.White, textAlign = TextAlign.Center)
+        }
       }
-      Spacer(modifier = Modifier.width(16.dp))
+      Row(Modifier.align(Alignment.TopEnd).wrapContentSize()) {
+        IconButton(
+          onClick = { AppState.toggleSettingsOverlayVisibility() },
+          modifier = Modifier
+            .size(32.dp)
+            .background(Color.Transparent, MaterialTheme.shapes.small)
+            .padding(top = 4.dp)
+            .shadow(
+              elevation = 0.dp,
+              clip = true,
+              ambientColor = Color.Transparent,
+              spotColor = Color.Transparent
+            )
+        ) {
+          Text("\uD83D\uDEE0\uFE0F", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
+        }
+        IconButton(
+          onClick = { },
+          modifier = Modifier
+            .size(32.dp)
+            .background(Color.Transparent, MaterialTheme.shapes.small)
+            .padding(top = 0.5.dp)
+            .shadow(
+              elevation = 0.dp,
+              clip = true,
+              ambientColor = Color.Transparent,
+              spotColor = Color.Transparent
+            )
+        ) {
+          Text("⌖", fontSize = 24.sp, color = Color.White, fontWeight = FontWeight.ExtraLight, textAlign = TextAlign.Center)
+        }
+        IconButton(
+          onClick = { CombatEventInteractor.resetStats() },
+          modifier = Modifier
+            .size(32.dp)
+            .background(Color.Transparent, MaterialTheme.shapes.small)
+            .padding(bottom = 4.dp, end = 8.dp)
+            .shadow(
+              elevation = 0.dp,
+              clip = true,
+              ambientColor = Color.Transparent,
+              spotColor = Color.Transparent
+            )
+        ) {
+          Text("⟳", fontSize = 24.sp, color = Color.White, textAlign = TextAlign.Center)
+        }
+      }
     }
 
     Row(

@@ -3,11 +3,12 @@ package ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import java.awt.Dimension
 import java.awt.Point
@@ -20,14 +21,11 @@ import java.awt.geom.Point2D
 import java.awt.geom.Rectangle2D
 import java.awt.geom.RoundRectangle2D
 
-
 @Composable
 fun OverlayWindow(
-  title: String,
-  initialPosition: WindowPosition,
-  initialSize: DpSize,
-  onCloseRequest: () -> Unit,
-  windowContent: @Composable (Window) -> Unit
+  title: String, initialPosition: WindowPosition, initialSize: DpSize,
+  isVisible: MutableState<Boolean>, isEverythingVisible: MutableState<Boolean>, isResizable: MutableState<Boolean>,
+  onCloseRequest: () -> Unit, windowContent: @Composable (Window) -> Unit
 ) {
   val windowState = rememberWindowState(
     width = initialSize.width,
@@ -35,52 +33,60 @@ fun OverlayWindow(
     position = initialPosition
   )
   Window(
-    onCloseRequest = onCloseRequest,
-    state = windowState,
-    resizable = false,
-    transparent = true,
-    title = title,
-    alwaysOnTop = true,
-    focusable = false,
-    undecorated = true
+    onCloseRequest = onCloseRequest, resizable = isResizable.value, state = windowState, transparent = true,
+    title = title, alwaysOnTop = true, focusable = false, undecorated = true,
+    visible = isVisible.value && isEverythingVisible.value
   ) {
     with(LocalDensity.current) {
       window.setBounds(
-        initialPosition.x.roundToPx(),
-        initialPosition.y.roundToPx(),
-        initialSize.width.roundToPx(),
-        initialSize.height.roundToPx()
+        windowState.position.x.roundToPx(),
+        windowState.position.y.roundToPx(),
+        windowState.size.width.roundToPx(),
+        windowState.size.height.roundToPx()
       )
-      window.shape = OverlayWindow(0.0, 0.0, initialSize.width.roundToPx().toDouble(),initialSize.height.roundToPx().toDouble(), 8.0, 8.0)
+      window.shape = OverlayWindow(
+        0.0,
+        0.0,
+        windowState.size.width.roundToPx().toDouble(),
+        windowState.size.height.roundToPx().toDouble(),
+        8.0,
+        8.0
+      )
     }
-    val mouseListener = createMouseListener(window)
+    val mouseListener = createMouseListener(windowState)
     window.addMouseListener(mouseListener)
     window.addMouseMotionListener(mouseListener)
     Box(
       modifier = Modifier
         .background(Color(0f, 0f, 0f, 0.43f))
         .fillMaxSize()
-    ) { windowContent(window) }
+    ) {
+      windowContent(window)
+    }
   }
 }
 
 /*
  * A custom shift-click listener that allows the user to drag the window around the screen.
  */
-fun createMouseListener(window: Window): MouseAdapter {
+fun createMouseListener(windowState: WindowState): MouseAdapter {
   return object : MouseAdapter() {
-    private val pressedAt = Point()
+    private val cornerOffset = Point()
 
+    // calculate offset from the top-left corner of the window where the user clicked
     override fun mousePressed(e: MouseEvent) {
       if (e.isShiftDown) {
-        pressedAt.x = e.x
-        pressedAt.y = e.y
+        cornerOffset.x = e.x
+        cornerOffset.y = e.y
       }
     }
 
     override fun mouseDragged(e: MouseEvent) {
       if (e.isShiftDown) {
-        window.location = Point(e.xOnScreen - pressedAt.x, e.yOnScreen - pressedAt.y)
+        if (cornerOffset.x == 0 || cornerOffset.y == 0) return
+        val newPositionX = e.locationOnScreen.x - cornerOffset.x
+        val newPositionY = e.locationOnScreen.y - cornerOffset.y
+        windowState.position = WindowPosition(newPositionX.dp, newPositionY.dp)
       }
     }
   }

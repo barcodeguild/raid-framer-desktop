@@ -26,9 +26,12 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
-    implementation("io.realm.kotlin:library-base:1.11.0")
-    implementation("io.realm.kotlin:library-sync:1.11.0") // If using Device Sync
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0") // If using coroutines with the SDK
+    implementation("io.realm.kotlin:library-base:1.14.0") // saving and loading settings
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0") // god if we did this all on the main thread life would be hell
+    implementation("net.java.dev.jna:jna-platform:5.8.0") // tabbed-out detection feature
+    implementation("com.dorkbox:SystemTray:4.4") // system tray feature
+    implementation("ch.qos.logback:logback-classic:1.5.3") // logging
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.20") // accesses the schema reflectively
 }
 
 compose.desktop {
@@ -43,10 +46,13 @@ compose.desktop {
             copyright = "© 2024 Raid Framer. All rights reserved."
             vendor = "by ~ catreo ~"
             windows {
-                iconFile.set(project.file("desktop.ico"))
+                iconFile.set(project.file("raidframer.ico"))
                 upgradeUuid = "547fdeb1-3ac5-4df9-9925-6ac9e7b18943"
                 dirChooser = true
                 msiPackageVersion = version as String
+                menu = true
+                shortcut = true
+                menuGroup = "Raid Framer"
             }
         }
     }
