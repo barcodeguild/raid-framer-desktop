@@ -1,9 +1,12 @@
 package ui.overlay
 
 import AppState
-import CombatEventInteractor
+import CombatInteractor
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.*
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -22,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import core.helpers.humanReadableAbbreviation
 import ui.dialog.exitDialog
-import kotlin.system.exitProcess
 
 @Preview
 @Composable
@@ -39,14 +41,25 @@ fun PreviewCombatOverlay() {
 @Composable
 fun CombatOverlay() {
 
-  val shouldShowExitDialog = mutableStateOf(false)
+  val shouldShowExitDialog = remember { mutableStateOf(false) }
 
-  val damageByPlayer by CombatEventInteractor.damageByPlayer
-  val healsByPlayer by CombatEventInteractor.healsByPlayer
+  val damageByPlayer by CombatInteractor.damageByPlayer.collectAsState()
+  val healsByPlayer by CombatInteractor.healsByPlayer.collectAsState()
+  val retributionByPlayer by CombatInteractor.retributionByPlayer.collectAsState()
 
   // Transform and sort the maps
   val sortedDamage = damageByPlayer.toList().sortedByDescending { it.second }
   val sortedHeals = healsByPlayer.toList().sortedByDescending { it.second }
+
+  // the animation for red flashing text
+  val flashingColorState = rememberInfiniteTransition().animateColor(
+    initialValue = Color.White,
+    targetValue = Color.Red,
+    animationSpec = infiniteRepeatable(
+      animation = tween(durationMillis = 1000, easing = LinearEasing),
+      repeatMode = RepeatMode.Reverse
+    )
+  )
 
   exitDialog(shouldShowExitDialog)
 
@@ -102,22 +115,7 @@ fun CombatOverlay() {
           Text("\uD83D\uDEE0\uFE0F", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
         }
         IconButton(
-          onClick = { },
-          modifier = Modifier
-            .size(32.dp)
-            .background(Color.Transparent, MaterialTheme.shapes.small)
-            .padding(top = 0.5.dp)
-            .shadow(
-              elevation = 0.dp,
-              clip = true,
-              ambientColor = Color.Transparent,
-              spotColor = Color.Transparent
-            )
-        ) {
-          Text("⌖", fontSize = 24.sp, color = Color.White, fontWeight = FontWeight.ExtraLight, textAlign = TextAlign.Center)
-        }
-        IconButton(
-          onClick = { CombatEventInteractor.resetStats() },
+          onClick = { CombatInteractor.resetStats() },
           modifier = Modifier
             .size(32.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)
@@ -150,7 +148,18 @@ fun CombatOverlay() {
           modifier = Modifier.padding(8.dp)
         ) {
           items(sortedDamage.size.coerceAtMost(50)) { item ->
-            Row(horizontalArrangement = Arrangement.Start) {
+            val damageInteractionSource = remember { MutableInteractionSource() }
+            val isDamageHovered = damageInteractionSource.collectIsHoveredAsState().value
+            Row(
+              horizontalArrangement = Arrangement.Start,
+              modifier = Modifier
+                .clickable {
+                  AppState.isTrackerOverlayVisible.value = true
+                  AppState.currentTargetName.value = sortedDamage[item].first
+                }
+                .background(if (isDamageHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
+                .hoverable(interactionSource = damageInteractionSource)
+            ) {
               Text(
                 text = "${item + 1}. ${sortedDamage[item].first}: ",
                 color = Color.White,
@@ -161,8 +170,19 @@ fun CombatOverlay() {
               Text(
                 text = sortedDamage[item].second.humanReadableAbbreviation(),
                 color = Color(249, 191, 59, 255),
+                maxLines = 1,
                 modifier = Modifier.weight(0.2f)
               )
+              if (retributionByPlayer[sortedDamage[item].first] != null) {
+                Text(
+                  text = "⛨",
+                  color = flashingColorState.value,
+                  maxLines = 1,
+                  modifier = Modifier.weight(0.1f)
+                )
+              } else {
+                Spacer(modifier = Modifier.weight(0.1f))
+              }
             }
           }
         }
@@ -179,19 +199,41 @@ fun CombatOverlay() {
           modifier = Modifier.padding(8.dp)
         ) {
           items(sortedHeals.size.coerceAtMost(50)) { item ->
-            Row(horizontalArrangement = Arrangement.Start) {
+            val healsInteractionSource = remember { MutableInteractionSource() }
+            val isHealsHovered = healsInteractionSource.collectIsHoveredAsState().value
+            Row(
+              horizontalArrangement = Arrangement.Start,
+              modifier = Modifier
+                .clickable {
+                  AppState.isTrackerOverlayVisible.value = true
+                  AppState.currentTargetName.value = sortedHeals[item].first
+                }
+                .background(if (isHealsHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
+                .hoverable(interactionSource = healsInteractionSource)
+            ) {
               Text(
-                text = "${item + 1}. ${sortedHeals[item].first}: ",
+                text = "${item + 1}. ${sortedHeals[item].first}",
                 color = Color.White,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                modifier = Modifier.weight(0.8f)
+                modifier = Modifier.weight(0.7f)
               )
               Text(
                 text = sortedHeals[item].second.humanReadableAbbreviation(),
                 color = Color.Green,
-                modifier = Modifier.weight(0.3f)
+                maxLines = 1,
+                modifier = Modifier.weight(0.2f)
               )
+              if (retributionByPlayer[sortedHeals[item].first] != null) {
+                Text(
+                  text = "⛨",
+                  color = flashingColorState.value,
+                  maxLines = 1,
+                  modifier = Modifier.weight(0.1f)
+                )
+              } else {
+                Spacer(modifier = Modifier.weight(0.1f))
+              }
             }
           }
         }

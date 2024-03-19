@@ -1,5 +1,6 @@
 package ui
 
+import OverlayInteractor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +11,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
-import java.awt.Dimension
+import core.database.OverlayType
+import core.database.Schema
 import java.awt.Point
 import java.awt.Shape
 import java.awt.Window
@@ -23,7 +25,7 @@ import java.awt.geom.RoundRectangle2D
 
 @Composable
 fun OverlayWindow(
-  title: String, initialPosition: WindowPosition, initialSize: DpSize,
+  title: String, initialPosition: WindowPosition, initialSize: DpSize, overlayType: OverlayType,
   isVisible: MutableState<Boolean>, isEverythingVisible: MutableState<Boolean>, isResizable: MutableState<Boolean>,
   onCloseRequest: () -> Unit, windowContent: @Composable (Window) -> Unit
 ) {
@@ -52,6 +54,7 @@ fun OverlayWindow(
         8.0,
         8.0
       )
+      OverlayInteractor.updateWindowStateFor(overlayType, windowState)
     }
     val mouseListener = createMouseListener(windowState)
     window.addMouseListener(mouseListener)

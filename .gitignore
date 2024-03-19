@@ -41,3 +41,6 @@ bin/
 ### Mac OS ###
 .DS_Store
 /.idea/copilot
+database.realm
+database.realm
+database.realm.lock

@@ -1,6 +1,9 @@
 package core.database
 
+import OverlayInteractor
+import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.TypedRealmObject
 import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
@@ -16,17 +19,48 @@ object Schema {
 
   class RFConfig() : RealmObject {
     var defaultLogPath: String = ""
+    var tabbedDetectionEnabled: Boolean = false
+    var overlayResizingEnabled: Boolean = false
+    var colorAndTextDetectionEnabled: Boolean = false
+  }
 
-    constructor(defaultLogPath: String) : this() {
-      this.defaultLogPath = defaultLogPath
+  class RFWindowStates() : RealmObject {
+    var combatState: RFWindowState? = null
+    var settingsState: RFWindowState? = null
+    var trackerState: RFWindowState? = null
+    var aggroState: RFWindowState? = null
+    var aboutState: RFWindowState? = null
+  }
+
+  class RFWindowState() : EmbeddedRealmObject {
+    var type: Int = OverlayType.COMBAT.ordinal
+    var lastPositionXDp: Float = 0f
+    var lastPositionYDp: Float = 0f
+    var lastWidthDp: Float = 0f
+    var lastHeightDp: Float = 0f
+
+    constructor(
+      type: Int,
+      lastPositionXDp: Float,
+      lastPositionYDp: Float,
+      lastWidthDp: Float,
+      lastHeightDp: Float
+    ) : this() {
+      this.lastPositionXDp = lastPositionXDp
+      this.lastPositionYDp = lastPositionYDp
+      this.lastWidthDp = lastWidthDp
+      this.lastHeightDp = lastHeightDp
     }
   }
 
-  fun getRealmObjectClasses(): Set<KClass<*>> {
-    return Schema::class.declaredMemberProperties
-      .mapNotNull { it.returnType.classifier as? KClass<*> }
-      .filter { it.isSubclassOf(RealmObject::class) }
+  fun getRealmObjectClasses(): Set<KClass<out TypedRealmObject>> {
+    return Schema::class.nestedClasses
+      .filterIsInstance<KClass<out TypedRealmObject>>()
       .toSet()
   }
 
+}
+
+enum class OverlayType {
+  COMBAT, SETTINGS, TRACKER, ABOUT, AGGRO
 }

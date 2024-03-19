@@ -3,7 +3,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("jvm")
     id("org.jetbrains.compose")
-    id("io.realm.kotlin") version "1.11.0"
+    id("io.realm.kotlin") version "1.11.1"
 }
 
 group = "lol.rfcloud"
@@ -26,12 +26,15 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
-    implementation("io.realm.kotlin:library-base:1.14.0") // saving and loading settings
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0") // god if we did this all on the main thread life would be hell
+    implementation("io.realm.kotlin:library-base:1.11.1")
+    implementation("io.realm.kotlin:library-sync:1.11.1") // If using Device Sync
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0") // If using coroutines with the SDK
     implementation("net.java.dev.jna:jna-platform:5.8.0") // tabbed-out detection feature
     implementation("com.dorkbox:SystemTray:4.4") // system tray feature
     implementation("ch.qos.logback:logback-classic:1.5.3") // logging
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.20") // accesses the schema reflectively
+    implementation("net.sourceforge.tess4j:tess4j:5.11.0") // text detection feature
+    implementation("org.jetbrains.skiko:skiko-jvm-runtime-windows-x64:0.6.7") // about video player nya
 }
 
 compose.desktop {

@@ -2,6 +2,7 @@ package core.helpers
 import java.awt.Toolkit
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.realm.kotlin.Realm
 
 /*
  * Extension function to abbreviate a numeric values by thousands, millions, billions, etc.
@@ -29,4 +30,15 @@ fun getScreenSizeInDp(): Pair<Dp, Dp> {
   val widthInDp = (screenSize.width / density).dp
   val heightInDp = (screenSize.height / density).dp
   return Pair(widthInDp, heightInDp)
+}
+
+/*
+ * Why this isn't built into the kotlin version of realm the world may never know.
+ */
+inline fun <T> Realm.use(block: (Realm) -> T): T {
+  return try {
+    block(this)
+  } finally {
+    this.close()
+  }
 }

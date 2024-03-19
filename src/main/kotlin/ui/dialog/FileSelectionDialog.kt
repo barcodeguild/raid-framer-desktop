@@ -69,7 +69,6 @@ fun FileSelectionDialog(possiblePaths: List<Path>, showDialog: MutableState<Bool
       confirmButton = {
         Button(
           onClick = {
-            println("Selected item: ${selectedItem.value}")
             showDialog.value = false
           },
           colors = ButtonDefaults.buttonColors(Color(32,32,32,255)),
