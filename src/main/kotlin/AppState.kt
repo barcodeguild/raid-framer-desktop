@@ -10,7 +10,7 @@ object AppState {
   /* User Wants Windows Visible */
   val isAboutOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isEverythingVisible: MutableState<Boolean> = mutableStateOf(false)
-  val isCombatOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
+  val isCombatOverlayVisible: MutableState<Boolean> = mutableStateOf(true)
   val isTrackerOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isAggroOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isSettingsOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
@@ -19,7 +19,7 @@ object AppState {
   /* Window Obstructing Game Window */
   val isCombatObstructing: MutableState<Boolean> = mutableStateOf(false)
   val isAggroObstructing: MutableState<Boolean> = mutableStateOf(false)
-  val isTrackerObstructing: MutableState<Map<String, Boolean>> = mutableStateOf(mapOf()) // multiple windows by player name
+  val isTrackerObstructing: MutableState<Boolean> = mutableStateOf(false)
 
   /* Filters and Mappings */
   val filterNames: MutableState<List<String>> = mutableStateOf(listOf()) // ignore these names

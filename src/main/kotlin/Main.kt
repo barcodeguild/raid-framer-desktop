@@ -132,11 +132,11 @@ fun main() = application {
         y = Dp(AppState.windowStates.trackerState?.lastPositionYDp ?: 32f)
       ),
       initialSize = DpSize(
-        width = Dp(AppState.windowStates.trackerState?.lastWidthDp ?: 320f),
-        height = Dp(AppState.windowStates.trackerState?.lastHeightDp ?: 512f)
+        width = Dp(AppState.windowStates.trackerState?.lastWidthDp ?: 360f),
+        height = Dp(AppState.windowStates.trackerState?.lastHeightDp ?: 420f)
       ),
       overlayType = OverlayType.TRACKER,
-      isObstructing = mutableStateOf(false), // AppState.isTrackerObstructing,
+      isObstructing = AppState.isTrackerObstructing,
       isVisible = AppState.isTrackerOverlayVisible,
       isEverythingVisible = AppState.isEverythingVisible,
       isResizable = AppState.isEverythingResizable,
@@ -157,7 +157,7 @@ fun main() = application {
       height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: 512f)
     ),
     overlayType = OverlayType.FILTERS,
-    isObstructing = AppState.isCombatObstructing,
+    isObstructing = mutableStateOf(false),
     isVisible = AppState.isFiltersOverlayVisible,
     isEverythingVisible = mutableStateOf(true),
     isResizable = AppState.isEverythingResizable,

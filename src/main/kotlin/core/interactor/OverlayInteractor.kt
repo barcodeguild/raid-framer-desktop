@@ -26,7 +26,7 @@ object OverlayInteractor {
   private val GAME_WINDOW_COLOR_MODIFIER_BASE = Color(237, 233, 214)
   private val GAME_WINDOW_COLOR_MODIFIER = Color(137, 137, 130)
   private val GAME_WINDOW_COLOR = Color(240, 240, 226)
-  const val COLOR_DETECTION_THRESHOLD = 10.0 // 10%
+  const val COLOR_DETECTION_THRESHOLD = 13.0 // 10%
   const val MAX_VARIANCE = 7
 
   /*
@@ -34,8 +34,10 @@ object OverlayInteractor {
    */
   fun start() {
     scope.launch {
-      delay(500)
       while (isActive) {
+
+        delay(500) // don't do too often
+
         // check to see if the player is tabbed-out of the game by window title
         if (AppState.config.tabbedDetectionEnabled) {
           val gameForegrounded = getActiveWindowTitle().contains("ArcheRage")
@@ -45,48 +47,56 @@ object OverlayInteractor {
         }
 
         // check to see if it looks like an in-game window is being covered by an overlay
+        val supportedWindows = listOf(
+          AppState.windowStates.combatState,
+          AppState.windowStates.trackerState
+        )
+
         if (AppState.config.colorAndTextDetectionEnabled) {
           val ss = takeScreenshot()
-          listOf(
-            AppState.windowStates.combatState,
-            AppState.windowStates.trackerState
-          ).onEach { state ->
-            if (state != null) {
-              val shouldHide = shouldHideWindow(state, ss)
-              when (state) {
-                AppState.windowStates.combatState -> AppState.isCombatOverlayVisible.value = !shouldHide
-                AppState.windowStates.trackerState -> AppState.isTrackerOverlayVisible.value = !shouldHide
-              }
+          supportedWindows.filterNotNull().forEach { state ->
+            when (state) {
+              AppState.windowStates.combatState -> AppState.isCombatObstructing.value = shouldHideWindow(alreadyObstructing = AppState.isCombatObstructing.value, windowState = state, image = ss)
+              AppState.windowStates.trackerState -> AppState.isTrackerObstructing.value = shouldHideWindow(alreadyObstructing = AppState.isTrackerObstructing.value, windowState = state, image = ss)
             }
           }
         } else {
-          AppState.isCombatOverlayVisible.value = true
+          supportedWindows.onEach {
+            when (it) {
+              AppState.windowStates.combatState -> AppState.isCombatObstructing.value = false
+              AppState.windowStates.trackerState -> AppState.isTrackerObstructing.value = false
+            }
+          }
         }
       }
     }
   }
 
-  private suspend fun shouldHideWindow(state: Schema.RFWindowState, ss: BufferedImage): Boolean {
+  private suspend fun shouldHideWindow(alreadyObstructing: Boolean, windowState: Schema.RFWindowState, image: BufferedImage): Boolean {
     val overlayRegion = Rectangle(
-      state.lastPositionXDp.toInt(),
-      state.lastPositionYDp.toInt(),
-      state.lastWidthDp.toInt(),
-      state.lastHeightDp.toInt()
+      windowState.lastPositionXDp.toInt(),
+      windowState.lastPositionYDp.toInt(),
+      windowState.lastWidthDp.toInt(),
+      windowState.lastHeightDp.toInt()
     )
+
     val isCovered = try {
-      isRegionObstructed(ss, overlayRegion)
+      isRegionObstructed(image, overlayRegion)
     } catch (E: Exception) {
       println("Error checking region obstruction because: ${E.message}")
       return false // fail open
     }
 
     val regionImage = try {
-      ss.getSubimage(overlayRegion.x, overlayRegion.y, overlayRegion.width, overlayRegion.height)
+      image.getSubimage(overlayRegion.x, overlayRegion.y, overlayRegion.width, overlayRegion.height)
     } catch (E: Exception) {
       println("Error getting subimage because: ${E.message}")
       return true // fail open
     }
-    return if (AppState.isCombatOverlayVisible.value) !isCovered else !isCovered && !isTextPresent(regionImage)
+
+    val isTextPresent = isTextPresent(regionImage)
+
+    return if (alreadyObstructing) isCovered || isTextPresent else isCovered
   }
 
 
@@ -157,7 +167,7 @@ object OverlayInteractor {
           tesseract.setTessVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
           val result: String = tesseract.doOCR(image)
           val words = filterWords(result)
-          return words.count() > 3 // because these older training models produce a lot of garbage
+          return words.isNotEmpty()
         }
       } catch (e: TesseractException) {
         println("Tesseract failed: ${e.message}")
