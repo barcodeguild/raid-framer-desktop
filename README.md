@@ -10,6 +10,8 @@ There are two ways to get **Raid Framer**. The first way is to download the sour
 
 The second way (with understanding that most players don't want a hassle) there's also a releases section to this GitHub that has pre-built versions of **Raid Framer**. Included is a setup program that automatically installs the runtime environment, resources and executable. It will place a shortcut on your desktop that you can use to launch the overlay, and you can quit it at any time from the system tray menu or by hitting the X on the combat overlay.
 
+-> Current Releases: https://github.com/barcodeguild/raid-framer-desktop/releases <-
+
 ## Some Notable Features
 
 This overlay can automatically hide itself when you tab out of the game so that it's not covering other windows. It also has some experimental functionality to do the same for obstructed in-game windows (like the faction menu the play's inventory) It does this based on what color is behind the overlay and also via *garbage text* recognition. The overlay is transparent so the colors of what's behind it bleed through the transparency and this allows us to detect the inventory color. The actual images themselves after being run through recognition are discarded.
