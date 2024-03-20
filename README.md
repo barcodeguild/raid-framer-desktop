@@ -8,7 +8,7 @@ My hope is that this tool will bring something to the table in-terms of damage t
 
 There are two ways to get **Raid Framer**. The first way is to download the source-code and build it yourself using Intellij and the included Gradle wrapper from the command-line. **Intellij Community Edition** is a free IDE for working with Java and Kotlin projects. You can get that here: https://www.jetbrains.com/idea/download
 
-The second way (with understanding that most players don't want a hassle) there's also a releases section to this Github that has pre-built versions of **Raid Framer**. Included is a setup program that automatically installs the runtime environment, resources and executable. It will place a shortcut on your desktop that you can use to launch the overlay, and you can quit it at any time from the system tray menu or by hitting the X on the combat overlay.
+The second way (with understanding that most players don't want a hassle) there's also a releases section to this GitHub that has pre-built versions of **Raid Framer**. Included is a setup program that automatically installs the runtime environment, resources and executable. It will place a shortcut on your desktop that you can use to launch the overlay, and you can quit it at any time from the system tray menu or by hitting the X on the combat overlay.
 
 ## Some Notable Features
 
