@@ -34,7 +34,7 @@ If you add a feature to the code, please consider making a pull request! I will 
 ## Installing
 Make sure that you have gone to your ArcheRage settings enabled combat logging. Switch the slider to ALL for logged events and checked the checkbox for combat logging. If you don't do this the overlay isn't going to know what's going on in the game. For distance, set the logging distance to the highest it will go.
 
-When you run the setup program, the app will be copied to your program files. You can run **Raid Framer** via the shortcut on your desktop or the start menu. It doesn't have any config files that you're meant to manually edit, but you can do so anyways by opening the database file located in C:\Users\<User>\.RaidFramer\ with Realm Studio.
+When you run the setup program, the app will be copied to your program files. You can run **Raid Framer** via the shortcut on your desktop or the start menu. It doesn't have any config files that you're meant to manually edit, but you can do so anyways by opening the database file located in C:\Users\User\\.RaidFramer\ with Realm Studio.
 
 ## Screenshots ##
 
