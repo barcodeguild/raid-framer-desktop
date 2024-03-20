@@ -4,6 +4,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import core.helpers.use
 import io.realm.kotlin.ext.isManaged
+import java.io.File
 
 object RFDao {
 
@@ -14,7 +15,19 @@ object RFDao {
    */
   private fun initialize(): RealmConfiguration {
     val schema = Schema.getRealmObjectClasses()
+
+    // We don't have permissions to write to the program files directory, so we'll use the user's home directory
+    val userHome = System.getProperty("user.home")
+    val dbDirectory = "$userHome/.RaidFramer"
+
+    // Create the directory if it doesn't exist
+    val directory = File(dbDirectory)
+    if (!directory.exists()) {
+      directory.mkdirs()
+    }
+
     return RealmConfiguration.Builder(schema)
+      .directory(dbDirectory)
       .name("database.realm")
       .deleteRealmIfMigrationNeeded()
       .schemaVersion(Schema.SCHEMA_VERSION)

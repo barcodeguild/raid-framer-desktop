@@ -88,7 +88,7 @@ fun main() = application {
   tray.menu.add(MenuItem("Exit") {
     exitApplication()
   })
-
+//
   tray.setImage(iconImage)
 
   /*

@@ -167,7 +167,7 @@ object OverlayInteractor {
           tesseract.setTessVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
           val result: String = tesseract.doOCR(image)
           val words = filterWords(result)
-          return words.isNotEmpty()
+          return words.size > 2
         }
       } catch (e: TesseractException) {
         println("Tesseract failed: ${e.message}")

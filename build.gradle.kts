@@ -34,7 +34,6 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.3") // logging
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.20") // accesses the schema reflectively
     implementation("net.sourceforge.tess4j:tess4j:5.11.0") // text detection feature
-    implementation("org.jetbrains.skiko:skiko-jvm-runtime-windows-x64:0.6.7") // about video player nya
 }
 
 compose.desktop {
