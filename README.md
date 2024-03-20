@@ -36,6 +36,10 @@ Make sure that you have gone to your ArcheRage settings enabled combat logging. 
 
 When you run the setup program, the app will be copied to your program files. You can run **Raid Framer** via the shortcut on your desktop or the start menu. It doesn't have any config files that you're meant to manually edit, but you can do so anyways by opening the database file located in C:\Users\User\\.RaidFramer\ with Realm Studio.
 
+You ArcheRage in-game settings should have "Enable Combat Logging" checked like so:
+
+![image](https://github.com/barcodeguild/raid-framer-desktop/assets/161555754/916514d8-8d05-42cc-a708-cb1434075ae6)
+
 ## Screenshots ##
 
 ![image](https://github.com/barcodeguild/raid-framer-desktop/assets/161555754/6243aaea-53a4-4bad-ba33-23313ddfb550)
