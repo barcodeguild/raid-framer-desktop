@@ -19,6 +19,7 @@ object Schema {
     var tabbedDetectionEnabled: Boolean = false
     var overlayResizingEnabled: Boolean = true
     var colorAndTextDetectionEnabled: Boolean = false
+    var searchEverywhere: Boolean = false
     var firstLaunch: Boolean = true
   }
 

@@ -10,9 +10,14 @@ import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
 object CombatInteractor {
+  var shouldSearchEverywhere: Boolean = false
   private var scope: CoroutineScope? = null
 
-  var possiblePaths = mutableListOf<Path>()
+  private var _isSearching = MutableStateFlow<Boolean>(false)
+  val isSearching: StateFlow<Boolean> = _isSearching
+  private var _possiblePaths = MutableStateFlow<List<Path>>(listOf())
+  val possiblePaths: StateFlow<List<Path>> = _possiblePaths
+
   var selectedPath: String? = null
   var mostRecentEventTimestamp: Long = 0
 
@@ -77,12 +82,24 @@ object CombatInteractor {
    * Recursively searches for Combat.log files in the player's Documents folder and populates a
    * list of possible paths for the user to choose from.
    */
-  private fun locateCombatLog() {
+  fun locateCombatLog() {
+
+    // set active
+    _isSearching.value = true
 
     val oneDriveDocumentsPath = Paths.get(System.getProperty("user.home"), "OneDrive", "Documents")
     val documentsPath = Paths.get(System.getProperty("user.home"), "Documents")
+    val everywherePath = Paths.get(System.getProperty("user.home"))
 
-    val baseDir = if (Files.exists(oneDriveDocumentsPath)) oneDriveDocumentsPath else documentsPath
+    val searchPaths = mutableListOf<Path>()
+    if (shouldSearchEverywhere) {
+      if (Files.exists(everywherePath)) searchPaths.add(everywherePath)
+    } else {
+      if (Files.exists(oneDriveDocumentsPath)) searchPaths.add(oneDriveDocumentsPath)
+      if (Files.exists(documentsPath)) searchPaths.add(documentsPath)
+    }
+
+    val possibleLogFiles = mutableListOf<Path>()
 
     fun seek(baseDir: Path) {
       val stream = Files.list(baseDir)
@@ -90,13 +107,18 @@ object CombatInteractor {
         paths.forEach { path ->
           if (Files.isDirectory(path) && Files.isReadable(path)) {
             seek(path)
-          } else if (path.fileName.toString() == "Combat.log" && !path.pathString.contains("LogBackups")) {
-            possiblePaths.add(path)
+          } else if (path.fileName.toString().lowercase() == "combat.log" && !path.pathString.contains("LogBackups")) {
+            possibleLogFiles.add(path)
           }
         }
       }
     }
-    seek(baseDir)
+    searchPaths.forEach {
+      seek(it)
+    }
+
+    _possiblePaths.value = possibleLogFiles
+    _isSearching.value = false
   }
 
   /*

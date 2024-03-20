@@ -1,17 +1,13 @@
 package ui.dialog
 
+import CombatInteractor
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,7 +19,11 @@ import java.nio.file.Path
 import kotlin.io.path.pathString
 
 @Composable
-fun FileSelectionDialog(possiblePaths: List<Path>, showDialog: MutableState<Boolean>, selectedItem: MutableState<String>) {
+fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: MutableState<String>) {
+
+  val isSearching by CombatInteractor.isSearching.collectAsState()
+  val possiblePaths by CombatInteractor.possiblePaths.collectAsState()
+
   if (showDialog.value) {
     AlertDialog(
       onDismissRequest = { showDialog.value = false },
@@ -40,30 +40,47 @@ fun FileSelectionDialog(possiblePaths: List<Path>, showDialog: MutableState<Bool
       modifier = Modifier.background(Color.Transparent),
       backgroundColor = Color(64,64,64,255),
       text = {
-        LazyColumn(Modifier.background(Color.Transparent)) {
-          items(count = possiblePaths.count(), itemContent = { itemId ->
-            Box(
-            modifier = Modifier
-              .fillMaxWidth()
-              .background(if (possiblePaths[itemId].pathString == selectedItem.value) Color(0,0,0,128) else Color.Transparent)
-              .clickable { selectedItem.value = possiblePaths[itemId].pathString }
-              .padding(16.dp)
+        if (isSearching) {
+          Column(
+            modifier = Modifier.wrapContentSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
           ) {
-              Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Text(
+              modifier = Modifier.fillMaxWidth(),
+              color = Color.White,
+              fontSize = 12.sp,
+              textAlign = TextAlign.Center,
+              text = "Searching for valid combat logs.. Results will appear here.."
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            CircularProgressIndicator(color = Color.White)
+          }
+        } else {
+          LazyColumn(Modifier.background(Color.Transparent)) {
+            items(count = possiblePaths.count(), itemContent = { itemId ->
+              Box(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .background(if (possiblePaths[itemId].pathString == selectedItem.value) Color(0,0,0,128) else Color.Transparent)
+                  .clickable { selectedItem.value = possiblePaths[itemId].pathString }
+                  .padding(16.dp)
               ) {
-                Text(text = "$itemId. ", color = Color.White, fontSize = 12.sp)
-                Text(
-                  text = possiblePaths[itemId].pathString,
-                  modifier = Modifier.weight(1f).padding(start = 8.dp),
-                  color = Color.White,
-                  fontSize = 12.sp,
-                  textAlign = TextAlign.Start
-                )
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Text(text = "$itemId. ", color = Color.White, fontSize = 12.sp)
+                  Text(
+                    text = possiblePaths[itemId].pathString,
+                    modifier = Modifier.weight(1f).padding(start = 8.dp),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Start
+                  )
+                }
               }
-            }
-          })
+            })
+          }
         }
       },
       confirmButton = {
@@ -87,10 +104,9 @@ fun FileSelectionDialog(possiblePaths: List<Path>, showDialog: MutableState<Bool
 @Preview
 @Composable
 fun PreviewFileSelectionDialog() {
-  val possiblePaths = emptyList<Path>()
   val showDialog = mutableStateOf(true)
   val selectedItem = mutableStateOf("")
   Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-    FileSelectionDialog(possiblePaths, showDialog, selectedItem)
+    FileSelectionDialog(showDialog, selectedItem)
   }
 }

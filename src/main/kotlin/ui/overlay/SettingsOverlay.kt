@@ -163,7 +163,7 @@ fun SettingsOverlay() {
     // )
   }
 
-  FileSelectionDialog(CombatInteractor.possiblePaths, showDialog, selectedItem)
+  FileSelectionDialog(showDialog, selectedItem)
   LaunchedEffect(selectedItem.value) {
     AppState.config.defaultLogPath = selectedItem.value
     CoroutineScope(Dispatchers.Default).launch {
@@ -256,6 +256,30 @@ fun GlobalOptionsPanel() {
           )
           Text(
             text = "Enable resizing of overlay windows. [EXPERIMENTAL]",
+            color = Color.White
+          )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          var searchEverywhereChecked: Boolean by remember { mutableStateOf(AppState.config.searchEverywhere) }
+          Checkbox(
+            checked = searchEverywhereChecked,
+            onCheckedChange = {
+              searchEverywhereChecked = it
+              AppState.config.searchEverywhere = it
+              CombatInteractor.shouldSearchEverywhere = it
+              CoroutineScope(Dispatchers.Default).launch {
+                RFDao.saveConfig(AppState.config)
+                CombatInteractor.locateCombatLog()
+              }
+            },
+            colors = CheckboxDefaults.colors(
+              checkmarkColor = Color.White,
+              checkedColor = Color.Red,
+              uncheckedColor = Color.White
+            )
+          )
+          Text(
+            text = "Search everywhere for combat.log and not just documents.",
             color = Color.White
           )
         }

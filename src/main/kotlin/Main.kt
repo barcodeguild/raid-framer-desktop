@@ -31,6 +31,7 @@ fun main() = application {
     appState.isEverythingResizable.value = AppState.config.overlayResizingEnabled
     appState.isAboutOverlayVisible.value = AppState.config.firstLaunch
     CombatInteractor.selectedPath = AppState.config.defaultLogPath
+    CombatInteractor.shouldSearchEverywhere = AppState.config.searchEverywhere
     AppState.config.firstLaunch = false
     RFDao.saveConfig(AppState.config)
   }
@@ -196,7 +197,7 @@ fun main() = application {
       y = Dp(AppState.windowStates.settingsState?.lastPositionYDp ?: 512f)),
     initialSize = DpSize(
       width = Dp(AppState.windowStates.settingsState?.lastWidthDp ?: 450f),
-      height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: 500f)
+      height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: 540f)
     ),
     overlayType = OverlayType.SETTINGS,
     isObstructing = mutableStateOf(false), // Always show opaque windows

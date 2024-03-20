@@ -56,6 +56,7 @@ object RFDao {
             oldWindowStates.trackerState = newWindowStates.trackerState
             oldWindowStates.aggroState = newWindowStates.aggroState
             oldWindowStates.aboutState = newWindowStates.aboutState
+            oldWindowStates.filterState = newWindowStates.filterState
           }
         }
       } ?: run {
@@ -87,6 +88,8 @@ object RFDao {
             oldConfig.tabbedDetectionEnabled = config.tabbedDetectionEnabled
             oldConfig.overlayResizingEnabled = config.overlayResizingEnabled
             oldConfig.colorAndTextDetectionEnabled = config.colorAndTextDetectionEnabled
+            oldConfig.firstLaunch = config.firstLaunch
+            oldConfig.searchEverywhere = config.searchEverywhere
           }
         }
       } ?: run {
