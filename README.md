@@ -31,6 +31,21 @@ More features in the future. Please provide me feedback friends so I can code st
 
 If you add a feature to the code, please consider making a pull request! I will be watching for feature requests, and listening to people's ideas about what to add!
 
+## Installing
+Make sure that you have gone to your ArcheRage settings enabled combat logging. Switch the slider to ALL for logged events and checked the checkbox for combat logging. If you don't do this the overlay isn't going to know what's going on in the game. For distance, set the logging distance to the highest it will go.
+
+When you run the setup program, the app will be copied to your program files. You can run **Raid Framer** via the shortcut on your desktop or the start menu. It doesn't have any config files that you're meant to manually edit, but you can do so anyways by opening the database file located in C:\Users\<User>\.RaidFramer\ with Realm Studio.
+
+## Screenshots ##
+
+![image](https://github.com/barcodeguild/raid-framer-desktop/assets/161555754/6243aaea-53a4-4bad-ba33-23313ddfb550)
+
+![image](https://github.com/barcodeguild/raid-framer-desktop/assets/161555754/771d75e5-b42e-435f-8f33-e513ae27733f)
+
+![image](https://github.com/barcodeguild/raid-framer-desktop/assets/161555754/860eff93-69ea-4b39-9795-3db1a6e09296)
+
+![image-1](https://github.com/barcodeguild/raid-framer-desktop/assets/161555754/25280248-3c78-4069-bba6-71cbdb170ea5)
+
 ## Warranty
 
 This software is open-source, it doesn't really come with any warranty or guarantee of any kind, but you are welcome to try it friends! All I can say is I do try to make it good, even though I'm sure there will be bugs. Please report those. ~
