@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -114,6 +113,21 @@ fun CombatOverlay() {
         ) {
           Text("\uD83D\uDEE0\uFE0F", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
         }
+//        IconButton(
+//          onClick = { AppState.toggleFiltersOverlayVisibility() },
+//          modifier = Modifier
+//            .size(32.dp)
+//            .background(Color.Transparent, MaterialTheme.shapes.small)
+//            .padding(top = 4.dp)
+//            .shadow(
+//              elevation = 0.dp,
+//              clip = true,
+//              ambientColor = Color.Transparent,
+//              spotColor = Color.Transparent
+//            )
+//        ) {
+//          Text("\uD83D\uDF56", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
+//        }
         IconButton(
           onClick = { CombatInteractor.resetStats() },
           modifier = Modifier

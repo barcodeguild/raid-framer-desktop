@@ -4,13 +4,30 @@ import core.database.Schema
 import java.nio.file.Path
 
 object AppState {
-  val isAboutOverlayVisible: MutableState<Boolean> = mutableStateOf(true)
-  val isEverythingResizable: MutableState<Boolean> = mutableStateOf(false)
+
+  val isEverythingResizable: MutableState<Boolean> = mutableStateOf(true)
+
+  /* User Wants Windows Visible */
+  val isAboutOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isEverythingVisible: MutableState<Boolean> = mutableStateOf(false)
   val isCombatOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isTrackerOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isAggroOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isSettingsOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
+  val isFiltersOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
+
+  /* Window Obstructing Game Window */
+  val isCombatObstructing: MutableState<Boolean> = mutableStateOf(false)
+  val isAggroObstructing: MutableState<Boolean> = mutableStateOf(false)
+  val isTrackerObstructing: MutableState<Map<String, Boolean>> = mutableStateOf(mapOf()) // multiple windows by player name
+
+  /* Filters and Mappings */
+  val filterNames: MutableState<List<String>> = mutableStateOf(listOf()) // ignore these names
+  val remappedNames: MutableState<Map<String, String>> = mutableStateOf(mapOf()) // interpret as: oldName -> newName
+
+  fun toggleFiltersOverlayVisibility() {
+    isFiltersOverlayVisible.value = !isFiltersOverlayVisible.value
+  }
 
   fun toggleTrackerOverlayVisibility() {
     isTrackerOverlayVisible.value = !isTrackerOverlayVisible.value
@@ -21,6 +38,7 @@ object AppState {
   }
 
   var currentTargetName: MutableState<String> = mutableStateOf("")
+  var trackerTargets: MutableState<List<String>> = mutableStateOf(listOf())
 
   var tessTempDirectory: Path? = null
   var windowStates = Schema.RFWindowStates()

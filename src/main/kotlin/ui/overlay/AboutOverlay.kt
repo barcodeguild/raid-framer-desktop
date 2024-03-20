@@ -15,17 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.io.FileInputStream
 
 @Preview
 @Composable
@@ -35,7 +30,7 @@ fun PreviewAboutOverlay() {
       .fillMaxSize()
       .background(Color.Black)
   ) {
-    TrackerOverlay()
+    AboutOverlay()
   }
 }
 
@@ -68,7 +63,7 @@ fun AboutOverlay() {
     }
 
     // content area
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp)
+    Column(modifier = Modifier.fillMaxSize().padding(12.dp)
     ) {
 
       // Header Logo and Version
@@ -82,47 +77,76 @@ fun AboutOverlay() {
           )
         }
         Column(modifier = Modifier.weight(0.67f)) {
-          Spacer(modifier = Modifier.height(24.dp))
+          Spacer(modifier = Modifier.height(8.dp))
           Text(
-            text = "Raid Framer Desktop (Offline)",
+            text = "Raid Framer Desktop",
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
           )
-          Spacer(modifier = Modifier.height(16.dp))
-          Text(
-            text = "Version: 1.4.3",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            fontSize = 16.sp,
-            color = Color.White
-          )
-          Spacer(modifier = Modifier.height(16.dp))
-          Text(
-            text = "Package: lol.rfcloud",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            fontSize = 16.sp,
-            color = Color.White
-          )
-          Spacer(modifier = Modifier.height(16.dp))
-          Text(
-            text = "Source Code: https://github.com/barcodeguild/raid-framer-desktop",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            fontSize = 16.sp,
-            color = Color.White
-          )
-          Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(8.dp))
+          Row {
+            Text(
+              text = "Version:",
+              modifier = Modifier.padding(2.dp),
+              textAlign = TextAlign.Start,
+              fontSize = 16.sp,
+              color = Color.White
+            )
+            Text(
+              text = "1.4.3",
+              modifier = Modifier.padding(2.dp),
+              textAlign = TextAlign.Start,
+              fontWeight = FontWeight.Bold,
+              fontSize = 16.sp,
+              color = Color.White
+            )
+          }
+          Spacer(modifier = Modifier.height(8.dp))
+          Row {
+            Text(
+              text = "Package:",
+              modifier = Modifier.padding(2.dp),
+              textAlign = TextAlign.Start,
+              fontSize = 16.sp,
+              color = Color.White
+            )
+            Text(
+              text = "lol.rfcloud",
+              modifier = Modifier.padding(2.dp),
+              fontWeight = FontWeight.Bold,
+              textAlign = TextAlign.Start,
+              fontSize = 16.sp,
+              color = Color.White
+            )
+          }
+          Spacer(modifier = Modifier.height(8.dp))
+          Row {
+            Text(
+              text = "Source:",
+              modifier = Modifier.padding(2.dp),
+              textAlign = TextAlign.Start,
+              fontSize = 16.sp,
+              color = Color.White
+            )
+            Text(
+              text = "https://github.com/barcodeguild/raid-framer-desktop",
+              modifier = Modifier.padding(2.dp),
+              textAlign = TextAlign.Start,
+              fontWeight = FontWeight.Bold,
+              fontSize = 16.sp,
+              color = Color.White
+            )
+          }
           Button(
             onClick = {
               AppState.isAboutOverlayVisible.value = false
               AppState.isSettingsOverlayVisible.value = true
             },
             colors = ButtonDefaults.buttonColors(Color.White),
-            modifier = Modifier.padding(bottom = 16.dp, end = 16.dp).align(Alignment.End)
+            modifier = Modifier.padding(bottom = 8.dp, end = 8.dp).align(Alignment.End)
           ) {
             Text(
               text = "Go to Settings",
@@ -132,7 +156,7 @@ fun AboutOverlay() {
         }
       }
 
-      Divider(color = Color.LightGray, thickness = 1.dp, modifier = Modifier.padding(bottom = 16.dp))
+      Divider(color = Color.LightGray, thickness = 1.dp, modifier = Modifier.padding(bottom = 8.dp))
 
       Row {
         Column(modifier = Modifier.weight(1f).padding(8.dp)) {
@@ -141,24 +165,26 @@ fun AboutOverlay() {
             contentDescription = "Cute Reoky Icon"
           )
           Spacer(modifier = Modifier.height(16.dp))
-          Row(modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)) {
+          Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
             Text(
               text = "Author:",
               fontWeight = FontWeight.W200,
+              textAlign = TextAlign.Start,
               fontSize = 16.sp,
               color = Color.LightGray
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
               text = "~ Reoky ~",
-              fontWeight = FontWeight.W500,
+              fontWeight = FontWeight.Bold,
+              textAlign = TextAlign.Start,
               fontSize = 16.sp,
               color = Color.White
             )
           }
           Spacer(modifier = Modifier.height(16.dp))
           Text(
-            text = "Dedicated to all of our friends on United East and in the virtual world. May this code be used for good and not evil. ty ty ~",
+            text = "Dedicated to all of our friends on the East and out in the virtual world. May this code be used for good, and not evil.",
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontSize = 16.sp,
@@ -168,44 +194,53 @@ fun AboutOverlay() {
         Column(modifier = Modifier.weight(1f).padding(8.dp)) {
           Image(
             painter = painterResource("haranyanseal.png"),
-            contentDescription = "Raid Framer Icon"
+            contentDescription = "Raid Framer Icon",
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(start = 24.dp, end = 24.dp)
           )
+          Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            Text(
+              text = "Ty ty from",
+              modifier = Modifier.padding(2.dp),
+              textAlign = TextAlign.Start,
+              fontSize = 16.sp,
+              fontWeight = FontWeight.W200,
+              color = Color.LightGray,
+            )
+            Text(
+              text = "United East",
+              modifier = Modifier.padding(2.dp),
+              textAlign = TextAlign.Start,
+              fontSize = 16.sp,
+              fontWeight = FontWeight.Bold,
+              color = Color.White
+            )
+          }
+          Spacer(modifier = Modifier.height(16.dp))
           Text(
-            text = "United East",
+            text = "To the ArcheRage community for their support and feedback. ~",
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Center,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
             color = Color.White
           )
           Spacer(modifier = Modifier.height(16.dp))
           Text(
-            text = "To the ArcheRage community for their support and feedback.",
+            text = "To the ArcheRage staff for their dedication and hard work. ~",
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Center,
             fontSize = 16.sp,
             color = Color.White
           )
           Spacer(modifier = Modifier.height(16.dp))
           Text(
-            text = "To the ArcheRage staff for their dedication and hard work.",
+            text = "To the ArcheRage developers for their continued support and updates. ~",
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            fontSize = 16.sp,
-            color = Color.White
-          )
-          Spacer(modifier = Modifier.height(16.dp))
-          Text(
-            text = "To the ArcheRage developers for their continued support and updates.",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Center,
             fontSize = 16.sp,
             color = Color.White
           )
         }
       }
-
     }
-
   }
 }

@@ -14,19 +14,17 @@ import androidx.compose.ui.window.*
 import core.database.OverlayType
 import core.database.Schema
 import java.awt.Point
+import java.awt.Rectangle
 import java.awt.Shape
 import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.awt.geom.AffineTransform
-import java.awt.geom.Point2D
-import java.awt.geom.Rectangle2D
-import java.awt.geom.RoundRectangle2D
+import java.awt.geom.*
 
 @Composable
 fun OverlayWindow(
-  title: String, initialPosition: WindowPosition, initialSize: DpSize, overlayType: OverlayType,
-  isVisible: MutableState<Boolean>, isEverythingVisible: MutableState<Boolean>, isResizable: MutableState<Boolean>,
+  title: String, initialPosition: WindowPosition, initialSize: DpSize, overlayType: OverlayType, isObstructing: MutableState<Boolean>,
+  isVisible: MutableState<Boolean>, isEverythingVisible: MutableState<Boolean>, isResizable: MutableState<Boolean>, isFocusable: Boolean,
   onCloseRequest: () -> Unit, windowContent: @Composable (Window) -> Unit
 ) {
   val windowState = rememberWindowState(
@@ -36,8 +34,8 @@ fun OverlayWindow(
   )
   Window(
     onCloseRequest = onCloseRequest, resizable = isResizable.value, state = windowState, transparent = true,
-    title = title, alwaysOnTop = true, focusable = false, undecorated = true,
-    visible = isVisible.value && isEverythingVisible.value
+    title = title, alwaysOnTop = true, focusable = isFocusable, undecorated = true,
+    visible = isVisible.value && isEverythingVisible.value && !isObstructing.value
   ) {
     with(LocalDensity.current) {
       window.setBounds(
@@ -121,12 +119,12 @@ class OverlayWindow(
 
   override fun contains(r: Rectangle2D) = roundRect.contains(r)
 
-  override fun getPathIterator(at: AffineTransform?) = roundRect.getPathIterator(at ?: AffineTransform())
+  override fun getPathIterator(at: AffineTransform?): PathIterator = roundRect.getPathIterator(at ?: AffineTransform())
 
-  override fun getPathIterator(at: AffineTransform?, flatness: Double) =
+  override fun getPathIterator(at: AffineTransform?, flatness: Double): PathIterator =
     roundRect.getPathIterator(at ?: AffineTransform(), flatness)
 
-  override fun getBounds() = roundRect.bounds
+  override fun getBounds(): Rectangle = roundRect.bounds
 
-  override fun getBounds2D() = roundRect.bounds2D
+  override fun getBounds2D(): Rectangle2D = roundRect.bounds2D
 }

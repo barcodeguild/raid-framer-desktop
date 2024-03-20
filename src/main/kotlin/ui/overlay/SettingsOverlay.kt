@@ -71,7 +71,7 @@ fun SettingsOverlay() {
             color = Color.White,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
+            fontSize = 24.sp,
             modifier = Modifier
               .padding(top = 12.dp)
           )

@@ -207,6 +207,7 @@ object OverlayInteractor {
         OverlayType.TRACKER -> OverlayType.TRACKER.ordinal
         OverlayType.ABOUT -> OverlayType.ABOUT.ordinal
         OverlayType.AGGRO -> OverlayType.AGGRO.ordinal
+        OverlayType.FILTERS -> OverlayType.FILTERS.ordinal
       },
       lastPositionXDp = windowState.position.x.value,
       lastPositionYDp = windowState.position.y.value,
@@ -219,6 +220,7 @@ object OverlayInteractor {
       OverlayType.TRACKER -> AppState.windowStates.trackerState = newState
       OverlayType.ABOUT -> AppState.windowStates.aboutState = newState
       OverlayType.AGGRO -> AppState.windowStates.aggroState = newState
+      OverlayType.FILTERS -> AppState.windowStates.filterState = newState
     }
     CoroutineScope(Dispatchers.Default).launch {
       RFDao.saveWindowStates(AppState.windowStates)

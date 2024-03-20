@@ -1,5 +1,3 @@
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -7,7 +5,6 @@ import java.nio.file.*
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
 import java.util.regex.Pattern
 import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
@@ -49,11 +46,21 @@ object CombatInteractor {
   val retributionByPlayer: StateFlow<MutableMap<String, Long>> = _retributionByPlayer
 
   // super tracker
-  private val _targetEvents = MutableStateFlow<List<CombatEvent>>(listOf())
-  val targetEvents: StateFlow<List<CombatEvent>> = _targetEvents
+  private val _incomingEventsByPlayer = MutableStateFlow<MutableMap<String, List<CombatEvent>>>(mutableMapOf())
+  val incomingEventsByPlayer: StateFlow<MutableMap<String, List<CombatEvent>>> = _incomingEventsByPlayer
+  private val _outgoingEventsByPlayer = MutableStateFlow<MutableMap<String, List<CombatEvent>>>(mutableMapOf())
+  val outgoingEventsByPlayer: StateFlow<MutableMap<String, List<CombatEvent>>> = _outgoingEventsByPlayer
 
+  // currently casting
   private val _targetCurrentlyCasting = MutableStateFlow<String>("")
   val targetCurrentlyCasting: StateFlow<String> = _targetCurrentlyCasting
+
+  // kept separate because eventsByPlayer is split into incoming and outgoing events and buffs are neither
+  // also a time-complexity problem keeping all events in singular maps.
+  private val _activeBuffsByPlayer = MutableStateFlow<MutableMap<String, List<BuffGainedEvent>>>(mutableMapOf())
+  val activeBuffsByPlayer: StateFlow<MutableMap<String, List<BuffGainedEvent>>> = _activeBuffsByPlayer
+  private val _activeDebuffsByPlayer = MutableStateFlow<MutableMap<String, List<DebuffGainedEvent>>>(mutableMapOf())
+  val activeDebuffsByPlayer: StateFlow<MutableMap<String, List<DebuffGainedEvent>>> = _activeDebuffsByPlayer
 
   fun resetStats() {
     _damageByPlayer.value = mutableMapOf()
@@ -237,6 +244,7 @@ object CombatInteractor {
           target = matcher.group(2),
           debuff = matcher.group(3),
         )
+        processDebuffGained(event)
         continue
       }
 
@@ -249,6 +257,7 @@ object CombatInteractor {
           target = matcher.group(2),
           debuff = matcher.group(3),
         )
+        processDebuffEnded(event)
         continue
       }
 
@@ -256,41 +265,55 @@ object CombatInteractor {
     return events
   }
 
-  /*
-   * Generates
-   */
-  private fun logCombatEvent(event: CombatEvent) {
-//    val currentMap = _lastCombatEventsByPlayer.value.toMutableMap()
-//    val currentList = currentMap[event.caster]?.toMutableList() ?: mutableListOf()
-//    currentList.add(event)
-//    currentMap[event.caster] = currentList
-//    _lastCombatEventsByPlayer.value = currentMap
-  }
-
   private fun postDamage(event: AttackEvent) {
+
+    // update global counter
     val currentMap = _damageByPlayer.value.toMutableMap()
     val totalDamage = currentMap[event.caster]?.plus(event.damage) ?: event.damage.toLong()
     currentMap[event.caster] = totalDamage
     _damageByPlayer.value = currentMap
 
-    // involves tracked target?
-    if (event.caster == AppState.currentTargetName.value || event.target == AppState.currentTargetName.value) {
-      val currentTargetEvents = _targetEvents.value.toMutableList()
-      currentTargetEvents.add(event)
-      _targetEvents.value = currentTargetEvents
-    }
+    // initiated by target?
+    val currentOutgoingEventsByPlayer = _outgoingEventsByPlayer.value.toMutableMap()
+    val playersCurrentOutgoingEvents = currentOutgoingEventsByPlayer[event.caster]?.toMutableList() ?: mutableListOf()
+    playersCurrentOutgoingEvents.add(event)
+    currentOutgoingEventsByPlayer[event.caster] = playersCurrentOutgoingEvents
+    _outgoingEventsByPlayer.value = currentOutgoingEventsByPlayer
+
+    // received by target?
+    val currentIncomingEventsByPlayer = _incomingEventsByPlayer.value.toMutableMap()
+    val playersCurrentIncomingEvents = currentIncomingEventsByPlayer[event.target]?.toMutableList() ?: mutableListOf()
+    playersCurrentIncomingEvents.add(event)
+    currentIncomingEventsByPlayer[event.target] = playersCurrentIncomingEvents
+    _incomingEventsByPlayer.value = currentIncomingEventsByPlayer
   }
 
   private fun postHeal(event: HealEvent) {
+
+    // update global heal counter
     val currentMap = _healsByPlayer.value.toMutableMap()
     val totalHeal = currentMap[event.caster]?.plus(event.amount) ?: event.amount.toLong()
     currentMap[event.caster] = totalHeal
     _healsByPlayer.value = currentMap
+
+    // initiated by target?
+    val currentOutgoingEventsByPlayer = _outgoingEventsByPlayer.value.toMutableMap()
+    val playersCurrentOutgoingEvents = currentOutgoingEventsByPlayer[event.caster]?.toMutableList() ?: mutableListOf()
+    playersCurrentOutgoingEvents.add(event)
+    currentOutgoingEventsByPlayer[event.caster] = playersCurrentOutgoingEvents
+    _outgoingEventsByPlayer.value = currentOutgoingEventsByPlayer
+
+    // received by target?
+    val currentIncomingEventsByPlayer = _incomingEventsByPlayer.value.toMutableMap()
+    val playersCurrentIncomingEvents = currentIncomingEventsByPlayer[event.target]?.toMutableList() ?: mutableListOf()
+    playersCurrentIncomingEvents.add(event)
+    currentIncomingEventsByPlayer[event.target] = playersCurrentIncomingEvents
+    _incomingEventsByPlayer.value = currentIncomingEventsByPlayer
   }
 
   private fun postCasting(event: CastingEvent) {
     if (event.caster == AppState.currentTargetName.value) {
-      _targetCurrentlyCasting.value = "" // force state update nya
+      _targetCurrentlyCasting.value = "nya" // force state update nya
       _targetCurrentlyCasting.value = event.spell
     }
   }
@@ -304,7 +327,6 @@ object CombatInteractor {
         _retributionByPlayer.value = currentMap
       }
     }
-
   }
 
   private fun processBuffEnded(event: BuffEndedEvent) {
@@ -315,6 +337,50 @@ object CombatInteractor {
         _retributionByPlayer.value = currentMap
       }
     }
+  }
+
+  private fun processDebuffGained(event: DebuffGainedEvent) {
+    val currentActiveDebuffsByPlayer = _activeDebuffsByPlayer.value.toMutableMap()
+    val playersCurrentDebuffs = currentActiveDebuffsByPlayer[event.target]?.toMutableList() ?: mutableListOf()
+
+    // add debuff if player doesn't already have it
+    val hasDebuffAlready = playersCurrentDebuffs.any { it.debuff == event.debuff }
+    if (!hasDebuffAlready) {
+      playersCurrentDebuffs.add(event)
+    }
+
+    currentActiveDebuffsByPlayer[event.target] = playersCurrentDebuffs
+    _activeDebuffsByPlayer.value = currentActiveDebuffsByPlayer
+  }
+
+  private fun processDebuffEnded(event: DebuffEndedEvent) {
+    val currentActiveDebuffsByPlayer = _activeDebuffsByPlayer.value.toMutableMap()
+    val playersCurrentDebuffs = currentActiveDebuffsByPlayer[event.target]?.toMutableList() ?: mutableListOf()
+
+    // return a new list with all the debuffs except the one that ended
+    val filteredDebuffs = playersCurrentDebuffs.filter { it.debuff != event.debuff }
+
+    currentActiveDebuffsByPlayer[event.target] = filteredDebuffs
+    _activeDebuffsByPlayer.value = currentActiveDebuffsByPlayer
+  }
+
+
+  /*
+   * Prunes old debuff events (1 minute) just in case we are not nearby to witness them fall-off.
+   */
+  private fun pruneOldDebuffs() {
+    val currentActiveDebuffsByPlayer = _activeDebuffsByPlayer.value.toMutableMap()
+    val keysToRemove = mutableListOf<String>()
+
+    currentActiveDebuffsByPlayer.forEach { (key, debuffs) ->
+      val prunedDebuffs = debuffs.filter { mostRecentEventTimestamp - it.timestamp < 60000 }
+      currentActiveDebuffsByPlayer[key] = prunedDebuffs
+      if (prunedDebuffs.isEmpty()) {
+        keysToRemove.add(key)
+      }
+    }
+
+    _activeDebuffsByPlayer.value = currentActiveDebuffsByPlayer
   }
 
   /*
@@ -340,10 +406,6 @@ object CombatInteractor {
 
   fun stop() {
     scope?.cancel()
-  }
-
-  enum class CastDirection {
-    INCOMING, OUTGOING
   }
 
   interface CombatEvent {

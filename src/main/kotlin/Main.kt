@@ -7,16 +7,12 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import core.database.OverlayType
 import core.database.RFDao
-import core.database.Schema
 import core.helpers.getScreenSizeInDp
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import kotlinx.coroutines.*
-import ui.overlay.CombatOverlay
 import ui.OverlayWindow
-import ui.overlay.AboutOverlay
-import ui.overlay.SettingsOverlay
-import ui.overlay.TrackerOverlay
+import ui.overlay.*
 import java.awt.Image
 import java.io.File
 import java.nio.file.Files
@@ -33,7 +29,10 @@ fun main() = application {
     AppState.config = RFDao.loadConfig()
     AppState.windowStates = RFDao.loadWindowStates()
     appState.isEverythingResizable.value = AppState.config.overlayResizingEnabled
+    appState.isAboutOverlayVisible.value = AppState.config.firstLaunch
     CombatInteractor.selectedPath = AppState.config.defaultLogPath
+    AppState.config.firstLaunch = false
+    RFDao.saveConfig(AppState.config)
   }
 
   // copies the tesseract training data from resources to the disk
@@ -83,6 +82,9 @@ fun main() = application {
   tray.menu.add(MenuItem("Settings") {
     AppState.isSettingsOverlayVisible.value = true
   })
+  tray.menu.add(MenuItem("About") {
+    AppState.isAboutOverlayVisible.value = true
+  })
   tray.menu.add(MenuItem("Exit") {
     exitApplication()
   })
@@ -108,13 +110,15 @@ fun main() = application {
       y = Dp(AppState.windowStates.combatState?.lastPositionYDp ?: 768f)
     ),
     initialSize = DpSize(
-      width = Dp(AppState.windowStates.combatState?.lastWidthDp ?: 512f),
-      height = Dp(AppState.windowStates.combatState?.lastHeightDp ?: 256f)
+      width = Dp(AppState.windowStates.combatState?.lastWidthDp ?: 620f),
+      height = Dp(AppState.windowStates.combatState?.lastHeightDp ?: 300f)
     ),
     overlayType = OverlayType.COMBAT,
+    isObstructing = AppState.isCombatObstructing,
     isVisible = AppState.isCombatOverlayVisible,
     isEverythingVisible = AppState.isEverythingVisible,
     isResizable = AppState.isEverythingResizable,
+    isFocusable = false,
     ::exitApplication
   ) {
     CombatOverlay()
@@ -128,17 +132,40 @@ fun main() = application {
         y = Dp(AppState.windowStates.trackerState?.lastPositionYDp ?: 32f)
       ),
       initialSize = DpSize(
-        width = Dp(AppState.windowStates.trackerState?.lastWidthDp ?: 512f),
+        width = Dp(AppState.windowStates.trackerState?.lastWidthDp ?: 320f),
         height = Dp(AppState.windowStates.trackerState?.lastHeightDp ?: 512f)
       ),
       overlayType = OverlayType.TRACKER,
+      isObstructing = mutableStateOf(false), // AppState.isTrackerObstructing,
       isVisible = AppState.isTrackerOverlayVisible,
       isEverythingVisible = AppState.isEverythingVisible,
       isResizable = AppState.isEverythingResizable,
+      isFocusable = false,
       ::exitApplication
     ) {
       TrackerOverlay()
     }
+
+  /* Filters Window */
+  OverlayWindow(
+    ".: Raid Framer Filters :.",
+    initialPosition = WindowPosition(
+      x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: 512f),
+      y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: 512f)),
+    initialSize = DpSize(
+      width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: 256f),
+      height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: 512f)
+    ),
+    overlayType = OverlayType.FILTERS,
+    isObstructing = AppState.isCombatObstructing,
+    isVisible = AppState.isFiltersOverlayVisible,
+    isEverythingVisible = mutableStateOf(true),
+    isResizable = AppState.isEverythingResizable,
+    isFocusable = true,
+    ::exitApplication
+  ) {
+    FiltersOverlay()
+  }
 
   /* About Window */
   OverlayWindow(
@@ -147,31 +174,36 @@ fun main() = application {
       x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: 512f),
       y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: 512f)),
     initialSize = DpSize(
-      width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: 480f),
-      height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: 512f)
+      width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: 600f),
+      height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: 750f)
     ),
     overlayType = OverlayType.ABOUT,
+    isObstructing = mutableStateOf(false), // Always show opaque windows
     isVisible = AppState.isAboutOverlayVisible,
     isEverythingVisible = mutableStateOf(true),
     isResizable = AppState.isEverythingResizable,
+    isFocusable = false,
     ::exitApplication
   ) {
     AboutOverlay()
   }
 
+  /* Settings Window */
   OverlayWindow(
     ".: Raid Framer Settings :.",
     initialPosition = WindowPosition(
       x = Dp(AppState.windowStates.settingsState?.lastPositionXDp ?: 512f),
       y = Dp(AppState.windowStates.settingsState?.lastPositionYDp ?: 512f)),
     initialSize = DpSize(
-      width = Dp(AppState.windowStates.settingsState?.lastWidthDp ?: 480f),
-      height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: 512f)
+      width = Dp(AppState.windowStates.settingsState?.lastWidthDp ?: 450f),
+      height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: 500f)
     ),
     overlayType = OverlayType.SETTINGS,
+    isObstructing = mutableStateOf(false), // Always show opaque windows
     isVisible = AppState.isSettingsOverlayVisible,
     isEverythingVisible = mutableStateOf(true), // always visible because it's a settings window
     isResizable = AppState.isEverythingResizable,
+    isFocusable = false,
     ::exitApplication
   ) {
     SettingsOverlay()

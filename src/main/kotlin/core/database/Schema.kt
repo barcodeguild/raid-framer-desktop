@@ -1,12 +1,9 @@
 package core.database
 
-import OverlayInteractor
 import io.realm.kotlin.types.EmbeddedRealmObject
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.TypedRealmObject
 import kotlin.reflect.KClass
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.isSubclassOf
 
 /*
  * This singleton is used to define the schema of the database. And wraps all the database types so
@@ -20,8 +17,9 @@ object Schema {
   class RFConfig() : RealmObject {
     var defaultLogPath: String = ""
     var tabbedDetectionEnabled: Boolean = false
-    var overlayResizingEnabled: Boolean = false
+    var overlayResizingEnabled: Boolean = true
     var colorAndTextDetectionEnabled: Boolean = false
+    var firstLaunch: Boolean = true
   }
 
   class RFWindowStates() : RealmObject {
@@ -30,6 +28,7 @@ object Schema {
     var trackerState: RFWindowState? = null
     var aggroState: RFWindowState? = null
     var aboutState: RFWindowState? = null
+    var filterState: RFWindowState? = null
   }
 
   class RFWindowState() : EmbeddedRealmObject {
@@ -62,5 +61,5 @@ object Schema {
 }
 
 enum class OverlayType {
-  COMBAT, SETTINGS, TRACKER, ABOUT, AGGRO
+  COMBAT, SETTINGS, TRACKER, ABOUT, AGGRO, FILTERS
 }
