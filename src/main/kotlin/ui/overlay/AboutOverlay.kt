@@ -96,7 +96,7 @@ fun AboutOverlay() {
               color = Color.White
             )
             Text(
-              text = "1.4.3",
+              text = "1.4.5",
               modifier = Modifier.padding(2.dp),
               textAlign = TextAlign.Start,
               fontWeight = FontWeight.Bold,

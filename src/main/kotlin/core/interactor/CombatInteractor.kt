@@ -155,6 +155,7 @@ object CombatInteractor {
     scope?.launch {
       while (isActive) {
         pruneOldEvents()
+        pruneOldDebuffs()
         delay(1000)
       }
     }
@@ -395,7 +396,7 @@ object CombatInteractor {
     val keysToRemove = mutableListOf<String>()
 
     currentActiveDebuffsByPlayer.forEach { (key, debuffs) ->
-      val prunedDebuffs = debuffs.filter { mostRecentEventTimestamp - it.timestamp < 60000 }
+      val prunedDebuffs = debuffs.filter { mostRecentEventTimestamp - it.timestamp < 20000 }
       currentActiveDebuffsByPlayer[key] = prunedDebuffs
       if (prunedDebuffs.isEmpty()) {
         keysToRemove.add(key)
