@@ -42,6 +42,8 @@ You ArcheRage in-game settings should have "Enable Combat Logging" checked like 
 
 ## Screenshots ##
 
+![image](https://github.com/barcodeguild/raid-framer-desktop/assets/161555754/44fdf5ac-ce07-4695-b926-0db6b51f1032)
+
 ![image](https://github.com/barcodeguild/raid-framer-desktop/assets/161555754/6243aaea-53a4-4bad-ba33-23313ddfb550)
 
 ![image](https://github.com/barcodeguild/raid-framer-desktop/assets/161555754/771d75e5-b42e-435f-8f33-e513ae27733f)
