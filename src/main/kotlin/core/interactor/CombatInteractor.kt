@@ -23,6 +23,9 @@ object CombatInteractor {
 
   private val ATTACK_PATTERN: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
+  private val ATTACK_PATTERN_NO_SKILL = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
+  private val ATTACK_PARRIED_PATTERN: Pattern = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r! Attack Parried, resulting in \\|c[0-9a-fA-F]{8}(.*)\\|r damage")
+
   private val HEAL_PATTERN: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r targeted (.*)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r to restore \\|c[0-9a-fA-F]{8}(.*)\\|r (\\w+).")
   private val IS_CASTING: Pattern =
@@ -148,8 +151,9 @@ object CombatInteractor {
               lastIndex++
             }
           }
-          delay(50) // delay checking to see if we have a valid file path
+          delay(10)
         }
+        delay(50)
       }
     }
     scope?.launch {
@@ -169,7 +173,7 @@ object CombatInteractor {
 
     for (line in lines) {
 
-      // Build Attack Objects
+      // Attacked for damage with a specific skill
       var matcher = ATTACK_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = AttackEvent(
@@ -179,6 +183,40 @@ object CombatInteractor {
           target = matcher.group(3),
           damage = matcher.group(5).toInt().absoluteValue,
           spell = matcher.group(4),
+          critical = false,
+        )
+        postDamage(event)
+        mostRecentEventTimestamp = event.timestamp
+        continue
+      }
+
+      // Attacked for damage but the game didn't specify the skill
+      matcher = ATTACK_PATTERN_NO_SKILL.matcher(line)
+      if (matcher.find()) {
+        val event = AttackEvent(
+          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          caster = matcher.group(2),
+          target = matcher.group(3),
+          damage = matcher.group(4).toInt().absoluteValue,
+          spell = "Auto-Attack",
+          critical = false,
+        )
+        postDamage(event)
+        mostRecentEventTimestamp = event.timestamp
+        continue
+      }
+
+      // Attack Except the person parried it
+      matcher = ATTACK_PARRIED_PATTERN.matcher(line)
+      if (matcher.find()) {
+        val event = AttackEvent(
+          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          caster = matcher.group(2),
+          target = matcher.group(3),
+          damage = matcher.group(4).toInt().absoluteValue,
+          spell = "Auto-Attack",
           critical = false,
         )
         postDamage(event)

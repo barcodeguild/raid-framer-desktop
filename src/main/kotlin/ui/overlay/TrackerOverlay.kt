@@ -1,6 +1,7 @@
 package ui.overlay
 
 import CombatInteractor
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
@@ -18,11 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import core.helpers.*
@@ -43,21 +50,21 @@ fun PreviewAggroOverlay() {
 @Composable
 fun TrackerOverlay() {
 
-  var showDmg by remember { mutableStateOf(true) }
+  var showDmg by remember { mutableStateOf(false) }
   var castProgress by remember { mutableStateOf(0f) }
   val spellName by CombatInteractor.targetCurrentlyCasting.collectAsState()
   var isCasting by remember { mutableStateOf(false) }
 
   val animatedProgress by animateFloatAsState(
     targetValue = castProgress,
-    animationSpec = tween(durationMillis = (castProgress * 2000).toInt(), delayMillis = 0)
+    animationSpec = tween(durationMillis = (castProgress * 500).toInt(), delayMillis = 0)
   )
 
   LaunchedEffect(spellName) {
     if (spellName.isBlank()) return@LaunchedEffect
     isCasting = false
     castProgress = 0f
-    delay(2000)
+    delay(1000)
     isCasting = true
     castProgress = 1f // set the progress to 100%
   }
@@ -72,7 +79,45 @@ fun TrackerOverlay() {
   val debuffsByPlayer by CombatInteractor.activeDebuffsByPlayer.collectAsState()
   val filteredDebuffs = debuffsByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).map { it.debuff }
 
-  Box {
+
+  // special status glow effect
+  var isSheeningSpecialStatus by remember { mutableStateOf(false) }
+  var specialStatus by remember { mutableStateOf("") }
+  LaunchedEffect(filteredDebuffs) {
+    val isCharmed = filteredDebuffs.contains("Charmed")
+    specialStatus = if (isCharmed) "Charmed" else ""
+
+    if (!isCharmed) return@LaunchedEffect
+
+    var i = 0
+    while (i < 3) {
+      isSheeningSpecialStatus = !isSheeningSpecialStatus
+      delay(1500L)
+      println("animation loop $i")
+      i++
+    }
+    isSheeningSpecialStatus = false
+  }
+
+  val specialColor by animateColorAsState(
+    targetValue = if (isSheeningSpecialStatus) Color(128, 0, 128, 128) else Color.Transparent,
+    animationSpec = tween(durationMillis = 1500) // Add this line to make the color transition smoother
+  )
+
+  var size by remember { mutableStateOf(IntSize(0,0)) }
+  val brush = Brush.linearGradient(
+    colors = listOf(specialColor, Color.Transparent),
+    start = Offset(0f, 0f),
+    end = Offset(0f, size.height.toFloat())
+  )
+
+  Box(modifier = Modifier
+    .fillMaxSize()
+    .background(brush = brush)
+    .onGloballyPositioned { coordinates ->
+      size = coordinates.size
+    }
+  ) {
 
     // top buttons
     Box(
@@ -137,15 +182,28 @@ fun TrackerOverlay() {
 
       /* Title */
       Row {
-        Text(
-          text = "${AppState.currentTargetName.value}'s Status",
-          color = Color.White,
-          textAlign = TextAlign.Center,
-          fontWeight = FontWeight.Bold,
-          fontSize = 22.sp,
-          modifier = Modifier
-            .padding(bottom = 8.dp)
-        )
+        val title = buildAnnotatedString {
+          withStyle(style = SpanStyle(color = Color.White)) {
+            append(AppState.currentTargetName.value)
+          }
+          withStyle(style = SpanStyle(color = Color.Cyan)) {
+            append(if (specialStatus.isNotBlank()) " [$specialStatus]" else "")
+          }
+        }
+        Row {
+          Text(
+            text = title,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            modifier = Modifier
+              .padding(bottom = 8.dp)
+
+          )
+          Spacer(modifier = Modifier.width(40.dp))
+        }
       }
 
       /* Cast State */
@@ -206,7 +264,7 @@ fun TrackerOverlay() {
           when (tabIndex) {
             0 -> {
               LazyColumn(
-                contentPadding = PaddingValues(4.dp)
+                contentPadding = PaddingValues(6.dp)
               ) {
                 items(sortedAndFilteredIncoming.size) { item ->
                   val incomingInteractionSource = remember { MutableInteractionSource() }

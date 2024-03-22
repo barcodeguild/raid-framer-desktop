@@ -1,15 +1,19 @@
 package core.helpers
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -131,148 +135,232 @@ fun annotatedStringForHeal(event: CombatInteractor.HealEvent): AnnotatedString {
   }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
-  LazyVerticalGrid(
-    columns = GridCells.Adaptive(minSize = 38.dp),
-    contentPadding = PaddingValues(1.dp),
-    content = {
-      items(thumbnails.size) { index ->
-        val painter: Painter? = when(thumbnails[index]) {
-          "Tripped" -> painterResource("tripped.png")
-          "Frozen" -> painterResource("frozen.png")
-          "Freeze" -> painterResource("freeze.png")
-          "Freezing" -> painterResource("freeze.png")
-          "Burning" -> painterResource("burning.png")
-          "Charmed" -> painterResource("charmed.png")
-          "Bleeding" -> painterResource("bleeding.png")
-          "Bleeding (Rank 1)" -> painterResource("bleeding.png")
-          "Bleeding (Rank 2)" -> painterResource("bleeding.png")
-          "Bleeding (Rank 3)" -> painterResource("bleeding.png")
-          "Bleeding (Rank 4)" -> painterResource("bleeding.png")
-          "Bleeding (Rank 5)" -> painterResource("bleeding.png")
-          "Dissonance" -> painterResource("dissonance.png")
-          "Enervated" -> painterResource("enervated.png")
-          "Root" -> painterResource("rooted.png")
-          "Stun" -> painterResource("stunned.png")
-          "Stunned" -> painterResource("stunned.png")
-          "Shackle" -> painterResource("shackled.png")
-          "Silence" -> painterResource("silenced.png")
-          "Lethargy (Bloody Chantey)" -> painterResource("lethargy.png")
-          "Taunt" -> painterResource("taunt.png")
-          "Distressed" -> painterResource("distressed.png")
-          "Snare" -> painterResource("snare.png")
-          "Dominator's Curse" -> painterResource("dominators.png")
-          "Shaken" -> painterResource("shaken.png")
-          "Shaken (Rank 1)" -> painterResource("shaken.png")
-          "Shaken (Rank 2)" -> painterResource("shaken.png")
-          "Shaken (Rank 3)" -> painterResource("shaken.png")
-          "Shaken (Rank 4)" -> painterResource("shaken.png")
-          "Shaken (Rank 5)" -> painterResource("shaken.png")
-          "Shaken (Rank 6)" -> painterResource("shaken.png")
-          "Shaken (Rank 7)" -> painterResource("shaken.png")
-          "Shaken (Rank 8)" -> painterResource("shaken.png")
-          "Provoked" -> painterResource("provoked.png")
-          "Bubble Trap" -> painterResource("bubble_trap.png")
-          "Falling" -> painterResource("falling.png")
-          "Discord" -> painterResource("discord.png")
-          "Unguarded (Bulwark Ballad)" -> painterResource("unguarded.png")
-          "Unguarded" -> painterResource("unguarded.png")
-          "Banshee Wail" -> painterResource("banshee_wail.png")
-          "Overpowered" -> painterResource("overpowered.png")
-          "Puncture" -> painterResource("puncture.png")
-          "Slow" -> painterResource("slow.png")
-          "Weak (Rank 1)" -> painterResource("weak.png")
-          "Weak (Rank 2)" -> painterResource("weak.png")
-          "Weak (Rank 3)" -> painterResource("weak.png")
-          "Weak (Rank 4)" -> painterResource("weak.png")
-          "Weak (Rank 5)" -> painterResource("weak.png")
-          "Weak (Rank 6)" -> painterResource("weak.png")
-          "Blinded By Crows" -> painterResource("blinded_by_crows.png")
-          "Crow Attack" -> painterResource("crow_attack.png")
-          "Cursed Seeds" -> painterResource("cursed_seeds.png")
-          "Cursed Thorns" -> painterResource("cursed_seeds.png")
-          "Reduces Received Healing" -> painterResource("reduces_received_healing.png")
-          "Flame Hell Spear" -> painterResource("hellspear.png")
-          "Hell Spear" -> painterResource("hellspear.png")
-          "Crippling Mire" -> painterResource("crippling_mire.png")
-          "Gleeful Destruction" -> painterResource("gleeful_destruction.png")
-          "Stagger" -> painterResource("stagger.png")
-          "Skewer" -> painterResource("skewer.png")
-          "Deathmark Aura" -> painterResource("deathmark_aura.png")
-          "Poisoned" -> painterResource("poisoned.png")
-          "Poisoning" -> painterResource("poisoned.png")
-          "Flight Speed Boost Cooldown" -> painterResource("general_mechanic.png")
-          "Preparing Glider" -> painterResource("general_mechanic.png")
-          "Blighted" -> painterResource("blight.png")
-          "Stone Corrosion" -> painterResource("stone_corrosion.png")
-          "Cat Nap" -> painterResource("cat_nap.png")
-          "Invincibility Limit" -> painterResource("invincibility_limit.png")
-          "Invincible Flight Disabled" -> painterResource("invincibility_limit.png")
-          "Ground Shackle" -> painterResource("ground_shackle.png")
-          "Wraith's Curse" -> painterResource("wraiths_curse.png")
-          "Earthen Grip" -> painterResource("earthen_grip.png")
-          "Shockwave" -> painterResource("shockwave.png")
-          "Dazed" -> painterResource("dazed.png")
-          "Electric Shock" -> painterResource("electric_shock.png")
-          "Mist Wraith's Curse" -> painterResource("mist_wraiths_curse.png")
-          "Ice Shard" -> painterResource("ice_shard.png")
-          "Instinct" -> painterResource("instinct.png")
-          "Twin Shadow Slash" -> painterResource("twin_shadow_slash.png")
-          "Blade Flurry" -> painterResource("blade_flurry.png")
-          "Bloodwind Rank 1" -> painterResource("bloodwind.png")
-          "Bloodwind Rank 2" -> painterResource("bloodwind.png")
-          "Bloodwind Rank 3" -> painterResource("bloodwind.png")
-          "Bloodwind Rank 4" -> painterResource("bloodwind.png")
-          "Bloodwind Rank 5" -> painterResource("bloodwind.png")
-          "Bloodwind Rank 6" -> painterResource("bloodwind.png")
-          "Bloodwind Rank 7" -> painterResource("bloodwind.png")
-          "Bloodwind Rank 8" -> painterResource("bloodwind.png")
-          "Mark" -> painterResource("mark.png")
-          "Lightning Fervent Healing" -> painterResource("lightning_fervent_healing.png")
-          "Obscure Vision" -> painterResource("obscure_vision.png")
-          "Disable Left-Hand Weapon" -> painterResource("disable_left_weapon.png")
-          "Unpleasant Sensation (Quickstep)" -> painterResource("unpleasant_sensation.png")
-          "Blight" -> painterResource("blight.png")
-          "Heroic Grandeur" -> painterResource("heroic_grandeur.png")
-          "Fear" -> painterResource("fear.png")
-          "Frustration" -> painterResource("frustration.png")
-          "Napping" -> painterResource("napping.png")
-          "Cold Wave" -> painterResource("cold_wave.png")
-          "Soulbound Edge" -> painterResource("soulbound_edge.png")
-          "Assault Shock" -> painterResource("assault_shock.png")
-          "Arcadian Sea Keeper's Curse" -> painterResource("arcadian_sea_keepers_curse.png")
-          "Flame Barrier" -> painterResource("flame_barrier.png")
-          "Blind" -> painterResource("blind.png")
-          "Untargetable Cooldown" -> painterResource("general_mechanic.png")
-          "Greater Shock" -> painterResource("greater_shock.png")
-          "Unable to use Potions" -> painterResource("unable_to_use_potions.png")
-          "Banishment" -> painterResource("banishment.png")
-          "Dragonfire" -> painterResource("dragonfire.png")
-          "Phantasm's Wail" -> painterResource("phantasms_wail.png")
-          "Untargetable Cooldown" -> painterResource("general_mechanic.png")
-          "Over Healing" -> painterResource("over_healing.png")
-          "Corrosion" -> painterResource("corrosion.png")
-          "Blinding Flash" -> painterResource("blinding_flash.png")
-          "Burning Flesh" -> painterResource("burning_flesh.png")
-          else -> {
-            println("No debuff icon for ${thumbnails[index]}.")
-            null
+  var showDebuffTooltip by remember { mutableStateOf(false) }
+  var currentHoveredIndex by remember { mutableStateOf(-1) }
+
+  Box {
+
+    LazyVerticalGrid(
+      columns = GridCells.Adaptive(minSize = 38.dp),
+      contentPadding = PaddingValues(1.dp),
+      content = {
+        items(thumbnails.size) { index ->
+          val painter: Painter? =
+            when(thumbnails[index]) {
+              "Tripped" -> painterResource("tripped.png")
+              "Frozen" -> painterResource("frozen.png")
+              "Freeze" -> painterResource("freeze.png")
+              "Freezing" -> painterResource("freeze.png")
+              "Burning" -> painterResource("burning.png")
+              "Charmed" -> painterResource("charmed.png")
+              "Bleeding" -> painterResource("bleeding.png")
+              "Bleeding (Rank 1)" -> painterResource("bleeding.png")
+              "Bleeding (Rank 2)" -> painterResource("bleeding.png")
+              "Bleeding (Rank 3)" -> painterResource("bleeding.png")
+              "Bleeding (Rank 4)" -> painterResource("bleeding.png")
+              "Bleeding (Rank 5)" -> painterResource("bleeding.png")
+              "Dissonance" -> painterResource("dissonance.png")
+              "Enervated" -> painterResource("enervated.png")
+              "Root" -> painterResource("rooted.png")
+              "Stun" -> painterResource("stunned.png")
+              "Stunned" -> painterResource("stunned.png")
+              "Shackle" -> painterResource("shackled.png")
+              "Silence" -> painterResource("silenced.png")
+              "Lethargy (Bloody Chantey)" -> painterResource("lethargy.png")
+              "Taunt" -> painterResource("taunt.png")
+              "Distressed" -> painterResource("distressed.png")
+              "Snare" -> painterResource("snare.png")
+              "Dominator's Curse" -> painterResource("dominators.png")
+              "Shaken" -> painterResource("shaken.png")
+              "Shaken (Rank 1)" -> painterResource("shaken.png")
+              "Shaken (Rank 2)" -> painterResource("shaken.png")
+              "Shaken (Rank 3)" -> painterResource("shaken.png")
+              "Shaken (Rank 4)" -> painterResource("shaken.png")
+              "Shaken (Rank 5)" -> painterResource("shaken.png")
+              "Shaken (Rank 6)" -> painterResource("shaken.png")
+              "Shaken (Rank 7)" -> painterResource("shaken.png")
+              "Shaken (Rank 8)" -> painterResource("shaken.png")
+              "Provoked" -> painterResource("provoked.png")
+              "Bubble Trap" -> painterResource("bubble_trap.png")
+              "Falling" -> painterResource("falling.png")
+              "Discord" -> painterResource("discord.png")
+              "Unguarded (Bulwark Ballad)" -> painterResource("unguarded.png")
+              "Unguarded" -> painterResource("unguarded.png")
+              "Banshee Wail" -> painterResource("banshee_wail.png")
+              "Overpowered" -> painterResource("overpowered.png")
+              "Puncture" -> painterResource("puncture.png")
+              "Slow" -> painterResource("slow.png")
+              "Weak (Rank 1)" -> painterResource("weak.png")
+              "Weak (Rank 2)" -> painterResource("weak.png")
+              "Weak (Rank 3)" -> painterResource("weak.png")
+              "Weak (Rank 4)" -> painterResource("weak.png")
+              "Weak (Rank 5)" -> painterResource("weak.png")
+              "Weak (Rank 6)" -> painterResource("weak.png")
+              "Blinded By Crows" -> painterResource("blinded_by_crows.png")
+              "Crow Attack" -> painterResource("crow_attack.png")
+              "Cursed Seeds" -> painterResource("cursed_seeds.png")
+              "Cursed Thorns" -> painterResource("cursed_seeds.png")
+              "Reduces Received Healing" -> painterResource("reduces_received_healing.png")
+              "Flame Hell Spear" -> painterResource("hellspear.png")
+              "Hell Spear" -> painterResource("hellspear.png")
+              "Crippling Mire" -> painterResource("crippling_mire.png")
+              "Gleeful Destruction" -> painterResource("gleeful_destruction.png")
+              "Stagger" -> painterResource("stagger.png")
+              "Skewer" -> painterResource("skewer.png")
+              "Deathmark Aura" -> painterResource("deathmark_aura.png")
+              "Poisoned" -> painterResource("poisoned.png")
+              "Poisoning" -> painterResource("poisoned.png")
+              "Flight Speed Boost Cooldown" -> painterResource("general_mechanic.png")
+              "Preparing Glider" -> painterResource("general_mechanic.png")
+              "Blighted" -> painterResource("blight.png")
+              "Stone Corrosion" -> painterResource("stone_corrosion.png")
+              "Cat Nap" -> painterResource("cat_nap.png")
+              "Invincibility Limit" -> painterResource("invincibility_limit.png")
+              "Invincible Flight Disabled" -> painterResource("invincibility_limit.png")
+              "Ground Shackle" -> painterResource("ground_shackle.png")
+              "Wraith's Curse" -> painterResource("wraiths_curse.png")
+              "Earthen Grip" -> painterResource("earthen_grip.png")
+              "Shockwave" -> painterResource("shockwave.png")
+              "Dazed" -> painterResource("dazed.png")
+              "Electric Shock" -> painterResource("electric_shock.png")
+              "Mist Wraith's Curse" -> painterResource("mist_wraiths_curse.png")
+              "Ice Shard" -> painterResource("ice_shard.png")
+              "Instinct" -> painterResource("instinct.png")
+              "Twin Shadow Slash" -> painterResource("twin_shadow_slash.png")
+              "Blade Flurry" -> painterResource("blade_flurry.png")
+              "Bloodwind Rank 1" -> painterResource("bloodwind.png")
+              "Bloodwind Rank 2" -> painterResource("bloodwind.png")
+              "Bloodwind Rank 3" -> painterResource("bloodwind.png")
+              "Bloodwind Rank 4" -> painterResource("bloodwind.png")
+              "Bloodwind Rank 5" -> painterResource("bloodwind.png")
+              "Bloodwind Rank 6" -> painterResource("bloodwind.png")
+              "Bloodwind Rank 7" -> painterResource("bloodwind.png")
+              "Bloodwind Rank 8" -> painterResource("bloodwind.png")
+              "Mark" -> painterResource("mark.png")
+              "Lightning Fervent Healing" -> painterResource("lightning_fervent_healing.png")
+              "Obscure Vision" -> painterResource("obscure_vision.png")
+              "Disable Left-Hand Weapon" -> painterResource("disable_left_weapon.png")
+              "Unpleasant Sensation (Quickstep)" -> painterResource("unpleasant_sensation.png")
+              "Blight" -> painterResource("blight.png")
+              "Heroic Grandeur" -> painterResource("heroic_grandeur.png")
+              "Fear" -> painterResource("fear.png")
+              "Frustration" -> painterResource("frustration.png")
+              "Napping" -> painterResource("napping.png")
+              "Cold Wave" -> painterResource("cold_wave.png")
+              "Soulbound Edge" -> painterResource("soulbound_edge.png")
+              "Assault Shock" -> painterResource("assault_shock.png")
+              "Arcadian Sea Keeper's Curse" -> painterResource("arcadian_sea_keepers_curse.png")
+              "Flame Barrier" -> painterResource("flame_barrier.png")
+              "Blind" -> painterResource("blind.png")
+              "Untargetable Cooldown" -> painterResource("general_mechanic.png")
+              "Greater Shock" -> painterResource("greater_shock.png")
+              "Unable to use Potions" -> painterResource("unable_to_use_potions.png")
+              "Banishment" -> painterResource("banishment.png")
+              "Dragonfire" -> painterResource("dragonfire.png")
+              "Phantasm's Wail" -> painterResource("phantasms_wail.png")
+              "Untargetable Cooldown" -> painterResource("general_mechanic.png")
+              "Over Healing" -> painterResource("over_healing.png")
+              "Corrosion" -> painterResource("corrosion.png")
+              "Blinding Flash" -> painterResource("blinding_flash.png")
+              "Burning Flesh" -> painterResource("burning_flesh.png")
+              "Conflagration" -> painterResource("conflagration.png")
+              "Petrification" -> painterResource("petrification.png")
+              "Charging" -> painterResource("charging.png")
+              "Cursed Flame" -> painterResource("cursed_flame.png")
+              "Ear-Splitter" -> painterResource("ear_splitter.png")
+              "Jola's Grudge" -> painterResource("jolas_grudge.png")
+              "Malicious Binding" -> painterResource("malicious_binding.png")
+              "Mark (Rank 1)" -> painterResource("stalkers_mark.png")
+              "Mark (Rank 2)" -> painterResource("stalkers_mark.png")
+              "Mark (Rank 3)" -> painterResource("stalkers_mark.png")
+              "Mark (Rank 4)" -> painterResource("stalkers_mark.png")
+              "Mana Chain" -> painterResource("mana_chain.png")
+              "Magical Bleeding" -> painterResource("magical_bleeding.png")
+              "Mana Poison" -> painterResource("mana_poison.png")
+              "Kitsu's Charm" -> painterResource("kitsus_charm.png")
+              "Kitsu's Fear" -> painterResource("kitsus_fear.png")
+              "Dive Trap" -> painterResource("dive_trap.png")
+              "Impaled" -> painterResource("impaled.png")
+              "Glider Disabled" -> painterResource("general_mechanic.png")
+              "Crows Search" -> painterResource("crows_searching.png")
+              "Turbulence" -> painterResource("turbulence.png")
+              "Overpowering Aura" -> painterResource("overpowering_aura.png")
+              "Mucus" -> painterResource("mucus.png")
+              "Leech" -> painterResource("leech.png")
+              "Rough Sea Winds" -> painterResource("rough_sea_winds.png")
+              "Dahuta's Curse" -> painterResource("dahutas_curse.png")
+              "Shattering Curse (Rank 6)" -> painterResource("shattering_curse.png")
+              "Shattering Curse (Rank 7)" -> painterResource("shattering_curse.png")
+              "Disables Right-Hand weapon" -> painterResource("disable_right_weapon.png")
+              "Curse" -> painterResource("curse.png")
+              "Dagger" -> painterResource("dagger.png")
+              "Sonic Wave" -> painterResource("sonic_wave.png")
+              "Tired Snowflake" -> painterResource("tired_snowflake.png")
+              "Preparing next Trick" -> painterResource("preparing_next_trick.png")
+              "Deadly Poison" -> painterResource("deadly_poison.png")
+              "Snipe Target" -> painterResource("snipe_target.png")
+              "Scratch" -> painterResource("scratch.png")
+              "Aftereffect" -> painterResource("aftereffect.png")
+              "Felon" -> painterResource("felon.png")
+              "Dried Up" -> painterResource("dried_up.png")
+              "Meteor Impact" -> painterResource("meteor_impact.png")
+              "Anchored: Move Speed 0" -> painterResource("anchored.png")
+              "Bloodthirst Shock" -> painterResource("bloodthirst_shock.png")
+              "Cleaver Target" -> painterResource("cleaver_target.png")
+              "Bane" -> painterResource("bane.png")
+              "Frostbite" -> painterResource("frostbite.png")
+              "Curse of Kraken" -> painterResource("curse_of_kraken.png")
+              "Destroyer Cursed Spear" -> painterResource("destroyer_cursed_spear.png")
+              "Fatal Wound" -> painterResource("fatal_wound.png")
+              "Lucius: Gods and Heroes" -> painterResource("lucius_gods_and_heroes.png")
+              "Oh no, oh no, oh no..." -> painterResource("oh_no_oh_no_oh_no.png")
+              "Disable Instrument" -> painterResource("disable_instrument.png")
+              "Weakened Energy" -> painterResource("weakened_energy.png")
+              "Twilight Stealth Cooldown" -> painterResource("general_mechanic.png")
+              "Blast Echo" -> painterResource("blast_echo.png")
+              else -> {
+                println("No debuff icon for ${thumbnails[index]}.")
+                null
+              }
+            }
+          if (painter != null) {
+            Image(
+              painter = painter,
+              contentDescription = thumbnails[index],
+              modifier = Modifier
+                .padding(2.dp)
+                .size(36.dp)
+                .border(1.dp, Color.Red)
+                .onPointerEvent(PointerEventType.Enter) {
+                  showDebuffTooltip = true
+                  currentHoveredIndex = index
+                }
+                .onPointerEvent(PointerEventType.Exit) {
+                  showDebuffTooltip = false
+                }
+            )
           }
         }
-        if (painter != null) {
-          Image(
-            painter = painter,
-            contentDescription = thumbnails[index],
-            modifier = Modifier
-              .padding(1.dp)
-              .size(32.dp)
-              .border(1.dp, Color.Red) // Add this line
-          )
-        }
+      }
+    )
+
+    if (showDebuffTooltip) {
+      Surface(
+        shape = RoundedCornerShape(4.dp),
+        elevation = 8.dp,
+        color = Color.White
+      ) {
+        Text(
+          text = thumbnails.getOrNull(currentHoveredIndex) ?: "Lost to Ravines of Time",
+          modifier = Modifier.padding(8.dp),
+          color = Color.Black
+        )
       }
     }
-  )
+  }
 }
 
 /*
@@ -283,5 +371,16 @@ inline fun <T> Realm.use(block: (Realm) -> T): T {
     block(this)
   } finally {
     this.close()
+  }
+}
+
+/*
+ * Simple extension function to shorten people's names to not overflow the page.
+ */
+fun String.ellipsis(chars: Int): String {
+  return if (length > chars) {
+    substring(0, chars) + ".."
+  } else {
+    this
   }
 }
