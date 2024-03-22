@@ -45,7 +45,7 @@ object CombatInteractor {
    * Initiating Spells : Might move this to a separate class if it gets too big.
    */
   val initiatingSpells = listOf(
-    "Mana Bolts", "Divebomb", "Lasso", "Charge", "Tiger Strike", "Shoot Arrow", "Concussive Arrow", "Endless Arrows",
+    "Mana Bolts", "Divebomb", "Charge", "Tiger Strike", "Shoot Arrow", "Concussive Arrow", "Endless Arrows",
     "Absorb Lifeforce", "Enervated", "Ceaseless Fire", "Flamebolt", "Freezing Arrow", "Arc Lightning", "Electrical Arrow",
     "Rapid Strike", "Pin Down", "Blade Flurry", "Entangle", "Dancer's Touch", "Holy Bolt", "Revive", "Mana Barrier", "Fervent Healing",
     "Bull Rush", "Critical Discord"
