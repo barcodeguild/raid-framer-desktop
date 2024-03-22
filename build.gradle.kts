@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "lol.rfcloud"
-version = "1.4.7"
+version = "1.4.8"
 
 repositories {
     mavenCentral()

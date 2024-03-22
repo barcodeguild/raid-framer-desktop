@@ -363,9 +363,8 @@ object CombatInteractor {
     currentIncomingEventsByPlayer[event.target] = playersCurrentIncomingEvents
     _incomingEventsByPlayer.value = currentIncomingEventsByPlayer
 
-    // initated damage?
-    println(event.spell)
-    if (AppState.config.autoTargetEnabled && AppState.config.playerName.isNotBlank()) {
+    // initiated damage?
+    if (AppState.config.autoTargetEnabled && event.caster == AppState.config.playerName) {
       if (initiatingSpells.contains(event.spell)) {
         if (event.target != AppState.config.playerName || AppState.config.allowAutoTargetSelf) {
           AppState.currentTargetName.value = event.target
@@ -396,8 +395,8 @@ object CombatInteractor {
     currentIncomingEventsByPlayer[event.target] = playersCurrentIncomingEvents
     _incomingEventsByPlayer.value = currentIncomingEventsByPlayer
 
-    // initated damage?
-    if (AppState.config.autoTargetEnabled && AppState.config.playerName.isNotBlank()) {
+    // initiated damage?
+    if (AppState.config.autoTargetEnabled && event.caster == AppState.config.playerName) {
       if (initiatingSpells.contains(event.spell)) {
         if (event.target != AppState.config.playerName || AppState.config.allowAutoTargetSelf) {
           AppState.currentTargetName.value = event.target
