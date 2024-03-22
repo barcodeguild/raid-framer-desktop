@@ -321,6 +321,9 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
               "Weakened Energy" -> painterResource("weakened_energy.png")
               "Twilight Stealth Cooldown" -> painterResource("general_mechanic.png")
               "Blast Echo" -> painterResource("blast_echo.png")
+              "Filthy Mucus" -> painterResource("filthy_mucus.png")
+              "Lassitude" -> painterResource("lassitude.png")
+              "Nightmare Grinder" -> painterResource("nightmare_grinder.png")
               else -> {
                 println("No debuff icon for ${thumbnails[index]}.")
                 null

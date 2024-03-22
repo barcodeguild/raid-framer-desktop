@@ -90,6 +90,9 @@ object RFDao {
             oldConfig.colorAndTextDetectionEnabled = config.colorAndTextDetectionEnabled
             oldConfig.firstLaunch = config.firstLaunch
             oldConfig.searchEverywhere = config.searchEverywhere
+            oldConfig.autoTargetEnabled = config.autoTargetEnabled
+            oldConfig.allowAutoTargetSelf = config.allowAutoTargetSelf
+            oldConfig.playerName = config.playerName
           }
         }
       } ?: run {

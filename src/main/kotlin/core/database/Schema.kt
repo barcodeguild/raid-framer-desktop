@@ -21,6 +21,9 @@ object Schema {
     var colorAndTextDetectionEnabled: Boolean = false
     var searchEverywhere: Boolean = false
     var firstLaunch: Boolean = true
+    var autoTargetEnabled: Boolean = true
+    var allowAutoTargetSelf: Boolean = false
+    var playerName: String = ""
   }
 
   class RFWindowStates() : RealmObject {

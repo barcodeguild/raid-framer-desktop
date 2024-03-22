@@ -11,7 +11,7 @@ object AppState {
   val isAboutOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isEverythingVisible: MutableState<Boolean> = mutableStateOf(false)
   val isCombatOverlayVisible: MutableState<Boolean> = mutableStateOf(true)
-  val isTrackerOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
+  val isTrackerOverlayVisible: MutableState<Boolean> = mutableStateOf(true)
   val isAggroOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isSettingsOverlayVisible: MutableState<Boolean> = mutableStateOf(false)
   val isFiltersOverlayVisible: MutableState<Boolean> = mutableStateOf(false)

@@ -107,12 +107,12 @@ fun main() = application {
   OverlayWindow(
     ".: Raid Framer Combat Overlay :.",
     initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.combatState?.lastPositionXDp ?: 32f),
-      y = Dp(AppState.windowStates.combatState?.lastPositionYDp ?: 768f)
+      x = Dp(AppState.windowStates.combatState?.lastPositionXDp ?: 5f),
+      y = Dp(AppState.windowStates.combatState?.lastPositionYDp ?: 875f)
     ),
     initialSize = DpSize(
-      width = Dp(AppState.windowStates.combatState?.lastWidthDp ?: 620f),
-      height = Dp(AppState.windowStates.combatState?.lastHeightDp ?: 300f)
+      width = Dp(AppState.windowStates.combatState?.lastWidthDp ?: 470f),
+      height = Dp(AppState.windowStates.combatState?.lastHeightDp ?: 270f)
     ),
     overlayType = OverlayType.COMBAT,
     isObstructing = AppState.isCombatObstructing,
@@ -129,12 +129,12 @@ fun main() = application {
     OverlayWindow(
       ".: Raid Framer Tracker Overlay :.",
       initialPosition = WindowPosition(
-        x = Dp(AppState.windowStates.trackerState?.lastPositionXDp ?: 32f),
-        y = Dp(AppState.windowStates.trackerState?.lastPositionYDp ?: 32f)
+        x = Dp(AppState.windowStates.trackerState?.lastPositionXDp ?: 550f),
+        y = Dp(AppState.windowStates.trackerState?.lastPositionYDp ?: 16f)
       ),
       initialSize = DpSize(
-        width = Dp(AppState.windowStates.trackerState?.lastWidthDp ?: 360f),
-        height = Dp(AppState.windowStates.trackerState?.lastHeightDp ?: 420f)
+        width = Dp(AppState.windowStates.trackerState?.lastWidthDp ?: 480f),
+        height = Dp(AppState.windowStates.trackerState?.lastHeightDp ?: 160f)
       ),
       overlayType = OverlayType.TRACKER,
       isObstructing = AppState.isTrackerObstructing,
@@ -172,8 +172,8 @@ fun main() = application {
   OverlayWindow(
     ".: Raid Framer About :.",
     initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: 512f),
-      y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: 512f)),
+      x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: 680f),
+      y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: 480f)),
     initialSize = DpSize(
       width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: 600f),
       height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: 750f)
@@ -193,18 +193,18 @@ fun main() = application {
   OverlayWindow(
     ".: Raid Framer Settings :.",
     initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.settingsState?.lastPositionXDp ?: 512f),
+      x = Dp(AppState.windowStates.settingsState?.lastPositionXDp ?: 620f),
       y = Dp(AppState.windowStates.settingsState?.lastPositionYDp ?: 512f)),
     initialSize = DpSize(
       width = Dp(AppState.windowStates.settingsState?.lastWidthDp ?: 450f),
-      height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: 540f)
+      height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: 740f)
     ),
     overlayType = OverlayType.SETTINGS,
     isObstructing = mutableStateOf(false), // Always show opaque windows
     isVisible = AppState.isSettingsOverlayVisible,
     isEverythingVisible = mutableStateOf(true), // always visible because it's a settings window
     isResizable = AppState.isEverythingResizable,
-    isFocusable = false,
+    isFocusable = true,
     ::exitApplication
   ) {
     SettingsOverlay()

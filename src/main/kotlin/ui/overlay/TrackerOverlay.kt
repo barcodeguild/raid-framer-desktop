@@ -57,14 +57,16 @@ fun TrackerOverlay() {
 
   val animatedProgress by animateFloatAsState(
     targetValue = castProgress,
-    animationSpec = tween(durationMillis = (castProgress * 500).toInt(), delayMillis = 0)
+    animationSpec = tween(durationMillis = (castProgress * 2000).toInt(), delayMillis = 0)
   )
 
   LaunchedEffect(spellName) {
-    if (spellName.isBlank()) return@LaunchedEffect
     isCasting = false
     castProgress = 0f
-    delay(1000)
+    if (spellName.isBlank()) return@LaunchedEffect
+    if (spellName.contains("Lunastone")) return@LaunchedEffect
+    if (spellName.contains("Longing")) return@LaunchedEffect
+    delay(250)
     isCasting = true
     castProgress = 1f // set the progress to 100%
   }
@@ -85,7 +87,7 @@ fun TrackerOverlay() {
   var specialStatus by remember { mutableStateOf("") }
   LaunchedEffect(filteredDebuffs) {
     isSheeningSpecialStatus = false
-    val isCharmed = filteredDebuffs.contains("Charmed")
+    val isCharmed = filteredDebuffs.contains("Charmed") || filteredDebuffs.contains("Kitsu's Charm") // mara will be happy to know her charms are real
     specialStatus = if (isCharmed) "Charmed" else ""
     if (!isCharmed) return@LaunchedEffect
 
@@ -93,14 +95,13 @@ fun TrackerOverlay() {
     while (i < 3) {
       isSheeningSpecialStatus = !isSheeningSpecialStatus
       delay(1500L)
-      println("animation loop $i")
       i++
     }
     isSheeningSpecialStatus = false
   }
 
   val specialColor by animateColorAsState(
-    targetValue = if (isSheeningSpecialStatus) Color(128, 0, 128, 128) else Color.Transparent,
+    targetValue = if (isSheeningSpecialStatus) Color(128, 0, 128, 150) else Color.Transparent,
     animationSpec = tween(durationMillis = 1500) // Add this line to make the color transition smoother
   )
 
@@ -218,7 +219,7 @@ fun TrackerOverlay() {
             color = Color(97, 155, 255),
             modifier = Modifier
               .fillMaxWidth()
-              .height(4.dp)
+              .height(5.dp)
               .padding(start = 8.dp, end = 8.dp)
           )
           Text(

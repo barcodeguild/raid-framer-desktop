@@ -41,6 +41,16 @@ object CombatInteractor {
   private val DEBUFF_ENDED: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r debuff cleared")
 
+  /*
+   * Initiating Spells : Might move this to a separate class if it gets too big.
+   */
+  val initiatingSpells = listOf(
+    "Mana Bolts", "Divebomb", "Lasso", "Charge", "Tiger Strike", "Shoot Arrow", "Concussive Arrow", "Endless Arrows",
+    "Absorb Lifeforce", "Enervated", "Ceaseless Fire", "Flamebolt", "Freezing Arrow", "Arc Lightning", "Electrical Arrow",
+    "Rapid Strike", "Pin Down", "Blade Flurry", "Entangle", "Dancer's Touch", "Holy Bolt", "Revive", "Mana Barrier", "Fervent Healing",
+    "Bull Rush", "Critical Discord"
+  )
+
   // Track Damage Amounts and Heals by Player
 
   // used to force recomposition of the UI
@@ -74,6 +84,11 @@ object CombatInteractor {
     _damageByPlayer.value = mutableMapOf()
     _healsByPlayer.value = mutableMapOf()
     _retributionByPlayer.value = mutableMapOf()
+    _incomingEventsByPlayer.value = mutableMapOf()
+    _outgoingEventsByPlayer.value = mutableMapOf()
+    _targetCurrentlyCasting.value = ""
+    _activeBuffsByPlayer.value = mutableMapOf()
+    _activeDebuffsByPlayer.value = mutableMapOf()
   }
 
   // called before the interaction event loop is started
@@ -347,6 +362,16 @@ object CombatInteractor {
     playersCurrentIncomingEvents.add(event)
     currentIncomingEventsByPlayer[event.target] = playersCurrentIncomingEvents
     _incomingEventsByPlayer.value = currentIncomingEventsByPlayer
+
+    // initated damage?
+    println(event.spell)
+    if (AppState.config.autoTargetEnabled && AppState.config.playerName.isNotBlank()) {
+      if (initiatingSpells.contains(event.spell)) {
+        if (event.target != AppState.config.playerName || AppState.config.allowAutoTargetSelf) {
+          AppState.currentTargetName.value = event.target
+        }
+      }
+    }
   }
 
   private fun postHeal(event: HealEvent) {
@@ -370,6 +395,15 @@ object CombatInteractor {
     playersCurrentIncomingEvents.add(event)
     currentIncomingEventsByPlayer[event.target] = playersCurrentIncomingEvents
     _incomingEventsByPlayer.value = currentIncomingEventsByPlayer
+
+    // initated damage?
+    if (AppState.config.autoTargetEnabled && AppState.config.playerName.isNotBlank()) {
+      if (initiatingSpells.contains(event.spell)) {
+        if (event.target != AppState.config.playerName || AppState.config.allowAutoTargetSelf) {
+          AppState.currentTargetName.value = event.target
+        }
+      }
+    }
   }
 
   private fun postCasting(event: CastingEvent) {

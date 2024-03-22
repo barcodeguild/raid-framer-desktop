@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,7 +72,7 @@ fun SettingsOverlay() {
             color = Color.White,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
+            fontSize = 26.sp,
             modifier = Modifier
               .padding(top = 12.dp)
           )
@@ -192,6 +193,86 @@ fun GlobalOptionsPanel() {
           .padding(bottom = 8.dp)
       )
       Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Column {
+            Text(
+              text = "Enter your character name below to enable the auto-targeting feature. It needs to match exactly what is displayed in-game:",
+              color = Color.White
+            )
+            val textFieldValue = rememberSaveable { mutableStateOf(AppState.config.playerName) }
+            TextField(
+              value = textFieldValue.value,
+              onValueChange = {
+                textFieldValue.value = it.toLowerCase().capitalize()
+                AppState.config.playerName = it.toLowerCase().capitalize()
+                CoroutineScope(Dispatchers.Default).launch {
+                  RFDao.saveConfig(AppState.config)
+                }
+              },
+              textStyle = TextStyle(
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp
+              ),
+              singleLine = true,
+              maxLines = 1,
+              placeholder = { Text("Enter Name Here") },
+              colors = TextFieldDefaults.textFieldColors(
+                textColor = Color.White,
+                backgroundColor = Color.Transparent,
+                focusedIndicatorColor = Color.Red,
+                unfocusedIndicatorColor = Color.White,
+                placeholderColor = Color.LightGray,
+                cursorColor = Color.Red
+              ),
+              modifier = Modifier.width(200.dp).align(Alignment.CenterHorizontally)
+            )
+          }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          var autoTargetChecked: Boolean by remember { mutableStateOf(AppState.config.autoTargetEnabled) }
+          Checkbox(
+            checked = autoTargetChecked,
+            onCheckedChange = {
+              autoTargetChecked = it
+              AppState.config.autoTargetEnabled = it
+              CoroutineScope(Dispatchers.Default).launch {
+                RFDao.saveConfig(AppState.config)
+              }
+            },
+            colors = CheckboxDefaults.colors(
+              checkmarkColor = Color.White,
+              checkedColor = Color.Red,
+              uncheckedColor = Color.White
+            )
+          )
+          Text(
+            text = "Automatically target players when dealing direct damage.",
+            color = Color.White
+          )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          var allowAutoTargetSelfChecked: Boolean by remember { mutableStateOf(AppState.config.allowAutoTargetSelf) }
+          Checkbox(
+            checked = allowAutoTargetSelfChecked,
+            onCheckedChange = {
+              allowAutoTargetSelfChecked = it
+              AppState.config.allowAutoTargetSelf = it
+              CoroutineScope(Dispatchers.Default).launch {
+                RFDao.saveConfig(AppState.config)
+              }
+            },
+            colors = CheckboxDefaults.colors(
+              checkmarkColor = Color.White,
+              checkedColor = Color.Red,
+              uncheckedColor = Color.White
+            )
+          )
+          Text(
+            text = "Allow automatically targeting self with heals.",
+            color = Color.White
+          )
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
           var tabbedDetectionChecked: Boolean by remember { mutableStateOf(AppState.config.tabbedDetectionEnabled) }
           Checkbox(
