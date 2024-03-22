@@ -84,9 +84,9 @@ fun TrackerOverlay() {
   var isSheeningSpecialStatus by remember { mutableStateOf(false) }
   var specialStatus by remember { mutableStateOf("") }
   LaunchedEffect(filteredDebuffs) {
+    isSheeningSpecialStatus = false
     val isCharmed = filteredDebuffs.contains("Charmed")
     specialStatus = if (isCharmed) "Charmed" else ""
-
     if (!isCharmed) return@LaunchedEffect
 
     var i = 0
