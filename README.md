@@ -16,16 +16,15 @@ The second way (with understanding that most players don't want a hassle) there'
 
 This overlay can automatically hide itself when you tab out of the game so that it's not covering other windows. It also has some experimental functionality to do the same for obstructed in-game windows (like the faction menu the play's inventory) It does this based on what color is behind the overlay and also via *garbage text* recognition. The overlay is transparent so the colors of what's behind it bleed through the transparency and this allows us to detect the inventory color. The actual images themselves after being run through recognition are discarded.
 
-- Re-settable damage and heals counter.
-- Independent damage logs for each player that scroll from the top.
-- Click player names to see current cast bar, status, and debuffs.
-- Shrink debuffs window to show only debuffs to save UI space.
-- Window positions are saved locally. The config entries are saved inside a Realm file. You can open these with **Realm Studio** from **MongoDB** if you want.
+- Damage and heals metering.
+- Independent damage logs for each player. (No more scrolling for miles)
+- Player cast bar and debuff tracking with icons and the names of each buff.
+- Translucent overlay windows with locally saved positions. The config entries are saved inside a Realm file. You can open these with **Realm Studio** from **MongoDB** if you want.
 - **Shift + Click** to drag overlays to any position on the screen you'd like. **Grab the edges** of overlays to resize them. The option in **Settings** lets you lock this so you don't accidentally your entire overlays.
 - Combat log seeking finds your "Combat.log" file automatically so you don't have to manually enter it. (Although you do have to select the correct one from the list.)
-- Debuff icons on the buff bar.
-- Retribution Tracking the flashes names of players using the defense skill and are either healing or dealing damage simultaneously.
-
+- Retribution tracking that flashes the names of players using the defense skill who are either healing or dealing damage simultaneously.
+- Automatic targeting of player's target by looking for single-way spell casts. (Like mana bolts, charge, flamebolt, dancer's touch, divebomb, etc..)
+- Charmed target indicator flashes the tracker overlay purple when the player's target is charmed. This is meant to make charmed status more visible in your peripheral as the tiny in-game icons can be difficult to read while you're also trying to PvP.
 
 More features in the future. Please provide me feedback friends so I can code stuff for us.
 
