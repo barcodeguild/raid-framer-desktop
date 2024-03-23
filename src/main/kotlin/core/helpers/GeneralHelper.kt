@@ -154,6 +154,7 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
               "Frozen" -> painterResource("frozen.png")
               "Freeze" -> painterResource("freeze.png")
               "Freezing" -> painterResource("freeze.png")
+              "Freezing Arrow" -> painterResource("freezing_arrow.png")
               "Burning" -> painterResource("burning.png")
               "Charmed" -> painterResource("charmed.png")
               "Bleeding" -> painterResource("bleeding.png")
@@ -285,7 +286,7 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
               "Dive Trap" -> painterResource("dive_trap.png")
               "Impaled" -> painterResource("impaled.png")
               "Glider Disabled" -> painterResource("general_mechanic.png")
-              "Crows Search" -> painterResource("crows_searching.png")
+              "Crows Search" -> painterResource("crows_search.png")
               "Turbulence" -> painterResource("turbulence.png")
               "Overpowering Aura" -> painterResource("overpowering_aura.png")
               "Mucus" -> painterResource("mucus.png")
@@ -331,8 +332,15 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
               "Machine in 5mins" -> painterResource("machine_in_5mins.png")
               "Sleep" -> painterResource("sleep.png")
               "Focal Concussion" -> painterResource("focal_concussion.png")
+              "Dragon Roar" -> painterResource("dragon_roar.png")
+              "Tremor" -> painterResource("tremor.png")
+              "Lassoed" -> painterResource("lassoed.png")
+              "Mirror's View" -> painterResource("mirrors_view.png") // admins maybe?
+              "Trip Impact" -> painterResource("trip_impact.png")
+              "Stepping on a Landmine" -> painterResource("landmine.png")
               else -> {
                 println("No debuff icon for ${thumbnails[index]}.")
+                painterResource("not_found.png")
                 null
               }
             }
