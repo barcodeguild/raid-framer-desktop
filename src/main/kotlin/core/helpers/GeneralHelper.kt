@@ -324,6 +324,13 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
               "Filthy Mucus" -> painterResource("filthy_mucus.png")
               "Lassitude" -> painterResource("lassitude.png")
               "Nightmare Grinder" -> painterResource("nightmare_grinder.png")
+              "Paralyzing Poison" -> painterResource("paralyzing_poison.png")
+              "Powerful Shock" -> painterResource("powerful_shock.png")
+              "Shackled" -> painterResource("shackled.png")
+              "Shock" -> painterResource("shock.png")
+              "Machine in 5mins" -> painterResource("machine_in_5mins.png")
+              "Sleep" -> painterResource("sleep.png")
+              "Focal Concussion" -> painterResource("focal_concussion.png")
               else -> {
                 println("No debuff icon for ${thumbnails[index]}.")
                 null
