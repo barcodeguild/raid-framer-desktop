@@ -14,6 +14,7 @@ import kotlinx.coroutines.*
 import ui.OverlayWindow
 import ui.overlay.*
 import java.awt.Image
+import java.awt.Toolkit
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -103,16 +104,32 @@ fun main() = application {
     exitProcess(0)
   }
 
+  fun scaleDpForScreenResolution(dp: Float): Float {
+    val screenSize = Toolkit.getDefaultToolkit().screenSize
+    val userScreenWidth = screenSize.getWidth()
+    val userScreenHeight = screenSize.getHeight()
+
+    val baseScreenWidth = 2560.0
+    val baseScreenHeight = 1440.0
+
+    val widthScalingFactor = userScreenWidth / baseScreenWidth
+    val heightScalingFactor = userScreenHeight / baseScreenHeight
+
+    val scalingFactor = minOf(widthScalingFactor, heightScalingFactor)
+
+    return dp * scalingFactor.toFloat()
+  }
+
   /* Shows combat-related statistics for the raid. */
   OverlayWindow(
     ".: Raid Framer Combat Overlay :.",
     initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.combatState?.lastPositionXDp ?: 5f),
-      y = Dp(AppState.windowStates.combatState?.lastPositionYDp ?: 875f)
+      x = Dp(AppState.windowStates.combatState?.lastPositionXDp ?: scaleDpForScreenResolution(5f)),
+      y = Dp(AppState.windowStates.combatState?.lastPositionYDp ?: scaleDpForScreenResolution(850f))
     ),
     initialSize = DpSize(
-      width = Dp(AppState.windowStates.combatState?.lastWidthDp ?: 470f),
-      height = Dp(AppState.windowStates.combatState?.lastHeightDp ?: 270f)
+      width = Dp(AppState.windowStates.combatState?.lastWidthDp ?: scaleDpForScreenResolution(470f)),
+      height = Dp(AppState.windowStates.combatState?.lastHeightDp ?: scaleDpForScreenResolution(270f))
     ),
     overlayType = OverlayType.COMBAT,
     isObstructing = AppState.isCombatObstructing,
@@ -129,12 +146,12 @@ fun main() = application {
     OverlayWindow(
       ".: Raid Framer Tracker Overlay :.",
       initialPosition = WindowPosition(
-        x = Dp(AppState.windowStates.trackerState?.lastPositionXDp ?: 550f),
-        y = Dp(AppState.windowStates.trackerState?.lastPositionYDp ?: 16f)
+        x = Dp(AppState.windowStates.trackerState?.lastPositionXDp ?: scaleDpForScreenResolution(550f)),
+        y = Dp(AppState.windowStates.trackerState?.lastPositionYDp ?: scaleDpForScreenResolution(16f))
       ),
       initialSize = DpSize(
-        width = Dp(AppState.windowStates.trackerState?.lastWidthDp ?: 480f),
-        height = Dp(AppState.windowStates.trackerState?.lastHeightDp ?: 160f)
+        width = Dp(AppState.windowStates.trackerState?.lastWidthDp ?: scaleDpForScreenResolution(470f)),
+        height = Dp(AppState.windowStates.trackerState?.lastHeightDp ?: scaleDpForScreenResolution(160f))
       ),
       overlayType = OverlayType.TRACKER,
       isObstructing = AppState.isTrackerObstructing,
@@ -151,11 +168,12 @@ fun main() = application {
   OverlayWindow(
     ".: Raid Framer Filters :.",
     initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: 512f),
-      y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: 512f)),
+      x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: scaleDpForScreenResolution(512f)),
+      y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: scaleDpForScreenResolution(512f))
+    ),
     initialSize = DpSize(
-      width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: 256f),
-      height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: 512f)
+      width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: scaleDpForScreenResolution(256f)),
+      height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: scaleDpForScreenResolution(512f))
     ),
     overlayType = OverlayType.FILTERS,
     isObstructing = mutableStateOf(false),
@@ -172,11 +190,12 @@ fun main() = application {
   OverlayWindow(
     ".: Raid Framer About :.",
     initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: 680f),
-      y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: 480f)),
+      x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: scaleDpForScreenResolution(860f)),
+      y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: scaleDpForScreenResolution(350f))
+    ),
     initialSize = DpSize(
-      width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: 600f),
-      height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: 750f)
+      width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: scaleDpForScreenResolution(600f)),
+      height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: scaleDpForScreenResolution(750f))
     ),
     overlayType = OverlayType.ABOUT,
     isObstructing = mutableStateOf(false), // Always show opaque windows
@@ -193,11 +212,12 @@ fun main() = application {
   OverlayWindow(
     ".: Raid Framer Settings :.",
     initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.settingsState?.lastPositionXDp ?: 620f),
-      y = Dp(AppState.windowStates.settingsState?.lastPositionYDp ?: 512f)),
+      x = Dp(AppState.windowStates.settingsState?.lastPositionXDp ?: scaleDpForScreenResolution(800f)),
+      y = Dp(AppState.windowStates.settingsState?.lastPositionYDp ?: scaleDpForScreenResolution(420f))
+    ),
     initialSize = DpSize(
-      width = Dp(AppState.windowStates.settingsState?.lastWidthDp ?: 450f),
-      height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: 740f)
+      width = Dp(AppState.windowStates.settingsState?.lastWidthDp ?: scaleDpForScreenResolution(450f)),
+      height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: scaleDpForScreenResolution(740f))
     ),
     overlayType = OverlayType.SETTINGS,
     isObstructing = mutableStateOf(false), // Always show opaque windows
