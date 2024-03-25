@@ -74,11 +74,12 @@ fun CombatOverlay() {
         .fillMaxWidth()
         .wrapContentHeight()
     ) {
-      Row(Modifier.align(Alignment.TopStart).wrapContentSize()) {
+      Row(Modifier.align(Alignment.TopEnd).wrapContentSize()) {
         IconButton(
           onClick = { shouldShowExitDialog.value = true },
           modifier = Modifier
-            .size(38.dp)
+            .size(32.dp)
+            .padding(top = 4.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)
             .shadow(
               elevation = 0.dp,
@@ -96,8 +97,46 @@ fun CombatOverlay() {
             modifier = Modifier.hoverable(interactionSource = closeButtonInteractionSource)
           )
         }
-      }
-      Row(Modifier.align(Alignment.TopEnd).wrapContentSize()) {
+        IconButton(
+          onClick = {  },
+          modifier = Modifier
+            .size(32.dp)
+            .padding(top = 4.dp)
+            .background(Color.Transparent, MaterialTheme.shapes.small)
+            .shadow(
+              elevation = 0.dp,
+              clip = true,
+              ambientColor = Color.Transparent,
+              spotColor = Color.Transparent,
+            ),
+        ) {
+          val closeButtonInteractionSource = remember { MutableInteractionSource() }
+          Text(
+            text = "⛨",
+            fontSize = 16.sp,
+            color = if (closeButtonInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.hoverable(interactionSource = closeButtonInteractionSource)
+          )
+        }
+        Column(
+          modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .padding(top = 16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          Text(text = "\uD83D\uDD25 Total Damage  \uD83D\uDD25", color = Color.White)
+        }
+        Column(
+          modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .padding(top = 16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          Text(text = "\uD83D\uDC89 Total Heals \uD83D\uDC89", color = Color.White)
+        }
         IconButton(
           onClick = { AppState.toggleSettingsOverlayVisibility() },
           modifier = Modifier
@@ -113,21 +152,6 @@ fun CombatOverlay() {
         ) {
           Text("\uD83D\uDEE0\uFE0F", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
         }
-//        IconButton(
-//          onClick = { AppState.toggleFiltersOverlayVisibility() },
-//          modifier = Modifier
-//            .size(32.dp)
-//            .background(Color.Transparent, MaterialTheme.shapes.small)
-//            .padding(top = 4.dp)
-//            .shadow(
-//              elevation = 0.dp,
-//              clip = true,
-//              ambientColor = Color.Transparent,
-//              spotColor = Color.Transparent
-//            )
-//        ) {
-//          Text("\uD83D\uDF56", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
-//        }
         IconButton(
           onClick = { CombatInteractor.resetStats() },
           modifier = Modifier
@@ -144,115 +168,110 @@ fun CombatOverlay() {
           Text("⟳", fontSize = 24.sp, color = Color.White, textAlign = TextAlign.Center)
         }
       }
-    }
-
-    Row(
-      modifier = Modifier.fillMaxSize(),
-      horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-      Column(
-        modifier = Modifier
-          .weight(1f)
-          .fillMaxHeight(),
-        horizontalAlignment = Alignment.CenterHorizontally
-      ) {
-        Text(text = "\uD83D\uDD25 Total Damage  \uD83D\uDD25", color = Color.White)
-        LazyColumn(
-          contentPadding = PaddingValues(4.dp),
-          modifier = Modifier.padding(8.dp)
+      Row(Modifier.align(Alignment.Center).wrapContentSize().padding(top = 16.dp, start = 8.dp, end = 8.dp)) {
+        Column(
+          modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .padding(top = 16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally
         ) {
-          items(sortedDamage.size.coerceAtMost(50)) { item ->
-            val damageInteractionSource = remember { MutableInteractionSource() }
-            val isDamageHovered = damageInteractionSource.collectIsHoveredAsState().value
-            Row(
-              horizontalArrangement = Arrangement.Start,
-              modifier = Modifier
-                .clickable {
-                  AppState.isTrackerOverlayVisible.value = true
-                  AppState.currentTargetName.value = sortedDamage[item].first
-                }
-                .background(if (isDamageHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
-                .hoverable(interactionSource = damageInteractionSource)
-            ) {
-              Text(
-                text = "${item + 1}. ${sortedDamage[item].first}: ",
-                color = Color.White,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                modifier = Modifier.weight(0.7f)
-              )
-              Text(
-                text = sortedDamage[item].second.humanReadableAbbreviation(),
-                color = Color(249, 191, 59, 255),
-                maxLines = 1,
-                modifier = Modifier.weight(0.2f)
-              )
-              if (retributionByPlayer[sortedDamage[item].first] != null) {
+          LazyColumn(
+            contentPadding = PaddingValues(4.dp),
+            modifier = Modifier.padding(12.dp)
+          ) {
+            items(sortedDamage.size.coerceAtMost(50)) { item ->
+              val damageInteractionSource = remember { MutableInteractionSource() }
+              val isDamageHovered = damageInteractionSource.collectIsHoveredAsState().value
+              Row(
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier
+                  .clickable {
+                    AppState.isTrackerOverlayVisible.value = true
+                    AppState.currentTargetName.value = sortedDamage[item].first
+                  }
+                  .background(if (isDamageHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
+                  .hoverable(interactionSource = damageInteractionSource)
+              ) {
                 Text(
-                  text = "⛨",
-                  color = flashingColorState.value,
+                  text = "${item + 1}. ${sortedDamage[item].first}: ",
+                  color = Color.White,
+                  overflow = TextOverflow.Ellipsis,
                   maxLines = 1,
-                  modifier = Modifier.weight(0.1f)
+                  modifier = Modifier.weight(0.7f)
                 )
-              } else {
-                Spacer(modifier = Modifier.weight(0.1f))
+                Text(
+                  text = sortedDamage[item].second.humanReadableAbbreviation(),
+                  color = Color(249, 191, 59, 255),
+                  maxLines = 1,
+                  modifier = Modifier.weight(0.2f)
+                )
+                if (retributionByPlayer[sortedDamage[item].first] != null) {
+                  Text(
+                    text = "⛨",
+                    color = flashingColorState.value,
+                    maxLines = 1,
+                    modifier = Modifier.weight(0.1f)
+                  )
+                } else {
+                  Spacer(modifier = Modifier.weight(0.1f))
+                }
               }
             }
           }
         }
-      }
-      Column(
-        modifier = Modifier
-          .weight(1f)
-          .fillMaxHeight(),
-        horizontalAlignment = Alignment.CenterHorizontally
-      ) {
-        Text(text = "\uD83D\uDC89 Total Heals \uD83D\uDC89", color = Color.White)
-        LazyColumn(
-          contentPadding = PaddingValues(4.dp),
-          modifier = Modifier.padding(8.dp)
+        Column(
+          modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .padding(top = 16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally
         ) {
-          items(sortedHeals.size.coerceAtMost(50)) { item ->
-            val healsInteractionSource = remember { MutableInteractionSource() }
-            val isHealsHovered = healsInteractionSource.collectIsHoveredAsState().value
-            Row(
-              horizontalArrangement = Arrangement.Start,
-              modifier = Modifier
-                .clickable {
-                  AppState.isTrackerOverlayVisible.value = true
-                  AppState.currentTargetName.value = sortedHeals[item].first
-                }
-                .background(if (isHealsHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
-                .hoverable(interactionSource = healsInteractionSource)
-            ) {
-              Text(
-                text = "${item + 1}. ${sortedHeals[item].first}",
-                color = Color.White,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                modifier = Modifier.weight(0.7f)
-              )
-              Text(
-                text = sortedHeals[item].second.humanReadableAbbreviation(),
-                color = Color.Green,
-                maxLines = 1,
-                modifier = Modifier.weight(0.2f)
-              )
-              if (retributionByPlayer[sortedHeals[item].first] != null) {
+          LazyColumn(
+            contentPadding = PaddingValues(4.dp),
+            modifier = Modifier.padding(12.dp)
+          ) {
+            items(sortedHeals.size.coerceAtMost(50)) { item ->
+              val healsInteractionSource = remember { MutableInteractionSource() }
+              val isHealsHovered = healsInteractionSource.collectIsHoveredAsState().value
+              Row(
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier
+                  .clickable {
+                    AppState.isTrackerOverlayVisible.value = true
+                    AppState.currentTargetName.value = sortedHeals[item].first
+                  }
+                  .background(if (isHealsHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
+                  .hoverable(interactionSource = healsInteractionSource)
+              ) {
                 Text(
-                  text = "⛨",
-                  color = flashingColorState.value,
+                  text = "${item + 1}. ${sortedHeals[item].first}",
+                  color = Color.White,
+                  overflow = TextOverflow.Ellipsis,
                   maxLines = 1,
-                  modifier = Modifier.weight(0.1f)
+                  modifier = Modifier.weight(0.7f)
                 )
-              } else {
-                Spacer(modifier = Modifier.weight(0.1f))
+                Text(
+                  text = sortedHeals[item].second.humanReadableAbbreviation(),
+                  color = Color.Green,
+                  maxLines = 1,
+                  modifier = Modifier.weight(0.2f)
+                )
+                if (retributionByPlayer[sortedHeals[item].first] != null) {
+                  Text(
+                    text = "⛨",
+                    color = flashingColorState.value,
+                    maxLines = 1,
+                    modifier = Modifier.weight(0.1f)
+                  )
+                } else {
+                  Spacer(modifier = Modifier.weight(0.1f))
+                }
               }
             }
           }
         }
       }
     }
-
   }
 }

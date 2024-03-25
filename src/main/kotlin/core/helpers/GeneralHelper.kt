@@ -338,6 +338,7 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
               "Mirror's View" -> painterResource("mirrors_view.png") // admins maybe?
               "Trip Impact" -> painterResource("trip_impact.png")
               "Stepping on a Landmine" -> painterResource("landmine.png")
+              "Fall Stun" -> painterResource("fall_stun.png")
               else -> {
                 println("No debuff icon for ${thumbnails[index]}.")
                 painterResource("not_found.png")
