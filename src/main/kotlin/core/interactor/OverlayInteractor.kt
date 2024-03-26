@@ -56,8 +56,17 @@ object OverlayInteractor {
           val ss = takeScreenshot()
           supportedWindows.filterNotNull().forEach { state ->
             when (state) {
-              AppState.windowStates.combatState -> AppState.isCombatObstructing.value = shouldHideWindow(alreadyObstructing = AppState.isCombatObstructing.value, windowState = state, image = ss)
-              AppState.windowStates.trackerState -> AppState.isTrackerObstructing.value = shouldHideWindow(alreadyObstructing = AppState.isTrackerObstructing.value, windowState = state, image = ss)
+              AppState.windowStates.combatState -> AppState.isCombatObstructing.value = shouldHideWindow(
+                alreadyObstructing = AppState.isCombatObstructing.value,
+                windowState = state,
+                image = ss
+              )
+
+              AppState.windowStates.trackerState -> AppState.isTrackerObstructing.value = shouldHideWindow(
+                alreadyObstructing = AppState.isTrackerObstructing.value,
+                windowState = state,
+                image = ss
+              )
             }
           }
         } else {
@@ -72,7 +81,11 @@ object OverlayInteractor {
     }
   }
 
-  private suspend fun shouldHideWindow(alreadyObstructing: Boolean, windowState: Schema.RFWindowState, image: BufferedImage): Boolean {
+  private suspend fun shouldHideWindow(
+    alreadyObstructing: Boolean,
+    windowState: Schema.RFWindowState,
+    image: BufferedImage
+  ): Boolean {
     val overlayRegion = Rectangle(
       windowState.lastPositionXDp.toInt(),
       windowState.lastPositionYDp.toInt(),
@@ -133,7 +146,12 @@ object OverlayInteractor {
    * The actual logic for looking at the pixels inside a rectangular region of the screen
    * and determining if the ratio of matching pixels is above the threshold.
    */
-  private fun isColorAmountAboveThreshold(image: BufferedImage, region: Rectangle, targetColors: List<Color>, threshold: Double): Boolean {
+  private fun isColorAmountAboveThreshold(
+    image: BufferedImage,
+    region: Rectangle,
+    targetColors: List<Color>,
+    threshold: Double
+  ): Boolean {
     var matchingPixels = 0L
 
     for (x in region.x until region.x + region.width) {
@@ -144,7 +162,8 @@ object OverlayInteractor {
         targetColors.forEach {
           if (abs(color.red - it.red) <= MAX_VARIANCE &&
             abs(color.green - it.green) <= MAX_VARIANCE &&
-            abs(color.blue - it.blue) <= MAX_VARIANCE) {
+            abs(color.blue - it.blue) <= MAX_VARIANCE
+          ) {
             matchingPixels++
           }
         }
@@ -218,19 +237,21 @@ object OverlayInteractor {
         OverlayType.ABOUT -> OverlayType.ABOUT.ordinal
         OverlayType.AGGRO -> OverlayType.AGGRO.ordinal
         OverlayType.FILTERS -> OverlayType.FILTERS.ordinal
+        else -> return
       },
       lastPositionXDp = windowState.position.x.value,
       lastPositionYDp = windowState.position.y.value,
       lastWidthDp = windowState.size.width.value,
       lastHeightDp = windowState.size.height.value
     )
-    when(overlayType) {
+    when (overlayType) {
       OverlayType.COMBAT -> AppState.windowStates.combatState = newState
       OverlayType.SETTINGS -> AppState.windowStates.settingsState = newState
       OverlayType.TRACKER -> AppState.windowStates.trackerState = newState
       OverlayType.ABOUT -> AppState.windowStates.aboutState = newState
       OverlayType.AGGRO -> AppState.windowStates.aggroState = newState
       OverlayType.FILTERS -> AppState.windowStates.filterState = newState
+      else -> return
     }
     CoroutineScope(Dispatchers.Default).launch {
       RFDao.saveWindowStates(AppState.windowStates)

@@ -1,7 +1,9 @@
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -23,8 +25,10 @@ object CombatInteractor {
 
   private val ATTACK_PATTERN: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
-  private val ATTACK_PATTERN_NO_SKILL = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
-  private val ATTACK_PARRIED_PATTERN: Pattern = Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r! Attack Parried, resulting in \\|c[0-9a-fA-F]{8}(.*)\\|r damage")
+  private val ATTACK_PATTERN_NO_SKILL =
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
+  private val ATTACK_PARRIED_PATTERN: Pattern =
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r! Attack Parried, resulting in \\|c[0-9a-fA-F]{8}(.*)\\|r damage")
 
   private val HEAL_PATTERN: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r targeted (.*)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r to restore \\|c[0-9a-fA-F]{8}(.*)\\|r (\\w+).")
@@ -45,10 +49,31 @@ object CombatInteractor {
    * Initiating Spells : Might move this to a separate class if it gets too big.
    */
   val initiatingSpells = listOf(
-    "Mana Bolts", "Divebomb", "Charge", "Tiger Strike", "Shoot Arrow", "Concussive Arrow", "Endless Arrows",
-    "Absorb Lifeforce", "Enervated", "Ceaseless Fire", "Flamebolt", "Freezing Arrow", "Arc Lightning", "Electrical Arrow",
-    "Rapid Strike", "Pin Down", "Blade Flurry", "Entangle", "Dancer's Touch", "Holy Bolt", "Revive", "Mana Barrier", "Fervent Healing",
-    "Bull Rush", "Critical Discord"
+    "Mana Bolts",
+    "Divebomb",
+    "Charge",
+    "Tiger Strike",
+    "Shoot Arrow",
+    "Concussive Arrow",
+    "Endless Arrows",
+    "Absorb Lifeforce",
+    "Enervated",
+    "Ceaseless Fire",
+    "Flamebolt",
+    "Freezing Arrow",
+    "Arc Lightning",
+    "Electrical Arrow",
+    "Rapid Strike",
+    "Pin Down",
+    "Blade Flurry",
+    "Entangle",
+    "Dancer's Touch",
+    "Holy Bolt",
+    "Revive",
+    "Mana Barrier",
+    "Fervent Healing",
+    "Bull Rush",
+    "Critical Discord"
   )
 
   // Track Damage Amounts and Heals by Player

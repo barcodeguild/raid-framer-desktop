@@ -1,9 +1,8 @@
 package core.database
 
+import core.helpers.use
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import core.helpers.use
-import io.realm.kotlin.ext.isManaged
 import java.io.File
 
 object RFDao {

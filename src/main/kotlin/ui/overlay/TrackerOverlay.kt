@@ -1,5 +1,6 @@
 package ui.overlay
 
+import AppState
 import CombatInteractor
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -32,7 +33,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import core.helpers.*
+import core.helpers.annotatedStringForAttack
+import core.helpers.annotatedStringForHeal
+import core.helpers.renderDebuffThumbnailGrid
 import kotlinx.coroutines.delay
 
 @Preview
@@ -73,10 +76,12 @@ fun TrackerOverlay() {
 
   // incoming and outgoing damage
   val incomingByPlayer by CombatInteractor.incomingEventsByPlayer.collectAsState()
-  val sortedAndFilteredIncoming = incomingByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
+  val sortedAndFilteredIncoming =
+    incomingByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
 
   val outgoingByPlayer by CombatInteractor.outgoingEventsByPlayer.collectAsState()
-  val sortedAndFilteredOutgoing = outgoingByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
+  val sortedAndFilteredOutgoing =
+    outgoingByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
 
   val debuffsByPlayer by CombatInteractor.activeDebuffsByPlayer.collectAsState()
   val filteredDebuffs = debuffsByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).map { it.debuff }
@@ -87,7 +92,8 @@ fun TrackerOverlay() {
   var specialStatus by remember { mutableStateOf("") }
   LaunchedEffect(filteredDebuffs) {
     isSheeningSpecialStatus = false
-    val isCharmed = filteredDebuffs.contains("Charmed") || filteredDebuffs.contains("Kitsu's Charm") // mara will be happy to know her charms are real
+    val isCharmed =
+      filteredDebuffs.contains("Charmed") || filteredDebuffs.contains("Kitsu's Charm") // mara will be happy to know her charms are real
     specialStatus = if (isCharmed) "Charmed" else ""
     if (!isCharmed) return@LaunchedEffect
 
@@ -105,7 +111,7 @@ fun TrackerOverlay() {
     animationSpec = tween(durationMillis = 1500) // Add this line to make the color transition smoother
   )
 
-  var size by remember { mutableStateOf(IntSize(0,0)) }
+  var size by remember { mutableStateOf(IntSize(0, 0)) }
   val brush = Brush.linearGradient(
     colors = listOf(specialColor, Color.Transparent),
     start = Offset(0f, 0f),
@@ -137,7 +143,10 @@ fun TrackerOverlay() {
             },
             modifier = Modifier
               .size(32.dp)
-              .background(if (isHideHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f), MaterialTheme.shapes.small)
+              .background(
+                if (isHideHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f),
+                MaterialTheme.shapes.small
+              )
               .shadow(
                 elevation = 0.dp,
                 clip = true,
@@ -147,7 +156,12 @@ fun TrackerOverlay() {
               .hoverable(interactionSource = interactionSource)
               .clip(RoundedCornerShape(8.dp))
           ) {
-            Text("DMG", fontSize = 10.sp, color = if (isHideHovered) Color.White else Color.White, textAlign = TextAlign.Center)
+            Text(
+              "DMG",
+              fontSize = 10.sp,
+              color = if (isHideHovered) Color.White else Color.White,
+              textAlign = TextAlign.Center
+            )
           }
         }
 
@@ -162,7 +176,10 @@ fun TrackerOverlay() {
             },
             modifier = Modifier
               .size(32.dp)
-              .background(if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f), MaterialTheme.shapes.small)
+              .background(
+                if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f),
+                MaterialTheme.shapes.small
+              )
               .shadow(
                 elevation = 0.dp,
                 clip = true,
@@ -172,7 +189,12 @@ fun TrackerOverlay() {
               .hoverable(interactionSource = interactionSource)
               .clip(RoundedCornerShape(8.dp))
           ) {
-            Text("✕", fontSize = 18.sp, color = if (isCloseHovered) Color.White else Color.White, textAlign = TextAlign.Center)
+            Text(
+              "✕",
+              fontSize = 18.sp,
+              color = if (isCloseHovered) Color.White else Color.White,
+              textAlign = TextAlign.Center
+            )
           }
         }
       }
@@ -281,7 +303,7 @@ fun TrackerOverlay() {
                       text = when (val event = sortedAndFilteredIncoming[item]) {
                         is CombatInteractor.AttackEvent -> annotatedStringForAttack(event)
                         is CombatInteractor.HealEvent -> annotatedStringForHeal(event)
-                        else -> buildAnnotatedString {  }
+                        else -> buildAnnotatedString { }
                       },
                       maxLines = 1,
                       overflow = TextOverflow.Ellipsis,
@@ -291,6 +313,7 @@ fun TrackerOverlay() {
                 }
               }
             }
+
             1 -> {
               LazyColumn(
                 contentPadding = PaddingValues(4.dp)
