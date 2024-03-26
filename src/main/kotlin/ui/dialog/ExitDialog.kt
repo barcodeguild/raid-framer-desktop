@@ -10,10 +10,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.system.exitProcess
+import quit
 
 @Composable
 fun exitDialog(shouldShowExitDialog: MutableState<Boolean>) {
@@ -30,7 +29,7 @@ fun exitDialog(shouldShowExitDialog: MutableState<Boolean>) {
       backgroundColor = Color.Black,
       confirmButton = {
         Button(
-          onClick = { exitProcess(0) },
+          onClick = { quit() },
           colors = ButtonDefaults.buttonColors(Color.Red.copy(alpha = 0.75f)),
           modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)
         ) {

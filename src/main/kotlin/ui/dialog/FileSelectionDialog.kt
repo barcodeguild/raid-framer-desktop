@@ -15,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.nio.file.Path
 import kotlin.io.path.pathString
 
 @Composable
@@ -38,7 +37,7 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
         )
       },
       modifier = Modifier.background(Color.Transparent),
-      backgroundColor = Color(64,64,64,255),
+      backgroundColor = Color(64, 64, 64, 255),
       text = {
         if (isSearching) {
           Column(
@@ -61,7 +60,14 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
               Box(
                 modifier = Modifier
                   .fillMaxWidth()
-                  .background(if (possiblePaths[itemId].pathString == selectedItem.value) Color(0,0,0,128) else Color.Transparent)
+                  .background(
+                    if (possiblePaths[itemId].pathString == selectedItem.value) Color(
+                      0,
+                      0,
+                      0,
+                      128
+                    ) else Color.Transparent
+                  )
                   .clickable { selectedItem.value = possiblePaths[itemId].pathString }
                   .padding(16.dp)
               ) {
@@ -88,7 +94,7 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
           onClick = {
             showDialog.value = false
           },
-          colors = ButtonDefaults.buttonColors(Color(32,32,32,255)),
+          colors = ButtonDefaults.buttonColors(Color(32, 32, 32, 255)),
           modifier = Modifier.padding(16.dp)
         ) {
           Text(

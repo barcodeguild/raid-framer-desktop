@@ -6,32 +6,43 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.window.rememberWindowState
 import core.database.OverlayType
-import core.database.Schema
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.Shape
-import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.geom.*
 
 @Composable
 fun OverlayWindow(
-  title: String, initialPosition: WindowPosition, initialSize: DpSize, overlayType: OverlayType, isObstructing: MutableState<Boolean>,
-  isVisible: MutableState<Boolean>, isEverythingVisible: MutableState<Boolean>, isResizable: MutableState<Boolean>, isFocusable: Boolean,
-  onCloseRequest: () -> Unit, windowContent: @Composable (Window) -> Unit
-) {
+  title: String,
+  initialPosition: WindowPosition,
+  initialSize: DpSize,
+  overlayType: OverlayType,
+  isObstructing: MutableState<Boolean>,
+  isVisible: MutableState<Boolean>,
+  isEverythingVisible: MutableState<Boolean>,
+  isResizable: MutableState<Boolean>,
+  isFocusable: Boolean,
+  onCloseRequest: () -> Unit,
+  windowContent: @Composable (ComposeWindow) -> Unit
+): ComposeWindow {
   val windowState = rememberWindowState(
     width = initialSize.width,
     height = initialSize.height,
     position = initialPosition
   )
+  var windowHandle: ComposeWindow by remember { mutableStateOf(ComposeWindow()) }
   Window(
     onCloseRequest = onCloseRequest, resizable = isResizable.value, state = windowState, transparent = true,
     title = title, alwaysOnTop = true, focusable = isFocusable, undecorated = true,
@@ -44,7 +55,7 @@ fun OverlayWindow(
         windowState.size.width.roundToPx(),
         windowState.size.height.roundToPx()
       )
-      window.shape = OverlayWindow(
+      window.shape = OverlayWindowShape(
         0.0,
         0.0,
         windowState.size.width.roundToPx().toDouble(),
@@ -64,7 +75,9 @@ fun OverlayWindow(
     ) {
       windowContent(window)
     }
+    windowHandle = this.window
   }
+  return windowHandle
 }
 
 /*
@@ -96,7 +109,7 @@ fun createMouseListener(windowState: WindowState): MouseAdapter {
 /*
  * A custom overlay window shape that can be used to create a window with rounded corners.
  */
-class OverlayWindow(
+class OverlayWindowShape(
   private val x: Double,
   private val y: Double,
   private val width: Double,

@@ -2,7 +2,6 @@ package ui.overlay
 
 import AppState
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,24 +11,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
-import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.res.loadImageBitmap
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.jetbrains.skia.paragraph.TextBox
-import java.io.FileInputStream
 
 @Preview
 @Composable
@@ -66,7 +57,10 @@ fun FiltersOverlay() {
         },
         modifier = Modifier
           .size(32.dp)
-          .background(if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f), MaterialTheme.shapes.small)
+          .background(
+            if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f),
+            MaterialTheme.shapes.small
+          )
           .shadow(
             elevation = 0.dp,
             clip = true,
@@ -76,7 +70,12 @@ fun FiltersOverlay() {
           .hoverable(interactionSource = interactionSource)
           .clip(RoundedCornerShape(8.dp))
       ) {
-        Text("✕", fontSize = 18.sp, color = if (isCloseHovered) Color.White else Color.White, textAlign = TextAlign.Center)
+        Text(
+          "✕",
+          fontSize = 18.sp,
+          color = if (isCloseHovered) Color.White else Color.White,
+          textAlign = TextAlign.Center
+        )
       }
     }
 

@@ -3,11 +3,14 @@ package ui.overlay
 import AppState
 import CombatInteractor
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,7 +54,10 @@ fun SettingsOverlay() {
         },
         modifier = Modifier
           .size(32.dp)
-          .background(if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f), MaterialTheme.shapes.small)
+          .background(
+            if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f),
+            MaterialTheme.shapes.small
+          )
           .shadow(
             elevation = 0.dp,
             clip = true,
@@ -61,7 +67,12 @@ fun SettingsOverlay() {
           .hoverable(interactionSource = interactionSource)
           .clip(RoundedCornerShape(8.dp))
       ) {
-        Text("✕", fontSize = 18.sp, color = if (isCloseHovered) Color.White else Color.White, textAlign = TextAlign.Center)
+        Text(
+          "✕",
+          fontSize = 18.sp,
+          color = if (isCloseHovered) Color.White else Color.White,
+          textAlign = TextAlign.Center
+        )
       }
     }
     Column {
@@ -92,7 +103,8 @@ fun SettingsOverlay() {
             fontWeight = FontWeight.W400,
             fontSize = 14.sp,
             modifier = Modifier
-              .padding(top = 8.dp))
+              .padding(top = 8.dp)
+          )
           if (selectedItem.value.isNotBlank()) {
             Text(
               text = "Current Source",

@@ -10,12 +10,14 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +50,10 @@ fun AboutOverlay() {
         },
         modifier = Modifier
           .size(32.dp)
-          .background(if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f), MaterialTheme.shapes.small)
+          .background(
+            if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f),
+            MaterialTheme.shapes.small
+          )
           .shadow(
             elevation = 0.dp,
             clip = true,
@@ -58,12 +63,18 @@ fun AboutOverlay() {
           .hoverable(interactionSource = interactionSource)
           .clip(RoundedCornerShape(8.dp))
       ) {
-        Text("✕", fontSize = 18.sp, color = if (isCloseHovered) Color.White else Color.White, textAlign = TextAlign.Center)
+        Text(
+          "✕",
+          fontSize = 18.sp,
+          color = if (isCloseHovered) Color.White else Color.White,
+          textAlign = TextAlign.Center
+        )
       }
     }
 
     // content area
-    Column(modifier = Modifier.fillMaxSize().padding(12.dp)
+    Column(
+      modifier = Modifier.fillMaxSize().padding(12.dp)
     ) {
 
       // Header Logo and Version
@@ -96,7 +107,7 @@ fun AboutOverlay() {
               color = Color.White
             )
             Text(
-              text = "1.5.0",
+              text = "1.5.1",
               modifier = Modifier.padding(2.dp),
               textAlign = TextAlign.Start,
               fontWeight = FontWeight.Bold,

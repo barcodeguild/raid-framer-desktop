@@ -1,8 +1,11 @@
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import core.database.OverlayType
@@ -10,6 +13,7 @@ import core.database.RFDao
 import core.helpers.getScreenSizeInDp
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
+import io.realm.kotlin.mongodb.App
 import kotlinx.coroutines.*
 import ui.OverlayWindow
 import ui.overlay.*
@@ -52,13 +56,6 @@ fun main() = application {
     println("Failed to create tessdata directory: ${e.message}")
   }
 
-
-  val iconImage = painterResource("raidframer.ico").toAwtImage(
-    density = Density(1f),
-    layoutDirection = LayoutDirection.Ltr,
-    size = Size(32f, 32f)
-  )
-
   /*
    * Starts the application by attaching the interactors and listeners.
    */
@@ -72,77 +69,142 @@ fun main() = application {
     return bufferedImage.getScaledInstance(-1, -1, Image.SCALE_SMOOTH)
   }
 
-  // *puts system tray entry*
-  val tray = SystemTray.get()
 
-  // menu title with icon
+  // spawns the system tray menu
+  val tray = spawnSystemTray()
+
+  // spawns the overlay windows
+  spawnDefaultWindows(tray)
+  AppState.tray = tray
+}
+
+/*
+ * Cleans up the application by stopping the interactors, closing all the windows, removing listeners, and
+ * finally exiting the application.
+ */
+fun quit() {
+  CombatInteractor.stop()
+  OverlayInteractor.stop()
+  AppState.tray?.shutdown()
+  AppState.tray?.remove()
+  exitProcess(0)
+}
+
+@Composable
+fun spawnSystemTray(): SystemTray {
+  val tray = SystemTray.get()
+  val iconImage = painterResource("raidframer.ico").toAwtImage(
+    density = Density(1f),
+    layoutDirection = LayoutDirection.Ltr,
+    size = Size(32f, 32f)
+  )
   val titleMenuItem = MenuItem(".: Raid Framer :.")
   titleMenuItem.setImage(iconImage)
   tray.menu.add(titleMenuItem)
-
-  // settings and exit buttons
   tray.menu.add(MenuItem("Settings") {
     AppState.isSettingsOverlayVisible.value = true
   })
   tray.menu.add(MenuItem("About") {
     AppState.isAboutOverlayVisible.value = true
   })
-  tray.menu.add(MenuItem("Exit") {
-    exitApplication()
-  })
-//
   tray.setImage(iconImage)
+  return tray
+}
 
-  /*
-   * Performs tear-down and exits the application.
-   */
-  fun exitApplication() {
-    CombatInteractor.stop()
-    OverlayInteractor.stop()
-    tray.shutdown()
-    tray.remove()
-    exitProcess(0)
+@Composable
+private fun spawnDefaultWindows(tray: SystemTray) {
+
+  var windowsOpen by remember { mutableStateOf(true) }
+  var shouldReload by remember { mutableStateOf(false) }
+
+  // Add the reset overlays to the tray menu
+  var firstStarting by remember { mutableStateOf(true) }
+  if (firstStarting) {
+    tray.menu.add(MenuItem("Move All to Corner") {
+      AppState.windowStates.combatState.apply {
+        this?.lastPositionXDp = 10f
+        this?.lastPositionYDp = 10f
+      }
+      AppState.windowStates.trackerState.apply {
+        this?.lastPositionXDp = 10f
+        this?.lastPositionYDp = 10f
+      }
+      AppState.windowStates.aggroState.apply {
+        this?.lastPositionXDp = 10f
+        this?.lastPositionYDp = 10f
+      }
+      AppState.windowStates.aboutState.apply {
+        this?.lastPositionXDp = 10f
+        this?.lastPositionYDp = 10f
+      }
+      AppState.windowStates.filterState.apply {
+        this?.lastPositionXDp = 10f
+        this?.lastPositionYDp = 10f
+      }
+      AppState.windowStates.settingsState.apply {
+        this?.lastPositionXDp = 10f
+        this?.lastPositionYDp = 10f
+      }
+      CoroutineScope(Dispatchers.IO).launch {
+        RFDao.saveWindowStates(AppState.windowStates)
+      }
+      shouldReload = true
+    })
+    tray.menu.add(MenuItem("Reset Overlays") {
+      AppState.windowStates.combatState = null
+      AppState.windowStates.trackerState = null
+      AppState.windowStates.aggroState = null
+      AppState.windowStates.aboutState = null
+      AppState.windowStates.filterState = null
+      AppState.windowStates.settingsState = null
+      CoroutineScope(Dispatchers.IO).launch {
+        RFDao.saveWindowStates(AppState.windowStates)
+      }
+      shouldReload = true
+    })
+    tray.menu.add(MenuItem("Exit") {
+      quit()
+    })
+    firstStarting = false
   }
 
-  fun scaleDpForScreenResolution(dp: Float): Float {
-    val screenSize = Toolkit.getDefaultToolkit().screenSize
-    val userScreenWidth = screenSize.getWidth()
-    val userScreenHeight = screenSize.getHeight()
-
-    val baseScreenWidth = 2560.0
-    val baseScreenHeight = 1440.0
-
-    val widthScalingFactor = userScreenWidth / baseScreenWidth
-    val heightScalingFactor = userScreenHeight / baseScreenHeight
-
-    val scalingFactor = minOf(widthScalingFactor, heightScalingFactor)
-
-    return dp * scalingFactor.toFloat()
+  // should reload
+  LaunchedEffect(shouldReload) {
+    if (shouldReload) {
+      shouldReload = false
+      windowsOpen = false
+      windowsOpen = true
+    }
   }
 
-  /* Shows combat-related statistics for the raid. */
-  OverlayWindow(
-    ".: Raid Framer Combat Overlay :.",
-    initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.combatState?.lastPositionXDp ?: scaleDpForScreenResolution(5f)),
-      y = Dp(AppState.windowStates.combatState?.lastPositionYDp ?: scaleDpForScreenResolution(850f))
-    ),
-    initialSize = DpSize(
-      width = Dp(AppState.windowStates.combatState?.lastWidthDp ?: scaleDpForScreenResolution(470f)),
-      height = Dp(AppState.windowStates.combatState?.lastHeightDp ?: scaleDpForScreenResolution(270f))
-    ),
-    overlayType = OverlayType.COMBAT,
-    isObstructing = AppState.isCombatObstructing,
-    isVisible = AppState.isCombatOverlayVisible,
-    isEverythingVisible = AppState.isEverythingVisible,
-    isResizable = AppState.isEverythingResizable,
-    isFocusable = false,
-    ::exitApplication
-  ) {
-    CombatOverlay()
-  }
+  // windows open/closed
+  if (windowsOpen && !shouldReload) {
 
-  /* Super Tracker Overlay */
+    println("oh eek: reload:$shouldReload open:$windowsOpen")
+
+    /* Shows combat-related statistics for the raid. */
+    OverlayWindow(
+      ".: Raid Framer Combat Overlay :.",
+      initialPosition = WindowPosition(
+        x = Dp(AppState.windowStates.combatState?.lastPositionXDp ?: scaleDpForScreenResolution(5f)),
+        y = Dp(AppState.windowStates.combatState?.lastPositionYDp ?: scaleDpForScreenResolution(850f))
+      ),
+      initialSize = DpSize(
+        width = Dp(AppState.windowStates.combatState?.lastWidthDp ?: scaleDpForScreenResolution(470f)),
+        height = Dp(AppState.windowStates.combatState?.lastHeightDp ?: scaleDpForScreenResolution(270f))
+      ),
+      overlayType = OverlayType.COMBAT,
+      isObstructing = AppState.isCombatObstructing,
+      isVisible = AppState.isCombatOverlayVisible,
+      isEverythingVisible = AppState.isEverythingVisible,
+      isResizable = AppState.isEverythingResizable,
+      isFocusable = false,
+      {}
+    ) {
+      CombatOverlay()
+    }
+
+    /* Super Tracker Overlay */
     OverlayWindow(
       ".: Raid Framer Tracker Overlay :.",
       initialPosition = WindowPosition(
@@ -159,74 +221,116 @@ fun main() = application {
       isEverythingVisible = AppState.isEverythingVisible,
       isResizable = AppState.isEverythingResizable,
       isFocusable = false,
-      ::exitApplication
+      {}
     ) {
       TrackerOverlay()
     }
 
-  /* Filters Window */
-  OverlayWindow(
-    ".: Raid Framer Filters :.",
-    initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: scaleDpForScreenResolution(512f)),
-      y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: scaleDpForScreenResolution(512f))
-    ),
-    initialSize = DpSize(
-      width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: scaleDpForScreenResolution(256f)),
-      height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: scaleDpForScreenResolution(512f))
-    ),
-    overlayType = OverlayType.FILTERS,
-    isObstructing = mutableStateOf(false),
-    isVisible = AppState.isFiltersOverlayVisible,
-    isEverythingVisible = mutableStateOf(true),
-    isResizable = AppState.isEverythingResizable,
-    isFocusable = true,
-    ::exitApplication
-  ) {
-    FiltersOverlay()
+    /* Filters Window */
+    OverlayWindow(
+      ".: Raid Framer Filters :.",
+      initialPosition = WindowPosition(
+        x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: scaleDpForScreenResolution(512f)),
+        y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: scaleDpForScreenResolution(512f))
+      ),
+      initialSize = DpSize(
+        width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: scaleDpForScreenResolution(256f)),
+        height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: scaleDpForScreenResolution(512f))
+      ),
+      overlayType = OverlayType.FILTERS,
+      isObstructing = mutableStateOf(false),
+      isVisible = AppState.isFiltersOverlayVisible,
+      isEverythingVisible = mutableStateOf(true),
+      isResizable = AppState.isEverythingResizable,
+      isFocusable = true,
+      {}
+    ) {
+      FiltersOverlay()
+    }
+
+    /* About Window */
+    OverlayWindow(
+      ".: Raid Framer About :.",
+      initialPosition = WindowPosition(
+        x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: scaleDpForScreenResolution(860f)),
+        y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: scaleDpForScreenResolution(350f))
+      ),
+      initialSize = DpSize(
+        width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: scaleDpForScreenResolution(600f)),
+        height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: scaleDpForScreenResolution(750f))
+      ),
+      overlayType = OverlayType.ABOUT,
+      isObstructing = mutableStateOf(false), // Always show opaque windows
+      isVisible = AppState.isAboutOverlayVisible,
+      isEverythingVisible = mutableStateOf(true),
+      isResizable = AppState.isEverythingResizable,
+      isFocusable = false,
+      {}
+    ) {
+      AboutOverlay()
+    }
+
+    /* Settings Window : Always Opened */
+    OverlayWindow(
+      ".: Raid Framer Settings :.",
+      initialPosition = WindowPosition(
+        x = Dp(AppState.windowStates.settingsState?.lastPositionXDp ?: scaleDpForScreenResolution(800f)),
+        y = Dp(AppState.windowStates.settingsState?.lastPositionYDp ?: scaleDpForScreenResolution(420f))
+      ),
+      initialSize = DpSize(
+        width = Dp(AppState.windowStates.settingsState?.lastWidthDp ?: scaleDpForScreenResolution(450f)),
+        height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: scaleDpForScreenResolution(740f))
+      ),
+      overlayType = OverlayType.SETTINGS,
+      isObstructing = mutableStateOf(false), // Always show opaque windows
+      isVisible = AppState.isSettingsOverlayVisible,
+      isEverythingVisible = mutableStateOf(true), // always visible because it's a settings window
+      isResizable = AppState.isEverythingResizable,
+      isFocusable = true,
+      {}
+    ) {
+      SettingsOverlay()
+    }
   }
 
-  /* About Window */
+  /*
+   * Dummy window just so the app doesn't close since the framework closes apps that don't have any windows open LOL.
+   */
   OverlayWindow(
-    ".: Raid Framer About :.",
+    ".: Raid Framer Placeholder Window :.",
     initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.aboutState?.lastPositionXDp ?: scaleDpForScreenResolution(860f)),
-      y = Dp(AppState.windowStates.aboutState?.lastPositionYDp ?: scaleDpForScreenResolution(350f))
+      x = Dp(0f),
+      y = Dp(0f),
     ),
     initialSize = DpSize(
-      width = Dp(AppState.windowStates.aboutState?.lastWidthDp ?: scaleDpForScreenResolution(600f)),
-      height = Dp(AppState.windowStates.aboutState?.lastHeightDp ?: scaleDpForScreenResolution(750f))
+      width = Dp(0f),
+      height = Dp(0f),
     ),
-    overlayType = OverlayType.ABOUT,
+    overlayType = OverlayType.DUMMY,
     isObstructing = mutableStateOf(false), // Always show opaque windows
-    isVisible = AppState.isAboutOverlayVisible,
-    isEverythingVisible = mutableStateOf(true),
-    isResizable = AppState.isEverythingResizable,
-    isFocusable = false,
-    ::exitApplication
-  ) {
-    AboutOverlay()
-  }
-
-  /* Settings Window */
-  OverlayWindow(
-    ".: Raid Framer Settings :.",
-    initialPosition = WindowPosition(
-      x = Dp(AppState.windowStates.settingsState?.lastPositionXDp ?: scaleDpForScreenResolution(800f)),
-      y = Dp(AppState.windowStates.settingsState?.lastPositionYDp ?: scaleDpForScreenResolution(420f))
-    ),
-    initialSize = DpSize(
-      width = Dp(AppState.windowStates.settingsState?.lastWidthDp ?: scaleDpForScreenResolution(450f)),
-      height = Dp(AppState.windowStates.settingsState?.lastHeightDp ?: scaleDpForScreenResolution(740f))
-    ),
-    overlayType = OverlayType.SETTINGS,
-    isObstructing = mutableStateOf(false), // Always show opaque windows
-    isVisible = AppState.isSettingsOverlayVisible,
+    isVisible = mutableStateOf(false),
     isEverythingVisible = mutableStateOf(true), // always visible because it's a settings window
-    isResizable = AppState.isEverythingResizable,
-    isFocusable = true,
-    ::exitApplication
-  ) {
-    SettingsOverlay()
-  }
+    isResizable = mutableStateOf(false),
+    isFocusable = false,
+    {}
+  ) {}
+
 }
+
+fun scaleDpForScreenResolution(dp: Float): Float {
+  val screenSize = Toolkit.getDefaultToolkit().screenSize
+  val userScreenWidth = screenSize.getWidth()
+  val userScreenHeight = screenSize.getHeight()
+
+  val baseScreenWidth = 2560.0
+  val baseScreenHeight = 1440.0
+
+  val widthScalingFactor = userScreenWidth / baseScreenWidth
+  val heightScalingFactor = userScreenHeight / baseScreenHeight
+
+  val scalingFactor = minOf(widthScalingFactor, heightScalingFactor)
+
+  return dp * scalingFactor.toFloat()
+}
+
+

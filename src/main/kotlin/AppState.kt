@@ -1,6 +1,7 @@
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import core.database.Schema
+import dorkbox.systemTray.SystemTray
 import java.nio.file.Path
 
 object AppState {
@@ -43,5 +44,6 @@ object AppState {
   var tessTempDirectory: Path? = null
   var windowStates = Schema.RFWindowStates()
   var config = Schema.RFConfig()
+  var tray: SystemTray? = null
 
 }
