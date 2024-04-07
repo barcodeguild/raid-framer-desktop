@@ -21,7 +21,7 @@ object CombatInteractor {
   val possiblePaths: StateFlow<List<Path>> = _possiblePaths
 
   var selectedPath: String? = null
-  var mostRecentEventTimestamp: Long = 0
+  private var mostRecentEventTimestamp: Long = 0
 
   private val ATTACK_PATTERN: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
@@ -29,7 +29,6 @@ object CombatInteractor {
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
   private val ATTACK_PARRIED_PATTERN: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r! Attack Parried, resulting in \\|c[0-9a-fA-F]{8}(.*)\\|r damage")
-
   private val HEAL_PATTERN: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r targeted (.*)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r to restore \\|c[0-9a-fA-F]{8}(.*)\\|r (\\w+).")
   private val IS_CASTING: Pattern =

@@ -345,6 +345,7 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
               "Weak (Rank 6)" -> painterResource("weak.png")
               "Weakened Energy" -> painterResource("weakened_energy.png")
               "Wraith's Curse" -> painterResource("wraiths_curse.png")
+              "Ghastly Aura" -> painterResource("ghastly_aura.png")
               else -> {
                 println("No debuff icon for ${thumbnails[index]}.")
                 painterResource("not_found.png")

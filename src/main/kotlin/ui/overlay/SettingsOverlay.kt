@@ -176,15 +176,19 @@ fun SettingsOverlay() {
     // )
   }
 
+  val dialogOpened = remember { mutableStateOf(false) }
   FileSelectionDialog(showDialog, selectedItem)
-  LaunchedEffect(selectedItem.value) {
-    AppState.config.defaultLogPath = selectedItem.value
-    CoroutineScope(Dispatchers.Default).launch {
-      RFDao.saveConfig(AppState.config)
+  LaunchedEffect(selectedItem.value, dialogOpened.value) {
+    if (dialogOpened.value) {
+      AppState.config.defaultLogPath = selectedItem.value
+      CoroutineScope(Dispatchers.Default).launch {
+        RFDao.saveConfig(AppState.config)
+      }
+      CombatInteractor.selectedPath = selectedItem.value
+      CombatInteractor.start()
     }
-    CombatInteractor.selectedPath = selectedItem.value
-    CombatInteractor.start()
   }
+
 }
 
 @Composable
