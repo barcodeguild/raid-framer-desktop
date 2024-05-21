@@ -19,14 +19,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import core.database.RFDao
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import core.helpers.openWebLink
 
 @Preview
 @Composable
@@ -42,13 +40,16 @@ fun PreviewFiltersOverlay() {
 
 @Composable
 fun FiltersOverlay() {
-  var newFilter by remember { mutableStateOf("") }
-  val filters = remember { mutableStateListOf<String>() }
 
-  fun addFilter(filter: String) {
-    if (filter.isBlank()) return
-    if (filters.contains(filter)) return
-    filters.add(filter)
+  val filters = remember { mutableStateListOf<Map<String, String>>() }
+
+  fun setFilter(filter: Pair<String, String>) {
+    if (filter.first.isBlank() || filter.second.isBlank()) return
+    if (filters.any { it.containsKey(filter.first) }) {
+      filters[filters.indexOfFirst { it.containsKey(filter.first) }] = mapOf(filter.first to filter.second)
+    } else {
+      filters.add(mapOf(filter.first to filter.second))
+    }
   }
 
   Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f))) {
@@ -96,20 +97,19 @@ fun FiltersOverlay() {
           modifier = Modifier.padding(8.dp)
         )
         Text(
-          text = "Subscriptions allow you to 'subscribe' to custom character name re-mappings and omissions as curated by your own guild or faction.\n\nEnter the URL of a .CSV file on the web containing custom filters. These will be combined / merged with your personal filters, such that personal filters always take precedence over remote filters. You can use this functionality to remove or re-map ambiguous names like 'Ironclad' that may be of no interest. You can make these in any common spreadsheet software. In the first column put the name, and the second column put the replacement name. The word 'REMOVE' (in all CAPS) will filter a name entirely. Lists are updated automatically based on the URL you enter below periodically:",
+          text = "Subscriptions allow you to create custom character name re-mappings and omissions from lists curated by your own guild or faction. You can use this functionality to remove or re-map ambiguous names like 'Ironclad' that may be of no interest. Lists are updated automatically based on the URL you enter below:",
           fontSize = 14.sp,
           color = Color.White,
           fontWeight = FontWeight.Light,
           textAlign = TextAlign.Start,
           modifier = Modifier.padding(8.dp)
         )
-        val textFieldValue = rememberSaveable { mutableStateOf(AppState.config.playerName) }
+        val selectedFilterURL = rememberSaveable { mutableStateOf("~Paste Link Here~") }
         TextField(
-          value = textFieldValue.value,
+          value = selectedFilterURL.value,
           onValueChange = {
-            textFieldValue.value = it
+            selectedFilterURL.value = it
           },
-          placeholder = { Text("Paste a URL here") },
           textStyle = TextStyle(
             textAlign = TextAlign.Center,
             fontSize = 20.sp
@@ -124,16 +124,68 @@ fun FiltersOverlay() {
             placeholderColor = Color.LightGray,
             cursorColor = Color.Red
           ),
-          modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
+          modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally).padding(8.dp, 0.dp)
         )
-      }
 
-      // Remote Filters
+//        Text(
+//          text = "• Filters from the web are combined with any local filters. Local filters always take precedence over remote ones.",
+//          fontSize = 14.sp,
+//          color = Color.White,
+//          fontWeight = FontWeight.Light,
+//          textAlign = TextAlign.Start,
+//          modifier = Modifier.padding(8.dp)
+//        )
+//        Text(
+//          text = "• You can make CSV filters in any common spreadsheet software. In the first column put the name, and the second column put the replacement name. The word 'REMOVE' (in all CAPS) will filter that player/npc entirely.",
+//          fontSize = 14.sp,
+//          color = Color.White,
+//          fontWeight = FontWeight.Light,
+//          textAlign = TextAlign.Start,
+//          modifier = Modifier.padding(8.dp)
+//        )
+//        Text(
+//          text = "Enter the URL of a .CSV file on the web containing custom filters:",
+//          fontSize = 14.sp,
+//          color = Color.White,
+//          fontWeight = FontWeight.Light,
+//          textAlign = TextAlign.Start,
+//          modifier = Modifier.padding(8.dp)
+//        )
 
-      // Personal Filters
-      Column {
+
+        // button to see an example
+        Row {
+          Button(
+            onClick = {
+              openWebLink("https://www.raidframer.lol/filters.csv")
+            },
+            colors = ButtonDefaults.buttonColors(Color.White),
+            modifier = Modifier.padding(16.dp)
+          ) {
+            Text(
+              text = "See Example CSV",
+              maxLines = 1,
+              color = Color.Black
+            )
+          }
+          Button(
+            onClick = {
+              selectedFilterURL.value = "https://www.raidframer.lol/filters.csv"
+            },
+            colors = ButtonDefaults.buttonColors(Color.White),
+            modifier = Modifier.padding(16.dp)
+          ) {
+            Text(
+              text = "Use Default",
+              maxLines = 1,
+              color = Color.Black
+            )
+          }
+        }
+
+        // Current Filters
         Text(
-          text = "Name Filters",
+          text = "Current Filters",
           fontSize = 24.sp,
           color = Color.White,
           fontWeight = FontWeight.Bold,
@@ -142,10 +194,32 @@ fun FiltersOverlay() {
         )
 
         LazyColumn {
-          items(filters.count()) { filter ->
+          items(filters.count()) { index ->
             Row {
+              val hoveredItem = remember { MutableInteractionSource() }
+              IconButton(
+                onClick = { },
+                modifier = Modifier
+                  .size(32.dp)
+                  .padding(top = 4.dp)
+                  .background(Color.Transparent, MaterialTheme.shapes.small)
+                  .shadow(
+                    elevation = 0.dp,
+                    clip = true,
+                    ambientColor = Color.Transparent,
+                    spotColor = Color.Transparent
+                  )
+              ) {
+                Text(
+                  text = "✕",
+                  fontSize = 18.sp,
+                  color = if (hoveredItem.collectIsHoveredAsState().value) Color.Red else Color.White,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.hoverable(interactionSource = hoveredItem)
+                )
+              }
               Text(
-                text = "$filter: ${filters[filter]}",
+                text = "${filters[index].keys.first()} ${if (filters[index].values.first() == "REMOVED") "will be removed." else "will become " + filters[index].values.first()}.",
                 fontSize = 14.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -156,37 +230,85 @@ fun FiltersOverlay() {
           }
         }
         Spacer(Modifier.weight(1f))
-        TextField(
-          value = newFilter,
-          onValueChange = { newFilter = it },
-          maxLines = 1,
-          placeholder = { Text("type a name here") },
-          modifier = Modifier.fillMaxWidth(),
-          colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.White.copy(alpha = 0.20f),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            cursorColor = Color.White,
-            textColor = Color.White
-          ),
-          keyboardActions = KeyboardActions(
-            onDone = {
-              addFilter(newFilter)
-            }
-          )
+
+
+        // Personal Filters
+        Text(
+          text = "Overrides",
+          fontSize = 24.sp,
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.padding(8.dp)
         )
+        Text(
+          text = "Filters from the web are combined with any local filters. Local filters always take precedence over remote ones. Use 'REMOVE' for the replacement to remove the player or NPC entirely.",
+          fontSize = 14.sp,
+          color = Color.White,
+          fontWeight = FontWeight.Light,
+          textAlign = TextAlign.Start,
+          modifier = Modifier.padding(8.dp)
+        )
+        var original by remember { mutableStateOf("") }
+        var replacement by remember { mutableStateOf("") }
+        Row {
+          TextField(
+            value = original,
+            onValueChange = { original = it.lowercase().capitalize() },
+            placeholder = { Text("Original") },
+            modifier = Modifier.weight(1f).padding(8.dp, 0.dp),
+            textStyle = TextStyle(
+              textAlign = TextAlign.Center,
+              fontSize = 20.sp
+            ),
+            singleLine = true,
+            maxLines = 1,
+            colors = TextFieldDefaults.textFieldColors(
+              textColor = Color.White,
+              backgroundColor = Color.Transparent,
+              focusedIndicatorColor = Color.Red,
+              unfocusedIndicatorColor = Color.White,
+              placeholderColor = Color.LightGray,
+              cursorColor = Color.Red
+            ),
+          )
+          TextField(
+            value = replacement,
+            onValueChange = { replacement = it.capitalize() },
+            placeholder = { Text("Replacement") },
+            modifier = Modifier.weight(1f).padding(8.dp, 0.dp),
+            textStyle = TextStyle(
+              textAlign = TextAlign.Center,
+              fontSize = 20.sp
+            ),
+            singleLine = true,
+            maxLines = 1,
+            colors = TextFieldDefaults.textFieldColors(
+              textColor = Color.White,
+              backgroundColor = Color.Transparent,
+              focusedIndicatorColor = Color.Red,
+              unfocusedIndicatorColor = Color.White,
+              placeholderColor = Color.LightGray,
+              cursorColor = Color.Red
+            ),
+            keyboardActions = KeyboardActions(
+              onDone = {
+                setFilter(original to replacement)
+              }
+            )
+          )
+        }
         Button(
           onClick = {
-            addFilter(newFilter)
+            setFilter(original to replacement)
           },
-          modifier = Modifier.padding(8.dp)
+          colors = ButtonDefaults.buttonColors(Color.White),
+          modifier = Modifier.padding(16.dp)
         ) {
           Text("Add to Filters")
         }
       }
     }
-
   }
-
 
 }

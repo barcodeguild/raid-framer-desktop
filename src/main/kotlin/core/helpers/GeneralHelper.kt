@@ -27,7 +27,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.realm.kotlin.Realm
+import java.awt.Desktop
 import java.awt.Toolkit
+import java.net.URI
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -47,6 +49,16 @@ fun Long.humanReadableAbbreviation(): String {
   val divisor = Math.pow(10.0, suffixNum * 3.toDouble())
   var shortValue = value / divisor
   return String.format("%.1f", shortValue) + suffixes[suffixNum]
+}
+
+
+/*
+ * Opens a browser window to the specified URL.
+ */
+fun openWebLink(url: String) {
+  if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+    Desktop.getDesktop().browse(URI(url))
+  }
 }
 
 /*

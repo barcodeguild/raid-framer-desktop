@@ -7,8 +7,8 @@ import com.sun.jna.win32.StdCallLibrary
 import core.database.OverlayType
 import core.database.RFDao
 import core.database.Schema
+import core.interactor.Interactor
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
 import net.sourceforge.tess4j.Tesseract
 import net.sourceforge.tess4j.TesseractException
 import java.awt.Color
@@ -18,10 +18,7 @@ import java.awt.Toolkit
 import java.awt.image.BufferedImage
 import kotlin.math.abs
 
-object OverlayInteractor {
-
-  private val scope = CoroutineScope(Dispatchers.IO)
-  val mutex = Mutex()
+object OverlayInteractor : Interactor() {
 
   private val GAME_WINDOW_COLOR_MODIFIER_BASE = Color(237, 233, 214)
   private val GAME_WINDOW_COLOR_MODIFIER = Color(137, 137, 130)
@@ -32,50 +29,43 @@ object OverlayInteractor {
   /*
    * Tries to programmatically manage overlay windows so that they can be hidden when the game is tabbed-out.
    */
-  fun start() {
-    scope.launch {
-      while (isActive) {
+  override suspend fun interact() {
+    // check to see if the player is tabbed-out of the game by window title
+    if (AppState.config.tabbedDetectionEnabled) {
+      val gameForegrounded = getActiveWindowTitle().contains("ArcheRage")
+      AppState.isEverythingVisible.value = gameForegrounded
+    } else {
+      AppState.isEverythingVisible.value = true
+    }
 
-        delay(500) // don't do too often
+    // check to see if it looks like an in-game window is being covered by an overlay
+    val supportedWindows = listOf(
+      AppState.windowStates.combatState,
+      AppState.windowStates.trackerState
+    )
 
-        // check to see if the player is tabbed-out of the game by window title
-        if (AppState.config.tabbedDetectionEnabled) {
-          val gameForegrounded = getActiveWindowTitle().contains("ArcheRage")
-          AppState.isEverythingVisible.value = gameForegrounded
-        } else {
-          AppState.isEverythingVisible.value = true
+    if (AppState.config.colorAndTextDetectionEnabled) {
+      val ss = takeScreenshot()
+      supportedWindows.filterNotNull().forEach { state ->
+        when (state) {
+          AppState.windowStates.combatState -> AppState.isCombatObstructing.value = shouldHideWindow(
+            alreadyObstructing = AppState.isCombatObstructing.value,
+            windowState = state,
+            image = ss
+          )
+
+          AppState.windowStates.trackerState -> AppState.isTrackerObstructing.value = shouldHideWindow(
+            alreadyObstructing = AppState.isTrackerObstructing.value,
+            windowState = state,
+            image = ss
+          )
         }
-
-        // check to see if it looks like an in-game window is being covered by an overlay
-        val supportedWindows = listOf(
-          AppState.windowStates.combatState,
-          AppState.windowStates.trackerState
-        )
-
-        if (AppState.config.colorAndTextDetectionEnabled) {
-          val ss = takeScreenshot()
-          supportedWindows.filterNotNull().forEach { state ->
-            when (state) {
-              AppState.windowStates.combatState -> AppState.isCombatObstructing.value = shouldHideWindow(
-                alreadyObstructing = AppState.isCombatObstructing.value,
-                windowState = state,
-                image = ss
-              )
-
-              AppState.windowStates.trackerState -> AppState.isTrackerObstructing.value = shouldHideWindow(
-                alreadyObstructing = AppState.isTrackerObstructing.value,
-                windowState = state,
-                image = ss
-              )
-            }
-          }
-        } else {
-          supportedWindows.onEach {
-            when (it) {
-              AppState.windowStates.combatState -> AppState.isCombatObstructing.value = false
-              AppState.windowStates.trackerState -> AppState.isTrackerObstructing.value = false
-            }
-          }
+      }
+    } else {
+      supportedWindows.onEach {
+        when (it) {
+          AppState.windowStates.combatState -> AppState.isCombatObstructing.value = false
+          AppState.windowStates.trackerState -> AppState.isTrackerObstructing.value = false
         }
       }
     }
@@ -110,11 +100,6 @@ object OverlayInteractor {
     val isTextPresent = isTextPresent(regionImage)
 
     return if (alreadyObstructing) isCovered || isTextPresent else isCovered
-  }
-
-
-  fun stop() {
-    scope.cancel()
   }
 
   /*

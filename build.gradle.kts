@@ -41,7 +41,7 @@ compose.desktop {
     mainClass = "MainKt"
 
     nativeDistributions {
-      targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+      targetFormats(TargetFormat.Msi)
       packageName = "Raid Framer"
       packageVersion = version as String
       description = "Raid Framer Daemon"

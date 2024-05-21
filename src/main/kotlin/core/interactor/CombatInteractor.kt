@@ -1,3 +1,4 @@
+import core.interactor.Interactor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,16 +12,16 @@ import java.util.regex.Pattern
 import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
-object CombatInteractor {
+object CombatInteractor : Interactor() {
   var shouldSearchEverywhere: Boolean = false
-  private var scope: CoroutineScope? = null
 
   private var _isSearching = MutableStateFlow<Boolean>(false)
   val isSearching: StateFlow<Boolean> = _isSearching
   private var _possiblePaths = MutableStateFlow<List<Path>>(listOf())
   val possiblePaths: StateFlow<List<Path>> = _possiblePaths
 
-  var selectedPath: String? = null
+  private var lastIndex: Long = 0 // used to keep position inside the log file
+  private var selectedPath: String? = null
   private var mostRecentEventTimestamp: Long = 0
 
   private val ATTACK_PATTERN: Pattern =
@@ -163,45 +164,26 @@ object CombatInteractor {
     _isSearching.value = false
   }
 
-  /*
+  /*f
    * Main interaction event loop. Watches the selected log file for changes and parses new lines.
    */
-  fun start() {
-
-    // GUARD: Cancel the previous scope and start a new one if already active
-    if (scope == null || scope?.isActive == true) {
-      scope?.cancel()
-      scope = CoroutineScope(Dispatchers.Default)
-    }
-
-    // Launch the event loop
-    scope?.launch {
-      delay(1000)
-      while (isActive) {
-        if (selectedPath.isNullOrBlank()) continue
-        val logPath = Paths.get(selectedPath!!)
-        var lastIndex = Files.lines(logPath).count()
-        while (isActive) {
-          Files.newBufferedReader(logPath).use { reader ->
-            val lines = reader.lines().skip(lastIndex).iterator()
-            while (lines.hasNext()) {
-              val line = lines.next()
-              parseLines(listOf(line))
-              lastIndex++
-            }
-          }
-          delay(10)
-        }
-        delay(50)
+  override suspend fun interact() {
+    if (selectedPath.isNullOrBlank()) return
+    val logPath = Paths.get(selectedPath!!)
+    withContext(Dispatchers.IO) {
+      Files.newBufferedReader(logPath)
+    }.use { reader ->
+      if (lastIndex == 0L) lastIndex = Files.lines(logPath).count()
+      val lines = reader.lines().skip(lastIndex).iterator()
+      while (lines.hasNext()) {
+        val line = lines.next()
+        parseLines(listOf(line))
+        lastIndex++
       }
+      lastIndex = Files.lines(logPath).count() // move index pointer to the end of the file
     }
-    scope?.launch {
-      while (isActive) {
-        pruneOldEvents()
-        pruneOldDebuffs()
-        delay(1000)
-      }
-    }
+    pruneOldEvents()
+    pruneOldDebuffs()
   }
 
   /*
@@ -522,8 +504,9 @@ object CombatInteractor {
     _retributionByPlayer.value = currentMap
   }
 
-  fun stop() {
-    scope?.cancel()
+  fun updateSelectedPath(path: String) {
+    selectedPath = path
+    lastIndex = 0
   }
 
   interface CombatEvent {

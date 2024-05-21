@@ -13,7 +13,6 @@ import core.database.RFDao
 import core.helpers.getScreenSizeInDp
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
-import io.realm.kotlin.mongodb.App
 import kotlinx.coroutines.*
 import ui.OverlayWindow
 import ui.overlay.*
@@ -26,7 +25,6 @@ import javax.imageio.ImageIO
 import kotlin.system.exitProcess
 
 fun main() = application {
-
   val appState = AppState
 
   // wait for database and state to become available
@@ -35,7 +33,7 @@ fun main() = application {
     AppState.windowStates = RFDao.loadWindowStates()
     appState.isEverythingResizable.value = AppState.config.overlayResizingEnabled
     appState.isAboutOverlayVisible.value = AppState.config.firstLaunch
-    CombatInteractor.selectedPath = AppState.config.defaultLogPath
+    CombatInteractor.updateSelectedPath(AppState.config.defaultLogPath)
     CombatInteractor.shouldSearchEverywhere = AppState.config.searchEverywhere
     AppState.config.firstLaunch = false
     RFDao.saveConfig(AppState.config)
@@ -56,26 +54,16 @@ fun main() = application {
     println("Failed to create tessdata directory: ${e.message}")
   }
 
-  /*
-   * Starts the application by attaching the interactors and listeners.
-   */
-  CombatInteractor.start()
-  OverlayInteractor.start()
-
-  // determine screen size in dp
-  val screenSize = getScreenSizeInDp()
-  fun loadImageFromDisk(path: String): Image {
-    val bufferedImage = ImageIO.read(File(path))
-    return bufferedImage.getScaledInstance(-1, -1, Image.SCALE_SMOOTH)
-  }
-
-
   // spawns the system tray menu
   val tray = spawnSystemTray()
 
   // spawns the overlay windows
   spawnDefaultWindows(tray)
   AppState.tray = tray
+
+  // starts the interactors
+  CombatInteractor.start()
+  OverlayInteractor.start()
 }
 
 /*
@@ -179,8 +167,6 @@ private fun spawnDefaultWindows(tray: SystemTray) {
 
   // windows open/closed
   if (windowsOpen && !shouldReload) {
-
-    println("oh eek: reload:$shouldReload open:$windowsOpen")
 
     /* Shows combat-related statistics for the raid. */
     OverlayWindow(

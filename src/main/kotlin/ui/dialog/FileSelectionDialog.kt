@@ -15,6 +15,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import core.database.RFDao
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.io.path.pathString
 
 @Composable
@@ -68,7 +72,16 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
                       128
                     ) else Color.Transparent
                   )
-                  .clickable { selectedItem.value = possiblePaths[itemId].pathString }
+                  .clickable {
+                    selectedItem.value = possiblePaths[itemId].pathString
+                    CombatInteractor.updateSelectedPath(selectedItem.value)
+                    CombatInteractor.stop()
+                    CombatInteractor.start()
+                    AppState.config.defaultLogPath = selectedItem.value
+                    CoroutineScope(Dispatchers.Default).launch {
+                      RFDao.saveConfig(AppState.config)
+                    }
+                  }
                   .padding(16.dp)
               ) {
                 Row(
@@ -98,7 +111,7 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
           modifier = Modifier.padding(16.dp)
         ) {
           Text(
-            text = "OK",
+            text = "Close",
             color = Color.White
           )
         }

@@ -49,8 +49,15 @@ fun CombatOverlay() {
   val retributionByPlayer by CombatInteractor.retributionByPlayer.collectAsState()
 
   // Transform and sort the maps
-  val sortedDamage = damageByPlayer.toList().sortedByDescending { it.second }
-  val sortedHeals = healsByPlayer.toList().sortedByDescending { it.second }
+  val sortedDamage = damageByPlayer.map { (key, value) ->
+    // val newKey = remaps.getOrDefault(key, key) 3CFE88 branch
+    Pair(key, value)
+  }.sortedByDescending { it.second }
+
+  val sortedHeals = healsByPlayer.map { (key, value) ->
+    // val newKey = remaps.getOrDefault(key, key)
+    Pair(key, value)
+  }.sortedByDescending { it.second }
 
   // the animation for red flashing text
   val flashingColorState = rememberInfiniteTransition().animateColor(
@@ -179,10 +186,10 @@ fun CombatOverlay() {
           horizontalAlignment = Alignment.CenterHorizontally
         ) {
           LazyColumn(
-            contentPadding = PaddingValues(4.dp),
+            contentPadding = PaddingValues(0.dp),
             modifier = Modifier.padding(12.dp)
           ) {
-            items(sortedDamage.size.coerceAtMost(50)) { item ->
+            items(sortedDamage.size.coerceAtMost(150)) { item ->
               val damageInteractionSource = remember { MutableInteractionSource() }
               val isDamageHovered = damageInteractionSource.collectIsHoveredAsState().value
               Row(
@@ -196,7 +203,7 @@ fun CombatOverlay() {
                   .hoverable(interactionSource = damageInteractionSource)
               ) {
                 Text(
-                  text = "${item + 1}. ${sortedDamage[item].first}: ",
+                  text = "${item + 1}. ${sortedDamage[item].first} ",
                   color = Color.White,
                   overflow = TextOverflow.Ellipsis,
                   maxLines = 1,
@@ -230,10 +237,10 @@ fun CombatOverlay() {
           horizontalAlignment = Alignment.CenterHorizontally
         ) {
           LazyColumn(
-            contentPadding = PaddingValues(4.dp),
+            contentPadding = PaddingValues(0.dp),
             modifier = Modifier.padding(12.dp)
           ) {
-            items(sortedHeals.size.coerceAtMost(50)) { item ->
+            items(sortedHeals.size.coerceAtMost(150)) { item ->
               val healsInteractionSource = remember { MutableInteractionSource() }
               val isHealsHovered = healsInteractionSource.collectIsHoveredAsState().value
               Row(

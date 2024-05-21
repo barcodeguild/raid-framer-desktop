@@ -176,19 +176,7 @@ fun SettingsOverlay() {
     // )
   }
 
-  val dialogOpened = remember { mutableStateOf(false) }
   FileSelectionDialog(showDialog, selectedItem)
-  LaunchedEffect(selectedItem.value, dialogOpened.value) {
-    if (dialogOpened.value) {
-      AppState.config.defaultLogPath = selectedItem.value
-      CoroutineScope(Dispatchers.Default).launch {
-        RFDao.saveConfig(AppState.config)
-      }
-      CombatInteractor.selectedPath = selectedItem.value
-      CombatInteractor.start()
-    }
-  }
-
 }
 
 @Composable
@@ -379,6 +367,22 @@ fun GlobalOptionsPanel() {
             text = "Search everywhere for combat.log and not just documents.",
             color = Color.White
           )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Button(
+            onClick = {
+              AppState.isSettingsOverlayVisible.value = false
+              AppState.isFiltersOverlayVisible.value = true
+            },
+            colors = ButtonDefaults.buttonColors(Color.White),
+            modifier = Modifier.padding(16.dp)
+          ) {
+            Text(
+              text = "Filters",
+              maxLines = 1,
+              color = Color.Black
+            )
+          }
         }
       }
     }
