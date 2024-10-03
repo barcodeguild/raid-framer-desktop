@@ -25,25 +25,25 @@ object CombatInteractor : Interactor() {
   private var mostRecentEventTimestamp: Long = 0
 
   private val ATTACK_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\|r\\)!")
   private val ATTACK_PATTERN_NO_SKILL =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
   private val ATTACK_PARRIED_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r! Attack Parried, resulting in \\|c[0-9a-fA-F]{8}(.*)\\|r damage")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r! Attack Parried, resulting in \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r damage")
   private val HEAL_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r targeted (.*)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r to restore \\|c[0-9a-fA-F]{8}(.*)\\|r (\\w+).")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r targeted (.*)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r to restore \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r (\\w+).")
   private val IS_CASTING: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r is casting \\|c[0-9a-fA-F]{8}(.*)\\|r")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r is casting \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r")
   private val SUCCESSFUL_CAST: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r successfully cast \\|c[0-9a-fA-F]{8}(.*)\\|r")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r successfully cast \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r")
   private val BUFF_GAINED_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r gained the buff: \\|c[0-9a-fA-F]{8}(.*)\\|r")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r gained the buff: \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r")
   private val BUFF_ENDED_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r buff ended\\.")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r buff ended\\.")
   private val DEBUFF_GAINED: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r was struck by a \\|c[0-9a-fA-F]{8}(.*)\\|r debuff!")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r was struck by a \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r debuff!")
   private val DEBUFF_ENDED: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r debuff cleared")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r debuff cleared")
 
   /*
    * Initiating Spells : Might move this to a separate class if it gets too big.
@@ -173,7 +173,7 @@ object CombatInteractor : Interactor() {
     withContext(Dispatchers.IO) {
       Files.newBufferedReader(logPath)
     }.use { reader ->
-      if (lastIndex == 0L) lastIndex = Files.lines(logPath).count()
+      // if (lastIndex == 0L) lastIndex = Files.lines(logPath).count()
       val lines = reader.lines().skip(lastIndex).iterator()
       while (lines.hasNext()) {
         val line = lines.next()
