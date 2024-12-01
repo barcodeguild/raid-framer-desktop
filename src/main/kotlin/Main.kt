@@ -314,7 +314,7 @@ fun scaleDpForScreenResolution(dp: Float): Float {
   val widthScalingFactor = userScreenWidth / baseScreenWidth
   val heightScalingFactor = userScreenHeight / baseScreenHeight
 
-  val scalingFactor = minOf(widthScalingFactor, heightScalingFactor)
+  val scalingFactor = minOf(widthScalingFactor, heightScalingFactor).coerceIn(0.5, 2.0)
 
   return dp * scalingFactor.toFloat()
 }

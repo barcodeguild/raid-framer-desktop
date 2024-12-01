@@ -38,8 +38,8 @@ fun OverlayWindow(
   windowContent: @Composable (ComposeWindow) -> Unit
 ): ComposeWindow {
   val windowState = rememberWindowState(
-    width = initialSize.width,
-    height = initialSize.height,
+    width = initialSize.width.coerceIn(0.dp, 1000.dp),
+    height = initialSize.height.coerceIn(0.dp, 1000.dp),
     position = initialPosition
   )
   var windowHandle: ComposeWindow by remember { mutableStateOf(ComposeWindow()) }
@@ -49,11 +49,13 @@ fun OverlayWindow(
     visible = isVisible.value && isEverythingVisible.value && !isObstructing.value
   ) {
     with(LocalDensity.current) {
+      val widthPx = windowState.size.width.roundToPx().coerceIn(0, 10000)
+      val heightPx = windowState.size.height.roundToPx().coerceIn(0, 10000)
       window.setBounds(
         windowState.position.x.roundToPx(),
         windowState.position.y.roundToPx(),
-        windowState.size.width.roundToPx(),
-        windowState.size.height.roundToPx()
+        widthPx,
+        heightPx
       )
       window.shape = OverlayWindowShape(
         0.0,
