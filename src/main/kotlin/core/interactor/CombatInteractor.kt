@@ -25,25 +25,25 @@ object CombatInteractor : Interactor() {
   private var mostRecentEventTimestamp: Long = 0
 
   private val ATTACK_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\|r\\)!")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r attacked (.+)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\|r\\)!")
   private val ATTACK_PATTERN_NO_SKILL =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r attacked (.+)\\|r and caused \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r \\(\\|c[0-9a-fA-F]{8}(.*)\\|r\\)!")
   private val ATTACK_PARRIED_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.+)\\|r attacked (.+)\\|r! Attack Parried, resulting in \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r damage")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r attacked (.+)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r! Attack Parried, resulting in \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r damage")
   private val HEAL_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r targeted (.*)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r to restore \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r (\\w+).")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r targeted (.*)\\|r using \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r to restore \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r (\\w+).")
   private val IS_CASTING: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r is casting \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r is casting \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r")
   private val SUCCESSFUL_CAST: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r successfully cast \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r successfully cast \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r")
   private val BUFF_GAINED_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r gained the buff: \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r gained the buff: \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r")
   private val BUFF_ENDED_PATTERN: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r buff ended\\.")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r buff ended\\.")
   private val DEBUFF_GAINED: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r was struck by a \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r debuff!")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r was struck by a \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r debuff!")
   private val DEBUFF_ENDED: Pattern =
-    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(.*)\\|r's \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r debuff cleared")
+    Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r debuff cleared")
 
   /*
    * Initiating Spells : Might move this to a separate class if it gets too big.
@@ -200,10 +200,10 @@ object CombatInteractor : Interactor() {
         val event = AttackEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          caster = matcher.group(2),
-          target = matcher.group(3),
-          damage = matcher.group(5).toInt().absoluteValue,
-          spell = matcher.group(4),
+          caster = matcher.group(3),
+          target = matcher.group(4),
+          damage = matcher.group(6).toInt().absoluteValue,
+          spell = matcher.group(5),
           critical = false,
         )
         postDamage(event)
@@ -217,9 +217,9 @@ object CombatInteractor : Interactor() {
         val event = AttackEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          caster = matcher.group(2),
-          target = matcher.group(3),
-          damage = matcher.group(4).toInt().absoluteValue,
+          caster = matcher.group(3),
+          target = matcher.group(4),
+          damage = matcher.group(5).toInt().absoluteValue,
           spell = "Auto-Attack",
           critical = false,
         )
@@ -234,10 +234,10 @@ object CombatInteractor : Interactor() {
         val event = AttackEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          caster = matcher.group(2),
-          target = matcher.group(3),
-          damage = matcher.group(4).toInt().absoluteValue,
-          spell = "Auto-Attack",
+          caster = matcher.group(3),
+          target = matcher.group(4),
+          damage = matcher.group(6).toInt().absoluteValue,
+          spell = matcher.group(5),
           critical = false,
         )
         postDamage(event)
@@ -251,10 +251,10 @@ object CombatInteractor : Interactor() {
         val event = HealEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          caster = matcher.group(2),
-          target = matcher.group(3),
-          amount = matcher.group(5).toInt(),
-          spell = matcher.group(4),
+          caster = matcher.group(3),
+          target = matcher.group(4),
+          amount = matcher.group(6).toInt(),
+          spell = matcher.group(5),
           critical = false,
         )
         postHeal(event)
@@ -268,8 +268,8 @@ object CombatInteractor : Interactor() {
         val event = CastingEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          caster = matcher.group(2),
-          spell = matcher.group(3),
+          caster = matcher.group(3),
+          spell = matcher.group(4),
         )
         postCasting(event)
         mostRecentEventTimestamp = event.timestamp
@@ -282,8 +282,8 @@ object CombatInteractor : Interactor() {
         val event = SuccessfulCastEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          caster = matcher.group(2),
-          spell = matcher.group(3),
+          caster = matcher.group(3),
+          spell = matcher.group(4),
         )
         mostRecentEventTimestamp = event.timestamp
         continue
@@ -295,8 +295,8 @@ object CombatInteractor : Interactor() {
         val event = BuffGainedEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          target = matcher.group(2),
-          buff = matcher.group(3),
+          target = matcher.group(3),
+          buff = matcher.group(4),
         )
         processBuffGained(event)
         mostRecentEventTimestamp = event.timestamp
@@ -309,8 +309,8 @@ object CombatInteractor : Interactor() {
         val event = BuffEndedEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          target = matcher.group(2),
-          buff = matcher.group(3),
+          target = matcher.group(3),
+          buff = matcher.group(4),
         )
         processBuffEnded(event)
         mostRecentEventTimestamp = event.timestamp
@@ -323,8 +323,8 @@ object CombatInteractor : Interactor() {
         val event = DebuffGainedEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          target = matcher.group(2),
-          debuff = matcher.group(3),
+          target = matcher.group(3),
+          debuff = matcher.group(4),
         )
         processDebuffGained(event)
         continue
@@ -336,8 +336,8 @@ object CombatInteractor : Interactor() {
         val event = DebuffEndedEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
-          target = matcher.group(2),
-          debuff = matcher.group(3),
+          target = matcher.group(3),
+          debuff = matcher.group(4),
         )
         processDebuffEnded(event)
         continue
