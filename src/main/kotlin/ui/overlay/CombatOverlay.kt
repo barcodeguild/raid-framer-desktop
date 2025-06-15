@@ -1,7 +1,7 @@
 package ui.overlay
 
 import AppState
-import CombatInteractor
+import CombatEventInteractor
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*
 import androidx.compose.desktop.ui.tooling.preview.Preview
@@ -44,9 +44,9 @@ fun CombatOverlay() {
 
   val shouldShowExitDialog = remember { mutableStateOf(false) }
 
-  val damageByPlayer by CombatInteractor.damageByPlayer.collectAsState()
-  val healsByPlayer by CombatInteractor.healsByPlayer.collectAsState()
-  val retributionByPlayer by CombatInteractor.retributionByPlayer.collectAsState()
+  val damageByPlayer by CombatEventInteractor.damageByPlayer.collectAsState()
+  val healsByPlayer by CombatEventInteractor.healsByPlayer.collectAsState()
+  val retributionByPlayer by CombatEventInteractor.retributionByPlayer.collectAsState()
 
   // Transform and sort the maps
   val sortedDamage = damageByPlayer.map { (key, value) ->
@@ -162,7 +162,7 @@ fun CombatOverlay() {
           Text("\uD83D\uDEE0\uFE0F", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
         }
         IconButton(
-          onClick = { CombatInteractor.resetStats() },
+          onClick = { CombatEventInteractor.resetStats() },
           modifier = Modifier
             .size(32.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)

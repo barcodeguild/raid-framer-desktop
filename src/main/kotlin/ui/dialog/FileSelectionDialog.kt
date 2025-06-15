@@ -1,6 +1,6 @@
 package ui.dialog
 
-import CombatInteractor
+import CombatEventInteractor
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,8 +24,8 @@ import kotlin.io.path.pathString
 @Composable
 fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: MutableState<String>) {
 
-  val isSearching by CombatInteractor.isSearching.collectAsState()
-  val possiblePaths by CombatInteractor.possiblePaths.collectAsState()
+  val isSearching by CombatEventInteractor.isSearching.collectAsState()
+  val possiblePaths by CombatEventInteractor.possiblePaths.collectAsState()
 
   if (showDialog.value) {
     AlertDialog(
@@ -74,9 +74,9 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
                   )
                   .clickable {
                     selectedItem.value = possiblePaths[itemId].pathString
-                    CombatInteractor.updateSelectedPath(selectedItem.value)
-                    CombatInteractor.stop()
-                    CombatInteractor.start()
+                    CombatEventInteractor.updateSelectedPath(selectedItem.value)
+                    CombatEventInteractor.stop()
+                    CombatEventInteractor.start()
                     AppState.config.defaultLogPath = selectedItem.value
                     CoroutineScope(Dispatchers.Default).launch {
                       RFDao.saveConfig(AppState.config)

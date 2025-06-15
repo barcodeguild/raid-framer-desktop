@@ -1,7 +1,7 @@
 package ui.overlay
 
 import AppState
-import CombatInteractor
+import CombatEventInteractor
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -55,7 +55,7 @@ fun TrackerOverlay() {
 
   var showDmg by remember { mutableStateOf(false) }
   var castProgress by remember { mutableStateOf(0f) }
-  val spellName by CombatInteractor.targetCurrentlyCasting.collectAsState()
+  val spellName by CombatEventInteractor.targetCurrentlyCasting.collectAsState()
   var isCasting by remember { mutableStateOf(false) }
 
   val animatedProgress by animateFloatAsState(
@@ -75,15 +75,15 @@ fun TrackerOverlay() {
   }
 
   // incoming and outgoing damage
-  val incomingByPlayer by CombatInteractor.incomingEventsByPlayer.collectAsState()
+  val incomingByPlayer by CombatEventInteractor.incomingEventsByPlayer.collectAsState()
   val sortedAndFilteredIncoming =
     incomingByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
 
-  val outgoingByPlayer by CombatInteractor.outgoingEventsByPlayer.collectAsState()
+  val outgoingByPlayer by CombatEventInteractor.outgoingEventsByPlayer.collectAsState()
   val sortedAndFilteredOutgoing =
     outgoingByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
 
-  val debuffsByPlayer by CombatInteractor.activeDebuffsByPlayer.collectAsState()
+  val debuffsByPlayer by CombatEventInteractor.activeDebuffsByPlayer.collectAsState()
   val filteredDebuffs = debuffsByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).map { it.debuff }
 
 
@@ -301,8 +301,8 @@ fun TrackerOverlay() {
                   ) {
                     Text(
                       text = when (val event = sortedAndFilteredIncoming[item]) {
-                        is CombatInteractor.AttackEvent -> annotatedStringForAttack(event)
-                        is CombatInteractor.HealEvent -> annotatedStringForHeal(event)
+                        is CombatEventInteractor.AttackEvent -> annotatedStringForAttack(event)
+                        is CombatEventInteractor.HealEvent -> annotatedStringForHeal(event)
                         else -> buildAnnotatedString { }
                       },
                       maxLines = 1,
@@ -330,8 +330,8 @@ fun TrackerOverlay() {
                   ) {
                     Text(
                       text = when (val event = sortedAndFilteredOutgoing[item]) {
-                        is CombatInteractor.AttackEvent -> annotatedStringForAttack(event)
-                        is CombatInteractor.HealEvent -> annotatedStringForHeal(event)
+                        is CombatEventInteractor.AttackEvent -> annotatedStringForAttack(event)
+                        is CombatEventInteractor.HealEvent -> annotatedStringForHeal(event)
                         else -> buildAnnotatedString { }
                       },
                       maxLines = 1,

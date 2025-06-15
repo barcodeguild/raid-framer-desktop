@@ -31,7 +31,7 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0") // If using coroutines with the SDK
   implementation("net.java.dev.jna:jna-platform:5.8.0") // tabbed-out detection feature
   implementation("com.dorkbox:SystemTray:4.4") // system tray feature
-  implementation("ch.qos.logback:logback-classic:1.5.3") // logging
+  implementation("ch.qos.logback:logback-classic:1.5.18") // logging
   implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.20") // accesses the schema reflectively
   implementation("net.sourceforge.tess4j:tess4j:5.11.0") // text detection feature
 }

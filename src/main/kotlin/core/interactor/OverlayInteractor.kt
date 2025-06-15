@@ -23,7 +23,7 @@ object OverlayInteractor : Interactor() {
   private val GAME_WINDOW_COLOR_MODIFIER_BASE = Color(237, 233, 214)
   private val GAME_WINDOW_COLOR_MODIFIER = Color(137, 137, 130)
   private val GAME_WINDOW_COLOR = Color(240, 240, 226)
-  const val COLOR_DETECTION_THRESHOLD = 13.0 // 10%
+  const val COLOR_DETECTION_THRESHOLD = 13.0 // 13%
   const val MAX_VARIANCE = 7
 
   /*

@@ -1,7 +1,7 @@
 package ui.overlay
 
 import AppState
-import CombatInteractor
+import CombatEventInteractor
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
@@ -351,10 +351,10 @@ fun GlobalOptionsPanel() {
             onCheckedChange = {
               searchEverywhereChecked = it
               AppState.config.searchEverywhere = it
-              CombatInteractor.shouldSearchEverywhere = it
+              CombatEventInteractor.shouldSearchEverywhere = it
               CoroutineScope(Dispatchers.Default).launch {
                 RFDao.saveConfig(AppState.config)
-                CombatInteractor.locateCombatLog()
+                CombatEventInteractor.locateCombatLog()
               }
             },
             colors = CheckboxDefaults.colors(

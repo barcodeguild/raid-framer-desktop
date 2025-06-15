@@ -15,5 +15,8 @@ data class Skill(
   val id: Int,
   val name: String,
   val castTime: Double,
-  val cooldown: Double
+  val cooldown: Double,
+  val possibleNames: List<String> = emptyList()
 )
+
+val ALL_SKILL_TREES = listOf<SkillTreeDefinition>(MaledictionDefinition)

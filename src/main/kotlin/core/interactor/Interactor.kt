@@ -2,6 +2,12 @@ package core.interactor
 
 import kotlinx.coroutines.*
 
+/*
+ * This is a base class for all interactors in the app.
+ * Each interactor is responsible for a specific piece of functionality, and will interact inside the coroutine scope.
+ * Every 'tick' of the event loop the interact() method is called to perform some work in the background.
+ * Classes that extend from this class will typically be object singletons, so that there are no duplicate instances.
+ */
 abstract class Interactor {
 
   // io dispatcher chosen because interact() may perform I/O operations and shouldn't update the UI directly
@@ -22,8 +28,8 @@ abstract class Interactor {
   }
 
   /*
-   * Event loop tick is performed in a background thread every 1s. (See interactor pattern, friends!)
-   * Interactors in this app are used to process data. Overlays are used to present said data.
+   * Event loop tick is performed in a background thread. (See interactor pattern, friends!)
+   * Interact() is called every 3 seconds inside the coroutine scope using the Dispatchers.IO background thread.
    */
   open suspend fun interact() {}
 

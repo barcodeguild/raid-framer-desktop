@@ -10,18 +10,14 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import core.database.OverlayType
 import core.database.RFDao
-import core.helpers.getScreenSizeInDp
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import kotlinx.coroutines.*
 import ui.OverlayWindow
 import ui.overlay.*
-import java.awt.Image
 import java.awt.Toolkit
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import javax.imageio.ImageIO
 import kotlin.system.exitProcess
 
 fun main() = application {
@@ -33,8 +29,8 @@ fun main() = application {
     AppState.windowStates = RFDao.loadWindowStates()
     appState.isEverythingResizable.value = AppState.config.overlayResizingEnabled
     appState.isAboutOverlayVisible.value = AppState.config.firstLaunch
-    CombatInteractor.updateSelectedPath(AppState.config.defaultLogPath)
-    CombatInteractor.shouldSearchEverywhere = AppState.config.searchEverywhere
+    CombatEventInteractor.updateSelectedPath(AppState.config.defaultLogPath)
+    CombatEventInteractor.shouldSearchEverywhere = AppState.config.searchEverywhere
     AppState.config.firstLaunch = false
     RFDao.saveConfig(AppState.config)
   }
@@ -62,7 +58,7 @@ fun main() = application {
   AppState.tray = tray
 
   // starts the interactors
-  CombatInteractor.start()
+  CombatEventInteractor.start()
   OverlayInteractor.start()
 }
 
@@ -71,7 +67,7 @@ fun main() = application {
  * finally exiting the application.
  */
 fun quit() {
-  CombatInteractor.stop()
+  CombatEventInteractor.stop()
   OverlayInteractor.stop()
   AppState.tray?.shutdown()
   AppState.tray?.remove()

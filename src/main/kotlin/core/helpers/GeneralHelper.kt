@@ -1,6 +1,6 @@
 package core.helpers
 
-import CombatInteractor
+import CombatEventInteractor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -84,7 +84,7 @@ fun Long.toLocalTimeString(): String {
  * it's too and will get used multiple times potentially.
  */
 @Composable
-fun annotatedStringForAttack(event: CombatInteractor.AttackEvent): AnnotatedString {
+fun annotatedStringForAttack(event: CombatEventInteractor.AttackEvent): AnnotatedString {
   return buildAnnotatedString {
     withStyle(style = SpanStyle(color = Color(249, 191, 59))) {
       append(event.caster)
@@ -120,7 +120,7 @@ fun annotatedStringForAttack(event: CombatInteractor.AttackEvent): AnnotatedStri
  * Makes a pretty-looking AnnotatedString for the heal events.
  */
 @Composable
-fun annotatedStringForHeal(event: CombatInteractor.HealEvent): AnnotatedString {
+fun annotatedStringForHeal(event: CombatEventInteractor.HealEvent): AnnotatedString {
   return buildAnnotatedString {
     withStyle(style = SpanStyle(color = Color(249, 191, 59))) {
       append(event.target)

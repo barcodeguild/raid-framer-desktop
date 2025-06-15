@@ -12,7 +12,11 @@ import java.util.regex.Pattern
 import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
-object CombatInteractor : Interactor() {
+/*
+ * This interactor will ingest combat events from the ArcheRage combat.log file and parse them into combat events.
+ * It will also keep track of damage, heals, buffs, debuffs, and other combat-related events.
+ */
+object CombatEventInteractor : Interactor() {
   var shouldSearchEverywhere: Boolean = false
 
   private var _isSearching = MutableStateFlow<Boolean>(false)
