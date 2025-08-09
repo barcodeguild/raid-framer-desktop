@@ -1,0 +1,7 @@
+package com.reoky.raidframer
+
+object AppGlobals {
+    const val PACKAGE_ID = "com.reoky.raidframer"
+    const val APP_VERSION = "2.0.0"
+    const val GITHUB_URL = "https://github.com/barcodeguild/raid-framer-desktop"
+}

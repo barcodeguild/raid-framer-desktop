@@ -1,13 +1,35 @@
-pluginManagement {
-  repositories {
-    gradlePluginPortal()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-  }
+rootProject.name = "raid-framer-desktop"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-  plugins {
-    kotlin("jvm").version(extra["kotlin.version"] as String)
-    id("org.jetbrains.compose").version(extra["compose.version"] as String)
-  }
+pluginManagement {
+    repositories {
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 
-rootProject.name = "raidframer"
+dependencyResolutionManagement {
+    repositories {
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+    }
+}
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
+include(":composeApp")
