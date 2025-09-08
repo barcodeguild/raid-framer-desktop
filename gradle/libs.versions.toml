@@ -1,14 +1,14 @@
 [versions]
-androidx-lifecycle = "2.9.1"
-composeHotReload = "1.0.0-alpha11"
-composeMultiplatform = "1.8.2"
-junit = "4.13.2"
-kotlin = "2.2.0"
-kotlinx-coroutines = "1.10.2"
-dorkbox-systemTray = "4.4"
-room = "2.7.2"
-sqlite = "2.5.2"
-ksp = "2.2.0-2.0.2" # https://github.com/google/ksp/releases
+androidx-lifecycle = "2.9.3" # https://developer.android.com/jetpack/androidx/versions
+composeHotReload = "1.0.0-beta6" # https://github.com/JetBrains/compose-hot-reload/releases
+composeMultiplatform = "1.8.2" # https://github.com/JetBrains/compose-multiplatform/releases/
+junit = "4.13.2"# https://search.maven.org/artifact/junit/junit
+kotlin = "2.2.10" # https://github.com/JetBrains/kotlin/releases/
+kotlinx-coroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases/
+dorkbox-systemTray = "4.4" # https://github.com/dorkbox/SystemTray/releases
+room = "2.7.2" # https://maven.google.com/web/index.html?q=room-gra#androidx.room:room-gradle-plugin
+sqlite = "2.5.2" # https://maven.google.com/web/index.html?q=sqlite#androidx.sqlite:sqlite
+ksp = "2.2.10-2.0.2" # https://github.com/google/ksp/releases
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }

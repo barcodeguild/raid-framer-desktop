@@ -37,7 +37,7 @@ fun main() = application {
     // This will create the database and tables if they don't exist
     initialize()
   } catch (e: Exception) {
-    println("eeeeeek: ${e.message}")
+    println("Oh eek, the database wouldn't open, friend: ${e.message}")
     exitProcess(1)
   }
 
