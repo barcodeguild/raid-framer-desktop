@@ -11,10 +11,12 @@ import com.reoky.raidframer.core.database.WindowStateDao
  */
 class WindowManager(private val dao: WindowStateDao) {
   private val windowStates = mutableMapOf<OverlayType, MutableState<WindowStateEntity>>()
+
   private val isAnyWindowOpen: Boolean
     get() = windowStates.values.any { it.value.isVisible }
 
   suspend fun loadStates() {
+    if (windowStates.isNotEmpty()) return
     dao.getAll().forEach { entity ->
       windowStates[OverlayType.valueOf(entity.overlayType)] = mutableStateOf(entity)
     }
@@ -26,27 +28,43 @@ class WindowManager(private val dao: WindowStateDao) {
         WindowStateEntity(
           overlayType = type.name,
           lastPositionXDp = 0f,
-          lastPositionYDp = 0f,
+            lastPositionYDp = 0f,
           lastWidthDp = 600f,
           lastHeightDp = 750f,
-          isVisible = type == OverlayType.COMBAT // Default: one window open
+          isVisible = (type == OverlayType.ABOUT) // initial fallback
         )
       )
     }
 
-  suspend fun updateState(type: OverlayType, update: WindowStateEntity.() -> WindowStateEntity) {
+  suspend fun updateState(
+    type: OverlayType,
+    update: WindowStateEntity.() -> WindowStateEntity
+  ) {
     val state = getState(type)
     state.value = state.value.update()
     dao.insert(state.value)
   }
 
-  /*
-   * Best name I could come up with for this function.
-   */
-  fun ensureAtLeastOneWindowOpen() {
-    if (!isAnyWindowOpen) {
-      getState(OverlayType.COMBAT).value =
-        getState(OverlayType.COMBAT).value.copy(isVisible = true)
+  fun openWindow(type: OverlayType) {
+    val s = getState(type)
+    if (!s.value.isVisible) {
+      s.value = s.value.copy(isVisible = true)
     }
   }
+
+  fun closeWindow(type: OverlayType) {
+    val s = getState(type)
+    if (s.value.isVisible) {
+      s.value = s.value.copy(isVisible = false)
+      ensureAtLeastOneWindowOpen()
+    }
+  }
+
+  fun ensureAtLeastOneWindowOpen() {
+    if (!isAnyWindowOpen) {
+      openWindow(OverlayType.ABOUT) // switch to combat when that's working again
+    }
+  }
+
+  fun allOverlayTypes(): Array<OverlayType> = OverlayType.values()
 }

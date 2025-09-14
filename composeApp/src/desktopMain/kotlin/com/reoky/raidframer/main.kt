@@ -16,9 +16,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.database.initialize
+import com.reoky.raidframer.ui.ManagedOverlays
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.OverlayWindow
+import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.overlay.AboutOverlay
+import com.reoky.raidframer.ui.overlay.CombatOverlay
 import com.reoky.raidframer.ui.overlay.RaidOverlay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,22 +44,20 @@ fun main() = application {
     exitProcess(1)
   }
 
-  /*
-   * Test loading the positions of the windows from the database.
-   */
+  // Window positions saved in the window manager
+  val windowManager = WindowManager(database.getWindowStateDao())
   CoroutineScope(Dispatchers.Main).launch {
     try {
-      val windowStates = database.getWindowStateDao().getAll()
-      windowStates.forEach {
-        println(it)
-      }
+      windowManager.loadStates()
     } catch (e: Exception) {
-      println("eeeeeek: ${e.message}")
+      println("Error loading window states: ${e.message}")
       exitProcess(1)
     }
   }
 
-//  val raid: List<Party> = List(10) { partyIndex ->
+  ManagedOverlays( windowManager = windowManager, contents = mapOf( OverlayType.ABOUT to { AboutOverlay() }, OverlayType.COMBAT to { CombatOverlay() } ) )
+
+  //  val raid: List<Party> = List(10) { partyIndex ->
 //    List(5) { memberIndex ->
 //      RaidMember("P${partyIndex+1}M${memberIndex+1}", 100)
 //    }
@@ -92,26 +93,8 @@ fun main() = application {
 //      }
 //    )
 //  }
-  OverlayWindow(
-    ".: Raid Framer About :.",
-    initialPosition = WindowPosition(
-      x = Dp(0f), // Dp(lol.rfcloud.AppState.windowStates.aboutState?.lastPositionXDp ?: lol.rfcloud.scaleDpForScreenResolution(860f)),
-      y = Dp(0f) // Dp(lol.rfcloud.AppState.windowStates.aboutState?.lastPositionYDp ?: lol.rfcloud.scaleDpForScreenResolution(350f))
-    ),
-    initialSize = DpSize(
-      width = Dp(600f),
-      height = Dp(750f)
-    ),
-    overlayType = OverlayType.ABOUT,
-    isObstructing = mutableStateOf(false), // Always show opaque windows
-    isVisible = mutableStateOf(true),
-    isEverythingVisible = mutableStateOf(true),
-    isResizable = AppState.isEverythingResizable,
-    isFocusable = false,
-    {}
-  ) {
-    AboutOverlay()
-  }
+
+  //windowManager.ensureAtLeastOneWindowOpen()
 }
 
 @Composable
