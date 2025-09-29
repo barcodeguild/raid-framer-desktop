@@ -471,7 +471,7 @@ object CombatEventInteractor : Interactor() {
 
 
   /*
-   * Prunes old debuff events (1 minute) just in case we are not nearby to witness them fall-off.
+   * Prunes old debuff events (20 second) just in case we are not nearby to witness them fall-off.
    */
   private fun pruneOldDebuffs() {
     val currentActiveDebuffsByPlayer = _activeDebuffsByPlayer.value.toMutableMap()
