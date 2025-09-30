@@ -28,10 +28,10 @@ class WindowManager(private val dao: WindowStateDao) {
         WindowStateEntity(
           overlayType = type.name,
           lastPositionXDp = 0f,
-            lastPositionYDp = 0f,
+          lastPositionYDp = 0f,
           lastWidthDp = 600f,
           lastHeightDp = 750f,
-          isVisible = (type == OverlayType.ABOUT) // initial fallback
+          isVisible = (type == OverlayType.SUMMARY) // initial fallback
         )
       )
     }
@@ -62,7 +62,7 @@ class WindowManager(private val dao: WindowStateDao) {
 
   fun ensureAtLeastOneWindowOpen() {
     if (!isAnyWindowOpen) {
-      openWindow(OverlayType.ABOUT) // switch to combat when that's working again
+      openWindow(OverlayType.SUMMARY) // switch to combat when that's working again
     }
   }
 

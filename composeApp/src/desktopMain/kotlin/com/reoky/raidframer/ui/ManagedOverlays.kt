@@ -77,6 +77,7 @@ fun ManagedOverlays(
 //      }
     ) {
       contents[type]?.invoke()
+      println("Rendering overlay: $type")
     }
   }
 }

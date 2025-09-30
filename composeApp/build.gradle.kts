@@ -30,7 +30,6 @@ kotlin {
       implementation(libs.room.runtime)
       implementation(libs.room.compiler)
       implementation(libs.sqlite.bundled)
-
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)

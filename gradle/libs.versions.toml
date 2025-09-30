@@ -22,7 +22,9 @@ room-gradle-plugin = { group = "androidx.room", name = "room-gradle-plugin", ver
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
+
 dorkbox-systemTray = { module = "com.dorkbox:SystemTray", version.ref = "dorkbox-systemTray" }
+
 
 [plugins]
 composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }

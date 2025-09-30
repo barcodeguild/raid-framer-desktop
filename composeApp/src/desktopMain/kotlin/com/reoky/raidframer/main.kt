@@ -23,6 +23,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.overlay.AboutOverlay
 import com.reoky.raidframer.ui.overlay.CombatOverlay
 import com.reoky.raidframer.ui.overlay.RaidOverlay
+import com.reoky.raidframer.ui.overlay.SummaryOverlay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,16 +47,16 @@ fun main() = application {
 
   // Window positions saved in the window manager
   val windowManager = WindowManager(database.getWindowStateDao())
-  CoroutineScope(Dispatchers.Main).launch {
-    try {
-      windowManager.loadStates()
-    } catch (e: Exception) {
-      println("Error loading window states: ${e.message}")
-      exitProcess(1)
-    }
-  }
 
-  ManagedOverlays( windowManager = windowManager, contents = mapOf( OverlayType.ABOUT to { AboutOverlay() }, OverlayType.COMBAT to { CombatOverlay() } ) )
+  /* Render the overlays */
+  ManagedOverlays(
+    windowManager = windowManager,
+    contents = mapOf(
+      OverlayType.ABOUT to { AboutOverlay() },
+      OverlayType.SUMMARY to { SummaryOverlay() },
+      OverlayType.COMBAT to { CombatOverlay() }
+    )
+  )
 
   //  val raid: List<Party> = List(10) { partyIndex ->
 //    List(5) { memberIndex ->
