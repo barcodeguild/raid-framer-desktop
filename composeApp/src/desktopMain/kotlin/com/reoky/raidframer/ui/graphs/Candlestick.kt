@@ -1,6 +1,7 @@
 package com.reoky.raidframer.ui.graphs
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
@@ -66,28 +67,70 @@ fun CandlestickChart(
   val minY = data.lows.minOrNull() ?: 0.0
   val yRange = maxY - minY
 
-  var scale by remember { mutableStateOf(1.5f) }
-  var scrollOffset by remember { mutableStateOf(0f) }
+  var scale by remember { mutableStateOf(3.5f) }
+  var scrollXOffset by remember { mutableStateOf(0f) }
+  var scrollYOffset by remember { mutableStateOf(0f) }
+  var dragOffset by remember { mutableStateOf(Offset.Zero) }
+  var isDragging by remember { mutableStateOf(false) }
 
   Box(
     modifier = modifier
       .pointerInput(Unit) {
         detectTransformGestures { _, pan, zoom, _ ->
           scale = (scale * zoom).coerceIn(1f, 10f)
-          scrollOffset = (scrollOffset - pan.x / scale)
+
+          // Horizontal scrolling
+          scrollXOffset = (scrollXOffset - pan.x / scale)
             .coerceIn(0f, ((candleCount - candleCount / scale).coerceAtLeast(0f)).toFloat())
+
+          // Vertical scrolling (we allow overscroll vertically)
+          val labelPaddingTop = 40f
+          val labelPaddingBottom = 40f
+          val chartHeight = size.height - labelPaddingTop - labelPaddingBottom
+
+          val pixelsPerUnit = chartHeight / yRange
+          scrollYOffset += (pan.y / pixelsPerUnit).toFloat()
+
+          val visibleYRange = yRange / scale
+          val maxYOffset = (yRange - visibleYRange).coerceAtLeast(0.0)
+          scrollYOffset = scrollYOffset.coerceIn(0.0f, maxYOffset.toFloat())
+        }
+
+        // Mouse wheel zoom (for Windows users)
+        detectTapGestures(
+          onPress = { offset ->
+            // Track drag start position
+            dragOffset = offset
+            isDragging = true
+          }
+        )
+      }
+      .pointerInput(Unit) {
+        awaitPointerEventScope {
+          while (true) {
+            val event = awaitPointerEvent()
+
+            // Scroll wheel zoom
+            event.changes.firstOrNull()?.scrollDelta?.let { scroll ->
+              val delta = scroll.y
+              if (delta != 0f) {
+                scale = (scale * (1f - delta * 0.1f)).coerceIn(1f, 10f)
+              }
+            }
+          }
         }
       }
   ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
       val visibleCandles = (candleCount / scale).roundToInt().coerceAtLeast(1)
-      val startIndex = scrollOffset.roundToInt().coerceIn(0, candleCount - visibleCandles)
+      val startIndex = scrollXOffset.roundToInt().coerceIn(0, candleCount - visibleCandles)
       val endIndex = (startIndex + visibleCandles).coerceAtMost(candleCount)
 
       val candleWidth = size.width / (visibleCandles * 2)
       val candleSpacing = size.width / visibleCandles
 
-      // Title
+
+      // title text
       drawText(
         textMeasurer = textMeasurer,
         text = title,
@@ -96,9 +139,10 @@ fun CandlestickChart(
           fontSize = 20.sp,
           fontWeight = FontWeight.Bold
         ),
-        topLeft = Offset(size.width / 2, 24f)
+        topLeft = Offset(size.width / 2 - 60f, 8f) // top padding
       )
-      // X Axis Label
+
+      // axis labels
       drawText(
         textMeasurer = textMeasurer,
         text = xAxisLabel,
@@ -106,7 +150,7 @@ fun CandlestickChart(
           color = colorScheme.text,
           fontSize = 14.sp
         ),
-        topLeft = Offset(size.width / 2, size.height - 24f)
+        topLeft = Offset(size.width / 2 - 40f, size.height - 32f)
       )
 
       withTransform({
@@ -148,17 +192,23 @@ fun CandlestickChart(
         strokeWidth = 2f
       )
 
+      // Draw candlesticks
       for (i in startIndex until endIndex) {
         val open = data.opens[i]
         val close = data.closes[i]
         val high = data.highs[i]
         val low = data.lows[i]
 
+        val labelPaddingTop = 40f
+        val labelPaddingBottom = 40f
+        val chartHeight = size.height - labelPaddingTop - labelPaddingBottom
+
         val x = candleSpacing * (i - startIndex) + candleSpacing / 2
-        val yOpen = size.height - ((open - minY) / yRange * size.height).toFloat()
-        val yClose = size.height - ((close - minY) / yRange * size.height).toFloat()
-        val yHigh = size.height - ((high - minY) / yRange * size.height).toFloat()
-        val yLow = size.height - ((low - minY) / yRange * size.height).toFloat()
+
+        val yOpen = size.height - labelPaddingBottom - (((open - minY - scrollYOffset) / yRange) * chartHeight).toFloat()
+        val yClose = size.height - labelPaddingBottom - (((close - minY - scrollYOffset) / yRange) * chartHeight).toFloat()
+        val yHigh = size.height - labelPaddingBottom - (((high - minY - scrollYOffset) / yRange) * chartHeight).toFloat()
+        val yLow = size.height - labelPaddingBottom - (((low - minY - scrollYOffset) / yRange) * chartHeight).toFloat()
 
         val candleColor = when {
           close > open -> colorScheme.bullish
@@ -181,7 +231,7 @@ fun CandlestickChart(
           )
         )
       } // end candlestick drawing loop
-
     }
   }
+
 }
