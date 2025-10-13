@@ -6,27 +6,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.database.initialize
 import com.reoky.raidframer.ui.ManagedOverlays
 import com.reoky.raidframer.ui.OverlayType
-import com.reoky.raidframer.ui.OverlayWindow
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.overlay.AboutOverlay
 import com.reoky.raidframer.ui.overlay.CombatOverlay
-import com.reoky.raidframer.ui.overlay.RaidOverlay
 import com.reoky.raidframer.ui.overlay.SummaryOverlay
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
 data class RaidMember(val name: String, val health: Int, val role: String = "Healer")

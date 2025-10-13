@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.ui.WindowManager
 import lol.rfcloud.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.ui.dialog.exitDialog
 
@@ -147,7 +148,7 @@ fun CombatOverlay() {
           Text(text = "\uD83D\uDC89 Total Heals \uD83D\uDC89", color = Color.White)
         }
         IconButton(
-          onClick = { AppState.toggleSettingsOverlayVisibility() },
+          onClick = {  },
           modifier = Modifier
             .size(32.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)
