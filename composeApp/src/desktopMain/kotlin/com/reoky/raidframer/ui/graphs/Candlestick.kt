@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -367,7 +368,7 @@ fun CandlestickChart(
           // Body
           val top = min(o, c)
           val height = max(1f, abs(o - c))
-          drawRect(color = color, topLeft = Offset(x - halfW, top), size = androidx.compose.ui.geometry.Size(bodyW, height))
+          drawRect(color = color, topLeft = Offset(x - halfW, top), size = Size(bodyW, height))
         }
 
       }
@@ -382,13 +383,13 @@ fun CandlestickChart(
           color = Color(0xFF1E88E5),
           start = Offset(chartLeft, yPrice),
           end = Offset(chartRight, yPrice),
-          strokeWidth = 1.5f,
+          strokeWidth = 1f.dp.toPx(),
           pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
         )
 
         drawCircle(
           color = Color(0xFF1E88E5).copy(alpha = pulseAlpha),
-          radius = 6f,
+          radius = 3f.dp.toPx(),
           center = Offset(centerX, yPrice)
         )
       }

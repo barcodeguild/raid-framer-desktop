@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.interactor.RealtimeMetricsInteractor
 import com.reoky.raidframer.core.mock.mockCandlestickDataFrame
+import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.graphs.CandlestickChart
@@ -43,7 +44,7 @@ fun SummaryOverlay(wm: WindowManager? = null, playerName: String = "Reoky") {
   Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f))) {
     TitleBarComponent(
       title = "$playerName's Summary",
-      onClose = { wm?.closeWindow(com.reoky.raidframer.ui.OverlayType.SUMMARY) }
+      onClose = { wm?.closeWindow(OverlayType.SUMMARY) }
     )
 
     // Chart area takes remaining space

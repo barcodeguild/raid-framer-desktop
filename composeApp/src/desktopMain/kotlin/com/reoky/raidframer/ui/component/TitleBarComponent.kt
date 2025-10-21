@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -26,7 +28,7 @@ fun TitleBarComponent(
     modifier = modifier
       .fillMaxWidth()
       .height(height)
-      .background(Color.Black.copy(alpha = 0.75f))
+      .background(Color.Black.copy(alpha = 0.35f))
       .drawBehind {
         // subtle diagonal grippable texture
         val step = 12f
@@ -68,7 +70,10 @@ fun TitleBarComponent(
     Text(
       text = title,
       color = Color.White,
-      modifier = Modifier.align(Alignment.Center)
+      modifier = Modifier.align(Alignment.Center),
+      style = TextStyle(
+        fontFamily = FontFamily.Monospace
+      )
     )
 
     CloseButton(
