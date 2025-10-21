@@ -24,6 +24,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppGlobals
+import com.reoky.raidframer.ui.OverlayType
+import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.CloseButton
 
 @Preview
 @Composable
@@ -38,40 +41,13 @@ fun PreviewAboutOverlay() {
 }
 
 @Composable
-fun AboutOverlay() {
+fun AboutOverlay(vm: WindowManager? = null) {
   Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f))) {
 
-    // close button
-    Box(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)) {
-      val interactionSource = remember { MutableInteractionSource() }
-      val isCloseHovered by interactionSource.collectIsHoveredAsState()
-      IconButton(
-        onClick = {
-          AppState.isAboutOverlayVisible.value = false
-        },
-        modifier = Modifier
-          .size(32.dp)
-          .background(
-            if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f),
-            MaterialTheme.shapes.small
-          )
-          .shadow(
-            elevation = 0.dp,
-            clip = true,
-            ambientColor = Color.Transparent,
-            spotColor = Color.Transparent
-          )
-          .hoverable(interactionSource = interactionSource)
-          .clip(RoundedCornerShape(8.dp))
-      ) {
-        Text(
-          "✕",
-          fontSize = 18.sp,
-          color = if (isCloseHovered) Color.White else Color.White,
-          textAlign = TextAlign.Center
-        )
-      }
-    }
+     CloseButton(
+       onClose = { vm?.closeWindow(OverlayType.ABOUT) },
+       modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)
+     )
 
     // content area
     Column(

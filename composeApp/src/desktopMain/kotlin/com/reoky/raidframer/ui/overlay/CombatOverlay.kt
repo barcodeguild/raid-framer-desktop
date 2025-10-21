@@ -41,7 +41,7 @@ fun PreviewCombatOverlay() {
 }
 
 @Composable
-fun CombatOverlay() {
+fun CombatOverlay(wm: WindowManager? = null) {
 
   val shouldShowExitDialog = remember { mutableStateOf(false) }
 

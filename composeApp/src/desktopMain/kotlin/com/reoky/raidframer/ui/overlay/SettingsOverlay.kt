@@ -31,7 +31,7 @@ package com.reoky.raidframer.ui.overlay
 //import lol.rfcloud.FileSelectionDialog
 //
 //@Composable
-//fun SettingsOverlay() {
+//fun SettingsOverlay(wm: WindowManager? = null) {
 //
 //  val scrollState = rememberScrollState()
 //

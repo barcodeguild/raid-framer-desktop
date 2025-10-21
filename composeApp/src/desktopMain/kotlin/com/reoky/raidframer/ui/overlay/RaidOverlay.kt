@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.Party
 import com.reoky.raidframer.RaidMember
 import com.reoky.raidframer.ui.RaidColors
+import com.reoky.raidframer.ui.WindowManager
 
 @Preview
 @Composable
@@ -23,12 +24,12 @@ fun PreviewRaidOverlay() {
       .fillMaxSize()
       .background(Color.Black)
   ) {
-    RaidOverlay(listOf())
+    RaidOverlay(raid = listOf())
   }
 }
 
 @Composable
-fun RaidOverlay(raid: List<Party>) {
+fun RaidOverlay(wm: WindowManager? = null, raid: List<Party>) {
   Row(
     modifier = Modifier.fillMaxSize().padding(16.dp),
     horizontalArrangement = Arrangement.spacedBy(12.dp)

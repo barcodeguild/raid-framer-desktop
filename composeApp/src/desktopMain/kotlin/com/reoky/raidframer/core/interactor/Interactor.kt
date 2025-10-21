@@ -19,11 +19,12 @@ abstract class Interactor {
       delay(3000) // stagger the start of interact() to give the UI time to load
       while (isActive) {
         interact()
+        delay(3000)
       }
     }
   }
 
-  fun stop() {
+  open fun stop() {
     scope.coroutineContext.cancel()
   }
 

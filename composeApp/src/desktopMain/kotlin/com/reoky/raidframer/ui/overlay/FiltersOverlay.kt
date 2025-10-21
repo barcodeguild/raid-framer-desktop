@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.ui.WindowManager
 import lol.rfcloud.core.helpers.openWebLink
 
 @Preview
@@ -38,7 +39,7 @@ fun PreviewFiltersOverlay() {
 }
 
 @Composable
-fun FiltersOverlay() {
+fun FiltersOverlay(wm: WindowManager? = null) {
 
   val filters = remember { mutableStateListOf<Map<String, String>>() }
 

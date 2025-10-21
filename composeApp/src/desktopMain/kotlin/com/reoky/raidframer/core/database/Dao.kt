@@ -22,6 +22,9 @@ interface WindowStateDao {
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(state: WindowStateEntity)
+
+  @Query("DELETE FROM window_states")
+  suspend fun deleteAll()
 }
 
 

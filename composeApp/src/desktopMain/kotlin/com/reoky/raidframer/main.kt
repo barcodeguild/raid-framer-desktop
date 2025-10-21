@@ -6,87 +6,67 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.database.initialize
-import com.reoky.raidframer.ui.ManagedOverlays
+import com.reoky.raidframer.core.interactor.LoggingInteractor
+import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
-import com.reoky.raidframer.ui.overlay.AboutOverlay
-import com.reoky.raidframer.ui.overlay.CombatOverlay
-import com.reoky.raidframer.ui.overlay.SummaryOverlay
+import kotlinx.coroutines.runBlocking
 import kotlin.system.exitProcess
 
 data class RaidMember(val name: String, val health: Int, val role: String = "Healer")
 
 typealias Party = List<RaidMember>
 
+const val TAG = "Main"
+
+
 /* ~ Entry Point ~ */
 fun main() = application {
 
+  // set up the debug.log
+  val log = LoggingInteractor().also { it.start() }
+
   // Initialize the database
-  val database = try {
-    // This will create the database and tables if they don't exist
-    initialize()
-  } catch (e: Exception) {
-    println("Oh eek, the database wouldn't open, friend: ${e.message}")
-    exitProcess(1)
+  val database = remember {
+    try {
+      // This will create the database and tables if they don't exist
+      initialize()
+    } catch (e: Exception) {
+      println("Oh eek, the database wouldn't open, friend: ${e.message}")
+      exitProcess(1)
+    }
   }
 
-  // Window positions saved in the window manager
-  val windowManager = WindowManager(database.getWindowStateDao())
+  val context = rememberCoroutineScope() // correct context for Compose
+  val dao = remember { database.getWindowStateDao() }
 
-  /* Render the overlays */
-  ManagedOverlays(
-    windowManager = windowManager,
-    contents = mapOf(
-      OverlayType.ABOUT to { AboutOverlay() },
-      OverlayType.SUMMARY to { SummaryOverlay() },
-      OverlayType.COMBAT to { CombatOverlay() }
-    )
-  )
+  val wm = remember {
+    WindowManager(scope = context, dao = dao)
+  }
 
-  //  val raid: List<Party> = List(10) { partyIndex ->
-//    List(5) { memberIndex ->
-//      RaidMember("P${partyIndex+1}M${memberIndex+1}", 100)
-//    }
-//  }
+  // at least one window has to be open on app start to prevent immediate exit
+  // however, we also want to load saved states of windows before opening them
+  runBlocking {
+    dao.deleteAll() // clear saved window positions and sizes for testing
+    val startTime: Long = System.currentTimeMillis()
+    log.info(TAG, "Loading saved window states...")
+    wm.loadStates()
+    log.info(TAG, "Finished loading saved window states. Took ${System.currentTimeMillis() - startTime} ms")
+    println(wm.visibilityStates[OverlayType.COMBAT]?.value)
+    println(wm.isVisible(OverlayType.COMBAT).value)
+    assert(wm.visibilityStates[OverlayType.COMBAT]?.value ?: false)
+  }
 
-//  OverlayWindow(
-//    ".: Raid Framer Raid Summary :.",
-//    initialPosition = WindowPosition(
-//      x = Dp(0f), // Dp(lol.rfcloud.AppState.windowStates.aboutState?.lastPositionXDp ?: lol.rfcloud.scaleDpForScreenResolution(860f)),
-//      y = Dp(0f) // Dp(lol.rfcloud.AppState.windowStates.aboutState?.lastPositionYDp ?: lol.rfcloud.scaleDpForScreenResolution(350f))
-//    ),
-//    initialSize = DpSize(
-//      width = Dp(600f),
-//      height = Dp(750f)
-//    ),
-//    overlayType = OverlayType.ABOUT,
-//    isObstructing = mutableStateOf(false), // Always show opaque windows
-//    isVisible = mutableStateOf(true),
-//    isEverythingVisible = mutableStateOf(true),
-//    isResizable = AppState.isEverythingResizable,
-//    isFocusable = false,
-//    {}
-//  ) {
-//    RaidOverlay(raid)
-//    TimeRangeSlider(
-//      minTime = 0f,
-//      maxTime = 100f,
-//      startTime = 20f,
-//      endTime = 80f,
-//      activityLevels = List(10) { it / 10f }, // Example activity levels
-//      onRangeChange = { start, end ->
-//        println("Selected range: $start to $end")
-//      }
-//    )
-//  }
-
-  //windowManager.ensureAtLeastOneWindowOpen()
+  log.info(TAG, "Opening default windows...")
+  OverlayContainer(wm)
 }
 
 @Composable
