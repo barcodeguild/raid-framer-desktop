@@ -6,7 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import dorkbox.systemTray.SystemTray
 import java.nio.file.Path
 
-object AppState {
+// singleton global application state
+object RaidFramer {
 
   val isEverythingResizable: MutableState<Boolean> = mutableStateOf(true)
 

@@ -1,6 +1,5 @@
 package com.reoky.raidframer.core.database
 
-import androidx.room.RoomDatabase
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +22,11 @@ fun initialize(): AppDatabase {
   if (!directory.exists()) {
     directory.mkdirs()
   }
+
+//  val dbFile = File(databaseFilePath)
+//  if (dbFile.exists()) {
+//    dbFile.delete()
+//  }
 
   return Room.databaseBuilder<AppDatabase>(
     name = File(databaseFilePath).absolutePath,

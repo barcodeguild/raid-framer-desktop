@@ -1,8 +1,8 @@
-import lol.rfcloud.core.interactor.Interactor
+import com.reoky.raidframer.core.interactor.Interactor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import com.reoky.raidframer.AppState
+import com.reoky.raidframer.RaidFramer
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -10,14 +10,13 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.regex.Pattern
-import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
 /*
  * This interactor will ingest combat events from the ArcheRage combat.log file and parse them into combat events.
  * It will also keep track of damage, heals, buffs, debuffs, and other combat-related events.
  */
-object CombatEventInteractor : Interactor() {
+object EventParserInteractor : Interactor() {
   var shouldSearchEverywhere: Boolean = false
 
   private var _isSearching = MutableStateFlow<Boolean>(false)
@@ -121,55 +120,7 @@ object CombatEventInteractor : Interactor() {
     _activeDebuffsByPlayer.value = mutableMapOf()
   }
 
-  // called before the interaction event loop is started
-  init {
-    locateCombatLog()
-  }
-
   /*
-   * Recursively searches for Combat.log files in the player's Documents folder and populates a
-   * list of possible paths for the user to choose from.
-   */
-  fun locateCombatLog() {
-
-    // set active
-    _isSearching.value = true
-
-    val oneDriveDocumentsPath = Paths.get(System.getProperty("user.home"), "OneDrive", "Documents")
-    val documentsPath = Paths.get(System.getProperty("user.home"), "Documents")
-    val everywherePath = Paths.get(System.getProperty("user.home"))
-
-    val searchPaths = mutableListOf<Path>()
-    if (shouldSearchEverywhere) {
-      if (Files.exists(everywherePath)) searchPaths.add(everywherePath)
-    } else {
-      if (Files.exists(oneDriveDocumentsPath)) searchPaths.add(oneDriveDocumentsPath)
-      if (Files.exists(documentsPath)) searchPaths.add(documentsPath)
-    }
-
-    val possibleLogFiles = mutableListOf<Path>()
-
-    fun seek(baseDir: Path) {
-      val stream = Files.list(baseDir)
-      stream.use { paths ->
-        paths.forEach { path ->
-          if (Files.isDirectory(path) && Files.isReadable(path)) {
-            seek(path)
-          } else if (path.fileName.toString().lowercase() == "combat.log" && !path.pathString.contains("LogBackups")) {
-            possibleLogFiles.add(path)
-          }
-        }
-      }
-    }
-    searchPaths.forEach {
-      seek(it)
-    }
-
-    _possiblePaths.value = possibleLogFiles
-    _isSearching.value = false
-  }
-
-  /*f
    * Main interaction event loop. Watches the selected log file for changes and parses new lines.
    */
   override suspend fun interact() {
@@ -194,7 +145,7 @@ object CombatEventInteractor : Interactor() {
   /*
    * Turns log lines into CombatEvents.
    */
-  private suspend fun parseLines(lines: List<String>): List<CombatEvent> {
+  fun parseLines(lines: List<String>) {
     val events = mutableListOf<CombatEvent>()
 
     for (line in lines) {
@@ -349,7 +300,7 @@ object CombatEventInteractor : Interactor() {
       }
 
     }
-    return events
+    //return events
   }
 
   private fun postDamage(event: AttackEvent) {
@@ -417,7 +368,7 @@ object CombatEventInteractor : Interactor() {
   }
 
   private fun postCasting(event: CastingEvent) {
-    if (event.caster == AppState.currentTargetName.value) {
+    if (event.caster == RaidFramer.currentTargetName.value) {
       _targetCurrentlyCasting.value = "nya" // force state update nya
       _targetCurrentlyCasting.value = event.spell
     }

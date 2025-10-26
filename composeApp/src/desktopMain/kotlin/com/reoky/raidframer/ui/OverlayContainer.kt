@@ -2,7 +2,6 @@ package com.reoky.raidframer.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -13,11 +12,11 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.WindowPosition
 import com.reoky.raidframer.ui.overlay.AboutOverlay
 import com.reoky.raidframer.ui.overlay.CombatOverlay
+import com.reoky.raidframer.ui.overlay.SettingsOverlay
 import com.reoky.raidframer.ui.overlay.SummaryOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.awt.event.ComponentAdapter
-import kotlin.text.toFloat
 
 @Composable
 fun OverlayContainer(wm: WindowManager) {
@@ -34,7 +33,7 @@ fun OverlayContainer(wm: WindowManager) {
         title = type.name,
         initialPosition = WindowPosition(Dp(state.lastPositionXDp), Dp(state.lastPositionYDp)),
         initialSize = DpSize(Dp(state.lastWidthDp), Dp(state.lastHeightDp)),
-        overlayType = type,
+        windowType = state.windowType,
         isObstructing = obstructing,
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
         isEverythingVisible = everythingVisible,
@@ -48,6 +47,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.SUMMARY -> SummaryOverlay(wm)
           OverlayType.COMBAT -> CombatOverlay(wm)
           OverlayType.ABOUT -> AboutOverlay(wm)
+          OverlayType.SETTINGS -> SettingsOverlay(wm)
           else -> {}//throw Exception("Overlay type $type not implemented")
         }
 

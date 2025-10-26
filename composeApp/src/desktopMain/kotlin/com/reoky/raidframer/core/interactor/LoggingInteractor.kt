@@ -1,6 +1,5 @@
 package com.reoky.raidframer.core.interactor
 
-import lol.rfcloud.core.interactor.Interactor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex

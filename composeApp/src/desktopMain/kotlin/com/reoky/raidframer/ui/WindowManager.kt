@@ -65,6 +65,7 @@ class WindowManager(
         mutableStateOf(
           WindowStateEntity(
             overlayType = type.name,
+            windowType = entity.windowType,
             lastPositionXDp = entity.lastPositionXDp,
             lastPositionYDp = entity.lastPositionYDp,
             lastWidthDp = entity.lastWidthDp,

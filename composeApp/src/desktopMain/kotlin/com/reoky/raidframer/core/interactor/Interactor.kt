@@ -1,4 +1,4 @@
-package lol.rfcloud.core.interactor
+package com.reoky.raidframer.core.interactor
 
 import kotlinx.coroutines.*
 
@@ -16,7 +16,6 @@ abstract class Interactor {
 
   fun start() {
     scope.launch {
-      delay(3000) // stagger the start of interact() to give the UI time to load
       while (isActive) {
         interact()
         delay(3000)
@@ -33,5 +32,7 @@ abstract class Interactor {
    * Interact() is called every 3 seconds inside the coroutine scope using the Dispatchers.IO background thread.
    */
   open suspend fun interact() {}
+
+  fun isRunning() = scope.isActive
 
 }

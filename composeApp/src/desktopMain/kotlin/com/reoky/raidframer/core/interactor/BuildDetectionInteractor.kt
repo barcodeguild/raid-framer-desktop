@@ -1,5 +1,7 @@
 package lol.rfcloud.core.interactor
 
+import com.reoky.raidframer.core.interactor.Interactor
+
 /*
  * Detects skill trees and builds for each player over time. Makes available the most recently detected build
  * for use in other parts of the application. Uses SkillTreeDefinitions to identify which trees each skill belongs to.

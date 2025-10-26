@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -26,7 +27,7 @@ fun OverlayWindow(
   title: String,
   initialPosition: WindowPosition,
   initialSize: DpSize,
-  overlayType: OverlayType,
+  windowType: OverlayWindowType,
   isObstructing: MutableState<Boolean>,
   isVisible: MutableState<Boolean>,
   isEverythingVisible: MutableState<Boolean>,
@@ -53,13 +54,37 @@ fun OverlayWindow(
     undecorated = true,
     visible = isVisible.value && isEverythingVisible.value && !isObstructing.value
   ) {
-    // provide the real ComposeWindow to the caller exactly once (when available)
+
+    // custom window shape with rounded corners
+    with(LocalDensity.current) {
+//      val widthPx = windowState.size.width.roundToPx().coerceIn(0, 10000)
+//      val heightPx = windowState.size.height.roundToPx().coerceIn(0, 10000)
+//      window.setBounds(
+//        windowState.position.x.roundToPx(),
+//        windowState.position.y.roundToPx(),
+//        widthPx,
+//        heightPx
+//      )
+      window.shape = OverlayWindowShape(
+        0.0,
+        0.0,
+        windowState.size.width.roundToPx().toDouble(),
+        windowState.size.height.roundToPx().toDouble(),
+        8.0,
+        8.0
+      )
+      //OverlayInteractor.updateWindowStateFor(overlayType, windowState)
+      println("OverlayWindow: Set window shape for $title to ${window.shape}")
+    }
+
+    // call window creation callback exactly once (when available)
     val composeWindow = this.window
     LaunchedEffect(composeWindow) {
       onWindowCreated(composeWindow)
     }
 
-    val mouseListener = createMouseListener(windowState)
+    // shift-click mouse listener to allow dragging the window around (tooltips always draggable without shift)
+    val mouseListener = createMouseListener(windowState, windowType)
     composeWindow.addMouseListener(mouseListener)
     composeWindow.addMouseMotionListener(mouseListener)
 
@@ -76,20 +101,20 @@ fun OverlayWindow(
 /*
  * A custom shift-click listener that allows the user to drag the window around the screen.
  */
-fun createMouseListener(windowState: WindowState): MouseAdapter {
+fun createMouseListener(windowState: WindowState, overlayWindowType: OverlayWindowType): MouseAdapter {
   return object : MouseAdapter() {
     private val cornerOffset = Point()
 
     // calculate offset from the top-left corner of the window where the user clicked
     override fun mousePressed(e: MouseEvent) {
-      if (e.isShiftDown) {
+      if (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP) {
         cornerOffset.x = e.x
         cornerOffset.y = e.y
       }
     }
 
     override fun mouseDragged(e: MouseEvent) {
-      if (e.isShiftDown) {
+      if (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP) {
         if (cornerOffset.x == 0 || cornerOffset.y == 0) return
         val newPositionX = e.locationOnScreen.x - cornerOffset.x
         val newPositionY = e.locationOnScreen.y - cornerOffset.y
@@ -138,11 +163,16 @@ enum class OverlayType {
   COMBAT, SETTINGS, TRACKER, ABOUT, AGGRO, SUMMARY, FILTERS, DUMMY
 }
 
+enum class OverlayWindowType {
+  OVERLAY, TOOLTIP
+}
+
 // Default positions and sizes for various overlay types
 fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
   return when (type) {
     OverlayType.COMBAT -> WindowStateEntity(
       overlayType = type.name,
+      windowType = OverlayWindowType.OVERLAY,
       lastPositionXDp = 50f,
       lastPositionYDp = 500f,
       lastWidthDp = 650f,
@@ -151,6 +181,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     )
     OverlayType.SUMMARY -> WindowStateEntity(
       overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 100f,
       lastPositionYDp = 100f,
       lastWidthDp = 750f,
@@ -160,15 +191,17 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
 
     OverlayType.SETTINGS -> WindowStateEntity(
       overlayType = type.name,
-      lastPositionXDp = 200f,
-      lastPositionYDp = 200f,
-      lastWidthDp = 500f,
-      lastHeightDp = 500f,
-      isVisible = false
+      windowType = OverlayWindowType.TOOLTIP,
+      lastPositionXDp = 500f,
+      lastPositionYDp = 70f,
+      lastWidthDp = 560f,
+      lastHeightDp = 800f,
+      isVisible = true
     )
 
     OverlayType.TRACKER -> WindowStateEntity(
       overlayType = type.name,
+      windowType = OverlayWindowType.OVERLAY,
       lastPositionXDp = 800f,
       lastPositionYDp = 50f,
       lastWidthDp = 300f,
@@ -178,6 +211,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
 
     OverlayType.AGGRO -> WindowStateEntity(
       overlayType = type.name,
+      windowType = OverlayWindowType.OVERLAY,
       lastPositionXDp = 50f,
       lastPositionYDp = 700f,
       lastWidthDp = 400f,
@@ -187,6 +221,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
 
     OverlayType.FILTERS -> WindowStateEntity(
       overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 600f,
       lastPositionYDp = 700f,
       lastWidthDp = 400f,
@@ -196,6 +231,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
 
     OverlayType.ABOUT -> WindowStateEntity(
       overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 300f,
       lastPositionYDp = 300f,
       lastWidthDp = 480f,
@@ -205,6 +241,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
 
     OverlayType.DUMMY -> WindowStateEntity(
       overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 0f,
       lastPositionYDp = 0f,
       lastWidthDp = 100f,

@@ -1,10 +1,9 @@
 package com.reoky.raidframer.core.interactor
 
-import com.reoky.raidframer.core.RealtimeComputer
-import com.reoky.raidframer.core.MetricRawSample
+import com.reoky.raidframer.core.calc.RealtimeComputer
+import com.reoky.raidframer.core.calc.MetricRawSample
 import com.reoky.raidframer.core.mock.mockCandlestickDataFrame
 import kotlinx.coroutines.delay
-import lol.rfcloud.core.interactor.Interactor
 
 class RealtimeMetricsInteractor : Interactor() {
 

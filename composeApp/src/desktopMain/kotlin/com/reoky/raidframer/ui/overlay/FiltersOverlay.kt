@@ -1,6 +1,6 @@
 package com.reoky.raidframer.ui.overlay
 
-import com.reoky.raidframer.AppState
+import com.reoky.raidframer.RaidFramer
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
@@ -60,7 +60,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
       val isCloseHovered by interactionSource.collectIsHoveredAsState()
       IconButton(
         onClick = {
-          AppState.isFiltersOverlayVisible.value = false
+          RaidFramer.isFiltersOverlayVisible.value = false
         },
         modifier = Modifier
           .size(32.dp)

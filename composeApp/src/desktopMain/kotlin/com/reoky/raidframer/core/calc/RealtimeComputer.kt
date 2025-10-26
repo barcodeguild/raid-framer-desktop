@@ -1,4 +1,4 @@
-package com.reoky.raidframer.core
+package com.reoky.raidframer.core.calc
 
 import com.reoky.raidframer.ui.graphs.CandlestickDataFrame
 import kotlinx.coroutines.*

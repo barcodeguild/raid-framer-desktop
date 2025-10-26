@@ -1,7 +1,7 @@
 package com.reoky.raidframer.ui.overlay
 
-import com.reoky.raidframer.AppState
-import CombatEventInteractor
+import com.reoky.raidframer.RaidFramer
+import EventParserInteractor
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -33,9 +33,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.core.helpers.renderDebuffThumbnailGrid
 import lol.rfcloud.core.helpers.annotatedStringForAttack
 import lol.rfcloud.core.helpers.annotatedStringForHeal
-import lol.rfcloud.core.helpers.renderDebuffThumbnailGrid
 import kotlinx.coroutines.delay
 
 @Preview
@@ -55,7 +55,7 @@ fun TrackerOverlay() {
 
   var showDmg by remember { mutableStateOf(false) }
   var castProgress by remember { mutableStateOf(0f) }
-  val spellName by CombatEventInteractor.targetCurrentlyCasting.collectAsState()
+  val spellName by EventParserInteractor.targetCurrentlyCasting.collectAsState()
   var isCasting by remember { mutableStateOf(false) }
 
   val animatedProgress by animateFloatAsState(
@@ -75,16 +75,16 @@ fun TrackerOverlay() {
   }
 
   // incoming and outgoing damage
-  val incomingByPlayer by CombatEventInteractor.incomingEventsByPlayer.collectAsState()
+  val incomingByPlayer by EventParserInteractor.incomingEventsByPlayer.collectAsState()
   val sortedAndFilteredIncoming =
-    incomingByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
+    incomingByPlayer.getOrDefault(RaidFramer.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
 
-  val outgoingByPlayer by CombatEventInteractor.outgoingEventsByPlayer.collectAsState()
+  val outgoingByPlayer by EventParserInteractor.outgoingEventsByPlayer.collectAsState()
   val sortedAndFilteredOutgoing =
-    outgoingByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
+    outgoingByPlayer.getOrDefault(RaidFramer.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
 
-  val debuffsByPlayer by CombatEventInteractor.activeDebuffsByPlayer.collectAsState()
-  val filteredDebuffs = debuffsByPlayer.getOrDefault(AppState.currentTargetName.value, listOf()).map { it.debuff }
+  val debuffsByPlayer by EventParserInteractor.activeDebuffsByPlayer.collectAsState()
+  val filteredDebuffs = debuffsByPlayer.getOrDefault(RaidFramer.currentTargetName.value, listOf()).map { it.debuff }
 
 
   // special status glow effect
@@ -172,7 +172,7 @@ fun TrackerOverlay() {
 
           IconButton(
             onClick = {
-              AppState.toggleTrackerOverlayVisibility()
+              RaidFramer.toggleTrackerOverlayVisibility()
             },
             modifier = Modifier
               .size(32.dp)
@@ -207,7 +207,7 @@ fun TrackerOverlay() {
       Row {
         val title = buildAnnotatedString {
           withStyle(style = SpanStyle(color = Color.White)) {
-            append(AppState.currentTargetName.value)
+            append(RaidFramer.currentTargetName.value)
           }
           withStyle(style = SpanStyle(color = Color.Cyan)) {
             append(if (specialStatus.isNotBlank()) " [$specialStatus]" else "")
@@ -301,8 +301,8 @@ fun TrackerOverlay() {
                   ) {
                     Text(
                       text = when (val event = sortedAndFilteredIncoming[item]) {
-                        is CombatEventInteractor.AttackEvent -> annotatedStringForAttack(event)
-                        is CombatEventInteractor.HealEvent -> annotatedStringForHeal(event)
+                        is EventParserInteractor.AttackEvent -> annotatedStringForAttack(event)
+                        is EventParserInteractor.HealEvent -> annotatedStringForHeal(event)
                         else -> buildAnnotatedString { }
                       },
                       maxLines = 1,
@@ -330,8 +330,8 @@ fun TrackerOverlay() {
                   ) {
                     Text(
                       text = when (val event = sortedAndFilteredOutgoing[item]) {
-                        is CombatEventInteractor.AttackEvent -> annotatedStringForAttack(event)
-                        is CombatEventInteractor.HealEvent -> annotatedStringForHeal(event)
+                        is EventParserInteractor.AttackEvent -> annotatedStringForAttack(event)
+                        is EventParserInteractor.HealEvent -> annotatedStringForHeal(event)
                         else -> buildAnnotatedString { }
                       },
                       maxLines = 1,

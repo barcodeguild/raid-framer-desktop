@@ -13,6 +13,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.application
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.initialize
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.ui.OverlayContainer
@@ -44,6 +45,10 @@ fun main() = application {
       exitProcess(1)
     }
   }
+
+  // Initialize the config store
+  val configDao = remember { database.getConfigDao() }
+  RFConfig.init(configDao)
 
   val context = rememberCoroutineScope() // correct context for Compose
   val dao = remember { database.getWindowStateDao() }

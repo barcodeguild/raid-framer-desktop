@@ -2,6 +2,9 @@ package com.reoky.raidframer.core.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.reoky.raidframer.core.definitions.SkillTreeDefinition
+import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.ui.OverlayWindowType
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -10,6 +13,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "window_states")
 data class WindowStateEntity(
   @PrimaryKey val overlayType: String,
+  val windowType: OverlayWindowType,
   val lastPositionXDp: Float,
   val lastPositionYDp: Float,
   val lastWidthDp: Float,
@@ -29,8 +33,6 @@ data class ConfigEntity(
   val overlayResizingEnabled: Boolean = true,
   val searchEverywhere: Boolean = false,
   val firstLaunch: Boolean = true,
-  val autoTargetEnabled: Boolean = true,
-  val allowAutoTargetSelf: Boolean = false,
   val playerName: String = ""
 )
 

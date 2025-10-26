@@ -1,7 +1,7 @@
 package com.reoky.raidframer.ui.overlay
 
-import com.reoky.raidframer.AppState
-import CombatEventInteractor
+import com.reoky.raidframer.RaidFramer
+import EventParserInteractor
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*
 import androidx.compose.desktop.ui.tooling.preview.Preview
@@ -45,9 +45,9 @@ fun CombatOverlay(wm: WindowManager? = null) {
 
   val shouldShowExitDialog = remember { mutableStateOf(false) }
 
-  val damageByPlayer by CombatEventInteractor.damageByPlayer.collectAsState()
-  val healsByPlayer by CombatEventInteractor.healsByPlayer.collectAsState()
-  val retributionByPlayer by CombatEventInteractor.retributionByPlayer.collectAsState()
+  val damageByPlayer by EventParserInteractor.damageByPlayer.collectAsState()
+  val healsByPlayer by EventParserInteractor.healsByPlayer.collectAsState()
+  val retributionByPlayer by EventParserInteractor.retributionByPlayer.collectAsState()
 
   // Transform and sort the maps
   val sortedDamage = damageByPlayer.map { (key, value) ->
@@ -163,7 +163,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           Text("\uD83D\uDEE0\uFE0F", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
         }
         IconButton(
-          onClick = { CombatEventInteractor.resetStats() },
+          onClick = { EventParserInteractor.resetStats() },
           modifier = Modifier
             .size(32.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)
@@ -197,8 +197,8 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 horizontalArrangement = Arrangement.Start,
                 modifier = Modifier
                   .clickable {
-                    AppState.isTrackerOverlayVisible.value = true
-                    AppState.currentTargetName.value = sortedDamage[item].first
+                    RaidFramer.isTrackerOverlayVisible.value = true
+                    RaidFramer.currentTargetName.value = sortedDamage[item].first
                   }
                   .background(if (isDamageHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
                   .hoverable(interactionSource = damageInteractionSource)
@@ -248,8 +248,8 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 horizontalArrangement = Arrangement.Start,
                 modifier = Modifier
                   .clickable {
-                    AppState.isTrackerOverlayVisible.value = true
-                    AppState.currentTargetName.value = sortedHeals[item].first
+                    RaidFramer.isTrackerOverlayVisible.value = true
+                    RaidFramer.currentTargetName.value = sortedHeals[item].first
                   }
                   .background(if (isHealsHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
                   .hoverable(interactionSource = healsInteractionSource)

@@ -1,6 +1,6 @@
 package com.reoky.raidframer.ui.dialog
 
-import CombatEventInteractor
+import EventParserInteractor
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,8 +20,8 @@ import kotlin.io.path.pathString
 @Composable
 fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: MutableState<String>) {
 
-  val isSearching by CombatEventInteractor.isSearching.collectAsState()
-  val possiblePaths by CombatEventInteractor.possiblePaths.collectAsState()
+  val isSearching by EventParserInteractor.isSearching.collectAsState()
+  val possiblePaths by EventParserInteractor.possiblePaths.collectAsState()
 
   if (showDialog.value) {
     AlertDialog(
@@ -70,9 +70,9 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
                   )
                   .clickable {
                     selectedItem.value = possiblePaths[itemId].pathString
-                    CombatEventInteractor.updateSelectedPath(selectedItem.value)
-                    CombatEventInteractor.stop()
-                    CombatEventInteractor.start()
+                    EventParserInteractor.updateSelectedPath(selectedItem.value)
+                    EventParserInteractor.stop()
+                    EventParserInteractor.start()
 //                    lol.rfcloud.AppState.config.defaultLogPath = selectedItem.value
 //                    CoroutineScope(Dispatchers.Default).launch {
 //                      RFDao.saveConfig(lol.rfcloud.AppState.config)
