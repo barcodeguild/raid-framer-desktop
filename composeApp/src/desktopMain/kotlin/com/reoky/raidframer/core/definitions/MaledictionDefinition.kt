@@ -17,5 +17,4 @@ object MaledictionDefinition : SkillTreeDefinition {
     Skill(10, "Shadow Cloak", 0.0, 70.0, listOf("")),
     Skill(11, "Bladefall", 0.0, 23.0, listOf("Bladefall")),
   )
-
 }
