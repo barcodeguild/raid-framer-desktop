@@ -11,7 +11,7 @@ object AuramancyDefinition : SkillTreeDefinition {
     Skill(4, "Teleportation", 0.0, 35.0, listOf("Teleportation")),
     Skill(5, "Courageous Action", 0.0, 30.0, listOf("Courageous Action")),
     Skill(6, "Meditate", 0.0, 45.0, listOf("Meditate")),
-    Skill(7, "Shrug It Off", 0.9, 80.0, listOf("Shrug It Off")),
+    Skill(7, "Shrug It Off", 0.0, 80.0, listOf("Shrug It Off")),
     Skill(8, "Health Lift", 0.0, 90.0, listOf("Health Lift")),
     Skill(9, "Banishment", 0.0, 40.0, listOf("Banishment")), // no casting, no damage, buff only
     Skill(10, "Protective Wings", 1.3, 30.0, listOf("Protective Wings")), // assuming stone version

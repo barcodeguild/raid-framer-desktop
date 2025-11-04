@@ -11,7 +11,7 @@ object SongcraftDefinition : SkillTreeDefinition {
     Skill(4, " ", 0.0, 0.0, listOf("")),
     Skill(5, "", 0.0, 0.0, listOf("")),
     Skill(6, "", 0.0, 0.0, listOf("")),
-    Skill(7, "", 0.9, 0.0, listOf("")),
+    Skill(7, "", 0.0, 0.0, listOf("")),
     Skill(8, "", 0.0, 0.0, listOf("")),
     Skill(9, " ", 0.0, 0.0, listOf("")),
     Skill(10, "", 0.0, 0.0, listOf("")),
