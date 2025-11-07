@@ -15,7 +15,9 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicLong
 
-class LoggingInteractor : Interactor() {
+typealias Log = LoggingInteractor // make this easy to reference all throughout the code
+
+object LoggingInteractor : Interactor() {
 
   private val queue = ConcurrentLinkedQueue<LogEntry>()
   private val seq = AtomicLong(0)

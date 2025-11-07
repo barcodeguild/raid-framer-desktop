@@ -5,4 +5,5 @@ object AppGlobals {
     const val APP_VERSION = "2.0.0"
     const val GITHUB_URL = "https://github.com/barcodeguild/raid-framer-desktop"
     const val DEBUG = false
+    const val DEBUG_WIPE_DB_AND_CACHE_ON_LAUNCH = true
 }

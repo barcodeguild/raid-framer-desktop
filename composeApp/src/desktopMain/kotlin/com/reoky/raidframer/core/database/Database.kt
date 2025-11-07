@@ -2,6 +2,8 @@ package com.reoky.raidframer.core.database
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.reoky.raidframer.AppGlobals
+import com.reoky.raidframer.core.interactor.LoggingInteractor
 import kotlinx.coroutines.Dispatchers
 import java.io.File
 
@@ -11,6 +13,8 @@ import java.io.File
  * database is created.
  */
 fun initialize(): AppDatabase {
+
+  val TAG = "Core/Database.initialize()"
 
   // We don't have permissions to write to the program files directory, so we'll use the user's home directory
   val userHomeDirectory = System.getProperty("user.home")
@@ -23,11 +27,12 @@ fun initialize(): AppDatabase {
     directory.mkdirs()
   }
 
-// testing delete database between launches
-//  val dbFile = File(databaseFilePath)
-//  if (dbFile.exists()) {
-//    dbFile.delete()
-//  }
+  // testing delete database between launches
+  File(databaseFilePath).let {
+    if (!AppGlobals.DEBUG_WIPE_DB_AND_CACHE_ON_LAUNCH) return@let
+    if (it.exists()) it.delete()
+    LoggingInteractor.debug(TAG, "The app database has been wiped as this is a debugging instance.")
+  }
 
   return Room.databaseBuilder<AppDatabase>(
     name = File(databaseFilePath).absolutePath,

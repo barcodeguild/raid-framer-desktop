@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -15,11 +17,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.initialize
+import com.reoky.raidframer.core.interactor.GameMonitorInteractor
+import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
 data class RaidMember(val name: String, val health: Int, val role: String = "Healer")
@@ -28,12 +37,11 @@ typealias Party = List<RaidMember>
 
 const val TAG = "Main"
 
-
 /* ~ Entry Point ~ */
 fun main() = application {
 
   // set up the debug.log
-  val log = LoggingInteractor().also { it.start() }
+  LoggingInteractor.start()
 
   // Initialize the database
   val database = remember {
@@ -60,17 +68,26 @@ fun main() = application {
   // at least one window has to be open on app start to prevent immediate exit
   // however, we also want to load saved states of windows before opening them
   runBlocking {
-    dao.deleteAll() // clear saved window positions and sizes for testing
+    if (AppGlobals.DEBUG_WIPE_DB_AND_CACHE_ON_LAUNCH) dao.deleteAll() // clear saved window positions and sizes for testing
     val startTime: Long = System.currentTimeMillis()
-    log.info(TAG, "Loading saved window states...")
+    Log.info(TAG, "Loading saved window states...")
     wm.loadStates()
-    log.info(TAG, "Finished loading saved window states. Took ${System.currentTimeMillis() - startTime} ms")
+    Log.info(TAG, "Finished loading saved window states. Took ${System.currentTimeMillis() - startTime} ms")
     println(wm.visibilityStates[OverlayType.COMBAT]?.value)
     println(wm.isVisible(OverlayType.COMBAT).value)
     assert(wm.visibilityStates[OverlayType.COMBAT]?.value ?: false)
   }
 
-  log.info(TAG, "Opening default windows...")
+  // start the game monitor
+  GameMonitorInteractor.locateCombatLog()
+  LaunchedEffect(GameMonitorInteractor.isSearching) {
+    GameMonitorInteractor.possiblePaths.value.onEach { path ->
+      println(path)
+    }
+
+  }
+
+  Log.info(TAG, "Opening default windows...")
   OverlayContainer(wm)
 }
 
