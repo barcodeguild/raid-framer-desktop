@@ -4,17 +4,17 @@ object VitalismDefinition : SkillTreeDefinition {
 
   override val tree = SkillTreeType.VITALISM
   override val skills = listOf(
-    Skill(0, "", 0.0, 0.0, listOf("")),
-    Skill(1, "", 0.0, 0.0, listOf("")),
-    Skill(2, " ", 0.0, 0.0, listOf("")),
-    Skill(3, " ", 0.0, 0.0, listOf("")),
-    Skill(4, " ", 0.0, 0.0, listOf("")),
-    Skill(5, "", 0.0, 0.0, listOf("")),
-    Skill(6, "", 0.0, 0.0, listOf("")),
-    Skill(7, "", 0.0, 0.0, listOf("")),
-    Skill(8, "", 0.0, 0.0, listOf("")),
-    Skill(9, " ", 0.0, 0.0, listOf("")),
-    Skill(10, "", 0.0, 0.0, listOf("")),
-    Skill(11, "", 0.0, 0.0, listOf(""))
+    Skill(0, "Holy Bolt", 1.7, 0.0, listOf("Holy Bolt")), // no casting
+    Skill(1, "Mirror Light", 0.0, 21.0, listOf("Mirror Light")),
+    Skill(2, "Antithesis", 1.7, 3.0, listOf("Antithesis")), // no casting
+    Skill(3, "Resurgence", 0.0, 0.0, listOf("Resurgence")),
+    Skill(4, "Skewer", 2.6, 18.0, listOf("Skewer")),
+    Skill(5, "Mend", 3.9, 9.0, listOf("Mend")),
+    Skill(6, "Revive", 9.0, 0.0, listOf("Revive")), // ambiguous with scroll version
+    Skill(7, "Fervent Healing", 0.0, 0.0, listOf("Fervent Healing")), // no casting
+    Skill(8, "Renewal", 1.3, 0.0, listOf("Renewal")),
+    Skill(9, "Aranzeb's Boon", 2.6, 8.0, listOf("Aranzeb's Boon")),
+    Skill(10, "Mana Barrier", 0.0, 0.0, listOf("Mana Barrier")), // buff only, no casting, no dmg
+    Skill(11, "Healing Circle", 0.0, 0.0, listOf("Healing Circle"))
   )
 }
