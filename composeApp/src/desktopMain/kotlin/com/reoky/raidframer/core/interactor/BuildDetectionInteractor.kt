@@ -1,5 +1,6 @@
 package lol.rfcloud.core.interactor
 
+import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.interactor.Interactor
 
 /*
@@ -7,6 +8,8 @@ import com.reoky.raidframer.core.interactor.Interactor
  * for use in other parts of the application. Uses SkillTreeDefinitions to identify which trees each skill belongs to.
  */
 class BuildDetectionInteractor : Interactor() {
+
+    val skillTreeUsageCache: HashMap<String, HashMap<SkillTreeType, Long>> = hashMapOf()
 
     override suspend fun interact() {
         // This method will be called every 3 seconds to detect the current build.

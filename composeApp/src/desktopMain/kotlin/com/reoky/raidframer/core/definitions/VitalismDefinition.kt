@@ -14,7 +14,7 @@ object VitalismDefinition : SkillTreeDefinition {
     Skill(7, "Fervent Healing", 0.0, 0.0, listOf("Fervent Healing")), // no casting
     Skill(8, "Renewal", 1.3, 0.0, listOf("Renewal")),
     Skill(9, "Aranzeb's Boon", 2.6, 8.0, listOf("Aranzeb's Boon")),
-    Skill(10, "Mana Barrier", 0.0, 0.0, listOf("Mana Barrier")), // buff only, no casting, no dmg
-    Skill(11, "Healing Circle", 0.0, 0.0, listOf("Healing Circle"))
+    Skill(10, "Mana Barrier", 0.0, 35.0, listOf("Mana Barrier")), // buff only, no casting, no dmg
+    Skill(11, "Healing Circle", 0.0, 50.0, listOf("Healing Circle"))
   )
 }

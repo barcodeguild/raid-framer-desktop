@@ -23,6 +23,7 @@ fun initialize(): AppDatabase {
     directory.mkdirs()
   }
 
+// testing delete database between launches
 //  val dbFile = File(databaseFilePath)
 //  if (dbFile.exists()) {
 //    dbFile.delete()
