@@ -8,14 +8,17 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import androidx.room.Transaction
+import kotlin.text.orEmpty
 
 @Database(
-  entities = [WindowStateEntity::class, ConfigEntity::class],
-  version = 1 // be sure to increment this friends!
+  entities = [WindowStateEntity::class, ConfigEntity::class, PlayerCacheEntity::class],
+  version = SCHEMA_VERSION
 )
 abstract class AppDatabase : RoomDatabase() {
   abstract fun getWindowStateDao(): WindowStateDao
   abstract fun getConfigDao(): ConfigDao
+  abstract fun getPlayerCacheDao(): PlayerCacheDao
 }
 
 @Dao
@@ -38,25 +41,15 @@ interface WindowStateDao {
   suspend fun insert(config: ConfigEntity)
 }
 
-//@Entity(tableName = "player_cache")
-//data class PlayerCacheEntity(
-//  @PrimaryKey val playerName: String,
-//  val lastSeen: Long = System.currentTimeMillis(),
-//  val lastKnownSpec: String = "",
-//  val lastKnownLevel: Int = 0,
-//  val lastKnownGuild: String = "",
-//  val lastKnownFaction: String = "",
-//  val lastKnownRegion: String = "",
-//  val lifetimeTotalDamage: Long = 0L,
-//  val lifetimeTotalHealing: Long = 0L,
-//  val lifetimeTotalDeaths: Long = 0L,
-//  val lifetimeTotalDamageTaken: Long = 0L,
-//  val lifetimeTotalCCDelivered: Long = 0L,
-//)
-@Dao interface PlayerCacheDao {
+@Dao
+interface PlayerCacheDao {
   @Query("SELECT * FROM player_cache WHERE playerName = :name")
-  suspend fun getPlayerCache(name: String): PlayerCacheEntity?
+  suspend fun getPlayerCacheFor(name: String): PlayerCacheEntity?
+
+  @Query("SELECT * FROM player_cache ORDER BY lastSeen DESC LIMIT 10000")
+  suspend fun getRecentPlayerCacheMetadata(): List<PlayerCacheEntity>
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(cache: PlayerCacheEntity)
 }
+

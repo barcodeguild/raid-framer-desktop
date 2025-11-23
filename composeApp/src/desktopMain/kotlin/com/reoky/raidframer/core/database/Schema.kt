@@ -2,9 +2,9 @@ package com.reoky.raidframer.core.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.reoky.raidframer.core.definitions.SkillTreeDefinition
-import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.ui.OverlayWindowType
+
+const val SCHEMA_VERSION = 1 // increment this when making schema changes
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -48,12 +48,58 @@ data class PlayerCacheEntity(
   val lastSeen: Long = System.currentTimeMillis(),
   val lastKnownSpec: String = "",
   val lastKnownLevel: Int = 0,
+
+  // future proofing
+  val lastKnownGearScore: Int = 0,
   val lastKnownGuild: String = "",
   val lastKnownFaction: String = "",
   val lastKnownRegion: String = "",
+
+  // glider usages
+  val lastBDGlider: Long = 0L,
+  val lastSkyEmpGlider: Long = 0L,
+  val lastKrakenGlider: Long = 0L,
+  val lastCrystalWings: Long = 0L,
+  val lastRocketGlider: Long = 0L,
+
+  // utility item usages
+  val lastKrakenScepter: Long = 0L,
+  val lastKrakenSpear: Long = 0L,
+  val lastLibShieldPull: Long = 0L,
+  val lastGreatclub: Long = 0L,
+  val lastHalcyNecklace: Long = 0L,
+  val lastSoulNecklace: Long = 0L,
+  val lastHonorNodachi: Long = 0L,
+  val lastJolaShield: Long = 0L,
+
+  // potion/buff item usages
+  val lastMinorHealingPotion: Long = 0L,
+  val lastMajorHealingPotion: Long = 0L,
+  val lastMinorManaPotion: Long = 0L,
+  val lastMajorManaPotion: Long = 0L,
+  val lastWildGinseng: Long = 0L,
+  val lastJinhuiWish: Long = 0L,
+  val lastBlueGoblet: Long = 0L, // melee attack
+  val lastYellowGoblet: Long = 0L, // ranged
+  val lastPurpleGoblet: Long = 0L, // magic
+  val lastPinkGoblet: Long = 0L, // heals
+  val lastGrayGoblet: Long = 0L, // focus
+  val lastOrangeGoblet: Long = 0L, // received damage
+  val lastAncientsPotion: Long = 0L,
+  val lastDahutasBubble: Long = 0L,
+  val lastWhisperPotion: Long = 0L,
+  val lastRedBerryFruit: Long = 0L,
+  val lastBlueBerryFruit: Long = 0L,
+  val lastSecretGift: Long = 0L,
+  val lastHonorElixir: Long = 0L,
+  val lastWonderlandPVEBook: Long = 0L,
+
+  // lifetime stats
   val lifetimeTotalDamage: Long = 0L,
   val lifetimeTotalHealing: Long = 0L,
   val lifetimeTotalDeaths: Long = 0L,
   val lifetimeTotalDamageTaken: Long = 0L,
   val lifetimeTotalCCDelivered: Long = 0L,
+  val lifetimeTotalGliderUses: Long = 0L,
 )
+
