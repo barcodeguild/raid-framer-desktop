@@ -301,7 +301,7 @@ fun TrackerOverlay() {
                   ) {
                     Text(
                       text = when (val event = sortedAndFilteredIncoming[item]) {
-                        is EventParserInteractor.AttackEvent -> annotatedStringForAttack(event)
+                        is EventParserInteractor.DamageEvent -> annotatedStringForAttack(event)
                         is EventParserInteractor.HealEvent -> annotatedStringForHeal(event)
                         else -> buildAnnotatedString { }
                       },
@@ -330,7 +330,7 @@ fun TrackerOverlay() {
                   ) {
                     Text(
                       text = when (val event = sortedAndFilteredOutgoing[item]) {
-                        is EventParserInteractor.AttackEvent -> annotatedStringForAttack(event)
+                        is EventParserInteractor.DamageEvent -> annotatedStringForAttack(event)
                         is EventParserInteractor.HealEvent -> annotatedStringForHeal(event)
                         else -> buildAnnotatedString { }
                       },

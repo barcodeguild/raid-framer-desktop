@@ -67,7 +67,7 @@ fun Long.toLocalTimeString(): String {
  * it's too and will get used multiple times potentially.
  */
 @Composable
-fun annotatedStringForAttack(event: EventParserInteractor.AttackEvent): AnnotatedString {
+fun annotatedStringForAttack(event: EventParserInteractor.DamageEvent): AnnotatedString {
   return buildAnnotatedString {
     withStyle(style = SpanStyle(color = Color(249, 191, 59))) {
       append(event.caster)

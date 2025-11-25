@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -23,12 +22,7 @@ import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
-import kotlin.coroutines.CoroutineContext
 import kotlin.system.exitProcess
 
 data class RaidMember(val name: String, val health: Int, val role: String = "Healer")
@@ -84,7 +78,6 @@ fun main() = application {
     GameMonitorInteractor.possiblePaths.value.onEach { path ->
       println(path)
     }
-
   }
 
   Log.info(TAG, "Opening default windows...")

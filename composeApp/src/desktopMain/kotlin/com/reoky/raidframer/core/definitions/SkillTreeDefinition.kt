@@ -1,6 +1,29 @@
 package com.reoky.raidframer.core.definitions
 
-/* Whitelist of preferred CC tank builds. */
+/*
+ * All the skill-trees in the game. This is useful if we need to loop over all the trees.
+ */
+val ALL_SKILL_TREES = listOf<SkillTreeDefinition>(
+  ArcheryDefinition,
+  AuramancyDefinition,
+  BattlerageDefinition,
+  DefenseDefinition,
+  GunslingerDefinition,
+  MaledictionDefinition,
+  OccultismDefinition,
+  ShadowplayDefinition,
+  SongcraftDefinition,
+  SorceryDefinition,
+  SpelldanceDefinition,
+  SwiftbladeDefinition,
+  VitalismDefinition,
+  WitchcraftDefinition
+)
+
+
+/*
+ * Whitelist of preferred builds. This is mostly just opinionated. I'm going to put a badge next to players who are playing PvP specs.
+ */
 val META_CC_SPECS = setOf<SpecType>(
   SpecType.DREAMBREAKER, SpecType.DEFILER, SpecType.REVENANT, SpecType.NIGHTCLOAK, SpecType.REVENANT
 )
@@ -435,4 +458,34 @@ enum class SpecIndication() {
   DPS, TANK, HEALS;
 }
 
-val ALL_SKILL_TREES = listOf<SkillTreeDefinition>(MaledictionDefinition)
+
+/*
+ * Initiating Spells : Spells that when cast
+ */
+val initiatingSpells = listOf(
+  "Mana Bolts",
+  "Divebomb",
+  "Charge",
+  "Tiger Strike",
+  "Shoot Arrow",
+  "Concussive Arrow",
+  "Endless Arrows",
+  "Absorb Lifeforce",
+  "Enervated",
+  "Ceaseless Fire",
+  "Flamebolt",
+  "Freezing Arrow",
+  "Arc Lightning",
+  "Electrical Arrow",
+  "Rapid Strike",
+  "Pin Down",
+  "Blade Flurry",
+  "Entangle",
+  "Dancer's Touch",
+  "Holy Bolt",
+  "Revive",
+  "Mana Barrier",
+  "Fervent Healing",
+  "Bull Rush",
+  "Critical Discord"
+)

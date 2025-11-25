@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.reoky.raidframer.RaidFramer
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -13,19 +12,10 @@ import java.util.regex.Pattern
 import kotlin.math.absoluteValue
 
 /*
- * This interactor will ingest combat events from the ArcheRage combat.log file and parse them into combat events.
- * It will also keep track of damage, heals, buffs, debuffs, and other combat-related events.
+ * This interactor ingests combat events from the game monitor and parses them into usable events for the rest of the app.
  */
 object EventParserInteractor : Interactor() {
-  var shouldSearchEverywhere: Boolean = false
 
-  private var _isSearching = MutableStateFlow<Boolean>(false)
-  val isSearching: StateFlow<Boolean> = _isSearching
-  private var _possiblePaths = MutableStateFlow<List<Path>>(listOf())
-  val possiblePaths: StateFlow<List<Path>> = _possiblePaths
-
-  private var lastIndex: Long = 0 // used to keep position inside the log file
-  private var selectedPath: String? = null
   private var mostRecentEventTimestamp: Long = 0
 
   private val ATTACK_PATTERN: Pattern =
@@ -49,36 +39,6 @@ object EventParserInteractor : Interactor() {
   private val DEBUFF_ENDED: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r debuff cleared")
 
-  /*
-   * Initiating Spells : Might move this to a separate class if it gets too big.
-   */
-  val initiatingSpells = listOf(
-    "Mana Bolts",
-    "Divebomb",
-    "Charge",
-    "Tiger Strike",
-    "Shoot Arrow",
-    "Concussive Arrow",
-    "Endless Arrows",
-    "Absorb Lifeforce",
-    "Enervated",
-    "Ceaseless Fire",
-    "Flamebolt",
-    "Freezing Arrow",
-    "Arc Lightning",
-    "Electrical Arrow",
-    "Rapid Strike",
-    "Pin Down",
-    "Blade Flurry",
-    "Entangle",
-    "Dancer's Touch",
-    "Holy Bolt",
-    "Revive",
-    "Mana Barrier",
-    "Fervent Healing",
-    "Bull Rush",
-    "Critical Discord"
-  )
 
   // Track Damage Amounts and Heals by Player
 
@@ -145,7 +105,7 @@ object EventParserInteractor : Interactor() {
   /*
    * Turns log lines into CombatEvents.
    */
-  fun parseLines(lines: List<String>) {
+  fun parseLines(lines: List<String>, reviewMode: Boolean = false) {
     val events = mutableListOf<CombatEvent>()
 
     for (line in lines) {
@@ -153,7 +113,7 @@ object EventParserInteractor : Interactor() {
       // Attacked for damage with a specific skill
       var matcher = ATTACK_PATTERN.matcher(line)
       if (matcher.find()) {
-        val event = AttackEvent(
+        val event = DamageEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
           caster = matcher.group(3),
@@ -170,7 +130,7 @@ object EventParserInteractor : Interactor() {
       // Attacked for damage but the game didn't specify the skill
       matcher = ATTACK_PATTERN_NO_SKILL.matcher(line)
       if (matcher.find()) {
-        val event = AttackEvent(
+        val event = DamageEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
           caster = matcher.group(3),
@@ -187,7 +147,7 @@ object EventParserInteractor : Interactor() {
       // Attack Except the person parried it
       matcher = ATTACK_PARRIED_PATTERN.matcher(line)
       if (matcher.find()) {
-        val event = AttackEvent(
+        val event = DamageEvent(
           timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             .toInstant(ZoneOffset.UTC).toEpochMilli(),
           caster = matcher.group(3),
@@ -303,7 +263,7 @@ object EventParserInteractor : Interactor() {
     //return events
   }
 
-  private fun postDamage(event: AttackEvent) {
+  private fun postDamage(event: DamageEvent) {
 
     // update global counter
     val currentMap = _damageByPlayer.value.toMutableMap()
@@ -325,14 +285,6 @@ object EventParserInteractor : Interactor() {
     currentIncomingEventsByPlayer[event.target] = playersCurrentIncomingEvents
     _incomingEventsByPlayer.value = currentIncomingEventsByPlayer
 
-    // initiated damage?
-//    if (lol.rfcloud.AppState.config.autoTargetEnabled && event.caster == lol.rfcloud.AppState.config.playerName) {
-//      if (initiatingSpells.contains(event.spell)) {
-//        if (event.target != lol.rfcloud.AppState.config.playerName || lol.rfcloud.AppState.config.allowAutoTargetSelf) {
-//          lol.rfcloud.AppState.currentTargetName.value = event.target
-//        }
-//      }
-//    }
   }
 
   private fun postHeal(event: HealEvent) {
@@ -357,14 +309,6 @@ object EventParserInteractor : Interactor() {
     currentIncomingEventsByPlayer[event.target] = playersCurrentIncomingEvents
     _incomingEventsByPlayer.value = currentIncomingEventsByPlayer
 
-    // initiated damage?
-//    if (lol.rfcloud.AppState.config.autoTargetEnabled && event.caster == lol.rfcloud.AppState.config.playerName) {
-//      if (initiatingSpells.contains(event.spell)) {
-//        if (event.target != lol.rfcloud.AppState.config.playerName || lol.rfcloud.AppState.config.allowAutoTargetSelf) {
-//          lol.rfcloud.AppState.currentTargetName.value = event.target
-//        }
-//      }
-//    }
   }
 
   private fun postCasting(event: CastingEvent) {
@@ -374,7 +318,6 @@ object EventParserInteractor : Interactor() {
     }
   }
 
-  //
   private fun processBuffGained(event: BuffGainedEvent) {
     when (event.buff) {
       "Retribution" -> {
@@ -469,7 +412,7 @@ object EventParserInteractor : Interactor() {
     val timestamp: Long
   }
 
-  data class AttackEvent(
+  data class DamageEvent(
     override val timestamp: Long,
     val caster: String,
     val target: String,

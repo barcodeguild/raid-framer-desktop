@@ -2,7 +2,7 @@ package com.reoky.raidframer.core.interactor
 
 import kotlinx.coroutines.*
 
-/*
+/**
  * This is a base class for all interactors in the app.
  * Each interactor is responsible for a specific piece of functionality, and will interact inside the coroutine scope.
  * Every 'tick' of the event loop the interact() method is called to perform some work in the background.

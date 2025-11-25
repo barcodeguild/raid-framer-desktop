@@ -52,4 +52,3 @@ interface PlayerCacheDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(cache: PlayerCacheEntity)
 }
-
