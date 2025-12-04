@@ -1,5 +1,7 @@
 package com.reoky.raidframer.core.interactor
 
+import com.reoky.raidframer.core.database.RFDao
+import com.reoky.raidframer.core.model.NPCCard
 import com.reoky.raidframer.core.model.PlayerCard
 
 /**
@@ -8,14 +10,25 @@ import com.reoky.raidframer.core.model.PlayerCard
  * back to the database for persistence. This allows the app to remember that a player is real vs an NPC across sessions,
  * instead of having to re-discover players every time the app is launched. (Which reduces accuracy of PvP vs PvE damage stats.)
  */
-class PlayerCacheInteractor : Interactor() {
+object PlayerCacheInteractor : Interactor() {
 
   // Mapping of all the players (and NPCs) sorted in no particular order
   val players: HashMap<PlayerCard, Long> = hashMapOf()
-  //val npcs: HashMap<PlayerCard, Long> = hashMapOf()
+  val npcs: HashMap<NPCCard, Long> = hashMapOf()
 
   // main event loop
   override suspend fun interact() {
+    val playerCacheDao = RFDao.playerCacheDao
+    println(playerCacheDao)
 
+    // Persist all cached players to the database
+    //    for ((player, _) in players) {
+    //      playerCacheDao.insertOrUpdatePlayerCard(player)
+    //    }
+    //
+    //    // Persist all cached NPCs to the database
+    //    for ((npc, _) in npcs) {
+    //      playerCacheDao.insertOrUpdateNPCCard(npc)
+    //    }
   }
 }

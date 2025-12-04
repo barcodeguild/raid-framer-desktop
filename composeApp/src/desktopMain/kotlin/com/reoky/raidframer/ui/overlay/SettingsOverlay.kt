@@ -22,7 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.CloseButton
 import com.reoky.raidframer.ui.dialog.FileSelectionDialog
 import java.util.Locale.getDefault
 
@@ -41,37 +43,10 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       .background(Color.Black.copy(alpha = 0.60f))
       .verticalScroll(scrollState)
   ) {
-    Box(modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)) {
-      val interactionSource = remember { MutableInteractionSource() }
-      val isCloseHovered by interactionSource.collectIsHoveredAsState()
-
-      IconButton(
-        onClick = {
-//          lol.rfcloud.AppState.isSettingsOverlayVisible.value = false
-        },
-        modifier = Modifier
-          .size(32.dp)
-          .background(
-            if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f),
-            MaterialTheme.shapes.small
-          )
-          .shadow(
-            elevation = 0.dp,
-            clip = true,
-            ambientColor = Color.Transparent,
-            spotColor = Color.Transparent
-          )
-          .hoverable(interactionSource = interactionSource)
-          .clip(RoundedCornerShape(8.dp))
-      ) {
-        Text(
-          "✕",
-          fontSize = 18.sp,
-          color = if (isCloseHovered) Color.White else Color.White,
-          textAlign = TextAlign.Center
-        )
-      }
-    }
+    CloseButton(
+      onClose = { wm?.closeWindow(OverlayType.ABOUT) },
+      modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)
+    )
     Column {
       Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
         Column {
@@ -94,7 +69,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
               .padding(top = 16.dp, bottom = 8.dp)
           )
           Text(
-            text = "Select the combat.log file for your ArcheRage installation to use for data-sourcing. This mod reads the game's logs and displays the data in real-time.",
+            text = "Select the combat.log file in your ArcheRage documents directory or another prior log. This mod works by reading the game's logs and displaying the data in real-time.",
             color = Color.White,
             textAlign = TextAlign.Start,
             fontWeight = FontWeight.W400,
@@ -148,8 +123,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
             }
             Button(
               onClick = {
-//                lol.rfcloud.AppState.isSettingsOverlayVisible.value = false
-//                lol.rfcloud.AppState.isAboutOverlayVisible.value = true
+                wm?.openWindow(OverlayType.ABOUT)
               },
               colors = ButtonDefaults.buttonColors(Color.White),
               modifier = Modifier.weight(1f).padding(16.dp)

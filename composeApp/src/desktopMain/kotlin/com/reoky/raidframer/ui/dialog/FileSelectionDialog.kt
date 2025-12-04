@@ -15,13 +15,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.nio.file.Path
 import kotlin.io.path.pathString
 
 @Composable
 fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: MutableState<String>) {
 
-  val isSearching by EventParserInteractor.isSearching.collectAsState()
-  val possiblePaths by EventParserInteractor.possiblePaths.collectAsState()
+//  val isSearching by EventParserInteractor.isSearching.collectAsState()
+//  val possiblePaths by EventParserInteractor.possiblePaths.collectAsState()
+  val isSearching = false
+  val possiblePaths: List<Path> = listOf()
 
   if (showDialog.value) {
     AlertDialog(

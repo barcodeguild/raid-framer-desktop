@@ -15,10 +15,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -34,35 +36,36 @@ const val TAG = "Main"
 /* ~ Entry Point ~ */
 fun main() = application {
 
-  // set up the debug.log
-  LoggingInteractor.start()
+  val context = rememberCoroutineScope() // correct context for Compose
 
-  // Initialize the database
+  // Initialize the database : critical that this occurs first and only once
   val database = remember {
     try {
       // This will create the database and tables if they don't exist
-      initialize()
+      initialize().also { db ->
+        RFDao.init(db)
+      }
     } catch (e: Exception) {
       println("Oh eek, the database wouldn't open, friend: ${e.message}")
       exitProcess(1)
     }
   }
 
-  // Initialize the config store
-  val configDao = remember { database.getConfigDao() }
-  RFConfig.init(configDao)
+  RFConfig.init(RFDao.configDao)
 
-  val context = rememberCoroutineScope() // correct context for Compose
-  val dao = remember { database.getWindowStateDao() }
+  // set up the debug.log
+  LoggingInteractor.start()
+  PlayerCacheInteractor.start()
+  GameMonitorInteractor.start()
 
   val wm = remember {
-    WindowManager(scope = context, dao = dao)
+    WindowManager(scope = context, dao = RFDao.windowStateDao)
   }
 
   // at least one window has to be open on app start to prevent immediate exit
   // however, we also want to load saved states of windows before opening them
   runBlocking {
-    if (AppGlobals.DEBUG_WIPE_DB_AND_CACHE_ON_LAUNCH) dao.deleteAll() // clear saved window positions and sizes for testing
+    if (AppGlobals.DEBUG_WIPE_DB_AND_CACHE_ON_LAUNCH) RFDao.windowStateDao.deleteAll() // clear saved window positions and sizes for testing
     val startTime: Long = System.currentTimeMillis()
     Log.info(TAG, "Loading saved window states...")
     wm.loadStates()

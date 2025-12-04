@@ -1,6 +1,5 @@
 package com.reoky.raidframer.core.interactor
 
-import EventParserInteractor.shouldSearchEverywhere
 import java.io.RandomAccessFile
 import java.nio.file.Files
 import java.nio.file.Path
@@ -22,6 +21,14 @@ object GameMonitorInteractor : Interactor() {
   private val _possiblePaths = MutableStateFlow<List<Path>>(emptyList())
   val possiblePaths: StateFlow<List<Path>> get() = _possiblePaths
 
+  // time range markers used for replays / restarts and exports long marker position timestamp
+  // so the player can view damage charts for a specific fights
+  private val _userMarkerStart = MutableStateFlow<Long>(0L)
+  val userMarkerStart: StateFlow<Long> get() = _userMarkerStart
+
+  private val _userMarkerEnd = MutableStateFlow<Long>(0L)
+  val userMarkerEnd: StateFlow<Long> get() = _userMarkerEnd
+
   @Volatile
   private var currentPath: Path? = null
 
@@ -29,7 +36,8 @@ object GameMonitorInteractor : Interactor() {
   private var raf: RandomAccessFile? = null
 
   @Volatile
-  private var currentPos: Long = 0L
+  private var currentPosition: Long = 0L
+
 
   /**
    * Search for combat.log files according to the provided logic.
@@ -42,13 +50,14 @@ object GameMonitorInteractor : Interactor() {
     val documentsPath = Paths.get(System.getProperty("user.home"), "Documents")
     val everywherePath = Paths.get(System.getProperty("user.home"))
 
-    val searchPaths = mutableListOf<Path>()
-    if (shouldSearchEverywhere) {
-      if (Files.exists(everywherePath)) searchPaths.add(everywherePath)
-    } else {
-      if (Files.exists(oneDriveDocumentsPath)) searchPaths.add(oneDriveDocumentsPath)
-      if (Files.exists(documentsPath)) searchPaths.add(documentsPath)
-    }
+    val searchPaths = mutableListOf<Path>(everywherePath)
+
+//    if (shouldSearchEverywhere) {
+//      if (Files.exists(everywherePath)) searchPaths.add(everywherePath)
+//    } else {
+//      if (Files.exists(oneDriveDocumentsPath)) searchPaths.add(oneDriveDocumentsPath)
+//      if (Files.exists(documentsPath)) searchPaths.add(documentsPath)
+//    }
 
     val possibleLogFiles = mutableListOf<Path>()
 
@@ -59,7 +68,7 @@ object GameMonitorInteractor : Interactor() {
           try {
             if (Files.isDirectory(path) && Files.isReadable(path)) {
               seek(path)
-            } else if (path.fileName.toString().lowercase() == "combat.log" && !path.pathString.contains("LogBackups")) {
+            } else if (path.fileName.toString().contains("combat.log") && !path.pathString.contains("LogBackups")) {
               possibleLogFiles.add(path)
             }
           } catch (_: Exception) {
@@ -104,7 +113,7 @@ object GameMonitorInteractor : Interactor() {
         // desired is current, check to see if file size has changed since three seconds ago
         // check for truncation/rotation
         val fileSize = Files.size(desired)
-        if (fileSize < currentPos) {
+        if (fileSize < currentPosition) {
           openFile(desired) // reopen and start tailing log
         }
       }
@@ -113,7 +122,7 @@ object GameMonitorInteractor : Interactor() {
 
       synchronized(this) {
         // Ensure pointer at last known position, then read available lines
-        localRaf.seek(currentPos)
+        localRaf.seek(currentPosition)
         var rawLine = localRaf.readLine()
         while (rawLine != null) {
           // RandomAccessFile.readLine uses ISO-8859-1 — convert to UTF-8
@@ -123,7 +132,7 @@ object GameMonitorInteractor : Interactor() {
           } catch (_: Exception) {
             // swallow parse exceptions to avoid stopping tailing
           }
-          currentPos = localRaf.filePointer
+          currentPosition = localRaf.filePointer
           rawLine = localRaf.readLine()
         }
       }
@@ -145,12 +154,12 @@ object GameMonitorInteractor : Interactor() {
         rafLocal.seek(startPos)
         raf = rafLocal
         currentPath = path
-        currentPos = startPos
+        currentPosition = startPos
       } catch (t: Throwable) {
         // failed to open — ensure closed state
         raf = null
         currentPath = null
-        currentPos = 0L
+        currentPosition = 0L
       }
     }
   }
@@ -162,7 +171,15 @@ object GameMonitorInteractor : Interactor() {
       } catch (_: Exception) {}
       raf = null
       currentPath = null
-      currentPos = 0L
+      currentPosition = 0L
     }
   }
+}
+
+
+enum class MonitorModes {
+  DISABLED, // no monitoring
+  REPLAY, // start from beginning of file (or from marker position) and stop at end
+  RESTART, // start from marker position and continue tailing
+  TAIL // start tailing from end of file
 }

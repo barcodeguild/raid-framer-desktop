@@ -84,22 +84,22 @@ object EventParserInteractor : Interactor() {
    * Main interaction event loop. Watches the selected log file for changes and parses new lines.
    */
   override suspend fun interact() {
-    if (selectedPath.isNullOrBlank()) return
-    val logPath = Paths.get(selectedPath!!)
-    withContext(Dispatchers.IO) {
-      Files.newBufferedReader(logPath)
-    }.use { reader ->
-      // if (lastIndex == 0L) lastIndex = Files.lines(logPath).count()
-      val lines = reader.lines().skip(lastIndex).iterator()
-      while (lines.hasNext()) {
-        val line = lines.next()
-        parseLines(listOf(line))
-        lastIndex++
-      }
-      lastIndex = Files.lines(logPath).count() // move index pointer to the end of the file
-    }
-    pruneOldEvents()
-    pruneOldDebuffs()
+//    if (selectedPath.isNullOrBlank()) return
+//    val logPath = Paths.get(selectedPath!!)
+//    withContext(Dispatchers.IO) {
+//      Files.newBufferedReader(logPath)
+//    }.use { reader ->
+//      // if (lastIndex == 0L) lastIndex = Files.lines(logPath).count()
+//      val lines = reader.lines().skip(lastIndex).iterator()
+//      while (lines.hasNext()) {
+//        val line = lines.next()
+//        parseLines(listOf(line))
+//        lastIndex++
+//      }
+//      lastIndex = Files.lines(logPath).count() // move index pointer to the end of the file
+//    }
+//    pruneOldEvents()
+//    pruneOldDebuffs()
   }
 
   /*
@@ -403,9 +403,10 @@ object EventParserInteractor : Interactor() {
     _retributionByPlayer.value = currentMap
   }
 
+  // todo: remove this
   fun updateSelectedPath(path: String) {
-    selectedPath = path
-    lastIndex = 0
+//    selectedPath = path
+//    lastIndex = 0
   }
 
   interface CombatEvent {

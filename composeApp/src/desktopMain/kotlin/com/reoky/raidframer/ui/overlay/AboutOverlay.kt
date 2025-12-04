@@ -33,11 +33,11 @@ fun PreviewAboutOverlay() {
 }
 
 @Composable
-fun AboutOverlay(vm: WindowManager? = null) {
+fun AboutOverlay(wm: WindowManager? = null) {
   Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f))) {
 
      CloseButton(
-       onClose = { vm?.closeWindow(OverlayType.ABOUT) },
+       onClose = { wm?.closeWindow(OverlayType.ABOUT) },
        modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)
      )
 
