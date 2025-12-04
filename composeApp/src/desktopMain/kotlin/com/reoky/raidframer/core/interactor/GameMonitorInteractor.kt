@@ -41,23 +41,24 @@ object GameMonitorInteractor : Interactor() {
 
   /**
    * Search for combat.log files according to the provided logic.
-   * Updates _possiblePaths and _isSearching.
+   * Updates _possiblePaths and _isSearching. Will search the user's entire home directory
+   * if searchEverywhere is true, otherwise looks for ArcheRage's default locations.
    */
-  fun locateCombatLog() {
+  fun locateCombatLog(searchEverywhere: Boolean = false) {
     _isSearching.value = true
 
-    val oneDriveDocumentsPath = Paths.get(System.getProperty("user.home"), "OneDrive", "Documents")
-    val documentsPath = Paths.get(System.getProperty("user.home"), "Documents")
+    val oneDriveDocumentsPath = Paths.get(System.getProperty("user.home"), "OneDrive", "Documents", "ArcheRage")
+    val documentsPath = Paths.get(System.getProperty("user.home"), "Documents", "ArcheRage")
     val everywherePath = Paths.get(System.getProperty("user.home"))
 
-    val searchPaths = mutableListOf<Path>(everywherePath)
+    val searchPaths = mutableListOf<Path>()
 
-//    if (shouldSearchEverywhere) {
-//      if (Files.exists(everywherePath)) searchPaths.add(everywherePath)
-//    } else {
-//      if (Files.exists(oneDriveDocumentsPath)) searchPaths.add(oneDriveDocumentsPath)
-//      if (Files.exists(documentsPath)) searchPaths.add(documentsPath)
-//    }
+    if (searchEverywhere) {
+      if (Files.exists(everywherePath)) searchPaths.add(everywherePath)
+    } else {
+      if (Files.exists(oneDriveDocumentsPath)) searchPaths.add(oneDriveDocumentsPath)
+      if (Files.exists(documentsPath)) searchPaths.add(documentsPath)
+    }
 
     val possibleLogFiles = mutableListOf<Path>()
 
