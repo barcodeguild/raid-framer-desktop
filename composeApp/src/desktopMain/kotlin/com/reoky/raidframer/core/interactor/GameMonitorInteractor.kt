@@ -175,12 +175,11 @@ object GameMonitorInteractor : Interactor() {
       currentPosition = 0L
     }
   }
-}
 
-
-enum class MonitorModes {
-  DISABLED, // no monitoring
-  REPLAY, // start from beginning of file (or from marker position) and stop at end
-  RESTART, // start from marker position and continue tailing
-  TAIL // start tailing from end of file
+  enum class MonitorModes {
+    DISABLED, // no monitoring
+    REPLAY, // start from beginning of file (or from marker position) and stop at end
+    RESTART, // start from marker position and continue tailing
+    TAIL // start tailing from end of file
+  }
 }

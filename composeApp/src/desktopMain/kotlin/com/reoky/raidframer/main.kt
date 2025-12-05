@@ -25,6 +25,8 @@ import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import kotlinx.coroutines.runBlocking
+import java.nio.file.Files
+import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 data class RaidMember(val name: String, val health: Int, val role: String = "Healer")
@@ -34,7 +36,7 @@ typealias Party = List<RaidMember>
 const val TAG = "Main"
 
 /* ~ Entry Point ~ */
-fun main() = application {
+fun main(args: Array<String>) = application {
 
   val context = rememberCoroutineScope() // correct context for Compose
 
@@ -53,10 +55,28 @@ fun main() = application {
 
   RFConfig.init(RFDao.configDao)
 
-  // set up the debug.log
+  // Start core of the app
   LoggingInteractor.start()
   PlayerCacheInteractor.start()
   GameMonitorInteractor.start()
+
+  // file path args processing
+  val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }
+  if (incoming != null) {
+    try {
+      // Trim surrounding quotes if any (Windows may quote paths with spaces).
+      val cleaned = incoming.trim().trim('"')
+      val p = Paths.get(cleaned)
+      if (Files.exists(p)) {
+        messageBox("Eek!", "You are viewing a replay of combat data from: $p. Live monitoring is disabled while viewing replays.")
+        //GameMonitorInteractor.openLogFileFromExternal(p)
+        //GameMonitorInteractor.setMode(GameMonitorInteractor.MonitorModes.REPLAY)
+        //GameMonitorInteractor.play()
+      }
+    } catch (_: Exception) {
+      // ignore malformed path
+    }
+  }
 
   val wm = remember {
     WindowManager(scope = context, dao = RFDao.windowStateDao)
@@ -156,6 +176,15 @@ fun quit() {
   //    AppState.tray?.shutdown()
   //    AppState.tray?.remove()
   exitProcess(0)
+}
+
+fun messageBox(title: String, message: String) {
+  javax.swing.JOptionPane.showMessageDialog(
+    null,
+    message,
+    title,
+    javax.swing.JOptionPane.INFORMATION_MESSAGE
+  )
 }
 
 data class PieChartData(
