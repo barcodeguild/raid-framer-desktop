@@ -50,8 +50,9 @@ object GameMonitorInteractor : Interactor() {
     val oneDriveDocumentsPath = Paths.get(System.getProperty("user.home"), "OneDrive", "Documents", "ArcheRage")
     val documentsPath = Paths.get(System.getProperty("user.home"), "Documents", "ArcheRage")
     val everywherePath = Paths.get(System.getProperty("user.home"))
+    val desktopPath = Paths.get(System.getProperty("user.home"), "Desktop")
 
-    val searchPaths = mutableListOf<Path>()
+    val searchPaths = mutableListOf<Path>(desktopPath)
 
     if (searchEverywhere) {
       if (Files.exists(everywherePath)) searchPaths.add(everywherePath)

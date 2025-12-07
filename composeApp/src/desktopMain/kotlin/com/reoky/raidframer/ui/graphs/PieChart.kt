@@ -12,7 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.reoky.raidframer.PieChartData
+
+data class PieChartData(
+  val value: Float,
+  val color: Color
+)
 
 @Composable
 fun PieChart(

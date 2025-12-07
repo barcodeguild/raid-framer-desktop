@@ -1,18 +1,8 @@
 package com.reoky.raidframer
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
@@ -22,16 +12,14 @@ import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayContainer
-import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
-data class RaidMember(val name: String, val health: Int, val role: String = "Healer")
-
-typealias Party = List<RaidMember>
 
 const val TAG = "Main"
 
@@ -90,16 +78,15 @@ fun main(args: Array<String>) = application {
     Log.info(TAG, "Loading saved window states...")
     wm.loadStates()
     Log.info(TAG, "Finished loading saved window states. Took ${System.currentTimeMillis() - startTime} ms")
-    println(wm.visibilityStates[OverlayType.COMBAT]?.value)
-    println(wm.isVisible(OverlayType.COMBAT).value)
-    assert(wm.visibilityStates[OverlayType.COMBAT]?.value ?: false)
   }
 
   // start the game monitor
-  GameMonitorInteractor.locateCombatLog()
+  context.launch(Dispatchers.IO) {
+    GameMonitorInteractor.locateCombatLog()
+  }
   LaunchedEffect(GameMonitorInteractor.isSearching) {
     GameMonitorInteractor.possiblePaths.value.onEach { path ->
-      println(path)
+      Log.info(TAG, "Found possible combat log at: ")
     }
   }
 
@@ -107,77 +94,22 @@ fun main(args: Array<String>) = application {
   OverlayContainer(wm)
 }
 
-@Composable
-fun TimeRangeSlider(
-  minTime: Float,
-  maxTime: Float,
-  startTime: Float,
-  endTime: Float,
-  activityLevels: List<Float>, // values between 0..1
-  onRangeChange: (Float, Float) -> Unit
-) {
-  val sliderWidth = 400.dp
-  val handleRadius = 10.dp
-  Box(
-    modifier = Modifier.width(sliderWidth).height(60.dp)
-  ) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-      val widthPx = size.width
-      val heightPx = size.height
-
-      // Draw activity level bar
-      val barHeight = heightPx * 0.3f
-      activityLevels.forEachIndexed { i, level ->
-        val x = i * widthPx / (activityLevels.size - 1)
-        drawLine(
-          color = Color.Green.copy(alpha = level),
-          start = Offset(x, heightPx / 2 - barHeight / 2),
-          end = Offset(x, heightPx / 2 + barHeight / 2),
-          strokeWidth = 2f
-        )
-      }
-
-      // Draw time markers (ticks)
-      for (i in 0..10) {
-        val x = i * widthPx / 10
-        drawLine(
-          color = Color.Gray,
-          start = Offset(x, heightPx / 2 - 12),
-          end = Offset(x, heightPx / 2 + 12),
-          strokeWidth = 1f
-        )
-      }
-
-      // Draw slider bar
-      drawLine(
-        color = Color.LightGray,
-        start = Offset(0f, heightPx / 2),
-        end = Offset(widthPx, heightPx / 2),
-        strokeWidth = 4f
-      )
-
-      // Draw handles
-      val startX = ((startTime - minTime) / (maxTime - minTime)) * widthPx
-      val endX = ((endTime - minTime) / (maxTime - minTime)) * widthPx
-      drawCircle(Color.Blue, handleRadius.toPx(), Offset(startX, heightPx / 2))
-      drawCircle(Color.Red, handleRadius.toPx(), Offset(endX, heightPx / 2))
-    }
-    // Add gesture handling for dragging handles (omitted for brevity)
-  }
-}
-
 /*
  * Cleans up the application by stopping the interactors, closing all the windows, removing listeners, and
  * finally exiting the application.
  */
 fun quit() {
-  //    CombatEventInteractor.stop()
-  //    OverlayInteractor.stop()
-  //    AppState.tray?.shutdown()
-  //    AppState.tray?.remove()
+  PlayerCacheInteractor.stop()
+  GameMonitorInteractor.stop()
+  //      AppState.tray?.shutdown()
+//      AppState.tray?.remove()
+  LoggingInteractor.stop()
   exitProcess(0)
 }
 
+/*
+ * Displays a simple Windows style message box with the given title and message.
+ */
 fun messageBox(title: String, message: String) {
   javax.swing.JOptionPane.showMessageDialog(
     null,
@@ -186,8 +118,3 @@ fun messageBox(title: String, message: String) {
     javax.swing.JOptionPane.INFORMATION_MESSAGE
   )
 }
-
-data class PieChartData(
-  val value: Float,
-  val color: Color
-)

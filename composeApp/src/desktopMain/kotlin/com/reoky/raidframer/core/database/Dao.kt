@@ -51,4 +51,7 @@ interface PlayerCacheDao {
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(cache: PlayerCacheEntity)
+
+  @Query("SELECT COUNT(*) FROM player_cache")
+  suspend fun getPlayerCount(): Int
 }

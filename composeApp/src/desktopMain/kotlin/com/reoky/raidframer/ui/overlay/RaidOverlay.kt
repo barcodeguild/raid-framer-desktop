@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.reoky.raidframer.Party
-import com.reoky.raidframer.RaidMember
+import com.reoky.raidframer.core.model.Party
+import com.reoky.raidframer.core.model.RaidMember
 import com.reoky.raidframer.ui.RaidColors
 import com.reoky.raidframer.ui.WindowManager
 

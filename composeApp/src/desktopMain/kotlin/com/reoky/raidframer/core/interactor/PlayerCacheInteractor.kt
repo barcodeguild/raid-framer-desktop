@@ -16,10 +16,10 @@ object PlayerCacheInteractor : Interactor() {
   val players: HashMap<PlayerCard, Long> = hashMapOf()
   val npcs: HashMap<NPCCard, Long> = hashMapOf()
 
+  val TAG = "PlayerCacheInteractor"
+
   // main event loop
   override suspend fun interact() {
-    val playerCacheDao = RFDao.playerCacheDao
-    println(playerCacheDao)
 
     // Persist all cached players to the database
     //    for ((player, _) in players) {
@@ -30,5 +30,7 @@ object PlayerCacheInteractor : Interactor() {
     //    for ((npc, _) in npcs) {
     //      playerCacheDao.insertOrUpdateNPCCard(npc)
     //    }
+    val playerCount = RFDao.playerCacheDao.getPlayerCount()
+    Log.info(TAG, "Currently cached $playerCount player cards. Learning battlefield dynamics.")
   }
 }
