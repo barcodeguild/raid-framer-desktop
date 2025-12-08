@@ -46,6 +46,7 @@ fun main(args: Array<String>) = application {
   // Start core of the app
   LoggingInteractor.start()
   PlayerCacheInteractor.start()
+  EventParserInteractor.start()
   GameMonitorInteractor.start()
 
   // file path args processing
@@ -57,12 +58,18 @@ fun main(args: Array<String>) = application {
       val p = Paths.get(cleaned)
       if (Files.exists(p)) {
         messageBox("Eek!", "You are viewing a replay of combat data from: $p. Live monitoring is disabled while viewing replays.")
-        //GameMonitorInteractor.openLogFileFromExternal(p)
-        //GameMonitorInteractor.setMode(GameMonitorInteractor.MonitorModes.REPLAY)
-        //GameMonitorInteractor.play()
+        GameMonitorInteractor.chooseCombatLog(p)
+        GameMonitorInteractor.setOptions(
+          mode = GameMonitorInteractor.MonitorModes.REPLAY,
+          startMarker = 0L,
+          endMarker = Long.MAX_VALUE
+        )
+        GameMonitorInteractor.restart()
       }
     } catch (_: Exception) {
-      // ignore malformed path
+      Log.error(TAG, "Failed to process incoming log path: $incoming")
+      messageBox("Eek!", "Failed to open the specified combat log file: $incoming")
+      exitProcess(1)
     }
   }
 
@@ -101,8 +108,8 @@ fun main(args: Array<String>) = application {
 fun quit() {
   PlayerCacheInteractor.stop()
   GameMonitorInteractor.stop()
-  //      AppState.tray?.shutdown()
-//      AppState.tray?.remove()
+  // AppState.tray?.shutdown()
+  // AppState.tray?.remove()
   LoggingInteractor.stop()
   exitProcess(0)
 }

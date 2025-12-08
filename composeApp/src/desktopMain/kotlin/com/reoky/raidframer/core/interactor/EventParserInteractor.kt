@@ -3,6 +3,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.reoky.raidframer.RaidFramer
+import com.reoky.raidframer.core.interactor.Log
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDateTime
@@ -15,6 +16,8 @@ import kotlin.math.absoluteValue
  * This interactor ingests combat events from the game monitor and parses them into usable events for the rest of the app.
  */
 object EventParserInteractor : Interactor() {
+
+  private const val TAG = "EventParserInteractor"
 
   private var mostRecentEventTimestamp: Long = 0
 

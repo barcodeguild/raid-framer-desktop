@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.interactor
 
 import java.io.RandomAccessFile
+import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -9,25 +10,24 @@ import kotlin.use
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/**
- * Interactor responsible for locating and tailing the combat.log file.
- * Searches user directories for combat.log files and maintains a handle
- * to the selected file for tailing new lines.
- */
 object GameMonitorInteractor : Interactor() {
+
+  private const val TAG = "GameMonitorInteractor"
+
   private val _isSearching = MutableStateFlow(false)
   val isSearching: StateFlow<Boolean> get() = _isSearching
 
   private val _possiblePaths = MutableStateFlow<List<Path>>(emptyList())
   val possiblePaths: StateFlow<List<Path>> get() = _possiblePaths
 
-  // time range markers used for replays / restarts and exports long marker position timestamp
-  // so the player can view damage charts for a specific fights
   private val _userMarkerStart = MutableStateFlow<Long>(0L)
   val userMarkerStart: StateFlow<Long> get() = _userMarkerStart
 
   private val _userMarkerEnd = MutableStateFlow<Long>(0L)
   val userMarkerEnd: StateFlow<Long> get() = _userMarkerEnd
+
+  private val _isPlaying = MutableStateFlow(false)
+  val isPlaying: StateFlow<Boolean> get() = _isPlaying
 
   @Volatile
   private var currentPath: Path? = null
@@ -38,12 +38,16 @@ object GameMonitorInteractor : Interactor() {
   @Volatile
   private var currentPosition: Long = 0L
 
+  @Volatile
+  private var currentMode: MonitorModes = MonitorModes.DISABLED
 
-  /**
-   * Search for combat.log files according to the provided logic.
-   * Updates _possiblePaths and _isSearching. Will search the user's entire home directory
-   * if searchEverywhere is true, otherwise looks for ArcheRage's default locations.
-   */
+  @Volatile
+  private var replayCompleted: Boolean = false
+
+  // Tunables
+  private const val READ_CHUNK_SIZE = 16 * 1024 * 1024 // 16 MB
+  private const val PARSE_BATCH_SIZE = 1000
+
   fun locateCombatLog(searchEverywhere: Boolean = false) {
     _isSearching.value = true
 
@@ -92,95 +96,267 @@ object GameMonitorInteractor : Interactor() {
     _isSearching.value = false
   }
 
+  fun chooseCombatLog(path: Path) {
+    synchronized(this) {
+      currentPath = path
+    }
+  }
 
-  /**
-   * Called periodically (every 3s from an IO thread). Maintains a handle to the selected combat.log,
-   * tails new lines and forwards them to CombatEventInteractor.parseLine().
-   */
+  fun setOptions(
+    mode: MonitorModes,
+    startMarker: Long,
+    endMarker: Long
+  ) {
+    _userMarkerStart.value = startMarker
+    _userMarkerEnd.value = endMarker
+    currentMode = mode
+
+    if (mode != MonitorModes.REPLAY) {
+      replayCompleted = false
+    }
+
+    if (mode == MonitorModes.DISABLED) {
+      closeFile()
+      replayCompleted = false
+      _isPlaying.value = false
+    } else {
+      try {
+        if (mode == MonitorModes.REPLAY) replayCompleted = false
+        restart()
+      } catch (_: Exception) {
+        _isPlaying.value = false
+      }
+    }
+  }
+
+  fun restart() {
+    synchronized(this) {
+      replayCompleted = false
+      val path = currentPath ?: _possiblePaths.value.firstOrNull()
+      if (path == null) {
+        _isPlaying.value = false
+        return
+      }
+      openFileForMode(path, restart = true)
+    }
+  }
+
   override suspend fun interact() {
+    println("GameMonitorInteractor.interact tick: mode=$currentMode, path=$currentPath, isPlaying=${_isPlaying.value}, replayCompleted=$replayCompleted")
     try {
-      val candidates = _possiblePaths.value
-      if (candidates.isEmpty()) {
-        // nothing to tail
+      if (currentMode == MonitorModes.DISABLED) {
         closeFile()
+        _isPlaying.value = false
+        return
+      }
+
+      if (currentMode == MonitorModes.REPLAY && replayCompleted) {
+        _isPlaying.value = false
+        return
+      }
+
+      val candidates = _possiblePaths.value
+      if (candidates.isEmpty() && currentPath == null) {
+        closeFile()
+        _isPlaying.value = false
         return
       }
 
       val desired = currentPath ?: candidates.firstOrNull() ?: return
 
-      // if we don't have a current, or it doesn't exist, or it's not the desired path, then open the desired one
       if (currentPath == null || !Files.exists(currentPath) || currentPath != desired) {
-        openFile(desired)
+        openFileForMode(desired, restart = false)
       } else {
-        // desired is current, check to see if file size has changed since three seconds ago
-        // check for truncation/rotation
         val fileSize = Files.size(desired)
         if (fileSize < currentPosition) {
-          openFile(desired) // reopen and start tailing log
+          openFileForMode(desired, restart = false)
         }
       }
 
-      val localRaf = raf ?: return
+      val localRaf = raf ?: run {
+        _isPlaying.value = false
+        return
+      }
 
       synchronized(this) {
-        // Ensure pointer at last known position, then read available lines
-        localRaf.seek(currentPosition)
-        var rawLine = localRaf.readLine()
-        while (rawLine != null) {
-          // RandomAccessFile.readLine uses ISO-8859-1 — convert to UTF-8
-          val line = String(rawLine.toByteArray(Charsets.ISO_8859_1), Charsets.UTF_8)
-          try {
-            EventParserInteractor.parseLines(listOf(line))
-          } catch (_: Exception) {
-            // swallow parse exceptions to avoid stopping tailing
+        val channel = localRaf.channel
+        val fileLength = channel.size()
+
+        // determine read target (respect REPLAY end marker)
+        val endMarker = _userMarkerEnd.value
+        val stopPosition = if (currentMode == MonitorModes.REPLAY && endMarker > 0L) {
+          endMarker.coerceAtMost(fileLength)
+        } else {
+          fileLength
+        }
+
+        if (currentPosition < stopPosition) {
+          var pos = currentPosition
+          val iso = Charsets.ISO_8859_1
+          val batch = ArrayList<String>(PARSE_BATCH_SIZE)
+          var leftover = ByteArray(0)
+
+          while (pos < stopPosition) {
+            val remaining = (stopPosition - pos).coerceAtMost(READ_CHUNK_SIZE.toLong()).toInt()
+            val buffer = ByteBuffer.allocate(remaining)
+            var read = 0
+            while (read < remaining) {
+              val r = channel.read(buffer, pos + read)
+              if (r <= 0) break
+              read += r.toInt()
+            }
+            if (read <= 0) break
+            buffer.flip()
+            val chunkBytes = ByteArray(buffer.remaining())
+            buffer.get(chunkBytes)
+
+            // combine leftover + chunk
+            val combined = if (leftover.isNotEmpty()) {
+              val merged = ByteArray(leftover.size + chunkBytes.size)
+              System.arraycopy(leftover, 0, merged, 0, leftover.size)
+              System.arraycopy(chunkBytes, 0, merged, leftover.size, chunkBytes.size)
+              merged
+            } else {
+              chunkBytes
+            }
+
+            var start = 0
+            val newline = '\n'.code.toByte()
+            for (i in combined.indices) {
+              if (combined[i] == newline) {
+                val endIdx = if (i > 0 && combined[i - 1] == '\r'.code.toByte()) i - 1 else i
+                val lineBytes = combined.copyOfRange(start, endIdx)
+                val line = String(lineBytes, iso)
+                batch.add(line)
+                if (batch.size >= PARSE_BATCH_SIZE) {
+                  try {
+                    EventParserInteractor.parseLines(batch.toList())
+                  } catch (_: Exception) {
+                    // swallow parse exceptions
+                  }
+                  batch.clear()
+                }
+                start = i + 1
+              }
+            }
+
+            leftover = if (start < combined.size) combined.copyOfRange(start, combined.size) else ByteArray(0)
+            pos += read.toLong()
           }
-          currentPosition = localRaf.filePointer
-          rawLine = localRaf.readLine()
+
+          // trailing leftover becomes final line fragment
+          if (leftover.isNotEmpty()) {
+            val line = String(leftover, iso)
+            batch.add(line)
+          }
+
+          if (batch.isNotEmpty()) {
+            try {
+              EventParserInteractor.parseLines(batch.toList())
+            } catch (_: Exception) {
+              // swallow parse exceptions
+            }
+            batch.clear()
+          }
+
+          currentPosition = pos.coerceAtMost(stopPosition)
+        }
+
+        // After reading available lines, mode-specific actions
+        val fileLenAfter = channel.size()
+        when (currentMode) {
+          MonitorModes.REPLAY -> {
+            val endMarkerVal = _userMarkerEnd.value
+            val stopPos = if (endMarkerVal <= 0L) Long.MAX_VALUE else endMarkerVal
+            if (currentPosition >= stopPos || currentPosition >= fileLenAfter) {
+              // finished replay: close reader but keep the chosen path and mark completed
+              closeFile(clearPath = false)
+              replayCompleted = true
+              _isPlaying.value = false
+              Log.info(TAG, "Completed REPLAY mode tailing of combat log at $desired...")
+            } else {
+              _isPlaying.value = true
+            }
+          }
+          MonitorModes.MONITOR -> {
+            _isPlaying.value = true
+          }
+          else -> {
+            _isPlaying.value = false
+          }
         }
       }
     } catch (t: Throwable) {
-      // on any IO error, close to allow recovery next tick
       try {
         closeFile()
       } catch (_: Exception) {}
+      _isPlaying.value = false
     }
   }
 
-  private fun openFile(path: Path) {
+  private fun openFileForMode(path: Path, restart: Boolean) {
+    Log.info(TAG, "Opening combat log at $path for mode $currentMode (restart=$restart)")
     synchronized(this) {
       closeFile()
       try {
         val rafLocal = RandomAccessFile(path.toFile(), "r")
-        // start tailing at end of file to avoid reprocessing existing content
-        val startPos = rafLocal.length()
+        val fileLen = rafLocal.length()
+
+        val startMarker = _userMarkerStart.value
+        val startPos = when (currentMode) {
+          MonitorModes.REPLAY -> {
+            val desired = if (startMarker > 0L) startMarker else 0L
+            desired.coerceIn(0L, fileLen)
+          }
+          MonitorModes.MONITOR -> {
+            if (startMarker > 0L) startMarker.coerceIn(0L, fileLen) else fileLen
+          }
+          else -> {
+            fileLen
+          }
+        }
+
         rafLocal.seek(startPos)
         raf = rafLocal
         currentPath = path
         currentPosition = startPos
+
+        _isPlaying.value = when (currentMode) {
+          MonitorModes.REPLAY -> {
+            val endMarker = _userMarkerEnd.value
+            val stopPosition = if (endMarker <= 0L) Long.MAX_VALUE else endMarker
+            (currentPosition < stopPosition) && (currentPosition < rafLocal.length())
+          }
+          MonitorModes.MONITOR -> true
+          else -> false
+        }
       } catch (t: Throwable) {
-        // failed to open — ensure closed state
         raf = null
         currentPath = null
         currentPosition = 0L
+        _isPlaying.value = false
       }
     }
   }
 
-  private fun closeFile() {
+  private fun closeFile(clearPath: Boolean = true) {
     synchronized(this) {
       try {
         raf?.close()
       } catch (_: Exception) {}
       raf = null
-      currentPath = null
-      currentPosition = 0L
+      if (clearPath) {
+        currentPath = null
+        currentPosition = 0L
+      } else {
+        currentPosition = 0L
+      }
     }
   }
 
   enum class MonitorModes {
-    DISABLED, // no monitoring
-    REPLAY, // start from beginning of file (or from marker position) and stop at end
-    RESTART, // start from marker position and continue tailing
-    TAIL // start tailing from end of file
+    DISABLED,
+    REPLAY,
+    MONITOR
   }
 }
