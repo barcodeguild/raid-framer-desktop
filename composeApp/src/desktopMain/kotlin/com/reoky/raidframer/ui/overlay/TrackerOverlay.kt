@@ -1,7 +1,7 @@
 package com.reoky.raidframer.ui.overlay
 
 import com.reoky.raidframer.RaidFramer
-import EventParserInteractor
+import com.reoky.raidframer.core.helpers.ParserHelper
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.renderDebuffThumbnailGrid
+import com.reoky.raidframer.core.model.DamageEvent
+import com.reoky.raidframer.core.model.HealEvent
 import lol.rfcloud.core.helpers.annotatedStringForAttack
 import lol.rfcloud.core.helpers.annotatedStringForHeal
 import kotlinx.coroutines.delay
@@ -55,7 +57,7 @@ fun TrackerOverlay() {
 
   var showDmg by remember { mutableStateOf(false) }
   var castProgress by remember { mutableStateOf(0f) }
-  val spellName by EventParserInteractor.targetCurrentlyCasting.collectAsState()
+  val spellName by ParserHelper.targetCurrentlyCasting.collectAsState()
   var isCasting by remember { mutableStateOf(false) }
 
   val animatedProgress by animateFloatAsState(
@@ -75,15 +77,15 @@ fun TrackerOverlay() {
   }
 
   // incoming and outgoing damage
-  val incomingByPlayer by EventParserInteractor.incomingEventsByPlayer.collectAsState()
+  val incomingByPlayer by ParserHelper.incomingEventsByPlayer.collectAsState()
   val sortedAndFilteredIncoming =
     incomingByPlayer.getOrDefault(RaidFramer.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
 
-  val outgoingByPlayer by EventParserInteractor.outgoingEventsByPlayer.collectAsState()
+  val outgoingByPlayer by ParserHelper.outgoingEventsByPlayer.collectAsState()
   val sortedAndFilteredOutgoing =
     outgoingByPlayer.getOrDefault(RaidFramer.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
 
-  val debuffsByPlayer by EventParserInteractor.activeDebuffsByPlayer.collectAsState()
+  val debuffsByPlayer by ParserHelper.activeDebuffsByPlayer.collectAsState()
   val filteredDebuffs = debuffsByPlayer.getOrDefault(RaidFramer.currentTargetName.value, listOf()).map { it.debuff }
 
 
@@ -301,8 +303,8 @@ fun TrackerOverlay() {
                   ) {
                     Text(
                       text = when (val event = sortedAndFilteredIncoming[item]) {
-                        is EventParserInteractor.DamageEvent -> annotatedStringForAttack(event)
-                        is EventParserInteractor.HealEvent -> annotatedStringForHeal(event)
+                        is DamageEvent -> annotatedStringForAttack(event)
+                        is HealEvent -> annotatedStringForHeal(event)
                         else -> buildAnnotatedString { }
                       },
                       maxLines = 1,
@@ -330,8 +332,8 @@ fun TrackerOverlay() {
                   ) {
                     Text(
                       text = when (val event = sortedAndFilteredOutgoing[item]) {
-                        is EventParserInteractor.DamageEvent -> annotatedStringForAttack(event)
-                        is EventParserInteractor.HealEvent -> annotatedStringForHeal(event)
+                        is DamageEvent -> annotatedStringForAttack(event)
+                        is HealEvent -> annotatedStringForHeal(event)
                         else -> buildAnnotatedString { }
                       },
                       maxLines = 1,

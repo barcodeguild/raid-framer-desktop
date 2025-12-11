@@ -326,7 +326,6 @@ enum class SpecType(val trees: Set<SkillTreeType>) {
   ORACLE(setOf(SkillTreeType.AURAMANCY, SkillTreeType.ARCHERY, SkillTreeType.VITALISM)),
   OUTRIDER(setOf(SkillTreeType.BATTLERAGE, SkillTreeType.ARCHERY, SkillTreeType.SHADOWPLAY)),
   PALADIN(setOf(SkillTreeType.BATTLERAGE, SkillTreeType.DEFENSE, SkillTreeType.VITALISM)),
-  PENDING(setOf(SkillTreeType.SONGCRAFT, SkillTreeType.SONGCRAFT, SkillTreeType.SONGCRAFT)),
   PHANTASM(setOf(SkillTreeType.AURAMANCY, SkillTreeType.OCCULTISM, SkillTreeType.SONGCRAFT)),
   PHANTOM(setOf(SkillTreeType.BATTLERAGE, SkillTreeType.WITCHCRAFT, SkillTreeType.SWIFTBLADE)),
   PITFIEND(setOf(SkillTreeType.BATTLERAGE, SkillTreeType.MALEDICTION, SkillTreeType.SWIFTBLADE)),
@@ -428,11 +427,16 @@ enum class SpecType(val trees: Set<SkillTreeType>) {
   WITCH_DOCTOR(setOf(SkillTreeType.WITCHCRAFT, SkillTreeType.OCCULTISM, SkillTreeType.MALEDICTION)),
   WRATHSLAYER(setOf(SkillTreeType.BATTLERAGE, SkillTreeType.AURAMANCY, SkillTreeType.GUNSLINGER)),
   ZEALOT(setOf(SkillTreeType.OCCULTISM, SkillTreeType.SORCERY, SkillTreeType.MALEDICTION)),
-  ZEPHYR(setOf(SkillTreeType.ARCHERY, SkillTreeType.SONGCRAFT, SkillTreeType.SWIFTBLADE));
+  ZEPHYR(setOf(SkillTreeType.ARCHERY, SkillTreeType.SONGCRAFT, SkillTreeType.SWIFTBLADE)),
+
+  UNKNOWN(setOf());
+
+  fun toDisplayName(): String = name.lowercase().split('_').joinToString(" ") { it.replaceFirstChar { ch -> ch.uppercase() } }
 
   companion object {
     private val byTrees = entries.associateBy { it.trees }
-    fun fromTrees(trees: Set<SkillTreeType>): SpecType? = byTrees[trees]
+    fun fromTrees(trees: Set<SkillTreeType>): SpecType = byTrees[trees] ?: SpecType.UNKNOWN
+    fun fromName(name: String): SpecType? = entries.find { it.name.equals(name, ignoreCase = true) }
   }
 }
 

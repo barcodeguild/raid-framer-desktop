@@ -1,6 +1,5 @@
 package lol.rfcloud.core.helpers
 
-import EventParserInteractor
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -9,7 +8,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-//import io.realm.kotlin.Realm
+import com.reoky.raidframer.core.model.DamageEvent
+import com.reoky.raidframer.core.model.HealEvent
 import java.awt.Desktop
 import java.awt.Toolkit
 import java.net.URI
@@ -67,7 +67,7 @@ fun Long.toLocalTimeString(): String {
  * it's too and will get used multiple times potentially.
  */
 @Composable
-fun annotatedStringForAttack(event: EventParserInteractor.DamageEvent): AnnotatedString {
+fun annotatedStringForAttack(event: DamageEvent): AnnotatedString {
   return buildAnnotatedString {
     withStyle(style = SpanStyle(color = Color(249, 191, 59))) {
       append(event.caster)
@@ -103,7 +103,7 @@ fun annotatedStringForAttack(event: EventParserInteractor.DamageEvent): Annotate
  * Makes a pretty-looking AnnotatedString for the heal events.
  */
 @Composable
-fun annotatedStringForHeal(event: EventParserInteractor.HealEvent): AnnotatedString {
+fun annotatedStringForHeal(event: HealEvent): AnnotatedString {
   return buildAnnotatedString {
     withStyle(style = SpanStyle(color = Color(249, 191, 59))) {
       append(event.target)

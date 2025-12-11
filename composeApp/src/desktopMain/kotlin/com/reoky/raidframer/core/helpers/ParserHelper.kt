@@ -1,11 +1,18 @@
+package com.reoky.raidframer.core.helpers
+
+import com.reoky.raidframer.RaidFramer
 import com.reoky.raidframer.core.interactor.Interactor
-import kotlinx.coroutines.*
+import com.reoky.raidframer.core.model.BuffEndedEvent
+import com.reoky.raidframer.core.model.BuffGainedEvent
+import com.reoky.raidframer.core.model.CastingEvent
+import com.reoky.raidframer.core.model.CombatEvent
+import com.reoky.raidframer.core.model.DamageEvent
+import com.reoky.raidframer.core.model.DebuffEndedEvent
+import com.reoky.raidframer.core.model.DebuffGainedEvent
+import com.reoky.raidframer.core.model.HealEvent
+import com.reoky.raidframer.core.model.SuccessfulCastEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import com.reoky.raidframer.RaidFramer
-import com.reoky.raidframer.core.interactor.Log
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -13,11 +20,12 @@ import java.util.regex.Pattern
 import kotlin.math.absoluteValue
 
 /*
- * This interactor ingests combat events from the game monitor and parses them into usable events for the rest of the app.
+ * Used to parse lines of ArcheRage combat log into CombatEvent objects. This used to be an interactor but has
+ * been converted to a helper since it doesn't need to run on its own coroutine loop.
  */
-object EventParserInteractor : Interactor() {
+object ParserHelper {
 
-  private const val TAG = "EventParserInteractor"
+  private const val TAG = "ParserHelper"
 
   private var mostRecentEventTimestamp: Long = 0
 
@@ -55,7 +63,7 @@ object EventParserInteractor : Interactor() {
   private val _retributionByPlayer = MutableStateFlow<MutableMap<String, Long>>(mutableMapOf())
   val retributionByPlayer: StateFlow<MutableMap<String, Long>> = _retributionByPlayer
 
-  // super tracker
+  // Track Events by Player
   private val _incomingEventsByPlayer = MutableStateFlow<MutableMap<String, List<CombatEvent>>>(mutableMapOf())
   val incomingEventsByPlayer: StateFlow<MutableMap<String, List<CombatEvent>>> = _incomingEventsByPlayer
   private val _outgoingEventsByPlayer = MutableStateFlow<MutableMap<String, List<CombatEvent>>>(mutableMapOf())
@@ -83,32 +91,11 @@ object EventParserInteractor : Interactor() {
     _activeDebuffsByPlayer.value = mutableMapOf()
   }
 
-  /*
-   * Main interaction event loop. Watches the selected log file for changes and parses new lines.
-   */
-  override suspend fun interact() {
-//    if (selectedPath.isNullOrBlank()) return
-//    val logPath = Paths.get(selectedPath!!)
-//    withContext(Dispatchers.IO) {
-//      Files.newBufferedReader(logPath)
-//    }.use { reader ->
-//      // if (lastIndex == 0L) lastIndex = Files.lines(logPath).count()
-//      val lines = reader.lines().skip(lastIndex).iterator()
-//      while (lines.hasNext()) {
-//        val line = lines.next()
-//        parseLines(listOf(line))
-//        lastIndex++
-//      }
-//      lastIndex = Files.lines(logPath).count() // move index pointer to the end of the file
-//    }
-//    pruneOldEvents()
-//    pruneOldDebuffs()
-  }
 
   /*
    * Turns log lines into CombatEvents.
    */
-  fun parseLines(lines: List<String>, reviewMode: Boolean = false) {
+  fun parseCombatEvents(lines: List<String>): List<CombatEvent> {
     val events = mutableListOf<CombatEvent>()
 
     for (line in lines) {
@@ -125,8 +112,7 @@ object EventParserInteractor : Interactor() {
           spell = matcher.group(5),
           critical = false,
         )
-        postDamage(event)
-        mostRecentEventTimestamp = event.timestamp
+        events.add(event)
         continue
       }
 
@@ -142,8 +128,7 @@ object EventParserInteractor : Interactor() {
           spell = "Auto-Attack",
           critical = false,
         )
-        postDamage(event)
-        mostRecentEventTimestamp = event.timestamp
+        events.add(event)
         continue
       }
 
@@ -159,8 +144,7 @@ object EventParserInteractor : Interactor() {
           spell = matcher.group(5),
           critical = false,
         )
-        postDamage(event)
-        mostRecentEventTimestamp = event.timestamp
+        events.add(event)
         continue
       }
 
@@ -176,8 +160,7 @@ object EventParserInteractor : Interactor() {
           spell = matcher.group(5),
           critical = false,
         )
-        postHeal(event)
-        mostRecentEventTimestamp = event.timestamp
+        events.add(event)
         continue
       }
 
@@ -190,8 +173,7 @@ object EventParserInteractor : Interactor() {
           caster = matcher.group(3),
           spell = matcher.group(4),
         )
-        postCasting(event)
-        mostRecentEventTimestamp = event.timestamp
+        events.add(event)
         continue
       }
 
@@ -204,7 +186,7 @@ object EventParserInteractor : Interactor() {
           caster = matcher.group(3),
           spell = matcher.group(4),
         )
-        mostRecentEventTimestamp = event.timestamp
+        events.add(event)
         continue
       }
 
@@ -217,8 +199,7 @@ object EventParserInteractor : Interactor() {
           target = matcher.group(3),
           buff = matcher.group(4),
         )
-        processBuffGained(event)
-        mostRecentEventTimestamp = event.timestamp
+        events.add(event)
         continue
       }
 
@@ -231,8 +212,7 @@ object EventParserInteractor : Interactor() {
           target = matcher.group(3),
           buff = matcher.group(4),
         )
-        processBuffEnded(event)
-        mostRecentEventTimestamp = event.timestamp
+        events.add(event)
         continue
       }
 
@@ -245,7 +225,7 @@ object EventParserInteractor : Interactor() {
           target = matcher.group(3),
           debuff = matcher.group(4),
         )
-        processDebuffGained(event)
+        events.add(event)
         continue
       }
 
@@ -258,12 +238,12 @@ object EventParserInteractor : Interactor() {
           target = matcher.group(3),
           debuff = matcher.group(4),
         )
-        processDebuffEnded(event)
+        events.add(event)
         continue
       }
 
     }
-    //return events
+    return events
   }
 
   private fun postDamage(event: DamageEvent) {
@@ -411,63 +391,5 @@ object EventParserInteractor : Interactor() {
 //    selectedPath = path
 //    lastIndex = 0
   }
-
-  interface CombatEvent {
-    val timestamp: Long
-  }
-
-  data class DamageEvent(
-    override val timestamp: Long,
-    val caster: String,
-    val target: String,
-    val damage: Int,
-    val spell: String,
-    val critical: Boolean,
-  ) : CombatEvent
-
-  data class HealEvent(
-    override val timestamp: Long,
-    val caster: String,
-    val target: String,
-    val amount: Int,
-    val spell: String,
-    val critical: Boolean,
-  ) : CombatEvent
-
-  data class CastingEvent(
-    override val timestamp: Long,
-    val caster: String,
-    val spell: String,
-  ) : CombatEvent
-
-  data class SuccessfulCastEvent(
-    override val timestamp: Long,
-    val caster: String,
-    val spell: String,
-  ) : CombatEvent
-
-  data class BuffGainedEvent(
-    override val timestamp: Long,
-    val target: String,
-    val buff: String,
-  ) : CombatEvent
-
-  data class BuffEndedEvent(
-    override val timestamp: Long,
-    val target: String,
-    val buff: String,
-  ) : CombatEvent
-
-  data class DebuffGainedEvent(
-    override val timestamp: Long,
-    val target: String,
-    val debuff: String,
-  ) : CombatEvent
-
-  data class DebuffEndedEvent(
-    override val timestamp: Long,
-    val target: String,
-    val debuff: String,
-  ) : CombatEvent
 
 }

@@ -7,6 +7,7 @@ import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
+import com.reoky.raidframer.core.helpers.ParserHelper
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
@@ -46,7 +47,6 @@ fun main(args: Array<String>) = application {
   // Start core of the app
   LoggingInteractor.start()
   PlayerCacheInteractor.start()
-  EventParserInteractor.start()
   GameMonitorInteractor.start()
 
   // file path args processing

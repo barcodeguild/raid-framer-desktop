@@ -1,5 +1,6 @@
 package com.reoky.raidframer.core.interactor
 
+import com.reoky.raidframer.core.helpers.ParserHelper
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.file.Files
@@ -230,7 +231,7 @@ object GameMonitorInteractor : Interactor() {
                 batch.add(line)
                 if (batch.size >= PARSE_BATCH_SIZE) {
                   try {
-                    EventParserInteractor.parseLines(batch.toList())
+                    ParserHelper.parseCombatEvents(batch.toList())
                   } catch (_: Exception) {
                     // swallow parse exceptions
                   }
@@ -252,7 +253,7 @@ object GameMonitorInteractor : Interactor() {
 
           if (batch.isNotEmpty()) {
             try {
-              EventParserInteractor.parseLines(batch.toList())
+              ParserHelper.parseCombatEvents(batch.toList())
             } catch (_: Exception) {
               // swallow parse exceptions
             }
