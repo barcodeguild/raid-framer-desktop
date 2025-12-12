@@ -231,7 +231,10 @@ object GameMonitorInteractor : Interactor() {
                 batch.add(line)
                 if (batch.size >= PARSE_BATCH_SIZE) {
                   try {
-                    ParserHelper.parseCombatEvents(batch.toList())
+                    val events = ParserHelper.parseCombatEvents(batch.toList())
+                    for (event in events) {
+                      PlayerCacheInteractor.postEvent(event)
+                    }
                   } catch (_: Exception) {
                     // swallow parse exceptions
                   }
@@ -253,7 +256,10 @@ object GameMonitorInteractor : Interactor() {
 
           if (batch.isNotEmpty()) {
             try {
-              ParserHelper.parseCombatEvents(batch.toList())
+              val events = ParserHelper.parseCombatEvents(batch.toList())
+              for (event in events) {
+                PlayerCacheInteractor.postEvent(event)
+              }
             } catch (_: Exception) {
               // swallow parse exceptions
             }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshotFlow
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.model.CombatEvent
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
 import com.reoky.raidframer.core.model.PlayerCard
@@ -38,20 +39,6 @@ object PlayerCacheInteractor : Interactor() {
     val savedCount = RFDao.playerCacheDao.getPlayerCount()
     val cachedCount = _cards.values.count()
     Log.info(TAG, "Currently saved $savedCount player cards. Cached count in memory is: $cachedCount")
-
-    // Post an event to the card
-    val damageEvent = DamageEvent(
-      timestamp = System.currentTimeMillis(),
-      caster = "Reoky",
-      target = "Fren",
-      damage = 16445,
-      spell = "Flamebolt",
-      critical = false
-    )
-    postDamage(damageEvent)
-    _cards.forEach { string, card ->
-      Log.info(TAG, "PlayerCard for $string: (total dmg: ${card.sessionDamageTotal}, total heal: ${card.sessionHealTotal}, isRealPlayer: ${card.isRealPlayer}), recentDamageEvents: ${card.recentDamageEvents.size}, recentHealEvents: ${card.recentHealEvents.size}")
-    }
 
     // logic to determine if player should be upgraded from NPC to real player
     _cards.forEach { name, card ->
@@ -92,32 +79,30 @@ object PlayerCacheInteractor : Interactor() {
     return _cards[name]
   }
 
-  private fun shouldUpgradeToPlayer(card: PlayerCard): Boolean {
-    // Simple heuristic: if the player has done any healing or crowd control, consider them a real player
-    val hasHealed = card.sessionHealTotal > 0
-    val hasCC = card.sessionCCTotal > 0
-    return hasHealed || hasCC
-  }
-
   /* Event Posting */
 
-  fun postDamage(event: DamageEvent) {
-    createCardIfNoneExists(event.caster)
-    _cards[event.caster]?.let { card ->
-      val updatedCard = card.postDamageEvent(event)
-      // Re-assign the updated card back into the map
-      _cards.remove(event.caster)
-      _cards[event.caster] = updatedCard
+  // catch all
+  fun postEvent(event: CombatEvent) {
+    when (event) {
+      is DamageEvent -> postDamage(event)
+      is HealEvent -> postHeal(event)
+      else -> {
+        // no-op for other event types
+      }
     }
   }
 
-  fun postHeal(event: HealEvent) {
+  private fun postDamage(event: DamageEvent) {
     createCardIfNoneExists(event.caster)
     _cards[event.caster]?.let { card ->
-      val updatedCard = card.postHealEvent(event)
-      // Re-assign the updated card back into the map
-      _cards.remove(event.caster)
-      _cards[event.caster] = updatedCard
+      _cards[event.caster] = card.postDamageEvent(event)
+    }
+  }
+
+  private fun postHeal(event: HealEvent) {
+    createCardIfNoneExists(event.caster)
+    _cards[event.caster]?.let { card ->
+      _cards[event.caster] = card.postHealEvent(event)
     }
   }
 
