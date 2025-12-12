@@ -2,14 +2,6 @@ package com.reoky.raidframer.core.model
 
 import com.reoky.raidframer.core.database.PlayerCacheDao
 
-/**
-  * Save the current PlayerCard's cache to the database. The PlayerCacheInteractor does this periodically for all loaded PlayerCards.
-  */
-suspend fun PlayerCard.saveToCache(dao: PlayerCacheDao) {
-  if (this.cache == null) return
-  assert(this.isRealPlayer) // for good measure, friends
-  dao.insert(this.cache)
-}
 
 /*
   * Determine if the PlayerCard should be upgraded to a real player based on heuristics. (oh eek!)
@@ -19,10 +11,10 @@ suspend fun PlayerCard.saveToCache(dao: PlayerCacheDao) {
 fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
   // rule out the easy stuff first
   if (this.name.contains(" ")) return false // only NPCs can have spaces in their names
-  if (this.name in listOf("Unknown", "Monster", "Critter")) return false // common NPC names
-  val recentCasts = this.recentCastEvents.takeLast(100)
-  val recentHeals = this.recentHealEvents.takeLast(100)
-  return false
+  if (this.name in listOf("Unknown Target", "Fren", "Meina", "Glenn")) return false // we might want a blacklist in the future
+  this.recentDebuffGainedEvent.takeLast(100).let {
+    return it.map { event -> event.debuff }.contains("Preparing Glider") // NPCs can't open their gliders
+  }
 }
 
 /**
@@ -31,6 +23,7 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
 fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
   return this.copy(
       lastEvent = event.timestamp,
+      cache = cache?.copy(lastSeen = event.timestamp),
       recentDamageEvents = (this.recentDamageEvents + event), // optional to takeLast(n)
       sessionDamageTotal = this.sessionDamageTotal + event.damage
     )
@@ -42,6 +35,7 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
+    cache = cache?.copy(lastSeen = event.timestamp),
     recentHealEvents = (this.recentHealEvents + event), // optional to takeLast(n)
     sessionHealTotal = this.sessionHealTotal + event.amount
   )
@@ -53,6 +47,7 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
 fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
+    cache = cache?.copy(lastSeen = event.timestamp),
     recentCastEvents = (this.recentCastEvents + event) // optional to takeLast(n)
   )
 }
@@ -63,6 +58,7 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
+    cache = cache?.copy(lastSeen = event.timestamp),
     recentCastSuccessfulCastEvent = (this.recentCastSuccessfulCastEvent + event) // optional to takeLast(n)
   )
 }
@@ -73,6 +69,7 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
 fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
+    cache = cache?.copy(lastSeen = event.timestamp),
     recentBuffGainedEvents = (this.recentBuffGainedEvents + event) // optional to takeLast(n)
   )
 }
@@ -83,6 +80,7 @@ fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
 fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
+    cache = cache?.copy(lastSeen = event.timestamp),
     recentBuffEndedEvent = (this.recentBuffEndedEvent + event) // optional to takeLast(n)
   )
 }
@@ -93,6 +91,7 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
 fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
+    cache = cache?.copy(lastSeen = event.timestamp),
     recentDebuffGainedEvent = (this.recentDebuffGainedEvent + event), // optional to takeLast(n)
   )
 }
@@ -103,6 +102,7 @@ fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
 fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
+    cache = cache?.copy(lastSeen = event.timestamp),
     recentDebuffEndedEvent = (this.recentDebuffEndedEvent + event), // optional to takeLast(n)
   )
 }

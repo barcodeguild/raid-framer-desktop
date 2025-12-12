@@ -2,14 +2,27 @@ package com.reoky.raidframer.core.interactor
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshotFlow
+import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.model.BuffEndedEvent
+import com.reoky.raidframer.core.model.BuffGainedEvent
+import com.reoky.raidframer.core.model.CastingEvent
 import com.reoky.raidframer.core.model.CombatEvent
 import com.reoky.raidframer.core.model.DamageEvent
+import com.reoky.raidframer.core.model.DebuffEndedEvent
+import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
 import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.model.SuccessfulCastEvent
+import com.reoky.raidframer.core.model.postBuffEndedEvent
+import com.reoky.raidframer.core.model.postBuffGainedEvent
+import com.reoky.raidframer.core.model.postCastingEvent
 import com.reoky.raidframer.core.model.postDamageEvent
+import com.reoky.raidframer.core.model.postDebuffEndedEvent
+import com.reoky.raidframer.core.model.postDebuffGainedEvent
 import com.reoky.raidframer.core.model.postHealEvent
+import com.reoky.raidframer.core.model.postSuccessfulCastEvent
 import com.reoky.raidframer.core.model.shouldUpgradeToPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,14 +51,30 @@ object PlayerCacheInteractor : Interactor() {
   override suspend fun interact() {
     val savedCount = RFDao.playerCacheDao.getPlayerCount()
     val cachedCount = _cards.values.count()
-    Log.info(TAG, "Currently saved $savedCount player cards. Cached count in memory is: $cachedCount")
+    Log.info(TAG, "Persisted $savedCount players. ($cachedCount total entities (mounts,players,pets,mobs,etc) cached in memory)")
 
-    // logic to determine if player should be upgraded from NPC to real player
     _cards.forEach { name, card ->
+
+      // logic to determine if player should be upgraded from NPC to real player
       if (!card.isRealPlayer && card.shouldUpgradeToPlayer()) {
         Log.info(TAG, "Upgrading ${card.name} from NPC to Real Player based on activity.")
-        val upgradedCard = card.copy(isRealPlayer = true)
+        val upgradedCard = card.copy(
+          isRealPlayer = true,
+          cache = PlayerCacheEntity(
+            playerName = card.name,
+            lastSeen = card.lastEvent,
+            lastKnownSpec = card.currentBuild
+          )
+        )
         _cards[name] = upgradedCard
+      }
+
+      // TODO: update last seen, build, detection and heuristic data here too?
+
+      // store all cached cards back to the database
+      runBlocking {
+        if (card.cache == null || !card.isRealPlayer) return@runBlocking
+        RFDao.playerCacheDao.insert(card.cache)
       }
     }
   }
@@ -86,6 +115,12 @@ object PlayerCacheInteractor : Interactor() {
     when (event) {
       is DamageEvent -> postDamage(event)
       is HealEvent -> postHeal(event)
+      is CastingEvent -> postCasting(event)
+      is SuccessfulCastEvent -> postSuccessfulCast(event)
+      is BuffGainedEvent -> postBuffGained(event)
+      is BuffEndedEvent -> postBuffEnded(event)
+      is DebuffGainedEvent -> postDebuffGained(event)
+      is DebuffEndedEvent -> postDebuffEnded(event)
       else -> {
         // no-op for other event types
       }
@@ -105,6 +140,49 @@ object PlayerCacheInteractor : Interactor() {
       _cards[event.caster] = card.postHealEvent(event)
     }
   }
+
+  private fun postCasting(event: CastingEvent) {
+    createCardIfNoneExists(event.caster)
+    _cards[event.caster]?.let { card ->
+      _cards[event.caster] = card.postCastingEvent(event)
+    }
+  }
+
+  private fun postSuccessfulCast(event: SuccessfulCastEvent) {
+    createCardIfNoneExists(event.caster)
+    _cards[event.caster]?.let { card ->
+      _cards[event.caster] = card.postSuccessfulCastEvent(event)
+    }
+  }
+
+  private fun postBuffGained(event: BuffGainedEvent) {
+    createCardIfNoneExists(event.target)
+    _cards[event.target]?.let { card ->
+      _cards[event.target] = card.postBuffGainedEvent(event)
+    }
+  }
+
+  private fun postBuffEnded(event: BuffEndedEvent) {
+    createCardIfNoneExists(event.target)
+    _cards[event.target]?.let { card ->
+      _cards[event.target] = card.postBuffEndedEvent(event)
+    }
+  }
+
+  private fun postDebuffGained(event: DebuffGainedEvent) {
+    createCardIfNoneExists(event.target)
+    _cards[event.target]?.let { card ->
+      _cards[event.target] = card.postDebuffGainedEvent(event)
+    }
+  }
+
+  private fun postDebuffEnded(event: DebuffEndedEvent) {
+    createCardIfNoneExists(event.target)
+    _cards[event.target]?.let { card ->
+      _cards[event.target] = card.postDebuffEndedEvent(event)
+    }
+  }
+
 
   /* UI Subscriptions */
   val topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
