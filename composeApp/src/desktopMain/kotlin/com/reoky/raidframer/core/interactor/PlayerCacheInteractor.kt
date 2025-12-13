@@ -4,7 +4,10 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshotFlow
 import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.database.RFDao
+import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.definitions.buildSkillTreeLastUsedMap
+import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
 import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CastingEvent
@@ -53,7 +56,7 @@ object PlayerCacheInteractor : Interactor() {
     val cachedCount = _cards.values.count()
     Log.info(TAG, "Persisted $savedCount players. ($cachedCount total entities (mounts,players,pets,mobs,etc) cached in memory)")
 
-    _cards.forEach { name, card ->
+    _cards.forEach { (name, card) ->
 
       // logic to determine if player should be upgraded from NPC to real player
       if (!card.isRealPlayer && card.shouldUpgradeToPlayer()) {
@@ -69,12 +72,46 @@ object PlayerCacheInteractor : Interactor() {
         _cards[name] = upgradedCard
       }
 
-      // TODO: update last seen, build, detection and heuristic data here too?
+      if (!card.isRealPlayer) return@forEach // only real players have specs
+
+      // identify SpecType based on recent casts
+      val skillTreeLastUsed: MutableMap<SkillTreeType, Long> = buildSkillTreeLastUsedMap() // timestamp 0 for all trees
+      card.recentCastEvents.take(128).forEach { castEvent ->
+        findSkillTreeForSpell(castEvent.spell)?.let { tree ->
+          skillTreeLastUsed[tree] = castEvent.timestamp
+        }
+      }
+
+      // determine three most recently used skill trees
+      val threeMostRecentTrees = skillTreeLastUsed.entries
+        .sortedByDescending { it.value } // most recent first
+        .take(3) // take top three
+        .map { it.key }
+        .toSet()
+
+      if (threeMostRecentTrees.count() < 3) {
+        return@forEach // not enough data yet, gib unknown
+      }
+
+      val determinedSpec = SpecType.fromTrees(threeMostRecentTrees)
+
+      // now update all the cards with the determined spec (some are gonna be unknown! but that's ok friends!)
+      val updatedCard = card.copy(
+        currentBuild = determinedSpec.name,
+        cache = PlayerCacheEntity(
+          playerName = card.name,
+          lastSeen = card.lastEvent,
+          lastKnownSpec = determinedSpec.name
+        )
+      )
+      _cards[name] = updatedCard
+      if (determinedSpec != SpecType.UNKNOWN) {
+        Log.info(TAG, "Determined ${card.name} is playing as ${determinedSpec.name}.")
+      }
 
       // store all cached cards back to the database
-      runBlocking {
-        if (card.cache == null || !card.isRealPlayer) return@runBlocking
-        RFDao.playerCacheDao.insert(card.cache)
+      _cards[name]?.cache?.let {
+        RFDao.playerCacheDao.insert(it)
       }
     }
   }

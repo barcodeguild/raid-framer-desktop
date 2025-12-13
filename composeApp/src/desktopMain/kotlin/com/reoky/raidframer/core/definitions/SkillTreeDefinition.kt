@@ -1,27 +1,6 @@
 package com.reoky.raidframer.core.definitions
 
 /*
- * All the skill-trees in the game. This is useful if we need to loop over all the trees.
- */
-val ALL_SKILL_TREES = listOf<SkillTreeDefinition>(
-  ArcheryDefinition,
-  AuramancyDefinition,
-  BattlerageDefinition,
-  DefenseDefinition,
-  GunslingerDefinition,
-  MaledictionDefinition,
-  OccultismDefinition,
-  ShadowplayDefinition,
-  SongcraftDefinition,
-  SorceryDefinition,
-  SpelldanceDefinition,
-  SwiftbladeDefinition,
-  VitalismDefinition,
-  WitchcraftDefinition
-)
-
-
-/*
  * Whitelist of preferred builds. This is mostly just opinionated. I'm going to put a badge next to players who are playing PvP specs.
  */
 val META_CC_SPECS = setOf<SpecType>(
@@ -55,12 +34,68 @@ data class Skill(
   val possibleNames: List<String> = emptyList()
 )
 
+// Build a map of all skill-trees to a last-used timestamp initialized to 0.
+fun buildSkillTreeLastUsedMap(): MutableMap<SkillTreeType, Long> {
+  val map = mutableMapOf<SkillTreeType, Long>()
+  SkillTreeType.entries.forEach { treeType -> map[treeType] = 0L }
+  return map
+}
+
+/**
+ * Find a Skill by a string by checking the skill's name and its possibleNames (case-insensitive).
+ */
+fun findSkillByName(query: String): Skill? {
+  val q = query.trim()
+  return SkillTreeType.entries.asSequence()
+    .flatMap { it.tree.skills.asSequence() }
+    .find { skill ->
+      skill.name.equals(q, ignoreCase = true) ||
+          skill.possibleNames.any { it.equals(q, ignoreCase = true) }
+    }
+}
+
+/**
+ * Return the SkillTreeDefinition that contains the provided Skill, or null if none found.
+ * find any where one of the possible names for a spell matches the skill name
+ */
+fun findSkillTreeForSkill(skill: Skill): SkillTreeType? {
+  return SkillTreeType.entries.find { treeType ->
+    treeType.tree.skills.any { it.possibleNames.contains(skill.name) } // uses possible names for matching the log file
+  }
+}
+
+/**
+ * Convenience: find the SkillTreeDefinition for a skill name string.
+ */
+fun findSkillTreeForSpell(spell: String): SkillTreeType? {
+  val skill = findSkillByName(spell) ?: return null
+  return findSkillTreeForSkill(skill)
+}
+
 /*
  * Skill trees sorted by name alphabetically and then indexed by their id starting from 0.
  */
-enum class SkillTreeType {
-  BATTLERAGE, DEFENSE, MALEDICTION, SWIFTBLADE, GUNSLINGER, SPELLDANCE, OCCULTISM,
-  SORCERY, SONGCRAFT, WITCHCRAFT, AURAMANCY, ARCHERY, SHADOWPLAY, VITALISM
+enum class SkillTreeType(val tree: SkillTreeDefinition) {
+  ARCHERY(ArcheryDefinition),
+  AURAMANCY(AuramancyDefinition),
+  BATTLERAGE(BattlerageDefinition),
+  DEFENSE(DefenseDefinition),
+  GUNSLINGER(GunslingerDefinition),
+  MALEDICTION(MaledictionDefinition),
+  OCCULTISM(OccultismDefinition),
+  SHADOWPLAY(ShadowplayDefinition),
+  SONGCRAFT(SongcraftDefinition),
+  SORCERY(SorceryDefinition),
+  SPELLDANCE(SpelldanceDefinition),
+  SWIFTBLADE(SwiftbladeDefinition),
+  VITALISM(VitalismDefinition),
+  WITCHCRAFT(WitchcraftDefinition);
+
+  companion object {
+    fun fromName(name: String): SkillTreeType? {
+      return entries.find { it.name.equals(name, ignoreCase = true) }
+    }
+  }
 }
 
 enum class SpecType(val trees: Set<SkillTreeType>) {
