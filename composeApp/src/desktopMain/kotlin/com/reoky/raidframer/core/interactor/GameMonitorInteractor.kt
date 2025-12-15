@@ -55,9 +55,8 @@ object GameMonitorInteractor : Interactor() {
     val oneDriveDocumentsPath = Paths.get(System.getProperty("user.home"), "OneDrive", "Documents", "ArcheRage")
     val documentsPath = Paths.get(System.getProperty("user.home"), "Documents", "ArcheRage")
     val everywherePath = Paths.get(System.getProperty("user.home"))
-    val desktopPath = Paths.get(System.getProperty("user.home"), "Desktop")
 
-    val searchPaths = mutableListOf<Path>(desktopPath)
+    val searchPaths = mutableListOf<Path>(oneDriveDocumentsPath, documentsPath)
 
     if (searchEverywhere) {
       if (Files.exists(everywherePath)) searchPaths.add(everywherePath)
@@ -75,7 +74,7 @@ object GameMonitorInteractor : Interactor() {
           try {
             if (Files.isDirectory(path) && Files.isReadable(path)) {
               seek(path)
-            } else if (path.fileName.toString().contains("combat.log") && !path.pathString.contains("LogBackups")) {
+            } else if (path.fileName.toString().lowercase().contains("combat.log") && !path.pathString.contains("LogBackups")) {
               possibleLogFiles.add(path)
             }
           } catch (_: Exception) {
@@ -93,7 +92,7 @@ object GameMonitorInteractor : Interactor() {
       }
     }
 
-    _possiblePaths.value = possibleLogFiles
+    _possiblePaths.value = possibleLogFiles.distinct()
     _isSearching.value = false
   }
 

@@ -14,7 +14,7 @@ import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
   // rule out the easy stuff first
   if (this.name.contains(" ")) return false // only NPCs can have spaces in their names
-  if (this.name in listOf("Unknown Target", "Fren", "Meina", "Glenn")) return false // we might want a blacklist in the future
+  if (this.name in listOf("Unknown Target", "Fren", "Meina", "Glenn", "Charybdis")) return false // we might want a blacklist in the future
   this.recentDebuffGainedEvent.takeLast(100).let {
     return it.map { event -> event.debuff }.contains("Preparing Glider") // NPCs can't open their gliders
   }
@@ -24,15 +24,12 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
  * Add a damage event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
-  val isCC = findSkillByName(event.spell)?.consideredCC == true
   val targetIsPlayer = PlayerCacheInteractor.isRealPlayer(event.target)
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCCDelivered = if (isCC && isRealPlayer) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
     ),
-    sessionCCTotal = if (isCC && isRealPlayer) this.sessionCCTotal + 1 else this.sessionCCTotal,
     recentDamageEvents = (this.recentDamageEvents + event), // optional to takeLast(n)
     sessionDamageTotal = if (targetIsPlayer) this.sessionDamageTotal + event.damage else this.sessionDamageTotal
   )
@@ -42,15 +39,12 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
  * Add a heal event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
-  val isCC = findSkillByName(event.spell)?.consideredCC == true
   val targetIsPlayer = PlayerCacheInteractor.isRealPlayer(event.target)
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCCDelivered = if (isCC && isRealPlayer) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
     ),
-    sessionCCTotal = if (isCC && isRealPlayer) this.sessionCCTotal + 1 else this.sessionCCTotal,
     recentHealEvents = (this.recentHealEvents + event), // optional to takeLast(n)
     sessionHealTotal = if (targetIsPlayer) this.sessionHealTotal + event.amount else this.sessionHealTotal
   )
@@ -71,14 +65,14 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
  * Add a successful cast event to the PlayerCard, updating recent events.
  */
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
-  val isCC = findSkillByName(event.spell)?.consideredCC
+  val isCC = findSkillByName(event.spell)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCCDelivered = if (isCC == true) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
+      lifetimeTotalCCDelivered = if (isCC) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
     ),
-    sessionCCTotal = if (isCC == true) this.sessionCCTotal + 1 else this.sessionCCTotal,
+    sessionCCTotal = if (isCC) this.sessionCCTotal + 1 else this.sessionCCTotal,
     recentCastSuccessfulCastEvent = (this.recentCastSuccessfulCastEvent + event) // optional to takeLast(n)
   )
 

@@ -72,6 +72,21 @@ fun main(args: Array<String>) = application {
       messageBox("Eek!", "Failed to open the specified combat log file: $incoming")
       exitProcess(1)
     }
+  } else {
+    // choose game path default automatically
+    context.launch(Dispatchers.IO) {
+      Log.info(TAG, "Searching for combat log path...")
+      GameMonitorInteractor.locateCombatLog()
+    }
+    LaunchedEffect(GameMonitorInteractor.isSearching) {
+      val automaticLogPath = GameMonitorInteractor.possiblePaths.value.firstOrNull()
+      automaticLogPath?.let {
+        it
+        Log.info(TAG, "Automatically choosing the combat log file here: $it")
+        GameMonitorInteractor.chooseCombatLog(it)
+        GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.MONITOR, Long.MIN_VALUE, Long.MAX_VALUE)
+      }
+    }
   }
 
   val wm = remember {
@@ -97,9 +112,6 @@ fun main(args: Array<String>) = application {
       Log.info(TAG, "Found possible combat log at: ")
     }
   }
-
-  GameMonitorInteractor.chooseCombatLog(Path("C:\\Users\\reoky\\OneDrive\\Documents\\ArcheRage\\combat.log"))
-  GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.REPLAY, Long.MIN_VALUE, Long.MAX_VALUE)
 
   Log.info(TAG, "Opening default windows...")
   OverlayContainer(wm)
