@@ -196,7 +196,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 70f,
       lastWidthDp = 560f,
       lastHeightDp = 800f,
-      isVisible = true
+      isVisible = false
     )
 
     OverlayType.TRACKER -> WindowStateEntity(

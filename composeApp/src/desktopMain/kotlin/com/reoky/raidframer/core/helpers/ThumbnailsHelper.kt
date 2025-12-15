@@ -291,6 +291,6 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
 @Composable
 fun renderTinySkillTreeIconFor(treeName: String): Painter {
   // Converts "Malediction" -> "malediction_tiny.png"
-  val filename = "${treeName.lowercase().replace(" ", "_")}_tiny.png"
+  val filename = "svg\\${treeName.lowercase().replace(" ", "_")}.svg"
   return painterResource(filename)
 }

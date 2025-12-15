@@ -56,9 +56,6 @@ object PlayerCacheInteractor : Interactor() {
     val cachedCount = _cards.values.count()
     Log.info(TAG, "Persisted $savedCount players. ($cachedCount total entities (mounts,players,pets,mobs,etc) cached in memory)")
 
-    val ccSkills = SkillTreeType.entries.map { it.tree.skills.filter { it.consideredCC } }.flatten().map { it.name }
-    println(ccSkills)
-
     _cards.forEach { (name, card) ->
 
       // logic to determine if player should be upgraded from NPC to real player
@@ -87,6 +84,8 @@ object PlayerCacheInteractor : Interactor() {
 
       // determine three most recently used skill trees
       val threeMostRecentTrees = skillTreeLastUsed.entries
+        .asSequence()
+        .filter { it.value > 0 }
         .sortedByDescending { it.value } // most recent first
         .take(3) // take top three
         .map { it.key }

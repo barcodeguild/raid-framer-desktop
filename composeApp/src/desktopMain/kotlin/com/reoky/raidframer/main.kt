@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.io.path.Path
 import kotlin.system.exitProcess
 
 
@@ -96,6 +97,9 @@ fun main(args: Array<String>) = application {
       Log.info(TAG, "Found possible combat log at: ")
     }
   }
+
+  GameMonitorInteractor.chooseCombatLog(Path("C:\\Users\\reoky\\OneDrive\\Documents\\ArcheRage\\combat.log"))
+  GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.MONITOR, Long.MIN_VALUE, Long.MAX_VALUE)
 
   Log.info(TAG, "Opening default windows...")
   OverlayContainer(wm)

@@ -1,5 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
+import com.reoky.raidframer.core.interactor.Log
+
 /*
  * Whitelist of preferred builds. This is mostly just opinionated. I'm going to put a badge next to players who are playing PvP specs.
  */
