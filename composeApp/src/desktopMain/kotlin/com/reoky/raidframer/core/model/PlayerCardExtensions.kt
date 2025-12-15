@@ -3,6 +3,7 @@ package com.reoky.raidframer.core.model
 import com.reoky.raidframer.core.calc.MetricRawSample
 import com.reoky.raidframer.core.database.PlayerCacheDao
 import com.reoky.raidframer.core.definitions.findSkillByName
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 
 /*
@@ -23,16 +24,17 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
  * Add a damage event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
-  val isCC = findSkillByName(event.spell)?.consideredCC
+  val isCC = findSkillByName(event.spell)?.consideredCC == true
+  val targetIsPlayer = PlayerCacheInteractor.isRealPlayer(event.target)
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCCDelivered = if (isCC == true) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
+      lifetimeTotalCCDelivered = if (isCC && isRealPlayer) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
     ),
-    sessionCCTotal = if (isCC == true) this.sessionCCTotal + 1 else this.sessionCCTotal,
+    sessionCCTotal = if (isCC && isRealPlayer) this.sessionCCTotal + 1 else this.sessionCCTotal,
     recentDamageEvents = (this.recentDamageEvents + event), // optional to takeLast(n)
-    sessionDamageTotal = this.sessionDamageTotal + event.damage
+    sessionDamageTotal = if (targetIsPlayer) this.sessionDamageTotal + event.damage else this.sessionDamageTotal
   )
 }
 
@@ -40,16 +42,17 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
  * Add a heal event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
-  val isCC = findSkillByName(event.spell)?.consideredCC
+  val isCC = findSkillByName(event.spell)?.consideredCC == true
+  val targetIsPlayer = PlayerCacheInteractor.isRealPlayer(event.target)
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCCDelivered = if (isCC == true) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
+      lifetimeTotalCCDelivered = if (isCC && isRealPlayer) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
     ),
-    sessionCCTotal = if (isCC == true) this.sessionCCTotal + 1 else this.sessionCCTotal,
+    sessionCCTotal = if (isCC && isRealPlayer) this.sessionCCTotal + 1 else this.sessionCCTotal,
     recentHealEvents = (this.recentHealEvents + event), // optional to takeLast(n)
-    sessionHealTotal = this.sessionHealTotal + event.amount
+    sessionHealTotal = if (targetIsPlayer) this.sessionHealTotal + event.amount else this.sessionHealTotal
   )
 }
 

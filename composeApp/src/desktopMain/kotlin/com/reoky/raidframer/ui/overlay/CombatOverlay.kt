@@ -167,7 +167,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           Text("\uD83D\uDEE0\uFE0F", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
         }
         IconButton(
-          onClick = { /* reset stats? */ },
+          onClick = { PlayerCacheInteractor.resetAllSessions() },
           modifier = Modifier
             .size(32.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)

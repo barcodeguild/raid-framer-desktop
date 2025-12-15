@@ -158,6 +158,12 @@ object PlayerCacheInteractor : Interactor() {
       )
       _cards[name] = resetCard
     }
+    _cards.clear()
+  }
+
+  // filter pve damage by checking if the target is a real player
+  fun isRealPlayer(playerName: String): Boolean {
+    return _cards.values.any { it.isRealPlayer && it.name == playerName }
   }
 
   /* Card Management */
@@ -244,15 +250,15 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   /* UI Subscriptions */
-  val topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
+  var topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
     .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionDamageTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  val topHeals: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
+  var topHeals: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
     .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionHealTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  val topCC: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
+  var topCC: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
     .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionCCTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 

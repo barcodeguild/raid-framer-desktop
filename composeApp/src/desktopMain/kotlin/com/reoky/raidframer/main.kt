@@ -99,7 +99,7 @@ fun main(args: Array<String>) = application {
   }
 
   GameMonitorInteractor.chooseCombatLog(Path("C:\\Users\\reoky\\OneDrive\\Documents\\ArcheRage\\combat.log"))
-  GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.MONITOR, Long.MIN_VALUE, Long.MAX_VALUE)
+  GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.REPLAY, Long.MIN_VALUE, Long.MAX_VALUE)
 
   Log.info(TAG, "Opening default windows...")
   OverlayContainer(wm)
