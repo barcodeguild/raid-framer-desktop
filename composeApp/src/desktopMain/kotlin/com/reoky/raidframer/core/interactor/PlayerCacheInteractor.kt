@@ -137,6 +137,29 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  /*
+   * Reset all session totals and recent events for all players.
+   */
+  fun resetAllSessions() {
+    _cards.forEach { (name, card) ->
+      val resetCard = card.copy(
+        recentCastSuccessfulCastEvent = listOf(),
+        recentCastEvents = listOf(),
+        recentDamageEvents = listOf(),
+        recentHealEvents = listOf(),
+        recentBuffGainedEvents = listOf(),
+        recentBuffEndedEvent = listOf(),
+        recentDebuffGainedEvent = listOf(),
+        recentDebuffEndedEvent = listOf(),
+        sessionDamageTotal = 0L,
+        sessionHealTotal = 0L,
+        sessionCCTotal = 0,
+        sessionDebuffTotal = 0
+      )
+      _cards[name] = resetCard
+    }
+  }
+
   /* Card Management */
 
   fun addOrUpdateCard(card: PlayerCard) {
