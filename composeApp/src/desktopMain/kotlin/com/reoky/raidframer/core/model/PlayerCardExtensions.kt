@@ -23,21 +23,31 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
  * Add a damage event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
+  val isCC = findSkillByName(event.spell)?.consideredCC
   return this.copy(
-      lastEvent = event.timestamp,
-      cache = cache?.copy(lastSeen = event.timestamp),
-      recentDamageEvents = (this.recentDamageEvents + event), // optional to takeLast(n)
-      sessionDamageTotal = this.sessionDamageTotal + event.damage
-    )
+    lastEvent = event.timestamp,
+    cache = cache?.copy(
+      lastSeen = event.timestamp,
+      lifetimeTotalCCDelivered = if (isCC == true) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
+    ),
+    sessionCCTotal = if (isCC == true) this.sessionCCTotal + 1 else this.sessionCCTotal,
+    recentDamageEvents = (this.recentDamageEvents + event), // optional to takeLast(n)
+    sessionDamageTotal = this.sessionDamageTotal + event.damage
+  )
 }
 
 /**
  * Add a heal event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
+  val isCC = findSkillByName(event.spell)?.consideredCC
   return this.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(lastSeen = event.timestamp),
+    cache = cache?.copy(
+      lastSeen = event.timestamp,
+      lifetimeTotalCCDelivered = if (isCC == true) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
+    ),
+    sessionCCTotal = if (isCC == true) this.sessionCCTotal + 1 else this.sessionCCTotal,
     recentHealEvents = (this.recentHealEvents + event), // optional to takeLast(n)
     sessionHealTotal = this.sessionHealTotal + event.amount
   )

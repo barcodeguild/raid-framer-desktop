@@ -5,7 +5,7 @@ object BattlerageDefinition : SkillTreeDefinition {
   override val tree = SkillTreeType.BATTLERAGE
   override val skills = listOf(
     Skill(0, "Triple Slash", 0.0, 0.0, false, listOf("Triple Slash")), // no casting quake version
-    Skill(1, "Charge", 0.0, 12.0, true, listOf("Charge")), // no casting
+    Skill(1, "Charge", 0.0, 12.0, false, listOf("Charge")), // no casting
     Skill(2, "Battle Focus", 0.0, 90.0, false, listOf("Battle Focus")),
     Skill(3, "Whirlwind Slash", 0.0, 12.0, true, listOf("Whirlwind Slash")), // no casting
     Skill(4, "Sunder Earth", 0.0, 16.0, false, listOf("Sunder Earth")),
