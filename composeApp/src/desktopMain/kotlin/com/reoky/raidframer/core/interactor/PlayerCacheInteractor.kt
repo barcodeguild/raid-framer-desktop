@@ -56,11 +56,14 @@ object PlayerCacheInteractor : Interactor() {
     val cachedCount = _cards.values.count()
     Log.info(TAG, "Persisted $savedCount players. ($cachedCount total entities (mounts,players,pets,mobs,etc) cached in memory)")
 
+    val ccSkills = SkillTreeType.entries.map { it.tree.skills.filter { it.consideredCC } }.flatten().map { it.name }
+    println(ccSkills)
+
     _cards.forEach { (name, card) ->
 
       // logic to determine if player should be upgraded from NPC to real player
       if (!card.isRealPlayer && card.shouldUpgradeToPlayer()) {
-        Log.info(TAG, "Upgrading ${card.name} from NPC to Real Player based on activity.")
+        //Log.info(TAG, "Upgrading ${card.name} from NPC to Real Player based on activity.")
         val upgradedCard = card.copy(
           isRealPlayer = true,
           cache = PlayerCacheEntity(
@@ -106,7 +109,7 @@ object PlayerCacheInteractor : Interactor() {
       )
       _cards[name] = updatedCard
       if (determinedSpec != SpecType.UNKNOWN) {
-        Log.info(TAG, "Determined ${card.name} is playing as ${determinedSpec.name}.")
+        //Log.info(TAG, "Determined ${card.name} is playing as ${determinedSpec.name}.")
       }
 
       // store all cached cards back to the database
@@ -158,9 +161,7 @@ object PlayerCacheInteractor : Interactor() {
       is BuffEndedEvent -> postBuffEnded(event)
       is DebuffGainedEvent -> postDebuffGained(event)
       is DebuffEndedEvent -> postDebuffEnded(event)
-      else -> {
-        // no-op for other event types
-      }
+      else -> {} // no-op for other event types
     }
   }
 
@@ -220,18 +221,17 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
-
   /* UI Subscriptions */
   val topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
-    .map { cards -> cards.sortedByDescending { it.sessionDamageTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionDamageTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topHeals: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
-    .map { cards -> cards.sortedByDescending { it.sessionHealTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionHealTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topCC: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
-    .map { cards -> cards.sortedByDescending { it.sessionCCTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionCCTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
 }

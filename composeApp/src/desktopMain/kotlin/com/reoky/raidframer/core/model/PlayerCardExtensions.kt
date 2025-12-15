@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.model
 
 import com.reoky.raidframer.core.database.PlayerCacheDao
+import com.reoky.raidframer.core.definitions.findSkillByName
 
 
 /*
@@ -56,11 +57,17 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
  * Add a successful cast event to the PlayerCard, updating recent events.
  */
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
+  val isCC = findSkillByName(event.spell)?.consideredCC
   return this.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(lastSeen = event.timestamp),
+    cache = cache?.copy(
+      lastSeen = event.timestamp,
+      lifetimeTotalCCDelivered = if (isCC == true) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
+    ),
+    sessionCCTotal = if (isCC == true) this.sessionCCTotal + 1 else this.sessionCCTotal,
     recentCastSuccessfulCastEvent = (this.recentCastSuccessfulCastEvent + event) // optional to takeLast(n)
   )
+
 }
 
 /**

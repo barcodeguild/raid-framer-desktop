@@ -284,3 +284,13 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
     }
   }
 }
+
+/*
+ * We use this for the skill-tree icons in the player ranking rows. Will crash if the resource is not found. Try..catch not supported around composable function invocations.
+ */
+@Composable
+fun renderTinySkillTreeIconFor(treeName: String): Painter {
+  // Converts "Malediction" -> "malediction_tiny.png"
+  val filename = "${treeName.lowercase().replace(" ", "_")}_tiny.png"
+  return painterResource(filename)
+}

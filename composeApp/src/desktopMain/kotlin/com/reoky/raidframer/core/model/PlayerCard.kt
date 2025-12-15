@@ -13,7 +13,7 @@ data class PlayerCard (
 
   // cache management for player data
   val isLoaded: Boolean = false,
-  val isRealPlayer: Boolean, // determined after some analysis
+  val isRealPlayer: Boolean = false, // determined after some analysis
   val cache: PlayerCacheEntity?, // saved to the database
 
   // recent builds / specs
@@ -32,7 +32,7 @@ data class PlayerCard (
 
   // session counter totals : when a new session starts, these reset to 0 and the totals are written to the database cache
   val sessionDamageTotal: Long = 0L,
-  val sessionHealTotal: Long = 30235L,
-  val sessionCCTotal: Int = 443, // only crowd control effects (Snare, Stun, Silence, Trip, etc)
+  val sessionHealTotal: Long = 0L,
+  val sessionCCTotal: Int = 0, // only crowd control effects (Snare, Stun, Silence, Trip, etc)
   val sessionDebuffTotal: Int = 0, // all debuffs
 )

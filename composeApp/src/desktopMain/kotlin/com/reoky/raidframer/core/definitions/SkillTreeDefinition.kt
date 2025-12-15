@@ -31,6 +31,7 @@ data class Skill(
   val name: String,
   val castTime: Double,
   val cooldown: Double,
+  val consideredCC: Boolean,
   val possibleNames: List<String> = emptyList()
 )
 
@@ -496,7 +497,6 @@ fun SpecType.isCCTank(): Boolean {
 enum class SpecIndication() {
   DPS, TANK, HEALS;
 }
-
 
 /*
  * Initiating Spells : Spells that when cast

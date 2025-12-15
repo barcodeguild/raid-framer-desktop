@@ -1,12 +1,12 @@
+// Kotlin
 package com.reoky.raidframer.ui.overlay
 
+import androidx.compose.animation.animateColor
 import com.reoky.raidframer.RaidFramer
 import com.reoky.raidframer.core.helpers.ParserHelper
-import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -22,13 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.WindowManager
 import lol.rfcloud.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.ui.dialog.exitDialog
+import com.reoky.raidframer.ui.component.PlayerRankingRow
 
 @Preview
 @Composable
@@ -182,7 +182,15 @@ fun CombatOverlay(wm: WindowManager? = null) {
           Text("⟳", fontSize = 24.sp, color = Color.White, textAlign = TextAlign.Center)
         }
       }
-      Row(Modifier.align(Alignment.Center).wrapContentSize().padding(top = 16.dp, start = 8.dp, end = 8.dp)) {
+
+      // Make the columns fill the full available width so weights perform correctly
+      Row(
+        Modifier
+          .align(Alignment.Center)
+          .fillMaxWidth()
+          .padding(top = 16.dp, start = 8.dp, end = 8.dp)
+      ) {
+        // Damage Column
         Column(
           modifier = Modifier
             .weight(1f)
@@ -192,48 +200,27 @@ fun CombatOverlay(wm: WindowManager? = null) {
         ) {
           LazyColumn(
             contentPadding = PaddingValues(0.dp),
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier
+              .padding(8.dp)
+              .fillMaxWidth()
           ) {
             itemsIndexed(sortedDamage, key = { _, card -> card.name }) { index, card ->
-              val damageInteractionSource = remember { MutableInteractionSource() }
-              val isDamageHovered = damageInteractionSource.collectIsHoveredAsState().value
-              Row(
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier
-                  .clickable {
-                    RaidFramer.isTrackerOverlayVisible.value = true
-                    RaidFramer.currentTargetName.value = card.name
-                  }
-                  .background(if (isDamageHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
-                  .hoverable(interactionSource = damageInteractionSource)
-              ) {
-                Text(
-                  text = "${index + 1}. ${card.name} ",
-                  color = Color.White,
-                  overflow = TextOverflow.Ellipsis,
-                  maxLines = 1,
-                  modifier = Modifier.weight(0.7f)
-                )
-                Text(
-                  text = card.sessionDamageTotal.humanReadableAbbreviation(),
-                  color = Color(249, 191, 59, 255),
-                  maxLines = 1,
-                  modifier = Modifier.weight(0.2f)
-                )
-                if (retributionByPlayer[card.name] != null) {
-                  Text(
-                    text = "⛨",
-                    color = flashingColorState.value,
-                    maxLines = 1,
-                    modifier = Modifier.weight(0.1f)
-                  )
-                } else {
-                  Spacer(modifier = Modifier.weight(0.1f))
+              PlayerRankingRow(
+                index = index,
+                card = card,
+                valueText = card.sessionDamageTotal.humanReadableAbbreviation(),
+                valueColor = Color(249, 191, 59, 255),
+                isRetribution = retributionByPlayer[card.name] != null,
+                flashingColor = flashingColorState.value,
+                onClick = {
+                  RaidFramer.isTrackerOverlayVisible.value = true
+                  RaidFramer.currentTargetName.value = card.name
                 }
-              }
+              )
             }
           }
         }
+        // Heals Column
         Column(
           modifier = Modifier
             .weight(1f)
@@ -243,48 +230,27 @@ fun CombatOverlay(wm: WindowManager? = null) {
         ) {
           LazyColumn(
             contentPadding = PaddingValues(0.dp),
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier
+              .padding(8.dp)
+              .fillMaxWidth()
           ) {
             itemsIndexed(sortedHeals, key = { _, card -> card.name }) { index, card ->
-              val healsInteractionSource = remember { MutableInteractionSource() }
-              val isHealsHovered = healsInteractionSource.collectIsHoveredAsState().value
-              Row(
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier
-                  .clickable {
-                    RaidFramer.isTrackerOverlayVisible.value = true
-                    RaidFramer.currentTargetName.value = card.name
-                  }
-                  .background(if (isHealsHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
-                  .hoverable(interactionSource = healsInteractionSource)
-              ) {
-                Text(
-                  text = "${index + 1}. ${card.name}",
-                  color = Color.White,
-                  overflow = TextOverflow.Ellipsis,
-                  maxLines = 1,
-                  modifier = Modifier.weight(0.7f)
-                )
-                Text(
-                  text = card.sessionHealTotal.humanReadableAbbreviation(),
-                  color = Color.Green,
-                  maxLines = 1,
-                  modifier = Modifier.weight(0.2f)
-                )
-                if (retributionByPlayer[card.name] != null) {
-                  Text(
-                    text = "⛨",
-                    color = flashingColorState.value,
-                    maxLines = 1,
-                    modifier = Modifier.weight(0.1f)
-                  )
-                } else {
-                  Spacer(modifier = Modifier.weight(0.1f))
+              PlayerRankingRow(
+                index = index,
+                card = card,
+                valueText = card.sessionHealTotal.humanReadableAbbreviation(),
+                valueColor = Color.Green,
+                isRetribution = retributionByPlayer[card.name] != null,
+                flashingColor = flashingColorState.value,
+                onClick = {
+                  RaidFramer.isTrackerOverlayVisible.value = true
+                  RaidFramer.currentTargetName.value = card.name
                 }
-              }
+              )
             }
           }
         }
+        // CC Column
         Column(
           modifier = Modifier
             .weight(1f)
@@ -294,45 +260,23 @@ fun CombatOverlay(wm: WindowManager? = null) {
         ) {
           LazyColumn(
             contentPadding = PaddingValues(0.dp),
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier
+              .padding(8.dp)
+              .fillMaxWidth()
           ) {
             itemsIndexed(sortedCC, key = { _, card -> card.name }) { index, card ->
-              val ccInteractionSource = remember { MutableInteractionSource() }
-              val isCcHovered = ccInteractionSource.collectIsHoveredAsState().value
-              Row(
-                horizontalArrangement = Arrangement.Start,
-                modifier = Modifier
-                  .clickable {
-                    RaidFramer.isTrackerOverlayVisible.value = true
-                    RaidFramer.currentTargetName.value = card.name
-                  }
-                  .background(if (isCcHovered) Color.Red.copy(alpha = 0.25f) else Color.Transparent) // Change color when hovered
-                  .hoverable(interactionSource = ccInteractionSource)
-              ) {
-                Text(
-                  text = "${index + 1}. ${card.name}",
-                  color = Color.White,
-                  overflow = TextOverflow.Ellipsis,
-                  maxLines = 1,
-                  modifier = Modifier.weight(0.7f)
-                )
-                Text(
-                  text = card.sessionCCTotal.toString(),
-                  color = Color.Cyan,
-                  maxLines = 1,
-                  modifier = Modifier.weight(0.2f)
-                )
-                if (retributionByPlayer[card.name] != null) {
-                  Text(
-                    text = "⛨",
-                    color = flashingColorState.value,
-                    maxLines = 1,
-                    modifier = Modifier.weight(0.1f)
-                  )
-                } else {
-                  Spacer(modifier = Modifier.weight(0.1f))
+              PlayerRankingRow(
+                index = index,
+                card = card,
+                valueText = card.sessionCCTotal.toString(),
+                valueColor = Color.Cyan,
+                isRetribution = retributionByPlayer[card.name] != null,
+                flashingColor = flashingColorState.value,
+                onClick = {
+                  RaidFramer.isTrackerOverlayVisible.value = true
+                  RaidFramer.currentTargetName.value = card.name
                 }
-              }
+              )
             }
           }
         }
