@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" shape-rendering="geometricPrecision">
+<circle cx="32" cy="32" r="26" fill="none" stroke="#dcdcdc" stroke-width="3"/>
+<path d="M 24 12 A 22 22 0 0 1 24 52" fill="none" stroke="#50dc78" stroke-width="4" stroke-linecap="round"/>
+<line x1="36" y1="15" x2="36" y2="49" stroke="#50dc78" stroke-width="2" stroke-linecap="round"/>
+<line x1="26" y1="46" x2="48" y2="24" stroke="#50dc78" stroke-width="3" stroke-linecap="round"/>
+<polygon points="48,24 42,23 46,29" fill="#50dc78"/>
+</svg>
