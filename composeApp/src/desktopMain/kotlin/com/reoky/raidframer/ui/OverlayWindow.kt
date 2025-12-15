@@ -74,7 +74,6 @@ fun OverlayWindow(
         8.0
       )
       //OverlayInteractor.updateWindowStateFor(overlayType, windowState)
-      println("OverlayWindow: Set window shape for $title to ${window.shape}")
     }
 
     // call window creation callback exactly once (when available)
