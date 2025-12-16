@@ -7,7 +7,7 @@ object WitchcraftDefinition : SkillTreeDefinition {
     Skill(0, "Earthen Grip", 0.4, 18.0, true, listOf("Earthen Grip")),
     Skill(1, "Enervate", 0.0, 24.0, true,  listOf("Enervated")),
     Skill(2, "Bubble Trap", 1.3, 39.0, true,  listOf("Bubble Trap")),
-    Skill(3, "Insidious Whisper", 1.7, 30.0, true,  listOf("Insidious Whisper")),
+    Skill(3, "Insidious Whisper", 1.7, 30.0, false,  listOf("Insidious Whisper")),
     Skill(4, "Mirror Warp", 0.0, 40.0, false, listOf("Mirror Warp")),
     Skill(5, "Purge", 0.0, 30.0, false, listOf("Purge")),
     Skill(6, "Lassitude", 0.0, 45.0, false,  listOf("Lassitude")),

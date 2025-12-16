@@ -6,9 +6,9 @@ object DefenseDefinition : SkillTreeDefinition {
   override val skills = listOf(
     Skill(0, "Shield Slam", 0.0, 2.0, false, listOf("Shield Slam")),
     Skill(1, "Toughen", 0.0, 60.0, false, listOf("Toughen")),
-    Skill(2, "Bull Rush", 0.0, 30.0, true, listOf("Bull Rush")),
-    Skill(3, "Boastful Roar", 0.0, 24.0, true, listOf("Boastful Roar")),
-    Skill(4, "Lasso", 0.2, 30.0, true, listOf("Lasso")), // no casting, no dmg, buffs are staggered and taunted
+    Skill(2, "Bull Rush", 0.0, 30.0, false, listOf("Bull Rush")),
+    Skill(3, "Boastful Roar", 0.0, 24.0, false, listOf("Boastful Roar")),
+    Skill(4, "Lasso", 0.2, 30.0, false, listOf("Lasso")), // no casting, no dmg, buffs are staggered and taunted
     Skill(5, "Redoubt", 0.0, 30.0, false, listOf("Redoubt")),
     Skill(6, "Mocking Howl", 0.0, 24.0, true,listOf("Mocking Howl")),
     Skill(7, "Refreshment", 0.0, 120.0, false, listOf("Refreshment")),

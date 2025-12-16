@@ -13,8 +13,8 @@ object GunslingerDefinition : SkillTreeDefinition {
     Skill(6, "Vicious Rebuke", 0.0, 16.0, false, listOf("Vicious Rebuke")),
     Skill(7, "Tactical Roll", 0.0, 8.0, false, listOf("Tactical Roll")), // no casting / Tactical Roll buff only
     Skill(8, "Trigger Happy", 0.0, 24.0, false, listOf("Trigger Happy")),
-    Skill(9, "Reversal", 0.0, 45.0, true, listOf("Reversal")), // no casting, no dmg, only debuffs applied
-    Skill(10, "Sniper's Bane", 0.0, 40.0, true, listOf("Sniper's Bane")),  // no casting, no dmg, Bane debuff applied to target
+    Skill(9, "Reversal", 0.0, 45.0, false, listOf("Reversal")), // no casting, no dmg, only debuffs applied
+    Skill(10, "Sniper's Bane", 0.0, 40.0, false, listOf("Sniper's Bane")),  // no casting, no dmg, Bane debuff applied to target
     Skill(11, "Collateral Damage", 1.8, 40.0, false, listOf("Collateral Damage")) // no casting
   )
 }

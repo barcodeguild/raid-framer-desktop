@@ -7,7 +7,7 @@ object ArcheryDefinition : SkillTreeDefinition {
     Skill(0, "Endless Arrows", 0.0, 0.0, false, listOf("Endless Arrows")), // no casting
     Skill(1, "Charged Bolt", 0.0, 12.0, false, listOf("Charged Bolt")),
     Skill(2, "Steady Shooting", 0.0, 30.0, false, listOf("Steady Shooting")),
-    Skill(3, "Fending Arrow", 0.0, 21.0, true, listOf("Fending Arrow")), // no casting
+    Skill(3, "Fending Arrow", 0.0, 21.0, false, listOf("Fending Arrow")), // no casting
     Skill(4, "Blazing Arrow", 0.0, 9.0, false, listOf("Blazing Arrow")), // no casting
     Skill(5, "Snare", 0.0, 24.0, true,listOf("Snare")),
     Skill(6, "Deadeye", 0.0, 80.0, false, listOf("Deadeye")),

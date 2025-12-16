@@ -11,7 +11,7 @@ object MaledictionDefinition : SkillTreeDefinition {
     Skill(4, "Fury", 0.0, 30.0, false,listOf("")),
     Skill(5, "Soulbound Edge", 0.0, 15.0, false, listOf("Soulbound Edge")),
     Skill(6, "Ghastly Pack", 0.0, 18.0, true, listOf("Ghastly Pack")),
-    Skill(7, "Grasping Void", 1.0, 60.0, true,listOf("Grasping Void")),
+    Skill(7, "Grasping Void", 1.0, 60.0, false,listOf("Grasping Void")),
     Skill(8, "Void Surge", 0.0, 21.0, false,listOf("Void Surge")),
     Skill(9, "Ring Throw", 0.0, 28.0, false, listOf("Ring Throw")),
     Skill(10, "Shadow Cloak", 0.0, 70.0, false,listOf("")),
