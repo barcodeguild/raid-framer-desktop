@@ -2,6 +2,8 @@ package com.reoky.raidframer.core.interactor
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshotFlow
+import com.reoky.raidframer.core.calc.MetricRawSample
+import com.reoky.raidframer.core.calc.RealtimeComputer
 import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SkillTreeType
@@ -30,10 +32,12 @@ import com.reoky.raidframer.core.model.shouldUpgradeToPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -47,14 +51,27 @@ object PlayerCacheInteractor : Interactor() {
   val TAG = "PlayerCacheInteractor"
 
   // Mapping of all the players (and NPCs) sorted in no particular order
+  val realtimeComputer = RealtimeComputer(windowBuckets = 60, bucketMillis = 10_000L)
   private val _cards = mutableStateMapOf<String, PlayerCard>()
   private val _scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+  init {
+    _scope.launch {
+      while (true) {
+        realtimeComputer.push(MetricRawSample(System.currentTimeMillis(), 5000.0))
+        delay(1000)
+      }
+    }
+  }
 
   // main event loop
   override suspend fun interact() {
     val savedCount = RFDao.playerCacheDao.getPlayerCount()
     val cachedCount = _cards.values.count()
     Log.info(TAG, "Persisted $savedCount players. ($cachedCount total entities (mounts,players,pets,mobs,etc) cached in memory)")
+
+    // Debug list spells that can count as cc
+    //SkillTreeType.entries.flatMap { it.tree.skills }.filter { it.consideredCC }.forEach { print(",${it.name}") }
 
     _cards.forEach { (name, card) ->
 
@@ -195,6 +212,7 @@ object PlayerCacheInteractor : Interactor() {
 
   private fun postDamage(event: DamageEvent) {
     createCardIfNoneExists(event.caster)
+    realtimeComputer.push(MetricRawSample(event.timestamp, event.damage.toDouble()))
     _cards[event.caster]?.let { card ->
       _cards[event.caster] = card.postDamageEvent(event)
     }

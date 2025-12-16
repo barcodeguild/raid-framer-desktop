@@ -31,13 +31,13 @@ class RealtimeMetricsInteractor : Interactor() {
     // Use the simulated clock as the base timestamp for the whole candle so all four samples land in the same bucket.
     val baseMs = simulatedClockMs
 
-    realtimeComputer.push(MetricRawSample(timestampMs = baseMs + 0L, value = open))
+    //realtimeComputer.push(MetricRawSample(timestampMs = baseMs + 0L, value = open))
     delay(500L)
-    realtimeComputer.push(MetricRawSample(timestampMs = baseMs + 10L, value = high))
+    //realtimeComputer.push(MetricRawSample(timestampMs = baseMs + 10L, value = high))
     delay(500L)
-    realtimeComputer.push(MetricRawSample(timestampMs = baseMs + 20L, value = low))
+    //realtimeComputer.push(MetricRawSample(timestampMs = baseMs + 20L, value = low))
     delay(1000L)
-    realtimeComputer.push(MetricRawSample(timestampMs = baseMs + 30L, value = close))
+   //realtimeComputer.push(MetricRawSample(timestampMs = baseMs + 30L, value = close))
 
     // advance simulated clock by one candle interval so next interact() advances to next bucket
     simulatedClockMs += simulatedIntervalMs

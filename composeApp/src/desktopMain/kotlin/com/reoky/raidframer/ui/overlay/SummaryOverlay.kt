@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.interactor.RealtimeMetricsInteractor
 import com.reoky.raidframer.core.mock.mockCandlestickDataFrame
 import com.reoky.raidframer.ui.OverlayType
@@ -34,8 +35,7 @@ fun PreviewSummaryOverlay() {
 
 @Composable
 fun SummaryOverlay(wm: WindowManager? = null, playerName: String = "Reoky") {
-  val interactor = remember { RealtimeMetricsInteractor() }
-  val realtime = interactor.realtimeComputer
+  val realtime = PlayerCacheInteractor.realtimeComputer
 
   val candlesState by realtime.candles.collectAsState(initial = mockCandlestickDataFrame())
   val currentCandleState by realtime.current.collectAsState(initial = null as Double?)
@@ -69,6 +69,4 @@ fun SummaryOverlay(wm: WindowManager? = null, playerName: String = "Reoky") {
       )
     }
   }
-
-  interactor.start()
 }

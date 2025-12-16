@@ -22,9 +22,9 @@ data class MetricRawSample(val timestampMs: Long, val value: Double)
  */
 class RealtimeComputer(
   private val windowBuckets: Int = 60,
-  private val bucketMillis: Long = 60_000L,
-  private val smoothingWindowMs: Long = 5_000L,        // how far back to average for "current"
-  private val smoothingEmitIntervalMs: Long = 5_000L   // how often to update _current
+  private val bucketMillis: Long = 10_000L, // 10-second chart
+  private val smoothingWindowMs: Long = 1_000L,        // how far back to average for "current"
+  private val smoothingEmitIntervalMs: Long = 1_000L   // how often to update _current
 ) {
   private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
   private val buckets = LinkedHashMap<Long, MutableList<Double>>() // bucketEpoch -> samples
@@ -92,8 +92,8 @@ class RealtimeComputer(
     // create sequential labels (one per bucket) starting at 0 to keep chart indexing aligned to indices
     val labels = keys.mapIndexed { idx, _ -> idx.toString() }
 
-    val opens = keys.map { k -> buckets[k]!!.first().toDouble() }
-    val closes = keys.map { k -> buckets[k]!!.last().toDouble() }
+    val opens = keys.map { k -> buckets[k]!!.first() }
+    val closes = keys.map { k -> buckets[k]!!.last() }
     val highs = keys.map { k -> buckets[k]!!.maxOrNull() ?: 0.0 }
     val lows = keys.map { k -> buckets[k]!!.minOrNull() ?: 0.0 }
 
