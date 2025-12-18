@@ -1,4 +1,4 @@
-package com.reoky.raidframer.ui.graphs
+package com.reoky.raidframer.ui.component.graphs
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background

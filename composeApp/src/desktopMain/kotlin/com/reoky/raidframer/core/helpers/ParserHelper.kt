@@ -1,7 +1,6 @@
 package com.reoky.raidframer.core.helpers
 
 import com.reoky.raidframer.RaidFramer
-import com.reoky.raidframer.core.interactor.Interactor
 import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CastingEvent
@@ -14,7 +13,7 @@ import com.reoky.raidframer.core.model.SuccessfulCastEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.regex.Pattern
 import kotlin.math.absoluteValue
@@ -50,6 +49,13 @@ object ParserHelper {
   private val DEBUFF_ENDED: Pattern =
     Pattern.compile("<(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\|(.+);(.+)\\|r \\|c[0-9a-fA-F]{8}(.*)\\|r\\|r debuff cleared")
 
+  private val AR_TIMESTAMP_FORMATTER: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+  private fun parseLogTimestamp(text: String): Long {
+    val ldt = LocalDateTime.parse(text, AR_TIMESTAMP_FORMATTER)
+    return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+  }
 
   // Track Damage Amounts and Heals by Player
 
@@ -104,8 +110,7 @@ object ParserHelper {
       var matcher = ATTACK_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = DamageEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           target = matcher.group(4),
           damage = matcher.group(6).toInt().absoluteValue,
@@ -120,8 +125,7 @@ object ParserHelper {
       matcher = ATTACK_PATTERN_NO_SKILL.matcher(line)
       if (matcher.find()) {
         val event = DamageEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           target = matcher.group(4),
           damage = matcher.group(5).toInt().absoluteValue,
@@ -136,8 +140,7 @@ object ParserHelper {
       matcher = ATTACK_PARRIED_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = DamageEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           target = matcher.group(4),
           damage = matcher.group(6).toInt().absoluteValue,
@@ -152,8 +155,7 @@ object ParserHelper {
       matcher = HEAL_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = HealEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           target = matcher.group(4),
           amount = matcher.group(6).toInt(),
@@ -168,8 +170,7 @@ object ParserHelper {
       matcher = IS_CASTING.matcher(line)
       if (matcher.find()) {
         val event = CastingEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           spell = matcher.group(4),
         )
@@ -181,8 +182,7 @@ object ParserHelper {
       matcher = SUCCESSFUL_CAST.matcher(line)
       if (matcher.find()) {
         val event = SuccessfulCastEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           spell = matcher.group(4),
         )
@@ -194,8 +194,7 @@ object ParserHelper {
       matcher = BUFF_GAINED_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = BuffGainedEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           buff = matcher.group(4),
         )
@@ -207,8 +206,7 @@ object ParserHelper {
       matcher = BUFF_ENDED_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = BuffEndedEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           buff = matcher.group(4),
         )
@@ -220,8 +218,7 @@ object ParserHelper {
       matcher = DEBUFF_GAINED.matcher(line)
       if (matcher.find()) {
         val event = DebuffGainedEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           debuff = matcher.group(4),
         )
@@ -233,8 +230,7 @@ object ParserHelper {
       matcher = DEBUFF_ENDED.matcher(line)
       if (matcher.find()) {
         val event = DebuffEndedEvent(
-          timestamp = LocalDateTime.parse(matcher.group(1), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            .toInstant(ZoneOffset.UTC).toEpochMilli(),
+          timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           debuff = matcher.group(4),
         )

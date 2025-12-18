@@ -1,6 +1,6 @@
 package com.reoky.raidframer.core.calc
 
-import com.reoky.raidframer.ui.graphs.CandlestickDataFrame
+import com.reoky.raidframer.ui.component.graphs.CandlestickDataFrame
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

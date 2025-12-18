@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.WindowPosition
 import com.reoky.raidframer.ui.overlay.AboutOverlay
 import com.reoky.raidframer.ui.overlay.CombatOverlay
+import com.reoky.raidframer.ui.overlay.MiniOverlay
 import com.reoky.raidframer.ui.overlay.SettingsOverlay
 import com.reoky.raidframer.ui.overlay.SummaryOverlay
 import kotlinx.coroutines.Job
@@ -44,10 +45,11 @@ fun OverlayContainer(wm: WindowManager) {
         val scope = rememberCoroutineScope()
 
         when (type) {
-          OverlayType.SUMMARY -> SummaryOverlay(wm)
-          OverlayType.COMBAT -> CombatOverlay(wm)
           OverlayType.ABOUT -> AboutOverlay(wm)
+          OverlayType.COMBAT -> CombatOverlay(wm)
+          OverlayType.MINI -> MiniOverlay(wm)
           OverlayType.SETTINGS -> SettingsOverlay(wm)
+          OverlayType.SUMMARY -> SummaryOverlay(wm)
           else -> {}//throw Exception("Overlay type $type not implemented")
         }
 

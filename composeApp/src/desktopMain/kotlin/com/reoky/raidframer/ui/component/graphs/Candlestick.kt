@@ -1,5 +1,6 @@
-package com.reoky.raidframer.ui.graphs
+package com.reoky.raidframer.ui.component.graphs
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -30,10 +31,6 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.*
 import java.util.*
 import lol.rfcloud.core.helpers.humanReadableAbbreviation
-import kotlin.collections.get
-import kotlin.compareTo
-import kotlin.text.get
-import kotlin.text.toFloat
 
 data class CandlestickDataFrame(
   val xValues: List<String>,
@@ -105,12 +102,12 @@ fun CandlestickChart(
   val lastCloseValue by remember { derivedStateOf { if (data.closes.isNotEmpty()) data.closes.last() else 0.0 } }
 
   val initialTarget = (currentValue ?: lastCloseValue).toFloat()
-  val displayedLiveAnim = remember { androidx.compose.animation.core.Animatable(initialTarget) }
+  val displayedLiveAnim = remember { Animatable(initialTarget) }
   val targetLiveValue = currentValue ?: lastCloseValue
 
   LaunchedEffect(targetLiveValue) {
     val target = (targetLiveValue ?: lastCloseValue).toFloat()
-    if (kotlin.math.abs(displayedLiveAnim.value - target) > 5000f) {
+    if (abs(displayedLiveAnim.value - target) > 5000f) {
       displayedLiveAnim.snapTo(target)
     } else {
       displayedLiveAnim.animateTo(target, animationSpec = tween(durationMillis = 0))
@@ -274,7 +271,7 @@ fun CandlestickChart(
       drawRect(
         color = colorScheme.background,
         topLeft = Offset(chartLeft, chartTop),
-        size = androidx.compose.ui.geometry.Size(chartW, chartH)
+        size = Size(chartW, chartH)
       )
 
       for (i in 0..yTicks) {

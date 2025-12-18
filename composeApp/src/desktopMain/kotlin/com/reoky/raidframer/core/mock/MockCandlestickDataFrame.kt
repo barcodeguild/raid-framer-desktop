@@ -4,7 +4,7 @@ import kotlin.math.*
 import kotlin.random.Random
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import com.reoky.raidframer.ui.graphs.CandlestickDataFrame
+import com.reoky.raidframer.ui.component.graphs.CandlestickDataFrame
 
 enum class Regime { Idle, Skirmish, Battle }
 

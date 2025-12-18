@@ -159,7 +159,7 @@ class OverlayWindowShape(
 }
 
 enum class OverlayType {
-  COMBAT, SETTINGS, TRACKER, ABOUT, AGGRO, SUMMARY, FILTERS, DUMMY
+  COMBAT, SETTINGS, TRACKER, MINI, ABOUT, AGGRO, SUMMARY, FILTERS, DUMMY
 }
 
 enum class OverlayWindowType {
@@ -196,6 +196,16 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastWidthDp = 560f,
       lastHeightDp = 800f,
       isVisible = false
+    )
+
+    OverlayType.MINI -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.OVERLAY,
+      lastPositionXDp = 800f,
+      lastPositionYDp = 50f,
+      lastWidthDp = 240f,
+      lastHeightDp = 160f,
+      isVisible = true
     )
 
     OverlayType.TRACKER -> WindowStateEntity(

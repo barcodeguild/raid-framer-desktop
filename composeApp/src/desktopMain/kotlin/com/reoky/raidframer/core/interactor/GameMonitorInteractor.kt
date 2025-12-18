@@ -31,6 +31,9 @@ object GameMonitorInteractor : Interactor() {
   val isPlaying: StateFlow<Boolean> get() = _isPlaying
 
   @Volatile
+  var currentMode: MonitorModes = MonitorModes.DISABLED
+
+  @Volatile
   private var currentPath: Path? = null
 
   @Volatile
@@ -38,9 +41,6 @@ object GameMonitorInteractor : Interactor() {
 
   @Volatile
   private var currentPosition: Long = 0L
-
-  @Volatile
-  private var currentMode: MonitorModes = MonitorModes.DISABLED
 
   @Volatile
   private var replayCompleted: Boolean = false

@@ -9,6 +9,7 @@ dorkbox-systemTray = "4.4" # https://github.com/dorkbox/SystemTray/releases
 room = "2.7.2" # https://maven.google.com/web/index.html?q=room-gra#androidx.room:room-gradle-plugin
 sqlite = "2.5.2" # https://maven.google.com/web/index.html?q=sqlite#androidx.sqlite:sqlite
 ksp = "2.2.10-2.0.2" # https://github.com/google/ksp/releases
+koala = "0.10.3" # https://github.com/KoalaPlot/koalaplot-core
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -24,7 +25,7 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 
 dorkbox-systemTray = { module = "com.dorkbox:SystemTray", version.ref = "dorkbox-systemTray" }
-
+koala-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koala" }
 
 [plugins]
 composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }

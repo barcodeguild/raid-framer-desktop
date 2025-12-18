@@ -193,6 +193,11 @@ object PlayerCacheInteractor : Interactor() {
     return _cards[name]
   }
 
+  // gets a list of player cards matching a filter predicate
+  fun getGroupCards(filter: (PlayerCard) -> Boolean): List<PlayerCard> {
+    return _cards.values.filter(filter)
+  }
+
   /* Event Posting */
 
   // catch all

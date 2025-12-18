@@ -1,4 +1,3 @@
-// Kotlin
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.animation.animateColor
@@ -13,6 +12,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -25,10 +25,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import lol.rfcloud.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.ui.dialog.exitDialog
 import com.reoky.raidframer.ui.component.PlayerRankingRow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 
 @Preview
 @Composable
@@ -64,6 +67,62 @@ fun CombatOverlay(wm: WindowManager? = null) {
       repeatMode = RepeatMode.Reverse
     )
   )
+
+  val damageListState = rememberLazyListState()
+  val healsListState = rememberLazyListState()
+  val ccListState = rememberLazyListState()
+
+  // --- Sticky Scroll Logic ---
+  // We track if the user is "stuck" to the top. If they are, we force scroll to 0 on data updates.
+  // If they scroll down manually, we release the stickiness.
+
+  var isDamageSticky by remember { mutableStateOf(true) }
+  LaunchedEffect(damageListState) {
+    snapshotFlow { damageListState.isScrollInProgress to damageListState.firstVisibleItemIndex }
+      .collect { (isScrolling, index) ->
+        // If user is scrolling, update sticky state based on position
+        if (isScrolling) {
+          isDamageSticky = (index == 0)
+        } else {
+          // If not scrolling (e.g. idle or programmatic scroll landed us at top), re-engage sticky
+          if (index == 0 && damageListState.firstVisibleItemScrollOffset == 0) isDamageSticky = true
+        }
+      }
+  }
+  LaunchedEffect(sortedDamage) {
+    if (isDamageSticky) damageListState.scrollToItem(0)
+  }
+
+  var isHealsSticky by remember { mutableStateOf(true) }
+  LaunchedEffect(healsListState) {
+    snapshotFlow { healsListState.isScrollInProgress to healsListState.firstVisibleItemIndex }
+      .collect { (isScrolling, index) ->
+        if (isScrolling) {
+          isHealsSticky = (index == 0)
+        } else {
+          if (index == 0 && healsListState.firstVisibleItemScrollOffset == 0) isHealsSticky = true
+        }
+      }
+  }
+  LaunchedEffect(sortedHeals) {
+    if (isHealsSticky) healsListState.scrollToItem(0)
+  }
+
+  var isCCSticky by remember { mutableStateOf(true) }
+  LaunchedEffect(ccListState) {
+    snapshotFlow { ccListState.isScrollInProgress to ccListState.firstVisibleItemIndex }
+      .collect { (isScrolling, index) ->
+        if (isScrolling) {
+          isCCSticky = (index == 0)
+        } else {
+          if (index == 0 && ccListState.firstVisibleItemScrollOffset == 0) isCCSticky = true
+        }
+      }
+  }
+  LaunchedEffect(sortedCC) {
+    if (isCCSticky) ccListState.scrollToItem(0)
+  }
+  // ---------------------------
 
   exitDialog(shouldShowExitDialog)
 
@@ -200,6 +259,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
         ) {
           LazyColumn(
             contentPadding = PaddingValues(0.dp),
+            state = damageListState,
             modifier = Modifier
               .padding(8.dp)
               .fillMaxWidth()
@@ -213,8 +273,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 isRetribution = retributionByPlayer[card.name] != null,
                 flashingColor = flashingColorState.value,
                 onClick = {
-                  RaidFramer.isTrackerOverlayVisible.value = true
-                  RaidFramer.currentTargetName.value = card.name
+                  wm?.openWindow(OverlayType.SUMMARY)
                 }
               )
             }
@@ -230,6 +289,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
         ) {
           LazyColumn(
             contentPadding = PaddingValues(0.dp),
+            state = healsListState,
             modifier = Modifier
               .padding(8.dp)
               .fillMaxWidth()
@@ -260,6 +320,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
         ) {
           LazyColumn(
             contentPadding = PaddingValues(0.dp),
+            state = ccListState,
             modifier = Modifier
               .padding(8.dp)
               .fillMaxWidth()
