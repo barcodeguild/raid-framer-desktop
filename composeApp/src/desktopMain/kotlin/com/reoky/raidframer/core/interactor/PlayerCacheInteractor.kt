@@ -111,7 +111,7 @@ object PlayerCacheInteractor : Interactor() {
         return@forEach // not enough data yet, gib unknown
       }
 
-      var determinedSpec = SpecType.fromTrees(threeMostRecentTrees)
+      val determinedSpec = SpecType.fromTrees(threeMostRecentTrees)
 
       // now update all the cards with the determined spec (some are gonna be unknown! but that's ok friends!)
       val updatedCard = card.copy(
