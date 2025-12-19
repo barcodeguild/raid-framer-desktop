@@ -85,7 +85,7 @@ fun MultiPlayerMetricLineChart(
       }
 
       // collect all events across groups to decide global range
-      val allEvents = groupCards.flatMap { cards -> cards.flatMap { it.recentHealEvents } }
+      val allEvents = groupCards.flatMap { cards -> cards.flatMap { it.recentDamageEvents } }
 
       if (allEvents.isEmpty()) {
         val nowMinuteStart = (now / 60_000L) * 60_000L
@@ -106,10 +106,10 @@ fun MultiPlayerMetricLineChart(
         val perGroupBuckets = groupCards.map { cards ->
           val buckets = mutableMapOf<Long, Long>()
           cards.forEach { c ->
-            c.recentHealEvents.forEach { e ->
+            c.recentDamageEvents.forEach { e ->
               if (e.timestamp >= windowStart) {
                 val minuteStart = (e.timestamp / 60_000L) * 60_000L
-                buckets[minuteStart] = (buckets[minuteStart] ?: 0L) + e.amount
+                buckets[minuteStart] = (buckets[minuteStart] ?: 0L) + e.damage
               }
             }
           }
@@ -136,9 +136,9 @@ fun MultiPlayerMetricLineChart(
         val perGroupBuckets = groupCards.map { cards ->
           val buckets = mutableMapOf<Long, Long>()
           cards.forEach { c ->
-            c.recentHealEvents.forEach { e ->
+            c.recentDamageEvents.forEach { e ->
               val minuteStart = (e.timestamp / 60_000L) * 60_000L
-              buckets[minuteStart] = (buckets[minuteStart] ?: 0L) + e.amount
+              buckets[minuteStart] = (buckets[minuteStart] ?: 0L) + e.damage
             }
           }
           buckets

@@ -19,6 +19,11 @@ data class PlayerCard (
   // recent builds / specs
   val currentBuild: String,
 
+  // important buffs/debuffs currently active on the player
+  val isBuildingAggression: Boolean = false,
+  val isCharmed: Boolean = false,
+  val isDistressed: Boolean = false,
+
   // held in memory only for each player, this prevents having singular exhaustive lists of events like before
   // are cleared between sessions and not persisted to the database
   val recentCastSuccessfulCastEvent: List<SuccessfulCastEvent> = listOf(),

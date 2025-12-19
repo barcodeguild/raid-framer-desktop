@@ -7,19 +7,18 @@ import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
-import com.reoky.raidframer.core.helpers.ParserHelper
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayContainer
+import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.io.path.Path
 import kotlin.system.exitProcess
 
 
@@ -84,7 +83,7 @@ fun main(args: Array<String>) = application {
         it
         Log.info(TAG, "Automatically choosing the combat log file here: $it")
         GameMonitorInteractor.chooseCombatLog(it)
-        GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.MONITOR, Long.MIN_VALUE, Long.MAX_VALUE)
+        GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.REPLAY, Long.MIN_VALUE, Long.MAX_VALUE)
       }
     }
   }
@@ -115,6 +114,16 @@ fun main(args: Array<String>) = application {
 
   Log.info(TAG, "Opening default windows...")
   OverlayContainer(wm)
+
+  // gets the config and show the about window on first launch then updates the firstLaunch flag
+  LaunchedEffect(Unit) {
+    RFDao.configDao.getConfig()?.let { config ->
+      if (config.firstLaunch) {
+        wm.openWindow(OverlayType.ABOUT)
+        RFDao.configDao.insert(config.copy(firstLaunch = false))
+      }
+    }
+  }
 }
 
 /*

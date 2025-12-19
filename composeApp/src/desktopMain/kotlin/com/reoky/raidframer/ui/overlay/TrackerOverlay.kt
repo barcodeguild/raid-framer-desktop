@@ -1,7 +1,6 @@
 package com.reoky.raidframer.ui.overlay
 
-import com.reoky.raidframer.RaidFramer
-import com.reoky.raidframer.core.helpers.ParserHelper
+import com.reoky.raidframer.core.helpers.EventParserHelper
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -34,8 +33,12 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.renderDebuffThumbnailGrid
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
+import com.reoky.raidframer.ui.OverlayType
+import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.CloseButton
 import lol.rfcloud.core.helpers.annotatedStringForAttack
 import lol.rfcloud.core.helpers.annotatedStringForHeal
 import kotlinx.coroutines.delay
@@ -53,11 +56,11 @@ fun PreviewAggroOverlay() {
 }
 
 @Composable
-fun TrackerOverlay() {
+fun TrackerOverlay(wm: WindowManager? = null) {
 
   var showDmg by remember { mutableStateOf(false) }
   var castProgress by remember { mutableStateOf(0f) }
-  val spellName by ParserHelper.targetCurrentlyCasting.collectAsState()
+  val spellName = "Unknown Spell"
   var isCasting by remember { mutableStateOf(false) }
 
   val animatedProgress by animateFloatAsState(
@@ -76,28 +79,41 @@ fun TrackerOverlay() {
     castProgress = 1f // set the progress to 100%
   }
 
-  // incoming and outgoing damage
-  val incomingByPlayer by ParserHelper.incomingEventsByPlayer.collectAsState()
-  val sortedAndFilteredIncoming =
-    incomingByPlayer.getOrDefault(RaidFramer.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
+  var playerName = remember { "Reoky" } // testing for now
 
-  val outgoingByPlayer by ParserHelper.outgoingEventsByPlayer.collectAsState()
-  val sortedAndFilteredOutgoing =
-    outgoingByPlayer.getOrDefault(RaidFramer.currentTargetName.value, listOf()).sortedByDescending { it.timestamp }
 
-  val debuffsByPlayer by ParserHelper.activeDebuffsByPlayer.collectAsState()
-  val filteredDebuffs = debuffsByPlayer.getOrDefault(RaidFramer.currentTargetName.value, listOf()).map { it.debuff }
+  val isCharmed = remember { mutableStateOf(false) }
+  val recentDamageEvents = remember { mutableStateListOf<DamageEvent>() }
+  val recentHealEvents = remember { mutableStateListOf<HealEvent>() }
+  val activeDebuffs = remember { mutableStateListOf<String>() }
 
+  // poll for recent heals and damage events
+  LaunchedEffect(playerName) {
+    while (true) {
+      PlayerCacheInteractor.getCard(playerName)?.let { player ->
+        isCharmed.value = player.isCharmed
+        recentDamageEvents.clear()
+        recentDamageEvents.addAll(player.recentDamageEvents)
+        recentHealEvents.clear()
+        recentHealEvents.addAll(player.recentHealEvents)
+        activeDebuffs.clear()
+        //activeDebuffs.addAll(player.activeDebuffs)
+      }
+      delay(5000)
+    }
+  }
 
   // special status glow effect
   var isSheeningSpecialStatus by remember { mutableStateOf(false) }
   var specialStatus by remember { mutableStateOf("") }
-  LaunchedEffect(filteredDebuffs) {
+  LaunchedEffect(isCharmed.value) {
     isSheeningSpecialStatus = false
-    val isCharmed =
-      filteredDebuffs.contains("Charmed") || filteredDebuffs.contains("Kitsu's Charm") // mara will be happy to know her charms are real
-    specialStatus = if (isCharmed) "Charmed" else ""
-    if (!isCharmed) return@LaunchedEffect
+    if (!isCharmed.value) {
+      specialStatus = ""
+      return@LaunchedEffect
+    }
+
+    specialStatus = "Charmed"
 
     var i = 0
     while (i < 3) {
@@ -168,37 +184,10 @@ fun TrackerOverlay() {
         }
 
         /* Close Button */
-        Box(modifier = Modifier.padding(6.dp)) {
-          val interactionSource = remember { MutableInteractionSource() }
-          val isCloseHovered by interactionSource.collectIsHoveredAsState()
-
-          IconButton(
-            onClick = {
-              RaidFramer.toggleTrackerOverlayVisibility()
-            },
-            modifier = Modifier
-              .size(32.dp)
-              .background(
-                if (isCloseHovered) Color.Red.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.20f),
-                MaterialTheme.shapes.small
-              )
-              .shadow(
-                elevation = 0.dp,
-                clip = true,
-                ambientColor = Color.Transparent,
-                spotColor = Color.Transparent
-              )
-              .hoverable(interactionSource = interactionSource)
-              .clip(RoundedCornerShape(8.dp))
-          ) {
-            Text(
-              "✕",
-              fontSize = 18.sp,
-              color = if (isCloseHovered) Color.White else Color.White,
-              textAlign = TextAlign.Center
-            )
-          }
-        }
+        CloseButton(
+          onClose = { wm?.closeWindow(OverlayType.TRACKER) },
+          //modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)
+        )
       }
     }
 
@@ -209,7 +198,7 @@ fun TrackerOverlay() {
       Row {
         val title = buildAnnotatedString {
           withStyle(style = SpanStyle(color = Color.White)) {
-            append(RaidFramer.currentTargetName.value)
+            append(playerName)
           }
           withStyle(style = SpanStyle(color = Color.Cyan)) {
             append(if (specialStatus.isNotBlank()) " [$specialStatus]" else "")
@@ -261,7 +250,7 @@ fun TrackerOverlay() {
         }
       }
       Column(Modifier.padding(top = 16.dp)) {
-        renderDebuffThumbnailGrid(filteredDebuffs)
+        renderDebuffThumbnailGrid(activeDebuffs)
       }
       if (showDmg) {
         Column(Modifier.padding(top = 16.dp)) {
@@ -273,14 +262,14 @@ fun TrackerOverlay() {
           ) {
             Tab(selected = tabIndex == 0, onClick = { tabIndex = 0 }) {
               Text(
-                text = "Incoming",
+                text = "Recent Damage",
                 color = Color.White,
                 modifier = Modifier.padding(6.dp)
               )
             }
             Tab(selected = tabIndex == 1, onClick = { tabIndex = 1 }) {
               Text(
-                text = "Outgoing",
+                text = "Recent Heals",
                 color = Color.White,
                 modifier = Modifier.padding(6.dp)
               )
@@ -291,7 +280,7 @@ fun TrackerOverlay() {
               LazyColumn(
                 contentPadding = PaddingValues(6.dp)
               ) {
-                items(sortedAndFilteredIncoming.size) { item ->
+                items(recentDamageEvents.size) { item ->
                   val incomingInteractionSource = remember { MutableInteractionSource() }
                   val isHovered = incomingInteractionSource.collectIsHoveredAsState().value
                   Row(
@@ -302,11 +291,7 @@ fun TrackerOverlay() {
                       .hoverable(interactionSource = incomingInteractionSource)
                   ) {
                     Text(
-                      text = when (val event = sortedAndFilteredIncoming[item]) {
-                        is DamageEvent -> annotatedStringForAttack(event)
-                        is HealEvent -> annotatedStringForHeal(event)
-                        else -> buildAnnotatedString { }
-                      },
+                      text = annotatedStringForAttack(recentDamageEvents[item]),
                       maxLines = 1,
                       overflow = TextOverflow.Ellipsis,
                       modifier = Modifier.padding(2.dp)
@@ -320,7 +305,7 @@ fun TrackerOverlay() {
               LazyColumn(
                 contentPadding = PaddingValues(4.dp)
               ) {
-                items(sortedAndFilteredOutgoing.size) { item ->
+                items(recentHealEvents.size) { item ->
                   val outgoingInteractionSource = remember { MutableInteractionSource() }
                   val isHovered = outgoingInteractionSource.collectIsHoveredAsState().value
                   Row(
@@ -331,11 +316,7 @@ fun TrackerOverlay() {
                       .hoverable(interactionSource = outgoingInteractionSource)
                   ) {
                     Text(
-                      text = when (val event = sortedAndFilteredOutgoing[item]) {
-                        is DamageEvent -> annotatedStringForAttack(event)
-                        is HealEvent -> annotatedStringForHeal(event)
-                        else -> buildAnnotatedString { }
-                      },
+                      text = annotatedStringForHeal(recentHealEvents[item]),
                       maxLines = 1,
                       overflow = TextOverflow.Ellipsis,
                       modifier = Modifier.padding(2.dp)

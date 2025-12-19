@@ -1,7 +1,5 @@
 package com.reoky.raidframer.core.model
 
-import com.reoky.raidframer.core.calc.MetricRawSample
-import com.reoky.raidframer.core.database.PlayerCacheDao
 import com.reoky.raidframer.core.definitions.findSkillByName
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 

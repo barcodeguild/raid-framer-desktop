@@ -30,12 +30,12 @@ fun PreviewSummaryOverlay() {
 }
 
 @Composable
-fun SummaryOverlay(wm: WindowManager? = null, playerName: String = "") {
+fun SummaryOverlay(wm: WindowManager? = null) {
 
   // Semi-transparent backdrop
   Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f))) {
     TitleBarComponent(
-      title = "",
+      title = "Spaguetti (Red) - PVP DMG (12/17)",
       onClose = { wm?.closeWindow(OverlayType.SUMMARY) }
     )
 
@@ -43,20 +43,20 @@ fun SummaryOverlay(wm: WindowManager? = null, playerName: String = "") {
     MultiPlayerMetricLineChart(
       groups = listOf(
         GroupSpec(
-          "",
-          filter = { it.name == "" },
-          color = Color.Magenta
+          "Spaguetti",
+          filter = { it.name == "Spaguetti" },
+          color = Color.Red
         ),
-        GroupSpec(
-          "",
-          filter = { it.name == "" },
-          color = Color.Green
-        ),
-        GroupSpec(
-          "",
-          filter = { it.name == "" },
-          color = Color.Cyan
-        ),
+//        GroupSpec(
+//          "",
+//          filter = { it.name == "" },
+//          color = Color.Green
+//        ),
+//        GroupSpec(
+//          "",
+//          filter = { it.name == "" },
+//          color = Color.Cyan
+//        ),
       ),
       smoothing = false,
       smoothingWindow = 1,

@@ -1,6 +1,5 @@
 package com.reoky.raidframer.ui.overlay
 
-import com.reoky.raidframer.RaidFramer
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -122,8 +121,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           }
           Button(
             onClick = {
-              RaidFramer.isAboutOverlayVisible.value = false
-              RaidFramer.isSettingsOverlayVisible.value = true
+              wm?.openWindow(OverlayType.SETTINGS)
             },
             colors = ButtonDefaults.buttonColors(Color.White),
             modifier = Modifier.padding(bottom = 8.dp, end = 8.dp).align(Alignment.End)

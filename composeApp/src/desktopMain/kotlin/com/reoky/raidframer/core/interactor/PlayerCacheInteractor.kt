@@ -39,6 +39,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.compareTo
+import kotlin.text.set
 
 /**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
@@ -91,22 +93,19 @@ object PlayerCacheInteractor : Interactor() {
 
       if (!card.isRealPlayer) return@forEach // only real players have specs
 
-      // identify SpecType based on recent casts
-      val skillTreeLastUsed: MutableMap<SkillTreeType, Long> = buildSkillTreeLastUsedMap() // timestamp 0 for all trees
-      card.recentCastEvents.take(128).forEach { castEvent ->
-        findSkillTreeForSpell(castEvent.spell)?.let { tree ->
-          skillTreeLastUsed[tree] = castEvent.timestamp
-        }
-      }
-
-      // determine three most recently used skill trees
-      val threeMostRecentTrees = skillTreeLastUsed.entries
-        .asSequence()
-        .filter { it.value > 0 }
-        .sortedByDescending { it.value } // most recent first
-        .take(3) // take top three
-        .map { it.key }
-        .toSet()
+      // doing it this way because we never create those intermediate lists of 128 items. We only ever have the current item in memory by using sequences.
+      // ok friends this was very hard for reoky to bear
+      val threeMostRecentTrees = sequenceOf(
+        card.recentCastEvents.take(128).map { it.timestamp to it.spell }, // doesn't allocate / execute immediately
+        card.recentDamageEvents.take(128).map { it.timestamp to it.spell } // saves a recipe for later
+      )
+        .flatten() // flatten the events from both into a single sequence
+        .mapNotNull { (ts, spell) -> findSkillTreeForSpell(spell)?.let { tree -> tree to ts } } // filter skills that resolve as null
+        .sortedByDescending { (_, ts) -> ts } // sort everything by timestamp (newest first)
+        .distinctBy { (tree, _) -> tree } // distinct keeps only the newest occurrence of each tree
+        .take(3) // take the three most recent unique trees
+        .map { (tree, _) -> tree } // into a map
+        .toSet() // make unique
 
       if (threeMostRecentTrees.count() < 3) {
         return@forEach // not enough data yet, gib unknown

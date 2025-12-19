@@ -1,8 +1,7 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.animation.animateColor
-import com.reoky.raidframer.RaidFramer
-import com.reoky.raidframer.core.helpers.ParserHelper
+import com.reoky.raidframer.core.helpers.EventParserHelper
 import androidx.compose.animation.core.*
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
@@ -30,8 +29,6 @@ import com.reoky.raidframer.ui.WindowManager
 import lol.rfcloud.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.ui.dialog.exitDialog
 import com.reoky.raidframer.ui.component.PlayerRankingRow
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 
 @Preview
 @Composable
@@ -54,9 +51,6 @@ fun CombatOverlay(wm: WindowManager? = null) {
   val sortedDamage by PlayerCacheInteractor.topDamage.collectAsState()
   val sortedHeals by PlayerCacheInteractor.topHeals.collectAsState()
   val sortedCC by PlayerCacheInteractor.topCC.collectAsState()
-
-  // This map is still needed for the retribution icon
-  val retributionByPlayer by ParserHelper.retributionByPlayer.collectAsState()
 
   // the animation for red flashing text
   val flashingColorState = rememberInfiniteTransition().animateColor(
@@ -270,10 +264,10 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 card = card,
                 valueText = card.sessionDamageTotal.humanReadableAbbreviation(),
                 valueColor = Color(249, 191, 59, 255),
-                isRetribution = retributionByPlayer[card.name] != null,
+                isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
-                  wm?.openWindow(OverlayType.SUMMARY)
+                  wm?.openWindow(OverlayType.TRACKER)
                 }
               )
             }
@@ -300,11 +294,10 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 card = card,
                 valueText = card.sessionHealTotal.humanReadableAbbreviation(),
                 valueColor = Color.Green,
-                isRetribution = retributionByPlayer[card.name] != null,
+                isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
-                  RaidFramer.isTrackerOverlayVisible.value = true
-                  RaidFramer.currentTargetName.value = card.name
+                  wm?.openWindow(OverlayType.SUMMARY)
                 }
               )
             }
@@ -331,11 +324,10 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 card = card,
                 valueText = card.sessionCCTotal.toString(),
                 valueColor = Color.Cyan,
-                isRetribution = retributionByPlayer[card.name] != null,
+                isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
-                  RaidFramer.isTrackerOverlayVisible.value = true
-                  RaidFramer.currentTargetName.value = card.name
+                  wm?.openWindow(OverlayType.SUMMARY)
                 }
               )
             }

@@ -1,6 +1,5 @@
 package com.reoky.raidframer.ui.overlay
 
-import com.reoky.raidframer.RaidFramer
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
@@ -23,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import lol.rfcloud.core.helpers.openWebLink
 
@@ -60,7 +60,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
       val isCloseHovered by interactionSource.collectIsHoveredAsState()
       IconButton(
         onClick = {
-          RaidFramer.isFiltersOverlayVisible.value = false
+          wm?.closeWindow(OverlayType.FILTERS)
         },
         modifier = Modifier
           .size(32.dp)

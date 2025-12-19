@@ -1,6 +1,6 @@
 package com.reoky.raidframer.ui.dialog
 
-import com.reoky.raidframer.core.helpers.ParserHelper
+import com.reoky.raidframer.core.helpers.EventParserHelper
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,16 +15,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import java.nio.file.Path
 import kotlin.io.path.pathString
 
 @Composable
 fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: MutableState<String>) {
 
-//  val isSearching by com.reoky.raidframer.core.helpers.EventParserInteractor.isSearching.collectAsState()
-//  val possiblePaths by com.reoky.raidframer.core.helpers.EventParserInteractor.possiblePaths.collectAsState()
-  val isSearching = false
-  val possiblePaths: List<Path> = listOf()
+  val isSearching by GameMonitorInteractor.isSearching.collectAsState()
+  val possiblePaths by GameMonitorInteractor.possiblePaths.collectAsState()
 
   if (showDialog.value) {
     AlertDialog(
@@ -72,14 +71,7 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
                     ) else Color.Transparent
                   )
                   .clickable {
-                    selectedItem.value = possiblePaths[itemId].pathString
-                    ParserHelper.updateSelectedPath(selectedItem.value)
-//                    ParserHelper.stop()
-//                    ParserHelper.start()
-//                    lol.rfcloud.AppState.config.defaultLogPath = selectedItem.value
-//                    CoroutineScope(Dispatchers.Default).launch {
-//                      RFDao.saveConfig(lol.rfcloud.AppState.config)
-//                    }
+                    // TODO: Update Selected Item
                   }
                   .padding(16.dp)
               ) {
