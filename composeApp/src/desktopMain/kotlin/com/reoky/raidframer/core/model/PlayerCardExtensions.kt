@@ -1,6 +1,8 @@
 package com.reoky.raidframer.core.model
 
+import com.reoky.raidframer.core.database.isPlayerNameOnWhitelist
 import com.reoky.raidframer.core.definitions.findSkillByName
+import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 
@@ -11,8 +13,9 @@ import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
  */
 fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
   // rule out the easy stuff first
-  if (this.name.contains(" ")) return false // only NPCs can have spaces in their names
-  if (this.name in listOf("Unknown Target", "Fren", "Meina", "Glenn", "Charybdis")) return false // we might want a blacklist in the future
+  if (this.name.contains(" ")) return false // only NPCs can have spaces in their names, auto-non-player
+  if (this.name in listOf("Unknown Target", "Fren", "Meina", "Glenn", "Charybdis")) return false // we might want a blacklist feature in the future where people can add their own NPC names
+  if (this.name.isPlayerNameOnWhitelist()) return true // name is on the whitelist, auto-upgrade
   this.recentDebuffGainedEvent.takeLast(100).let {
     return it.map { event -> event.debuff }.contains("Preparing Glider") // NPCs can't open their gliders
   }

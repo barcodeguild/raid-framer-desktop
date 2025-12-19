@@ -10,6 +10,7 @@ import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.buildSkillTreeLastUsedMap
 import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
+import com.reoky.raidframer.core.helpers.sha256
 import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CastingEvent
@@ -71,9 +72,6 @@ object PlayerCacheInteractor : Interactor() {
     val savedCount = RFDao.playerCacheDao.getPlayerCount()
     val cachedCount = _cards.values.count()
     Log.info(TAG, "Persisted $savedCount players. ($cachedCount total entities (mounts,players,pets,mobs,etc) cached in memory)")
-
-    // Debug list spells that can count as cc
-    //SkillTreeType.entries.flatMap { it.tree.skills }.filter { it.consideredCC }.forEach { print(",${it.name}") }
 
     _cards.forEach { (name, card) ->
 
