@@ -1,3 +1,4 @@
+// kotlin
 package com.reoky.raidframer.core.interactor
 
 import com.reoky.raidframer.core.helpers.EventParserHelper
@@ -6,11 +7,14 @@ import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import kotlin.io.path.pathString
 import kotlin.use
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/*
+ * Interactor that monitors the ArcheRage combat log file for new events.  Can operate
+ * in REPLAY mode (read events between UTC timestamps) or MONITOR mode (tail the file for new events).
+ */
 object GameMonitorInteractor : Interactor() {
 
   private const val TAG = "GameMonitorInteractor"
@@ -18,13 +22,13 @@ object GameMonitorInteractor : Interactor() {
   private val _isSearching = MutableStateFlow(false)
   val isSearching: StateFlow<Boolean> get() = _isSearching
 
-  private val _possiblePaths = MutableStateFlow<List<Path>>(emptyList())
-  val possiblePaths: StateFlow<List<Path>> get() = _possiblePaths
+  private val _possibleCombatLogs = MutableStateFlow<List<Path>>(emptyList())
+  val possiblePaths: StateFlow<List<Path>> get() = _possibleCombatLogs
 
-  private val _userMarkerStart = MutableStateFlow<Long>(0L)
+  private val _userMarkerStart = MutableStateFlow<Long>(0L) // UTC timestamp (ms)
   val userMarkerStart: StateFlow<Long> get() = _userMarkerStart
 
-  private val _userMarkerEnd = MutableStateFlow<Long>(0L)
+  private val _userMarkerEnd = MutableStateFlow<Long>(0L) // UTC timestamp (ms); 0 => no end
   val userMarkerEnd: StateFlow<Long> get() = _userMarkerEnd
 
   private val _isPlaying = MutableStateFlow(false)
@@ -49,7 +53,11 @@ object GameMonitorInteractor : Interactor() {
   private const val READ_CHUNK_SIZE = 16 * 1024 * 1024 // 16 MB
   private const val PARSE_BATCH_SIZE = 1000
 
-  fun locateCombatLog(searchEverywhere: Boolean = false) {
+
+  /*
+   * Recursively search for ArcheRage directory in common locations to enumerate possible combat log files.
+   */
+  fun locateArcheRageDirectory(searchEverywhere: Boolean = false) {
     _isSearching.value = true
 
     val oneDriveDocumentsPath = Paths.get(System.getProperty("user.home"), "OneDrive", "Documents", "ArcheRage")
@@ -65,20 +73,19 @@ object GameMonitorInteractor : Interactor() {
       if (Files.exists(documentsPath)) searchPaths.add(documentsPath)
     }
 
-    val possibleLogFiles = mutableListOf<Path>()
+    val possibleArcheRageDirectories = mutableListOf<Path>()
 
     fun seek(baseDir: Path) {
       val stream = Files.list(baseDir)
       stream.use { paths ->
-        paths.forEach { path ->
+        paths.forEach { file ->
           try {
-            if (Files.isDirectory(path) && Files.isReadable(path)) {
-              seek(path)
-            } else if (path.fileName.toString().lowercase().contains("combat.log") && !path.pathString.contains("LogBackups")) {
-              possibleLogFiles.add(path)
+            if (Files.isDirectory(file) && Files.isReadable(file)) {
+              seek(file)
+            } else if (file.fileName.toString().lowercase().contains("system.cfg")) {
+              possibleArcheRageDirectories.add(file.parent)
             }
           } catch (_: Exception) {
-            // ignore directories we can't read
           }
         }
       }
@@ -88,20 +95,37 @@ object GameMonitorInteractor : Interactor() {
       try {
         seek(it)
       } catch (_: Exception) {
-        // ignore unreachable top-level search paths
       }
     }
 
-    _possiblePaths.value = possibleLogFiles.distinct()
+    println(possibleArcheRageDirectories.distinct())
+
+
+    val combatLogPaths = possibleArcheRageDirectories.mapNotNull { dir ->
+      val combatLogPath = dir.resolve("combat.log")
+      if (Files.exists(combatLogPath) && Files.isReadable(combatLogPath)) {
+        combatLogPath
+      } else {
+        null
+      }
+    }
+
+    _possibleCombatLogs.value = combatLogPaths.distinct()
     _isSearching.value = false
   }
 
+  /*
+   * Manually choose a combat log file to monitor or replay.
+   */
   fun chooseCombatLog(path: Path) {
     synchronized(this) {
       currentPath = path
     }
   }
 
+  /*
+   * Set monitoring mode and user-defined UTC start/end timestamps (milliseconds).
+   */
   fun setOptions(
     mode: MonitorModes,
     startMarker: Long,
@@ -129,10 +153,13 @@ object GameMonitorInteractor : Interactor() {
     }
   }
 
+  /*
+   * Restart monitoring or replaying from the chosen combat log file and user-defined markers.
+   */
   fun restart() {
     synchronized(this) {
       replayCompleted = false
-      val path = currentPath ?: _possiblePaths.value.firstOrNull()
+      val path = currentPath ?: _possibleCombatLogs.value.firstOrNull()
       if (path == null) {
         _isPlaying.value = false
         return
@@ -141,6 +168,9 @@ object GameMonitorInteractor : Interactor() {
     }
   }
 
+  /*
+   * Main event loop tick: read new lines from the combat log file as per the current mode and user markers.
+   */
   override suspend fun interact() {
     println("GameMonitorInteractor.interact tick: mode=$currentMode, path=$currentPath, isPlaying=${_isPlaying.value}, replayCompleted=$replayCompleted")
     try {
@@ -155,7 +185,7 @@ object GameMonitorInteractor : Interactor() {
         return
       }
 
-      val candidates = _possiblePaths.value
+      val candidates = _possibleCombatLogs.value
       if (candidates.isEmpty() && currentPath == null) {
         closeFile()
         _isPlaying.value = false
@@ -182,21 +212,18 @@ object GameMonitorInteractor : Interactor() {
         val channel = localRaf.channel
         val fileLength = channel.size()
 
-        // determine read target (respect REPLAY end marker)
-        val endMarker = _userMarkerEnd.value
-        val stopPosition = if (currentMode == MonitorModes.REPLAY && endMarker > 0L) {
-          endMarker.coerceAtMost(fileLength)
-        } else {
-          fileLength
-        }
+        // In timestamp-based REPLAY, stopPosition is file end (we stop based on event timestamps)
+        val stopPosition = fileLength
 
-        if (currentPosition < stopPosition) {
+        if (currentPosition < stopPosition && (currentMode != MonitorModes.REPLAY || !replayCompleted)) {
           var pos = currentPosition
           val iso = Charsets.ISO_8859_1
           val batch = ArrayList<String>(PARSE_BATCH_SIZE)
           var leftover = ByteArray(0)
+          var reachedEndByTimestamp = false
+          var anyEventFoundAfterStart = false
 
-          while (pos < stopPosition) {
+          while (pos < stopPosition && !reachedEndByTimestamp) {
             val remaining = (stopPosition - pos).coerceAtMost(READ_CHUNK_SIZE.toLong()).toInt()
             val buffer = ByteBuffer.allocate(remaining)
             var read = 0
@@ -229,10 +256,29 @@ object GameMonitorInteractor : Interactor() {
                 val line = String(lineBytes, iso)
                 batch.add(line)
                 if (batch.size >= PARSE_BATCH_SIZE) {
+                  // parse and handle batch
                   try {
                     val events = EventParserHelper.parseCombatEvents(batch.toList())
-                    for (event in events) {
-                      PlayerCacheInteractor.postEvent(event)
+                    if (events.isNotEmpty()) {
+                      val startMarkerTs = _userMarkerStart.value
+                      val endMarkerTs = _userMarkerEnd.value
+                      // mark if any event is after the start marker
+                      if (events.any { it.timestamp >= startMarkerTs }) anyEventFoundAfterStart = true
+
+                      // post only events inside inclusive [start, end]
+                      val toPost = events.filter { ev ->
+                        val afterStart = if (startMarkerTs <= 0L) true else ev.timestamp >= startMarkerTs
+                        val beforeEnd = if (endMarkerTs <= 0L) true else ev.timestamp <= endMarkerTs
+                        afterStart && beforeEnd
+                      }
+                      for (event in toPost) {
+                        PlayerCacheInteractor.postEvent(event)
+                      }
+
+                      // if any event in this batch exceeds endMarker (strictly >), end replay
+                      if (endMarkerTs > 0L && events.any { it.timestamp > endMarkerTs }) {
+                        reachedEndByTimestamp = true
+                      }
                     }
                   } catch (_: Exception) {
                     // swallow parse exceptions
@@ -248,48 +294,77 @@ object GameMonitorInteractor : Interactor() {
           }
 
           // trailing leftover becomes final line fragment
-          if (leftover.isNotEmpty()) {
+          if (leftover.isNotEmpty() && !reachedEndByTimestamp) {
             val line = String(leftover, iso)
             batch.add(line)
           }
 
-          if (batch.isNotEmpty()) {
+          if (batch.isNotEmpty() && !reachedEndByTimestamp) {
             try {
               val events = EventParserHelper.parseCombatEvents(batch.toList())
-              for (event in events) {
-                PlayerCacheInteractor.postEvent(event)
+              if (events.isNotEmpty()) {
+                val startMarkerTs = _userMarkerStart.value
+                val endMarkerTs = _userMarkerEnd.value
+                if (events.any { it.timestamp >= startMarkerTs }) anyEventFoundAfterStart = true
+
+                val toPost = events.filter { ev ->
+                  val afterStart = if (startMarkerTs <= 0L) true else ev.timestamp >= startMarkerTs
+                  val beforeEnd = if (endMarkerTs <= 0L) true else ev.timestamp <= endMarkerTs
+                  afterStart && beforeEnd
+                }
+                for (event in toPost) {
+                  PlayerCacheInteractor.postEvent(event)
+                }
+
+                if (endMarkerTs > 0L && events.any { it.timestamp > endMarkerTs }) {
+                  reachedEndByTimestamp = true
+                }
               }
             } catch (_: Exception) {
-              // swallow parse exceptions
             }
             batch.clear()
           }
 
           currentPosition = pos.coerceAtMost(stopPosition)
-        }
 
-        // After reading available lines, mode-specific actions
-        val fileLenAfter = channel.size()
-        when (currentMode) {
-          MonitorModes.REPLAY -> {
-            val endMarkerVal = _userMarkerEnd.value
-            val stopPos = if (endMarkerVal <= 0L) Long.MAX_VALUE else endMarkerVal
-            if (currentPosition >= stopPos || currentPosition >= fileLenAfter) {
+          // If replay mode and we've either seen an event past the end timestamp or we've reached EOF
+          if (currentMode == MonitorModes.REPLAY) {
+            val endMarkerTs = _userMarkerEnd.value
+            // If we reached end-by-timestamp, finish.
+            if (reachedEndByTimestamp) {
               // finished replay: close reader but keep the chosen path and mark completed
-              closeFile(clearPath = false)
+              try {
+                closeFile(clearPath = false)
+              } catch (_: Exception) {}
               replayCompleted = true
               _isPlaying.value = false
-              Log.info(TAG, "Completed REPLAY mode tailing of combat log at $desired...")
+              Log.info(TAG, "Completed REPLAY mode tailing of combat log at $currentPath (by end timestamp)...")
             } else {
-              _isPlaying.value = true
+              // If EOF and we never found any event after start marker, still mark completed (nothing to play)
+              val fileLenAfter = channel.size()
+              if (currentPosition >= fileLenAfter) {
+                // If start marker was set but no events matched, treat as completed
+                val startMarkerTs = _userMarkerStart.value
+                if (startMarkerTs > 0L && !anyEventFoundAfterStart) {
+                  try {
+                    closeFile(clearPath = false)
+                  } catch (_: Exception) {}
+                  replayCompleted = true
+                  _isPlaying.value = false
+                  Log.info(TAG, "Completed REPLAY mode tailing of combat log at $currentPath (EOF with no events after start)...")
+                } else {
+                  _isPlaying.value = !replayCompleted
+                }
+              } else {
+                _isPlaying.value = true
+              }
             }
-          }
-          MonitorModes.MONITOR -> {
+          } else {
             _isPlaying.value = true
           }
-          else -> {
-            _isPlaying.value = false
-          }
+        } else {
+          // nothing to read
+          _isPlaying.value = false
         }
       }
     } catch (t: Throwable) {
@@ -308,11 +383,12 @@ object GameMonitorInteractor : Interactor() {
         val rafLocal = RandomAccessFile(path.toFile(), "r")
         val fileLen = rafLocal.length()
 
+        // For timestamp-based REPLAY, we start reading from file start (0L) and filter events by timestamp.
+        // MONITOR retains previous behaviour (start at end unless user asked otherwise).
         val startMarker = _userMarkerStart.value
         val startPos = when (currentMode) {
           MonitorModes.REPLAY -> {
-            val desired = if (startMarker > 0L) startMarker else 0L
-            desired.coerceIn(0L, fileLen)
+            0L
           }
           MonitorModes.MONITOR -> {
             if (startMarker > 0L) startMarker.coerceIn(0L, fileLen) else fileLen
@@ -329,9 +405,8 @@ object GameMonitorInteractor : Interactor() {
 
         _isPlaying.value = when (currentMode) {
           MonitorModes.REPLAY -> {
-            val endMarker = _userMarkerEnd.value
-            val stopPosition = if (endMarker <= 0L) Long.MAX_VALUE else endMarker
-            (currentPosition < stopPosition) && (currentPosition < rafLocal.length())
+            // initially true; actual completion will be determined during reading/parsing
+            fileLen > 0L
           }
           MonitorModes.MONITOR -> true
           else -> false
@@ -355,7 +430,7 @@ object GameMonitorInteractor : Interactor() {
         currentPath = null
         currentPosition = 0L
       } else {
-        currentPosition = 0L
+        // preserve currentPosition when we only close the file but keep the chosen path
       }
     }
   }

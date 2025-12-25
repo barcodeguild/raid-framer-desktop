@@ -28,12 +28,12 @@ data class WindowStateEntity(
 @Entity(tableName = "config")
 data class ConfigEntity(
   @PrimaryKey val id: Int = 0, // Singleton config, always id 0
-  val defaultLogPath: String = "",
+  val defaultArcheRageDirectory: String = "", // automatic path detection if empty (location of addons, logs, configs for AR)
   val tabbedDetectionEnabled: Boolean = false,
   val overlayResizingEnabled: Boolean = true,
-  val searchEverywhere: Boolean = false,
   val firstLaunch: Boolean = true,
-  val playerName: String = ""
+  val playerName: String = "", // player's own name
+  val playerFaction: String = "" // player's own faction
 )
 
 /*

@@ -30,8 +30,8 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-// small data holder unchanged
-private data class MinuteSample(val minuteStartMillis: Long, val damageSum: Long)
+// Changed to TimeSample to reflect variable resolution (now 1s)
+private data class TimeSample(val timestamp: Long, val damageSum: Long)
 
 // Group descriptor - filter is typed as PlayerCard -> Boolean
 data class GroupSpec(
@@ -73,9 +73,9 @@ fun MultiPlayerMetricLineChart(
     listOf(GroupSpec("All", { true }, Color(0xFFEF5350)))
   }
 
-  var samplesPerGroup by remember { mutableStateOf<List<List<MinuteSample>>>(emptyList()) }
-  var minuteRangeStart by remember { mutableStateOf(0L) }
-  var minuteRangeEnd by remember { mutableStateOf(0L) }
+  var samplesPerGroup by remember { mutableStateOf<List<List<TimeSample>>>(emptyList()) }
+  var rangeStart by remember { mutableStateOf(0L) }
+  var rangeEnd by remember { mutableStateOf(0L) }
 
   LaunchedEffect(usedGroups, minutesWindow, mode, forceSlidingWindow) {
     while (true) {
@@ -85,14 +85,19 @@ fun MultiPlayerMetricLineChart(
       }
 
       // collect all events across groups to decide global range
-      val allEvents = groupCards.flatMap { cards -> cards.flatMap { it.recentDamageEvents } }
+      val allEvents = groupCards.flatMap { cards -> cards.flatMap { it.recentHealEvents } }
+
+      // Resolution: 1 second (1000ms) instead of 1 minute (60000ms) for better detail
+      val bucketSize = 1000L
 
       if (allEvents.isEmpty()) {
-        val nowMinuteStart = (now / 60_000L) * 60_000L
-        val baseline = (minutesWindow - 1 downTo 0).map { i -> MinuteSample(nowMinuteStart - i * 60_000L, 0L) }
+        val nowBucketStart = (now / bucketSize) * bucketSize
+        // Calculate how many 1-second buckets fit in the minutesWindow
+        val totalBuckets = minutesWindow * 60
+        val baseline = (totalBuckets - 1 downTo 0).map { i -> TimeSample(nowBucketStart - i * bucketSize, 0L) }
         samplesPerGroup = List(usedGroups.size) { baseline }
-        minuteRangeStart = baseline.first().minuteStartMillis
-        minuteRangeEnd = baseline.last().minuteStartMillis
+        rangeStart = baseline.first().timestamp
+        rangeEnd = baseline.last().timestamp
         delay(5_000L)
         continue
       }
@@ -101,63 +106,66 @@ fun MultiPlayerMetricLineChart(
 
       if (useSliding) {
         val windowStart = now - minutesWindow * 60_000L
-        val nowMinuteStart = (now / 60_000L) * 60_000L
-        // buckets per group keyed by minuteStartMillis
+        val nowBucketStart = (now / bucketSize) * bucketSize
+
+        // buckets per group keyed by bucketStart (timestamp)
         val perGroupBuckets = groupCards.map { cards ->
           val buckets = mutableMapOf<Long, Long>()
           cards.forEach { c ->
-            c.recentDamageEvents.forEach { e ->
+            c.recentHealEvents.forEach { e ->
               if (e.timestamp >= windowStart) {
-                val minuteStart = (e.timestamp / 60_000L) * 60_000L
-                buckets[minuteStart] = (buckets[minuteStart] ?: 0L) + e.damage
+                val bucketStart = (e.timestamp / bucketSize) * bucketSize
+                buckets[bucketStart] = (buckets[bucketStart] ?: 0L) + e.amount
               }
             }
           }
           buckets
         }
 
-        val minutes = (minutesWindow - 1 downTo 0).map { i -> nowMinuteStart - i * 60_000L }
+        val totalBuckets = minutesWindow * 60
+        val bucketTimestamps = (totalBuckets - 1 downTo 0).map { i -> nowBucketStart - i * bucketSize }
         val computedPerGroup = perGroupBuckets.map { buckets ->
-          minutes.map { m -> MinuteSample(m, buckets[m] ?: 0L) }
+          bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
         }
 
         samplesPerGroup = computedPerGroup
-        minuteRangeStart = minutes.first()
-        minuteRangeEnd = minutes.last()
+        rangeStart = bucketTimestamps.first()
+        rangeEnd = bucketTimestamps.last()
       } else {
         // replay: union range across all events
         val oldest = allEvents.minOf { it.timestamp }
         val newest = allEvents.maxOf { it.timestamp }
-        val startMinute = (oldest / 60_000L) * 60_000L
-        val endMinute = (newest / 60_000L) * 60_000L
-        val minutesRange = ((endMinute - startMinute) / 60_000L).toInt().coerceAtLeast(0)
-        val minutes = (0..minutesRange).map { i -> startMinute + i * 60_000L }
+        val startBucket = (oldest / bucketSize) * bucketSize
+        val endBucket = (newest / bucketSize) * bucketSize
+        val bucketCount = ((endBucket - startBucket) / bucketSize).toInt().coerceAtLeast(0)
+        val bucketTimestamps = (0..bucketCount).map { i -> startBucket + i * bucketSize }
 
         val perGroupBuckets = groupCards.map { cards ->
           val buckets = mutableMapOf<Long, Long>()
           cards.forEach { c ->
-            c.recentDamageEvents.forEach { e ->
-              val minuteStart = (e.timestamp / 60_000L) * 60_000L
-              buckets[minuteStart] = (buckets[minuteStart] ?: 0L) + e.damage
+            c.recentHealEvents.forEach { e ->
+              val bucketStart = (e.timestamp / bucketSize) * bucketSize
+              buckets[bucketStart] = (buckets[bucketStart] ?: 0L) + e.amount
             }
           }
           buckets
         }
 
         val computedPerGroup = perGroupBuckets.map { buckets ->
-          minutes.map { m -> MinuteSample(m, buckets[m] ?: 0L) }
+          bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
         }
 
         samplesPerGroup = computedPerGroup
-        minuteRangeStart = minutes.first()
-        minuteRangeEnd = minutes.last()
+        rangeStart = bucketTimestamps.first()
+        rangeEnd = bucketTimestamps.last()
       }
 
       delay(5_000L)
     }
   }
 
-  val minuteFmt = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+  // Updated format to include seconds for higher precision
+  val timeFmt = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
 
   Column(modifier = modifier) {
     Box(
@@ -171,9 +179,9 @@ fun MultiPlayerMetricLineChart(
       if (samplesPerGroup.isEmpty() || samplesPerGroup.first().isEmpty()) {
         Text("No data", color = Color.LightGray)
       } else {
-        // keep minute timestamps aligned source
-        val minutes = remember(samplesPerGroup) { samplesPerGroup.first().map { it.minuteStartMillis } }
-        val count = minutes.size.coerceAtLeast(1)
+        // keep timestamps aligned source
+        val timestamps = remember(samplesPerGroup) { samplesPerGroup.first().map { it.timestamp } }
+        val count = timestamps.size.coerceAtLeast(1)
 
         // Use index-based X to ensure equal spacing across the X axis (0 .. count-1)
         val minX = 0f
@@ -215,8 +223,8 @@ fun MultiPlayerMetricLineChart(
 
         // precompute index -> formatted time for only those label positions
         val indexToLabel: Map<Int, String> = labelIndices.associateWith { idx ->
-          val millis = minutes[idx.coerceIn(0, minutes.lastIndex)]
-          minuteFmt.format(Date(millis))
+          val millis = timestamps[idx.coerceIn(0, timestamps.lastIndex)]
+          timeFmt.format(Date(millis))
         }
 
         val xAxisModel = rememberFloatLinearAxisModel(
@@ -263,9 +271,9 @@ fun MultiPlayerMetricLineChart(
               return@XYGraph
             }
 
-            val nearestIndex = xVal.roundToInt().coerceIn(0, minutes.lastIndex)
-            val millis = minutes[nearestIndex]
-            val labelText = minuteFmt.format(Date(millis))
+            val nearestIndex = xVal.roundToInt().coerceIn(0, timestamps.lastIndex)
+            val millis = timestamps[nearestIndex]
+            val labelText = timeFmt.format(Date(millis))
 
             Text(
               labelText,
@@ -311,7 +319,7 @@ fun MultiPlayerMetricLineChart(
 @Composable
 fun PlayerMetricLineChart(
   playerName: String,
-  minutesWindow: Int = 15,
+  minutesWindow: Int = 1,
   mode: GameMonitorInteractor.MonitorModes = GameMonitorInteractor.MonitorModes.MONITOR,
   forceSlidingWindow: Boolean = false,
   smoothing: Boolean = false,

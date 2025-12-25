@@ -21,6 +21,8 @@ import java.awt.Shape
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.geom.*
+import kotlin.compareTo
+import kotlin.text.compareTo
 
 @Composable
 fun OverlayWindow(
@@ -103,18 +105,32 @@ fun OverlayWindow(
 fun createMouseListener(windowState: WindowState, overlayWindowType: OverlayWindowType): MouseAdapter {
   return object : MouseAdapter() {
     private val cornerOffset = Point()
+    private var isDragAllowed = false
 
     // calculate offset from the top-left corner of the window where the user clicked
     override fun mousePressed(e: MouseEvent) {
+      isDragAllowed = false
       if (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP) {
-        cornerOffset.x = e.x
-        cornerOffset.y = e.y
+        // Define a margin for resizing (e.g. 10 pixels)
+        val resizeMargin = 10
+        val width = e.component.width
+        val height = e.component.height
+
+        // Check if the mouse press is within the resize margin
+        val isResizeArea = e.x <= resizeMargin || e.x >= width - resizeMargin ||
+            e.y <= resizeMargin || e.y >= height - resizeMargin
+
+        // Only allow dragging if we are NOT in the resize area
+        if (!isResizeArea) {
+          isDragAllowed = true
+          cornerOffset.x = e.x
+          cornerOffset.y = e.y
+        }
       }
     }
 
     override fun mouseDragged(e: MouseEvent) {
-      if (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP) {
-        if (cornerOffset.x == 0 || cornerOffset.y == 0) return
+      if (isDragAllowed && (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP)) {
         val newPositionX = e.locationOnScreen.x - cornerOffset.x
         val newPositionY = e.locationOnScreen.y - cornerOffset.y
         windowState.position = WindowPosition(newPositionX.dp, newPositionY.dp)
@@ -203,7 +219,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       windowType = OverlayWindowType.OVERLAY,
       lastPositionXDp = 800f,
       lastPositionYDp = 50f,
-      lastWidthDp = 240f,
+      lastWidthDp = 380f,
       lastHeightDp = 160f,
       isVisible = true
     )
@@ -243,8 +259,8 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 300f,
       lastPositionYDp = 300f,
-      lastWidthDp = 480f,
-      lastHeightDp = 700f,
+      lastWidthDp = 500f,
+      lastHeightDp = 720f,
       isVisible = false
     )
 

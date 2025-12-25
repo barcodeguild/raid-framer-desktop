@@ -2,6 +2,7 @@ package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -22,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.AppGlobals
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CloseButton
@@ -35,7 +38,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
   val scrollState = rememberScrollState()
 
   val showDialog = remember { mutableStateOf(false) }
-  val selectedItem = remember { mutableStateOf("c:\\defaultLogPath") }
+  val selectedItem = remember { mutableStateOf("C:\\Users\\Fren\\Documents\\ArcheRage") }
 
   Box(
     modifier = Modifier
@@ -43,10 +46,13 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       .background(Color.Black.copy(alpha = 0.60f))
       .verticalScroll(scrollState)
   ) {
+
+    // close button
     CloseButton(
-      onClose = { wm?.closeWindow(OverlayType.ABOUT) },
+      onClose = { wm?.closeWindow(OverlayType.SETTINGS) },
       modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)
     )
+
     Column {
       Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
         Column {
@@ -171,18 +177,17 @@ fun GlobalOptionsPanel() {
         Row(verticalAlignment = Alignment.CenterVertically) {
           Column {
             Text(
-              text = "Enter your character name below to enable the auto-targeting feature. It needs to match exactly what is displayed in-game:",
+              text = "Enter your character name and faction below. Rf it's not correct already ${AppGlobals.APP_NAME} won't work. This information is used to deduce which players are allies and enemies over time:",
               color = Color.White
             )
-            val textFieldValue = rememberSaveable { mutableStateOf("playernamefromappstate") }
+            val textFieldValue = rememberSaveable { mutableStateOf(RFConfig.state.value.playerName) }
             TextField(
               value = textFieldValue.value,
               onValueChange = {
                 textFieldValue.value = it.lowercase(getDefault()).capitalize()
-//                lol.rfcloud.AppState.config.playerName = it.toLowerCase().capitalize()
-//                CoroutineScope(Dispatchers.Default).launch {
-//                  RFDao.saveConfig(lol.rfcloud.AppState.config)
-//                }
+                RFConfig.update { oldState ->
+                  oldState.copy(playerName = textFieldValue.value)
+                }
               },
               textStyle = TextStyle(
                 textAlign = TextAlign.Center,
@@ -201,6 +206,44 @@ fun GlobalOptionsPanel() {
               ),
               modifier = Modifier.width(200.dp).align(Alignment.CenterHorizontally)
             )
+            val factionOptions = listOf("East", "West", "Pirate")
+            val selectedFaction = rememberSaveable { mutableStateOf(RFConfig.state.value.playerFaction) }
+
+            Row(
+              modifier = Modifier
+                .padding(top = 8.dp)
+                .align(Alignment.CenterHorizontally),
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              factionOptions.forEach { option ->
+                Row(
+                  modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .clickable {
+                      selectedFaction.value = option
+                      RFConfig.update { oldState -> oldState.copy(playerFaction = option) }
+                    },
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  RadioButton(
+                    selected = (option == selectedFaction.value),
+                    onClick = {
+                      selectedFaction.value = option
+                      RFConfig.update { oldState -> oldState.copy(playerFaction = option) }
+                    },
+                    colors = RadioButtonDefaults.colors(
+                      selectedColor = Color.Red,
+                      unselectedColor = Color.White
+                    )
+                  )
+                  Text(
+                    text = option,
+                    color = Color.White,
+                    modifier = Modifier.padding(start = 4.dp)
+                  )
+                }
+              }
+            }
           }
         }
         Spacer(modifier = Modifier.height(8.dp))

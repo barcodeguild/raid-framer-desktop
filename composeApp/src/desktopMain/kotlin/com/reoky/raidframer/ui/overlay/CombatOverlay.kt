@@ -205,7 +205,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           Text(text = "⛨ CC Delivered ⛨", color = Color.White)
         }
         IconButton(
-          onClick = {  },
+          onClick = { wm?.openWindow(OverlayType.SETTINGS) },
           modifier = Modifier
             .size(32.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)

@@ -18,6 +18,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+// Assumed package for generated resources
+// import com.reoky.raidframer.generated.resources.Res
+// import com.reoky.raidframer.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import io.github.koalaplot.core.line.AreaBaseline
 import io.github.koalaplot.core.line.AreaPlot2
 import io.github.koalaplot.core.line.LinePlot2
@@ -30,6 +34,16 @@ import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberAxisStyle
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import kotlinx.coroutines.delay
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.mini_graph_graph_subtitle
+import raid_framer_desktop.composeapp.generated.resources.mini_graph_metric_cc
+import raid_framer_desktop.composeapp.generated.resources.mini_graph_metric_dps
+import raid_framer_desktop.composeapp.generated.resources.mini_graph_metric_heals
+import raid_framer_desktop.composeapp.generated.resources.mini_graph_mode_cc
+import raid_framer_desktop.composeapp.generated.resources.mini_graph_mode_dmg
+import raid_framer_desktop.composeapp.generated.resources.mini_graph_mode_heals
+import raid_framer_desktop.composeapp.generated.resources.mini_graph_no_recent_data
+import raid_framer_desktop.composeapp.generated.resources.mini_graph_player_metric_format
 import kotlin.math.max
 
 private const val BUCKET_COUNT = 300
@@ -148,7 +162,12 @@ fun PlayerMetricMiniLineGraphComponent(
     ) {
       if (buckets.all { it == 0L }) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-          Text("No Recent Data", color = Color.LightGray, style = MaterialTheme.typography.caption)
+          // REPLACED: Hardcoded string
+          Text(
+            stringResource(Res.string.mini_graph_no_recent_data),
+            color = Color.LightGray,
+            style = MaterialTheme.typography.caption
+          )
         }
       } else {
         val series = remember(buckets) {
@@ -266,9 +285,10 @@ fun PlayerMetricMiniLineGraphComponent(
           }
 
           // Render the three toggles
-          tinyToggle("DMG", MiniGraphMode.DMG).invoke()
-          tinyToggle("HEALS", MiniGraphMode.HEALS).invoke()
-          tinyToggle("CC", MiniGraphMode.CC).invoke()
+          // REPLACED: Hardcoded strings
+          tinyToggle(stringResource(Res.string.mini_graph_mode_dmg), MiniGraphMode.DMG).invoke()
+          tinyToggle(stringResource(Res.string.mini_graph_mode_heals), MiniGraphMode.HEALS).invoke()
+          tinyToggle(stringResource(Res.string.mini_graph_mode_cc), MiniGraphMode.CC).invoke()
 
         }
 
@@ -278,14 +298,20 @@ fun PlayerMetricMiniLineGraphComponent(
           contentAlignment = Alignment.Center
         ) {
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // REPLACED: Hardcoded strings and logic
+            val metricName = when(selectedMode) {
+              MiniGraphMode.DMG -> stringResource(Res.string.mini_graph_metric_dps)
+              MiniGraphMode.HEALS -> stringResource(Res.string.mini_graph_metric_heals)
+              MiniGraphMode.CC -> stringResource(Res.string.mini_graph_metric_cc)
+            }
             Text(
-              "$playerName's ${when(selectedMode) { MiniGraphMode.DMG -> "DPS"; MiniGraphMode.HEALS -> "Heals"; MiniGraphMode.CC -> "CC" }}",
+              stringResource(Res.string.mini_graph_player_metric_format, playerName, metricName),
               color = Color.White.copy(alpha = 0.2f),
               style = MaterialTheme.typography.h6
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-              "5-Minute",
+              stringResource(Res.string.mini_graph_graph_subtitle),
               color = Color.White.copy(alpha = 0.2f),
               style = MaterialTheme.typography.subtitle2
             )

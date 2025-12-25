@@ -5,9 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
@@ -31,12 +33,14 @@ fun MiniOverlay() {
 }
 
 @Composable
-fun MiniOverlay(wm: WindowManager? = null, playerName: String = "<Put your name here>") {
-  PlayerMetricMiniLineGraphComponent(
-    playerName = playerName,
-    modifier = Modifier
-      .fillMaxWidth()
-      .fillMaxHeight()
-      .padding(12.dp)
-  )
+fun MiniOverlay(wm: WindowManager? = null) {
+  RFConfig.state.collectAsState().let {
+    PlayerMetricMiniLineGraphComponent(
+      playerName = it.value.playerName,
+      modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight()
+        .padding(12.dp)
+    )
+  }
 }

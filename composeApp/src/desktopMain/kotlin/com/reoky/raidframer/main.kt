@@ -1,33 +1,56 @@
 package com.reoky.raidframer
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.toAwtImage
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
+import com.reoky.raidframer.core.interactor.InstallationInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import dorkbox.systemTray.MenuItem
+import dorkbox.systemTray.SystemTray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.Locale
+import kotlin.io.path.Path
 import kotlin.system.exitProcess
 
-
 const val TAG = "Main"
+
+var tray: SystemTray? = null
 
 /* ~ Entry Point ~ */
 fun main(args: Array<String>) = application {
 
   val context = rememberCoroutineScope() // correct context for Compose
+  var languageCode by remember { mutableStateOf(Locale.getDefault().language) } // default system language
+
+  fun updateLanguage(newCode: String) {
+    if (newCode == languageCode) return
+    val locale = Locale.Builder().setLanguage(newCode).build()
+    Locale.setDefault(locale)
+    languageCode = newCode
+  }
 
   // Initialize the database : critical that this occurs first and only once
   val database = remember {
@@ -48,6 +71,7 @@ fun main(args: Array<String>) = application {
   LoggingInteractor.start()
   PlayerCacheInteractor.start()
   GameMonitorInteractor.start()
+  InstallationInteractor.start()
 
   // file path args processing
   val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }
@@ -57,7 +81,7 @@ fun main(args: Array<String>) = application {
       val cleaned = incoming.trim().trim('"')
       val p = Paths.get(cleaned)
       if (Files.exists(p)) {
-        messageBox("Eek!", "You are viewing a replay of combat data from: $p. Live monitoring is disabled while viewing replays.")
+        messageBox(AppGlobals.APP_NAME, "You are viewing a replay of combat data from: $p. Live monitoring is disabled while viewing replays.")
         GameMonitorInteractor.chooseCombatLog(p)
         GameMonitorInteractor.setOptions(
           mode = GameMonitorInteractor.MonitorModes.REPLAY,
@@ -68,14 +92,14 @@ fun main(args: Array<String>) = application {
       }
     } catch (_: Exception) {
       Log.error(TAG, "Failed to process incoming log path: $incoming")
-      messageBox("Eek!", "Failed to open the specified combat log file: $incoming")
+      messageBox(AppGlobals.APP_NAME, "Failed to open the specified combat log file: $incoming")
       exitProcess(1)
     }
   } else {
     // choose game path default automatically
     context.launch(Dispatchers.IO) {
       Log.info(TAG, "Searching for combat log path...")
-      GameMonitorInteractor.locateCombatLog()
+      GameMonitorInteractor.locateArcheRageDirectory()
     }
     LaunchedEffect(GameMonitorInteractor.isSearching) {
       val automaticLogPath = GameMonitorInteractor.possiblePaths.value.firstOrNull()
@@ -83,7 +107,7 @@ fun main(args: Array<String>) = application {
         it
         Log.info(TAG, "Automatically choosing the combat log file here: $it")
         GameMonitorInteractor.chooseCombatLog(it)
-        GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.REPLAY, Long.MIN_VALUE, Long.MAX_VALUE)
+        GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.MONITOR, 0L, Long.MAX_VALUE)
       }
     }
   }
@@ -104,13 +128,16 @@ fun main(args: Array<String>) = application {
 
   // start the game monitor
   context.launch(Dispatchers.IO) {
-    GameMonitorInteractor.locateCombatLog()
+    GameMonitorInteractor.locateArcheRageDirectory()
   }
   LaunchedEffect(GameMonitorInteractor.isSearching) {
     GameMonitorInteractor.possiblePaths.value.onEach { path ->
       Log.info(TAG, "Found possible combat log at: ")
     }
   }
+
+  // spawn the system tray
+  tray = spawnSystemTray(wm)
 
   Log.info(TAG, "Opening default windows...")
   OverlayContainer(wm)
@@ -133,9 +160,9 @@ fun main(args: Array<String>) = application {
 fun quit() {
   PlayerCacheInteractor.stop()
   GameMonitorInteractor.stop()
-  // AppState.tray?.shutdown()
-  // AppState.tray?.remove()
-  LoggingInteractor.stop()
+  tray?.shutdown()
+  tray?.remove()
+  LoggingInteractor.stop() // should be last because this is the thing that logs shutdown messages
   exitProcess(0)
 }
 
@@ -149,4 +176,29 @@ fun messageBox(title: String, message: String) {
     title,
     javax.swing.JOptionPane.INFORMATION_MESSAGE
   )
+}
+
+/*
+ * Spawns the system tray icon and menu. I basically added this in case the overlay's go behind other windows or
+ * off the screen, so the user has a way to get them back.
+ */
+@Composable
+fun spawnSystemTray(wm: WindowManager): SystemTray {
+  val tray = SystemTray.get()
+  val iconImage = painterResource("raidframer.ico").toAwtImage(
+    density = Density(1f),
+    layoutDirection = LayoutDirection.Ltr,
+    size = Size(32f, 32f)
+  )
+  val titleMenuItem = MenuItem(".: Raid Framer :.")
+  titleMenuItem.setImage(iconImage)
+  tray.menu.add(titleMenuItem)
+  tray.menu.add(MenuItem("Settings") {
+    wm.openWindow(OverlayType.SETTINGS)
+  })
+  tray.menu.add(MenuItem("About") {
+    wm.openWindow(OverlayType.ABOUT)
+  })
+  tray.setImage(iconImage)
+  return tray
 }
