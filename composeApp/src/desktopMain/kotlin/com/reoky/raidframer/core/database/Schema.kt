@@ -33,7 +33,20 @@ data class ConfigEntity(
   val overlayResizingEnabled: Boolean = true,
   val firstLaunch: Boolean = true,
   val playerName: String = "", // player's own name
-  val playerFaction: String = "" // player's own faction
+  val playerFaction: String = "", // player's own faction
+
+  // companion features
+  val companionEnabled: Boolean = false,
+  val companionShowRaidStatus: Boolean = false,
+  val companionShowCharmedInChat: Boolean = false,
+  val companionShowSilencedInChat: Boolean = false,
+  val companionMarkHVTHealers: Boolean = false,
+  val companionMarkHVTDPS: Boolean = false,
+  val companionMarkHVTCrowdControl: Boolean = false,
+  val companionMarkSacDancers: Boolean = false,
+  val companionMarkCharmedTargets: Boolean = false,
+  val companionMarkSilencedTargets: Boolean = false,
+  val companionMarkDistressedTargets: Boolean = false
 )
 
 /*

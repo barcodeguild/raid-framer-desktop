@@ -126,6 +126,38 @@ object InstallationInteractor : Interactor() {
       }
     }
 
+    // pick the relevant settings from the config to write to settings.conf
+    // this is one-way write only from app to lua addon
+    val config = RFConfig.state.value
+    val relevantSettings = mapOf(
+      "companion_enabled" to config.companionEnabled.toString(),
+      "show_raid_status" to config.companionShowRaidStatus.toString(),
+      "show_charmed_in_chat" to config.companionShowCharmedInChat.toString(),
+      "show_silenced_in_chat" to config.companionShowSilencedInChat.toString(),
+      "mark_hvt_healers" to config.companionMarkHVTHealers.toString(),
+      "mark_hvt_dps" to config.companionMarkHVTDPS.toString(),
+      "mark_hvt_cc" to config.companionMarkHVTCrowdControl.toString(),
+      "mark_sac_dancers" to config.companionMarkSacDancers.toString(),
+      "mark_charmed_targets" to config.companionMarkCharmedTargets.toString(),
+      "mark_silenced_targets" to config.companionMarkSilencedTargets.toString(),
+      "mark_distressed_targets" to config.companionMarkDistressedTargets.toString()
+    )
+
+    // write config in ini format to settings.conf in the addon directory
+    val settingsFilePath = rfAddonPath.resolve("settings.conf")
+    val settingsContent = "# RaidFramer Addon Settings Managed by RaidFramer App : Not for manual editing"
+    try {
+      withContext(Dispatchers.IO) {
+        settingsFilePath.toFile().writeText(settingsContent)
+        for ((key, value) in relevantSettings) {
+          settingsFilePath.toFile().appendText("\n${key}=${value}")
+        }
+      }
+      Log.info(TAG, "Wrote settings.conf to addon directory: $settingsFilePath")
+    } catch (e: Exception) {
+      Log.error(TAG, "Failed to write settings.conf to addon directory: $settingsFilePath")
+    }
+
   }
 
   /*

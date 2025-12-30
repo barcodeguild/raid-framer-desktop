@@ -11,4 +11,17 @@
     <string name="mini_graph_graph_subtitle">5-Minute</string>
     <string name="mini_graph_player_metric_format">%1$s's %2$s</string>
 
+    <string name="companion_description">The Lua Addon (dubbed the 'companion') provides additional functionality by loading a native Lua addon. This allows for native-only functionality like target-based debuff tracking, raid management, and in-game visual/audible effects. Without the companion some features won't work as intended. \n\n Note that: The "mark" features below are purely visual and do not automatically target or apply raid marks to targets.</string>
+    <string name="companion_toggle">Enable Lua Companion. (Disabling the addon will retract the Lua code from the game at the next character switch automatically!)</string>
+    <string name="companion_toggle_raid_status">Display the main / co-raid member count when players join or leave the raid.</string>
+    <string name="companion_toggle_display_charmed">Display 'Charmed' targets in game chat window.</string>
+    <string name="companion_toggle_display_silenced">Display 'Silenced' targets in game chat window.</string>
+    <string name="companion_toggl_display_mark_hvt_healers">Show a [Heart Mark] over highest-value enemy healers. (Top 3 enemy healers based on cumulative PvP healing.)</string>
+    <string name="companion_toggle_display_mark_hvt_dps">Show a [Crossed-Swords Mark] over highest-value enemy DPS. (Top 3 enemy DPS based on cumulative PvP damage.)</string>
+    <string name="companion_toggle_display_mark_hvt_cc">Show a [Shield Mark] over high-value enemy CC mages to stay away from. (Top 3 enemy CC based on cumulative PvP crowd control time.)</string>
+    <string name="companion_toggle_display_mark_sac_dancers">Sheen a God ray over sacrifice dancers while they are channeling. (Easier to spot than default game effect.)</string>
+    <string name="companion_toggle_display_mark_charmed_targets">Show a [Purple Dot] over player's heads to indicate that they are Charmed.</string>
+    <string name="companion_toggle_display_mark_silenced_targets">Show a [Black Dot] over player's heads to indicate that they are Silenced.</string>
+    <string name="companion_toggle_display_mark_distressed_targets">Show a [Blue Dot] over player's heads to indicate that they are Distressed.</string>
+
 </resources>
