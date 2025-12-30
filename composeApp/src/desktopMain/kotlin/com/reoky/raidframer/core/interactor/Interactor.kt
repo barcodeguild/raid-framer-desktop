@@ -14,11 +14,11 @@ abstract class Interactor {
   // the ui layer should observe the state of the interactor and update the UI accordingly in the lol.rfcloud.main dispatcher
   private val scope = CoroutineScope(Dispatchers.IO)
 
-  fun start() {
+  fun start(delay: Long = 3000L) {
     scope.launch {
       while (isActive) {
         interact()
-        delay(3000)
+        delay(delay)
       }
     }
   }

@@ -1,6 +1,7 @@
 // kotlin
 package com.reoky.raidframer.core.interactor
 
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.helpers.EventParserHelper
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
@@ -104,6 +105,10 @@ object GameMonitorInteractor : Interactor() {
     val combatLogPaths = possibleArcheRageDirectories.mapNotNull { dir ->
       val combatLogPath = dir.resolve("combat.log")
       if (Files.exists(combatLogPath) && Files.isReadable(combatLogPath)) {
+        // assign valid install path as well as return the combat log path
+        RFConfig.update { old ->
+          old.copy(defaultArcheRageDirectory = dir.toString())
+        }
         combatLogPath
       } else {
         null

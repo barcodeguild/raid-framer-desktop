@@ -27,6 +27,7 @@ import com.reoky.raidframer.ui.WindowManager
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
@@ -71,7 +72,7 @@ fun main(args: Array<String>) = application {
   LoggingInteractor.start()
   PlayerCacheInteractor.start()
   GameMonitorInteractor.start()
-  InstallationInteractor.start()
+  InstallationInteractor.start(delay = 20000L) // delay to allow user to set game path in settings if needed
 
   // file path args processing
   val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }
