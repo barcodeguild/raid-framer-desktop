@@ -94,9 +94,9 @@ object InstallationInteractor : Interactor() {
       val isValid = knownGoodHashes[file]?.let { it == hash } ?: false
       val isMissing = knownGoodHashes[file] == null
       if (isMissing) {
-        Log.debug(TAG, "Installed addon file hash computed: $file (missing) -> ????")
+        Log.debug(TAG, "Addon file: $file (missing) -> ????")
       } else {
-        Log.debug(TAG, "Installed addon file hash computed: $file ${if (!isValid) "(outdated)" else "(valid)"} -> $hash")
+        Log.debug(TAG, "Addon file: $file ${if (!isValid) "(outdated)" else "(valid)"} -> $hash")
       }
     }
 

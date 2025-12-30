@@ -136,18 +136,29 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
   local countRaidOne = 0
   local countRaidTwo = 0
   for i = 1, 50 do
-    if RF.Raid.Roster[i].playerName then
+    local r1 = RF.Raid.Roster[i]
+    if r1 and r1.playerName and r1.playerName ~= "" then
       countRaidOne = countRaidOne + 1
     end
-    if RF.Raid.Roster[i + 50].playerName then
+
+    local r2 = RF.Raid.Roster[i + 50]
+    if r2 and r2.playerName and r2.playerName ~= "" then
       countRaidTwo = countRaidTwo + 1
     end
   end
-  if (countRaidTwo > 0) then
-    RF:Log(string.format("Currently there are %d players in raid one, and %d players in raid two.", countRaidOne, countRaidTwo))
-  else
-    RF:Log(string.format("Currently there are %d players in the raid.", countRaidOne))
+
+  local function fmtPlayers(n)
+    if n == 0 then return "no players" end
+    if n == 1 then return "1 player" end
+    return string.format("%d players", n)
   end
+
+  if countRaidTwo > 0 then
+    RF:Log(string.format("Currently there are %s in raid one, and %s in raid two.", fmtPlayers(countRaidOne), fmtPlayers(countRaidTwo)))
+  else
+    RF:Log(string.format("Currently there are %s in the raid.", fmtPlayers(countRaidOne)))
+  end
+
 
   -- ipc export updated raid roster
   RF.IPC.WriteMessage(
