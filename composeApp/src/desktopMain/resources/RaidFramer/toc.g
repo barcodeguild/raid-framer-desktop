@@ -5,6 +5,7 @@ buttoncommon.lua
 button.lua
 combobox.lua
 debug.lua
+config.lua
 json.lua
 raid.lua
 ipc.lua

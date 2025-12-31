@@ -16,6 +16,7 @@ import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
+import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.InstallationInteractor
 import com.reoky.raidframer.core.interactor.Log
@@ -72,7 +73,8 @@ fun main(args: Array<String>) = application {
   LoggingInteractor.start()
   PlayerCacheInteractor.start()
   GameMonitorInteractor.start()
-  InstallationInteractor.start(delay = 20000L) // delay to allow user to set game path in settings if needed
+  InstallationInteractor.start(delay = 3000L) // delay to allow user to set game path in settings if needed
+  CompanionInteractor.start()
 
   // file path args processing
   val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }

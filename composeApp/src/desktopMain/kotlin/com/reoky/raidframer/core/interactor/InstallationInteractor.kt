@@ -29,6 +29,7 @@ object InstallationInteractor : Interactor() {
     "apitypes.lua",
     "windowcommon.lua",
     "window.lua",
+    "config.lua",
     "buttoncommon.lua",
     "button.lua",
     "combobox.lua",
@@ -94,7 +95,7 @@ object InstallationInteractor : Interactor() {
       val isValid = knownGoodHashes[file]?.let { it == hash } ?: false
       val isMissing = knownGoodHashes[file] == null
       if (isMissing) {
-        Log.debug(TAG, "Addon file: $file (missing) -> ????")
+        Log.debug(TAG, "Hash for Addon file: $file (missing) -> ????")
       } else {
         Log.debug(TAG, "Addon file: $file ${if (!isValid) "(outdated)" else "(valid)"} -> $hash")
       }
@@ -145,6 +146,7 @@ object InstallationInteractor : Interactor() {
 
     // write config in ini format to settings.conf in the addon directory
     val settingsFilePath = rfAddonPath.resolve("settings.conf")
+    val beforeHash = if (settingsFilePath.toFile().exists()) settingsFilePath.toFile().sha256() else "missing"
     val settingsContent = "# RaidFramer Addon Settings Managed by RaidFramer App : Not for manual editing"
     try {
       withContext(Dispatchers.IO) {
@@ -152,8 +154,12 @@ object InstallationInteractor : Interactor() {
         for ((key, value) in relevantSettings) {
           settingsFilePath.toFile().appendText("\n${key}=${value}")
         }
+        val afterHash = settingsFilePath.toFile().sha256()
+        if (beforeHash != afterHash) {
+          Log.info(TAG, "Notifying companion addon of updated config settings.")
+          CompanionInteractor.notifyConfigUpdated()
+        }
       }
-      Log.info(TAG, "Wrote settings.conf to addon directory: $settingsFilePath")
     } catch (e: Exception) {
       Log.error(TAG, "Failed to write settings.conf to addon directory: $settingsFilePath")
     }

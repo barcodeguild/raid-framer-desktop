@@ -11,7 +11,8 @@
     <string name="mini_graph_graph_subtitle">5-Minute</string>
     <string name="mini_graph_player_metric_format">%1$s's %2$s</string>
 
-    <string name="companion_description">The Lua Addon (dubbed the 'companion') provides additional functionality by loading a native Lua addon. This allows for native-only functionality like target-based debuff tracking, raid management, and in-game visual/audible effects. Without the companion some features won't work as intended. \n\n Note that: The "mark" features below are purely visual and do not automatically target or apply raid marks to targets.</string>
+    <!-- Companion Addon Settings Strings -->
+    <string name="companion_description">The Lua Addon (dubbed the 'companion') provides additional functionality by loading a native Lua addon. This allows for native-only functionality like target-based debuff tracking, raid management, and in-game visual/audible effects. Without the companion some features won't work as intended. \n\nNote that: The "mark" features below are purely visual and do not automatically target or apply raid marks to targets.</string>
     <string name="companion_toggle">Enable Lua Companion. (Disabling the addon will retract the Lua code from the game at the next character switch automatically!)</string>
     <string name="companion_toggle_raid_status">Display the main / co-raid member count when players join or leave the raid.</string>
     <string name="companion_toggle_display_charmed">Display 'Charmed' targets in game chat window.</string>
@@ -23,5 +24,12 @@
     <string name="companion_toggle_display_mark_charmed_targets">Show a [Purple Dot] over player's heads to indicate that they are Charmed.</string>
     <string name="companion_toggle_display_mark_silenced_targets">Show a [Black Dot] over player's heads to indicate that they are Silenced.</string>
     <string name="companion_toggle_display_mark_distressed_targets">Show a [Blue Dot] over player's heads to indicate that they are Distressed.</string>
+
+    <!-- Settings Strings -->
+    <string name="settings_title">Raid Framer Desktop Settings</string>
+    <string name="settings_data_sourcing_title">Data Sourcing</string>
+    <string name="settings_data_sourcing_description">Please be careful to enter the correct ArcheRage directory below. This field may have been populated automatically.</string>
+    <string name="settings_data_sourcing_sidenote">Technically, you do not need ArcheRage installed if you only want to view historical combat.log files. Just right-click on the .log or .rf (battle slice export file) and choose 'Open-With → Raid Framer' in the Windows Explorer context menu to view a replay.</string>
+
 
 </resources>

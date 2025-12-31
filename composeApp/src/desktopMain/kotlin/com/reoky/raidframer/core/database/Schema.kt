@@ -37,16 +37,16 @@ data class ConfigEntity(
 
   // companion features
   val companionEnabled: Boolean = false,
-  val companionShowRaidStatus: Boolean = false,
-  val companionShowCharmedInChat: Boolean = false,
-  val companionShowSilencedInChat: Boolean = false,
+  val companionShowRaidStatus: Boolean = true,
+  val companionShowCharmedInChat: Boolean = true,
+  val companionShowSilencedInChat: Boolean = true,
   val companionMarkHVTHealers: Boolean = false,
   val companionMarkHVTDPS: Boolean = false,
   val companionMarkHVTCrowdControl: Boolean = false,
-  val companionMarkSacDancers: Boolean = false,
-  val companionMarkCharmedTargets: Boolean = false,
-  val companionMarkSilencedTargets: Boolean = false,
-  val companionMarkDistressedTargets: Boolean = false
+  val companionMarkSacDancers: Boolean = true,
+  val companionMarkCharmedTargets: Boolean = true,
+  val companionMarkSilencedTargets: Boolean = true,
+  val companionMarkDistressedTargets: Boolean = true
 )
 
 /*

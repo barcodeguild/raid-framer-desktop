@@ -5,6 +5,8 @@
 RF = RF or {}
 RF.TAG = "Raid Framer 2.0"
 
+RF.PLAYER_NAME = ""
+
 ADDON:ImportAPI(API_TYPE.CHAT.id)
 ADDON:ImportAPI(API_TYPE.UNIT.id)
 ADDON:ImportAPI(API_TYPE.MAP.id)
@@ -38,24 +40,19 @@ function RF:Log(msg)
   X2Chat:DispatchChatMessage(CMF_SYSTEM, line)
 end
 
-local function DumpTableKeys(tbl, name)
-  name = name or "table"
-  RF:Log(string.format("Dumping %s:", name))
-  for k, v in pairs(tbl) do
-    RF:Log(string.format("  %s (%s)", tostring(k), type(v)))
-  end
-end
-
 ----------------------------
 -- Main Lifecycle Methods --
 ----------------------------
 function RF:Init()
   self:Shutdown()  -- makes Init idempotent
-
   self.initialized = true
 
-  self:Log("Good news, friend! If you can read this message, then the Raid Framer 2.0 Lua component is working! (Please be sure to launch the companion app for a multi-monitor GUI experience!)")
-  --DumpTableKeys(X2Unit, "X2Unit")
+  -- get player name : tell desktop app which character the user is playing
+  PLAYER_NAME = X2Unit:UnitName("player")
+  RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.SELF_UPDATE, PLAYER_NAME)
+
+  self:Log("Good news, " .. PLAYER_NAME .. "! If you can read this message, then the Raid Framer 2.0 Lua component is working!")
+  self:Log("Please be sure to launch the Raid Framer Desktop App to access the multi-monitor overlay.")
 
   -- create UI
   -- register events
@@ -84,7 +81,7 @@ function registerForEvents()
   end
   
   UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED, RF.Raid.handleTeamMembersChanged)
-  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, CombatEvents)
+  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, handleCombatMessage)
   UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINTED, RF.Raid.handleCoraidEstablished)
   UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, RF.Raid.handleCoraidBroken)
 end
@@ -104,7 +101,11 @@ local function onEnteredWorld()
 end
 UIParent:SetEventHandler(UIEVENT_TYPE.ENTERED_WORLD, onEnteredWorld)
 
-function CombatEvents(...)
+function handleCombatMessage(...)
+
+    -- Check if there's config changes (rate limited!)
+    RF.IPC.ReadMessages()
+
     local args = { ... }
     local evt = RF:ParseInternalEvent(args)
     if (evt.spellName == "Charmed") then

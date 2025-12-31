@@ -4,8 +4,10 @@ RF = RF or {}
 RF.IPC = RF.IPC or {}
 
 RF.IPC.BASE_DIR = "../Documents/Addon/RaidFramer/"
-RF.IPC.CHANNEL_OUT_FILE = RF.IPC.BASE_DIR .. "rf_ipc.out"
-RF.IPC.CHANNEL_IN_FILE  = RF.IPC.BASE_DIR .. "rf_ipc.in"
+RF.IPC.CHANNEL_OUT_FILE = RF.IPC.BASE_DIR .. "ipc.rfout"
+RF.IPC.CHANNEL_IN_FILE  = RF.IPC.BASE_DIR .. "ipc.rfin"
+RF.IPC.LAST_READ_TIME = 0
+RF.IPC.READ_COOLDOWN = 5  -- seconds
 
 RF.IPC.MESSAGE_VERSION = 1
 
@@ -18,10 +20,12 @@ RF.IPC.MESSAGE_TYPES = {
   DEATH = "PLAYER_DEATH",
   WORLD = "WORLD_EVENT",
   FRAMES_UPDATE = "FRAMES_UPDATE",
-  TARGETS_UPDATED = "TARGETS_UPDATE",
+  TARGET_UPDATE = "TARGET_UPDATE",
+  SELF_UPDATE = "SELF_UPDATE",
   SOUND_ALERT = "SOUND_ALERT",
   AOE_SPLAT = "AOE_SPLAT",
   TEST_PING = "TEST_PING",
+  CONFIG_UPDATE = "CONFIG_UPDATE"
 }
 
 function RF.IPC.WriteMessage(msgType, payload)
@@ -37,6 +41,14 @@ end
 -- Will clear the input file after reading because of the problem where the file
 -- just keeps getting bigger and bigger aaaaaaa
 function RF.IPC.ReadMessages()
+
+  -- rate limit ( every READ_COOLDOWN seconds )
+  local now = os.time(os.date("!*t"))
+  if now - RF.IPC.LAST_READ_TIME < RF.IPC.READ_COOLDOWN then
+    return
+  end
+  RF.IPC.LAST_READ_TIME = now -- almost forgot this LOL
+
   local f = io.open(RF.IPC.CHANNEL_IN_FILE, "r")
   if not f then return end
 
@@ -74,5 +86,26 @@ function RF.IPC.ResetOutputFile()
   if f then
     f:write("")  -- truncate
     f:close()
+  end
+end
+
+function RF.IPC.HandleRawMessage(rawMessage)
+
+  local success, message = pcall(RF.JSON.json_decode, rawMessage)
+  if not success then
+    RF:Log("IPC: Failed to decode message: " .. tostring(message))
+    return
+  end
+
+  -- switch based on message.type
+  if message.type == RF.IPC.MESSAGE_TYPES.TEST_PING then
+    RF:Log("IPC: Received TEST_PING message.")
+    -- maybe respond with a pong?
+  elseif message.type == RF.IPC.MESSAGE_TYPES.CONFIG_UPDATE then
+    RF:Log("Addon configuration updated via the desktop app.")
+    RF.Config.LoadConfig()
+  else
+    RF:Log("IPC: Received unknown message type: " .. tostring(message.type))
+
   end
 end
