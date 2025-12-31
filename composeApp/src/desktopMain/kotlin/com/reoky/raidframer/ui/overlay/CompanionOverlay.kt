@@ -4,6 +4,8 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +17,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppGlobals
+import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CheckBoxComponent
@@ -27,6 +31,7 @@ import raid_framer_desktop.composeapp.generated.resources.companion_toggle
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_charmed
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_hvt_cc
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_hvt_dps
+import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_sac_dancers
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_silenced
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_raid_status
 
@@ -92,15 +97,15 @@ fun CompanionOverlay(wm: WindowManager? = null) {
 
       Divider(color = Color.White, thickness = 1.dp, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
 
-      Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+      val scrollState = rememberScrollState()
+      Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp).verticalScroll(scrollState)) {
         // main toggle
         Row {
           CheckBoxComponent(
             label = stringResource(Res.string.companion_toggle),
-            initialChecked = false,
-            onCheckedChange = { enabled ->
-
-
+            initialChecked = RFConfig.state.value.companionEnabled,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionEnabled = isChecked) }
             }
           )
         }
@@ -109,9 +114,9 @@ fun CompanionOverlay(wm: WindowManager? = null) {
         Row {
           CheckBoxComponent(
             label = stringResource(Res.string.companion_toggle_raid_status),
-            initialChecked = false,
-            onCheckedChange = { enabled ->
-
+            initialChecked = RFConfig.state.value.companionShowRaidStatus,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionShowRaidStatus = isChecked) }
             }
           )
         }
@@ -120,9 +125,9 @@ fun CompanionOverlay(wm: WindowManager? = null) {
         Row {
           CheckBoxComponent(
             label = stringResource(Res.string.companion_toggle_display_charmed),
-            initialChecked = false,
-            onCheckedChange = { enabled ->
-
+            initialChecked = RFConfig.state.value.companionShowCharmedInChat,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionShowCharmedInChat = isChecked) }
             }
           )
         }
@@ -131,9 +136,9 @@ fun CompanionOverlay(wm: WindowManager? = null) {
         Row {
           CheckBoxComponent(
             label = stringResource(Res.string.companion_toggle_display_silenced),
-            initialChecked = false,
-            onCheckedChange = { enabled ->
-
+            initialChecked = RFConfig.state.value.companionShowSilencedInChat,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionShowSilencedInChat = isChecked) }
             }
           )
         }
@@ -142,9 +147,9 @@ fun CompanionOverlay(wm: WindowManager? = null) {
         Row {
           CheckBoxComponent(
             label = stringResource(Res.string.companion_toggl_display_mark_hvt_healers),
-            initialChecked = false,
-            onCheckedChange = { enabled ->
-
+            initialChecked = RFConfig.state.value.companionMarkHVTHealers,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionMarkHVTHealers = isChecked) }
             }
           )
         }
@@ -153,9 +158,9 @@ fun CompanionOverlay(wm: WindowManager? = null) {
         Row {
           CheckBoxComponent(
             label = stringResource(Res.string.companion_toggle_display_mark_hvt_dps),
-            initialChecked = false,
-            onCheckedChange = { enabled ->
-
+            initialChecked = RFConfig.state.value.companionMarkHVTDPS,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionMarkHVTDPS = isChecked) }
             }
           )
         }
@@ -164,22 +169,34 @@ fun CompanionOverlay(wm: WindowManager? = null) {
         Row {
           CheckBoxComponent(
             label = stringResource(Res.string.companion_toggle_display_mark_hvt_cc),
-            initialChecked = false,
-            onCheckedChange = { enabled ->
-
+            initialChecked = RFConfig.state.value.companionMarkHVTCrowdControl,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionMarkHVTCrowdControl = isChecked) }
             }
           )
         }
 
         // mark sac dancers
+        // mark enemy cc
+        Row {
+          CheckBoxComponent(
+            label = stringResource(Res.string.companion_toggle_display_mark_sac_dancers),
+            initialChecked = RFConfig.state.value.companionMarkHVTCrowdControl,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionMarkSacDancers = isChecked) }
+            }
+          )
+        }
 
         // enemy cc (purple = charmed, black = silenced)
         Row {
           CheckBoxComponent(
-            label = "Apply CC dots over players heads to indicate charmed / silenced status. (Slightly more visible than default game effect.)",
-            initialChecked = false,
-            onCheckedChange = { enabled ->
-
+            label = "Apply CC dots over players heads to indicate that they are charmed (purple), distressed (blue) or silenced (black). (Slightly more visible than default game effect.)",
+            initialChecked = (RFConfig.state.value.companionMarkCharmedTargets && RFConfig.state.value.companionMarkDistressedTargets && RFConfig.state.value.companionMarkSilencedTargets),
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionMarkCharmedTargets = isChecked) }
+              RFConfig.update { it.copy(companionMarkDistressedTargets = isChecked) }
+              RFConfig.update { it.copy(companionMarkSilencedTargets = isChecked) }
             }
           )
         }

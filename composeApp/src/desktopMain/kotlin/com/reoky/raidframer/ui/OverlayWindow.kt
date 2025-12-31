@@ -212,7 +212,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 70f,
       lastWidthDp = 560f,
       lastHeightDp = 800f,
-      isVisible = false
+      isVisible = true
     )
 
     OverlayType.COMPANION -> WindowStateEntity(
@@ -222,7 +222,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 70f,
       lastWidthDp = 560f,
       lastHeightDp = 800f,
-      isVisible = true
+      isVisible = false
     )
 
     OverlayType.MINI -> WindowStateEntity(

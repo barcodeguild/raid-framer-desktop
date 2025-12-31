@@ -28,7 +28,15 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CloseButton
+import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.dialog.FileSelectionDialog
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.companion_description
+import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_description
+import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_sidenote
+import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_title
+import raid_framer_desktop.composeapp.generated.resources.settings_title
 import java.util.Locale.getDefault
 
 
@@ -43,78 +51,66 @@ fun SettingsOverlay(wm: WindowManager? = null) {
   Box(
     modifier = Modifier
       .fillMaxSize()
-      .background(Color.Black.copy(alpha = 0.60f))
       .verticalScroll(scrollState)
   ) {
-
-    // close button
-    CloseButton(
-      onClose = { wm?.closeWindow(OverlayType.SETTINGS) },
-      modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)
-    )
-
     Column {
-      Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
+      TitleBarComponent(
+        title = stringResource(Res.string.settings_title),
+        onClose = { wm?.closeWindow(OverlayType.SETTINGS) }
+      )
+      Box(modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
         Column {
-          Text(
-            text = "Raid Framer Settings",
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            fontSize = 26.sp,
-            modifier = Modifier
-              .padding(top = 12.dp)
-          )
-          Text(
-            text = "Data Sourcing",
-            color = Color.White,
-            textAlign = TextAlign.Start,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-              .padding(top = 16.dp, bottom = 8.dp)
-          )
-          Text(
-            text = "Select the combat.log file in your ArcheRage documents directory or another prior log. This mod works by reading the game's logs and displaying the data in real-time.",
-            color = Color.White,
-            textAlign = TextAlign.Start,
-            fontWeight = FontWeight.W400,
-            fontSize = 14.sp,
-            modifier = Modifier
-              .padding(top = 8.dp)
-          )
-          if (selectedItem.value.isNotBlank()) {
+
+          // Data Sourcing Section
+          Row(modifier = Modifier.padding(top = 16.dp, bottom = 4.dp, start = 8.dp, end = 8.dp)) {
             Text(
-              text = "Current Source",
+              text = stringResource(Res.string.settings_data_sourcing_title),
               color = Color.White,
-              textAlign = TextAlign.Center,
-              fontSize = 14.sp,
-              fontWeight = FontWeight.Bold,
-              modifier = Modifier
-                .padding(top = 8.dp)
-                .align(Alignment.CenterHorizontally)
-            )
-            Text(
-              text = "`${selectedItem.value}`",
-              color = Color.Green,
-              textAlign = TextAlign.Center,
-              fontSize = 12.sp,
-              modifier = Modifier
-                .padding(top = 8.dp)
-                .align(Alignment.CenterHorizontally)
-            )
-          } else {
-            Text(
-              text = "No file selected.",
-              color = Color.Red,
-              textAlign = TextAlign.Center,
-              fontWeight = FontWeight.Bold,
-              fontSize = 12.sp,
-              modifier = Modifier
-                .padding(top = 16.dp)
-                .align(Alignment.CenterHorizontally)
+              textAlign = TextAlign.Start,
+              fontSize = 18.sp,
+              fontWeight = FontWeight.Bold
             )
           }
+
+          Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+            Text(
+              text = stringResource(Res.string.settings_data_sourcing_description),
+              color = Color.White,
+              textAlign = TextAlign.Start,
+              fontWeight = FontWeight.W400,
+              fontSize = 14.sp
+            )
+          }
+
+          Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 8.dp, vertical = 4.dp)) {
+            if (selectedItem.value.isNotBlank()) {
+              Text(
+                text = "Current Source:",
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(end = 4.dp).align(Alignment.CenterVertically)
+              )
+              Text(
+                text = RFConfig.state.value.defaultArcheRageDirectory,
+                color = Color.Green,
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                modifier = Modifier.align(Alignment.CenterVertically)
+              )
+            } else {
+              Text(
+                text = "No file selected.",
+                color = Color.Red,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                modifier = Modifier
+              )
+            }
+          }
+
           Row(modifier = Modifier.fillMaxWidth()) {
             Button(
               onClick = { showDialog.value = !showDialog.value },
@@ -140,6 +136,14 @@ fun SettingsOverlay(wm: WindowManager? = null) {
                 color = Color.Black
               )
             }
+          }
+          Row(Modifier.padding(start = 8.dp, end = 8.dp)) {
+            Text(
+              text = stringResource(Res.string.settings_data_sourcing_sidenote),
+              color = Color.White,
+              textAlign = TextAlign.Start,
+              fontWeight = FontWeight.W400,
+              fontSize = 14.sp)
           }
         }
       }
