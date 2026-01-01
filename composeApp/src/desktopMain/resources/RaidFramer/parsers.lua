@@ -32,15 +32,15 @@ end
 function RF.Parser.ParseCombatEvent(t)
   local evt = {}
 
-  evt.cid        = t[1]
-  evt.eventType  = t[2]
-  evt.source     = t[3]
-  evt.target     = t[4]
-  evt.spellId    = t[5]
-  evt.spellName  = t[6]
-  evt.school     = t[7]
-  evt.auraType   = t[8]
-  evt.isHarmful  = t[9]
+  evt.cid          = t[1]
+  evt.eventType    = t[2]
+  evt.source       = t[3]
+  evt.target       = t[4]
+  evt.buffId       = t[5]
+  evt.buffName     = t[6]
+  evt.school       = t[7]
+  evt.auraType     = t[8] -- auraType (e.g., DEBUFF, BUFF)
+  evt.unknownBool  = t[9]
 
   -- Environmental damage special case
   if evt.eventType == "ENVIRONMENTAL_DAMAGE" then
@@ -48,6 +48,8 @@ function RF.Parser.ParseCombatEvent(t)
     evt.amount  = tonumber(t[7])
     evt.result  = t[9] -- HIT
   end
+
+  evt.timestamp  = os.time(os.date("!*t"))
 
   return evt
 end

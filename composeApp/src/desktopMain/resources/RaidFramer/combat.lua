@@ -13,10 +13,10 @@ function RF.Combat.handleUnitDead(...)
 end
 
 -- duel event handlers - notify desktop app (we may treat combat events during duels differently later)
-function handleDuelStarted()
+function RF.Combat.handleDuelStarted()
   RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_STARTED, os.time(os.date("!*t")))
 end
-function handleDuelEnded(...)
+function RF.Combat.handleDuelEnded(...)
   RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_ENDED, os.time(os.date("!*t")))
 end
 
@@ -27,13 +27,26 @@ function RF.Combat.handleCombatMessage(...)
   local args = { ... }
   local evt = RF.Parser.ParseCombatEvent(args)
 
-  -- only care about Reoky's events for now
-  if (evt.source ~= "Reoky") then
-    return
+  --
+  -- send all buff related events to desktop app to build us pretty graphs
+  --
+
+  -- debuffs
+  if (evt.auraType == "DEBUFF") then
+    RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DEBUFF, RF.JSON.json_encode(evt))
   end
 
+  -- buffs
+  if (evt.auraType == "BUFF") then
+    RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.BUFF, RF.JSON.json_encode(evt))
+  end
+
+  --
+  -- handle combat-related addon features below (implemented on the Lua side)
+  --
+
   -- charmed
-  if (evt.spellName == "Charmed" and evt.eventType == "SPELL_AURA_APPLIED") then
+  if (evt.buffName == "Charmed" and evt.eventType == "SPELL_AURA_APPLIED") then
     if (RF.Config.SHOW_CHARMED_IN_CHAT) then
       RF:Log(tostring(evt.source) .. " charmed " .. tostring(evt.target))
     end
@@ -43,14 +56,14 @@ function RF.Combat.handleCombatMessage(...)
   end
 
   -- silenced
-  if (evt.spellName == "Silence" and evt.eventType == "SPELL_AURA_APPLIED") then
+  if (evt.buffName == "Silence" and evt.eventType == "SPELL_AURA_APPLIED") then
     if (RF.Config.SHOW_SILENCED_IN_CHAT) then
       RF:Log(tostring(evt.source) .. " silenced " .. tostring(evt.target))
     end
   end
 
   -- distressed
-  if (evt.spellName == "Distressed" and evt.eventType == "SPELL_AURA_APPLIED") then
+  if (evt.buffName == "Distressed" and evt.eventType == "SPELL_AURA_APPLIED") then
     if (RF.Config.SHOW_DISTRESSED_IN_CHAT) then
       RF:Log(tostring(evt.source) .. " distressed " .. tostring(evt.target))
     end

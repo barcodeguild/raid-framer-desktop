@@ -7,7 +7,7 @@ RF.IPC.BASE_DIR = "../Documents/Addon/RaidFramer/"
 RF.IPC.CHANNEL_OUT_FILE = RF.IPC.BASE_DIR .. "ipc.rfout"
 RF.IPC.CHANNEL_IN_FILE  = RF.IPC.BASE_DIR .. "ipc.rfin"
 RF.IPC.LAST_READ_TIME = 0
-RF.IPC.READ_COOLDOWN = 5  -- seconds
+RF.IPC.READ_COOLDOWN = 1 -- seconds
 
 RF.IPC.MESSAGE_VERSION = 1
 

@@ -36,24 +36,28 @@ data class SuccessfulCastEvent(
 
 data class BuffGainedEvent(
   override val timestamp: Long,
+  val source: String? = null,
   val target: String,
   val buff: String,
 ) : CombatEvent
 
 data class BuffEndedEvent(
   override val timestamp: Long,
+  val source: String? = null,
   val target: String,
   val buff: String,
 ) : CombatEvent
 
 data class DebuffGainedEvent(
   override val timestamp: Long,
+  val source: String? = null,
   val target: String,
   val debuff: String,
 ) : CombatEvent
 
 data class DebuffEndedEvent(
   override val timestamp: Long,
+  val source: String? = null,
   val target: String,
   val debuff: String,
 ) : CombatEvent

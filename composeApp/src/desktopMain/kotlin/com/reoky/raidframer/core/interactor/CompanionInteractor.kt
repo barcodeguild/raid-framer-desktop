@@ -1,6 +1,12 @@
 package com.reoky.raidframer.core.interactor
 
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.model.ARBuffEvent
+import com.reoky.raidframer.core.model.BuffEndedEvent
+import com.reoky.raidframer.core.model.BuffGainedEvent
+import com.reoky.raidframer.core.model.CombatEvent
+import com.reoky.raidframer.core.model.DebuffEndedEvent
+import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.Faction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,12 +17,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.exists
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
+import kotlin.times
 
 object CompanionInteractor : Interactor() {
 
@@ -137,6 +145,15 @@ object CompanionInteractor : Interactor() {
             it.copy(playerName = payload)
           }
         }
+        MessageType.PLAYER_BUFF,
+        MessageType.PLAYER_DEBUFF -> {
+          Log.debug(TAG, "Received PLAYER_BUFF: $payload")
+          message.payload?.let { jsonElement ->
+            handleBuffEvent(jsonElement, message.timestamp) { event ->
+              PlayerCacheInteractor.postEvent(event)
+            }
+          }
+        }
         MessageType.SELF_FACTION -> {
           Faction.fromString(payload).let { faction ->
             RFConfig.update { it.copy(playerFaction = faction.value) }
@@ -188,6 +205,55 @@ object CompanionInteractor : Interactor() {
     }
   }
 
+  private fun handleBuffEvent(jsonElement: JsonElement, messageTimestamp: Long, dispatch: (CombatEvent) -> Unit) {
+    val json = Json { ignoreUnknownKeys = true }
+    try {
+      // If the payload is a JSON string containing the actual object, parse that string first.
+      val actualElement = if (jsonElement is JsonPrimitive && jsonElement.isString) {
+        json.parseToJsonElement(jsonElement.content)
+      } else {
+        jsonElement
+      }
+
+      val aura = json.decodeFromJsonElement(ARBuffEvent.serializer(), actualElement)
+
+      val eventType = aura.eventType?.trim()?.uppercase()
+      val auraType = aura.auraType?.trim()?.uppercase()
+      val name = aura.buffName?.takeIf { it.isNotBlank() }
+      val target = aura.target?.takeIf { it.isNotBlank() }
+      val source = aura.source?.takeIf { it.isNotBlank() }
+      val ts = if (aura.timestamp != 0L) aura.timestamp * 1000L else messageTimestamp
+
+      if (eventType == null) {
+        println("ignore: missing eventType")
+        return
+      }
+      if (name == null || target == null) {
+        println("ignore: missing buffName or target")
+        return
+      }
+
+      when (eventType) {
+        "SPELL_AURA_APPLIED" -> {
+          when (auraType) {
+            "BUFF" -> dispatch(BuffGainedEvent(timestamp = ts, source = source, target = target, buff = name))
+            "DEBUFF" -> dispatch(DebuffGainedEvent(timestamp = ts, source = source, target = target, debuff = name))
+            else -> Log.error(TAG, "ignore: unknown auraType=$auraType")
+          }
+        }
+        "SPELL_AURA_REMOVED" -> {
+          when (auraType) {
+            "BUFF" -> dispatch(BuffEndedEvent(timestamp = ts, source = source, target = target, buff = name))
+            "DEBUFF" -> dispatch(DebuffEndedEvent(timestamp = ts, source = source, target = target, debuff = name))
+            else -> Log.error(TAG, "ignore: unknown auraType=$auraType")
+          }
+        }
+        else -> Log.error(TAG, "ignore: unhandled eventType=$eventType")
+      }
+    } catch (t: Throwable) {
+      println("failed to decode ARBuffEvent: ${t.message}")
+    }
+  }
   /*
    * Sends a test ping message to the companion addon.
    */
@@ -204,4 +270,6 @@ object CompanionInteractor : Interactor() {
   fun notifyConfigUpdated() {
     _shouldNotifyCompanion = true
   }
+
+
 }

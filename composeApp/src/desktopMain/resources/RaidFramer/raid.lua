@@ -4,7 +4,7 @@
 RF = RF or {} -- ensure global RF exists so this file can initialize RF.Raid
 RF.Raid = RF.Raid or {}
 
-RF.Raid.Roster = RF.Raid.Roster or {} -- somewhat abiguous name but it is what it is
+RF.Raid.Roster = RF.Raid.Roster or {} -- somewhat ambiguous name but it is what it is
 
 RF.Raid.recentlyJoined = false
 RF.Raid.isPrepared = false
@@ -25,9 +25,9 @@ RF.TEAM_CHANGE_REASONS = {
   INVITATION_REJECTED = "invitation_rejected",
 }
 
--- numberic list of roles for healer, tank, dps and ranged etc
+-- numeric list of roles for healer, tank, dps and ranged etc
 -- literally just doing the colors because no one can agree on what colors map to what roles
-RF.TEAM.TEAM_ROLES = {
+RF.Raid.ROLES = {
   BLUE = 0,
   GREEN = 1,
   PINK = 2,
@@ -147,6 +147,16 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
     end
   end
 
+  -- ipc export updated raid roster
+  RF.IPC.WriteMessage(
+      RF.IPC.MESSAGE_TYPES.FRAMES_UPDATE,
+      RF.Raid.GetRaidRoster()
+  )
+
+  if not RF.Config.SHOW_RAID_STATUS then
+    return
+  end
+
   -- output the number of players in raid one and raid two for logging purposes
   local countRaidOne = 0
   local countRaidTwo = 0
@@ -173,13 +183,6 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
   else
     RF:Log(string.format("Currently there are %s in the raid.", fmtPlayers(countRaidOne)))
   end
-
-
-  -- ipc export updated raid roster
-  RF.IPC.WriteMessage(
-    RF.IPC.MESSAGE_TYPES.FRAMES_UPDATE,
-    RF.Raid.GetRaidRoster()
-  )
 end
 
 -- scans for co-raid presence if we just joined a raid and the events for it have not fired yet
