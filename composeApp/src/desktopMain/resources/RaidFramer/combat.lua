@@ -25,7 +25,7 @@ function RF.Combat.handleCombatMessage(...)
   RF.IPC.ReadMessages() -- Check if there's config changes (rate limited to every 5s!)
 
   local args = { ... }
-  local evt = RF:ParseCombatEvent(args)
+  local evt = RF.Parser.ParseCombatEvent(args)
 
   -- only care about Reoky's events for now
   if (evt.source ~= "Reoky") then
@@ -37,7 +37,7 @@ function RF.Combat.handleCombatMessage(...)
     if (RF.Config.SHOW_CHARMED_IN_CHAT) then
       RF:Log(tostring(evt.source) .. " charmed " .. tostring(evt.target))
     end
-    if (evt.source ~= RF.PLAYER_NAME) then
+    if (evt.source == RF.PLAYER_NAME) then
       X2Sound:PlayUISound("event_trade_lock", true)
     end
   end
