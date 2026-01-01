@@ -22,7 +22,9 @@ end
 
 -- main combat event handler
 function RF.Combat.handleCombatMessage(...)
-  RF.IPC.ReadMessages() -- Check if there's config changes (rate limited to every 5s!)
+  RF.IPC.interact() -- Rate limited write of queued messages and also triggers read of incoming messages on a cooldown
+
+
 
   local args = { ... }
   local evt = RF.Parser.ParseCombatEvent(args)
@@ -33,12 +35,12 @@ function RF.Combat.handleCombatMessage(...)
 
   -- debuffs
   if (evt.auraType == "DEBUFF") then
-    RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DEBUFF, RF.JSON.json_encode(evt))
+    RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.DEBUFF, RF.JSON.json_encode(evt))
   end
 
   -- buffs
   if (evt.auraType == "BUFF") then
-    RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.BUFF, RF.JSON.json_encode(evt))
+    RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.BUFF, RF.JSON.json_encode(evt))
   end
 
   --

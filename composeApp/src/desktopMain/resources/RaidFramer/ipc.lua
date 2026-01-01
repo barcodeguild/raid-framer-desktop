@@ -6,10 +6,14 @@ RF.IPC = RF.IPC or {}
 RF.IPC.BASE_DIR = "../Documents/Addon/RaidFramer/"
 RF.IPC.CHANNEL_OUT_FILE = RF.IPC.BASE_DIR .. "ipc.rfout"
 RF.IPC.CHANNEL_IN_FILE  = RF.IPC.BASE_DIR .. "ipc.rfin"
-RF.IPC.LAST_READ_TIME = 0
-RF.IPC.READ_COOLDOWN = 1 -- seconds
-
 RF.IPC.MESSAGE_VERSION = 1
+
+-- queue structure that holds future messages to be written to the ipc file
+RF.IPC.BATCH_SIZE = 100 -- trying 100 for now
+RF.IPC.BATCH_COOLDOWN = 1 -- seconds
+RF.IPC.LAST_INTERACT_TIME = 0
+
+RF.IPC.MESSAGE_WRITE_QUEUE = {}
 
 RF.IPC.MESSAGE_TYPES = {
   CAST = "PLAYER_CAST",
@@ -29,6 +33,61 @@ RF.IPC.MESSAGE_TYPES = {
   CONFIG_UPDATE = "CONFIG_UPDATE"
 }
 
+-- Flushes batches of the write queue to the output file by calling write message
+-- poke does some work and then returns; this is called periodically by the main addon loop
+-- and it's meant to smooth out writes over time instead of spamming writes in the combat event handler
+function RF.IPC.interact()
+
+  -- GUARD: Should we write right now? (rate limit)
+  local now = os.time(os.date("!*t"))
+  if now - RF.IPC.LAST_INTERACT_TIME < RF.IPC.BATCH_COOLDOWN then
+    return
+  end
+
+  -- We've decided we're doing stuff; update last interact time
+  RF.IPC.LAST_INTERACT_TIME = now
+
+  -- First check if there's anything to read
+  RF.IPC.ReadMessages()
+
+  -- GUARD: Anything to write? (Done before call to os.time for efficiency?)
+  if #RF.IPC.MESSAGE_WRITE_QUEUE == 0 then
+    return
+  end
+
+  -- Determine batch size (process up to BATCH_SIZE messages)
+  local batchSize = math.min(RF.IPC.BATCH_SIZE, #RF.IPC.MESSAGE_WRITE_QUEUE)
+
+  -- Open file once for batch write
+  local f = io.open(RF.IPC.CHANNEL_OUT_FILE, "a")
+  if not f then return end
+
+  -- Write batch of messages
+  for i = 1, batchSize do
+    local json = RF.IPC.MESSAGE_WRITE_QUEUE[i]
+    f:write(json)
+    f:write("\n")
+  end
+  f:close()
+
+  -- Remove processed messages from queue
+  for i = batchSize, 1, -1 do
+    table.remove(RF.IPC.MESSAGE_WRITE_QUEUE, 1)
+  end
+end
+
+-- Queues a message to be sent later; returns the JSON string
+function RF.IPC.EnqueueWriteMessage(msgType, payload)
+  local message = RF.IPC.BuildIPCMessage(msgType, payload)
+  local json = RF.JSON.json_encode(message)
+  table.insert(RF.IPC.MESSAGE_WRITE_QUEUE, json)
+  return json
+end
+
+-- Immediately writes a message to the output file
+-- The reason we don't call this in the interaction loop is because then writing batches
+-- would constantly open and close the file, which is inefficient.
+-- but this is how we used to do combat event writes before batching was implemented
 function RF.IPC.WriteMessage(msgType, payload)
   local message = RF.IPC.BuildIPCMessage(msgType, payload)
   local json = RF.JSON.json_encode(message)
@@ -42,14 +101,6 @@ end
 -- Will clear the input file after reading because of the problem where the file
 -- just keeps getting bigger and bigger aaaaaaa
 function RF.IPC.ReadMessages()
-
-  -- rate limit ( every READ_COOLDOWN seconds )
-  local now = os.time(os.date("!*t"))
-  if now - RF.IPC.LAST_READ_TIME < RF.IPC.READ_COOLDOWN then
-    return
-  end
-  RF.IPC.LAST_READ_TIME = now -- almost forgot this LOL
-
   local f = io.open(RF.IPC.CHANNEL_IN_FILE, "r")
   if not f then return end
 
