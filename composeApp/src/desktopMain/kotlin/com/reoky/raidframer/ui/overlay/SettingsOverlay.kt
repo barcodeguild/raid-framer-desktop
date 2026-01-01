@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CloseButton
@@ -43,10 +44,10 @@ import java.util.Locale.getDefault
 @Composable
 fun SettingsOverlay(wm: WindowManager? = null) {
 
-  val scrollState = rememberScrollState()
+  val config by RFConfig.state.collectAsState() // single source of truth
 
+  val scrollState = rememberScrollState()
   val showDialog = remember { mutableStateOf(false) }
-  val selectedItem = remember { mutableStateOf("C:\\Users\\Fren\\Documents\\ArcheRage") }
 
   Box(
     modifier = Modifier
@@ -83,9 +84,9 @@ fun SettingsOverlay(wm: WindowManager? = null) {
           }
 
           Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 8.dp, vertical = 4.dp)) {
-            if (selectedItem.value.isNotBlank()) {
+            if (config.defaultArcheRageDirectory.isNotBlank()) {
               Text(
-                text = "Current Source:",
+                text = "ArcheRage Documents Directory:",
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
@@ -93,7 +94,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
                 modifier = Modifier.padding(end = 4.dp).align(Alignment.CenterVertically)
               )
               Text(
-                text = RFConfig.state.value.defaultArcheRageDirectory,
+                text = config.defaultArcheRageDirectory,
                 color = Color.Green,
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
@@ -101,7 +102,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
               )
             } else {
               Text(
-                text = "No file selected.",
+                text = "Please Specify Directory (It's the folder that has a system.cfg file inside it!)",
                 color = Color.Red,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
@@ -113,12 +114,12 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
           Row(modifier = Modifier.fillMaxWidth()) {
             Button(
-              onClick = { showDialog.value = !showDialog.value },
+              onClick = { wm?.openWindow(OverlayType.COMPANION) },
               colors = ButtonDefaults.buttonColors(Color.White),
               modifier = Modifier.weight(1f).padding(16.dp)
             ) {
               Text(
-                text = "Select Logfile",
+                text = "Lua Companion Options",
                 maxLines = 1,
                 color = Color.Black
               )
@@ -157,11 +158,12 @@ fun SettingsOverlay(wm: WindowManager? = null) {
     // )
   }
 
-  FileSelectionDialog(showDialog, selectedItem)
+  //FileSelectionDialog(showDialog, config.defaultArcheRageDirectory)
 }
 
 @Composable
 fun GlobalOptionsPanel() {
+  val config by RFConfig.state.collectAsState() // single source of truth
   Box(
     modifier = Modifier
       .padding(16.dp)
@@ -169,7 +171,7 @@ fun GlobalOptionsPanel() {
   ) {
     Column {
       Text(
-        text = "Global Options",
+        text = "Your Current Character",
         color = Color.White,
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
@@ -181,16 +183,15 @@ fun GlobalOptionsPanel() {
         Row(verticalAlignment = Alignment.CenterVertically) {
           Column {
             Text(
-              text = "Enter your character name and faction below. Rf it's not correct already ${AppGlobals.APP_NAME} won't work. This information is used to deduce which players are allies and enemies over time:",
+              text = "Please ensure that your character and faction are specified correctly and kept up-to-date. ${AppGlobals.APP_NAME} uses this information to deduce friendly and hostile characters over time.",
               color = Color.White
             )
-            val textFieldValue = rememberSaveable { mutableStateOf(RFConfig.state.value.playerName) }
             TextField(
-              value = textFieldValue.value,
+              value = config.playerName,
               onValueChange = {
-                textFieldValue.value = it.lowercase(getDefault()).capitalize()
-                RFConfig.update { oldState ->
-                  oldState.copy(playerName = textFieldValue.value)
+                RFConfig.update { config ->
+                  val newPlayerName = it.lowercase(getDefault()).capitalize()
+                  config.copy(playerName = newPlayerName)
                 }
               },
               textStyle = TextStyle(
@@ -210,8 +211,9 @@ fun GlobalOptionsPanel() {
               ),
               modifier = Modifier.width(200.dp).align(Alignment.CenterHorizontally)
             )
-            val factionOptions = listOf("East", "West", "Pirate")
-            val selectedFaction = rememberSaveable { mutableStateOf(RFConfig.state.value.playerFaction) }
+
+            // same as listing the three factions manually, except kept in sync with the enum
+            val factionOptions = Faction.entries.filter { it != Faction.UNKNOWN }.map { it. value }
 
             Row(
               modifier = Modifier
@@ -224,16 +226,14 @@ fun GlobalOptionsPanel() {
                   modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .clickable {
-                      selectedFaction.value = option
-                      RFConfig.update { oldState -> oldState.copy(playerFaction = option) }
+                      RFConfig.update { it.copy(playerFaction = option) }
                     },
                   verticalAlignment = Alignment.CenterVertically
                 ) {
                   RadioButton(
-                    selected = (option == selectedFaction.value),
+                    selected = (option == config.playerFaction),
                     onClick = {
-                      selectedFaction.value = option
-                      RFConfig.update { oldState -> oldState.copy(playerFaction = option) }
+                      RFConfig.update { it.copy(playerFaction = option) }
                     },
                     colors = RadioButtonDefaults.colors(
                       selectedColor = Color.Red,
@@ -252,59 +252,10 @@ fun GlobalOptionsPanel() {
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-          var autoTargetChecked: Boolean by remember { mutableStateOf(false) } // default
           Checkbox(
-            checked = autoTargetChecked,
-            onCheckedChange = {
-              autoTargetChecked = it
-//              lol.rfcloud.AppState.config.autoTargetEnabled = it
-//              CoroutineScope(Dispatchers.Default).launch {
-//                RFDao.saveConfig(lol.rfcloud.AppState.config)
-//              }
-            },
-            colors = CheckboxDefaults.colors(
-              checkmarkColor = Color.White,
-              checkedColor = Color.Red,
-              uncheckedColor = Color.White
-            )
-          )
-          Text(
-            text = "Automatically target players when dealing direct damage.",
-            color = Color.White
-          )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          var allowAutoTargetSelfChecked: Boolean by remember { mutableStateOf(false) } // replace default TODO
-          Checkbox(
-            checked = allowAutoTargetSelfChecked,
-            onCheckedChange = {
-              allowAutoTargetSelfChecked = it
-//              lol.rfcloud.AppState.config.allowAutoTargetSelf = it
-//              CoroutineScope(Dispatchers.Default).launch {
-//                RFDao.saveConfig(lol.rfcloud.AppState.config)
-//              }
-            },
-            colors = CheckboxDefaults.colors(
-              checkmarkColor = Color.White,
-              checkedColor = Color.Red,
-              uncheckedColor = Color.White
-            )
-          )
-          Text(
-            text = "Allow automatically targeting self with heals.",
-            color = Color.White
-          )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          var tabbedDetectionChecked: Boolean by remember { mutableStateOf(false) } // replace default TODO
-          Checkbox(
-            checked = tabbedDetectionChecked,
+            checked = config.miniGraphEnabled,
             onCheckedChange = { isChecked ->
-              tabbedDetectionChecked = isChecked
-//              lol.rfcloud.AppState.config.tabbedDetectionEnabled = isChecked
-//              CoroutineScope(Dispatchers.Default).launch {
-//                RFDao.saveConfig(lol.rfcloud.AppState.config)
-//              }
+              RFConfig.update { it.copy(miniGraphEnabled = isChecked) }
             },
             colors = CheckboxDefaults.colors(
               checkmarkColor = Color.White,
@@ -313,20 +264,15 @@ fun GlobalOptionsPanel() {
             )
           )
           Text(
-            text = "Enable automatic hiding of overlays while tabbed-out of the game. [EXPERIMENTAL]",
+            text = "Enable DPS/HEALS/CC Mini-Graph. Shows performance over time.",
             color = Color.White
           )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-          var colorAndTextDetectionChecked: Boolean by remember { mutableStateOf(false) } // replace default TODO
           Checkbox(
-            checked = colorAndTextDetectionChecked,
-            onCheckedChange = {
-//              colorAndTextDetectionChecked = it
-//              lol.rfcloud.AppState.config.colorAndTextDetectionEnabled = it
-//              CoroutineScope(Dispatchers.Default).launch {
-//                RFDao.saveConfig(lol.rfcloud.AppState.config)
-//              }
+            checked = config.splitChatEnabled,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(splitChatEnabled = isChecked) }
             },
             colors = CheckboxDefaults.colors(
               checkmarkColor = Color.White,
@@ -335,21 +281,15 @@ fun GlobalOptionsPanel() {
             )
           )
           Text(
-            text = "Hide overlays that obstruct in-game windows using color and text recognition. [EXPERIMENTAL]",
+            text = "Enable OSRS-style split-chat window overlay. [EXPERIMENTAL]",
             color = Color.White
           )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-          var overlayResizingChecked: Boolean by remember { mutableStateOf(false) } // replace default TODO
           Checkbox(
-            checked = overlayResizingChecked,
-            onCheckedChange = {
-              overlayResizingChecked = it
-//              lol.rfcloud.AppState.config.overlayResizingEnabled = it
-//              lol.rfcloud.AppState.isEverythingResizable.value = it
-//              CoroutineScope(Dispatchers.Default).launch {
-//                RFDao.saveConfig(lol.rfcloud.AppState.config)
-//              }
+            checked = config.tabbedDetectionEnabled,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(tabbedDetectionEnabled = isChecked) }
             },
             colors = CheckboxDefaults.colors(
               checkmarkColor = Color.White,
@@ -358,22 +298,16 @@ fun GlobalOptionsPanel() {
             )
           )
           Text(
-            text = "Enable resizing of overlay windows. [EXPERIMENTAL]",
+            text = "Automatically hide game overlay's while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).",
             color = Color.White
           )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-          var searchEverywhereChecked: Boolean by remember { mutableStateOf(false) } // replace default TODO
           Checkbox(
-            checked = searchEverywhereChecked,
+            checked = config.gameScheduleHotkeyEnabled,
             onCheckedChange = {
-              searchEverywhereChecked = it
-//              lol.rfcloud.AppState.config.searchEverywhere = it
-//              CombatEventInteractor.shouldSearchEverywhere = it
-//              CoroutineScope(Dispatchers.Default).launch {
-//                RFDao.saveConfig(lol.rfcloud.AppState.config)
-//                CombatEventInteractor.locateCombatLog()
-//              }
+              isChecked ->
+              RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) }
             },
             colors = CheckboxDefaults.colors(
               checkmarkColor = Color.White,
@@ -382,21 +316,54 @@ fun GlobalOptionsPanel() {
             )
           )
           Text(
-            text = "Search everywhere for combat.log and not just documents.",
+            text = "Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay.",
+            color = Color.White
+          )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Checkbox(
+            checked = config.useSadlyDotEyeOhhh,
+            onCheckedChange = {
+              isChecked ->
+              RFConfig.update { it.copy(useSadlyDotEyeOhhh = isChecked) }
+            },
+            colors = CheckboxDefaults.colors(
+              checkmarkColor = Color.White,
+              checkedColor = Color.Red,
+              uncheckedColor = Color.White
+            )
+          )
+          Text(
+            text = "I'd prefer to use Sadly.io for in-game schedule data.",
+            color = Color.White
+          )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Checkbox(
+            checked = config.dragonBreathOverlayEnabled,
+            onCheckedChange = {
+              isChecked ->
+              RFConfig.update { it.copy(dragonBreathOverlayEnabled = isChecked) }
+            },
+            colors = CheckboxDefaults.colors(
+              checkmarkColor = Color.White,
+              checkedColor = Color.Red,
+              uncheckedColor = Color.White
+            )
+          )
+          Text(
+            text = "Enable dragon breath detector and counter overlay. (Note: You still have be in 100 meter range of the dragon rider to witness the breaths, this isn't magic!)",
             color = Color.White
           )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
           Button(
-            onClick = {
-//              lol.rfcloud.AppState.isSettingsOverlayVisible.value = false
-//              lol.rfcloud.AppState.isFiltersOverlayVisible.value = true
-            },
+            onClick = {},
             colors = ButtonDefaults.buttonColors(Color.White),
             modifier = Modifier.padding(16.dp)
           ) {
             Text(
-              text = "Filters",
+              text = "Player Re-mappings, PvP Duels & Filters",
               maxLines = 1,
               color = Color.Black
             )

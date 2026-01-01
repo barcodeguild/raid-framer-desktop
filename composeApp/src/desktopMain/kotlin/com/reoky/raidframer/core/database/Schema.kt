@@ -30,7 +30,11 @@ data class ConfigEntity(
   @PrimaryKey val id: Int = 0, // Singleton config, always id 0
   val defaultArcheRageDirectory: String = "", // automatic path detection if empty (location of addons, logs, configs for AR)
   val tabbedDetectionEnabled: Boolean = false,
-  val overlayResizingEnabled: Boolean = true,
+  val miniGraphEnabled: Boolean = false,
+  val splitChatEnabled: Boolean = false,
+  val gameScheduleHotkeyEnabled: Boolean = false,
+  val useSadlyDotEyeOhhh: Boolean = false,
+  val dragonBreathOverlayEnabled: Boolean = false,
   val firstLaunch: Boolean = true,
   val playerName: String = "", // player's own name
   val playerFaction: String = "", // player's own faction

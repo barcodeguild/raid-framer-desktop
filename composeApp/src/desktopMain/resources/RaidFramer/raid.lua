@@ -25,6 +25,16 @@ RF.TEAM_CHANGE_REASONS = {
   INVITATION_REJECTED = "invitation_rejected",
 }
 
+-- numberic list of roles for healer, tank, dps and ranged etc
+-- literally just doing the colors because no one can agree on what colors map to what roles
+RF.TEAM.TEAM_ROLES = {
+  BLUE = 0,
+  GREEN = 1,
+  PINK = 2,
+  RED = 3,
+  PURPLE = 4
+}
+
 -- what one raid member looks like
 function RF.Raid.NewRaidMember(slot)
   return {
@@ -48,6 +58,11 @@ function RF.Raid.Prepare()
     RF.Raid.Roster[i] = RF.Raid.NewRaidMember(i)
   end
   RF.Raid.isPrepared = true
+end
+
+function RF.Raid.handleTeamRoleChanged(...)
+  local raid, position, role = { ... }
+  RF:Log("Team Role Changed - Raid: " .. tostring(raid) .. " Position: " .. tostring(position) .. " Role: " .. tostring(role))
 end
 
 -- allows us to set data for a raid slot from outside the module
@@ -196,4 +211,3 @@ function RF.Raid.handleCoraidBroken()
   RF.Raid.hasCoRaid = false
   RF:Log("[Raid] Joint raid broken")
 end
-

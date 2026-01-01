@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppGlobals
@@ -33,7 +34,7 @@ fun PreviewAboutOverlay() {
 
 @Composable
 fun AboutOverlay(wm: WindowManager? = null) {
-  Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f))) {
+  Box(modifier = Modifier.fillMaxSize()) {
 
      CloseButton(
        onClose = { wm?.closeWindow(OverlayType.ABOUT) },
@@ -119,17 +120,29 @@ fun AboutOverlay(wm: WindowManager? = null) {
               color = Color.White
             )
           }
-          Button(
-            onClick = {
-              wm?.openWindow(OverlayType.SETTINGS)
-            },
-            colors = ButtonDefaults.buttonColors(Color.White),
-            modifier = Modifier.padding(bottom = 8.dp, end = 8.dp).align(Alignment.End)
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
           ) {
             Text(
-              text = "Go to Settings",
-              color = Color.Black
+              text = "Please before use. ->",
+              modifier = Modifier
+                .weight(1f)
+                .padding(2.dp),
+              textAlign = TextAlign.Start,
+              fontSize = 16.sp,
+              color = Color.White,
+              maxLines = 1,
+              overflow = TextOverflow.Visible
             )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+              onClick = { wm?.openWindow(OverlayType.SETTINGS) },
+              colors = ButtonDefaults.buttonColors(Color.White),
+              modifier = Modifier.padding(bottom = 8.dp, end = 8.dp)
+            ) {
+              Text(text = "Go to Settings", color = Color.Black)
+            }
           }
         }
       }

@@ -22,6 +22,7 @@ RF.IPC.MESSAGE_TYPES = {
   FRAMES_UPDATE = "FRAMES_UPDATE",
   TARGET_UPDATE = "TARGET_UPDATE",
   SELF_UPDATE = "SELF_UPDATE",
+  SELF_FACTION = "SELF_FACTION",
   SOUND_ALERT = "SOUND_ALERT",
   AOE_SPLAT = "AOE_SPLAT",
   TEST_PING = "TEST_PING",
@@ -99,13 +100,15 @@ function RF.IPC.HandleRawMessage(rawMessage)
 
   -- switch based on message.type
   if message.type == RF.IPC.MESSAGE_TYPES.TEST_PING then
-    RF:Log("IPC: Received TEST_PING message.")
-    -- maybe respond with a pong?
+    RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.TEST_PING, { reply = "pong" })
+    if RF.PLAYER_NAME ~= "" and RF.FACTION ~= "" then
+      RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.SELF_UPDATE, RF.PLAYER_NAME)
+      RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.SELF_FACTION, RF.FACTION)
+    end
   elseif message.type == RF.IPC.MESSAGE_TYPES.CONFIG_UPDATE then
     RF:Log("Addon configuration updated via the desktop app.")
     RF.Config.LoadConfig()
   else
     RF:Log("IPC: Received unknown message type: " .. tostring(message.type))
-
   end
 end

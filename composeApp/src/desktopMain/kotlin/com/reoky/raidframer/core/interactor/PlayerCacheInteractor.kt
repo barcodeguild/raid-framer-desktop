@@ -71,7 +71,8 @@ object PlayerCacheInteractor : Interactor() {
   override suspend fun interact() {
     val savedCount = RFDao.playerCacheDao.getPlayerCount()
     val cachedCount = _cards.values.count()
-    Log.info(TAG, "Persisted $savedCount players. ($cachedCount total entities (mounts,players,pets,mobs,etc) cached in memory)")
+
+    //Log.info(TAG, "Persisted $savedCount players. ($cachedCount total entities (mounts,players,pets,mobs,etc) cached in memory)")
 
     _cards.forEach { (name, card) ->
 

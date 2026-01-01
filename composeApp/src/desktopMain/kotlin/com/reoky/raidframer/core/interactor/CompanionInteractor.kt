@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.interactor
 
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.model.Faction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,6 +28,7 @@ object CompanionInteractor : Interactor() {
   private val _scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
   private var _shouldNotifyCompanion: Boolean = false
+  private var _didATestPing: Boolean = false
 
   // JSON configuration
   private val json = Json {
@@ -46,6 +48,7 @@ object CompanionInteractor : Interactor() {
     @SerialName("FRAMES_UPDATE") FRAMES_UPDATE,
     @SerialName("TARGET_UPDATE") TARGET_UPDATE, // when the user tab-targets to a new character
     @SerialName("SELF_UPDATE") SELF_UPDATE, // sets the character name of the player automatically at char switch
+    @SerialName("SELF_FACTION") SELF_FACTION, // notifies the app of the players' faction (for enemy/friendly coloring & may change on character switch!)
     @SerialName("SOUND_ALERT") SOUND_ALERT,
     @SerialName("AOE_SPLAT") AOE_SPLAT,
     @SerialName("TEST_PING") TEST_PING,
@@ -96,6 +99,12 @@ object CompanionInteractor : Interactor() {
       }
     }
 
+    // Send a test ping once to establish communication. (We don't know if app or lua code was started first, this syncs them)
+    if (!_didATestPing) {
+      sendMessage(MessageType.TEST_PING)
+      _didATestPing = true
+    }
+
     // If we need to notify the companion of config changes, do so now
     if (_shouldNotifyCompanion) {
       sendMessage(MessageType.CONFIG_UPDATE)
@@ -109,6 +118,7 @@ object CompanionInteractor : Interactor() {
   private fun processIncomingMessage(rawJson: String) {
     try {
       val message = json.decodeFromString<IPCMessage>(rawJson)
+      val payload = message.payload.toString().trim('"')
 
       when (message.type) {
         MessageType.TEST_PING -> {
@@ -122,9 +132,16 @@ object CompanionInteractor : Interactor() {
           Log.info(TAG, "Received CONFIG_UPDATE request. This is not meant to go in this direction aaaa.")
         }
         MessageType.SELF_UPDATE -> {
-          val name = message.payload.toString().trim('"')
-          if (name.isNotBlank()) RFConfig.update { it.copy(playerName = name) }
-          Log.info(TAG, "Player character name updated to: $name")
+          if (payload.isNotBlank()) RFConfig.update {
+            Log.info(TAG, "Player character name updated to: $payload")
+            it.copy(playerName = payload)
+          }
+        }
+        MessageType.SELF_FACTION -> {
+          Faction.fromString(payload).let { faction ->
+            RFConfig.update { it.copy(playerFaction = faction.value) }
+            Log.info(TAG, "Player character faction updated to: $faction")
+          }
         }
         else -> {
           Log.debug(TAG, "Received message: ${message.type}")

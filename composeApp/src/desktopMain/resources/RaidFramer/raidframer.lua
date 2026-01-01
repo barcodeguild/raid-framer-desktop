@@ -1,17 +1,18 @@
--- Raid Framer Main Module
--- Automatically placed addon by Raid Framer 2.0
+-- Raid Framer 2.0 Lua Companion
+-- May have automatically been placed by the Raid Framer Desktop App
 -- https://github.com/barcodeguild/raid-framer-desktop
 -- Author: Reoky
 RF = RF or {}
 RF.TAG = "Raid Framer 2.0"
 
 RF.PLAYER_NAME = ""
+RF.FACTION = ""
 
 ADDON:ImportAPI(API_TYPE.CHAT.id)
 ADDON:ImportAPI(API_TYPE.UNIT.id)
-ADDON:ImportAPI(API_TYPE.MAP.id)
 ADDON:ImportAPI(API_TYPE.PLAYER.id)
 ADDON:ImportAPI(API_TYPE.TEAM.id)
+ADDON:ImportAPI(API_TYPE.SOUND.id)
 
 RF.COLORS = {
   regular = "|cFFFFD700",
@@ -45,50 +46,54 @@ end
 ----------------------------
 function RF:Init()
   self:Shutdown()  -- makes Init idempotent
-  self.initialized = true
+
+  local success = guardAllModulesArePresent()
+  self.initialized = success
+
+  if (not success) then
+    self:Log("ERROR: " .. RF.TAG .. " failed to initialize. Please replace the missing modules, friend.")
+    return
+  end
 
   -- get player name : tell desktop app which character the user is playing
-  PLAYER_NAME = X2Unit:UnitName("player")
-  RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.SELF_UPDATE, PLAYER_NAME)
+  RF.PLAYER_NAME = X2Unit:UnitName("player")
+  RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.SELF_UPDATE, RF.PLAYER_NAME)
 
-  self:Log("Good news, " .. PLAYER_NAME .. "! If you can read this message, then the Raid Framer 2.0 Lua component is working!")
-  self:Log("Please be sure to launch the Raid Framer Desktop App to access the multi-monitor overlay.")
+  self:Log("Good news, " .. RF.PLAYER_NAME .. "! If you can read this message, then the " .. RF.TAG .. " Lua component is working!")
+  self:Log("Please be sure to launch the " .. RF.TAG .. " Desktop App to access the multi-monitor game overlay.")
 
-  -- create UI
-  -- register events
   registerForEvents()
-  -- OTHER STUFF
 end
 
 function RF:Shutdown()
   if not self.initialized then return end
-
   self.initialized = false
   self:Log("Shutdown")
-
-
-  -- hide/destroy UI
-  -- unregister events
   deregisterForEvents()
-  -- OTHER STUFF
 end
 
+-- Attach handlers to the game for various events we care about
 function registerForEvents()
-  -- Guard: ensure RF.Raid module is loaded before registering its handlers
-  if not RF.Raid or not RF.Raid.handleTeamMembersChanged then
-    RF:Log("ERROR: RF.Raid module not loaded. Cannot register event handlers.")
-    return
-  end
-  
   UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED, RF.Raid.handleTeamMembersChanged)
-  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, handleCombatMessage)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_ROLE_CHANGED, RF.Raid.handleTeamRoleChanged)
+  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, RF.Combat.handleCombatMessage)
+  UIParent:SetEventHandler(UIEVENT_TYPE.UNIT_DEAD, RF.Combat.handleUnitDead)
+  UIParent:SetEventHandler(UIEVENT_TYPE.STARTED_DUEL, RF.Combat.handleDuelStarted)
+  UIParent:SetEventHandler(UIEVENT_TYPE.ENDED_DUEL, RF.Combat.handleDuelEnded)
+  UIParent:SetEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL, RF.Chat.handleChatChannelJoined)
   UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINTED, RF.Raid.handleCoraidEstablished)
   UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, RF.Raid.handleCoraidBroken)
 end
 
+-- Do the opposite of registerForEvents as part of the tear-down pattern
 function deregisterForEvents()
   UIParent:RemoveEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED)
+  UIParent:RemoveEventHandler(UIEVENT_TYPE.TEAM_ROLE_CHANGED)
   UIParent:RemoveEventHandler(UIEVENT_TYPE.COMBAT_MSG)
+  UIParent:RemoveEventHandler(UIEVENT_TYPE.UNIT_DEAD)
+  UIParent:RemoveEventHandler(UIEVENT_TYPE.STARTED_DUEL)
+  UIParent:RemoveEventHandler(UIEVENT_TYPE.ENDED_DUEL)
+  UIParent:RemoveEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL)
   UIParent:RemoveEventHandler(UIEVENT_TYPE.TEAM_JOINTED)
   UIParent:RemoveEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN)
 end
@@ -96,47 +101,47 @@ end
 -------------------------
 -- Game Event Handlers --
 -------------------------
-local function onEnteredWorld()
+local function handleEnteredWorld()
   RF:Init()
 end
-UIParent:SetEventHandler(UIEVENT_TYPE.ENTERED_WORLD, onEnteredWorld)
 
-function handleCombatMessage(...)
-
-    -- Check if there's config changes (rate limited!)
-    RF.IPC.ReadMessages()
-
-    local args = { ... }
-    local evt = RF:ParseInternalEvent(args)
-    if (evt.spellName == "Charmed") then
-      RF:Log(tostring(evt.source) .. " charmed " .. tostring(evt.target))
-    end
-    if (evt.spellName == "Silence") then
-      RF:Log(tostring(evt.source) .. " silenced " .. tostring(evt.target))
-    end
+-- GUARD: Ensure every module is initialized before proceeding
+function guardAllModulesArePresent()
+  if not RF.Raid then
+    RF:Log("ERROR: RF.Raid module not initialized.")
+    return false
+  end
+  if not RF.Combat then
+    RF:Log("ERROR: RF.Combat module not initialized.")
+    return false
+  end
+  if not RF.IPC then
+    RF:Log("ERROR: RF.IPC module not initialized.")
+    return false
+  end
+  if not RF.Parser then
+    RF:Log("ERROR: RF.Parser module not initialized.")
+    return false
+  end
+  if not RF.JSON then
+    RF:Log("ERROR: RF.JSON module not initialized.")
+    return false
+  end
+  if not RF.Config then
+    RF:Log("ERROR: RF.Config module not initialized.")
+    return false
+  end
+  if not RF.Debug then
+    RF:Log("ERROR: RF.DEBUG module not initialized.")
+    return false
+  end
+  if not RF.Chat then
+    RF:Log("ERROR: RF.Chat module not initialized.")
+    return false
+  end
+  return true
 end
 
--- Tries to parse the raw event args from the game into a structured table
--- the game has many event types with different arg structures under the hood
--- so this is a simplified parser that only extracts common fields for now
-function RF:ParseInternalEvent(t)
-    local evt = {}
+UIParent:SetEventHandler(UIEVENT_TYPE.ENTERED_WORLD, handleEnteredWorld) -- entry point
 
-    evt.eventType  = t[2]
-    evt.source     = t[3]
-    evt.target     = t[4]
-    evt.spellId    = t[5]
-    evt.spellName  = t[6]
-    evt.school     = t[7]
-    evt.auraType   = t[8]
-    evt.isHarmful  = t[9]
-
-    -- Environmental damage special case
-    if evt.eventType == "ENVIRONMENTAL_DAMAGE" then
-        evt.envType = t[6] -- FALLING
-        evt.amount  = tonumber(t[7])
-        evt.result  = t[9] -- HIT
-    end
-
-    return evt
-end
+-- God I love Unix

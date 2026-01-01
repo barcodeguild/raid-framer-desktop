@@ -21,7 +21,6 @@ object InstallationInteractor : Interactor() {
   const val AR_CONFIG_FILE_NAME = "system.cfg"
   const val AR_ADDONS_DIRECTORY = "Addon"
 
-
   // list of resource lua files to install to the addons directory from the app's resources
   val RF_ADDON_DIRECTORY = "RaidFramer"
   val RF_ADDON_META = listOf(
@@ -33,8 +32,11 @@ object InstallationInteractor : Interactor() {
     "buttoncommon.lua",
     "button.lua",
     "combobox.lua",
+    "parsers.lua",
     "debug.lua",
     "json.lua",
+    "combat.lua",
+    "chat.lua",
     "raid.lua",
     "ipc.lua",
     "reload.lua",
@@ -58,7 +60,7 @@ object InstallationInteractor : Interactor() {
     if (!arConfigFile.exists() || arConfigFile.length() == 0L) return Log.error(TAG, "ArcheRage config file not found at expected location: ${arConfigFile.absolutePath}")
 
     // ok now we can do stuff with it
-    Log.info(TAG, "InstallationInteractor started successfully with path: $gameDirectory")
+    //Log.info(TAG, "InstallationInteractor started successfully with path: $gameDirectory")
 
     // Make a folder for addons if it doesn't exist (just in case the person has an older install of the game or something)
     // will do nothing if it already exists
@@ -93,6 +95,7 @@ object InstallationInteractor : Interactor() {
     val installedHashes = computeInstalledAddonHashes(arAddonsPath.resolve(RF_ADDON_DIRECTORY).toString())
     for ((file, hash) in installedHashes) {
       val isValid = knownGoodHashes[file]?.let { it == hash } ?: false
+      if (isValid) continue // skip logging valid files
       val isMissing = knownGoodHashes[file] == null
       if (isMissing) {
         Log.debug(TAG, "Hash for Addon file: $file (missing) -> ????")

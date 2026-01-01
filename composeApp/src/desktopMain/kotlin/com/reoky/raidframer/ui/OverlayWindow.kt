@@ -89,12 +89,23 @@ fun OverlayWindow(
     composeWindow.addMouseListener(mouseListener)
     composeWindow.addMouseMotionListener(mouseListener)
 
-    Box(
-      modifier = Modifier
-        .background(Color(0f, 0f, 0f, 0.43f))
-        .fillMaxSize()
-    ) {
-      windowContent(composeWindow)
+    if (windowType == OverlayWindowType.TOOLTIP) {
+      Box(
+        modifier = Modifier
+          .background(Color(0f, 0f, 0f, 0.43f))
+          .fillMaxSize()
+          .background(Color.Black.copy(alpha = 0.60f))
+      ) {
+        windowContent(composeWindow)
+      }
+    } else {
+      Box(
+        modifier = Modifier
+          .background(Color(0f, 0f, 0f, 0.43f))
+          .fillMaxSize()
+      ) {
+        windowContent(composeWindow)
+      }
     }
   }
 }
