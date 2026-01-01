@@ -147,7 +147,6 @@ object CompanionInteractor : Interactor() {
         }
         MessageType.PLAYER_BUFF,
         MessageType.PLAYER_DEBUFF -> {
-          Log.debug(TAG, "Received PLAYER_BUFF: $payload")
           message.payload?.let { jsonElement ->
             handleBuffEvent(jsonElement, message.timestamp) { event ->
               PlayerCacheInteractor.postEvent(event)

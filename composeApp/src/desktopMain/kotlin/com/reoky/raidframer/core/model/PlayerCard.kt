@@ -26,14 +26,20 @@ data class PlayerCard (
 
   // held in memory only for each player, this prevents having singular exhaustive lists of events like before
   // are cleared between sessions and not persisted to the database
-  val recentCastSuccessfulCastEvent: List<SuccessfulCastEvent> = listOf(),
+  val recentCastSuccessfulCastEvents: List<SuccessfulCastEvent> = listOf(),
   val recentCastEvents: List<CastingEvent> = listOf(),
   val recentDamageEvents: List<DamageEvent> = listOf(),
   val recentHealEvents: List<HealEvent> = listOf(),
   val recentBuffGainedEvents: List<BuffGainedEvent> = listOf(),
-  val recentBuffEndedEvent: List<BuffEndedEvent> = listOf(),
-  val recentDebuffGainedEvent: List<DebuffGainedEvent> = listOf(),
-  val recentDebuffEndedEvent: List<DebuffEndedEvent> = listOf(),
+  val recentBuffEndedEvents: List<BuffEndedEvent> = listOf(),
+  val recentDebuffGainedEvents: List<DebuffGainedEvent> = listOf(),
+  val recentDebuffEndedEvents: List<DebuffEndedEvent> = listOf(),
+
+  // cost more memory but useful for quick access and uses less CPU than scanning all events on all cards
+  // this solution is similar to what facebook did before switching to graph databases; effectively storing some data twice by stashing it all in memcached
+  // don't look at me aaaaaaaaaa
+  val recentBuffAppliedEvents: List<BuffAppliedEvent> = listOf(),
+  val recentDebuffAppliedEvents: List<DebuffAppliedEvent> = listOf(),
 
   // session counter totals : when a new session starts, these reset to 0 and the totals are written to the database cache
   val sessionDamageTotal: Long = 0L,

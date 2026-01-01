@@ -8,7 +8,7 @@
     <string name="mini_graph_metric_dps">DPS</string>
     <string name="mini_graph_metric_heals">Heals</string>
     <string name="mini_graph_metric_cc">CC</string>
-    <string name="mini_graph_graph_subtitle">5-Minute</string>
+    <string name="mini_graph_graph_subtitle">1-Minute</string>
     <string name="mini_graph_player_metric_format">%1$s's %2$s</string>
 
     <!-- Companion Addon Settings Strings -->

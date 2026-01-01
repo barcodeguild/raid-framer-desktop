@@ -2,7 +2,6 @@ package com.reoky.raidframer.core.model
 
 import com.reoky.raidframer.core.database.isPlayerNameOnWhitelist
 import com.reoky.raidframer.core.definitions.findSkillByName
-import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 
@@ -16,7 +15,7 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
   if (this.name.contains(" ")) return false // only NPCs can have spaces in their names, auto-non-player
   if (this.name in listOf("Unknown Target", "Fren", "Meina", "Glenn", "Charybdis")) return false // we might want a blacklist feature in the future where people can add their own NPC names
   if (this.name.isPlayerNameOnWhitelist()) return true // name is on the whitelist, auto-upgrade
-  this.recentDebuffGainedEvent.takeLast(100).let {
+  this.recentDebuffGainedEvents.takeLast(100).let {
     return it.map { event -> event.debuff }.contains("Preparing Glider") // NPCs can't open their gliders
   }
 }
@@ -66,17 +65,11 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
  * Add a successful cast event to the PlayerCard, updating recent events.
  */
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
-  val isCC = findSkillByName(event.spell)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(
-      lastSeen = event.timestamp,
-      lifetimeTotalCCDelivered = if (isCC) (cache.lifetimeTotalCCDelivered + 1) else cache.lifetimeTotalCCDelivered
-    ),
-    sessionCCTotal = if (isCC) this.sessionCCTotal + 1 else this.sessionCCTotal,
-    recentCastSuccessfulCastEvent = (this.recentCastSuccessfulCastEvent + event) // optional to takeLast(n)
+    cache = cache?.copy(lastSeen = event.timestamp),
+    recentCastSuccessfulCastEvents = (this.recentCastSuccessfulCastEvents + event) // optional to takeLast(n)
   )
-
 }
 
 /**
@@ -97,7 +90,7 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
-    recentBuffEndedEvent = (this.recentBuffEndedEvent + event) // optional to takeLast(n)
+    recentBuffEndedEvents = (this.recentBuffEndedEvents + event) // optional to takeLast(n)
   )
 }
 
@@ -108,7 +101,7 @@ fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
-    recentDebuffGainedEvent = (this.recentDebuffGainedEvent + event), // optional to takeLast(n)
+    recentDebuffGainedEvents = (this.recentDebuffGainedEvents + event), // optional to takeLast(n)
   )
 }
 
@@ -119,7 +112,34 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
-    recentDebuffEndedEvent = (this.recentDebuffEndedEvent + event), // optional to takeLast(n)
+    recentDebuffEndedEvents = (this.recentDebuffEndedEvents + event), // optional to takeLast(n)
+  )
+}
+
+/*
+ * Essentially we maintain the reverse relationship on each PlayerCard (but only for applied debuffs/buffs)
+ * so that we can track who applied what debuff to whom, and how many times, etc. This costs more memory but
+ * makes analysis way easier later on, and uses less CPU to compute. (See: Graph Databases vs Relational Databases heh)
+ */
+fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
+  val isCC = findSkillByName(event.debuff)?.consideredCC == true
+  return this.copy(
+    lastEvent = event.timestamp,
+    cache = cache?.copy(
+      lastSeen = event.timestamp,
+      lifetimeTotalCCDelivered = if (isCC) cache.lifetimeTotalCCDelivered + 1 else cache.lifetimeTotalCCDelivered
+    ),
+    recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event), // optional to takeLast(n)
+    sessionDebuffTotal = this.sessionDebuffTotal + 1,
+    sessionCCTotal = if (isCC) this.sessionCCTotal + 1 else this.sessionCCTotal,
+  )
+}
+
+fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
+  return this.copy(
+    lastEvent = event.timestamp,
+    cache = cache?.copy(lastSeen = event.timestamp),
+    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event) // optional to takeLast(n)
   )
 }
 

@@ -46,7 +46,7 @@ import raid_framer_desktop.composeapp.generated.resources.mini_graph_no_recent_d
 import raid_framer_desktop.composeapp.generated.resources.mini_graph_player_metric_format
 import kotlin.math.max
 
-private const val BUCKET_COUNT = 300
+private const val BUCKET_COUNT = 60
 private const val BUCKET_MILLIS = 1000L
 
 enum class MiniGraphMode {
@@ -101,7 +101,7 @@ fun PlayerMetricMiniLineGraphComponent(
       val events: Iterable<*>? = when (selectedMode) {
         MiniGraphMode.DMG -> card?.recentDamageEvents
         MiniGraphMode.HEALS -> card?.recentHealEvents
-        MiniGraphMode.CC -> card?.recentCastSuccessfulCastEvent
+        MiniGraphMode.CC -> card?.recentDebuffAppliedEvents
       }
 
       events?.forEach { raw ->

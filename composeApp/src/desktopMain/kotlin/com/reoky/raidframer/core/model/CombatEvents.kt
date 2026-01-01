@@ -61,3 +61,17 @@ data class DebuffEndedEvent(
   val target: String,
   val debuff: String,
 ) : CombatEvent
+
+data class DebuffAppliedEvent(
+  override val timestamp: Long,
+  val source: String? = null,
+  val target: String,
+  val debuff: String,
+) : CombatEvent
+
+data class BuffAppliedEvent(
+  override val timestamp: Long,
+  val source: String? = null,
+  val target: String,
+  val buff: String,
+) : CombatEvent

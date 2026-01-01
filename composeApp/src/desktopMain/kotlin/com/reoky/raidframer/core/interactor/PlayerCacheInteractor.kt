@@ -6,16 +6,14 @@ import com.reoky.raidframer.core.calc.MetricRawSample
 import com.reoky.raidframer.core.calc.RealtimeComputer
 import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.database.RFDao
-import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
-import com.reoky.raidframer.core.definitions.buildSkillTreeLastUsedMap
 import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
-import com.reoky.raidframer.core.helpers.sha256
 import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CastingEvent
 import com.reoky.raidframer.core.model.CombatEvent
 import com.reoky.raidframer.core.model.DamageEvent
+import com.reoky.raidframer.core.model.DebuffAppliedEvent
 import com.reoky.raidframer.core.model.DebuffEndedEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
@@ -25,6 +23,7 @@ import com.reoky.raidframer.core.model.postBuffEndedEvent
 import com.reoky.raidframer.core.model.postBuffGainedEvent
 import com.reoky.raidframer.core.model.postCastingEvent
 import com.reoky.raidframer.core.model.postDamageEvent
+import com.reoky.raidframer.core.model.postDebuffAppliedEvent
 import com.reoky.raidframer.core.model.postDebuffEndedEvent
 import com.reoky.raidframer.core.model.postDebuffGainedEvent
 import com.reoky.raidframer.core.model.postHealEvent
@@ -40,8 +39,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.compareTo
-import kotlin.text.set
 
 /**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
@@ -158,14 +155,14 @@ object PlayerCacheInteractor : Interactor() {
   fun resetAllSessions() {
     _cards.forEach { (name, card) ->
       val resetCard = card.copy(
-        recentCastSuccessfulCastEvent = listOf(),
+        recentCastSuccessfulCastEvents = listOf(),
         recentCastEvents = listOf(),
         recentDamageEvents = listOf(),
         recentHealEvents = listOf(),
         recentBuffGainedEvents = listOf(),
-        recentBuffEndedEvent = listOf(),
-        recentDebuffGainedEvent = listOf(),
-        recentDebuffEndedEvent = listOf(),
+        recentBuffEndedEvents = listOf(),
+        recentDebuffGainedEvents = listOf(),
+        recentDebuffEndedEvents = listOf(),
         sessionDamageTotal = 0L,
         sessionHealTotal = 0L,
         sessionCCTotal = 0,
@@ -260,6 +257,19 @@ object PlayerCacheInteractor : Interactor() {
     createCardIfNoneExists(event.target)
     _cards[event.target]?.let { card ->
       _cards[event.target] = card.postDebuffGainedEvent(event)
+    }
+
+    // give credit to the source
+    event.source?.let { source ->
+      createCardIfNoneExists(source)
+      _cards[source]?.let { card ->
+        _cards[source] = card.postDebuffAppliedEvent(DebuffAppliedEvent(
+          timestamp = event.timestamp,
+          source = event.source,
+          target = event.target,
+          debuff = event.debuff
+        ))
+      }
     }
   }
 
