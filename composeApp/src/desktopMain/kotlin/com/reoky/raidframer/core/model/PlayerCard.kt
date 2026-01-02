@@ -46,4 +46,10 @@ data class PlayerCard (
   val sessionHealTotal: Long = 0L,
   val sessionCCTotal: Int = 0, // only crowd control effects (Snare, Stun, Silence, Trip, etc)
   val sessionDebuffTotal: Int = 0, // all debuffs
+  val sessionCharmTotal: Int = 0,
+  val sessionDistressTotal: Int = 0,
+  val sessionSilenceTotal: Int = 0,
+  val sessionGliderTotal: Int = 0,
+  val sessionUtilityTotal: Int = 0,
+  val sessionPotionTotal: Int = 0,
 )

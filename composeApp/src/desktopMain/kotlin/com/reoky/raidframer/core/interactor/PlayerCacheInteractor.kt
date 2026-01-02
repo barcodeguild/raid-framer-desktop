@@ -293,4 +293,11 @@ object PlayerCacheInteractor : Interactor() {
     .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionCCTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+  var topDebuff: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
+    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionDebuffTotal }.take(100) }
+    .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  var topCharmers: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
+    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionCharmTotal }.take(100) }
+    .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 }

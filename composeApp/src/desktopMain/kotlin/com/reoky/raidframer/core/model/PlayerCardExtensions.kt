@@ -1,7 +1,9 @@
 package com.reoky.raidframer.core.model
 
 import com.reoky.raidframer.core.database.isPlayerNameOnWhitelist
+import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.definitions.findSkillByName
+import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 
@@ -122,7 +124,8 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
  * makes analysis way easier later on, and uses less CPU to compute. (See: Graph Databases vs Relational Databases heh)
  */
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
-  val isCC = findSkillByName(event.debuff)?.consideredCC == true
+  val isCC = findDebuffByName(event.debuff)?.consideredCC == true
+  Log.info("PlayerCardExtensions", "${event.source} applied ${event.debuff} to ${event.target}: (isCC=$isCC)")
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
