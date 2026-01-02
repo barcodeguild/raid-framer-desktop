@@ -47,5 +47,11 @@ data class DebuffsDefinition(
     Debuff(name = "Wraith's Curse", consideredCC = true), // Similar to slow but also reduces attack speed and cast time.
     Debuff(name = "Crippling Mire", consideredCC = true), // Reduces movement speed significantly.
     Debuff(name = "Earthen Grip", consideredCC = true), // prevents movement and turning
+    Debuff(name = "Dragonfire", consideredCC = true), // BD glider trips people
+    Debuff(name = "Freezing", consideredCC = true), // crystal wings freeze slows movement
+    Debuff(name = "Sonic Wave", consideredCC = true), // prevents targeting
+    Debuff(name = "Focal Concussion", consideredCC = true), // it's a sleep, but the buff isn't the sleep debuff
+    Debuff(name = "Quake Dahuta's Breath", consideredCC = true), // pushes
+    Debuff(name = "Dahuta's Breath", consideredCC = true), // pushes / pulls enough to pull someone off the castle walls, so that's pvp I guess
   )
 ) : DebuffsDefinitions()

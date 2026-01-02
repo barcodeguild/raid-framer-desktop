@@ -49,7 +49,7 @@ function RF.Parser.ParseCombatEvent(t)
     evt.result  = t[9] -- HIT
   end
 
-  evt.timestamp  = os.time(os.date("!*t"))
+  evt.timestamp  = os.time()
 
   return evt
 end

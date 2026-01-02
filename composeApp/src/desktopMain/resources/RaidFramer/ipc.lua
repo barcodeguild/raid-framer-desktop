@@ -39,7 +39,7 @@ RF.IPC.MESSAGE_TYPES = {
 function RF.IPC.interact()
 
   -- GUARD: Should we write right now? (rate limit)
-  local now = os.time(os.date("!*t"))
+  local now = os.time()
   if now - RF.IPC.LAST_INTERACT_TIME < RF.IPC.BATCH_COOLDOWN then
     return
   end
@@ -128,7 +128,7 @@ function RF.IPC.BuildIPCMessage(msgType, payload)
   return {
     version = RF.IPC.MESSAGE_VERSION,
     type = msgType,
-    timestamp = os.time(os.date("!*t")),
+    timestamp = os.time(),
     payload = payload or {}
   }
 end

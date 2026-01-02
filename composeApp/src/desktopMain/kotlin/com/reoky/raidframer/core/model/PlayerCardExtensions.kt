@@ -56,6 +56,9 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
  * Add a casting event to the PlayerCard, updating recent events.
  */
 fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
+
+  Log.info("PlayerCardExt", "CastingEvent: ${event.timestamp}")
+
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
@@ -125,7 +128,9 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
  */
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
-  Log.info("PlayerCardExtensions", "${event.source} applied ${event.debuff} to ${event.target}: (isCC=$isCC)")
+  Log.info("PlayerCardExt", "DebuffAppliedEvent: ${event.timestamp}")
+  Log.info("PlayerCardExt", "Current Time is: ${System.currentTimeMillis()}")
+
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(

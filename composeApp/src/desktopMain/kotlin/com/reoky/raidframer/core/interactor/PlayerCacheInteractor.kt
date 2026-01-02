@@ -300,4 +300,16 @@ object PlayerCacheInteractor : Interactor() {
   var topCharmers: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
     .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionCharmTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
+    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionGliderTotal }.take(100) }
+    .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  var topPotters: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
+    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionPotionTotal }.take(100) }
+    .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  var topItemSkillCasters : StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
+    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionItemSkillTotal }.take(100) }
+    .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 }

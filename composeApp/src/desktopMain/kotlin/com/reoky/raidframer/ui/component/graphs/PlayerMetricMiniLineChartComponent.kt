@@ -17,7 +17,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.unit.dp
+import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.model.CombatEvent
+import com.reoky.raidframer.core.model.DamageEvent
+import com.reoky.raidframer.core.model.DebuffAppliedEvent
+import com.reoky.raidframer.core.model.HealEvent
 // Assumed package for generated resources
 // import com.reoky.raidframer.generated.resources.Res
 // import com.reoky.raidframer.generated.resources.*
@@ -44,7 +49,12 @@ import raid_framer_desktop.composeapp.generated.resources.mini_graph_mode_dmg
 import raid_framer_desktop.composeapp.generated.resources.mini_graph_mode_heals
 import raid_framer_desktop.composeapp.generated.resources.mini_graph_no_recent_data
 import raid_framer_desktop.composeapp.generated.resources.mini_graph_player_metric_format
+import kotlin.collections.get
+import kotlin.collections.plusAssign
+import kotlin.div
 import kotlin.math.max
+import kotlin.text.compareTo
+import kotlin.text.toInt
 
 private const val BUCKET_COUNT = 60
 private const val BUCKET_MILLIS = 1000L
@@ -65,27 +75,6 @@ fun PlayerMetricMiniLineGraphComponent(
   var baseSec by remember { mutableStateOf((System.currentTimeMillis() / 1000L) - (BUCKET_COUNT - 1)) }
   var buckets by remember { mutableStateOf(LongArray(BUCKET_COUNT) { 0L }) }
 
-  // helper: try to read numeric property via getter or field
-  fun readNumericFieldAny(obj: Any, names: Array<String>): Long? {
-    for (n in names) {
-      try {
-        // try getter first
-        val getterName = "get" + n.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-        obj::class.java.methods.firstOrNull { it.name.equals(getterName, ignoreCase = true) || it.name.equals(n, ignoreCase = true) }?.let { m ->
-          val res = m.invoke(obj) ?: return@let
-          if (res is Number) return res.toLong()
-        }
-      } catch (_: Exception) { /* ignore */ }
-
-      try {
-        val f = obj::class.java.getDeclaredField(n)
-        f.isAccessible = true
-        val res = f.get(obj)
-        if (res is Number) return res.toLong()
-      } catch (_: Exception) { /* ignore */ }
-    }
-    return null
-  }
 
   // update every second and switch event source based on selectedMode
   LaunchedEffect(playerName, selectedMode) {
@@ -98,26 +87,53 @@ fun PlayerMetricMiniLineGraphComponent(
       val card = PlayerCacheInteractor.getCard(playerName)
       val windowStartMillis = newBase * 1000L
 
-      val events: Iterable<*>? = when (selectedMode) {
+      val events: List<CombatEvent>? = when (selectedMode) {
         MiniGraphMode.DMG -> card?.recentDamageEvents
         MiniGraphMode.HEALS -> card?.recentHealEvents
         MiniGraphMode.CC -> card?.recentDebuffAppliedEvents
       }
 
-      events?.forEach { raw ->
-        val e = raw ?: return@forEach
-        // attempt to read timestamp
-        val ts = readNumericFieldAny(e, arrayOf("timestamp", "time", "ts")) ?: return@forEach
-        if (ts >= windowStartMillis) {
-          val sec = ts / 1000L
-          val idx = (sec - newBase).toInt()
-          if (idx in 0 until BUCKET_COUNT) {
-            val value: Long = when (selectedMode) {
-              MiniGraphMode.DMG -> readNumericFieldAny(e, arrayOf("damage", "amount", "value")) ?: 0L
-              MiniGraphMode.HEALS -> readNumericFieldAny(e, arrayOf("heal", "healing", "amount", "value")) ?: 0L
-              MiniGraphMode.CC -> readNumericFieldAny(e, arrayOf("stacks", "count", "amount", "value")) ?: 1L
+      Log.info("MiniGraph", "Recalculating mini-graph for $playerName mode=$selectedMode events=${events?.size ?: 0}")
+
+      events?.forEach { combatEvent ->
+        when (selectedMode) {
+          MiniGraphMode.DMG -> {
+            val e = combatEvent as? DamageEvent ?: return@forEach
+            if (e.timestamp >= windowStartMillis) {
+              val sec = e.timestamp / 1000L
+              val idx = (sec - newBase).toInt()
+              if (idx in 0 until BUCKET_COUNT) {
+                // replace property names with the actual ones on your DamageEvent
+                val value: Long = e.damage.toLong()
+                newBuckets[idx] += value
+              }
             }
-            newBuckets[idx] = newBuckets[idx] + value
+          }
+
+          MiniGraphMode.HEALS -> {
+            val e = combatEvent as? HealEvent ?: return@forEach
+            if (e.timestamp >= windowStartMillis) {
+              val sec = e.timestamp / 1000L
+              val idx = (sec - newBase).toInt()
+              if (idx in 0 until BUCKET_COUNT) {
+                // replace property names with the actual ones on your HealEvent
+                val value: Long = e.amount.toLong()
+                newBuckets[idx] += value
+              }
+            }
+          }
+
+          MiniGraphMode.CC -> {
+            val e = combatEvent as? DebuffAppliedEvent ?: return@forEach
+            if (e.timestamp >= windowStartMillis) {
+              val sec = e.timestamp / 1000L
+              val idx = (sec - newBase).toInt()
+              if (idx in 0 until BUCKET_COUNT) {
+                // replace property names with the actual ones on your DebuffAppliedEvent
+                val value: Long = 1L // count each application as 1
+                newBuckets[idx] += value
+              }
+            }
           }
         }
       }

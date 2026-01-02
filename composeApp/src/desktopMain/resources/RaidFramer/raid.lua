@@ -44,7 +44,7 @@ function RF.Raid.NewRaidMember(slot)
     characterBuild = "",         -- string
     lastZone = "",               -- string
     distance = -1,               -- meters, -1 = unknown
-    lastUpdated = os.time(os.date("!*t")), -- used to track staleness of data at the higher layers
+    lastUpdated = os.time(), -- used to track staleness of data at the higher layers
   }
 end
 
@@ -76,7 +76,7 @@ function RF.Raid.UpdateRaidSlot(slot, data)
   end
 
   -- important to note that this is UTC time, we don't expose local time here
-  member.lastUpdated = os.time(os.date("!*t"))  -- "!*t" returns a table in UTC
+  member.lastUpdated = os.time()  -- "!*t" returns a table in UTC
 end
 
 -- handler for when we detect changes to the raid roster

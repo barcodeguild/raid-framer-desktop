@@ -14,10 +14,10 @@ end
 
 -- duel event handlers - notify desktop app (we may treat combat events during duels differently later)
 function RF.Combat.handleDuelStarted()
-  RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_STARTED, os.time(os.date("!*t")))
+  RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_STARTED, os.time())
 end
 function RF.Combat.handleDuelEnded(...)
-  RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_ENDED, os.time(os.date("!*t")))
+  RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_ENDED, os.time())
 end
 
 -- main combat event handler
