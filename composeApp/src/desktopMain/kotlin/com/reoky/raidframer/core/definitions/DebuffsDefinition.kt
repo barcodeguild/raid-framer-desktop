@@ -32,6 +32,7 @@ data class DebuffsDefinition(
     Debuff(name = "Impaled", consideredCC = true), // can't move
     Debuff(name = "Flame Hell Spear", consideredCC = true), // same as impaled
     Debuff(name = "Frozen", consideredCC = true), // can't move can't cast
+    Debuff(name = "Freeze", consideredCC = true), // can't move can't cast (tracks)
     Debuff(name = "Petrification", consideredCC = true), // can't move or cast
     Debuff(name = "Knockdown", consideredCC = true), // can't move or cast
     Debuff(name = "Sleep", consideredCC = true), // can't move or cast
@@ -41,7 +42,6 @@ data class DebuffsDefinition(
     Debuff(name = "Snare", consideredCC = true), // target can't move
     Debuff(name = "Banshee Wail", consideredCC = true), // feared (the spell also applies slow)
     Debuff(name = "Concussion", consideredCC = true), // prevents target from standing
-    Debuff(name = "Snare", consideredCC = true), // target can't move
     Debuff(name = "Shackle", consideredCC = true), // Melee and range skills are restrained for 2 sec.
     Debuff(name = "Overpowered", consideredCC = true), // Prevents movement and periodically deals Melee Damage.
     Debuff(name = "Wraith's Curse", consideredCC = true), // Similar to slow but also reduces attack speed and cast time.
@@ -54,5 +54,7 @@ data class DebuffsDefinition(
     Debuff(name = "Quake Dahuta's Breath", consideredCC = true), // pushes
     Debuff(name = "Dahuta's Breath", consideredCC = true), // pushes / pulls enough to pull someone off the castle walls, so that's pvp I guess
     Debuff(name = "Staggered", consideredCC = true), // player can't move or cast for a short time
+    Debuff(name = "Disables Right-Hand weapon", consideredCC = true), // Ring toss
+    Debuff(name = "Disable Left-Hand weapon", consideredCC = true), // shield strip
   )
 ) : DebuffsDefinitions()
