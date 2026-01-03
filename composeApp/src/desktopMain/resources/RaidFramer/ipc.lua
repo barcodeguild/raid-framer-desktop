@@ -38,14 +38,8 @@ RF.IPC.MESSAGE_TYPES = {
 -- and it's meant to smooth out writes over time instead of spamming writes in the combat event handler
 function RF.IPC.interact()
 
-  local now = os.time()
-
-  -- GUARD: Only write on odd seconds to reduce contention with desktop (that only reads on even seconds)
-  if now % 2 == 0 then
-    return
-  end
-
   -- GUARD: Should we write right now? (rate limit)
+  local now = os.time()
   if now - RF.IPC.LAST_INTERACT_TIME < RF.IPC.BATCH_COOLDOWN then
     return
   end
