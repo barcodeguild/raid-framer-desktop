@@ -223,7 +223,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 70f,
       lastWidthDp = 560f,
       lastHeightDp = 800f,
-      isVisible = true
+      isVisible = false
     )
 
     OverlayType.COMPANION -> WindowStateEntity(
@@ -238,7 +238,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
 
     OverlayType.RAID -> WindowStateEntity(
       overlayType = type.name,
-      windowType = OverlayWindowType.OVERLAY,
+      windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 200f,
       lastPositionYDp = 200f,
       lastWidthDp = 600f,
@@ -253,7 +253,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 50f,
       lastWidthDp = 380f,
       lastHeightDp = 160f,
-      isVisible = true
+      isVisible = false
     )
 
     OverlayType.TRACKER -> WindowStateEntity(

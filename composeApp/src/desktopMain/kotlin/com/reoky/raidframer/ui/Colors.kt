@@ -6,12 +6,13 @@ import androidx.compose.ui.graphics.Color
  * For portraying raid frames designed to match the look and feel of the game.
  */
 object RaidColors {
-  val Green = Color(0xFF89A15B)
-  val Pink = Color(0xFFD091D5) // Lime Green
-  val Red = Color(0xFFFF4500) // Orange Red
-  val Purple = Color(0xFFFFFFF)
-  val Blue = Color(0xFF43AACC)
-  val FrameBorder = Color(0xFF444444)
+  val Green = Color(0xFF91A660)
+  val Pink = Color(0xFFD493D3)
+  val Red = Color(0xFFA54851)
+  val Purple = Color(0xFF8369CD)
+  val Blue = Color(0xFF4F93C0)
+  val FrameBorder = Color(0xFF3E3E3E)
+  val ManaBarBlue = Color(0xFF204ABF)
 }
 
 /*

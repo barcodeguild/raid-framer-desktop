@@ -2,7 +2,7 @@ package com.reoky.raidframer.core.interactor
 
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.model.ARBuffEvent
-import com.reoky.raidframer.core.model.ARRaidFrames
+import com.reoky.raidframer.core.model.ARRaidFrame
 import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CombatEvent
@@ -224,7 +224,7 @@ object CompanionInteractor : Interactor() {
   /*
    * Builds a data structure to hold raid frames from the JSON payload and then calls the lamba to dispatch the event.
    */
-  private fun handleFrameEvent(jsonElement: JsonElement, messageTimestamp: Long, dispatch: (List<ARRaidFrames>) -> Unit) {
+  private fun handleFrameEvent(jsonElement: JsonElement, messageTimestamp: Long, dispatch: (List<ARRaidFrame>) -> Unit) {
     val json = Json { ignoreUnknownKeys = true }
 
     try {
@@ -242,7 +242,7 @@ object CompanionInteractor : Interactor() {
         listOf(actualElement)
       }
 
-      val frames = mutableListOf<ARRaidFrames>()
+      val frames = mutableListOf<ARRaidFrame>()
 
       fun parseInt(e: JsonElement?, default: Int): Int {
         if (e == null) return default
@@ -287,7 +287,7 @@ object CompanionInteractor : Interactor() {
             continue
           }
 
-          frames += ARRaidFrames(
+          frames += ARRaidFrame(
             slot = slot,
             playerName = playerName,
             gearScore = gearScore,

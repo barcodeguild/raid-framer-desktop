@@ -19,8 +19,10 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Party
 import com.reoky.raidframer.core.model.RaidMember
+import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.RaidColors
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.TitleBarComponent
 
 @Preview
 @Composable
@@ -41,36 +43,50 @@ fun RaidOverlay(wm: WindowManager? = null) {
   // Take up to 10 parties and split into two rows of up to 5 each
   val partyRows = raid.value.take(10).chunked(5)
 
-  Column(
-    modifier = Modifier.fillMaxSize(),
-    verticalArrangement = Arrangement.spacedBy(12.dp)
+  Box(
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(4.dp)
   ) {
-    // Ensure exactly two rows (top and bottom)
-    for (rowIndex in 0 until 2) {
-      val rowParties = partyRows.getOrNull(rowIndex) ?: emptyList()
 
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-      ) {
-        // Render exactly 5 slots per row. Use weight so columns size evenly.
-        for (col in 0 until 5) {
-          val party = rowParties.getOrNull(col)
-          if (party != null) {
-            Column(
-              modifier = Modifier
-                .width(72.dp)
-                .background(Color.DarkGray, RoundedCornerShape(8.dp))
-                .padding(bottom = 0.5.dp),
-              verticalArrangement = Arrangement.spacedBy(1.dp)
-            ) {
-              party.forEach { member ->
-                RaidMemberFrame(member)
+    Column(
+      modifier = Modifier.fillMaxSize().padding(1.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+      TitleBarComponent(
+        title = "Raid Overlay",
+        onClose = { wm?.closeWindow(OverlayType.RAID) }
+      )
+
+      Spacer(modifier = Modifier.height(8.dp))
+
+      // Ensure exactly two rows (top and bottom)
+      for (rowIndex in 0 until 2) {
+        val rowParties = partyRows.getOrNull(rowIndex) ?: emptyList()
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+          for (col in 0 until 5) {
+            val party = rowParties.getOrNull(col)
+            if (party != null) {
+              Column(
+                modifier = Modifier
+                  .width(66.dp)
+                  .background(Color.Green.copy(alpha = 0.25F), RoundedCornerShape(8.dp))
+                  .padding(bottom = 0.5.dp),
+                verticalArrangement = Arrangement.spacedBy(0.75.dp)
+              ) {
+                party.forEach { member ->
+                  RaidMemberFrame(member)
+                }
               }
+            } else {
+              // Empty slot to keep spacing and alignment consistent
+              Spacer(modifier = Modifier.weight(1f))
             }
-          } else {
-            // Empty slot to keep spacing and alignment consistent
-            Spacer(modifier = Modifier.weight(1f))
           }
         }
       }
@@ -88,18 +104,32 @@ fun RaidMemberFrame(member: RaidMember) {
     4 -> RaidColors.Purple
     else -> RaidColors.FrameBorder
   }
-  Box(
-    modifier = Modifier
-      .size(width = 72.dp, height = 28.dp)
-      .background(roleColor, RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 6.dp, bottomEnd = 6.dp))
-  ) {
-    Text(
-      text = member.name,
-      color = Color.LightGray,
-      fontSize = 12.sp,
-      fontWeight = FontWeight.Normal,
-      maxLines = 1, // prevent overflow
-      overflow = TextOverflow.Ellipsis
+  val frameShape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
+
+  Box(modifier = Modifier.width(66.dp)) {
+    // Mana Bar (Background Layer)
+    Box(
+      modifier = Modifier
+        .padding(top = 20.75.dp) // Position to tuck under the frame's bottom corners
+        .size(width = 65.dp, height = 9.5.dp) // 6dp overlap + 3dp visible bar
+        .background(RaidColors.ManaBarBlue, RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
     )
+
+    // Nameplate Frame (Foreground Layer)
+    Surface(
+      modifier = Modifier.size(width = 66.dp, height = 26.dp),
+      shape = frameShape,
+      color = roleColor,
+      elevation = 4.dp // Casts shadow onto the mana bar below
+    ) {
+      Text(
+        text = member.name,
+        color = Color.LightGray,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Normal,
+        maxLines = 1, // prevent overflow
+        overflow = TextOverflow.Ellipsis
+      )
+    }
   }
 }
