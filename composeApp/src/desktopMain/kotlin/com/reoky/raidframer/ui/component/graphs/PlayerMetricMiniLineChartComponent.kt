@@ -93,8 +93,6 @@ fun PlayerMetricMiniLineGraphComponent(
         MiniGraphMode.CC -> card?.recentDebuffAppliedEvents
       }
 
-      Log.info("MiniGraph", "Recalculating mini-graph for $playerName mode=$selectedMode events=${events?.size ?: 0}")
-
       events?.forEach { combatEvent ->
         when (selectedMode) {
           MiniGraphMode.DMG -> {

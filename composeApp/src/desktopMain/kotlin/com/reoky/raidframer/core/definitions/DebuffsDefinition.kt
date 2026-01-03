@@ -53,5 +53,6 @@ data class DebuffsDefinition(
     Debuff(name = "Focal Concussion", consideredCC = true), // it's a sleep, but the buff isn't the sleep debuff
     Debuff(name = "Quake Dahuta's Breath", consideredCC = true), // pushes
     Debuff(name = "Dahuta's Breath", consideredCC = true), // pushes / pulls enough to pull someone off the castle walls, so that's pvp I guess
+    Debuff(name = "Staggered", consideredCC = true), // player can't move or cast for a short time
   )
 ) : DebuffsDefinitions()

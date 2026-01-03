@@ -128,8 +128,6 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
  */
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
-  Log.info("PlayerCardExt", "DebuffAppliedEvent: ${event.timestamp}")
-  Log.info("PlayerCardExt", "Current Time is: ${System.currentTimeMillis()}")
 
   return this.copy(
     lastEvent = event.timestamp,
