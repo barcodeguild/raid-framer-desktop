@@ -17,7 +17,9 @@ import com.reoky.raidframer.core.model.DebuffAppliedEvent
 import com.reoky.raidframer.core.model.DebuffEndedEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
+import com.reoky.raidframer.core.model.Party
 import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.model.RaidMember
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
 import com.reoky.raidframer.core.model.postBuffEndedEvent
 import com.reoky.raidframer.core.model.postBuffGainedEvent
@@ -52,6 +54,7 @@ object PlayerCacheInteractor : Interactor() {
 
   // Mapping of all the players (and NPCs) sorted in no particular order
   val realtimeComputer = RealtimeComputer(windowBuckets = 60, bucketMillis = 10_000L)
+  private val _raids = mutableStateMapOf<Int, List<Party>>()
   private val _cards = mutableStateMapOf<String, PlayerCard>()
   private val _scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -127,6 +130,16 @@ object PlayerCacheInteractor : Interactor() {
       _cards[name]?.cache?.let {
         RFDao.playerCacheDao.insert(it)
       }
+    }
+  }
+
+  /*
+   * Builds parties of five from the ordered list of raid members and stores them under the raid ID.
+   */
+  fun updatePlayersForRaidById(raidId: Int, members: List<RaidMember>) {
+    _raids[raidId] = members.chunked(5).take(20)
+    members.forEach { member: RaidMember ->
+      createCardIfNoneExists(member.name)
     }
   }
 
@@ -312,4 +325,10 @@ object PlayerCacheInteractor : Interactor() {
   var topItemSkillCasters : StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
     .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionItemSkillTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  /* Raid Parties UI Subscriptions */
+  fun getRaidById(raidId: Int): StateFlow<List<Party>> {
+    return snapshotFlow { _raids[raidId] ?: listOf() }
+      .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
+  }
 }

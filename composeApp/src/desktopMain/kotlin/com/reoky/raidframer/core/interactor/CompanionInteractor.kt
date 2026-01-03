@@ -2,12 +2,14 @@ package com.reoky.raidframer.core.interactor
 
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.model.ARBuffEvent
+import com.reoky.raidframer.core.model.ARRaidFrames
 import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CombatEvent
 import com.reoky.raidframer.core.model.DebuffEndedEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.RaidMember
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,7 +26,6 @@ import java.nio.file.StandardOpenOption
 import kotlin.io.path.exists
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
-import kotlin.times
 
 object CompanionInteractor : Interactor() {
 
@@ -73,6 +74,10 @@ object CompanionInteractor : Interactor() {
 
   override suspend fun interact() {
     val gameDirectory = RFConfig.state.value.defaultArcheRageDirectory
+
+    // Only read on even seconds, the lua code only writes on odd seconds
+    val currentSecond = System.currentTimeMillis() / 1000
+    if (currentSecond % 2 != 0L) return
 
     // If config is not set, just return (poll again later)
     if (gameDirectory.isBlank()) return
@@ -133,8 +138,20 @@ object CompanionInteractor : Interactor() {
           Log.info(TAG, "Received TEST_PING from Addon.")
         }
         MessageType.FRAMES_UPDATE -> {
-          Log.debug(TAG, "Received FRAMES_UPDATE.")
-          // TODO: Dispatch update to UI or State
+          message.payload?.let { jsonElement ->
+            handleFrameEvent(jsonElement, message.timestamp) { frames ->
+              PlayerCacheInteractor.updatePlayersForRaidById(0, frames.take(50).map { RaidMember(
+                name = it.playerName,
+                health = 57000, // placeholder, we don't have health info here
+                role = 0
+              )})
+              PlayerCacheInteractor.updatePlayersForRaidById(1, frames.slice(51 .. 100).map { RaidMember(
+                name = it.playerName,
+                health = 57000, // placeholder, we don't have health info here
+                role = 0
+              )})
+            }
+          }
         }
         MessageType.CONFIG_UPDATE -> {
           Log.info(TAG, "Received CONFIG_UPDATE request. This is not meant to go in this direction aaaa.")
@@ -204,6 +221,94 @@ object CompanionInteractor : Interactor() {
     }
   }
 
+  /*
+   * Builds a data structure to hold raid frames from the JSON payload and then calls the lamba to dispatch the event.
+   */
+  private fun handleFrameEvent(jsonElement: JsonElement, messageTimestamp: Long, dispatch: (List<ARRaidFrames>) -> Unit) {
+    val json = Json { ignoreUnknownKeys = true }
+
+    try {
+      // If payload is a JSON string containing the real JSON, parse it first
+      val actualElement = if (jsonElement is JsonPrimitive && jsonElement.isString) {
+        json.parseToJsonElement(jsonElement.content)
+      } else {
+        jsonElement
+      }
+
+      // Normalize to a list of JsonElement (JsonArray implements List<JsonElement>)
+      val items: List<JsonElement> = if (actualElement is kotlinx.serialization.json.JsonArray) {
+        actualElement
+      } else {
+        listOf(actualElement)
+      }
+
+      val frames = mutableListOf<ARRaidFrames>()
+
+      fun parseInt(e: JsonElement?, default: Int): Int {
+        if (e == null) return default
+        val s = (e as? JsonPrimitive)?.content ?: return default
+        return s.toIntOrNull() ?: default
+      }
+
+      fun parseLong(e: JsonElement?, default: Long): Long {
+        if (e == null) return default
+        val s = (e as? JsonPrimitive)?.content ?: return default
+        return s.toLongOrNull() ?: default
+      }
+
+      fun parseString(e: JsonElement?, default: String = ""): String {
+        if (e == null) return default
+        val s = (e as? JsonPrimitive)?.content ?: return default
+        return s.trim().takeIf { it.isNotBlank() } ?: default
+      }
+
+      for (el in items) {
+        try {
+          val obj = when {
+            el is kotlinx.serialization.json.JsonObject -> el
+            el is JsonPrimitive && el.isString -> {
+              val parsed = json.parseToJsonElement(el.content)
+              if (parsed is kotlinx.serialization.json.JsonObject) parsed else continue
+            }
+            else -> continue
+          }
+
+          val slot = parseInt(obj["slot"], 0).coerceAtLeast(0)
+          val playerName = parseString(obj["playerName"], "")
+          val gearScore = parseInt(obj["gearScore"], 0).coerceAtLeast(0)
+          val characterBuild = parseString(obj["characterBuild"], "")
+          val lastZone = parseString(obj["lastZone"], "")
+          val distance = parseInt(obj["distance"], -1)
+          val lastUpdated = parseLong(obj["lastUpdated"], 0L).let { if (it != 0L) it else messageTimestamp }
+
+          // Require at least a playerName or slot to consider this a valid frame
+          if (playerName.isBlank() && slot == 0 && gearScore == 0) {
+            // skip obviously invalid / empty entries
+            continue
+          }
+
+          frames += ARRaidFrames(
+            slot = slot,
+            playerName = playerName,
+            gearScore = gearScore,
+            characterBuild = characterBuild,
+            lastZone = lastZone,
+            distance = distance,
+            lastUpdated = lastUpdated
+          )
+        } catch (inner: Throwable) {
+          Log.error(TAG, "Skipping malformed frame element: ${inner.message}")
+          continue
+        }
+      }
+
+      dispatch(frames)
+    } catch (t: Throwable) {
+      Log.error(TAG, "Failed to decode ARRaidFrames payload: ${t.message}")
+    }
+  }
+
+
   private fun handleBuffEvent(jsonElement: JsonElement, messageTimestamp: Long, dispatch: (CombatEvent) -> Unit) {
     val json = Json { ignoreUnknownKeys = true }
     try {
@@ -214,14 +319,14 @@ object CompanionInteractor : Interactor() {
         jsonElement
       }
 
-      val aura = json.decodeFromJsonElement(ARBuffEvent.serializer(), actualElement)
+      val event = json.decodeFromJsonElement(ARBuffEvent.serializer(), actualElement)
 
-      val eventType = aura.eventType?.trim()?.uppercase()
-      val auraType = aura.auraType?.trim()?.uppercase()
-      val name = aura.buffName?.takeIf { it.isNotBlank() }
-      val target = aura.target?.takeIf { it.isNotBlank() }
-      val source = aura.source?.takeIf { it.isNotBlank() }
-      val ts = if (aura.timestamp != 0L) aura.timestamp * 1000L else messageTimestamp
+      val eventType = event.eventType?.trim()?.uppercase()
+      val auraType = event.auraType?.trim()?.uppercase()
+      val name = event.buffName?.takeIf { it.isNotBlank() }
+      val target = event.target?.takeIf { it.isNotBlank() }
+      val source = event.source?.takeIf { it.isNotBlank() }
+      val ts = if (event.timestamp != 0L) event.timestamp * 1000L else messageTimestamp
 
       if (eventType == null) {
         println("ignore: missing eventType")

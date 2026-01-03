@@ -9,7 +9,7 @@ RF.IPC.CHANNEL_IN_FILE  = RF.IPC.BASE_DIR .. "ipc.rfin"
 RF.IPC.MESSAGE_VERSION = 1
 
 -- queue structure that holds future messages to be written to the ipc file
-RF.IPC.BATCH_SIZE = 100 -- trying 100 for now
+RF.IPC.BATCH_SIZE = 300 -- 300 events per every other second
 RF.IPC.BATCH_COOLDOWN = 1 -- seconds
 RF.IPC.LAST_INTERACT_TIME = 0
 
@@ -38,8 +38,14 @@ RF.IPC.MESSAGE_TYPES = {
 -- and it's meant to smooth out writes over time instead of spamming writes in the combat event handler
 function RF.IPC.interact()
 
-  -- GUARD: Should we write right now? (rate limit)
   local now = os.time()
+
+  -- GUARD: Only write on odd seconds to reduce contention with desktop (that only reads on even seconds)
+  if now % 2 == 0 then
+    return
+  end
+
+  -- GUARD: Should we write right now? (rate limit)
   if now - RF.IPC.LAST_INTERACT_TIME < RF.IPC.BATCH_COOLDOWN then
     return
   end

@@ -74,7 +74,7 @@ fun main(args: Array<String>) = application {
   PlayerCacheInteractor.start()
   GameMonitorInteractor.start()
   InstallationInteractor.start(delay = 3000L) // delay to allow user to set game path in settings if needed
-  CompanionInteractor.start()
+  CompanionInteractor.start(delay = 1000L) // delay to allow game monitor to start first
 
   // file path args processing
   val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }

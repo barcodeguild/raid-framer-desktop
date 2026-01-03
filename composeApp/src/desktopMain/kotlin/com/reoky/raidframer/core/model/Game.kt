@@ -2,9 +2,9 @@ package com.reoky.raidframer.core.model
 
 import kotlinx.serialization.Serializable
 
-data class RaidMember(val name: String, val health: Int, val role: String = "Healer")
+data class RaidMember(val name: String, val health: Int, val role: Int)
 
-typealias Party = Array<RaidMember>
+typealias Party = List<RaidMember>
 
 // the three factions as an enum with a string helper to restrive from string values that ignore case
 enum class Faction(val value: String) {
@@ -19,6 +19,22 @@ enum class Faction(val value: String) {
     }
   }
 }
+
+
+// raid framer buff event mode
+@Serializable
+data class ARRaidFrames(
+  val slot: Int = 0,
+  val playerName: String = "",
+  val gearScore: Int = 0,
+  val characterBuild: String = "",
+  val lastZone: String = "",
+  val distance: Int = -1,
+  val lastUpdated: Long = 0L
+)
+
+
+
 
 // this is what the lua addon sends when a buff event occurs
 // it's not perfectly compatible by we can pull the fields we need
