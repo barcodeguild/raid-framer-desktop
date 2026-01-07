@@ -17,9 +17,9 @@ import com.reoky.raidframer.core.model.DebuffAppliedEvent
 import com.reoky.raidframer.core.model.DebuffEndedEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
-import com.reoky.raidframer.core.model.Party
+import com.reoky.raidframer.core.serialization.Party
 import com.reoky.raidframer.core.model.PlayerCard
-import com.reoky.raidframer.core.model.RaidMember
+import com.reoky.raidframer.core.serialization.RaidMember
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
 import com.reoky.raidframer.core.model.postBuffEndedEvent
 import com.reoky.raidframer.core.model.postBuffGainedEvent

@@ -5,6 +5,8 @@ RF = RF or {} -- ensure global RF exists so this file can initialize RF.Raid
 RF.Raid = RF.Raid or {}
 
 RF.Raid.Roster = RF.Raid.Roster or {} -- somewhat ambiguous name but it is what it is
+RF.Raid.CountRaidOne = 0 -- number of players in raid one
+RF.Raid.CountRaidTwo = 0 -- number of players in raid two
 
 RF.Raid.recentlyJoined = false
 RF.Raid.isPrepared = false
@@ -113,8 +115,6 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
     RF:Log("Left raid, clearing co-raid status.")
     return
   end
-
-  RF:Log(string.format("[Raid] Team members changed: reason=%s", tostring(reason)))
   
   -- something must have changed: scan raid slots and update roster (scan both raids if co-raid)
   if not RF.Raid.hasCoRaid then
@@ -174,6 +174,7 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
     end
   end
 
+  -- helper to format player counts nicely
   local function fmtPlayers(n)
     if n == 0 then return "no players" end
     if n == 1 then return "1 player" end
@@ -181,10 +182,17 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
   end
 
   if countRaidTwo > 0 then
-    RF:Log(string.format("Currently there are %s in raid one, and %s in raid two.", fmtPlayers(countRaidOne), fmtPlayers(countRaidTwo)))
+    if (countRaidOne ~= RF.Raid.CountRaidOne or countRaidTwo ~= RF.Raid.CountRaidTwo) then
+      RF:Log(string.format("Currently there are %s in raid one, and %s in raid two. (%s total)", fmtPlayers(countRaidOne), fmtPlayers(countRaidTwo), fmtPlayers(countRaidOne + countRaidTwo)))
+    end
   else
-    RF:Log(string.format("Currently there are %s in the raid.", fmtPlayers(countRaidOne)))
+    if (countRaidOne ~= RF.Raid.CountRaidOne) then
+      RF:Log(string.format("Currently there are %s in the raid.", fmtPlayers(countRaidOne)))
+    end
   end
+
+  RF.Raid.CountRaidOne = countRaidOne
+  RF.Raid.CountRaidTwo = countRaidTwo
 end
 
 -- scans for co-raid presence if we just joined a raid and the events for it have not fired yet

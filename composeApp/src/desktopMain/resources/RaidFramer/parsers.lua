@@ -2,22 +2,6 @@
 RF = RF or {}
 RF.Parser = RF.Parser or {}
 
-function RF.Parser.ParseUnitInfo(t)
-  local info = {}
-  info.type       = t[1]   -- "player", "npc", etc
-  info.isPortal   = t[2]   -- bool
-  info.classId    = t[3]   -- table [1 = x, 2 = y, 3 = z]
-  info.hp         = t[4]   -- int
-  info.grade      = t[5]   -- LEGENDARYYYYY
-  info.kind       = t[6]   -- "humanoid", "beast", etc
-  info.familyName = t[7]   -- "wolf", "dragon", etc
-  info.name       = t[8]   -- Like the actual name of the unit
-  info.faction    = t[9]   -- "friendly", "hostile"
-  info.level      = t[10]  -- int 55
-  info.heirLevel  = t[11]  -- int no idea what this is
-  return info
-end
-
 function RF.Parser.ParseUnitDeathEvent(t)
   local evt = {}
   evt.tuuid      = t[1]
@@ -26,30 +10,65 @@ function RF.Parser.ParseUnitDeathEvent(t)
   return evt
 end
 
--- Tries to parse the raw event args from the game into a structured table
--- the game has many event types with different arg structures under the hood
--- so this is a simplified parser that only extracts common fields for now
-function RF.Parser.ParseCombatEvent(t)
-  local evt = {}
+-- Extracts just the metadata from a combat event so we can perform routing logic on it / client-side actions
+-- before passing the whole unprocessed table to the desktop app as a json string. The game itself has multiple
+-- sub-types combat events (damage, heal, buff, etc) and we don't want to have to parse all of those in Lua just to route them
+-- because it would waste single-threaded CPU time. So we just parse the metadata we need to make decisions on the Lua side
+-- and pass to the multi-threaded desktop app for full processing.
+function RF.Parser.ParseCombatEventMetadata(t)
+  local event = {}
 
-  evt.cid          = t[1]
-  evt.eventType    = t[2]
-  evt.source       = t[3]
-  evt.target       = t[4]
-  evt.buffId       = t[5]
-  evt.buffName     = t[6]
-  evt.school       = t[7]
-  evt.auraType     = t[8] -- auraType (e.g., DEBUFF, BUFF)
-  evt.unknownBool  = t[9]
+  event.timestamp  = os.time()
+  event.cid          = t[1] -- always entity id
+  event.type         = t[2] -- always event type
+  event.source       = t[3] -- always source name
+  event.target       = t[4] -- always target name
 
-  -- Environmental damage special case
-  if evt.eventType == "ENVIRONMENTAL_DAMAGE" then
-    evt.envType = t[6] -- FALLING
-    evt.amount  = tonumber(t[7])
-    evt.result  = t[9] -- HIT
-  end
+  return event
+end
 
-  evt.timestamp  = os.time()
+-- SPELL_AURA_APPLIED, SPELL_AURA_REMOVED
+function RF.Parser.ParseBuffEvent(t)
+  local event = {}
 
-  return evt
+  event.timestamp  = os.time()
+  event.cid          = t[1] -- always entity id
+  event.type         = t[2] -- always event type
+  event.source       = t[3] -- always source name
+  event.target       = t[4] -- always target name
+
+  -- specific fields for buff events
+  event.buffId       = t[5] -- buff id or 0
+  event.buffName     = t[6] -- buff name or ""
+  event.damageType   = t[7] -- PHYSICAL
+  event.buffType     = t[8] -- DEBUFF / BUFF
+  event.isActive     = t[9] -- not sure what this is yet
+
+  return event
+end
+
+-- SPELL_DAMAGE
+function RF.Parser.ParseDamageEvent(t)
+  local event = {}
+
+  event.timestamp    = os.time()
+  event.cid            = t[1] -- always entity id
+  event.type           = t[2] -- always event type
+  event.source         = t[3] -- always source name
+  event.target         = t[4] -- always target name
+
+  -- specific fields for damage events
+  event.unknownInt    = t[5] -- always seems to be zero
+  event.spell         = t[6] -- name of spell
+  event.damageType    = t[7] -- PHYSICAL / FIRE / etc
+  event.amount        = t[8] -- integer (negative means removed health)
+  event.pool          = t[9] -- HEALTH / MANA
+  event.result        = t[10] -- string HIT
+  event.f11           = t[11] -- zero int
+  event.f12           = t[12] -- zero int
+  event.f13           = t[13] -- bool
+  event.f14           = t[14] -- bool
+  event.f15           = t[15] -- bool
+
+  return event
 end

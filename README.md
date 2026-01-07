@@ -14,13 +14,16 @@
   - Internationalization support targetting English, Korean, Brazilian, Russian, Chinese, German, Australian, and Pirate
 
 ## What counts as CC?
-This has been a huge headache friends, let me tell you. The truth is everyone wants it to work differently, so the solution ended-up being to do breakdowns by skill. However, you'll notice that there is still a "PvP CC Applied" column. When you see CC-applied, RF is referring to any spells or utility items that:
+This has been a huge headache friends, let me tell you. ~ The truth is everyone wants it to work differently, so the solution ended-up being to do breakdowns by skill. However, you'll notice that there is still a "PvP CC" column. When you see the phrase CC used throughout the APP, RF is referring to any spells or utility items that:
   - Inhibit or reduce player movement.
   - Prevent or slow the casting of spells, or confine the casting in a specific direction.
-  - Spells that entrap or cause the players camera to face another direction.
-  - Spells that affect the ability for a player to target another player.
-  - Spells that force the player to move or physics fling players in a direction they did not intend to move.
-  - Examples are: Silence, Distressed, Slow, Tripped, Stunned, Impaled, Frozen, Petrified, Knocked-Down, Slept, Feared, Provoked, Bubble Trap, Snare, Shackle, Overpowered, Wraiths Curse, Earthen Grip (Mud Hands), and numerous more.
+  - That entrap or cause the players camera to face another direction.
+  - That affect the ability for a player to target another player.
+  - That force the player to move or physics fling players in a direction they did not intend to move.
+  - That disable the user's weapon or ability to use their skills, gliders, or potions.
+
+Examples are: Silence, Distressed, Slow, Tripped, Stunned, Impaled, Frozen, Petrified, Knocked-Down, Slept, Feared, Provoked, Bubble Trap, Snare, Shackle, Overpowered, Wraiths Curse, Earthen Grip (Mud Hands), and numerous more:
+
   - Example 1: A friendly CC Mage casts a Stillnesss on a clump of 7 enemy players. +7 points are attributed to that action as long as the debuff was indeed applied to all 7 players.
   - Example 2: A friendly Melee with Defense tree does the distress combo on a group of 3 enemy players. (The shield slam counts as +1, distress applied +3, provoked applied to the three targets is another +3) IE it's counting all the stacks of CC applied.
   - Example 3: A friendly Mage lays a Bubble Trap in the choke on Freed. 7 enemies get caught in the bubble. However, people can get ree-caught in the bubble, so out of those, 4 are still stuck in the bubble for another raise into the aie. (+7 inital points, +4 on second raise for +11 points total) Same is true for other spells that have debuffs that can get re-applied to targets. The re-application is extra points, because it resulted in even more crowd-control time.

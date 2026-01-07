@@ -177,7 +177,6 @@ object GameMonitorInteractor : Interactor() {
    * Main event loop tick: read new lines from the combat log file as per the current mode and user markers.
    */
   override suspend fun interact() {
-    println("GameMonitorInteractor.interact tick: mode=$currentMode, path=$currentPath, isPlaying=${_isPlaying.value}, replayCompleted=$replayCompleted")
     try {
       if (currentMode == MonitorModes.DISABLED) {
         closeFile()

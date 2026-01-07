@@ -22,20 +22,18 @@ import com.reoky.raidframer.core.interactor.InstallationInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
-import com.reoky.raidframer.core.model.RaidMember
+import com.reoky.raidframer.core.serialization.RaidMember
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Locale
-import kotlin.io.path.Path
 import kotlin.system.exitProcess
 
 const val TAG = "Main"

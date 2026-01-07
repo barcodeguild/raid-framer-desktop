@@ -16,21 +16,20 @@ RF.IPC.LAST_INTERACT_TIME = 0
 RF.IPC.MESSAGE_WRITE_QUEUE = {}
 
 RF.IPC.MESSAGE_TYPES = {
-  CAST = "PLAYER_CAST",
-  DAMAGE = "PLAYER_DAMAGE",
-  HEAL = "PLAYER_HEAL",
-  DEBUFF = "PLAYER_DEBUFF",
-  BUFF = "PLAYER_BUFF",
-  DEATH = "PLAYER_DEATH",
-  WORLD = "WORLD_EVENT",
-  FRAMES_UPDATE = "FRAMES_UPDATE",
-  TARGET_UPDATE = "TARGET_UPDATE",
-  SELF_UPDATE = "SELF_UPDATE",
-  SELF_FACTION = "SELF_FACTION",
-  SOUND_ALERT = "SOUND_ALERT",
-  AOE_SPLAT = "AOE_SPLAT",
-  TEST_PING = "TEST_PING",
-  CONFIG_UPDATE = "CONFIG_UPDATE"
+  COMBAT_EVENT = "COMBAT_EVENT", -- see game monitor branch (not used yet)
+  PLAYER_DEATH = "PLAYER_DEATH", -- from the callback when a unit dies
+  PLAYER_INFO = "PLAYER_INFO", -- authoritative entity update (we know for sure some piece of info in the form of raw X2UnitInfo data)
+  WORLD_EVENT = "WORLD_EVENT", -- thinking maybe zone changes / like going to conflict/peace could be useful to know down the line (not used yet)
+  FRAMES_UPDATE = "FRAMES_UPDATE", -- full raid frames update (sent periodically when the raid roster changes)
+  TARGET_UPDATE = "TARGET_UPDATE", -- used for the debuff tracker to select the target the players tabs over (similar to other debuff trackers)
+  SELF_UPDATE = "SELF_UPDATE", -- sets own player name
+  SELF_FACTION = "SELF_FACTION", -- sets own faction (very important for knowing who is an enemy LOL)
+  DUEL_STARTED = "DUEL_STARTED", -- duel started event
+  DUEL_ENDED = "DUEL_ENDED", -- duel ended event
+  SOUND_ALERT = "SOUND_ALERT", -- play a sound alert on the companion (not used yet, but I want to get the unreal tournament sounds for this LOL)
+  AOE_SPLAT = "AOE_SPLAT", -- hoping maybe Queen Sparkles will open the animation api someday (not used yet but I want to draw sick animations on the ground for charms and stuff!)
+  TEST_PING = "TEST_PING", -- companion replies with a "pong" payload (used for the lua companion indicator LED)
+  CONFIG_UPDATE = "CONFIG_UPDATE" -- app notifies addon that config has changed, prompts a reload from disk
 }
 
 -- Flushes batches of the write queue to the output file by calling write message
@@ -55,25 +54,35 @@ function RF.IPC.interact()
     return
   end
 
+  -- reset file if size is >100MB to prevent bloat
+  local file = io.open(RF.IPC.CHANNEL_OUT_FILE, "r")
+  if file then
+    local size = file:seek("end")
+    file:close()
+    if size > 100 * 1024 * 1024 then -- 100MB
+      RF.IPC.ResetOutputFile()
+    end
+  end
+
   -- Determine batch size (process up to BATCH_SIZE messages)
   local batchSize = math.min(RF.IPC.BATCH_SIZE, #RF.IPC.MESSAGE_WRITE_QUEUE)
 
   -- Open file once for batch write
-  local f = io.open(RF.IPC.CHANNEL_OUT_FILE, "a")
-  if not f then return end
+  file = io.open(RF.IPC.CHANNEL_OUT_FILE, "a")
+  if not file then return end
 
   -- Write batch of messages
   for i = 1, batchSize do
     local json = RF.IPC.MESSAGE_WRITE_QUEUE[i]
-    f:write(json)
-    f:write("\n")
+    file:write(json)
+    file:write("\n")
   end
-  f:close()
+  file:close()
+
+
 
   -- Remove processed messages from queue
-  for i = batchSize, 1, -1 do
-    table.remove(RF.IPC.MESSAGE_WRITE_QUEUE, 1)
-  end
+  RF.IPC.MESSAGE_WRITE_QUEUE = {}
 end
 
 -- Queues a message to be sent later; returns the JSON string

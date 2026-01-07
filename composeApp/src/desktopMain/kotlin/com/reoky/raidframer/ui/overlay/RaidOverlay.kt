@@ -8,8 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -17,8 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
-import com.reoky.raidframer.core.model.Party
-import com.reoky.raidframer.core.model.RaidMember
+import com.reoky.raidframer.core.serialization.RaidMember
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.RaidColors
 import com.reoky.raidframer.ui.WindowManager
@@ -75,7 +72,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
               Column(
                 modifier = Modifier
                   .width(66.dp)
-                  .background(Color.Green.copy(alpha = 0.25F), RoundedCornerShape(8.dp))
+                  .background(Color.Black.copy(alpha = 0.25F), RoundedCornerShape(2.dp))
                   .padding(bottom = 0.5.dp),
                 verticalArrangement = Arrangement.spacedBy(0.75.dp)
               ) {
@@ -106,30 +103,39 @@ fun RaidMemberFrame(member: RaidMember) {
   }
   val frameShape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
 
-  Box(modifier = Modifier.width(66.dp)) {
-    // Mana Bar (Background Layer)
+  if (member.name.isNotEmpty()) {
+    Box(modifier = Modifier.width(65.75.dp)) {
+      // Mana Bar (Background Layer)
+      Box(
+        modifier = Modifier
+          .padding(top = 20.75.dp) // Position to tuck under the frame's bottom corners
+          .size(width = 65.75.dp, height = 9.5.dp) // 6dp overlap + 3dp visible bar
+          .background(RaidColors.ManaBarBlue, RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
+      )
+
+      // Nameplate Frame (Foreground Layer)
+      Surface(
+        modifier = Modifier.size(width = 65.75.dp, height = 26.dp),
+        shape = frameShape,
+        color = roleColor,
+        elevation = 4.dp // Casts shadow onto the mana bar below
+      ) {
+        Text(
+          text = member.name,
+          color = Color.LightGray,
+          fontSize = 12.sp,
+          fontWeight = FontWeight.Normal,
+          maxLines = 1, // prevent overflow
+          overflow = TextOverflow.Ellipsis
+        )
+      }
+    }
+  } else {
+    // Empty frame for missing member
     Box(
       modifier = Modifier
-        .padding(top = 20.75.dp) // Position to tuck under the frame's bottom corners
-        .size(width = 65.dp, height = 9.5.dp) // 6dp overlap + 3dp visible bar
-        .background(RaidColors.ManaBarBlue, RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
+        .size(width = 65.75.dp, height = 26.dp)
+        .background(Color.Transparent, frameShape)
     )
-
-    // Nameplate Frame (Foreground Layer)
-    Surface(
-      modifier = Modifier.size(width = 66.dp, height = 26.dp),
-      shape = frameShape,
-      color = roleColor,
-      elevation = 4.dp // Casts shadow onto the mana bar below
-    ) {
-      Text(
-        text = member.name,
-        color = Color.LightGray,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Normal,
-        maxLines = 1, // prevent overflow
-        overflow = TextOverflow.Ellipsis
-      )
-    }
   }
 }
