@@ -99,9 +99,6 @@ object GameMonitorInteractor : Interactor() {
       }
     }
 
-    println(possibleArcheRageDirectories.distinct())
-
-
     val combatLogPaths = possibleArcheRageDirectories.mapNotNull { dir ->
       val combatLogPath = dir.resolve("combat.log")
       if (Files.exists(combatLogPath) && Files.isReadable(combatLogPath)) {

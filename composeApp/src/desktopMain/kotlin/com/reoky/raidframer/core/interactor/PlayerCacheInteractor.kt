@@ -19,7 +19,6 @@ import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
 import com.reoky.raidframer.core.serialization.Party
 import com.reoky.raidframer.core.model.PlayerCard
-import com.reoky.raidframer.core.serialization.RaidMember
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
 import com.reoky.raidframer.core.model.postBuffEndedEvent
 import com.reoky.raidframer.core.model.postBuffGainedEvent
@@ -31,6 +30,7 @@ import com.reoky.raidframer.core.model.postDebuffGainedEvent
 import com.reoky.raidframer.core.model.postHealEvent
 import com.reoky.raidframer.core.model.postSuccessfulCastEvent
 import com.reoky.raidframer.core.model.shouldUpgradeToPlayer
+import com.reoky.raidframer.core.serialization.RaidFramePayload
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -136,10 +136,10 @@ object PlayerCacheInteractor : Interactor() {
   /*
    * Builds parties of five from the ordered list of raid members and stores them under the raid ID.
    */
-  fun updatePlayersForRaidById(raidId: Int, members: List<RaidMember>) {
+  fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
     _raids[raidId] = members.chunked(5).take(20)
-    members.forEach { member: RaidMember ->
-      createCardIfNoneExists(member.name)
+    members.forEach { member ->
+      createCardIfNoneExists(member.playerName)
     }
   }
 

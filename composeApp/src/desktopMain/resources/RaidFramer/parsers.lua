@@ -27,6 +27,24 @@ function RF.Parser.ParseCombatEventMetadata(t)
   return event
 end
 
+-- SPELL_CAST_START, SPELL_CAST_SUCCESS
+function RF.Parser.ParseCastEvent(t)
+  local event = {}
+
+  event.timestamp  = os.time()
+  event.cid          = t[1] -- always entity id
+  event.type         = t[2] -- always event type
+  event.source       = t[3] -- always source name
+  event.target       = t[4] -- always target name
+
+  -- specific fields for buff events
+  event.spellId      = t[5] -- id or 0
+  event.spellName    = t[6] -- string name of spell
+  event.damageType   = t[7] -- PHYSICAL
+
+  return event
+end
+
 -- SPELL_AURA_APPLIED, SPELL_AURA_REMOVED
 function RF.Parser.ParseBuffEvent(t)
   local event = {}
@@ -60,15 +78,82 @@ function RF.Parser.ParseDamageEvent(t)
   -- specific fields for damage events
   event.unknownInt    = t[5] -- always seems to be zero
   event.spell         = t[6] -- name of spell
-  event.damageType    = t[7] -- PHYSICAL / FIRE / etc
+  event.damageType    = t[7] -- PHYSICAL / FIRE / HOLY
   event.amount        = t[8] -- integer (negative means removed health)
   event.pool          = t[9] -- HEALTH / MANA
   event.result        = t[10] -- string HIT
   event.f11           = t[11] -- zero int
   event.f12           = t[12] -- zero int
   event.f13           = t[13] -- bool
-  event.f14           = t[14] -- bool
+  event.f14           = t[14] -- string bool
   event.f15           = t[15] -- bool
+
+  return event
+end
+
+-- SPELL_HEALED
+function RF.Parser.ParseHealEvent(t)
+  local event = {}
+
+  event.timestamp    = os.time()
+  event.cid            = t[1] -- always entity id
+  event.type           = t[2] -- always event type
+  event.source         = t[3] -- always source name
+  event.target         = t[4] -- always target name
+
+  -- specific fields for heal events
+  event.unknownInt    = t[5] -- always seems to be zero
+  event.spell         = t[6] -- name of spell
+  event.damageType    = t[7] -- PHYSICAL / FIRE / HOLY
+  event.amount        = t[8] -- integer (negative means removed health)
+  event.result        = t[9] -- string HIT
+  event.f10           = t[10] -- bool
+  event.f11           = t[11] -- zero int
+
+  return event
+end
+
+-- SPELL_DAMAGE
+function RF.Parser.ParseEnergizeEvent(t)
+  local event = {}
+
+  event.timestamp    = os.time()
+  event.cid            = t[1] -- always entity id
+  event.type           = t[2] -- always event type
+  event.source         = t[3] -- always source name
+  event.target         = t[4] -- always target name
+
+  -- specific fields for energize events
+  event.unknownInt    = t[5] -- always seems to be zero
+  event.spell         = t[6] -- name of spell
+  event.damageType    = t[7] -- PHYSICAL / FIRE / HOLY
+  event.amount        = t[8] -- integer (negative means removed health)
+  event.pool          = t[9] -- HEALTH / MANA
+
+  return event
+end
+
+-- SPELL_DAMAGE
+function RF.Parser.ParseEnvironmentalDamageEvent(t)
+  local event = {}
+
+  event.timestamp    = os.time()
+  event.cid            = t[1] -- always entity id
+  event.type           = t[2] -- always event type
+  event.source         = t[3] -- always source name
+  event.target         = t[4] -- always target name
+
+  -- specific fields for env damage events
+  event.damageType    = t[5] -- FALLING
+  event.unknownInt    = t[6] -- seen -1 maybe multiplier?
+  event.amount        = t[7] -- integer (positive means removed health here)
+  event.pool          = t[8] -- HEALTH / MANA
+  event.result        = t[9] -- string HIT
+  event.f10           = t[10] -- zero int
+  event.f11           = t[11] -- zero int
+  event.f12           = t[12] -- bool
+  event.f13           = t[13] -- int
+  event.f14           = t[14] -- bool
 
   return event
 end

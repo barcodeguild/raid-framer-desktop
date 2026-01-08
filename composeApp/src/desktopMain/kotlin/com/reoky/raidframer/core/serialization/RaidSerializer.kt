@@ -2,11 +2,14 @@ package com.reoky.raidframer.core.serialization
 
 import kotlinx.serialization.Serializable
 
+typealias Party = List<RaidFramePayload>
+
 @Serializable
-sealed class FramesUpdatedPayload(
+data class RaidFramePayload(
   val slot: Int = 0,
   val playerName: String = "",
   val gearScore: Int = 0,
+  val role: Int = 0,
   val characterBuild: String = "",
   val lastZone: String = "",
   val distance: Int = -1,

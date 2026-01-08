@@ -12,7 +12,7 @@ sealed class PlayerInfoPayload {
   @Serializable
   @SerialName("character")
   data class Character(
-    val expeditionName: String,
+    val expeditionName: String = "",
     // val type: String, consumed by framework always character
     @SerialName("class") val classMap: Map<String, Int>, // Corresponds to the "class" key in JSON
     val hp: String,
@@ -28,6 +28,7 @@ sealed class PlayerInfoPayload {
   @SerialName("npc")
   data class Npc(
     // val type: String, consumed by framework always npc
+    val expeditionName: String = "",
     val isPortal: Boolean = false,
     val grade: String,
     @SerialName("class") val classMap: Map<String, Int>, // Corresponds to the "class" key in JSON
@@ -46,7 +47,7 @@ sealed class PlayerInfoPayload {
   @Serializable
   @SerialName("mate")
   data class Mate(
-    val expeditionName: String,
+    val expeditionName: String = "",
     // val type: String, consumed by framework always mate
     @SerialName("class") val classMap: Map<String, Int>, // Corresponds to the "class" key in JSON
     val hp: Int,
@@ -59,4 +60,23 @@ sealed class PlayerInfoPayload {
     val heirLevel: Int,
     @SerialName("max_hp") val maxHp: String
   ) : PlayerInfoPayload()
+
+  // apparently farm haulers are considered "slaves" in the API
+  // kind of hilarious
+  @Serializable
+  @SerialName("slave")
+  data class Slave(
+    val expeditionName: String = "",
+    @SerialName("class") val classMap: Map<String, Int>, // Corresponds to the "class" key in JSON
+    val hp: Int,
+    @SerialName("owner_name") val ownerName: String,
+    @SerialName("family_name") val familyName: String,
+    val name: String,
+    val faction: String,
+    val level: Int,
+    val heirLevel: Int,
+    @SerialName("max_hp") val maxHp: String
+  ) : PlayerInfoPayload()
+
+
 }

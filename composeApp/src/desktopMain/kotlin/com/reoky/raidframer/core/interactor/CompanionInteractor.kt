@@ -1,6 +1,11 @@
 package com.reoky.raidframer.core.interactor
 
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.model.BuffEndedEvent
+import com.reoky.raidframer.core.model.BuffGainedEvent
+import com.reoky.raidframer.core.model.CastingEvent
+import com.reoky.raidframer.core.model.DamageEvent
+import com.reoky.raidframer.core.model.SuccessfulCastEvent
 
 import com.reoky.raidframer.core.serialization.AppJson
 import com.reoky.raidframer.core.serialization.CombatEventPayload
@@ -16,6 +21,7 @@ import java.nio.file.StandardOpenOption
 import kotlin.io.path.exists
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
+import kotlin.math.abs
 
 object CompanionInteractor : Interactor() {
 
@@ -88,24 +94,125 @@ object CompanionInteractor : Interactor() {
    * we can use a 'when' statement here to switch on the actual message type. (It took a while to get this right!)
    */
   private fun handleInboundIPCMessage(rawJson: String) {
-    println("Received: $rawJson")
     try {
       when (val message = AppJson.decodeFromString<IPCMessagePayload>(rawJson)) {
         is IPCMessagePayload.PlayerInfo -> {
           //handlePlayerInfoUpdated(message.payload, message.timestamp)
         }
+
         is IPCMessagePayload.FramesUpdate -> { // Was "BatchUpdate"
-          //Log.info(TAG, "Player info updated with count: ${message.payload.size}")
+          Log.info(TAG, "Player info updated with count: ${message.payload.size}")
+          message.payload.chunked(50).take(2).forEachIndexed { index, chunk ->
+            PlayerCacheInteractor.updatePlayersForRaidById(index, chunk)
+          }
         }
+
         is IPCMessagePayload.PlayerCast -> {
           //Log.info(TAG, "Cast event: ${message.payload}")
         }
+
         is IPCMessagePayload.CombatEvent -> {
-          if (message.payload is CombatEventPayload.DamagePayload) Log.info(TAG, "Combat event received: ${message.payload}")
+          println(rawJson)
+          when (val event = message.payload) {
+
+            is CombatEventPayload.SpellCastStartPayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
+              PlayerCacheInteractor.postEvent(
+                CastingEvent(
+                  timestamp = event.timestamp,
+                  caster = event.source,
+                  spell = event.spellName
+                )
+              )
+            }
+
+            is CombatEventPayload.SpellCastSuccessPayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.source} successfully cast ${event.spellName} (id:${event.spellId}) on ${event.target}.")
+              PlayerCacheInteractor.postEvent(
+                SuccessfulCastEvent(
+                  timestamp = event.timestamp,
+                  caster = event.source,
+                  spell = event.spellName,
+                )
+              )
+            }
+
+            is CombatEventPayload.DamagePayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.source} damaged ${event.target} for ${event.amount} using ${event.spell}.")
+              PlayerCacheInteractor.postEvent(
+                DamageEvent(
+                  timestamp = event.timestamp,
+                  caster = event.source,
+                  target = event.target,
+                  damage = event.amount,
+                  spell = event.spell,
+                  critical = event.f13
+                )
+              )
+            }
+
+            is CombatEventPayload.HealPayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.source} healed ${event.target} for ${event.amount} using ${event.spell}.")
+              PlayerCacheInteractor.postEvent(
+                com.reoky.raidframer.core.model.HealEvent(
+                  timestamp = event.timestamp,
+                  caster = event.source,
+                  target = event.target,
+                  amount = event.amount,
+                  spell = event.spell,
+                  critical = event.f10
+                )
+              )
+            }
+
+            is CombatEventPayload.BuffGainedPayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.source} applied ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) to ${event.target}")
+              PlayerCacheInteractor.postEvent(
+                BuffGainedEvent(
+                  timestamp = event.timestamp,
+                  source = event.source,
+                  target = event.target,
+                  buff = event.buffName
+                )
+              )
+            }
+
+            is CombatEventPayload.BuffEndedPayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.target}'s ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) caused by ${event.source} ended.")
+              PlayerCacheInteractor.postEvent(
+                BuffEndedEvent(
+                  timestamp = event.timestamp,
+                  source = event.source,
+                  target = event.target,
+                  buff = event.buffName
+                )
+              )
+            }
+
+            is CombatEventPayload.EnergizePayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.target} energized after a duel healing ${event.amount} health.")
+            }
+
+            is CombatEventPayload.EnvironmentalDamagePayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.target} took ${event.amount} ${event.damageType} damage.")
+            }
+
+            is CombatEventPayload.ConditionDamagePayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.target} suffered ${event.amount} damage to their ${event.pool} because of ${event.source}'s ${event.spell} spell.")
+              PlayerCacheInteractor.postEvent(
+                DamageEvent(
+                  timestamp = event.timestamp,
+                  caster = event.source,
+                  target = event.target,
+                  damage = event.amount,
+                  spell = event.spell,
+                  critical = event.f13
+                )
+              )
+            }
+          }
         }
-        else -> {
-          Log.error(TAG, "Received unknown message type: ${message.javaClass.simpleName}")
-        }
+        else -> {}
       }
     } catch (e: Exception) {
       Log.error(TAG, "Could not decode JSON IPC message: ${e.message}")
@@ -163,6 +270,9 @@ object CompanionInteractor : Interactor() {
       // Fixed: Added 'Mate' branch to make 'when' exhaustive
       is PlayerInfoPayload.Mate -> {
         println("Mate spotted!")
+      }
+      is PlayerInfoPayload.Slave -> {
+        println("Slave spotted!")
       }
     }
   }

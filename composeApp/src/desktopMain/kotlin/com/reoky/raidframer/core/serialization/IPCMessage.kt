@@ -67,7 +67,7 @@ sealed class IPCMessagePayload {
     override val timestamp: Long,
     // Specific wrapper for list
     @Serializable(with = FramesUpdatedListUnwrapper::class)
-    val payload: List<PlayerInfoPayload>
+    val payload: List<RaidFramePayload>
   ) : IPCMessagePayload()
 
   @Serializable
@@ -123,6 +123,6 @@ object CombatEventUnwrapper : UnwrapStringizedJsonSerializer<CombatEventPayload>
 )
 
 // Because it's a list of raid frames and not a single object
-object FramesUpdatedListUnwrapper : UnwrapStringizedJsonSerializer<List<FramesUpdatedPayload>>(
-  ListSerializer(FramesUpdatedPayload.serializer())
+object FramesUpdatedListUnwrapper : UnwrapStringizedJsonSerializer<List<RaidFramePayload>>(
+  ListSerializer(RaidFramePayload.serializer())
 )

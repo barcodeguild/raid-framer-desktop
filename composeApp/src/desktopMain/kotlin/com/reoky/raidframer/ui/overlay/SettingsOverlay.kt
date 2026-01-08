@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
-import com.reoky.raidframer.core.serialization.Faction
+import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent

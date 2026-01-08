@@ -22,7 +22,6 @@ import com.reoky.raidframer.core.interactor.InstallationInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
-import com.reoky.raidframer.core.serialization.RaidMember
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -71,7 +70,7 @@ fun main(args: Array<String>) = application {
   // Start core of the app
   LoggingInteractor.start()
   PlayerCacheInteractor.start()
-  GameMonitorInteractor.start()
+  //GameMonitorInteractor.start()
   InstallationInteractor.start(delay = 3000L) // delay to allow user to set game path in settings if needed
   CompanionInteractor.start(delay = 1000L) // delay to allow game monitor to start first
 
@@ -152,20 +151,6 @@ fun main(args: Array<String>) = application {
         RFDao.configDao.insert(config.copy(firstLaunch = false))
       }
     }
-  }
-
-
-  // add mock data to player cache raid for testing
-  LaunchedEffect(Unit) {
-    val mockRaid = (0 .. 100).map { i ->
-      RaidMember(
-        name = "Player_$i",
-        health = i,
-        role = (0..4).random()
-      )
-    }
-    PlayerCacheInteractor.updatePlayersForRaidById(0, mockRaid.take(50))
-    PlayerCacheInteractor.updatePlayersForRaidById(1, mockRaid.slice(51 .. 100))
   }
 }
 
