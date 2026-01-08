@@ -5,6 +5,8 @@ import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CastingEvent
 import com.reoky.raidframer.core.model.DamageEvent
+import com.reoky.raidframer.core.model.DebuffGainedEvent
+import com.reoky.raidframer.core.model.HealEvent
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
 
 import com.reoky.raidframer.core.serialization.AppJson
@@ -112,11 +114,10 @@ object CompanionInteractor : Interactor() {
         }
 
         is IPCMessagePayload.CombatEvent -> {
-          println(rawJson)
           when (val event = message.payload) {
 
             is CombatEventPayload.SpellCastStartPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
               PlayerCacheInteractor.postEvent(
                 CastingEvent(
                   timestamp = event.timestamp,
@@ -127,7 +128,7 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.SpellCastSuccessPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} successfully cast ${event.spellName} (id:${event.spellId}) on ${event.target}.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.source} successfully cast ${event.spellName} (id:${event.spellId}) on ${event.target}.")
               PlayerCacheInteractor.postEvent(
                 SuccessfulCastEvent(
                   timestamp = event.timestamp,
@@ -138,13 +139,13 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.DamagePayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} damaged ${event.target} for ${event.amount} using ${event.spell}.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.source} damaged ${event.target} for ${abs(event.amount)} using ${event.spell}.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
                   caster = event.source,
                   target = event.target,
-                  damage = event.amount,
+                  damage = abs(event.amount),
                   spell = event.spell,
                   critical = event.f13
                 )
@@ -152,13 +153,13 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.HealPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} healed ${event.target} for ${event.amount} using ${event.spell}.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.source} healed ${event.target} for ${event.amount} using ${event.spell}.")
               PlayerCacheInteractor.postEvent(
-                com.reoky.raidframer.core.model.HealEvent(
+                HealEvent(
                   timestamp = event.timestamp,
                   caster = event.source,
                   target = event.target,
-                  amount = event.amount,
+                  amount = abs(event.amount),
                   spell = event.spell,
                   critical = event.f10
                 )
@@ -166,19 +167,30 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.BuffGainedPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} applied ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) to ${event.target}")
-              PlayerCacheInteractor.postEvent(
-                BuffGainedEvent(
-                  timestamp = event.timestamp,
-                  source = event.source,
-                  target = event.target,
-                  buff = event.buffName
+              //Log.info(TAG, "At ${event.timestamp} ${event.source} applied ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) to ${event.target}")
+              if (event.buffType == "DEBUFF") {
+                PlayerCacheInteractor.postEvent(
+                  DebuffGainedEvent(
+                    timestamp = event.timestamp,
+                    source = event.source,
+                    target = event.target,
+                    debuff = event.buffName
+                  )
                 )
-              )
+              } else {
+                PlayerCacheInteractor.postEvent(
+                  BuffGainedEvent(
+                    timestamp = event.timestamp,
+                    source = event.source,
+                    target = event.target,
+                    buff = event.buffName
+                  )
+                )
+              }
             }
 
             is CombatEventPayload.BuffEndedPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target}'s ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) caused by ${event.source} ended.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.target}'s ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) caused by ${event.source} ended.")
               PlayerCacheInteractor.postEvent(
                 BuffEndedEvent(
                   timestamp = event.timestamp,
@@ -194,17 +206,17 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.EnvironmentalDamagePayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target} took ${event.amount} ${event.damageType} damage.")
+              Log.info(TAG, "At ${event.timestamp} ${event.target} took ${abs(event.amount)} ${event.damageType} damage.")
             }
 
             is CombatEventPayload.ConditionDamagePayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target} suffered ${event.amount} damage to their ${event.pool} because of ${event.source}'s ${event.spell} spell.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.target} suffered ${abs(event.amount)} damage to their ${event.pool} because of ${event.source}'s ${event.spell} spell.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
                   caster = event.source,
                   target = event.target,
-                  damage = event.amount,
+                  damage = abs(event.amount),
                   spell = event.spell,
                   critical = event.f13
                 )

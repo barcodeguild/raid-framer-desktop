@@ -225,7 +225,7 @@ object PlayerCacheInteractor : Interactor() {
 
   private fun postDamage(event: DamageEvent) {
     createCardIfNoneExists(event.caster)
-    realtimeComputer.push(MetricRawSample(event.timestamp, event.damage.toDouble()))
+    //realtimeComputer.push(MetricRawSample(event.timestamp, event.damage.toDouble()))
     _cards[event.caster]?.let { card ->
       _cards[event.caster] = card.postDamageEvent(event)
     }

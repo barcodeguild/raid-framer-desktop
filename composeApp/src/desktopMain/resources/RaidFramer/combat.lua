@@ -129,7 +129,7 @@ function RF.Combat.handleCombatMessage(...)
   end
 
   -- dump any newly discovered event types for future implementation
-  RF.Debug.dumpTable(combatEvent)
+  --RF.Debug.dumpTable(combatEvent)
 
 end
 

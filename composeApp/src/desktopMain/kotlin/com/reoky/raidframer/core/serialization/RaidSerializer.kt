@@ -13,6 +13,7 @@ data class RaidFramePayload(
   val characterBuild: String = "",
   val lastZone: String = "",
   val distance: Int = -1,
+  @Serializable(with = SecondsToMillisSerializer::class)
   val lastUpdated: Long = 0L
 ) {
 }

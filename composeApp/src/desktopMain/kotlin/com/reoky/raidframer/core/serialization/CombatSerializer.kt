@@ -9,6 +9,7 @@ sealed class CombatEventPayload {
   @Serializable
   @SerialName("SPELL_CAST_START")
   data class SpellCastStartPayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
     val timestamp: Long,
     val cid: String,
     val source: String = "Unknown Target",
@@ -21,6 +22,7 @@ sealed class CombatEventPayload {
   @Serializable
   @SerialName("SPELL_CAST_SUCCESS")
   data class SpellCastSuccessPayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
     val timestamp: Long,
     val cid: String,
     val source: String = "Unknown Target",
@@ -33,6 +35,7 @@ sealed class CombatEventPayload {
   @Serializable
   @SerialName("SPELL_AURA_APPLIED")
   data class BuffGainedPayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
     val timestamp: Long,
     val cid: String,
     val source: String = "Unknown Target",
@@ -47,6 +50,7 @@ sealed class CombatEventPayload {
   @Serializable
   @SerialName("SPELL_AURA_REMOVED")
   data class BuffEndedPayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
     val timestamp: Long,
     val cid: String,
     val source: String = "Unknown Target",
@@ -61,6 +65,7 @@ sealed class CombatEventPayload {
   @Serializable
   @SerialName("SPELL_DAMAGE")
   data class DamagePayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
     val timestamp: Long,
     val cid: String,
     val source: String = "Unknown Target",
@@ -81,6 +86,7 @@ sealed class CombatEventPayload {
   @Serializable
   @SerialName("SPELL_HEALED")
   data class HealPayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
     val timestamp: Long,
     val cid: String,
     val source: String = "Unknown Target",
@@ -100,6 +106,7 @@ sealed class CombatEventPayload {
   @Serializable
   @SerialName("SPELL_ENERGIZE")
   data class EnergizePayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
     val timestamp: Long,
     val cid: String,
     val source: String = "Unknown Target",
@@ -115,6 +122,7 @@ sealed class CombatEventPayload {
   @Serializable
   @SerialName("SPELL_DOT_DAMAGE")
   data class ConditionDamagePayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
     val timestamp: Long,
     val cid: String,
     val source: String = "Unknown Target",
@@ -135,6 +143,7 @@ sealed class CombatEventPayload {
   @Serializable
   @SerialName("ENVIRONMENTAL_DAMAGE")
   data class EnvironmentalDamagePayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
     val timestamp: Long,
     val cid: String,
     val source: String = "Unknown Target",
