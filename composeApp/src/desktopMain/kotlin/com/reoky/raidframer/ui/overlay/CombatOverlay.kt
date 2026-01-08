@@ -267,7 +267,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
-                  wm?.openWindow(OverlayType.TRACKER)
+                  //wm?.openWindow(OverlayType.TRACKER)
                 }
               )
             }
@@ -297,7 +297,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
-                  wm?.openWindow(OverlayType.SUMMARY)
+                  //wm?.openWindow(OverlayType.SUMMARY)
                 }
               )
             }
