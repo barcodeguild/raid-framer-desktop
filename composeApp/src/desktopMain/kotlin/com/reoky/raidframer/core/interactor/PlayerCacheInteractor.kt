@@ -79,15 +79,18 @@ object PlayerCacheInteractor : Interactor() {
       // logic to determine if player should be upgraded from NPC to real player
       if (!card.isRealPlayer && card.shouldUpgradeToPlayer()) {
         //Log.info(TAG, "Upgrading ${card.name} from NPC to Real Player based on activity.")
-        val upgradedCard = card.copy(
-          isRealPlayer = true,
-          cache = PlayerCacheEntity(
-            playerName = card.name,
-            lastSeen = card.lastEvent,
-            lastKnownSpec = card.currentBuild
+        // FIX: Re-fetch current card state to avoid race condition overwrite
+        _cards[name]?.let { currentCard ->
+          val upgradedCard = currentCard.copy(
+            isRealPlayer = true,
+            cache = PlayerCacheEntity(
+              playerName = currentCard.name,
+              lastSeen = currentCard.lastEvent,
+              lastKnownSpec = currentCard.currentBuild
+            )
           )
-        )
-        _cards[name] = upgradedCard
+          _cards[name] = upgradedCard
+        }
       }
 
       if (!card.isRealPlayer) return@forEach // only real players have specs
@@ -112,23 +115,27 @@ object PlayerCacheInteractor : Interactor() {
 
       val determinedSpec = SpecType.fromTrees(threeMostRecentTrees)
 
-      // now update all the cards with the determined spec (some are gonna be unknown! but that's ok friends!)
-      val updatedCard = card.copy(
-        currentBuild = determinedSpec.name,
-        cache = PlayerCacheEntity(
-          playerName = card.name,
-          lastSeen = card.lastEvent,
-          lastKnownSpec = determinedSpec.name
+      // now update all the cards with the determined spec
+      // FIX: Re-fetch current card to ensure we don't overwrite concurrent increments (damage, heals)
+      _cards[name]?.let { currentCard ->
+        val updatedCard = currentCard.copy(
+          currentBuild = determinedSpec.name,
+          cache = PlayerCacheEntity(
+            playerName = currentCard.name,
+            lastSeen = currentCard.lastEvent, // Use latest
+            lastKnownSpec = determinedSpec.name
+          )
         )
-      )
-      _cards[name] = updatedCard
-      if (determinedSpec != SpecType.UNKNOWN) {
-        //Log.info(TAG, "Determined ${card.name} is playing as ${determinedSpec.name}.")
-      }
+        _cards[name] = updatedCard
 
-      // store all cached cards back to the database
-      _cards[name]?.cache?.let {
-        RFDao.playerCacheDao.insert(it)
+        if (determinedSpec != SpecType.UNKNOWN) {
+          //Log.info(TAG, "Determined ${card.name} is playing as ${determinedSpec.name}.")
+        }
+
+        // store all cached cards back to the database
+        updatedCard.cache?.let {
+          RFDao.playerCacheDao.insert(it)
+        }
       }
     }
   }
