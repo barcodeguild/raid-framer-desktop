@@ -1,8 +1,6 @@
 package com.reoky.raidframer.core.model
 
-import com.reoky.raidframer.core.database.isPlayerNameOnWhitelist
 import com.reoky.raidframer.core.definitions.findDebuffByName
-import com.reoky.raidframer.core.definitions.findSkillByName
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
@@ -13,10 +11,8 @@ import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
   * because the cache needs to be saved back to the database and the UI updated.
  */
 fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
-  // rule out the easy stuff first
   if (this.name.contains(" ")) return false // only NPCs can have spaces in their names, auto-non-player
   if (this.name in listOf("Unknown Target", "Fren", "Meina", "Glenn", "Charybdis")) return false // we might want a blacklist feature in the future where people can add their own NPC names
-  if (this.name.isPlayerNameOnWhitelist()) return true // name is on the whitelist, auto-upgrade
   this.recentDebuffGainedEvents.takeLast(100).let {
     return it.map { event -> event.debuff }.contains("Preparing Glider") // NPCs can't open their gliders
   }
@@ -115,6 +111,17 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
     recentDebuffEndedEvents = (this.recentDebuffEndedEvents + event), // optional to takeLast(n)
+  )
+}
+
+/*
+ * Increment the death counter.
+ */
+fun PlayerCard.postDeathEvent(timestamp: Long): PlayerCard {
+  return this.copy(
+    lastEvent = timestamp,
+    cache = cache?.copy(lastSeen = timestamp),
+    sessionDeathTotal = this.sessionDeathTotal + 1
   )
 }
 

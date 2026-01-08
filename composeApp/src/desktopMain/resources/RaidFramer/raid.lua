@@ -66,8 +66,8 @@ end
 function RF.Raid.handleTeamRoleChanged(...)
   local raid, position, role = { ... }
   -- raid appears to be a table during siege
-  RF:Log("Team Role Changed - Raid: " .. tostring(raid) .. " Position: " .. tostring(position) .. " Role: " .. tostring(role))
-  RF.Raid.Roster[position].role = role
+  --RF:Log("Team Role Changed - Raid: " .. tostring(raid) .. " Position: " .. tostring(position) .. " Role: " .. tostring(role))
+  --RF.Raid.Roster[position].role = role
 end
 
 -- allows us to set data for a raid slot from outside the module

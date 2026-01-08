@@ -24,6 +24,7 @@ import com.reoky.raidframer.core.model.postBuffEndedEvent
 import com.reoky.raidframer.core.model.postBuffGainedEvent
 import com.reoky.raidframer.core.model.postCastingEvent
 import com.reoky.raidframer.core.model.postDamageEvent
+import com.reoky.raidframer.core.model.postDeathEvent
 import com.reoky.raidframer.core.model.postDebuffAppliedEvent
 import com.reoky.raidframer.core.model.postDebuffEndedEvent
 import com.reoky.raidframer.core.model.postDebuffGainedEvent
@@ -199,7 +200,6 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   /* Card Management */
-
   fun addOrUpdateCard(card: PlayerCard) {
     _cards[card.name] = card
   }
@@ -211,6 +211,25 @@ object PlayerCacheInteractor : Interactor() {
   // gets a list of player cards matching a filter predicate
   fun getGroupCards(filter: (PlayerCard) -> Boolean): List<PlayerCard> {
     return _cards.values.filter(filter)
+  }
+
+  /*
+   * Helps upgrade an NPC card to a real player card immediately based on metadata from the game proving it's a player.
+   */
+  fun stronglyAssertIsPlayer(name: String) {
+    _cards[name]?.let { card ->
+      if (!card.isRealPlayer) {
+        val upgradedCard = card.copy(
+          isRealPlayer = true,
+          cache = PlayerCacheEntity(
+            playerName = card.name,
+            lastSeen = card.lastEvent,
+            lastKnownSpec = card.currentBuild
+          )
+        )
+        _cards[name] = upgradedCard
+      }
+    }
   }
 
   /* Event Posting */
@@ -300,37 +319,48 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  fun postPlayerDeath(playerName: String, timestamp: Long) {
+    createCardIfNoneExists(playerName) // lol your first event ever is a death
+    _cards[playerName]?.let { card ->
+      _cards[playerName] = card.postDeathEvent(timestamp)
+    }
+  }
+
   /* UI Subscriptions */
   var topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
-    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionDamageTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer && it.sessionDamageTotal > 0 }.sortedByDescending { it.sessionDamageTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topHeals: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
-    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionHealTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer && it.sessionHealTotal > 0 }.sortedByDescending { it.sessionHealTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topCC: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
-    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionCCTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer && it.sessionCCTotal > 0 }.sortedByDescending { it.sessionCCTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topDebuff: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList() }
-    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionDebuffTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer && it.sessionDebuffTotal > 0 }.sortedByDescending { it.sessionDebuffTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topCharmers: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionCharmTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer && it.sessionCharmTotal > 0 }.sortedByDescending { it.sessionCharmTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionGliderTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer && it.sessionGliderTotal > 0 }.sortedByDescending { it.sessionGliderTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topPotters: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionPotionTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer && it.sessionPotionTotal > 0 }.sortedByDescending { it.sessionPotionTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topItemSkillCasters : StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer }.sortedByDescending { it.sessionItemSkillTotal }.take(100) }
+    .map { cards -> cards.filter { it.isRealPlayer && it.sessionItemSkillTotal > 0 }.sortedByDescending { it.sessionItemSkillTotal }.take(100) }
+    .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topDeaths: StateFlow<List<PlayerCard>> = snapshotFlow { _cards.values.toList()  }
+    .map { cards -> cards.filter { it.isRealPlayer && it.sessionDeathTotal > 0 }.sortedByDescending { it.sessionDeathTotal }.take(100) }
     .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   /* Raid Parties UI Subscriptions */
@@ -338,4 +368,5 @@ object PlayerCacheInteractor : Interactor() {
     return snapshotFlow { _raids[raidId] ?: listOf() }
       .stateIn(_scope, SharingStarted.WhileSubscribed(5000), emptyList())
   }
+
 }

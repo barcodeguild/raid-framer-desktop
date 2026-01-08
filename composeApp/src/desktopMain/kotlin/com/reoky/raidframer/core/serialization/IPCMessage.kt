@@ -49,12 +49,36 @@ sealed class IPCMessagePayload {
   // 'type' is handled automatically by AppJson configuration
 
   @Serializable
+  @SerialName("SELF_UPDATE")
+  data class SelfUpdate(
+    override val version: Int = 1,
+    override val timestamp: Long,
+    val payload: String // character name
+  ) : IPCMessagePayload()
+
+  @Serializable
+  @SerialName("SELF_FACTION")
+  data class SelfFaction(
+    override val version: Int = 1,
+    override val timestamp: Long,
+    val payload: String // faction name
+  ) : IPCMessagePayload()
+
+  @Serializable
   @SerialName("COMBAT_EVENT")
   data class CombatEvent(
     override val version: Int = 1,
     override val timestamp: Long,
     @Serializable(with = CombatEventUnwrapper::class)
     val payload: CombatEventPayload
+  ) : IPCMessagePayload()
+
+  @Serializable
+  @SerialName("PLAYER_DEATH")
+  data class PlayerDeath(
+    override val version: Int = 1,
+    override val timestamp: Long,
+    val payload: String // player name that died
   ) : IPCMessagePayload()
 
   @Serializable
@@ -74,15 +98,6 @@ sealed class IPCMessagePayload {
     // Specific wrapper for list
     @Serializable(with = FramesUpdatedListUnwrapper::class)
     val payload: List<RaidFramePayload>
-  ) : IPCMessagePayload()
-
-  @Serializable
-  @SerialName("PLAYER_CAST")
-  data class PlayerCast(
-    override val version: Int = 1,
-    override val timestamp: Long,
-    // this remains a simple String
-    val payload: String
   ) : IPCMessagePayload()
 
   @Serializable

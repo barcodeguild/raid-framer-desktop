@@ -98,21 +98,42 @@ object CompanionInteractor : Interactor() {
   private fun handleInboundIPCMessage(rawJson: String) {
     try {
       when (val message = AppJson.decodeFromString<IPCMessagePayload>(rawJson)) {
-        is IPCMessagePayload.PlayerInfo -> {
-          //handlePlayerInfoUpdated(message.payload, message.timestamp)
+        is IPCMessagePayload.SelfUpdate -> {
+          val playerName = message.payload
+          if (playerName.isBlank() || playerName.contains(" ")) return
+          RFConfig.update { it.copy(playerName = playerName)}
         }
-
+        is IPCMessagePayload.SelfFaction -> {
+          val factionName = message.payload
+          if (factionName.isBlank() || factionName.contains(" ")) return
+          RFConfig.update { it.copy(playerFaction = factionName)}
+        }
+        is IPCMessagePayload.PlayerInfo -> {
+          when (val payload = message.payload) {
+            is PlayerInfoPayload.Character -> {
+              val playerName = payload.name
+              println("Metadata for player ${payload.name} received.")
+              if (playerName.isBlank() || playerName.contains(" ")) return
+              PlayerCacheInteractor.stronglyAssertIsPlayer(payload.name)
+            }
+            is PlayerInfoPayload.Npc -> {
+              println("Metadata for NPC ${payload.name} received.")
+            }
+            // Fixed: Added 'Mate' branch to make 'when' exhaustive
+            is PlayerInfoPayload.Mate -> {
+              println("Metadata for companion pet ${payload.name} owned by ${payload.ownerName} received.")
+            }
+            is PlayerInfoPayload.Slave -> {
+              println("Metadata for vehicle summon ${payload.name} owned by ${payload.ownerName} received.")
+            }
+          }
+        }
         is IPCMessagePayload.FramesUpdate -> { // Was "BatchUpdate"
           Log.info(TAG, "Player info updated with count: ${message.payload.size}")
           message.payload.chunked(50).take(2).forEachIndexed { index, chunk ->
             PlayerCacheInteractor.updatePlayersForRaidById(index, chunk)
           }
         }
-
-        is IPCMessagePayload.PlayerCast -> {
-          //Log.info(TAG, "Cast event: ${message.payload}")
-        }
-
         is IPCMessagePayload.CombatEvent -> {
           when (val event = message.payload) {
 
@@ -200,15 +221,12 @@ object CompanionInteractor : Interactor() {
                 )
               )
             }
-
             is CombatEventPayload.EnergizePayload -> {
               Log.info(TAG, "At ${event.timestamp} ${event.target} energized after a duel healing ${event.amount} health.")
             }
-
             is CombatEventPayload.EnvironmentalDamagePayload -> {
               Log.info(TAG, "At ${event.timestamp} ${event.target} took ${abs(event.amount)} ${event.damageType} damage.")
             }
-
             is CombatEventPayload.ConditionDamagePayload -> {
               //Log.info(TAG, "At ${event.timestamp} ${event.target} suffered ${abs(event.amount)} damage to their ${event.pool} because of ${event.source}'s ${event.spell} spell.")
               PlayerCacheInteractor.postEvent(
@@ -223,6 +241,12 @@ object CompanionInteractor : Interactor() {
               )
             }
           }
+        }
+        is IPCMessagePayload.PlayerDeath -> {
+          val playerName = message.payload
+          if (playerName.isBlank() || playerName.contains(" ")) return
+          Log.info(TAG, "Player death event received for $playerName")
+          PlayerCacheInteractor.postPlayerDeath(playerName, message.timestamp)
         }
         else -> {}
       }
@@ -267,27 +291,6 @@ object CompanionInteractor : Interactor() {
     }
   }
 
-  /*
-   * Handles incoming entity info payloads from the companion addon. (These are results of calling X2UnitInfo)
-   */
-  private fun handlePlayerInfoUpdated(payload: PlayerInfoPayload, envelopeTimestamp: Long) {
-    when (payload) {
-      is PlayerInfoPayload.Character -> {
-        // Fixed: 'data' property does not exist; access properties directly on the payload
-        println("Character ${payload.name} processed at $envelopeTimestamp")
-      }
-      is PlayerInfoPayload.Npc -> {
-        println("NPC ${payload.name} spotted!")
-      }
-      // Fixed: Added 'Mate' branch to make 'when' exhaustive
-      is PlayerInfoPayload.Mate -> {
-        println("Mate spotted!")
-      }
-      is PlayerInfoPayload.Slave -> {
-        println("Slave spotted!")
-      }
-    }
-  }
 
   /*
    * Simply tells the companion addon that the config has updated,

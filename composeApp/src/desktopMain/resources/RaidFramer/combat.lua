@@ -23,8 +23,37 @@ end
 function RF.Combat.handleDuelStarted()
   RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_STARTED, os.time())
 end
-function RF.Combat.handleDuelEnded(...)
+function RF.Combat.handleDuelEnded()
   RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_ENDED, os.time())
+end
+function RF.Combat.handleTargetChanged(...)
+  local unitInfo = X2Unit:GetUnitInfoById(X2Unit:GetUnitId("target"))
+
+  -- GUARD: not nil
+  if not unitInfo then
+    return
+  end
+
+  -- GUARD: A player target
+  if not unitInfo["type"] == "character" then
+    return
+  end
+
+  -- check to see if they have any buffs we care about
+  --local buffCount = X2Unit:UnitBuffCount("target")
+  --local playerBuffs = {}
+  --if type(buffCount) == "number" then
+  --  for i = 1, buffCount do
+  --    local buffInfo = X2Unit:UnitBuff("target", i)
+  --    if (buffInfo) then
+  --      playerBuffs[i] = buffInfo
+  --    end
+  --  end
+  --  RF.Debug.dumpTable(playerBuffs)
+  --end
+
+  -- send target update to desktop app
+  RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.TARGET_UPDATE, unitInfo["name"])
 end
 
 -- main combat event handler
@@ -124,7 +153,7 @@ function RF.Combat.handleCombatMessage(...)
   -- ENVIRONMENTAL_DAMAGE
   -- falling/drowning etc
   if (meta.type == "ENVIRONMENTAL_DAMAGE") then
-    RF.Combat.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(RF.Parser.ParseEnvironmentalDamageEvent(combatEvent)))
+    RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(RF.Parser.ParseEnvironmentalDamageEvent(combatEvent)))
     return
   end
 

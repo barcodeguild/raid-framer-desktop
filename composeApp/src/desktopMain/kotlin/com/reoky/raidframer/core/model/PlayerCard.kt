@@ -52,4 +52,5 @@ data class PlayerCard (
   val sessionGliderTotal: Int = 0,
   val sessionItemSkillTotal: Int = 0,
   val sessionPotionTotal: Int = 0,
+  val sessionDeathTotal: Int = 0,
 )

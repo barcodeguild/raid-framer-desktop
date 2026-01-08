@@ -159,5 +159,4 @@ sealed class CombatEventPayload {
     val f13: String, // sometimes false sometime 0
     val f14: Boolean // might need to change this to string
   ) : CombatEventPayload()
-
 }
