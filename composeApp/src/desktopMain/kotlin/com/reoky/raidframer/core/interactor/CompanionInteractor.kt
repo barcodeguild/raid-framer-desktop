@@ -32,7 +32,6 @@ object CompanionInteractor : Interactor() {
   private const val IPC_IN_FILENAME = "ipc.rfin"   // App writes to this file (Lua reads)
   private const val IPC_OUT_FILENAME = "ipc.rfout" // App reads from this file (Lua writes)
 
-  private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
   private var shouldNotifyCompanion: Boolean = false
   private var didATestPing: Boolean = false
 
