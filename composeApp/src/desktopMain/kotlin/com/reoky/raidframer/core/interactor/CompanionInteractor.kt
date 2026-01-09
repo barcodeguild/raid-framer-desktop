@@ -118,7 +118,6 @@ object CompanionInteractor : Interactor() {
           when (val payload = message.payload) {
             is PlayerInfoPayload.Character -> {
               val playerName = payload.name
-              println("Metadata for player ${payload.name} received.")
               if (playerName.isBlank() || playerName.contains(" ")) return
               PlayerCacheInteractor.stronglyAssertIsPlayer(payload.name, payload.classMap)
             }

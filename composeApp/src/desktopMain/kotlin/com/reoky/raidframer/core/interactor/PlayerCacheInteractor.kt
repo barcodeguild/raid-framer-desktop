@@ -9,33 +9,9 @@ import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
-import com.reoky.raidframer.core.model.BuffEndedEvent
-import com.reoky.raidframer.core.model.BuffGainedEvent
-import com.reoky.raidframer.core.model.CastingEvent
-import com.reoky.raidframer.core.model.CombatEvent
-import com.reoky.raidframer.core.model.DamageEvent
-import com.reoky.raidframer.core.model.DebuffAppliedEvent
-import com.reoky.raidframer.core.model.DebuffEndedEvent
-import com.reoky.raidframer.core.model.DebuffGainedEvent
-import com.reoky.raidframer.core.model.HealEvent
+import com.reoky.raidframer.core.model.*
 import com.reoky.raidframer.core.serialization.Party
-import com.reoky.raidframer.core.model.PlayerCard
-import com.reoky.raidframer.core.model.SuccessfulCastEvent
-import com.reoky.raidframer.core.model.postBuffEndedEvent
-import com.reoky.raidframer.core.model.postBuffGainedEvent
-import com.reoky.raidframer.core.model.postCastingEvent
-import com.reoky.raidframer.core.model.postDamageEvent
-import com.reoky.raidframer.core.model.postDeathEvent
-import com.reoky.raidframer.core.model.postDebuffAppliedEvent
-import com.reoky.raidframer.core.model.postDebuffEndedEvent
-import com.reoky.raidframer.core.model.postDebuffGainedEvent
-import com.reoky.raidframer.core.model.postHealEvent
-import com.reoky.raidframer.core.model.postSuccessfulCastEvent
-import com.reoky.raidframer.core.model.shouldUpgradeToPlayer
 import com.reoky.raidframer.core.serialization.RaidFramePayload
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
@@ -53,13 +30,13 @@ import kotlinx.coroutines.sync.withLock
  */
 object PlayerCacheInteractor : Interactor() {
 
-  val TAG = "PlayerCacheInteractor"
+  const val TAG = "PlayerCacheInteractor"
 
   // Mapping of all the players (and NPCs) sorted in no particular order
   val realtimeComputer = RealtimeComputer(windowBuckets = 60, bucketMillis = 10_000L)
   private val raids = mutableStateMapOf<Int, List<Party>>()
   private val cards = mutableStateMapOf<String, PlayerCard>()
-  private val mutex = kotlinx.coroutines.sync.Mutex() // to protect critical sections during player card updates from other threads
+  private val mutex = Mutex() // to protect critical sections during player card updates from other threads
 
   init {
     scope.launch {
@@ -72,72 +49,77 @@ object PlayerCacheInteractor : Interactor() {
 
   // main event loop
   override suspend fun interact() {
-    val savedCount = RFDao.playerCacheDao.getPlayerCount()
-    val cachedCount = cards.values.count()
+    // Take a snapshot of values to iterate. Iterating the map directly while updates happen
+    // (even with ConcurrentHashMap/MutableStateMap) can be risky with heavy logic,
+    // and we want to perform calculations without holding a lock. Ok friends!?
+    val snapshot = cards.values.toList()
 
-    //Log.info(TAG, "Persisted $savedCount players. ($cachedCount total entities (mounts,players,pets,mobs,etc) cached in memory)")
+    snapshot.forEach { card ->
+      val name = card.name
 
-    cards.forEach { (name, card) ->
-
-      // logic to determine if player should be upgraded from NPC to real player
+      // 1. Logic to determine if player should be upgraded from NPC to real player
       if (!card.isRealPlayer && card.shouldUpgradeToPlayer()) {
-        //Log.info(TAG, "Upgrading ${card.name} from NPC to Real Player based on activity.")
-        // FIX: Re-fetch current card state to avoid race condition overwrite
-        cards[name]?.let { currentCard ->
-          val upgradedCard = currentCard.copy(
-            isRealPlayer = true,
-            cache = PlayerCacheEntity(
-              playerName = currentCard.name,
-              lastSeen = currentCard.lastEvent,
-              lastKnownSpec = currentCard.currentBuild
-            )
-          )
-          cards[name] = upgradedCard
+        scope.launch {
+          mutex.withLock {
+            // Re-fetch inside lock to ensure we don't overwrite concurrent changes
+            cards[name]?.let { current ->
+              // Verify condition still holds
+              if (!current.isRealPlayer && current.shouldUpgradeToPlayer()) {
+                val upgradedCard = current.copy(
+                  isRealPlayer = true,
+                  cache = PlayerCacheEntity(
+                    playerName = current.name,
+                    lastSeen = current.lastEvent,
+                    lastKnownSpec = current.currentBuild
+                  )
+                )
+                cards[name] = upgradedCard
+              }
+            }
+          }
         }
       }
 
-      if (!card.isRealPlayer) return@forEach // only real players have specs
+      // Early exit if still not a real player (calculations below are for specs)
+      if (!card.isRealPlayer) return@forEach
 
-      // doing it this way because we never create those intermediate lists of 128 items. We only ever have the current item in memory by using sequences.
-      // ok friends this was very hard for reoky to bear
+      // Heavy Calculation: Spec Determination
+      // Performed on the snapshot data, outside the lock.
       val threeMostRecentTrees = sequenceOf(
-        card.recentCastEvents.take(128).map { it.timestamp to it.spell }, // doesn't allocate / execute immediately
-        card.recentDamageEvents.take(128).map { it.timestamp to it.spell } // saves a recipe for later
+        card.recentCastEvents.take(128).map { it.timestamp to it.spell },
+        card.recentDamageEvents.take(128).map { it.timestamp to it.spell }
       )
-        .flatten() // flatten the events from both into a single sequence
-        .mapNotNull { (ts, spell) -> findSkillTreeForSpell(spell)?.let { tree -> tree to ts } } // filter skills that resolve as null
-        .sortedByDescending { (_, ts) -> ts } // sort everything by timestamp (newest first)
-        .distinctBy { (tree, _) -> tree } // distinct keeps only the newest occurrence of each tree
-        .take(3) // take the three most recent unique trees
-        .map { (tree, _) -> tree } // into a map
-        .toSet() // make unique
+        .flatten()
+        .mapNotNull { (ts, spell) -> findSkillTreeForSpell(spell)?.let { tree -> tree to ts } }
+        .sortedByDescending { (_, ts) -> ts }
+        .distinctBy { (tree, _) -> tree }
+        .take(3)
+        .map { (tree, _) -> tree }
+        .toSet()
 
-      if (threeMostRecentTrees.count() < 3) {
-        return@forEach // not enough data yet, gib unknown
-      }
+      if (threeMostRecentTrees.count() < 3) return@forEach
 
       val determinedSpec = SpecType.fromTrees(threeMostRecentTrees)
 
-      // now update all the cards with the determined spec
-      // FIX: Re-fetch current card to ensure we don't overwrite concurrent increments (damage, heals)
-      cards[name]?.let { currentCard ->
-        val updatedCard = currentCard.copy(
-          currentBuild = determinedSpec.name,
-          cache = PlayerCacheEntity(
-            playerName = currentCard.name,
-            lastSeen = currentCard.lastEvent, // Use latest
-            lastKnownSpec = determinedSpec.name
-          )
-        )
-        cards[name] = updatedCard
+      // Update the card with the calculated spec
+      scope.launch {
+        mutex.withLock {
+          cards[name]?.let { currentCard ->
+            val updatedCard = currentCard.copy(
+              currentBuild = determinedSpec.name,
+              cache = PlayerCacheEntity(
+                playerName = currentCard.name,
+                lastSeen = currentCard.lastEvent,
+                lastKnownSpec = determinedSpec.name
+              )
+            )
+            cards[name] = updatedCard
 
-        if (determinedSpec != SpecType.UNKNOWN) {
-          //Log.info(TAG, "Determined ${card.name} is playing as ${determinedSpec.name}.")
-        }
-
-        // store all cached cards back to the database
-        updatedCard.cache?.let {
-          RFDao.playerCacheDao.insert(it)
+            // Persist to DB
+            updatedCard.cache?.let {
+              RFDao.playerCacheDao.insert(it)
+            }
+          }
         }
       }
     }
@@ -147,19 +129,24 @@ object PlayerCacheInteractor : Interactor() {
    * Builds parties of five from the ordered list of raid members and stores them under the raid ID.
    */
   fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
-    raids[raidId] = members.chunked(5).take(20)
-    members.forEach { member ->
-      createCardIfNoneExists(member.playerName)
+    scope.launch {
+      mutex.withLock {
+        raids[raidId] = members.chunked(5).take(20)
+        members.forEach { member ->
+          createCardIfNoneExists(member.playerName)
+        }
+      }
     }
   }
 
   /*
    * Create card for a player if none exists... Upgrade from NPC to Player occurs inside the PlayerCardExtensions helpers.
+   * NOTE: This method must be called within a mutex.withLock block as it is not thread-safe on its own.
    */
-  fun createCardIfNoneExists(playerName: String) {
+  private fun createCardIfNoneExists(playerName: String) {
     if (!cards.containsKey(playerName)) {
       val cached = runBlocking {
-        RFDao.playerCacheDao.getPlayerCacheFor(playerName) // only called if not in memory already
+        RFDao.playerCacheDao.getPlayerCacheFor(playerName)
       }
       val card = PlayerCard(
         name = playerName,
@@ -176,24 +163,30 @@ object PlayerCacheInteractor : Interactor() {
    * Reset all session totals and recent events for all players.
    */
   fun resetAllSessions() {
-    cards.forEach { (name, card) ->
-      val resetCard = card.copy(
-        recentCastSuccessfulCastEvents = listOf(),
-        recentCastEvents = listOf(),
-        recentDamageEvents = listOf(),
-        recentHealEvents = listOf(),
-        recentBuffGainedEvents = listOf(),
-        recentBuffEndedEvents = listOf(),
-        recentDebuffGainedEvents = listOf(),
-        recentDebuffEndedEvents = listOf(),
-        sessionDamageTotal = 0L,
-        sessionHealTotal = 0L,
-        sessionCCTotal = 0,
-        sessionDebuffTotal = 0
-      )
-      cards[name] = resetCard
+    scope.launch {
+      mutex.withLock {
+        // Iterate on keys to modify values
+        cards.keys.toList().forEach { name ->
+          cards[name]?.let { card ->
+            cards[name] = card.copy(
+              recentCastSuccessfulCastEvents = listOf(),
+              recentCastEvents = listOf(),
+              recentDamageEvents = listOf(),
+              recentHealEvents = listOf(),
+              recentBuffGainedEvents = listOf(),
+              recentBuffEndedEvents = listOf(),
+              recentDebuffGainedEvents = listOf(),
+              recentDebuffEndedEvents = listOf(),
+              sessionDamageTotal = 0L,
+              sessionHealTotal = 0L,
+              sessionCCTotal = 0,
+              sessionDebuffTotal = 0
+            )
+          }
+        }
+        cards.clear()
+      }
     }
-    cards.clear()
   }
 
   // filter pve damage by checking if the target is a real player
@@ -203,7 +196,11 @@ object PlayerCacheInteractor : Interactor() {
 
   /* Card Management */
   fun addOrUpdateCard(card: PlayerCard) {
-    cards[card.name] = card
+    scope.launch {
+      mutex.withLock {
+        cards[card.name] = card
+      }
+    }
   }
 
   fun getCard(name: String): PlayerCard? {
@@ -220,6 +217,7 @@ object PlayerCacheInteractor : Interactor() {
    */
   fun stronglyAssertIsPlayer(name: String, classMap: Map<String, Int>) {
     val spec = SpecType.fromTrees(classMap.values.mapNotNull { gameId -> SkillTreeType.fromGameId(gameId) }.toSet())
+    Log.debug(TAG, "Strongly asserting $name is a real player with spec $spec based on raid metadata.")
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(name)
@@ -360,7 +358,7 @@ object PlayerCacheInteractor : Interactor() {
   fun postPlayerDeath(playerName: String, timestamp: Long) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(playerName) // lol your first event ever is a death
+        createCardIfNoneExists(playerName)
         cards[playerName]?.let { card ->
           cards[playerName] = card.postDeathEvent(timestamp)
         }
