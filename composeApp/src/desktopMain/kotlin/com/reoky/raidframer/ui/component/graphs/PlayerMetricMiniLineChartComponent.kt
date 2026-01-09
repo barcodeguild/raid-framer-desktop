@@ -36,6 +36,7 @@ import io.github.koalaplot.core.xygraph.rememberAxisStyle
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import kotlinx.coroutines.delay
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.general_instructions_dragging_overlays
 import raid_framer_desktop.composeapp.generated.resources.general_metric_type_cc_short
 import raid_framer_desktop.composeapp.generated.resources.general_metric_type_damage_short
 import raid_framer_desktop.composeapp.generated.resources.general_metric_type_healing_short
@@ -164,12 +165,23 @@ fun PlayerMetricMiniLineGraphComponent(
     ) {
       if (buckets.all { it == 0L }) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-          // REPLACED: Hardcoded string
-          Text(
-            stringResource(Res.string.graphs_no_recent_data),
-            color = Color.LightGray,
-            style = MaterialTheme.typography.caption
-          )
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Row {
+              Text(
+                stringResource(Res.string.graphs_no_recent_data),
+                color = Color.LightGray,
+                style = MaterialTheme.typography.caption
+              )
+            }
+            Row {
+              Text(
+                stringResource(Res.string.general_instructions_dragging_overlays),
+                color = Color.LightGray,
+                style = MaterialTheme.typography.caption
+              )
+            }
+
+          }
         }
       } else {
         val series = remember(buckets) {

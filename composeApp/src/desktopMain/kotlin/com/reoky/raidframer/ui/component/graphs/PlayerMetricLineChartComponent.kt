@@ -35,10 +35,18 @@ import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_no_recent_data
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.get
+import kotlin.compareTo
+import kotlin.div
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.text.compareTo
+import kotlin.text.get
+import kotlin.text.toFloat
+import kotlin.times
 
 private data class TimeSample(val timestamp: Long, val valueSum: Long)
+private data class Peak(val index: Int, val value: Float) // used for the white line
 
 data class GroupSpec(
   val name: String,
@@ -227,6 +235,65 @@ fun MultiPlayerMetricLineChart(
                 alpha = 0.95f
               )
             )
+            dataSeries.firstOrNull()?.let { firstSeries ->
+              findTwoHighestPeaks(firstSeries)?.let { (peak1, peak2) ->
+                val midY = maxY / 2f
+
+                if (peak1.value > midY && peak2.value > midY) {
+                  // Calculate slope
+                  val slope = (peak2.value - peak1.value) / (peak2.index - peak1.index)
+
+                  // Calculate angle in degrees
+                  val angleRadians = kotlin.math.atan(slope)
+                  val angleDegrees = kotlin.math.abs(Math.toDegrees(angleRadians.toDouble()))
+
+                  // Only render if angle is less than 40 degrees
+                  if (angleDegrees < 40.0) {
+                    // Extend line to graph boundaries
+                    var leftX = 0f
+                    var leftY = peak1.value - (peak1.index * slope)
+
+                    var rightX = maxX
+                    var rightY = peak1.value + ((maxX - peak1.index) * slope)
+
+                    // Check if extended points go below any curve values
+                    // Find leftmost safe point
+                    for (i in 0 until peak1.index) {
+                      val projectedY = peak1.value - ((peak1.index - i) * slope)
+                      if (projectedY <= firstSeries[i].y) {
+                        leftX = i.toFloat()
+                        leftY = projectedY
+                        break
+                      }
+                    }
+
+                    // Find rightmost safe point
+                    for (i in firstSeries.lastIndex downTo peak2.index + 1) {
+                      val projectedY = peak2.value + ((i - peak2.index) * slope)
+                      if (projectedY <= firstSeries[i].y) {
+                        rightX = i.toFloat()
+                        rightY = projectedY
+                        break
+                      }
+                    }
+
+                    val trendLine = listOf(
+                      DefaultPoint(leftX, leftY),
+                      DefaultPoint(rightX, rightY)
+                    )
+
+                    LinePlot2<Float, Float>(
+                      data = trendLine,
+                      lineStyle = LineStyle(
+                        brush = SolidColor(Color.White),
+                        strokeWidth = 3.dp,
+                        alpha = 0.85f
+                      )
+                    )
+                  }
+                }
+              }
+            }
           }
         }
 
@@ -283,30 +350,45 @@ fun MultiPlayerMetricLineChart(
   }
 }
 
-@Composable
-fun PlayerMetricLineChart(
-  playerName: String,
-  metricType: GraphMetricType = GraphMetricType.HEALING,
-  minutesWindow: Int = 1,
-  mode: GameMonitorInteractor.MonitorModes = GameMonitorInteractor.MonitorModes.MONITOR,
-  forceSlidingWindow: Boolean = false,
-  smoothing: Boolean = false,
-  smoothingWindow: Int = 3,
-  modifier: Modifier = Modifier
-) {
-  MultiPlayerMetricLineChart(
-    metricType = metricType,
-    groups = listOf(
-      GroupSpec(
-        name = playerName,
-        filter = { it.name == playerName },
-        color = Color(0xFF42A5F5))
-    ),
-    initialMinutesWindow = minutesWindow,
-    mode = mode,
-    forceSlidingWindow = forceSlidingWindow,
-    smoothing = smoothing,
-    smoothingWindow = smoothingWindow,
-    modifier = modifier
-  )
+private fun findTwoHighestPeaks(series: List<DefaultPoint<Float, Float>>): Pair<Peak, Peak>? {
+  if (series.size < 3) return null
+
+  // Find local maxima (peaks) - allow equal values
+  val peaks = mutableListOf<Peak>()
+  for (i in 1 until series.size - 1) {
+    val prev = series[i - 1].y
+    val curr = series[i].y
+    val next = series[i + 1].y
+
+    if (curr >= prev && curr >= next && curr > 0f) {
+      peaks.add(Peak(i, curr))
+    }
+  }
+
+  // If not enough peaks, try taking the 2 highest values (not necessarily local maxima)
+  if (peaks.size < 2) {
+    val allPoints = series.mapIndexed { idx, pt -> Peak(idx, pt.y) }
+      .filter { it.value > 0f }
+      .sortedByDescending { it.value }
+      .take(2)
+
+    if (allPoints.size < 2) return null
+
+    return if (allPoints[0].index < allPoints[1].index) {
+      Pair(allPoints[0], allPoints[1])
+    } else {
+      Pair(allPoints[1], allPoints[0])
+    }
+  }
+
+  // Sort by value descending and take top 2
+  val topTwo = peaks.sortedByDescending { it.value }.take(2)
+
+  // Return in chronological order (left to right)
+  return if (topTwo[0].index < topTwo[1].index) {
+    Pair(topTwo[0], topTwo[1])
+  } else {
+    Pair(topTwo[1], topTwo[0])
+  }
 }
+

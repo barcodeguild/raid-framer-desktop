@@ -26,7 +26,6 @@
     <string name="settings_data_sourcing_description">Please be careful to enter the correct ArcheRage directory below. This field may have been populated automatically.</string>
     <string name="settings_data_sourcing_sidenote">Technically, you do not need ArcheRage installed if you only want to view historical combat.log files. Just right-click on the .log or .rf (battle slice export file) and choose 'Open-With → Raid Framer' in the Windows Explorer context menu to view a replay.</string>
 
-
     <!-- General Strings -->
     <string name="general_metric_type_damage">Damage</string>
     <string name="general_metric_type_damage_short">DMG</string>
@@ -34,5 +33,7 @@
     <string name="general_metric_type_healing_short">HEALS</string>
     <string name="general_metric_type_cc">Crowd Control</string>
     <string name="general_metric_type_cc_short">CC</string>
+
+    <string name="general_instructions_dragging_overlays">Shift + Click to Drag Overlays</string>
 
 </resources>
