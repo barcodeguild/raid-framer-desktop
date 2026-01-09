@@ -21,3 +21,25 @@ object RaidColors {
 object RFColors {
 
 }
+
+enum class RFGraphColor(val color: Color) {
+  RED(Color.Red),
+  GREEN(Color.Green),
+  BLUE(Color.Blue),
+  YELLOW(Color.Yellow),
+  CYAN(Color.Cyan),
+  MAGENTA(Color.Magenta),
+  ORANGE(Color(0xFFFFA500))
+}
+
+/*
+ * Pick the next color that is not already used from a predefined list randomly.
+ */
+fun pickNextColor(usedColors: Set<RFGraphColor>): RFGraphColor {
+  val availableColors = RFGraphColor.entries
+  val unusedColors = availableColors.filter { it !in usedColors }
+  if (unusedColors.isNotEmpty()) {
+    return unusedColors.random()
+  }
+  return RFGraphColor.ORANGE // default if all colors are used
+}
