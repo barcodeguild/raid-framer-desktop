@@ -3,7 +3,7 @@ RF = RF or {} -- ensure global RF exists
 ADDON:ImportObject(OBJECT_TYPE.BUTTON)
 ADDON:ImportAPI(API_TYPE.CHAT.id)
 
-local DEV_RELOAD_BUTTON = true  -- flip to false before release
+local DEV_RELOAD_BUTTON = false  -- flip to false before release
 
 local reloadButton
 
