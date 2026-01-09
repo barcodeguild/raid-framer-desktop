@@ -15,14 +15,19 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import com.reoky.raidframer.core.database.WindowStateEntity
+import com.sun.jna.Pointer
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.Shape
+import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.geom.*
-import kotlin.compareTo
-import kotlin.text.compareTo
+import com.sun.jna.platform.win32.User32
+import com.sun.jna.platform.win32.WinUser
+import com.sun.jna.platform.win32.WinDef.HWND
+import kotlinx.coroutines.delay
+import java.lang.reflect.Field
 
 @Composable
 fun OverlayWindow(
@@ -52,21 +57,13 @@ fun OverlayWindow(
     transparent = true,
     title = title,
     alwaysOnTop = true,
-    focusable = isFocusable,
+    focusable = false,
     undecorated = true,
     visible = isVisible.value && isEverythingVisible.value && !isObstructing.value
   ) {
 
     // custom window shape with rounded corners
     with(LocalDensity.current) {
-//      val widthPx = windowState.size.width.roundToPx().coerceIn(0, 10000)
-//      val heightPx = windowState.size.height.roundToPx().coerceIn(0, 10000)
-//      window.setBounds(
-//        windowState.position.x.roundToPx(),
-//        windowState.position.y.roundToPx(),
-//        widthPx,
-//        heightPx
-//      )
       window.shape = OverlayWindowShape(
         0.0,
         0.0,
@@ -75,13 +72,22 @@ fun OverlayWindow(
         8.0,
         8.0
       )
-      //OverlayInteractor.updateWindowStateFor(overlayType, windowState)
     }
 
     // call window creation callback exactly once (when available)
     val composeWindow = this.window
     LaunchedEffect(composeWindow) {
       onWindowCreated(composeWindow)
+    }
+
+    // does what apps like Discord do to make an overlay window that doesn't steal focus
+    LaunchedEffect(Unit) {
+      if (windowType == OverlayWindowType.OVERLAY) {
+        delay(100)
+        getHWND(window)?.let { windowHandle ->
+          makeDiscordStyleOverlay(windowHandle)
+        }
+      }
     }
 
     // shift-click mouse listener to allow dragging the window around (tooltips always draggable without shift)
@@ -306,4 +312,43 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       isVisible = false
     )
   }
+}
+
+/*
+ * Simply utility to get the HWND from a Java AWT Window. Jetpack doesn't expose this directly
+ * because it's supposed to be cross-platform (including Android, which doesn't have HWNDs).
+ * This is so when the user alt-tabs it doesn't alt-tab them to a bunch of overlay windows,
+ * when really they just want to go back to / leave the game.
+ */
+fun getHWND(window: Window): HWND? {
+  return try {
+    val peerField: Field = java.awt.Component::class.java
+      .getDeclaredField("peer")
+      .apply { isAccessible = true }
+
+    val peer = peerField.get(window) ?: return null
+
+    // Reflectively read hWnd field
+    val hwndField = peer.javaClass.getDeclaredField("hWnd")
+    hwndField.isAccessible = true
+
+    val hwndValue = hwndField.getLong(peer)
+
+    if (hwndValue != 0L) {
+      HWND(Pointer.createConstant(hwndValue))
+    } else null
+  } catch (e: Exception) {
+    null
+  }
+}
+
+/*
+ * Applies the necessary window styles to make an overlay window that doesn't steal focus
+ * and behaves similarly to Discord's in-game overlay.
+ */
+fun makeDiscordStyleOverlay(hwnd: HWND) {
+  val user32 = User32.INSTANCE
+  val exStyle = user32.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE)
+  val newStyle = (exStyle or 0x00000080 or WinUser.WS_EX_LAYERED) and 0x00040000.inv()
+  user32.SetWindowLong(hwnd, WinUser.GWL_EXSTYLE, newStyle)
 }

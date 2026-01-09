@@ -87,8 +87,10 @@ compose.desktop {
           windowsIconFile = project.file("raidframer.ico")
         )
       }
-
-
+      jvmArgs(
+        "--add-opens=java.desktop/java.awt=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.awt.windows=ALL-UNNAMED"
+      )
     }
   }
 }

@@ -1,6 +1,5 @@
 package com.reoky.raidframer.ui.overlay
 
-import com.reoky.raidframer.core.helpers.EventParserHelper
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -32,6 +31,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.helpers.renderDebuffThumbnailGrid
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.DamageEvent
@@ -79,7 +80,7 @@ fun TrackerOverlay(wm: WindowManager? = null) {
     castProgress = 1f // set the progress to 100%
   }
 
-  var playerName = remember { "Reoky" } // testing for now
+  val playerName by AppState.selectedTarget.collectAsState()
 
 
   val isCharmed = remember { mutableStateOf(false) }
@@ -90,14 +91,16 @@ fun TrackerOverlay(wm: WindowManager? = null) {
   // poll for recent heals and damage events
   LaunchedEffect(playerName) {
     while (true) {
-      PlayerCacheInteractor.getCard(playerName)?.let { player ->
-        isCharmed.value = player.isCharmed
-        recentDamageEvents.clear()
-        recentDamageEvents.addAll(player.recentDamageEvents)
-        recentHealEvents.clear()
-        recentHealEvents.addAll(player.recentHealEvents)
-        activeDebuffs.clear()
-        //activeDebuffs.addAll(player.activeDebuffs)
+      playerName?.let { name ->
+        PlayerCacheInteractor.getCard(name)?.let { player ->
+          isCharmed.value = player.isCharmed
+          recentDamageEvents.clear()
+          recentDamageEvents.addAll(player.recentDamageEvents)
+          recentHealEvents.clear()
+          recentHealEvents.addAll(player.recentHealEvents)
+          activeDebuffs.clear()
+          //activeDebuffs.addAll(player.activeDebuffs)
+        }
       }
       delay(5000)
     }
