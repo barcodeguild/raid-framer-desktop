@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object MaledictionDefinition : SkillTreeDefinition {
-
+  override val gameId = 11
   override val tree = SkillTreeType.MALEDICTION
   override val skills = listOf(
     Skill(0, "Mana Bolts", 0.0, 0.0, false, listOf("Mana Bolts")),

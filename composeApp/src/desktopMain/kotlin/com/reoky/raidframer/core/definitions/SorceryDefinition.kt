@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object SorceryDefinition : SkillTreeDefinition {
-
+  override val gameId = 7
   override val tree = SkillTreeType.SORCERY
   override val skills = listOf(
     Skill(0, "Flamebolt", 0.8, 0.0, false,listOf("Flamebolt")),

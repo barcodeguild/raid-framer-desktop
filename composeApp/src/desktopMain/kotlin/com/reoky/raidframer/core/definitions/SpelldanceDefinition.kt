@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object SpelldanceDefinition : SkillTreeDefinition {
-
+  override val gameId = 14
   override val tree = SkillTreeType.AURAMANCY
   override val skills = listOf(
     Skill(0, "Dancer's Touch", 0.0, 0.0, false, listOf("Dancer's Touch")),

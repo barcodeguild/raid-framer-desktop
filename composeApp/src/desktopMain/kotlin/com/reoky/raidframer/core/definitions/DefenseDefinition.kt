@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object DefenseDefinition : SkillTreeDefinition {
-
+  override val gameId = 3
   override val tree = SkillTreeType.DEFENSE
   override val skills = listOf(
     Skill(0, "Shield Slam", 0.0, 2.0, false, listOf("Shield Slam")),

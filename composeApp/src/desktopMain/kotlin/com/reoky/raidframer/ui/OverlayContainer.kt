@@ -17,6 +17,7 @@ import com.reoky.raidframer.ui.overlay.MiniOverlay
 import com.reoky.raidframer.ui.overlay.RaidOverlay
 import com.reoky.raidframer.ui.overlay.SettingsOverlay
 import com.reoky.raidframer.ui.overlay.SummaryOverlay
+import com.reoky.raidframer.ui.overlay.TrackerOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.awt.event.ComponentAdapter
@@ -52,6 +53,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.MINI -> MiniOverlay(wm)
           OverlayType.SETTINGS -> SettingsOverlay(wm)
           OverlayType.COMPANION -> CompanionOverlay(wm)
+          OverlayType.TRACKER -> TrackerOverlay(wm)
           OverlayType.RAID -> RaidOverlay(wm)
           OverlayType.SUMMARY -> SummaryOverlay(wm)
           else -> {}//throw Exception("Overlay type $type not implemented")

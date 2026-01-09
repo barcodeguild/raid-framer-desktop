@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object BattlerageDefinition : SkillTreeDefinition {
-
+  override val gameId = 1
   override val tree = SkillTreeType.BATTLERAGE
   override val skills = listOf(
     Skill(0, "Triple Slash", 0.0, 0.0, false, listOf("Triple Slash")), // no casting quake version

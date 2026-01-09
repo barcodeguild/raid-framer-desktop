@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object AuramancyDefinition : SkillTreeDefinition {
-
+  override val gameId = 4
   override val tree = SkillTreeType.AURAMANCY
   override val skills = listOf(
     Skill(0, "Thwart", 0.0, 15.0, false, listOf("Thwart")),

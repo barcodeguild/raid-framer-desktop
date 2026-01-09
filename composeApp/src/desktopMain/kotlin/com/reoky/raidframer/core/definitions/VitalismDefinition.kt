@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object VitalismDefinition : SkillTreeDefinition {
-
+  override val gameId = 10
   override val tree = SkillTreeType.VITALISM
   override val skills = listOf(
     Skill(0, "Holy Bolt", 1.7, 0.0, false, listOf("Holy Bolt")), // no casting

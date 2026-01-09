@@ -6,6 +6,7 @@ import com.reoky.raidframer.core.calc.MetricRawSample
 import com.reoky.raidframer.core.calc.RealtimeComputer
 import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.database.RFDao
+import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
 import com.reoky.raidframer.core.model.BuffEndedEvent
@@ -217,18 +218,22 @@ object PlayerCacheInteractor : Interactor() {
   /*
    * Helps upgrade an NPC card to a real player card immediately based on metadata from the game proving it's a player.
    */
-  fun stronglyAssertIsPlayer(name: String) {
-    cards[name]?.let { card ->
-      if (!card.isRealPlayer) {
-        val upgradedCard = card.copy(
-          isRealPlayer = true,
-          cache = PlayerCacheEntity(
-            playerName = card.name,
-            lastSeen = card.lastEvent,
-            lastKnownSpec = card.currentBuild
+  fun stronglyAssertIsPlayer(name: String, classMap: Map<String, Int>) {
+    val spec = SpecType.fromTrees(classMap.values.mapNotNull { gameId -> SkillTreeType.fromGameId(gameId) }.toSet())
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(name)
+        cards[name]?.let { card ->
+          cards[name] = card.copy(
+            isRealPlayer = true,
+            currentBuild = if (spec != SpecType.UNKNOWN) spec.name else card.currentBuild,
+            cache = PlayerCacheEntity(
+              playerName = card.name,
+              lastSeen = card.lastEvent,
+              lastKnownSpec = card.currentBuild
+            )
           )
-        )
-        cards[name] = upgradedCard
+        }
       }
     }
   }
@@ -252,7 +257,8 @@ object PlayerCacheInteractor : Interactor() {
 
   private fun postDamage(event: DamageEvent) {
     scope.launch {
-      mutex.withLock {    createCardIfNoneExists(event.caster)
+      mutex.withLock {
+        createCardIfNoneExists(event.caster)
         //realtimeComputer.push(MetricRawSample(event.timestamp, event.damage.toDouble()))
         cards[event.caster]?.let { card ->
           cards[event.caster] = card.postDamageEvent(event)
@@ -263,7 +269,8 @@ object PlayerCacheInteractor : Interactor() {
 
   private fun postHeal(event: HealEvent) {
     scope.launch {
-      mutex.withLock {    createCardIfNoneExists(event.caster)
+      mutex.withLock {
+        createCardIfNoneExists(event.caster)
         cards[event.caster]?.let { card ->
           cards[event.caster] = card.postHealEvent(event)
         }

@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object ShadowplayDefinition : SkillTreeDefinition {
-
+  override val gameId = 8
   override val tree = SkillTreeType.SHADOWPLAY
   override val skills = listOf(
     Skill(0, "Rapid Strike", 0.0, 0.0, false, listOf("Rapid Strike")),

@@ -269,7 +269,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 50f,
       lastWidthDp = 300f,
       lastHeightDp = 400f,
-      isVisible = false
+      isVisible = true
     )
 
     OverlayType.AGGRO -> WindowStateEntity(

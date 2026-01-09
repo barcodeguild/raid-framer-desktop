@@ -1,5 +1,6 @@
 package com.reoky.raidframer.core.interactor
 
+import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
@@ -107,13 +108,19 @@ object CompanionInteractor : Interactor() {
           if (factionName.isBlank() || factionName.contains(" ")) return
           RFConfig.update { it.copy(playerFaction = factionName)}
         }
+        is IPCMessagePayload.TargetUpdate -> {
+          val targetName = message.payload
+          if (targetName.isBlank() || targetName.contains(" ")) return
+          AppState.selectTarget(targetName)
+          Log.info(TAG, "User tabbed over $targetName..")
+        }
         is IPCMessagePayload.PlayerInfo -> {
           when (val payload = message.payload) {
             is PlayerInfoPayload.Character -> {
               val playerName = payload.name
               println("Metadata for player ${payload.name} received.")
               if (playerName.isBlank() || playerName.contains(" ")) return
-              PlayerCacheInteractor.stronglyAssertIsPlayer(payload.name)
+              PlayerCacheInteractor.stronglyAssertIsPlayer(payload.name, payload.classMap)
             }
             is PlayerInfoPayload.Npc -> {
               println("Metadata for NPC ${payload.name} received.")

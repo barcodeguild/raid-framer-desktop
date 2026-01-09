@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object WitchcraftDefinition : SkillTreeDefinition {
-
+  override val gameId = 2
   override val tree = SkillTreeType.WITCHCRAFT
   override val skills = listOf(
     Skill(0, "Earthen Grip", 0.4, 18.0, true, listOf("Earthen Grip")),

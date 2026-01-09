@@ -59,10 +59,10 @@ fun PreviewAggroOverlay() {
 @Composable
 fun TrackerOverlay(wm: WindowManager? = null) {
 
-  var showDmg by remember { mutableStateOf(false) }
-  var castProgress by remember { mutableStateOf(0f) }
+  var showDmg by remember { mutableStateOf(true) }
+  var castProgress by remember { mutableStateOf(50f) }
   val spellName = "Unknown Spell"
-  var isCasting by remember { mutableStateOf(false) }
+  var isCasting by remember { mutableStateOf(true) }
 
   val animatedProgress by animateFloatAsState(
     targetValue = castProgress,

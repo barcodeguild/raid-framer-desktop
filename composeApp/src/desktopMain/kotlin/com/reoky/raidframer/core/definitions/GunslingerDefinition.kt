@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object GunslingerDefinition : SkillTreeDefinition {
-
+  override val gameId = 13
   override val tree = SkillTreeType.GUNSLINGER
   override val skills = listOf(
     Skill(0, "Ceaseless Fire", 0.0, 0.0, false, listOf("Ceaseless Fire")), // no casting

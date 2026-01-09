@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object OccultismDefinition : SkillTreeDefinition {
-
+  override val gameId = 5
   override val tree = SkillTreeType.OCCULTISM
   override val skills = listOf(
     Skill(0, "Crippling Mire", 0.0, 36.0, true,listOf("Crippling Mire")), // no casting

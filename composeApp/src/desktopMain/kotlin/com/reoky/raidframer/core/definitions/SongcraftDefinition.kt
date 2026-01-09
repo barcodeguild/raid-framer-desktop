@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object SongcraftDefinition : SkillTreeDefinition {
-
+  override val gameId = 9
   override val tree = SkillTreeType.SONGCRAFT
   override val skills = listOf(
     Skill(0, "Critical Discord",  0.0, 16.0, false, listOf("Critical Discord")), // no casting

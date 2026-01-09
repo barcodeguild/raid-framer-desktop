@@ -65,6 +65,14 @@ sealed class IPCMessagePayload {
   ) : IPCMessagePayload()
 
   @Serializable
+  @SerialName("TARGET_UPDATE")
+  data class TargetUpdate(
+    override val version: Int = 1,
+    override val timestamp: Long,
+    val payload: String // character name
+  ) : IPCMessagePayload()
+
+  @Serializable
   @SerialName("COMBAT_EVENT")
   data class CombatEvent(
     override val version: Int = 1,

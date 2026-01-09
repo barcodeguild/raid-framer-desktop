@@ -24,6 +24,7 @@ val META_MAGE_SPECS = setOf<SpecType>(
  * The base definitions class used for identifying what classes players are playing.
  */
 interface SkillTreeDefinition {
+  val gameId: Int // the int id used in the game for this tree
   val tree: SkillTreeType
   val skills: List<Skill>
 }
@@ -97,6 +98,9 @@ enum class SkillTreeType(val tree: SkillTreeDefinition) {
   companion object {
     fun fromName(name: String): SkillTreeType? {
       return entries.find { it.name.equals(name, ignoreCase = true) }
+    }
+    fun fromGameId(id: Int): SkillTreeType? {
+      return entries.find { it.tree.gameId == id }
     }
   }
 }

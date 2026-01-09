@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object SwiftbladeDefinition : SkillTreeDefinition {
-
+  override val gameId = 12
   override val tree = SkillTreeType.SWIFTBLADE
   override val skills = listOf(
     Skill(0, "Blade Flurry", 0.0, 0.0, false, listOf("Blade Flurry")), // no casting

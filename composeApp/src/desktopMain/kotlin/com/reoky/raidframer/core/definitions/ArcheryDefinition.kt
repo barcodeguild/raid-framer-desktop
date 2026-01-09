@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.definitions
 
 object ArcheryDefinition : SkillTreeDefinition {
-
+  override val gameId = 6
   override val tree = SkillTreeType.ARCHERY
   override val skills = listOf(
     Skill(0, "Endless Arrows", 0.0, 0.0, false, listOf("Endless Arrows")), // no casting
