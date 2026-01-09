@@ -1,48 +1,57 @@
 package com.reoky.raidframer.ui.component.graphs
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.unit.dp
-import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
-import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.model.*
 import io.github.koalaplot.core.line.AreaBaseline
+import io.github.koalaplot.core.line.AreaBaseline.ConstantLine
 import io.github.koalaplot.core.line.AreaPlot2
-import io.github.koalaplot.core.style.LineStyle
-import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.xygraph.DefaultPoint
-import io.github.koalaplot.core.xygraph.XYGraph
-import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import io.github.koalaplot.core.line.LinePlot2
 import io.github.koalaplot.core.style.AreaStyle
+import io.github.koalaplot.core.style.LineStyle
+import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
+import io.github.koalaplot.core.xygraph.*
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.graphs_no_recent_data
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 
-// Changed to TimeSample to reflect variable resolution (now 1s)
-private data class TimeSample(val timestamp: Long, val damageSum: Long)
+private data class TimeSample(val timestamp: Long, val valueSum: Long)
 
-// Group descriptor - filter is typed as PlayerCard -> Boolean
 data class GroupSpec(
   val name: String,
   val filter: (PlayerCard) -> Boolean,
   val color: Color
 )
 
-/*
- * ArcheAge PvP event data can be very spiky, so I'm hoping that any smoothing at all could help, friends..!
- */
+enum class GraphMetricType(val displayName: String) {
+  DAMAGE("Damage"),
+  HEALING("Healing"),
+  CC("Crowd Control")
+}
+
 private fun simpleMovingAverage(series: List<DefaultPoint<Float, Float>>, window: Int): List<DefaultPoint<Float, Float>> {
   if (window <= 1 || series.size <= 1) return series
   val half = window / 2
@@ -55,17 +64,16 @@ private fun simpleMovingAverage(series: List<DefaultPoint<Float, Float>>, window
   }
 }
 
-@OptIn(ExperimentalKoalaPlotApi::class)
+@OptIn(ExperimentalKoalaPlotApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MultiPlayerMetricLineChart(
+  metricType: GraphMetricType,
   groups: List<GroupSpec>,
-  minutesWindow: Int = 15,
+  initialMinutesWindow: Int = 15,
   mode: GameMonitorInteractor.MonitorModes = GameMonitorInteractor.MonitorModes.MONITOR,
   forceSlidingWindow: Boolean = false,
   smoothing: Boolean = false,
   smoothingWindow: Int = 3,
-  minXAxisLabels: Int = 2,
-  maxXAxisLabels: Int = 8,
   modifier: Modifier = Modifier
 ) {
   // clamp groups to 1..3
@@ -73,124 +81,91 @@ fun MultiPlayerMetricLineChart(
     listOf(GroupSpec("All", { true }, Color(0xFFEF5350)))
   }
 
+  var selectedMinutes by remember(initialMinutesWindow) { mutableStateOf(initialMinutesWindow) }
   var samplesPerGroup by remember { mutableStateOf<List<List<TimeSample>>>(emptyList()) }
-  var rangeStart by remember { mutableStateOf(0L) }
-  var rangeEnd by remember { mutableStateOf(0L) }
 
-  LaunchedEffect(usedGroups, minutesWindow, mode, forceSlidingWindow) {
+  // Update loop
+  LaunchedEffect(usedGroups, selectedMinutes, mode, forceSlidingWindow, metricType) {
     while (true) {
       val now = System.currentTimeMillis()
       val groupCards = usedGroups.map { spec ->
         PlayerCacheInteractor.getGroupCards { pc -> spec.filter(pc) }
       }
 
-      // collect all events across groups to decide global range
-      val allEvents = groupCards.flatMap { cards -> cards.flatMap { it.recentHealEvents } }
+      val bucketSize = 1000L // 1 second resolution
+      val windowStart = now - selectedMinutes * 60_000L
+      val nowBucketStart = (now / bucketSize) * bucketSize
+      val totalBuckets = selectedMinutes * 60
 
-      // Resolution: 1 second (1000ms) instead of 1 minute (60000ms) for better detail
-      val bucketSize = 1000L
-
-      if (allEvents.isEmpty()) {
-        val nowBucketStart = (now / bucketSize) * bucketSize
-        // Calculate how many 1-second buckets fit in the minutesWindow
-        val totalBuckets = minutesWindow * 60
-        val baseline = (totalBuckets - 1 downTo 0).map { i -> TimeSample(nowBucketStart - i * bucketSize, 0L) }
-        samplesPerGroup = List(usedGroups.size) { baseline }
-        rangeStart = baseline.first().timestamp
-        rangeEnd = baseline.last().timestamp
-        delay(5_000L)
-        continue
-      }
+      // Generate X axis timestamps (descending from now)
+      val bucketTimestamps = (totalBuckets - 1 downTo 0).map { i -> nowBucketStart - i * bucketSize }
 
       val useSliding = forceSlidingWindow || (mode != GameMonitorInteractor.MonitorModes.REPLAY)
 
-      if (useSliding) {
-        val windowStart = now - minutesWindow * 60_000L
-        val nowBucketStart = (now / bucketSize) * bucketSize
-
-        // buckets per group keyed by bucketStart (timestamp)
-        val perGroupBuckets = groupCards.map { cards ->
-          val buckets = mutableMapOf<Long, Long>()
-          cards.forEach { c ->
-            c.recentHealEvents.forEach { e ->
-              if (e.timestamp >= windowStart) {
-                val bucketStart = (e.timestamp / bucketSize) * bucketSize
-                buckets[bucketStart] = (buckets[bucketStart] ?: 0L) + e.amount
-              }
-            }
+      val computedPerGroup = groupCards.map { cards ->
+        val buckets = mutableMapOf<Long, Long>()
+        cards.forEach { card ->
+          // Select events based on metric type
+          val events: List<CombatEvent> = when (metricType) {
+            GraphMetricType.DAMAGE -> card.recentDamageEvents
+            GraphMetricType.HEALING -> card.recentHealEvents
+            GraphMetricType.CC -> card.recentDebuffAppliedEvents
           }
-          buckets
-        }
 
-        val totalBuckets = minutesWindow * 60
-        val bucketTimestamps = (totalBuckets - 1 downTo 0).map { i -> nowBucketStart - i * bucketSize }
-        val computedPerGroup = perGroupBuckets.map { buckets ->
-          bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
-        }
-
-        samplesPerGroup = computedPerGroup
-        rangeStart = bucketTimestamps.first()
-        rangeEnd = bucketTimestamps.last()
-      } else {
-        // replay: union range across all events
-        val oldest = allEvents.minOf { it.timestamp }
-        val newest = allEvents.maxOf { it.timestamp }
-        val startBucket = (oldest / bucketSize) * bucketSize
-        val endBucket = (newest / bucketSize) * bucketSize
-        val bucketCount = ((endBucket - startBucket) / bucketSize).toInt().coerceAtLeast(0)
-        val bucketTimestamps = (0..bucketCount).map { i -> startBucket + i * bucketSize }
-
-        val perGroupBuckets = groupCards.map { cards ->
-          val buckets = mutableMapOf<Long, Long>()
-          cards.forEach { c ->
-            c.recentHealEvents.forEach { e ->
+          events.forEach { e ->
+            if (!useSliding || e.timestamp >= windowStart) {
               val bucketStart = (e.timestamp / bucketSize) * bucketSize
-              buckets[bucketStart] = (buckets[bucketStart] ?: 0L) + e.amount
+
+              val amount = when (metricType) {
+                GraphMetricType.DAMAGE -> (e as? DamageEvent)?.damage?.toLong() ?: 0L
+                GraphMetricType.HEALING -> (e as? HealEvent)?.amount?.toLong() ?: 0L
+                GraphMetricType.CC -> 1L // Count
+              }
+
+              buckets[bucketStart] = (buckets[bucketStart] ?: 0L) + amount
             }
           }
-          buckets
         }
 
-        val computedPerGroup = perGroupBuckets.map { buckets ->
-          bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
-        }
-
-        samplesPerGroup = computedPerGroup
-        rangeStart = bucketTimestamps.first()
-        rangeEnd = bucketTimestamps.last()
+        // Map back to the generated timestamp list
+        bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
       }
 
-      delay(5_000L)
+      samplesPerGroup = computedPerGroup
+      delay(1000L)
     }
   }
 
-  // Updated format to include seconds for higher precision
   val timeFmt = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
 
   Column(modifier = modifier) {
+    var isHovered by remember { mutableStateOf(false) }
+
     Box(
       modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight()
         .background(Color.Transparent)
-        .padding(8.dp),
+        .padding(8.dp)
+        .pointerMoveFilter(
+          onEnter = { isHovered = true; false },
+          onExit = { isHovered = false; false }
+        ),
       contentAlignment = Alignment.Center
     ) {
       if (samplesPerGroup.isEmpty() || samplesPerGroup.first().isEmpty()) {
-        Text("No data", color = Color.LightGray)
+        Text(text = stringResource(Res.string.graphs_no_recent_data), color = Color.LightGray)
       } else {
-        // keep timestamps aligned source
         val timestamps = remember(samplesPerGroup) { samplesPerGroup.first().map { it.timestamp } }
-        val count = timestamps.size.coerceAtLeast(1)
+        val count = timestamps.size
 
-        // Use index-based X to ensure equal spacing across the X axis (0 .. count-1)
+        // X axis is 0..count-1
         val minX = 0f
         val maxX = (count - 1).toFloat().coerceAtLeast(1f)
 
-        // build data series per group using index as X
         val rawSeries = remember(samplesPerGroup) {
           samplesPerGroup.map { samples ->
-            samples.mapIndexed { idx, s -> DefaultPoint(idx.toFloat(), s.damageSum.toFloat()) }
+            samples.mapIndexed { idx, s -> DefaultPoint(idx.toFloat(), s.valueSum.toFloat()) }
           }
         }
 
@@ -201,90 +176,36 @@ fun MultiPlayerMetricLineChart(
         }
 
         val maxY = remember(samplesPerGroup) {
-          val maxVal = samplesPerGroup.flatten().maxOfOrNull { it.damageSum } ?: 1000L
-          max(maxVal.toFloat(), 100f) * 1.1f
+          val maxVal = samplesPerGroup.flatten().maxOfOrNull { it.valueSum } ?: 10L
+          max(maxVal.toFloat(), 10f) * 1.1f
         }
-
-        val totalRange = (maxX - minX).coerceAtLeast(1f)
-
-        val desiredLabelCount = max(
-          minXAxisLabels,
-          min(maxXAxisLabels, count) // cannot have more labels than points mhmm
-        )
-
-        // compute evenly spaced label *indices* between 0 and count-1
-        val labelIndices: List<Int> = if (desiredLabelCount <= 1) {
-          listOf(0)
-        } else {
-          (0 until desiredLabelCount).map { i ->
-            ((i.toFloat() * (count - 1)) / (desiredLabelCount - 1)).roundToInt()
-          }.distinct().sorted()
-        }
-
-        // precompute index -> formatted time for only those label positions
-        val indexToLabel: Map<Int, String> = labelIndices.associateWith { idx ->
-          val millis = timestamps[idx.coerceIn(0, timestamps.lastIndex)]
-          timeFmt.format(Date(millis))
-        }
-
-        val xAxisModel = rememberFloatLinearAxisModel(
-          range = minX..maxX,
-          minimumMajorTickSpacing = 60.dp,
-          minorTickCount = 0
-        )
-
-        val tickPositionsState = remember { mutableStateOf<List<Float>>(emptyList()) }
-        val labeledTicksState = remember { mutableStateOf<Set<Float>>(emptySet()) }
 
         XYGraph<Float, Float>(
-          xAxisModel = xAxisModel,
-          yAxisModel = rememberFloatLinearAxisModel(0f..maxY),
-          horizontalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.3f),
-          verticalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.3f),
-          horizontalMinorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0f),
-          verticalMinorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0f),
-
-          xAxisLabels = @Composable { xVal: Float ->
-            val currentTicks = tickPositionsState.value
-            if (!currentTicks.contains(xVal)) {
-              val updated = (currentTicks + xVal).distinct().sorted()
-              tickPositionsState.value = updated
-
-              val tickCount = updated.size
-              if (tickCount > 0) {
-                val maxLabels = maxXAxisLabels.coerceAtLeast(minXAxisLabels)
-                val indicesToKeep: List<Int> = if (tickCount <= maxLabels) {
-                  (0 until tickCount).toList()
-                } else {
-                  val step = (tickCount - 1).toFloat() / (maxLabels - 1)
-                  (0 until maxLabels).map { i -> (i * step).roundToInt().coerceIn(0, tickCount - 1) }.distinct().sorted()
-                }
-                labeledTicksState.value = indicesToKeep.map { updated[it] }.toSet()
-              }
-            }
-
-            val labeledTicks = labeledTicksState.value
-            val showLabel = labeledTicks.isEmpty() || labeledTicks.contains(xVal)
-
-            if (!showLabel) {
-              Text("", style = MaterialTheme.typography.caption)
-              return@XYGraph
-            }
-
-            val nearestIndex = xVal.roundToInt().coerceIn(0, timestamps.lastIndex)
-            val millis = timestamps[nearestIndex]
-            val labelText = timeFmt.format(Date(millis))
-
-            Text(
-              labelText,
-              style = MaterialTheme.typography.caption,
-              color = Color.LightGray
-            )
+          xAxisModel = rememberFloatLinearAxisModel(
+            range = minX..maxX,
+            minViewExtent = maxX, // Show whole range
+            maxViewExtent = maxX,
+            minimumMajorTickSpacing = 80.dp, // Tweakable
+            minorTickCount = 0
+          ),
+          yAxisModel = rememberFloatLinearAxisModel(
+            range = 0f..maxY,
+            minimumMajorTickSpacing = 50.dp,
+            minorTickCount = 0
+          ),
+          horizontalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.2f),
+          verticalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.2f),
+          xAxisStyle = rememberAxisStyle(color = Color.White, tickPosition = TickPosition.Outside),
+          yAxisStyle = rememberAxisStyle(color = Color.White, tickPosition = TickPosition.Outside),
+          // FIX: Explicitly mark lambdas as @Composable to resolve overload ambiguity
+          xAxisLabels = @Composable { xVal ->
+            val idx = xVal.toInt()
+            val label = if (idx in 0 until count) timeFmt.format(Date(timestamps[idx])) else ""
+            Text(text = label, style = typography.caption, color = Color.LightGray)
           },
-
-          yAxisLabels = @Composable { yVal: Float ->
+          yAxisLabels = @Composable { yVal ->
             val label = if (yVal >= 1000f) "${(yVal / 1000f).toInt()}k" else yVal.toInt().toString()
-            Text(label, style = MaterialTheme.typography.caption, color = Color.LightGray)
+            Text(text = label, style = typography.caption, color = Color.LightGray)
           }
         ) {
           dataSeries.forEachIndexed { idx, series ->
@@ -295,13 +216,10 @@ fun MultiPlayerMetricLineChart(
                 brush = Brush.verticalGradient(listOf(color.copy(alpha = 0.35f), Color.Transparent)),
                 alpha = 1.0f
               ),
-              areaBaseline = AreaBaseline.ConstantLine(0f)
+              // FIX: Explicitly specifying generic types to help type inference
+              areaBaseline = ConstantLine<Float, Float>(0f)
             )
-          }
-
-          dataSeries.forEachIndexed { idx, series ->
-            val color = usedGroups.getOrNull(idx)?.color ?: Color(0xFFEF5350)
-            LinePlot2<Float, Float>( // why no type detect :(
+            LinePlot2<Float, Float>(
               data = series,
               lineStyle = LineStyle(
                 brush = Brush.linearGradient(listOf(color, color.copy(alpha = 0.85f))),
@@ -309,6 +227,55 @@ fun MultiPlayerMetricLineChart(
                 alpha = 0.95f
               )
             )
+          }
+        }
+
+        // Time-frame selection buttons
+        val buttonsAlpha by animateFloatAsState(
+          targetValue = if (isHovered) 1f else 0f,
+          animationSpec = tween(durationMillis = 250)
+        )
+
+        Row(
+          modifier = Modifier
+            .align(Alignment.TopEnd)
+            .padding(6.dp)
+            .alpha(buttonsAlpha),
+          horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+          val options = listOf(1 to "1m", 5 to "5m", 15 to "15m", 60 to "1h")
+
+          options.forEach { (mins, label) ->
+            var btnHovered by remember { mutableStateOf(false) }
+            val isSelected = mins == selectedMinutes
+            val bgAlpha = when {
+              isSelected -> 0.9f
+              btnHovered -> 0.55f
+              else -> 0.35f
+            }
+
+            Box(
+              modifier = Modifier
+                .height(20.dp)
+                .width(36.dp)
+                .background(
+                  if (isSelected) MaterialTheme.colors.primary.copy(alpha = 0.8f)
+                  else Color.White.copy(alpha = bgAlpha),
+                  shape = MaterialTheme.shapes.small
+                )
+                .pointerMoveFilter(
+                  onEnter = { btnHovered = true; false },
+                  onExit = { btnHovered = false; false }
+                )
+                .clickable { selectedMinutes = mins },
+              contentAlignment = Alignment.Center
+            ) {
+              Text(
+                label,
+                color = if (isSelected) Color.White else Color.Black,
+                style = typography.caption
+              )
+            }
           }
         }
       }
@@ -319,6 +286,7 @@ fun MultiPlayerMetricLineChart(
 @Composable
 fun PlayerMetricLineChart(
   playerName: String,
+  metricType: GraphMetricType = GraphMetricType.HEALING,
   minutesWindow: Int = 1,
   mode: GameMonitorInteractor.MonitorModes = GameMonitorInteractor.MonitorModes.MONITOR,
   forceSlidingWindow: Boolean = false,
@@ -327,13 +295,14 @@ fun PlayerMetricLineChart(
   modifier: Modifier = Modifier
 ) {
   MultiPlayerMetricLineChart(
+    metricType = metricType,
     groups = listOf(
       GroupSpec(
         name = playerName,
         filter = { it.name == playerName },
         color = Color(0xFF42A5F5))
     ),
-    minutesWindow = minutesWindow,
+    initialMinutesWindow = minutesWindow,
     mode = mode,
     forceSlidingWindow = forceSlidingWindow,
     smoothing = smoothing,

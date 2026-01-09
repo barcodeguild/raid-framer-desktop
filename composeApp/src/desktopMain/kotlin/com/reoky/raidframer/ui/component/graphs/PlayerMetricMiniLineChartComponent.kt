@@ -17,15 +17,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.unit.dp
-import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.CombatEvent
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.DebuffAppliedEvent
 import com.reoky.raidframer.core.model.HealEvent
-// Assumed package for generated resources
-// import com.reoky.raidframer.generated.resources.Res
-// import com.reoky.raidframer.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import io.github.koalaplot.core.line.AreaBaseline
 import io.github.koalaplot.core.line.AreaPlot2
@@ -40,21 +36,13 @@ import io.github.koalaplot.core.xygraph.rememberAxisStyle
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import kotlinx.coroutines.delay
 import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.mini_graph_graph_subtitle
-import raid_framer_desktop.composeapp.generated.resources.mini_graph_metric_cc
-import raid_framer_desktop.composeapp.generated.resources.mini_graph_metric_dps
-import raid_framer_desktop.composeapp.generated.resources.mini_graph_metric_heals
-import raid_framer_desktop.composeapp.generated.resources.mini_graph_mode_cc
-import raid_framer_desktop.composeapp.generated.resources.mini_graph_mode_dmg
-import raid_framer_desktop.composeapp.generated.resources.mini_graph_mode_heals
-import raid_framer_desktop.composeapp.generated.resources.mini_graph_no_recent_data
-import raid_framer_desktop.composeapp.generated.resources.mini_graph_player_metric_format
-import kotlin.collections.get
-import kotlin.collections.plusAssign
-import kotlin.div
+import raid_framer_desktop.composeapp.generated.resources.general_metric_type_cc_short
+import raid_framer_desktop.composeapp.generated.resources.general_metric_type_damage_short
+import raid_framer_desktop.composeapp.generated.resources.general_metric_type_healing_short
+import raid_framer_desktop.composeapp.generated.resources.graphs_no_recent_data
+import raid_framer_desktop.composeapp.generated.resources.graphs_one_minute
+import raid_framer_desktop.composeapp.generated.resources.graphs_player_metric_format
 import kotlin.math.max
-import kotlin.text.compareTo
-import kotlin.text.toInt
 
 private const val BUCKET_COUNT = 60
 private const val BUCKET_MILLIS = 1000L
@@ -178,7 +166,7 @@ fun PlayerMetricMiniLineGraphComponent(
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
           // REPLACED: Hardcoded string
           Text(
-            stringResource(Res.string.mini_graph_no_recent_data),
+            stringResource(Res.string.graphs_no_recent_data),
             color = Color.LightGray,
             style = MaterialTheme.typography.caption
           )
@@ -252,60 +240,6 @@ fun PlayerMetricMiniLineGraphComponent(
           )
         }
 
-        // animate toggles alpha based on outer hover
-        val buttonsAlpha by animateFloatAsState(
-          targetValue = if (isHovered) 1f else 0f,
-          animationSpec = tween(durationMillis = 250)
-        )
-
-        // tiny top-right mode toggles
-        Row(
-          modifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(6.dp)
-            .alpha(buttonsAlpha),
-          horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-          fun tinyToggle(label: String, mode: MiniGraphMode) : @Composable () -> Unit = {
-            var hovered by remember { mutableStateOf(false) }
-            val isSelected = mode == selectedMode
-            val bgAlpha = when {
-              isSelected -> 0.9f
-              hovered -> 0.55f
-              else -> 0.35f
-            }
-            Box(
-              modifier = Modifier
-                .height(18.dp)
-                .width(42.dp)
-                .background(if (isSelected) highlightColor.copy(alpha = 0.2f) else Color.White.copy(alpha = bgAlpha), shape = MaterialTheme.shapes.small)
-                .pointerMoveFilter(
-                  onEnter = {
-                    hovered = true; false
-                  },
-                  onExit = {
-                    hovered = false; false
-                  }
-                )
-                .clickable { selectedMode = mode },
-              contentAlignment = Alignment.Center
-            ) {
-              Text(
-                label,
-                color = Color.White,
-                style = MaterialTheme.typography.caption
-              )
-            }
-          }
-
-          // Render the three toggles
-          // REPLACED: Hardcoded strings
-          tinyToggle(stringResource(Res.string.mini_graph_mode_dmg), MiniGraphMode.DMG).invoke()
-          tinyToggle(stringResource(Res.string.mini_graph_mode_heals), MiniGraphMode.HEALS).invoke()
-          tinyToggle(stringResource(Res.string.mini_graph_mode_cc), MiniGraphMode.CC).invoke()
-
-        }
-
         // Overall mini-graph title and subtitle (centered)
         Box(
           modifier = Modifier.fillMaxSize(),
@@ -314,23 +248,77 @@ fun PlayerMetricMiniLineGraphComponent(
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             // REPLACED: Hardcoded strings and logic
             val metricName = when(selectedMode) {
-              MiniGraphMode.DMG -> stringResource(Res.string.mini_graph_metric_dps)
-              MiniGraphMode.HEALS -> stringResource(Res.string.mini_graph_metric_heals)
-              MiniGraphMode.CC -> stringResource(Res.string.mini_graph_metric_cc)
+              MiniGraphMode.DMG -> stringResource(Res.string.general_metric_type_damage_short)
+              MiniGraphMode.HEALS -> stringResource(Res.string.general_metric_type_healing_short)
+              MiniGraphMode.CC -> stringResource(Res.string.general_metric_type_cc_short)
             }
             Text(
-              stringResource(Res.string.mini_graph_player_metric_format, playerName, metricName),
+              stringResource(Res.string.graphs_player_metric_format, playerName, metricName),
               color = Color.White.copy(alpha = 0.2f),
               style = MaterialTheme.typography.h6
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-              stringResource(Res.string.mini_graph_graph_subtitle),
+              stringResource(Res.string.graphs_one_minute),
               color = Color.White.copy(alpha = 0.2f),
               style = MaterialTheme.typography.subtitle2
             )
           }
         }
+      }
+
+      // animate toggles alpha based on outer hover
+      val buttonsAlpha by animateFloatAsState(
+        targetValue = if (isHovered) 1f else 0f,
+        animationSpec = tween(durationMillis = 250)
+      )
+
+      // tiny top-right mode toggles
+      Row(
+        modifier = Modifier
+          .align(Alignment.TopEnd)
+          .padding(6.dp)
+          .alpha(buttonsAlpha),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        fun tinyToggle(label: String, mode: MiniGraphMode) : @Composable () -> Unit = {
+          var hovered by remember { mutableStateOf(false) }
+          val isSelected = mode == selectedMode
+          val bgAlpha = when {
+            isSelected -> 0.9f
+            hovered -> 0.55f
+            else -> 0.35f
+          }
+          Box(
+            modifier = Modifier
+              .height(18.dp)
+              .width(42.dp)
+              .background(if (isSelected) highlightColor.copy(alpha = 0.2f) else Color.White.copy(alpha = bgAlpha), shape = MaterialTheme.shapes.small)
+              .pointerMoveFilter(
+                onEnter = {
+                  hovered = true; false
+                },
+                onExit = {
+                  hovered = false; false
+                }
+              )
+              .clickable { selectedMode = mode },
+            contentAlignment = Alignment.Center
+          ) {
+            Text(
+              label,
+              color = Color.White,
+              style = MaterialTheme.typography.caption
+            )
+          }
+        }
+
+        // Render the three toggles
+        // REPLACED: Hardcoded strings
+        tinyToggle(stringResource(Res.string.general_metric_type_damage_short), MiniGraphMode.DMG).invoke()
+        tinyToggle(stringResource(Res.string.general_metric_type_healing_short), MiniGraphMode.HEALS).invoke()
+        tinyToggle(stringResource(Res.string.general_metric_type_cc_short), MiniGraphMode.CC).invoke()
+
       }
     }
   }

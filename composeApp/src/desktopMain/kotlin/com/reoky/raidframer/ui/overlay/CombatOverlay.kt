@@ -23,12 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import lol.rfcloud.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.ui.dialog.exitDialog
 import com.reoky.raidframer.ui.component.PlayerRankingRow
+import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 
 @Preview
 @Composable
@@ -267,7 +269,9 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
-                  //wm?.openWindow(OverlayType.TRACKER)
+                  AppState.selectPlayer(card.name)
+                  AppState.selectMetricType(GraphMetricType.DAMAGE)
+                  wm?.openWindow(OverlayType.SUMMARY)
                 }
               )
             }
@@ -297,7 +301,9 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
-                  //wm?.openWindow(OverlayType.SUMMARY)
+                  AppState.selectPlayer(card.name)
+                  AppState.selectMetricType(GraphMetricType.HEALING)
+                  wm?.openWindow(OverlayType.SUMMARY)
                 }
               )
             }
@@ -327,6 +333,8 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
+                  AppState.selectPlayer(card.name)
+                  AppState.selectMetricType(GraphMetricType.CC)
                   wm?.openWindow(OverlayType.SUMMARY)
                 }
               )

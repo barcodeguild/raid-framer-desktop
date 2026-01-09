@@ -78,9 +78,6 @@ class WindowManager(
       // replace pre-populated values with the one from the database
       existingWindowState.value = entity
       visibilityStates.getOrPut(type) { mutableStateOf(type == OverlayType.COMBAT) }
-
-      // debug
-      println("Using previous window state for $type." )
     }
   }
 
