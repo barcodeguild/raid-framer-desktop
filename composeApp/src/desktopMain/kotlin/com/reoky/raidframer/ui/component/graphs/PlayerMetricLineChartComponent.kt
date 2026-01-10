@@ -235,62 +235,60 @@ fun MultiPlayerMetricLineChart(
                 alpha = 0.95f
               )
             )
-            dataSeries.firstOrNull()?.let { firstSeries ->
-              findTwoHighestPeaks(firstSeries)?.let { (peak1, peak2) ->
-                val midY = maxY / 2f
+            findTwoHighestPeaks(series)?.let { (peak1, peak2) ->
+              val thresholdY = maxY / 3f
 
-                if (peak1.value > midY && peak2.value > midY) {
-                  // Calculate slope
-                  val slope = (peak2.value - peak1.value) / (peak2.index - peak1.index)
+              if (peak1.value > thresholdY && peak2.value > thresholdY) {
+                // Calculate slope
+                val slope = (peak2.value - peak1.value) / (peak2.index - peak1.index)
 
-                  // Calculate angle in degrees
-                  val angleRadians = kotlin.math.atan(slope)
-                  val angleDegrees = kotlin.math.abs(Math.toDegrees(angleRadians.toDouble()))
+                // Calculate angle in degrees
+                val angleRadians = kotlin.math.atan(slope)
+                val angleDegrees = kotlin.math.abs(Math.toDegrees(angleRadians.toDouble()))
 
-                  // Only render if angle is less than 40 degrees
-                  if (angleDegrees < 40.0) {
-                    // Extend line to graph boundaries
-                    var leftX = 0f
-                    var leftY = peak1.value - (peak1.index * slope)
+                // Only render if angle is less than 40 degrees
+                if (angleDegrees < 40.0) {
+                  // Extend line to graph boundaries
+                  var leftX = 0f
+                  var leftY = peak1.value - (peak1.index * slope)
 
-                    var rightX = maxX
-                    var rightY = peak1.value + ((maxX - peak1.index) * slope)
+                  var rightX = series.lastIndex.toFloat()
+                  var rightY = peak1.value + ((series.lastIndex - peak1.index) * slope)
 
-                    // Check if extended points go below any curve values
-                    // Find leftmost safe point
-                    for (i in 0 until peak1.index) {
-                      val projectedY = peak1.value - ((peak1.index - i) * slope)
-                      if (projectedY <= firstSeries[i].y) {
-                        leftX = i.toFloat()
-                        leftY = projectedY
-                        break
-                      }
+                  // Find leftmost safe point
+                  for (i in 0 until peak1.index) {
+                    val projectedY = peak1.value - ((peak1.index - i) * slope)
+                    if (projectedY <= series[i].y) {
+                      leftX = i.toFloat()
+                      leftY = projectedY
+                      break
                     }
-
-                    // Find rightmost safe point
-                    for (i in firstSeries.lastIndex downTo peak2.index + 1) {
-                      val projectedY = peak2.value + ((i - peak2.index) * slope)
-                      if (projectedY <= firstSeries[i].y) {
-                        rightX = i.toFloat()
-                        rightY = projectedY
-                        break
-                      }
-                    }
-
-                    val trendLine = listOf(
-                      DefaultPoint(leftX, leftY),
-                      DefaultPoint(rightX, rightY)
-                    )
-
-                    LinePlot2<Float, Float>(
-                      data = trendLine,
-                      lineStyle = LineStyle(
-                        brush = SolidColor(Color.White),
-                        strokeWidth = 3.dp,
-                        alpha = 0.85f
-                      )
-                    )
                   }
+
+                  // Find rightmost safe point
+                  for (i in series.lastIndex downTo peak2.index + 1) {
+                    val projectedY = peak2.value + ((i - peak2.index) * slope)
+                    if (projectedY <= series[i].y) {
+                      rightX = i.toFloat()
+                      rightY = projectedY
+                      break
+                    }
+                  }
+
+                  val trendLine = listOf(
+                    DefaultPoint(leftX, leftY),
+                    DefaultPoint(rightX, rightY)
+                  )
+
+                  LinePlot2<Float, Float>(
+                    data = trendLine,
+                    lineStyle = LineStyle(
+                      brush = SolidColor(Color.White),
+                      strokeWidth = 3.dp,
+                      alpha = 0.90f,
+                      pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 5f), 0f)
+                    )
+                  )
                 }
               }
             }
@@ -353,42 +351,35 @@ fun MultiPlayerMetricLineChart(
 private fun findTwoHighestPeaks(series: List<DefaultPoint<Float, Float>>): Pair<Peak, Peak>? {
   if (series.size < 3) return null
 
-  // Find local maxima (peaks) - allow equal values
+  // Find local maxima (peaks)
   val peaks = mutableListOf<Peak>()
   for (i in 1 until series.size - 1) {
     val prev = series[i - 1].y
     val curr = series[i].y
     val next = series[i + 1].y
 
-    if (curr >= prev && curr >= next && curr > 0f) {
+    if (curr > prev && curr > next && curr > 0f) {
       peaks.add(Peak(i, curr))
     }
   }
 
-  // If not enough peaks, try taking the 2 highest values (not necessarily local maxima)
-  if (peaks.size < 2) {
-    val allPoints = series.mapIndexed { idx, pt -> Peak(idx, pt.y) }
-      .filter { it.value > 0f }
-      .sortedByDescending { it.value }
-      .take(2)
+  if (peaks.size < 2) return null
 
-    if (allPoints.size < 2) return null
+  // Sort by value descending
+  val sortedPeaks = peaks.sortedByDescending { it.value }
 
-    return if (allPoints[0].index < allPoints[1].index) {
-      Pair(allPoints[0], allPoints[1])
-    } else {
-      Pair(allPoints[1], allPoints[0])
-    }
-  }
+  // Use a smaller minimum separation (2-3 indices is enough to avoid adjacent points)
+  val minSeparation = 3
 
-  // Sort by value descending and take top 2
-  val topTwo = peaks.sortedByDescending { it.value }.take(2)
+  // Find the two highest peaks that are sufficiently separated
+  val peak1 = sortedPeaks[0]
+  val peak2 = sortedPeaks.drop(1).firstOrNull { kotlin.math.abs(it.index - peak1.index) >= minSeparation } ?: return null
 
   // Return in chronological order (left to right)
-  return if (topTwo[0].index < topTwo[1].index) {
-    Pair(topTwo[0], topTwo[1])
+  return if (peak1.index < peak2.index) {
+    Pair(peak1, peak2)
   } else {
-    Pair(topTwo[1], topTwo[0])
+    Pair(peak2, peak1)
   }
 }
 

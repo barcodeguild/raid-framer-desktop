@@ -56,5 +56,6 @@ data class DebuffsDefinition(
     Debuff(name = "Staggered", consideredCC = true), // player can't move or cast for a short time
     Debuff(name = "Disables Right-Hand weapon", consideredCC = true), // Ring toss
     Debuff(name = "Disable Left-Hand weapon", consideredCC = true), // shield strip
+    Debuff(name = "Bracing Blast Immunity", consideredCC = true), // result of bracing blast that pushes
   )
 ) : DebuffsDefinitions()
