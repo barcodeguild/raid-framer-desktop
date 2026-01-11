@@ -270,7 +270,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 50f,
       lastWidthDp = 380f,
       lastHeightDp = 160f,
-      isVisible = RFConfig.state.value.miniGraphEnabled
+      isVisible = true
     )
 
     OverlayType.TRACKER -> WindowStateEntity(
