@@ -9,6 +9,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class PlayerInfoPayload {
 
+  val cid = ""
+
   @Serializable
   @SerialName("character")
   data class Character(

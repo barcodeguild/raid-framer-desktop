@@ -25,6 +25,10 @@
     <string name="settings_data_sourcing_title">Data Sourcing</string>
     <string name="settings_data_sourcing_description">Please be careful to enter the correct ArcheRage directory below. This field may have been populated automatically.</string>
     <string name="settings_data_sourcing_sidenote">Technically, you do not need ArcheRage installed if you only want to view historical combat.log files. Just right-click on the .log or .rf (battle slice export file) and choose 'Open-With → Raid Framer' in the Windows Explorer context menu to view a replay.</string>
+    <string name="settings_toggle_pvp_damage">Show only PvP damage</string>
+    <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
+
+
 
     <!-- General Strings -->
     <string name="general_metric_type_damage">Damage</string>

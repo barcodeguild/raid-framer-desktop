@@ -57,5 +57,6 @@ data class DebuffsDefinition(
     Debuff(name = "Disables Right-Hand weapon", consideredCC = true), // Ring toss
     Debuff(name = "Disable Left-Hand weapon", consideredCC = true), // shield strip
     Debuff(name = "Bracing Blast Immunity", consideredCC = true), // result of bracing blast that pushes
+    Debuff(name = "Dragon Roar", consideredCC = true) // result of a dragoon roar that knocks down gliders
   )
 ) : DebuffsDefinitions()

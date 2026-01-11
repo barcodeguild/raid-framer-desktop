@@ -294,3 +294,18 @@ fun renderTinySkillTreeIconFor(treeName: String): Painter {
   val filename = "svg\\${treeName.lowercase().replace(" ", "_")}.svg"
   return painterResource(filename)
 }
+
+/*
+ * Function to get pet thumbnails based on pet type.
+ */
+@Composable
+fun getPetIcon(petType: String): Painter {
+  val filename = when (petType.lowercase()) {
+    "red_dragon" -> "pets/red_dragon.png"
+    "green_dragon" -> "pets/green_dragon.png"
+    "black_dragon" -> "pets/black_dragon.png"
+    "riso" -> "pets/riso.png"
+    else -> "pets/riso.png"
+  }
+  return painterResource(filename)
+}

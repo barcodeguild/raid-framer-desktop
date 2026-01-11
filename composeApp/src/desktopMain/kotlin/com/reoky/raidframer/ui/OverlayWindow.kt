@@ -192,7 +192,7 @@ class OverlayWindowShape(
 }
 
 enum class OverlayType {
-  COMBAT, SETTINGS, COMPANION, RAID, TRACKER, MINI, ABOUT, AGGRO, SUMMARY, FILTERS, DUMMY
+  COMBAT, SETTINGS, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, AGGRO, SUMMARY, FILTERS, DUMMY
 }
 
 enum class OverlayWindowType {
@@ -240,6 +240,16 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastWidthDp = 560f,
       lastHeightDp = 800f,
       isVisible = false
+    )
+
+    OverlayType.POKEMON -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
+      lastPositionXDp = 500f,
+      lastPositionYDp = 70f,
+      lastWidthDp = 560f,
+      lastHeightDp = 800f,
+      isVisible = true
     )
 
     OverlayType.RAID -> WindowStateEntity(

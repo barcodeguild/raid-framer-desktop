@@ -36,6 +36,7 @@ object PlayerCacheInteractor : Interactor() {
   val realtimeComputer = RealtimeComputer(windowBuckets = 60, bucketMillis = 10_000L)
   private val raids = mutableStateMapOf<Int, List<Party>>()
   private val cards = mutableStateMapOf<String, PlayerCard>()
+  private val petCards = mutableStateMapOf<String, PetCard>()
   private val mutex = Mutex() // to protect critical sections during player card updates from other threads
 
   init {
@@ -158,6 +159,69 @@ object PlayerCacheInteractor : Interactor() {
       cards[playerName] = card
     }
   }
+
+  /*
+   * The same thing except for pets.
+   */
+  private fun createOrUpdatePetCard(
+    petName: String,
+    owner: String,
+    cid: String,
+    petType: String = "default"
+  ) {
+    val key = "$owner:$petName"
+    if (!petCards.containsKey(key)) {
+      petCards[key] = PetCard(
+        name = petName,
+        owner = owner,
+        recentCid = cid,
+        lastEvent = System.currentTimeMillis(),
+        petType = petType
+      )
+    } else {
+      petCards[key]?.let { card ->
+        petCards[key] = card.copy(
+          recentCid = cid,
+          lastEvent = System.currentTimeMillis()
+        )
+      }
+    }
+  }
+
+  fun postPetDamage(event: DamageEvent, owner: String, cid: String, petType: String = "riso") {
+    scope.launch {
+      mutex.withLock {
+        val key = "$owner:${event.caster}"
+        createOrUpdatePetCard(event.caster, owner, cid, petType)
+        petCards[key]?.let { card ->
+          petCards[key] = card.copy(
+            lastEvent = event.timestamp,
+            recentDamageEvents = (card.recentDamageEvents + event).takeLast(50),
+            sessionDamageTotal = card.sessionDamageTotal + event.damage
+          )
+        }
+      }
+    }
+  }
+
+  fun postPetDebuff(event: DebuffAppliedEvent, owner: String, cid: String, petType: String = "riso") {
+    scope.launch {
+      mutex.withLock {
+        val key = "$owner:${event.source}"
+        event.source?.let {
+          createOrUpdatePetCard(event.source, owner, cid, petType)
+          petCards[key]?.let { card ->
+            petCards[key] = card.copy(
+              lastEvent = event.timestamp,
+              recentDebuffAppliedEvents = (card.recentDebuffAppliedEvents + event).takeLast(50),
+              sessionDebuffTotal = card.sessionDebuffTotal + 1
+            )
+          }
+        }
+      }
+    }
+  }
+
 
   /*
    * Reset all session totals and recent events for all players.
@@ -401,6 +465,14 @@ object PlayerCacheInteractor : Interactor() {
 
   val topDeaths: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
     .map { cards -> cards.filter { it.isRealPlayer && it.sessionDeathTotal > 0 }.sortedByDescending { it.sessionDeathTotal }.take(100) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
+    .map { pets ->
+      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 }
+        .sortedByDescending { it.sessionDamageTotal }
+        .take(50)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   /* Raid Parties UI Subscriptions */
