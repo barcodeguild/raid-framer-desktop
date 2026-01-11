@@ -1,245 +1,51 @@
-//import androidx.compose.ui.window.WindowState
-//import com.sun.jna.Memory
-//import com.sun.jna.Native
-//import com.sun.jna.Pointer
-//import com.sun.jna.platform.win32.WinDef.HWND
-//import com.sun.jna.win32.StdCallLibrary
-////import core.database.OverlayType
-////import core.database.RFDao
-////import core.database.Schema
-//import lol.rfcloud.Interactor
-//import kotlinx.coroutines.*
-//import net.sourceforge.tess4j.Tesseract
-//import net.sourceforge.tess4j.TesseractException
-//import java.awt.Color
-//import java.awt.Rectangle
-//import java.awt.Robot
-//import java.awt.Toolkit
-//import java.awt.image.BufferedImage
-//import kotlin.math.abs
-//
-//object OverlayInteractor : Interactor() {
-//
-//  private val GAME_WINDOW_COLOR_MODIFIER_BASE = Color(237, 233, 214)
-//  private val GAME_WINDOW_COLOR_MODIFIER = Color(137, 137, 130)
-//  private val GAME_WINDOW_COLOR = Color(240, 240, 226)
-//  const val COLOR_DETECTION_THRESHOLD = 13.0 // 13%
-//  const val MAX_VARIANCE = 7
-//
-//  /*
-//   * Tries to programmatically manage overlay windows so that they can be hidden when the game is tabbed-out.
-//   */
-//  override suspend fun interact() {
-//    // check to see if the player is tabbed-out of the game by window title
-//    if (lol.rfcloud.AppState.config.tabbedDetectionEnabled) {
-//      val gameForegrounded = getActiveWindowTitle().contains("ArcheRage")
-//      lol.rfcloud.AppState.isEverythingVisible.value = gameForegrounded
-//    } else {
-//      lol.rfcloud.AppState.isEverythingVisible.value = true
-//    }
-//
-//    // check to see if it looks like an in-game window is being covered by an overlay
-//    val supportedWindows = listOf(
-//      lol.rfcloud.AppState.windowStates.combatState,
-//      lol.rfcloud.AppState.windowStates.trackerState
-//    )
-//
-//    if (lol.rfcloud.AppState.config.colorAndTextDetectionEnabled) {
-//      val ss = takeScreenshot()
-//      supportedWindows.filterNotNull().forEach { state ->
-//        when (state) {
-//          lol.rfcloud.AppState.windowStates.combatState -> lol.rfcloud.AppState.isCombatObstructing.value = shouldHideWindow(
-//            alreadyObstructing = lol.rfcloud.AppState.isCombatObstructing.value,
-//            windowState = state,
-//            image = ss
-//          )
-//
-//          lol.rfcloud.AppState.windowStates.trackerState -> lol.rfcloud.AppState.isTrackerObstructing.value = shouldHideWindow(
-//            alreadyObstructing = lol.rfcloud.AppState.isTrackerObstructing.value,
-//            windowState = state,
-//            image = ss
-//          )
-//        }
-//      }
-//    } else {
-//      supportedWindows.onEach {
-//        when (it) {
-//          lol.rfcloud.AppState.windowStates.combatState -> lol.rfcloud.AppState.isCombatObstructing.value = false
-//          lol.rfcloud.AppState.windowStates.trackerState -> lol.rfcloud.AppState.isTrackerObstructing.value = false
-//        }
-//      }
-//    }
-//  }
-//
-//  private suspend fun shouldHideWindow(
-//    alreadyObstructing: Boolean,
-//    windowState: Schema.RFWindowState,
-//    image: BufferedImage
-//  ): Boolean {
-//    val overlayRegion = Rectangle(
-//      windowState.lastPositionXDp.toInt(),
-//      windowState.lastPositionYDp.toInt(),
-//      windowState.lastWidthDp.toInt(),
-//      windowState.lastHeightDp.toInt()
-//    )
-//
-//    val isCovered = try {
-//      isRegionObstructed(image, overlayRegion)
-//    } catch (E: Exception) {
-//      println("Error checking region obstruction because: ${E.message}")
-//      return false // fail open
-//    }
-//
-//    val regionImage = try {
-//      image.getSubimage(overlayRegion.x, overlayRegion.y, overlayRegion.width, overlayRegion.height)
-//    } catch (E: Exception) {
-//      println("Error getting subimage because: ${E.message}")
-//      return true // fail open
-//    }
-//
-//    val isTextPresent = isTextPresent(regionImage)
-//
-//    return if (alreadyObstructing) isCovered || isTextPresent else isCovered
-//  }
-//
-//  /*
-//   * Tries to determine if a game window is being covered by an overlay window in the specified region.
-//   * It's looking for that classes inventory window background color. (genius eh? ~_~)
-//   */
-//  private suspend fun isRegionObstructed(image: BufferedImage, region: Rectangle): Boolean {
-//    return isColorAmountAboveThreshold(
-//      image = image,
-//      region = region,
-//      targetColors = listOf(GAME_WINDOW_COLOR, GAME_WINDOW_COLOR_MODIFIER, GAME_WINDOW_COLOR_MODIFIER_BASE),
-//      threshold = COLOR_DETECTION_THRESHOLD
-//    )
-//  }
-//
-//  /*
-//   * Helper that captures a bitmap to use for color detection.
-//   */
-//  private fun takeScreenshot(): BufferedImage {
-//    val screenSize = Toolkit.getDefaultToolkit().screenSize
-//    return Robot().let { robot ->
-//      Rectangle(screenSize).let {
-//        robot.createScreenCapture(it)
-//      }
-//    }
-//  }
-//
-//  /*
-//   * The actual logic for looking at the pixels inside a rectangular region of the screen
-//   * and determining if the ratio of matching pixels is above the threshold.
-//   */
-//  private fun isColorAmountAboveThreshold(
-//    image: BufferedImage,
-//    region: Rectangle,
-//    targetColors: List<Color>,
-//    threshold: Double
-//  ): Boolean {
-//    var matchingPixels = 0L
-//
-//    for (x in region.x until region.x + region.width) {
-//      for (y in region.y until region.y + region.height) {
-//        val rgb = image.getRGB(x, y)
-//        val color = Color(rgb, true)
-//
-//        targetColors.forEach {
-//          if (abs(color.red - it.red) <= MAX_VARIANCE &&
-//            abs(color.green - it.green) <= MAX_VARIANCE &&
-//            abs(color.blue - it.blue) <= MAX_VARIANCE
-//          ) {
-//            matchingPixels++
-//          }
-//        }
-//      }
-//    }
-//
-//    val totalPixels = region.width * region.height
-//    val percentage = matchingPixels.toDouble() / totalPixels * 100
-//
-//    return percentage > threshold
-//  }
-//
-//  private fun isTextPresent(image: BufferedImage): Boolean {
-//    lol.rfcloud.AppState.tessTempDirectory?.let {
-//      try {
-//        Tesseract().let { tesseract ->
-//          tesseract.setDatapath(it.toString())
-//          tesseract.setLanguage("eng")
-//          tesseract.setTessVariable("user_defined_dpi", "96")
-//          tesseract.setTessVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
-//          val result: String = tesseract.doOCR(image)
-//          val words = filterWords(result)
-//          return words.size > 2
-//        }
-//      } catch (e: TesseractException) {
-//        println("Tesseract failed: ${e.message}")
-//        return false
-//      }
-//    } ?: return false // no tessdata directory
-//  }
-//
-//  fun filterWords(input: String): List<String> {
-//    val regex = Regex("\\b[A-Z][a-zA-Z]{4,}\\b")
-//    return regex.findAll(input).map { it.value }.toList()
-//  }
-//
-//  /*
-//   * See if ArcheRage is in the foreground for automatic hiding of overlay windows.
-//   */
-//  private fun getActiveWindowTitle(): String {
-//    val buffer = Memory(1024 * 2) // Allocate memory for the buffer
-//    val hwnd = User32.INSTANCE.GetForegroundWindow()
-//    val textLength = User32.INSTANCE.GetWindowTextA(hwnd, buffer, 1024)
-//    if (textLength > 0) {
-//      return buffer.getString(0)
-//    } else {
-//      println("Failed to get a window handle.. Failing Open.")
-//      return "ArcheRage"
-//    }
-//  }
-//
-//  interface User32 : StdCallLibrary {
-//    fun GetForegroundWindow(): HWND
-//    fun GetWindowTextA(hWnd: HWND, lpString: Pointer, nMaxCount: Int): Int
-//
-//    companion object {
-//      val INSTANCE: User32 = Native.load("user32", User32::class.java)
-//    }
-//  }
-//
-//  /*
-//   * Updates the window state for a specific overlay type in the app state. The window states later gets saved
-//   * to the disk for persistence.
-//   */
-//  fun updateWindowStateFor(overlayType: OverlayType, windowState: WindowState) {
-//    val newState = Schema.RFWindowState(
-//      type = when (overlayType) {
-//        OverlayType.COMBAT -> OverlayType.COMBAT.ordinal
-//        OverlayType.SETTINGS -> OverlayType.SETTINGS.ordinal
-//        OverlayType.TRACKER -> OverlayType.TRACKER.ordinal
-//        OverlayType.ABOUT -> OverlayType.ABOUT.ordinal
-//        OverlayType.AGGRO -> OverlayType.AGGRO.ordinal
-//        OverlayType.FILTERS -> OverlayType.FILTERS.ordinal
-//        else -> return
-//      },
-//      lastPositionXDp = windowState.position.x.value,
-//      lastPositionYDp = windowState.position.y.value,
-//      lastWidthDp = windowState.size.width.value,
-//      lastHeightDp = windowState.size.height.value
-//    )
-//    when (overlayType) {
-//      OverlayType.COMBAT -> lol.rfcloud.AppState.windowStates.combatState = newState
-//      OverlayType.SETTINGS -> lol.rfcloud.AppState.windowStates.settingsState = newState
-//      OverlayType.TRACKER -> lol.rfcloud.AppState.windowStates.trackerState = newState
-//      OverlayType.ABOUT -> lol.rfcloud.AppState.windowStates.aboutState = newState
-//      OverlayType.AGGRO -> lol.rfcloud.AppState.windowStates.aggroState = newState
-//      OverlayType.FILTERS -> lol.rfcloud.AppState.windowStates.filterState = newState
-//      else -> return
-//    }
-//    CoroutineScope(Dispatchers.Default).launch {
-//      RFDao.saveWindowStates(lol.rfcloud.AppState.windowStates)
-//    }
-//  }
-//}
+import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.interactor.Interactor
+import com.sun.jna.Memory
+import com.sun.jna.Native
+import com.sun.jna.Pointer
+import com.sun.jna.platform.win32.WinDef.HWND
+import com.sun.jna.win32.StdCallLibrary
+
+object OverlayInteractor : Interactor() {
+
+  /*
+   * Tries to programmatically manage overlay windows so that they can be hidden when the game is tabbed-out.
+   */
+  override suspend fun interact() {
+    // check to see if the player is tabbed-out of the game by window title
+    if (RFConfig.state.value.tabbedDetectionEnabled) {
+      val gameForegrounded = getActiveWindowTitle().contains("ArcheRage")
+      AppState.setEverythingVisible(gameForegrounded)
+    } else {
+      AppState.setEverythingVisible(true) // because the detection was disabled everything should always be visible
+    }
+  }
+
+  /*
+   * See if ArcheRage is in the foreground for automatic hiding of overlay windows.
+   */
+  private fun getActiveWindowTitle(): String {
+    val buffer = Memory(1024 * 2) // Allocate memory for the buffer
+    val hwnd = User32.INSTANCE.GetForegroundWindow()
+    val textLength = User32.INSTANCE.GetWindowTextA(hwnd, buffer, 1024)
+    if (textLength > 0) {
+      return buffer.getString(0)
+    } else {
+      println("Failed to get a window handle.. Failing Open.")
+      return "ArcheRage" // fail open means we assume the game is active
+    }
+  }
+
+  /*
+   * JNA interface for User32.dll functions we need.
+   */
+  interface User32 : StdCallLibrary {
+    fun GetForegroundWindow(): HWND
+    fun GetWindowTextA(hWnd: HWND, lpString: Pointer, nMaxCount: Int): Int
+
+    companion object {
+      val INSTANCE: User32 = Native.load("user32", User32::class.java)
+    }
+  }
+}

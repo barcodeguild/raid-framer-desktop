@@ -73,6 +73,7 @@ fun main(args: Array<String>) = application {
   //GameMonitorInteractor.start()
   InstallationInteractor.start(delay = 3000L) // delay to allow user to set game path in settings if needed
   CompanionInteractor.start(delay = 1000L) // delay to allow game monitor to start first
+  OverlayInteractor.start(delay = 150L) // show to allow for hiding overlays quickly
 
   // file path args processing
   val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }

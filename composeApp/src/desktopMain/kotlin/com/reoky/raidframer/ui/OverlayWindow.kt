@@ -14,6 +14,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.WindowStateEntity
 import com.sun.jna.Pointer
 import java.awt.Point
@@ -249,7 +250,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 70f,
       lastWidthDp = 560f,
       lastHeightDp = 800f,
-      isVisible = true
+      isVisible = false
     )
 
     OverlayType.RAID -> WindowStateEntity(
@@ -269,7 +270,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 50f,
       lastWidthDp = 380f,
       lastHeightDp = 160f,
-      isVisible = true
+      isVisible = RFConfig.state.value.miniGraphEnabled
     )
 
     OverlayType.TRACKER -> WindowStateEntity(

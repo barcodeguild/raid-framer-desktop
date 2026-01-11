@@ -81,6 +81,7 @@ function RF.Combat.handleCombatMessage(...)
   if not RF.Combat.ENTITY_REPORT_COOLDOWNS[meta.target] or (meta.timestamp - RF.Combat.ENTITY_REPORT_COOLDOWNS[meta.target]) >= RF.Combat.REPORT_COOLDOWN  or meta.cid == "0" then
     local result = X2Unit:GetUnitInfoById(meta.cid)
     if (result) then
+      result["cid"] = meta.cid -- ensure cid is included in the result
       if (result["type"] == "character") then
         --RF:Log("Caching player info for " .. meta.target)
       elseif (result["type"] == "npc") then

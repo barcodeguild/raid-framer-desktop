@@ -2,6 +2,7 @@ package com.reoky.raidframer.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -10,6 +11,7 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.WindowPosition
+import com.reoky.raidframer.AppState
 import com.reoky.raidframer.ui.overlay.AboutOverlay
 import com.reoky.raidframer.ui.overlay.CombatOverlay
 import com.reoky.raidframer.ui.overlay.CompanionOverlay
@@ -30,8 +32,7 @@ fun OverlayContainer(wm: WindowManager) {
     val visible = wm.isVisible(type).value
     if (visible) {
       val state by wm.getWindowState(type)
-      val obstructing = remember { mutableStateOf(false) }
-      val everythingVisible = remember { mutableStateOf(true) }
+      val everythingVisible by AppState.isEverythingVisible.collectAsState()
       val resizable = remember { mutableStateOf(true) }
 
       OverlayWindow(
@@ -39,9 +40,9 @@ fun OverlayContainer(wm: WindowManager) {
         initialPosition = WindowPosition(Dp(state.lastPositionXDp), Dp(state.lastPositionYDp)),
         initialSize = DpSize(Dp(state.lastWidthDp), Dp(state.lastHeightDp)),
         windowType = state.windowType,
-        isObstructing = obstructing,
+        isObstructing = mutableStateOf(false),
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
-        isEverythingVisible = everythingVisible,
+        isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(state.windowType == OverlayWindowType.TOOLTIP),
         isResizable = resizable,
         isFocusable = true,
         onCloseRequest = { wm.closeWindow(type) }

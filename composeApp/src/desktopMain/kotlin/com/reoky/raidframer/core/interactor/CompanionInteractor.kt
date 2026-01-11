@@ -122,11 +122,11 @@ object CompanionInteractor : Interactor() {
               PlayerCacheInteractor.stronglyAssertIsPlayer(payload.name, payload.classMap)
             }
             is PlayerInfoPayload.Npc -> {
-              println("Metadata for NPC ${payload.name} received.")
+              //println("Metadata for NPC ${payload.name} received.")
             }
             // Fixed: Added 'Mate' branch to make 'when' exhaustive
             is PlayerInfoPayload.Mate -> {
-              println("Metadata for companion pet ${payload.name} owned by ${payload.ownerName} received.")
+              println("Metadata for companion pet ${payload.name} owned by ${payload.ownerName} with cid ${payload.cid} received.")
               val petName = payload.name
               if (petName.isBlank() || petName.contains(" ")) return
               PlayerCacheInteractor.postPetDamage(
@@ -208,7 +208,7 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.BuffGainedPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} applied ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) to ${event.target}")
+              // Log.info(TAG, "At ${event.timestamp} ${event.source} applied ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) to ${event.target}")
               if (event.buffType == "DEBUFF") {
                 PlayerCacheInteractor.postEvent(
                   DebuffGainedEvent(

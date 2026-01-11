@@ -30,4 +30,11 @@ object AppState {
     _selectedTarget.value = name
   }
 
+  // handles whether overlays should be visible based on tab detection and obstruction detection
+  private val _isEverythingVisible = MutableStateFlow(true)
+  var isEverythingVisible = _isEverythingVisible.asStateFlow()
+  fun setEverythingVisible(visible: Boolean) {
+    _isEverythingVisible.value = visible
+  }
+
 }
