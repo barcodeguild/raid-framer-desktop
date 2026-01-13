@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.text.get
+import kotlin.text.set
 
 /**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
@@ -134,7 +136,7 @@ object PlayerCacheInteractor : Interactor() {
       mutex.withLock {
         raids[raidId] = members.chunked(5).take(20)
         members.forEach { member ->
-          createCardIfNoneExists(member.playerName)
+          createCardIfNoneExists(playerName = member.playerName)
         }
       }
     }
@@ -144,12 +146,13 @@ object PlayerCacheInteractor : Interactor() {
    * Create card for a player if none exists... Upgrade from NPC to Player occurs inside the PlayerCardExtensions helpers.
    * NOTE: This method must be called within a mutex.withLock block as it is not thread-safe on its own.
    */
-  private fun createCardIfNoneExists(playerName: String) {
+  private fun createCardIfNoneExists(cid: String? = null, playerName: String) {
     if (!cards.containsKey(playerName)) {
       val cached = runBlocking {
         RFDao.playerCacheDao.getPlayerCacheFor(playerName)
       }
       val card = PlayerCard(
+        recentCids = cid?.let { listOf(it) } ?: listOf(),
         name = playerName,
         lastEvent = System.currentTimeMillis(),
         isRealPlayer = cached != null,
@@ -160,68 +163,40 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  fun buildPetNameKey(owner: String, petName: String): String {
+    return "pet_id_${owner.lowercase().replace(" ", "_")}_${petName.lowercase().replace(" ", "_")}"
+  }
+
   /*
-   * The same thing except for pets.
+   * The same thing except for pets and callable from outside the interactor because pets are a special case.
    */
-  private fun createOrUpdatePetCard(
-    petName: String,
-    owner: String,
-    cid: String,
-    petType: String = "default"
-  ) {
+  fun createOrUpdatePetCard(cid: String? = null, petName: String, owner: String, petType: String) {
     val key = "$owner:$petName"
-    if (!petCards.containsKey(key)) {
-      petCards[key] = PetCard(
-        name = petName,
-        owner = owner,
-        recentCid = cid,
-        lastEvent = System.currentTimeMillis(),
-        petType = petType
-      )
-    } else {
-      petCards[key]?.let { card ->
-        petCards[key] = card.copy(
-          recentCid = cid,
-          lastEvent = System.currentTimeMillis()
-        )
-      }
-    }
-  }
-
-  fun postPetDamage(event: DamageEvent, owner: String, cid: String, petType: String = "riso") {
     scope.launch {
       mutex.withLock {
-        val key = "$owner:${event.caster}"
-        createOrUpdatePetCard(event.caster, owner, cid, petType)
-        petCards[key]?.let { card ->
-          petCards[key] = card.copy(
-            lastEvent = event.timestamp,
-            recentDamageEvents = (card.recentDamageEvents + event).takeLast(50),
-            sessionDamageTotal = card.sessionDamageTotal + event.damage
+        if (!petCards.containsKey(key)) {
+          petCards[key] = PetCard(
+            // id is owner + pet name to ensure uniqueness
+            petId = buildPetNameKey(owner, petName),
+            name = petName,
+            owner = owner,
+            recentCids = cid?.let { listOf(it) } ?: listOf(),
+            lastEvent = System.currentTimeMillis(),
+            petType = petType
           )
-        }
-      }
-    }
-  }
-
-  fun postPetDebuff(event: DebuffAppliedEvent, owner: String, cid: String, petType: String = "riso") {
-    scope.launch {
-      mutex.withLock {
-        val key = "$owner:${event.source}"
-        event.source?.let {
-          createOrUpdatePetCard(event.source, owner, cid, petType)
+        } else {
           petCards[key]?.let { card ->
             petCards[key] = card.copy(
-              lastEvent = event.timestamp,
-              recentDebuffAppliedEvents = (card.recentDebuffAppliedEvents + event).takeLast(50),
-              sessionDebuffTotal = card.sessionDebuffTotal + 1
+              recentCids = cid?.let { (card.recentCids + it).distinct().takeLast(50) } ?: card.recentCids,
+              lastEvent = System.currentTimeMillis()
             )
+            //debug print all cids for pet id
+            Log.debug(TAG, "Pet ${card.petId} (${card.name}) CIDs: ${petCards[key]?.recentCids}")
           }
         }
       }
     }
   }
-
 
   /*
    * Reset all session totals and recent events for all players.
@@ -279,16 +254,17 @@ object PlayerCacheInteractor : Interactor() {
   /*
    * Helps upgrade an NPC card to a real player card immediately based on metadata from the game proving it's a player.
    */
-  fun stronglyAssertIsPlayer(name: String, classMap: Map<String, Int>) {
+  fun stronglyAssertIsPlayer(cid: String, name: String, classMap: Map<String, Int>) {
     val spec = SpecType.fromTrees(classMap.values.mapNotNull { gameId -> SkillTreeType.fromGameId(gameId) }.toSet())
-    Log.debug(TAG, "Strongly asserting $name is a real player with spec $spec based on raid metadata.")
+    Log.debug(TAG, "Strongly asserting $name is a real player with spec $spec and recent cid of $cid.")
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(name)
+        createCardIfNoneExists(cid, name)
         cards[name]?.let { card ->
           cards[name] = card.copy(
             isRealPlayer = true,
             currentBuild = if (spec != SpecType.UNKNOWN) spec.name else card.currentBuild,
+            recentCids = (card.recentCids + cid).distinct().takeLast(50),
             cache = PlayerCacheEntity(
               playerName = card.name,
               lastSeen = card.lastEvent,
@@ -320,8 +296,13 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDamage(event: DamageEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(event.caster)
+        createCardIfNoneExists(cid = event.cid, playerName = event.caster)
         //realtimeComputer.push(MetricRawSample(event.timestamp, event.damage.toDouble()))
+        //  search pet cards for matching cid from event.cid to see if this is a pet damage event
+        val pet = petCards.values.find { it.recentCids.contains(event.cid) }
+        if (pet != null) {
+          Log.debug(TAG, "Pet dealt damage: ${pet.name} (${pet.owner}) - ${event.damage} damage with ${event.spell}")
+        }
         cards[event.caster]?.let { card ->
           cards[event.caster] = card.postDamageEvent(event)
         }
@@ -332,7 +313,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postHeal(event: HealEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(event.caster)
+        createCardIfNoneExists(cid = event.cid,event.caster)
         cards[event.caster]?.let { card ->
           cards[event.caster] = card.postHealEvent(event)
         }
@@ -343,7 +324,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postCasting(event: CastingEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(event.caster)
+        createCardIfNoneExists(cid = event.cid,event.caster)
         cards[event.caster]?.let { card ->
           cards[event.caster] = card.postCastingEvent(event)
         }
@@ -354,7 +335,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postSuccessfulCast(event: SuccessfulCastEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(event.caster)
+        createCardIfNoneExists(cid = event.cid,event.caster)
         cards[event.caster]?.let { card ->
           cards[event.caster] = card.postSuccessfulCastEvent(event)
         }
@@ -365,7 +346,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postBuffGained(event: BuffGainedEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(event.target)
+        createCardIfNoneExists(cid = event.cid,event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postBuffGainedEvent(event)
         }
@@ -376,7 +357,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postBuffEnded(event: BuffEndedEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(event.target)
+        createCardIfNoneExists(cid = event.cid,event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postBuffEndedEvent(event)
         }
@@ -387,16 +368,17 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDebuffGained(event: DebuffGainedEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(event.target)
+        createCardIfNoneExists(cid = event.cid,event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postDebuffGainedEvent(event)
         }
 
         // give credit to the source
         event.source?.let { source ->
-          createCardIfNoneExists(source)
+          createCardIfNoneExists(cid = event.cid,source)
           cards[source]?.let { card ->
             cards[source] = card.postDebuffAppliedEvent(DebuffAppliedEvent(
+              cid = event.cid,
               timestamp = event.timestamp,
               source = event.source,
               target = event.target,
@@ -411,7 +393,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDebuffEnded(event: DebuffEndedEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(event.target)
+        createCardIfNoneExists(cid = event.cid,event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postDebuffEndedEvent(event)
         }
@@ -419,16 +401,43 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
-  fun postPlayerDeath(playerName: String, timestamp: Long) {
+  /*
+   * Returns a list of real players to be used by analysis interactors. (Like the accumulator)
+   * This allows other interactors to search player history without holding the main lock.
+   */
+  fun getRealPlayersSnapshot(): List<PlayerCard> {
+    return cards.values.filter { it.isRealPlayer }
+  }
+
+  /*
+   * Processes a batch of resolved death/kill attributions atomically.
+   * Input: List of Triple(VictimName, DeathTimestamp, KillerName?)'
+   * This doesn't do the calculation of who killed whom, just applies the results to the cache.
+   * The calculation is performed in the DeathAccumulatorInteractor. ^_^
+   */
+  fun processDeathBatch(batchResults: List<Triple<String, Long, String?>>) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(playerName)
-        cards[playerName]?.let { card ->
-          cards[playerName] = card.postDeathEvent(timestamp)
+        batchResults.forEach { (victimName, timestamp, killerName) ->
+          // 1. Update Victim
+          createCardIfNoneExists(playerName = victimName)
+          cards[victimName]?.let { victim ->
+            // Update victim stats and record who killed them (if known)
+            cards[victimName] = victim.postDeathEvent(timestamp, killerName)
+          }
+
+          // 2. Update Killer (only if a killer was identified)
+          if (killerName != null) {
+            cards[killerName]?.let { killer ->
+              cards[killerName] = killer.postKillEvent(timestamp, victimName)
+            }
+          }
         }
       }
     }
   }
+
+
 
   /* UI Subscriptions */
   var topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }

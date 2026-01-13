@@ -5,10 +5,10 @@ import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 
-/*
-  * Determine if the PlayerCard should be upgraded to a real player based on heuristics. (oh eek!)
-  * The upgrade is permanent and cannot be undone. Also, the actual flag is changed outside this method
-  * because the cache needs to be saved back to the database and the UI updated.
+/**
+ * Determine if the PlayerCard should be upgraded to a real player based on heuristics. (oh eek!)
+ * The upgrade is permanent and cannot be undone. Also, the actual flag is changed outside this method
+ * because the cache needs to be saved back to the database and the UI updated.
  */
 fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
   if (this.name.contains(" ")) return false // only NPCs can have spaces in their names, auto-non-player
@@ -114,7 +114,7 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
   )
 }
 
-/*
+/**
  * Increment the death counter.
  */
 fun PlayerCard.postDeathEvent(timestamp: Long): PlayerCard {
@@ -125,7 +125,7 @@ fun PlayerCard.postDeathEvent(timestamp: Long): PlayerCard {
   )
 }
 
-/*
+/**
  * Essentially we maintain the reverse relationship on each PlayerCard (but only for applied debuffs/buffs)
  * so that we can track who applied what debuff to whom, and how many times, etc. This costs more memory but
  * makes analysis way easier later on, and uses less CPU to compute. (See: Graph Databases vs Relational Databases heh)
@@ -150,6 +150,37 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
     recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event) // optional to takeLast(n)
+  )
+}
+
+/**
+ * Record that this player killed someone.
+ */
+fun PlayerCard.postKillEvent(timestamp: Long, victimName: String): PlayerCard {
+  return this.copy(
+    lastEvent = timestamp,
+    // Add to recent kills map
+    recentKills = this.recentKills + (timestamp to victimName),
+    // Increment kill score
+    sessionKillTotal = this.sessionKillTotal + 1
+  )
+}
+
+/**
+ * Increment the death counter and record who did it.
+ */
+fun PlayerCard.postDeathEvent(timestamp: Long, killerName: String?): PlayerCard {
+  val updatedKilledBys = if (killerName != null) {
+    this.recentKilledBys + (timestamp to killerName)
+  } else {
+    this.recentKilledBys
+  }
+
+  return this.copy(
+    lastEvent = timestamp,
+    cache = cache?.copy(lastSeen = timestamp),
+    sessionDeathTotal = this.sessionDeathTotal + 1,
+    recentKilledBys = updatedKilledBys
   )
 }
 

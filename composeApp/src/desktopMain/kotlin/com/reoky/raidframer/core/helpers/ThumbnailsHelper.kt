@@ -300,12 +300,28 @@ fun renderTinySkillTreeIconFor(treeName: String): Painter {
  */
 @Composable
 fun getPetIcon(petType: String): Painter {
-  val filename = when (petType.lowercase()) {
+  val filename = when (petType) {
     "red_dragon" -> "pets/red_dragon.png"
     "green_dragon" -> "pets/green_dragon.png"
     "black_dragon" -> "pets/black_dragon.png"
     "riso" -> "pets/riso.png"
-    else -> "pets/riso.png"
+    "Ellam" -> "pets/ellam.png"
+    "Violet Bloomfang" -> "pets/violet_bloomfang.png"
+    "Black Bloomfang" -> "pets/black_bloomfang.png"
+    "Igneer" -> "pets/igneer.png"
+    "Iceneer" -> "pets/iceneer.png"
+    "Mooneer" -> "pets/mooneer.png"
+    "Ser Meatball" -> "pets/ser_meatball.png"
+    "Stormwraith Kirin" -> "pets/stormwraith_kirin.png"
+    "Gloomwraith Kirin" -> "pets/gloomwraith_kirin.png"
+    "Hellwraith Kirin" -> "pets/hellwraith_kirin.png"
+    "Moonlight Kitsu" -> "pets/moonlight_kitsu.png"
+    "Celestial Kitsu" -> "pets/celestial_kitsu.png"
+    "Siegeram Taurus" -> "pets/siegeram_taurus.png"
+    "Typhoon Drake" -> "pets/typhoon_drake.png"
+    "Deathmaw" -> "pets/deathmaw.png"
+    "Maahes" -> "pets/maahes.png"
+    else -> "unknown_tinyy.png"
   }
   return painterResource(filename)
 }

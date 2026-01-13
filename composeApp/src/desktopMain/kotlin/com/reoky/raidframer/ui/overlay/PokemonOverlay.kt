@@ -40,7 +40,7 @@ fun PokemonOverlay(wm: WindowManager? = null) {
   ) {
     // Title bar
     TitleBarComponent(
-      title = "Battle Companions",
+      title = "Dragon Breaths, Risos, Battle Pets and Other Creatures",
       onClose = { wm?.closeWindow(OverlayType.POKEMON) }
     )
 
@@ -52,7 +52,7 @@ fun PokemonOverlay(wm: WindowManager? = null) {
           .padding(16.dp)
       ) {
         Text(
-          text = "No active companions detected",
+          text = "No active companions detected, yet...",
           fontSize = 14.sp,
           color = Color(0xFF9CA3AF)
         )
@@ -63,10 +63,10 @@ fun PokemonOverlay(wm: WindowManager? = null) {
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
-        itemsIndexed(activePets.value, key = { _, card -> card.name }) { index, card ->
+        itemsIndexed(activePets.value, key = { _, card -> card.petId }) { index, card ->
           PetListItem(
             petName = card.name,
-            owner = card.owner,
+            owner = card.petId,
             damage = card.sessionDamageTotal,
             debuffs = card.recentDebuffAppliedEvents.map { it.debuff }.distinct(),
             petType = card.petType,

@@ -10,13 +10,10 @@ RF.Combat.EVENTS_PER_MINUTE = 0 -- for informative purposes / monitoring addon p
 RF.Combat.DEATHS_PER_MINUTE = 0 -- oh eek
 RF.Combat.EVENTS_PER_MINUTE_LAST_RESET = os.time()
 
-
 -- tell desktop app when a unit dies
-function RF.Combat.handleUnitDead(...)
-  local args = { ... }
-  local evt = RF.Parser.ParseUnitDeathEvent(args)
+function RF.Combat.handleUnitDead(playerName)
   RF.Combat.DEATHS_PER_MINUTE = RF.Combat.DEATHS_PER_MINUTE + 1
-  RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.PLAYER_DEATH, X2Unit:GetUnitNameById(evt.tuuid))
+  RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.PLAYER_DEATH, playerName)
 end
 
 -- duel event handlers - notify desktop app (we may treat combat events during duels differently later)
@@ -62,7 +59,11 @@ function RF.Combat.handleCombatMessage(...)
 
   local combatEvent = { ... }
   local meta = RF.Parser.ParseCombatEventMetadata(combatEvent)
-
+  --local result = X2Unit:GetUnitInfoById(meta.cid)
+  --RF:Log("----------------  EVENT  ----------------")
+  --RF.Debug.dumpTable(combatEvent)
+  --RF:Log("--------------- CHAR INFO ---------------")
+  --RF.Debug.dumpTable(result)
   RF.Combat.EVENTS_PER_MINUTE = RF.Combat.EVENTS_PER_MINUTE + 1
 
   -- if it's been a minute, reset the counter

@@ -39,7 +39,14 @@ object RFColors {
   // Accent colors
   val AccentRed = Color(0xFFDC143C)
   val AccentRedMuted = Color(0xFFD08080)
+
+
+  val dpsOrange = Color(249, 191, 59, 255)
+  val healsGreen = Color(105, 235, 113, 255)
+  val ccCyan = Color.Cyan
 }
+
+
 
 
 enum class RFGraphColor(val color: Color) {
@@ -49,7 +56,7 @@ enum class RFGraphColor(val color: Color) {
   YELLOW(Color.Yellow),
   CYAN(Color.Cyan),
   MAGENTA(Color.Magenta),
-  ORANGE(Color(0xFFFFA500))
+  ORANGE(Color(249, 191, 59, 255))
 }
 
 /*

@@ -52,6 +52,7 @@ sealed class IPCMessagePayload {
   @SerialName("SELF_UPDATE")
   data class SelfUpdate(
     override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long,
     val payload: String // character name
   ) : IPCMessagePayload()
@@ -60,6 +61,7 @@ sealed class IPCMessagePayload {
   @SerialName("SELF_FACTION")
   data class SelfFaction(
     override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long,
     val payload: String // faction name
   ) : IPCMessagePayload()
@@ -68,6 +70,7 @@ sealed class IPCMessagePayload {
   @SerialName("TARGET_UPDATE")
   data class TargetUpdate(
     override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long,
     val payload: String // character name
   ) : IPCMessagePayload()
@@ -76,6 +79,7 @@ sealed class IPCMessagePayload {
   @SerialName("COMBAT_EVENT")
   data class CombatEvent(
     override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long,
     @Serializable(with = CombatEventUnwrapper::class)
     val payload: CombatEventPayload
@@ -85,6 +89,7 @@ sealed class IPCMessagePayload {
   @SerialName("PLAYER_DEATH")
   data class PlayerDeath(
     override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long,
     val payload: String // player name that died
   ) : IPCMessagePayload()
@@ -93,6 +98,7 @@ sealed class IPCMessagePayload {
   @SerialName("PLAYER_INFO")
   data class PlayerInfo(
     override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long,
     @Serializable(with = PlayerInfoUnwrapper::class)
     val payload: PlayerInfoPayload
@@ -102,6 +108,7 @@ sealed class IPCMessagePayload {
   @SerialName("FRAMES_UPDATE")
   data class FramesUpdate(
     override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long,
     // Specific wrapper for list
     @Serializable(with = FramesUpdatedListUnwrapper::class)
@@ -112,6 +119,7 @@ sealed class IPCMessagePayload {
   @SerialName("TEST_PING")
   data class TestPing(
     override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long = System.currentTimeMillis()
   ) : IPCMessagePayload()
 
@@ -119,6 +127,7 @@ sealed class IPCMessagePayload {
   @SerialName("CONFIG_UPDATE")
   data class ConfigUpdate(
     override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long = System.currentTimeMillis()
   ) : IPCMessagePayload()
 

@@ -6,9 +6,10 @@ package com.reoky.raidframer.core.model
  * So I figure, we just make one and do the same thing right?
  */
 data class PetCard(
+  val petId: String, // it's name + owner to lowercase spaced with _ separated by hyphen
   val name: String, // pet/companion name
   val owner: String, // owner's character name
-  val recentCid: String, // recent companion ID from game
+  val recentCids: List<String>, // these change so keeping a list
   val lastEvent: Long, // timestamp of last event
   val petType: String = "default", // type for icon rendering
 

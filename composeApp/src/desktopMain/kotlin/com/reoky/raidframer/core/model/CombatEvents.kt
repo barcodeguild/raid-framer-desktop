@@ -2,10 +2,12 @@ package com.reoky.raidframer.core.model
 
 interface CombatEvent {
   val timestamp: Long
+  val cid: String
 }
 
 data class DamageEvent(
   override val timestamp: Long,
+  override val cid: String,
   val caster: String,
   val target: String,
   val damage: Int,
@@ -15,6 +17,7 @@ data class DamageEvent(
 
 data class HealEvent(
   override val timestamp: Long,
+  override val cid: String,
   val caster: String,
   val target: String,
   val amount: Int,
@@ -24,18 +27,21 @@ data class HealEvent(
 
 data class CastingEvent(
   override val timestamp: Long,
+  override val cid: String,
   val caster: String,
   val spell: String,
 ) : CombatEvent
 
 data class SuccessfulCastEvent(
   override val timestamp: Long,
+  override val cid: String,
   val caster: String,
   val spell: String,
 ) : CombatEvent
 
 data class BuffGainedEvent(
   override val timestamp: Long,
+  override val cid: String,
   val source: String? = null,
   val target: String,
   val buff: String,
@@ -43,6 +49,7 @@ data class BuffGainedEvent(
 
 data class BuffEndedEvent(
   override val timestamp: Long,
+  override val cid: String,
   val source: String? = null,
   val target: String,
   val buff: String,
@@ -50,6 +57,7 @@ data class BuffEndedEvent(
 
 data class DebuffGainedEvent(
   override val timestamp: Long,
+  override val cid: String,
   val source: String? = null,
   val target: String,
   val debuff: String,
@@ -57,6 +65,7 @@ data class DebuffGainedEvent(
 
 data class DebuffEndedEvent(
   override val timestamp: Long,
+  override val cid: String,
   val source: String? = null,
   val target: String,
   val debuff: String,
@@ -64,6 +73,7 @@ data class DebuffEndedEvent(
 
 data class DebuffAppliedEvent(
   override val timestamp: Long,
+  override val cid: String,
   val source: String? = null,
   val target: String,
   val debuff: String,
@@ -71,6 +81,7 @@ data class DebuffAppliedEvent(
 
 data class BuffAppliedEvent(
   override val timestamp: Long,
+  override val cid: String,
   val source: String? = null,
   val target: String,
   val buff: String,

@@ -64,6 +64,7 @@ object EventParserHelper {
       var matcher = ATTACK_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = DamageEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           target = matcher.group(4),
@@ -79,6 +80,7 @@ object EventParserHelper {
       matcher = ATTACK_PATTERN_NO_SKILL.matcher(line)
       if (matcher.find()) {
         val event = DamageEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           target = matcher.group(4),
@@ -94,6 +96,7 @@ object EventParserHelper {
       matcher = ATTACK_PARRIED_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = DamageEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           target = matcher.group(4),
@@ -109,6 +112,7 @@ object EventParserHelper {
       matcher = HEAL_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = HealEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           target = matcher.group(4),
@@ -124,6 +128,7 @@ object EventParserHelper {
       matcher = IS_CASTING.matcher(line)
       if (matcher.find()) {
         val event = CastingEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           spell = matcher.group(4),
@@ -136,6 +141,7 @@ object EventParserHelper {
       matcher = SUCCESSFUL_CAST.matcher(line)
       if (matcher.find()) {
         val event = SuccessfulCastEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           spell = matcher.group(4),
@@ -148,6 +154,7 @@ object EventParserHelper {
       matcher = BUFF_GAINED_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = BuffGainedEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           buff = matcher.group(4),
@@ -160,6 +167,7 @@ object EventParserHelper {
       matcher = BUFF_ENDED_PATTERN.matcher(line)
       if (matcher.find()) {
         val event = BuffEndedEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           buff = matcher.group(4),
@@ -172,6 +180,7 @@ object EventParserHelper {
       matcher = DEBUFF_GAINED.matcher(line)
       if (matcher.find()) {
         val event = DebuffGainedEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           debuff = matcher.group(4),
@@ -184,6 +193,7 @@ object EventParserHelper {
       matcher = DEBUFF_ENDED.matcher(line)
       if (matcher.find()) {
         val event = DebuffEndedEvent(
+          cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           debuff = matcher.group(4),

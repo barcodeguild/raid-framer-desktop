@@ -1,7 +1,6 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.animation.animateColor
-import com.reoky.raidframer.core.helpers.EventParserHelper
 import androidx.compose.animation.core.*
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
@@ -26,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
+import com.reoky.raidframer.ui.RFColors
 import com.reoky.raidframer.ui.WindowManager
 import lol.rfcloud.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.ui.dialog.exitDialog
@@ -161,7 +161,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           onClick = { },
           modifier = Modifier
             .size(32.dp)
-            .padding(top = 4.dp)
+            .padding(top = 1.5.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)
             .shadow(
               elevation = 0.dp,
@@ -172,7 +172,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
         ) {
           val closeButtonInteractionSource = remember { MutableInteractionSource() }
           Text(
-            text = "⛨",
+            text = "\uD83D\uDD0D",
             fontSize = 16.sp,
             color = if (closeButtonInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
             textAlign = TextAlign.Center,
@@ -265,7 +265,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 index = index,
                 card = card,
                 valueText = card.sessionDamageTotal.humanReadableAbbreviation(),
-                valueColor = Color(249, 191, 59, 255),
+                valueColor = RFColors.dpsOrange,
                 isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
@@ -297,7 +297,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 index = index,
                 card = card,
                 valueText = card.sessionHealTotal.humanReadableAbbreviation(),
-                valueColor = Color.Green,
+                valueColor = RFColors.healsGreen,
                 isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {
@@ -329,7 +329,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 index = index,
                 card = card,
                 valueText = card.sessionCCTotal.toString(),
-                valueColor = Color.Cyan,
+                valueColor = RFColors.ccCyan,
                 isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,
                 onClick = {

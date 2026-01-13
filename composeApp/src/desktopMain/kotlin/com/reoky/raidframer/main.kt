@@ -17,6 +17,7 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
 import com.reoky.raidframer.core.interactor.CompanionInteractor
+import com.reoky.raidframer.core.interactor.DeathAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.InstallationInteractor
 import com.reoky.raidframer.core.interactor.Log
@@ -74,6 +75,7 @@ fun main(args: Array<String>) = application {
   InstallationInteractor.start(delay = 3000L) // delay to allow user to set game path in settings if needed
   CompanionInteractor.start(delay = 1000L) // delay to allow game monitor to start first
   OverlayInteractor.start(delay = 150L) // show to allow for hiding overlays quickly
+  DeathAccumulatorInteractor.start()
 
   // file path args processing
   val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }

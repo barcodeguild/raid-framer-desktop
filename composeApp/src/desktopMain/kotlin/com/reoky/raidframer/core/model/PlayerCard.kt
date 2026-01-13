@@ -9,6 +9,7 @@ import com.reoky.raidframer.core.database.PlayerCacheEntity
  */
 data class PlayerCard (
   val name: String, // player character name
+  val recentCids: List<String>, // these change so keeping a list
   val lastEvent: Long, // timestamp of the last event seen for this player
 
   // cache management for player data
@@ -34,6 +35,8 @@ data class PlayerCard (
   val recentBuffEndedEvents: List<BuffEndedEvent> = listOf(),
   val recentDebuffGainedEvents: List<DebuffGainedEvent> = listOf(),
   val recentDebuffEndedEvents: List<DebuffEndedEvent> = listOf(),
+  val recentKills: Map<Long, String> = mapOf(), // Timestamp -> Victim Name
+  val recentKilledBys: Map<Long, String> = mapOf(), // Timestamp -> Killer Name (stored in reverse for ez lookup)
 
   // cost more memory but useful for quick access and uses less CPU than scanning all events on all cards
   // this solution is similar to what facebook did before switching to graph databases; effectively storing some data twice by stashing it all in memcached
@@ -52,6 +55,7 @@ data class PlayerCard (
   val sessionGliderTotal: Int = 0,
   val sessionItemSkillTotal: Int = 0,
   val sessionPotionTotal: Int = 0,
-  val sessionDeathTotal: Int = 0,
+  val sessionKillTotal: Int = 0,
+  val sessionDeathTotal: Int = 0
 )
 

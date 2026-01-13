@@ -13,6 +13,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.getPetIcon
@@ -64,11 +67,24 @@ fun PetListItem(
             .border(1.dp, RFColors.IconBorder, CircleShape),
           contentAlignment = Alignment.Center
         ) {
-          Image(
-            painter = getPetIcon(petType),
-            contentDescription = "$petType icon",
-            modifier = Modifier.size(32.dp)
-          )
+          // inner clipped area that crops the image to a circle and zooms it slightly
+          val zoom = 1.25f
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(6.dp) // optional inner padding to keep border visible
+              .clip(CircleShape),
+            contentAlignment = Alignment.Center
+          ) {
+            Image(
+              painter = getPetIcon(petType),
+              contentDescription = "$petType icon",
+              modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { scaleX = zoom; scaleY = zoom },
+              contentScale = ContentScale.Crop
+            )
+          }
         }
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -113,7 +129,7 @@ fun PetListItem(
               }
             }
           } else {
-            Text(text = "No debuffs", fontSize = 12.sp, color = RFColors.TextDisabled)
+            Text(text = petType, fontSize = 12.sp, color = RFColors.TextDisabled)
           }
         }
 
@@ -123,7 +139,7 @@ fun PetListItem(
           Text(
             text = "${damage.humanReadableAbbreviation()}",
             fontSize = 18.sp,
-            color = RFColors.AccentRed
+            color = RFColors.dpsOrange
           )
           Text(text = "Companion dmg", fontSize = 11.sp, color = RFColors.TextTertiary)
         }

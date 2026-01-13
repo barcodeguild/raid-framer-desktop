@@ -28,7 +28,7 @@ import kotlin.math.abs
 
 object CompanionInteractor : Interactor() {
 
-  private const val TAG = "IPCInteractor"
+  private const val TAG = "CompanionInteractor"
   private const val ADDON_RELATIVE_PATH = "Addon/RaidFramer"
   private const val IPC_IN_FILENAME = "ipc.rfin"   // App writes to this file (Lua reads)
   private const val IPC_OUT_FILENAME = "ipc.rfout" // App reads from this file (Lua writes)
@@ -119,28 +119,21 @@ object CompanionInteractor : Interactor() {
             is PlayerInfoPayload.Character -> {
               val playerName = payload.name
               if (playerName.isBlank() || playerName.contains(" ")) return
-              PlayerCacheInteractor.stronglyAssertIsPlayer(payload.name, payload.classMap)
+              PlayerCacheInteractor.stronglyAssertIsPlayer(payload.cid, payload.name, payload.classMap)
             }
             is PlayerInfoPayload.Npc -> {
               //println("Metadata for NPC ${payload.name} received.")
             }
             // Fixed: Added 'Mate' branch to make 'when' exhaustive
             is PlayerInfoPayload.Mate -> {
-              println("Metadata for companion pet ${payload.name} owned by ${payload.ownerName} with cid ${payload.cid} received.")
+              println("Metadata for companion pet ${payload.name} owned by ${payload.ownerName} with cid ${payload.cid} type ${payload.mateNpcName} received.")
               val petName = payload.name
-              if (petName.isBlank() || petName.contains(" ")) return
-              PlayerCacheInteractor.postPetDamage(
-                event = DamageEvent(
-                  timestamp = message.timestamp,
-                  caster = petName,
-                  target = petName,
-                  damage = 1000,
-                  spell = "Clinging Flame",
-                  critical = false
-                ),
-                owner = payload.ownerName,
+              if (petName.isBlank()) return
+              PlayerCacheInteractor.createOrUpdatePetCard(
                 cid = payload.cid,
-                petType = "green_dragon"
+                petName = petName,
+                owner = payload.ownerName,
+                petType = payload.mateNpcName
               )
             }
             is PlayerInfoPayload.Slave -> {
@@ -149,19 +142,18 @@ object CompanionInteractor : Interactor() {
           }
         }
         is IPCMessagePayload.FramesUpdate -> { // Was "BatchUpdate"
-          Log.info(TAG, "Player info updated with count: ${message.payload.size}")
           message.payload.chunked(50).take(2).forEachIndexed { index, chunk ->
             PlayerCacheInteractor.updatePlayersForRaidById(index, chunk)
           }
         }
         is IPCMessagePayload.CombatEvent -> {
           when (val event = message.payload) {
-
             is CombatEventPayload.SpellCastStartPayload -> {
               //Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
               PlayerCacheInteractor.postEvent(
                 CastingEvent(
                   timestamp = event.timestamp,
+                  cid = event.cid,
                   caster = event.source,
                   spell = event.spellName
                 )
@@ -173,6 +165,7 @@ object CompanionInteractor : Interactor() {
               PlayerCacheInteractor.postEvent(
                 SuccessfulCastEvent(
                   timestamp = event.timestamp,
+                  cid = event.cid,
                   caster = event.source,
                   spell = event.spellName,
                 )
@@ -180,10 +173,11 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.DamagePayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.source} damaged ${event.target} for ${abs(event.amount)} using ${event.spell}.")
+              Log.info(TAG, "At ${event.timestamp} ${event.source} (${event.cid}) damaged ${event.target} for ${abs(event.amount)} using ${event.spell}.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
+                  cid = event.cid,
                   caster = event.source,
                   target = event.target,
                   damage = abs(event.amount),
@@ -198,6 +192,7 @@ object CompanionInteractor : Interactor() {
               PlayerCacheInteractor.postEvent(
                 HealEvent(
                   timestamp = event.timestamp,
+                  cid = event.cid,
                   caster = event.source,
                   target = event.target,
                   amount = abs(event.amount),
@@ -213,6 +208,7 @@ object CompanionInteractor : Interactor() {
                 PlayerCacheInteractor.postEvent(
                   DebuffGainedEvent(
                     timestamp = event.timestamp,
+                    cid = event.cid,
                     source = event.source,
                     target = event.target,
                     debuff = event.buffName
@@ -222,6 +218,7 @@ object CompanionInteractor : Interactor() {
                 PlayerCacheInteractor.postEvent(
                   BuffGainedEvent(
                     timestamp = event.timestamp,
+                    cid = event.cid,
                     source = event.source,
                     target = event.target,
                     buff = event.buffName
@@ -235,6 +232,7 @@ object CompanionInteractor : Interactor() {
               PlayerCacheInteractor.postEvent(
                 BuffEndedEvent(
                   timestamp = event.timestamp,
+                  cid = event.cid,
                   source = event.source,
                   target = event.target,
                   buff = event.buffName
@@ -252,6 +250,7 @@ object CompanionInteractor : Interactor() {
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
+                  cid = event.cid,
                   caster = event.source,
                   target = event.target,
                   damage = abs(event.amount),
@@ -265,8 +264,8 @@ object CompanionInteractor : Interactor() {
         is IPCMessagePayload.PlayerDeath -> {
           val playerName = message.payload
           if (playerName.isBlank() || playerName.contains(" ")) return
-          Log.info(TAG, "Player death event received for $playerName")
-          PlayerCacheInteractor.postPlayerDeath(playerName, message.timestamp)
+          Log.info(TAG, "Player death event received for $playerName at ${message.timestamp}.")
+          DeathAccumulatorInteractor.queueDeath(playerName, message.timestamp)
         }
         else -> {}
       }
