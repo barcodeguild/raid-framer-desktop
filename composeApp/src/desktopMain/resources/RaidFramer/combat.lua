@@ -71,7 +71,7 @@ function RF.Combat.handleTargetChanged(...)
   end
 
   -- message if player doesn't have a statue buff
-  if playerFaction == "Unknown" then
+  if playerFaction == "Unknown" and unitInfo["type"] == "character" then
     RF:Log("Target " .. unitInfo["name"] .. " is missing statue buff. If you mention this to them please be kind! =^_^=")
   end
 
