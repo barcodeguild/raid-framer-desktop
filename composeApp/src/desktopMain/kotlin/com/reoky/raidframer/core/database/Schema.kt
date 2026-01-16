@@ -35,6 +35,7 @@ data class ConfigEntity(
   val gameScheduleHotkeyEnabled: Boolean = false,
   val useSadlyDotEyeOhhh: Boolean = false,
   val dragonBreathOverlayEnabled: Boolean = false,
+  //val killCounterMode: String = KillCounterMode.KILLING_BLOW.name,
   val firstLaunch: Boolean = true,
   val playerName: String = "", // player's own name
   val playerFaction: String = "", // player's own faction
@@ -44,6 +45,11 @@ data class ConfigEntity(
   val companionShowRaidStatus: Boolean = true,
   val companionShowCharmedInChat: Boolean = true,
   val companionShowSilencedInChat: Boolean = true,
+  //val companionPlaySoundWhenYouCharmTargets: Boolean = false,
+
+  // future-proofing for more companion marks
+  // currently in lua we can only track the location / mark one target at a time
+  // so these are just toggles for potential future api whitelists where maybe we could do that?
   val companionMarkHVTHealers: Boolean = false,
   val companionMarkHVTDPS: Boolean = false,
   val companionMarkHVTCrowdControl: Boolean = false,
@@ -120,3 +126,14 @@ data class PlayerCacheEntity(
   val lifetimeTotalGliderUses: Long = 0L,
 )
 
+// global enums below for consolidation
+enum class KillCounterMode {
+  KILLING_BLOW,
+  MOST_DAMAGE;
+
+  companion object {
+    fun fromString(value: String): KillCounterMode {
+      return entries.find { it.name == value } ?: KILLING_BLOW
+    }
+  }
+}

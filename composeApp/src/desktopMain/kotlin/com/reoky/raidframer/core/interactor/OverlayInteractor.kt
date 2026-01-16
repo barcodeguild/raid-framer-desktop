@@ -32,7 +32,6 @@ object OverlayInteractor : Interactor() {
     if (textLength > 0) {
       return buffer.getString(0)
     } else {
-      println("Failed to get a window handle.. Failing Open.")
       return "ArcheRage" // fail open means we assume the game is active
     }
   }

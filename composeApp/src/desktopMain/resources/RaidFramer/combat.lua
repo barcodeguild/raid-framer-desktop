@@ -37,20 +37,51 @@ function RF.Combat.handleTargetChanged(...)
   end
 
   -- check to see if they have any buffs we care about
-  --local buffCount = X2Unit:UnitBuffCount("target")
-  --local playerBuffs = {}
-  --if type(buffCount) == "number" then
-  --  for i = 1, buffCount do
-  --    local buffInfo = X2Unit:UnitBuff("target", i)
-  --    if (buffInfo) then
-  --      playerBuffs[i] = buffInfo
-  --    end
-  --  end
-  --  RF.Debug.dumpTable(playerBuffs)
-  --end
+  local buffCount = X2Unit:UnitBuffCount("target")
+  local playerFaction = "Unknown"
+  if type(buffCount) == "number" then
+    for i = 1, buffCount do
+      local buffInfo = X2Unit:UnitBuff("target", i)
+      if (buffInfo) then
+        local buffId = buffInfo["buff_id"]
+
+        -- east faction (main, ext and enhanced versions of each buff)
+        if (buffId == 30767) or (buffId == 30764) or (buffId == 9002338) or (buffId == 9002337) or (buffId == 30773) or (buffId == 30772) then
+          playerFaction = "Haranya"
+          RF:Log("Target " .. unitInfo["name"] .. " is in the Haranya faction.")
+          break
+        end
+
+        -- west faction
+        if (buffId == 30766) or (buffId == 9002340) or (buffIf == 30760) or (buffId == 9002339) or (buffIf == 30770) or (buffId == 30771) then
+          playerFaction = "Nuia"
+          RF:Log("Target " .. unitInfo["name"] .. " is in the Nuia faction.")
+          break
+        end
+
+        -- pirate faction (pirates don't have enhanced versions of the buffs) :(
+        -- but we'll support pirate faction anyways cause we love them
+        if (buffId == 30768) or (buffId == 30765) or (buffId == 9002342) or (buffId == 9002341) then
+          playerFaction = "Pirate"
+          RF:Log("Target " .. unitInfo["name"] .. " is in the Pirate faction.")
+          break
+        end
+      end
+    end
+  end
+
+  -- message if player doesn't have a statue buff
+  if playerFaction == "Unknown" then
+    RF:Log("Target " .. unitInfo["name"] .. " is missing statue buff. If you mention this to them please be kind! =^_^=")
+  end
 
   -- send target update to desktop app
-  RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.TARGET_UPDATE, unitInfo["name"])
+  RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.TARGET_UPDATE, RF.JSON.json_encode({
+    name = unitInfo["name"],
+    type = unitInfo["type"],
+    factionStatus = unitInfo["faction"], -- friendly/hostile/neutral
+    faction = playerFaction -- which faction
+  }))
 end
 
 -- main combat event handler
