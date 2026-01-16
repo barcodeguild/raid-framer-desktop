@@ -2,9 +2,11 @@ package com.reoky.raidframer.core.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.FactionStatus
 import com.reoky.raidframer.ui.OverlayWindowType
 
-const val SCHEMA_VERSION = 1 // increment this when making schema changes
+const val SCHEMA_VERSION = 2 // increment this when making schema changes
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -74,9 +76,10 @@ data class PlayerCacheEntity(
 
   // future proofing
   val lastKnownGearScore: Int = 0,
+  val lastKnownFaction: String = Faction.UNKNOWN.value,
+  val lastKnownFactionStatus: String = FactionStatus.UNKNOWN.value,
   val lastKnownGuild: String = "",
-  val lastKnownFaction: String = "",
-  val lastKnownRegion: String = "",
+  val lastKnownRegion: String = "", // unused for now
 
   // glider usages
   val lastBDGlider: Long = 0L,
@@ -117,13 +120,19 @@ data class PlayerCacheEntity(
   val lastHonorElixir: Long = 0L,
   val lastWonderlandPVEBook: Long = 0L,
 
-  // lifetime stats
+  // lifetime stats (could be fun to track over time)
   val lifetimeTotalDamage: Long = 0L,
   val lifetimeTotalHealing: Long = 0L,
+  val lifetimeTotalCCDelivered: Long = 0L,
+  val lifetimeTotalDebuffsApplied: Long = 0L,
+  val lifetimeTotalCharms: Long = 0L,
+  val lifetimeTotalDistresses: Long = 0L,
+  val lifetimeTotalSilences: Long = 0L,
+  val lifetimeTotalGliderUses: Long = 0L,
+  val lifetimeTotalItemSkillsUsed: Long = 0L,
+  val lifetimeTotalKills: Long = 0L,
   val lifetimeTotalDeaths: Long = 0L,
   val lifetimeTotalDamageTaken: Long = 0L,
-  val lifetimeTotalCCDelivered: Long = 0L,
-  val lifetimeTotalGliderUses: Long = 0L,
 )
 
 // global enums below for consolidation

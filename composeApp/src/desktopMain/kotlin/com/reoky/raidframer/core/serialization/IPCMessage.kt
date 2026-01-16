@@ -72,7 +72,7 @@ sealed class IPCMessagePayload {
     override val version: Int = 1,
     @Serializable(with = SecondsToMillisSerializer::class)
     override val timestamp: Long,
-    val payload: String // character name
+    val payload: TargetUpdatedPayload // target info
   ) : IPCMessagePayload()
 
   @Serializable

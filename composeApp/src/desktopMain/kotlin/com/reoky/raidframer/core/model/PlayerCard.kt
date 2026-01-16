@@ -11,14 +11,15 @@ data class PlayerCard (
   val name: String, // player character name
   val recentCids: List<String>, // these change so keeping a list
   val lastEvent: Long, // timestamp of the last event seen for this player
+  val lastKnownFaction: String = Faction.UNKNOWN.value, // see Faction definitions
+  val lastKnownFactionStatus: String = FactionStatus.UNKNOWN.value, // friendly / hostile / neutral
+  val lastKnownGuild: String = "", // string (not used for anything yet, thinking maybe dominion / duels support for future release)
+  val currentBuild: String,
 
   // cache management for player data
   val isLoaded: Boolean = false,
   val isRealPlayer: Boolean = false, // determined after some analysis
   val cache: PlayerCacheEntity?, // saved to the database
-
-  // recent builds / specs
-  val currentBuild: String,
 
   // important buffs/debuffs currently active on the player
   val isBuildingAggression: Boolean = false,

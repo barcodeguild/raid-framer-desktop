@@ -109,10 +109,8 @@ object CompanionInteractor : Interactor() {
           RFConfig.update { it.copy(playerFaction = factionName)}
         }
         is IPCMessagePayload.TargetUpdate -> {
-          val targetName = message.payload
-          if (targetName.isBlank() || targetName.contains(" ")) return
-          AppState.selectTarget(targetName)
-          Log.info(TAG, "User tabbed over $targetName..")
+          val target = message.payload
+          PlayerCacheInteractor.switchActiveTarget(target)
         }
         is IPCMessagePayload.PlayerInfo -> {
           when (val payload = message.payload) {

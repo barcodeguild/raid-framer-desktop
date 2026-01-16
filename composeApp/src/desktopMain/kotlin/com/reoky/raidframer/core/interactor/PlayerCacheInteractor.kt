@@ -2,6 +2,7 @@ package com.reoky.raidframer.core.interactor
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshotFlow
+import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.calc.MetricRawSample
 import com.reoky.raidframer.core.calc.RealtimeComputer
 import com.reoky.raidframer.core.database.PlayerCacheEntity
@@ -12,6 +13,7 @@ import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
 import com.reoky.raidframer.core.model.*
 import com.reoky.raidframer.core.serialization.Party
 import com.reoky.raidframer.core.serialization.RaidFramePayload
+import com.reoky.raidframer.core.serialization.TargetUpdatedPayload
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +24,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.text.get
+import kotlin.text.insert
 import kotlin.text.set
 
 /**
@@ -77,6 +80,12 @@ object PlayerCacheInteractor : Interactor() {
                   )
                 )
                 cards[name] = upgradedCard
+
+                // Persist the fact this is a player immediately
+                upgradedCard.cache?.let { cacheEntity ->
+                  RFDao.playerCacheDao.insert(cacheEntity)
+                  Log.debug(TAG, "Persisted player cache on auto-upgrade for ${cacheEntity.playerName}")
+                }
               }
             }
           }
@@ -120,6 +129,7 @@ object PlayerCacheInteractor : Interactor() {
 
             // Persist to DB
             updatedCard.cache?.let {
+              Log.debug(TAG, "Persisting updated cache for player ${it.playerName} with new spec ${it.lastKnownSpec}")
               RFDao.playerCacheDao.insert(it)
             }
           }
@@ -151,12 +161,17 @@ object PlayerCacheInteractor : Interactor() {
       val cached = runBlocking {
         RFDao.playerCacheDao.getPlayerCacheFor(playerName)
       }
+      // pre-populate card fields from cache. Very important to get this right so we don't overwrite data and for isRealPlayer flag
       val card = PlayerCard(
-        recentCids = cid?.let { listOf(it) } ?: listOf(),
         name = playerName,
-        lastEvent = System.currentTimeMillis(),
-        isRealPlayer = cached != null,
-        cache = cached,
+        recentCids = cid?.let { listOf(it) } ?: listOf(),
+        lastEvent = System.currentTimeMillis(), // because an event triggered this load from db
+        lastKnownFaction = Faction.fromString(cached?.lastKnownFaction ?: Faction.UNKNOWN.value).value, // fixes bad data over time by fitting into the enum
+        lastKnownFactionStatus = FactionStatus.fromString(cached?.lastKnownFactionStatus ?: Faction.UNKNOWN.value).value, // always code defensive
+        lastKnownGuild = cached?.lastKnownGuild ?: "",
+        isLoaded = true,
+        isRealPlayer = cached != null, // cache is for players not NPCs, Mounts, Pets, Vehicles, etc
+        cache = cached, // everything
         currentBuild = cached?.lastKnownSpec ?: SpecType.UNKNOWN.name
       )
       cards[playerName] = card
@@ -251,26 +266,34 @@ object PlayerCacheInteractor : Interactor() {
     return cards.values.filter(filter)
   }
 
-  /*
+  /**
    * Helps upgrade an NPC card to a real player card immediately based on metadata from the game proving it's a player.
-   */
-  fun stronglyAssertIsPlayer(cid: String, name: String, classMap: Map<String, Int>) {
+   * Also persists the updated cache to the database right away. (which we didn't used to do and records got lost eek!)
+   **/
+  fun stronglyAssertIsPlayer(cid: String?, name: String, classMap: Map<String, Int>) {
     val spec = SpecType.fromTrees(classMap.values.mapNotNull { gameId -> SkillTreeType.fromGameId(gameId) }.toSet())
     Log.debug(TAG, "Strongly asserting $name is a real player with spec $spec and recent cid of $cid.")
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid, name)
         cards[name]?.let { card ->
-          cards[name] = card.copy(
+          val updated = card.copy(
             isRealPlayer = true,
             currentBuild = if (spec != SpecType.UNKNOWN) spec.name else card.currentBuild,
-            recentCids = (card.recentCids + cid).distinct().takeLast(50),
+            recentCids = cid?.let { (card.recentCids + it).distinct().takeLast(50) } ?: card.recentCids,
             cache = PlayerCacheEntity(
               playerName = card.name,
               lastSeen = card.lastEvent,
-              lastKnownSpec = card.currentBuild
+              lastKnownSpec = if (spec != SpecType.UNKNOWN) spec.name else card.currentBuild
             )
           )
+          cards[name] = updated
+
+          // Persist immediately that this is a player
+          updated.cache?.let { cacheEntity ->
+            RFDao.playerCacheDao.insert(cacheEntity)
+            Log.debug(TAG, "Persisted player cache on strong-assert for ${cacheEntity.playerName}")
+          }
         }
       }
     }
@@ -409,6 +432,40 @@ object PlayerCacheInteractor : Interactor() {
     return cards.values.filter { it.isRealPlayer }
   }
 
+
+  /*
+   * When the user tabs over a target the active target is switched here and throughout the app. This is performed inside the
+   * interactor to ensure thread-safety and proper synchronization because we will be updating the corresponding player card with
+   * the faction info. Which could change if the player exiles or is in a duel.
+   */
+  fun switchActiveTarget(target: TargetUpdatedPayload) {
+    if (target.name.isBlank()) return // don't switch to non-targets
+    AppState.selectTarget(target.name)
+    val currentFaction = Faction.fromString(target.faction)
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(playerName = target.name)
+        cards[target.name]?.let { card ->
+          cards[target.name] = card.copy(
+            lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value, // always update status
+            lastKnownFaction = if (currentFaction != Faction.UNKNOWN) currentFaction.value else card.lastKnownFaction, // only update faction if known
+            lastKnownGuild = target.guild, // always replace guild for now
+            cache = card.cache?.copy(
+              lastKnownFaction = if (currentFaction != Faction.UNKNOWN) currentFaction.value else card.lastKnownFaction, // only update faction if known
+              lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value,
+              lastKnownGuild = target.guild
+            )
+          )
+        }
+      }
+    }
+    // upgrade to real player immediately if type is character
+    if (target.type == "character") {
+      stronglyAssertIsPlayer(cid = null, name = target.name, classMap = target.classMap)
+    }
+    Log.info(TAG, "Player's tab-target switched to $target")
+  }
+
   /*
    * Processes a batch of resolved death/kill attributions atomically.
    * Input: List of Triple(VictimName, DeathTimestamp, KillerName?)'
@@ -436,8 +493,6 @@ object PlayerCacheInteractor : Interactor() {
       }
     }
   }
-
-
 
   /* UI Subscriptions */
   var topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
@@ -489,5 +544,4 @@ object PlayerCacheInteractor : Interactor() {
     return snapshotFlow { raids[raidId] ?: listOf() }
       .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
   }
-
 }

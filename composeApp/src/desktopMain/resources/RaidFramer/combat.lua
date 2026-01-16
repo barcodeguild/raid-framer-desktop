@@ -48,14 +48,12 @@ function RF.Combat.handleTargetChanged(...)
         -- east faction (main, ext and enhanced versions of each buff)
         if (buffId == 30767) or (buffId == 30764) or (buffId == 9002338) or (buffId == 9002337) or (buffId == 30773) or (buffId == 30772) then
           playerFaction = "Haranya"
-          RF:Log("Target " .. unitInfo["name"] .. " is in the Haranya faction.")
           break
         end
 
         -- west faction
         if (buffId == 30766) or (buffId == 9002340) or (buffIf == 30760) or (buffId == 9002339) or (buffIf == 30770) or (buffId == 30771) then
           playerFaction = "Nuia"
-          RF:Log("Target " .. unitInfo["name"] .. " is in the Nuia faction.")
           break
         end
 
@@ -63,7 +61,6 @@ function RF.Combat.handleTargetChanged(...)
         -- but we'll support pirate faction anyways cause we love them
         if (buffId == 30768) or (buffId == 30765) or (buffId == 9002342) or (buffId == 9002341) then
           playerFaction = "Pirate"
-          RF:Log("Target " .. unitInfo["name"] .. " is in the Pirate faction.")
           break
         end
       end
@@ -76,12 +73,14 @@ function RF.Combat.handleTargetChanged(...)
   end
 
   -- send target update to desktop app
-  RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.TARGET_UPDATE, RF.JSON.json_encode({
+  RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.TARGET_UPDATE, {
     name = unitInfo["name"],
     type = unitInfo["type"],
-    factionStatus = unitInfo["faction"], -- friendly/hostile/neutral
-    faction = playerFaction -- which faction
-  }))
+    class = unitInfo["class"],
+    factionStatus = unitInfo["faction"],
+    faction = playerFaction,
+    guild = unitInfo["expeditionName"]
+  })
 end
 
 -- main combat event handler

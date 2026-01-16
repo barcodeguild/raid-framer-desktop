@@ -14,7 +14,7 @@
   - Internationalization support targetting English, Korean, Brazilian, Russian, Chinese, German, Australian, and Pirate
 
 ## What counts as CC?
-This has been a huge headache friends, let me tell you. ~ The truth is everyone wants it to work differently, so the solution ended-up being to do breakdowns by skill. However, you'll notice that there is still a "PvP CC" column. When you see the phrase CC used throughout the APP, RF is referring to any spells or utility items that:
+This has been a huge headache friends, let me tell you. ~ The truth is everyone wants it to work differently, so the solution ended-up being to do break-downs by debuff. You'll notice that there's a "PvP CC" column. When you see the phrase CC used throughout the APP, RF is referring to any spells or utility items that:
   - Inhibit or reduce player movement.
   - Prevent or slow the casting of spells, or confine the casting in a specific direction.
   - That entrap or cause the players camera to face another direction.

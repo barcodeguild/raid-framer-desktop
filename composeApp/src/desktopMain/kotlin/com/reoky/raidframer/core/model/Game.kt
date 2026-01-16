@@ -10,7 +10,20 @@ enum class Faction(val value: String) {
 
   companion object {
     fun fromString(value: String): Faction {
-      return values().firstOrNull { it.value.equals(value, ignoreCase = true) } ?: UNKNOWN
+      return entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: UNKNOWN
+    }
+  }
+}
+
+enum class FactionStatus(val value: String) {
+  FRIENDLY("Friendly"),
+  HOSTILE("Hostile"),
+  NEUTRAL("Neutral"),
+  UNKNOWN("Unknown");
+
+  companion object {
+    fun fromString(value: String): FactionStatus {
+      return entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: UNKNOWN
     }
   }
 }

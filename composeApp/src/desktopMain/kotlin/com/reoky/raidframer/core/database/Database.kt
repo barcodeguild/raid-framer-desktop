@@ -38,9 +38,9 @@ fun initialize(): AppDatabase {
     name = File(databaseFilePath).absolutePath,
   )
   .setDriver(BundledSQLiteDriver())
+  .fallbackToDestructiveMigrationFrom(true, 1) // still developing, wipe from v1
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
-  //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
-  //.addMigrations(MIGRATION_1_2) // Add your migration objects here
+    //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)
   .setQueryCoroutineContext(Dispatchers.IO)
   .build()
