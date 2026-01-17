@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.helpers.FaIcon
+import com.reoky.raidframer.core.helpers.FontsHelper.FaSolid
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.RFColors
@@ -139,29 +141,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           onClick = { shouldShowExitDialog.value = true },
           modifier = Modifier
             .size(32.dp)
-            .padding(top = 4.dp)
-            .background(Color.Transparent, MaterialTheme.shapes.small)
-            .shadow(
-              elevation = 0.dp,
-              clip = true,
-              ambientColor = Color.Transparent,
-              spotColor = Color.Transparent
-            )
-        ) {
-          val closeButtonInteractionSource = remember { MutableInteractionSource() }
-          Text(
-            text = "✕",
-            fontSize = 18.sp,
-            color = if (closeButtonInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.hoverable(interactionSource = closeButtonInteractionSource)
-          )
-        }
-        IconButton(
-          onClick = { },
-          modifier = Modifier
-            .size(32.dp)
-            .padding(top = 1.5.dp)
+            .padding(top = 3.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)
             .shadow(
               elevation = 0.dp,
@@ -170,20 +150,67 @@ fun CombatOverlay(wm: WindowManager? = null) {
               spotColor = Color.Transparent,
             ),
         ) {
-          val closeButtonInteractionSource = remember { MutableInteractionSource() }
+          val closeInteractionSource = remember { MutableInteractionSource() }
           Text(
-            text = "\uD83D\uDD0D",
+            text = "\uf00d", // Close icon
+            fontFamily = FaSolid,
             fontSize = 16.sp,
-            color = if (closeButtonInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
+            color = if (closeInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
             textAlign = TextAlign.Center,
-            modifier = Modifier.hoverable(interactionSource = closeButtonInteractionSource)
+            modifier = Modifier.hoverable(interactionSource = closeInteractionSource)
+          )
+        }
+        IconButton(
+          onClick = { wm?.openWindow(OverlayType.POKEMON) },
+          modifier = Modifier
+            .size(32.dp)
+            .padding(top = 3.dp)
+            .background(Color.Transparent, MaterialTheme.shapes.small)
+            .shadow(
+              elevation = 0.dp,
+              clip = true,
+              ambientColor = Color.Transparent,
+              spotColor = Color.Transparent,
+            ),
+        ) {
+          val petsInteractionSource = remember { MutableInteractionSource() }
+          Text(
+            text = "\uf6d5", // Dragon icon
+            fontFamily = FaSolid,
+            fontSize = 13.sp,
+            color = if (petsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.hoverable(interactionSource = petsInteractionSource)
+          )
+        }
+        IconButton(
+          onClick = { wm?.openWindow(OverlayType.RAID) },
+          modifier = Modifier
+            .size(32.dp)
+            .padding(top = 3.dp)
+            .background(Color.Transparent, MaterialTheme.shapes.small)
+            .shadow(
+              elevation = 0.dp,
+              clip = true,
+              ambientColor = Color.Transparent,
+              spotColor = Color.Transparent,
+            ),
+        ) {
+          val raidInteractionSource = remember { MutableInteractionSource() }
+          Text(
+            text = "\uf500", // Party / Raid Icon
+            fontFamily = FaSolid,
+            fontSize = 13.sp,
+            color = if (raidInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.hoverable(interactionSource = raidInteractionSource)
           )
         }
         Column(
           modifier = Modifier
             .weight(1f)
             .fillMaxHeight()
-            .padding(top = 16.dp),
+            .padding(top = 12.dp),
           horizontalAlignment = Alignment.CenterHorizontally
         ) {
           Text(text = "\uD83D\uDD25 PvP Damage \uD83D\uDD25", color = Color.White)
@@ -192,7 +219,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           modifier = Modifier
             .weight(1f)
             .fillMaxHeight()
-            .padding(top = 16.dp),
+            .padding(top = 12.dp),
           horizontalAlignment = Alignment.CenterHorizontally
         ) {
           Text(text = "\uD83D\uDC89 PvP Heals \uD83D\uDC89", color = Color.White)
@@ -201,40 +228,79 @@ fun CombatOverlay(wm: WindowManager? = null) {
           modifier = Modifier
             .weight(1f)
             .fillMaxHeight()
-            .padding(top = 16.dp),
+            .padding(top = 12.dp),
           horizontalAlignment = Alignment.CenterHorizontally
         ) {
           Text(text = "⛨ CC Delivered ⛨", color = Color.White)
         }
         IconButton(
-          onClick = { wm?.openWindow(OverlayType.SETTINGS) },
+          onClick = { wm?.openWindow(OverlayType.SUMMARY) },
           modifier = Modifier
             .size(32.dp)
+            .padding(top = 3.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)
-            .padding(top = 4.dp)
             .shadow(
               elevation = 0.dp,
               clip = true,
               ambientColor = Color.Transparent,
-              spotColor = Color.Transparent
-            )
+              spotColor = Color.Transparent,
+            ),
         ) {
-          Text("\uD83D\uDEE0\uFE0F", fontSize = 16.sp, color = Color.White, textAlign = TextAlign.Center)
+          val summaryInteractionSource = remember { MutableInteractionSource() }
+          Text(
+            text = "\uf200", // Pie Chart Icon
+            fontFamily = FaSolid,
+            fontSize = 13.sp,
+            color = if (summaryInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.hoverable(interactionSource = summaryInteractionSource)
+          )
+        }
+        IconButton(
+          onClick = { wm?.openWindow(OverlayType.SETTINGS) },
+          modifier = Modifier
+            .size(32.dp)
+            .padding(top = 3.dp)
+            .background(Color.Transparent, MaterialTheme.shapes.small)
+            .shadow(
+              elevation = 0.dp,
+              clip = true,
+              ambientColor = Color.Transparent,
+              spotColor = Color.Transparent,
+            ),
+        ) {
+          val settingsInteractionSource = remember { MutableInteractionSource() }
+          Text(
+            text = "\uf013", // Gear Icon
+            fontFamily = FaSolid,
+            fontSize = 13.sp,
+            color = if (settingsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.hoverable(interactionSource = settingsInteractionSource)
+          )
         }
         IconButton(
           onClick = { PlayerCacheInteractor.resetAllSessions() },
           modifier = Modifier
             .size(32.dp)
+            .padding(top = 3.dp, end = 4.dp)
             .background(Color.Transparent, MaterialTheme.shapes.small)
-            .padding(bottom = 4.dp, end = 8.dp)
             .shadow(
               elevation = 0.dp,
               clip = true,
               ambientColor = Color.Transparent,
-              spotColor = Color.Transparent
-            )
+              spotColor = Color.Transparent,
+            ),
         ) {
-          Text("⟳", fontSize = 24.sp, color = Color.White, textAlign = TextAlign.Center)
+          val settingsInteractionSource = remember { MutableInteractionSource() }
+          Text(
+            text = "\u002b", // Plus Icon
+            fontFamily = FaSolid,
+            fontSize = 15.sp,
+            color = if (settingsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.hoverable(interactionSource = settingsInteractionSource)
+          )
         }
       }
 
