@@ -7,6 +7,7 @@ RF.Raid = RF.Raid or {}
 RF.Raid.Roster = RF.Raid.Roster or {} -- somewhat ambiguous name but it is what it is
 RF.Raid.CountRaidOne = 0 -- number of players in raid one
 RF.Raid.CountRaidTwo = 0 -- number of players in raid two
+RF.Raid.LastRosterUpdate = 0 -- timestamp of last roster update
 
 RF.Raid.recentlyJoined = false
 RF.Raid.isPrepared = false
@@ -64,10 +65,7 @@ function RF.Raid.Prepare()
 end
 
 function RF.Raid.handleTeamRoleChanged(...)
-  local raid, position, role = { ... }
-  -- raid appears to be a table during siege
-  --RF:Log("Team Role Changed - Raid: " .. tostring(raid) .. " Position: " .. tostring(position) .. " Role: " .. tostring(role))
-  --RF.Raid.Roster[position].role = role
+  --RF.Debug.dumpTable({...})
 end
 
 -- allows us to set data for a raid slot from outside the module
@@ -94,7 +92,13 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
       scanForCoRaid() -- scan on first refresh after joining
       RF.Raid.recentlyJoined = false
     end
-    return -- don't process further on refreshes (there's a lot of these and we're trying to be more efficient)
+
+    -- allow scanning because of a refresh if we haven't done that for 5 seconds
+    if (os.time() - RF.Raid.LastRosterUpdate) >= 5 then
+      RF.Raid.LastRosterUpdate = os.time()
+    else
+      return -- skip processing on rapid refreshes (there's a lot of these and we're trying to be more efficient)
+    end
   end
 
   -- GUARD: make sure there's empty raid slots to fill with players
@@ -121,9 +125,10 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
   if not RF.Raid.hasCoRaid then
     for position = 1, 50 do
       local raidMember = X2Unit:UnitName(string.format("team%02d", position))
+      local raidRole = X2Team:GetRole(0, position)
       if raidMember then
         --RF:Log(string.format("Raid Slot %02d: %s", position, raidMember))
-        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember })
+        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole })
       else
         --RF:Log(string.format("Raid Slot %02d: <empty>", position))
         RF.Raid.Roster[position] = RF.Raid.NewRaidMember(position) -- clear slot
@@ -132,17 +137,19 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
   else
     for position = 1, 50 do
       local raidMember = X2Unit:UnitName(string.format("team_01_%02d", position))
+      local raidRole = X2Team:GetRole(1, position)
       if raidMember then
         --RF:Log(string.format("Main Raid Raid Slot %02d: %s", position, raidMember))
-        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember })
+        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole })
       else
         --RF:Log(string.format("Main Raid Raid Slot %02d: <empty>", position))
         RF.Raid.Roster[position] = RF.Raid.NewRaidMember(position) -- clear slot
       end
       local raidTwoMember = X2Unit:UnitName(string.format("team_02_%02d", position))
+      local raidRole = X2Team:GetRole(2, position)
       if raidTwoMember then
         --RF:Log(string.format("Co-Raid Raid Slot %02d: %s", position + 50, raidTwoMember))
-        RF.Raid.UpdateRaidSlot(position + 50, { playerName = raidTwoMember })
+        RF.Raid.UpdateRaidSlot(position + 50, { playerName = raidTwoMember, role = raidRole })
       else
         --RF:Log(string.format("Co-Raid Raid Slot %02d: <empty>", position + 50))
         RF.Raid.Roster[position + 50] = RF.Raid.NewRaidMember(position + 50) -- clear slot

@@ -140,6 +140,7 @@ object CompanionInteractor : Interactor() {
           }
         }
         is IPCMessagePayload.FramesUpdate -> { // Was "BatchUpdate"
+          Log.debug(TAG, "Received frames update with ${message.payload} players.")
           message.payload.chunked(50).take(2).forEachIndexed { index, chunk ->
             PlayerCacheInteractor.updatePlayersForRaidById(index, chunk)
           }

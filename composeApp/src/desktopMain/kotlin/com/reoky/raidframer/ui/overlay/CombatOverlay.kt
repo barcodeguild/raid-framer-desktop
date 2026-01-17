@@ -309,7 +309,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
         Modifier
           .align(Alignment.Center)
           .fillMaxWidth()
-          .padding(top = 16.dp, start = 8.dp, end = 8.dp)
+          .padding(top = 12.dp, start = 8.dp, end = 8.dp)
       ) {
         // Damage Column
         Column(
