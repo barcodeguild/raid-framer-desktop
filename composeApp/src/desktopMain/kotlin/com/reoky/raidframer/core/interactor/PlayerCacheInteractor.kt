@@ -528,6 +528,18 @@ object PlayerCacheInteractor : Interactor() {
     .map { cards -> cards.filter { it.isRealPlayer && it.sessionDeathTotal > 0 }.sortedByDescending { it.sessionDeathTotal }.take(100) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+  val nearbyNuianPlayers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
+    .map { cards -> cards.filter { it.isRealPlayer && it.lastKnownFaction == Faction.NUIA.value }.sortedBy { it.name }.take(200) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val nearbyHaraniPlayers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
+    .map { cards -> cards.filter { it.isRealPlayer && it.lastKnownFaction == Faction.HARANYA.value }.sortedByDescending { it.lastEvent }.take(200) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val nearbyPiratePlayers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
+    .map { cards -> cards.filter { it.isRealPlayer && it.lastKnownFaction == Faction.PIRATE.value }.sortedByDescending { it.lastEvent }.take(200) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .map { pets ->
       pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 }
@@ -541,4 +553,6 @@ object PlayerCacheInteractor : Interactor() {
     return snapshotFlow { raids[raidId] ?: listOf() }
       .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
   }
+
+
 }

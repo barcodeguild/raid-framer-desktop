@@ -19,7 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.getPetIcon
-import com.reoky.raidframer.ui.RFColors
+import com.reoky.raidframer.core.helpers.RFColors
 import lol.rfcloud.core.helpers.humanReadableAbbreviation
 
 @Composable

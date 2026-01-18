@@ -27,3 +27,18 @@ enum class FactionStatus(val value: String) {
     }
   }
 }
+
+enum class PlayerRole(val value: Int) {
+  BLUE(0),
+  GREEN(1),
+  PINK(2),
+  RED(3),
+  PURPLE(4),
+  UNKNOWN(-1);
+
+  companion object {
+    fun fromInt(value: Int): PlayerRole {
+      return entries.firstOrNull { it.value == value } ?: UNKNOWN
+    }
+  }
+}

@@ -23,11 +23,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
-import com.reoky.raidframer.core.helpers.FaIcon
 import com.reoky.raidframer.core.helpers.FontsHelper.FaSolid
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
-import com.reoky.raidframer.ui.RFColors
+import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.WindowManager
 import lol.rfcloud.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.ui.dialog.exitDialog
@@ -387,7 +386,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
             contentPadding = PaddingValues(0.dp),
             state = ccListState,
             modifier = Modifier
-              .padding(8.dp)
+              .padding(start = 8.dp, top = 8.dp, end = 0.dp, bottom = 8.dp)
               .fillMaxWidth()
           ) {
             itemsIndexed(sortedCC, key = { _, card -> card.name }) { index, card ->

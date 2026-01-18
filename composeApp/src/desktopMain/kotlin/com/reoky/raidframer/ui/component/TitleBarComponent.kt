@@ -16,6 +16,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.reoky.raidframer.core.helpers.FontsHelper
 
 @Composable
 fun TitleBarComponent(
@@ -72,7 +73,7 @@ fun TitleBarComponent(
       color = Color.White,
       modifier = Modifier.align(Alignment.Center),
       style = TextStyle(
-        fontFamily = FontFamily.Monospace
+        fontFamily = FontsHelper.ARKorean
       )
     )
 

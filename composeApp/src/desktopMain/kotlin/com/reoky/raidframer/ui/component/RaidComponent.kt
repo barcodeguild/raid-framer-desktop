@@ -12,101 +12,101 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.serialization.RaidFramePayload
-import com.reoky.raidframer.ui.RaidColors
+import com.reoky.raidframer.core.helpers.RaidColors
+import com.reoky.raidframer.core.helpers.getRaidColor
+import com.reoky.raidframer.core.model.PlayerRole
+
+private val PARTY_COUNT = 10
+private val PARTIES_PER_ROW = 5
+private val PARTY_WIDTH = 66.dp
+private val NAMEPLATE_HEIGHT = 26.dp
+private val MANA_TOP_PADDING = 20.75.dp
+private val MANA_HEIGHT = 9.5.dp
+private val MEMBER_FRAME_HEIGHT = MANA_TOP_PADDING + MANA_HEIGHT
 
 @Composable
 fun RaidComponent(
-    parties: List<List<RaidFramePayload>>,
-    modifier: Modifier = Modifier
+  parties: List<List<RaidFramePayload>>,
+  modifier: Modifier = Modifier
 ) {
-    // Chunk parties into rows of 5. This handles unlimited parties dynamically.
-    val partyRows = parties.chunked(5)
+  val paddedParties = parties.toMutableList()
+  while (paddedParties.size < PARTY_COUNT) paddedParties.add(emptyList())
+  val partyRows = paddedParties.chunked(PARTIES_PER_ROW)
 
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp) // Gap between rows
-    ) {
-        partyRows.forEach { rowParties ->
-            Row(
-                modifier = Modifier.wrapContentWidth(),
-                horizontalArrangement = Arrangement.spacedBy(3.dp)
-            ) {
-                // Iterate 0..4 to ensure we print empty slots for alignment if a row is incomplete
-                for (col in 0 until 5) {
-                    val party = rowParties.getOrNull(col)
-                    if (party != null) {
-                        RaidPartyColumn(party)
-                    } else {
-                        // Empty slot to keep spacing and alignment consistent with other rows
-                        Box(modifier = Modifier.width(66.dp))
-                    }
-                }
-            }
+  Column(
+    modifier = modifier,
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+  ) {
+    partyRows.forEach { rowParties ->
+      Row(
+        modifier = Modifier.wrapContentWidth(),
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
+      ) {
+        rowParties.forEach { party ->
+          RaidPartyColumn(party)
         }
+      }
     }
+  }
 }
 
 @Composable
 private fun RaidPartyColumn(party: List<RaidFramePayload>) {
-    Column(
-        modifier = Modifier
-            .width(66.dp)
-            .background(Color.Black.copy(alpha = 0.25F), RoundedCornerShape(2.dp))
-            .padding(bottom = 0.5.dp),
-        verticalArrangement = Arrangement.spacedBy(0.75.dp)
-    ) {
-        party.forEach { member ->
-            RaidMemberFrame(member)
-        }
+  Column(
+    modifier = Modifier
+      .width(PARTY_WIDTH)
+      .background(Color.Black.copy(alpha = 0.25F), RoundedCornerShape(2.dp))
+      .padding(bottom = 1.dp),
+    verticalArrangement = Arrangement.spacedBy(1.dp)
+  ) {
+    for (i in 0 until 5) {
+      val member = party.getOrNull(i)
+      RaidMemberFrame(member ?: RaidFramePayload(playerName = ""))
     }
+  }
 }
 
 @Composable
 fun RaidMemberFrame(member: RaidFramePayload) {
-    val roleColor = when (member.role) {
-        0 -> RaidColors.Blue
-        1 -> RaidColors.Green
-        2 -> RaidColors.Pink
-        3 -> RaidColors.Red
-        4 -> RaidColors.Purple
-        else -> RaidColors.FrameBorder
-    }
-    val frameShape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
+  val roleColor = PlayerRole.fromInt(member.role).getRaidColor()
+  val frameShape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
 
+  Box(modifier = Modifier.size(width = PARTY_WIDTH, height = MEMBER_FRAME_HEIGHT)) {
+    // Mana bar only for active members
     if (member.playerName.isNotEmpty()) {
-        Box(modifier = Modifier.width(65.75.dp)) {
-            // Mana Bar (Background Layer)
-            Box(
-                modifier = Modifier
-                    .padding(top = 20.75.dp)
-                    .size(width = 65.75.dp, height = 9.5.dp)
-                    .background(RaidColors.ManaBarBlue, RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
-            )
-
-            // Nameplate Frame (Foreground Layer)
-            Surface(
-                modifier = Modifier.size(width = 65.75.dp, height = 26.dp),
-                shape = frameShape,
-                color = roleColor,
-                elevation = 4.dp
-            ) {
-                Text(
-                    text = member.playerName,
-                    color = Color.LightGray,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    } else {
-        // Empty frame for missing member
-        Box(
-            modifier = Modifier
-                .size(width = 65.75.dp, height = 26.dp)
-                .background(Color.Transparent, frameShape)
-        )
+      Box(
+        modifier = Modifier
+          .padding(top = MANA_TOP_PADDING)
+          .size(width = PARTY_WIDTH, height = MANA_HEIGHT)
+          .background(RaidColors.ManaBarBlue, RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
+      )
     }
+
+    // Use the same Surface for both filled and empty slots so elevation/shadow and sizing match exactly.
+    Surface(
+      modifier = Modifier.size(width = PARTY_WIDTH, height = NAMEPLATE_HEIGHT),
+      shape = frameShape,
+      color = if (member.playerName.isNotEmpty()) roleColor else Color.Transparent,
+      elevation = 4.dp
+    ) {
+      if (member.playerName.isNotEmpty()) {
+        Text(
+          text = member.playerName,
+          color = Color.LightGray,
+          fontFamily = FontsHelper.ARKorean,
+          fontSize = 11.sp,
+          fontWeight = FontWeight.Normal,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 3.dp, top = 3.dp)
+        )
+      } else {
+        Spacer(modifier = Modifier.fillMaxSize())
+      }
+    }
+  }
 }

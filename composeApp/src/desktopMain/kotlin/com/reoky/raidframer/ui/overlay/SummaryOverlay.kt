@@ -18,7 +18,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.GroupSpec
 import com.reoky.raidframer.ui.component.graphs.MultiPlayerMetricLineChart
-import com.reoky.raidframer.ui.pickNextColor
+import com.reoky.raidframer.core.helpers.pickNextColor
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_trend_graph

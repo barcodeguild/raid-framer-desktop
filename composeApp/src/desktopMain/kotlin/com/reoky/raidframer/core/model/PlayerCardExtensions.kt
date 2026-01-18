@@ -184,3 +184,17 @@ fun PlayerCard.postDeathEvent(timestamp: Long, killerName: String?): PlayerCard 
   )
 }
 
+//fun PlayerCard.guessPlayerRole(): PlayerRole {
+//  // Simple heuristic based on recent casts and heals
+//  val totalCasts = this.recentCastSuccessfulCastEvents.size
+//  val totalHeals = this.recentHealEvents.size
+//
+//  if (totalHeals > totalCasts * 0.5) {
+//    return PlayerRole.HEALER
+//  }
+//
+//  // Further heuristics can be added here based on abilities used, items, etc.
+//
+//  return PlayerRole.DPS // Default to DPS if no other role is determined
+//}
+

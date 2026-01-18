@@ -17,6 +17,10 @@ object FontsHelper {
   val FaRegular: FontFamily by lazy {
     FontFamily(Font(resource = "fonts/Font Awesome 7 Free-Regular-400.otf"))
   }
+
+  val ARKorean: FontFamily by lazy {
+    FontFamily(Font(resource = "fonts/ARKorean-Regular.ttf"))
+  }
 }
 
 /** Render a Font Awesome glyph by Unicode codepoint (e.g. "\uF0C0"). */
@@ -25,3 +29,4 @@ fun FaIcon(codepoint: String, useSolid: Boolean = true, sizeSp: Int = 20) {
   val family = if (useSolid) FontsHelper.FaSolid else FontsHelper.FaRegular
   Text(text = codepoint, style = TextStyle(fontFamily = family, fontSize = sizeSp.sp))
 }
+
