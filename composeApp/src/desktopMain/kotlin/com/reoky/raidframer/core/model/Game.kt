@@ -1,5 +1,7 @@
 package com.reoky.raidframer.core.model
 
+import kotlin.text.compareTo
+
 
 // the three factions as an enum with a string helper to restrive from string values that ignore case
 enum class Faction(val value: String) {

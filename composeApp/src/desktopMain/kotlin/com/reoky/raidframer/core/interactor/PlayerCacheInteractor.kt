@@ -24,6 +24,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.collections.get
+import kotlin.rem
+import kotlin.text.chunked
 import kotlin.text.get
 import kotlin.text.set
 
@@ -528,16 +531,73 @@ object PlayerCacheInteractor : Interactor() {
     .map { cards -> cards.filter { it.isRealPlayer && it.sessionDeathTotal > 0 }.sortedByDescending { it.sessionDeathTotal }.take(100) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  val nearbyNuianPlayers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer && it.lastKnownFaction == Faction.NUIA.value }.sortedBy { it.name }.take(200) }
+  private val _rolePriority = mapOf(
+    PlayerRole.GREEN to 0,
+    PlayerRole.RED to 1,
+    PlayerRole.BLUE to 2,
+    PlayerRole.PURPLE to 3,
+    PlayerRole.UNKNOWN to 4,
+    PlayerRole.PINK to 5
+  )
+
+  /*
+   * You can, like, feed these Comparators to sortedWith() and it allows you compare against a running sequence by returning
+   */
+  private val roleComparator = Comparator<PlayerCard> { a, b ->
+    val ra = _rolePriority[a.guessPlayerRole()] ?: Int.MAX_VALUE // max is an impossible role, but it goes to the end
+    val rb = _rolePriority[b.guessPlayerRole()] ?: Int.MAX_VALUE
+    if (ra != rb) ra - rb else a.name.compareTo(b.name)
+  }
+
+  /*
+   * Nearby Nuia faction players, sorted by their guessed raid roles, excluding those already in the player's own raid.
+   */
+  val nearbyNuianRaidParties: StateFlow<List<PlayerCard>> = snapshotFlow {
+    val cardList = cards.values.toList()
+    val combinedParties = (raids[0] ?: emptyList()) + (raids[1] ?: emptyList())
+    Pair(cardList, combinedParties)
+  }
+    .map { (allCards, combinedParties) ->
+      val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
+      allCards
+        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.NUIA.value && it.name !in raidNames }
+        .sortedWith(roleComparator)
+        .take(400)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  val nearbyHaraniPlayers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer && it.lastKnownFaction == Faction.HARANYA.value }.sortedByDescending { it.lastEvent }.take(200) }
+  /*
+   * Nearby Haranya faction players, sorted by their guessed raid roles, excluding those already in the player's own raid.
+   */
+  val nearbyHaraniRaidParties: StateFlow<List<PlayerCard>> = snapshotFlow {
+    val cardList = cards.values.toList()
+    val combinedParties = (raids[0] ?: emptyList()) + (raids[1] ?: emptyList())
+    Pair(cardList, combinedParties)
+  }
+    .map { (allCards, combinedParties) ->
+      val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
+      allCards
+        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.HARANYA.value && it.name !in raidNames }
+        .sortedWith(roleComparator)
+        .take(400)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  val nearbyPiratePlayers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer && it.lastKnownFaction == Faction.PIRATE.value }.sortedByDescending { it.lastEvent }.take(200) }
+  /*
+    * Nearby Pirate faction players, sorted by their guessed raid roles, excluding those already in the player's own raid.
+   */
+  val nearbyPirateRaidParties: StateFlow<List<PlayerCard>> = snapshotFlow {
+    val cardList = cards.values.toList()
+    val combinedParties = (raids[0] ?: emptyList()) + (raids[1] ?: emptyList())
+    Pair(cardList, combinedParties)
+  }
+    .map { (allCards, combinedParties) ->
+      val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
+      allCards
+        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.PIRATE.value && it.name !in raidNames }
+        .sortedWith(roleComparator)
+        .take(400)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }

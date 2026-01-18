@@ -20,26 +20,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.guessPlayerRole
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
-import com.reoky.raidframer.ui.component.CheckBoxComponent
 import com.reoky.raidframer.ui.component.RaidComponent
 import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
-import kotlin.text.chunked
 
 @Composable
 fun RaidOverlay(wm: WindowManager? = null) {
   // Collect data for both raids
+  val playerFaction = Faction.fromString(RFConfig.state.collectAsState().value.playerFaction)
   val mainRaid = PlayerCacheInteractor.getRaidById(0).collectAsState()
   val coRaid = PlayerCacheInteractor.getRaidById(1).collectAsState()
-  val nearbyNuia = PlayerCacheInteractor.nearbyNuianPlayers.collectAsState()
-  val nearbyHaranya = PlayerCacheInteractor.nearbyHaraniPlayers.collectAsState()
-  val nearbyPirate = PlayerCacheInteractor.nearbyPiratePlayers.collectAsState()
+  val nearbyNuia = PlayerCacheInteractor.nearbyNuianRaidParties.collectAsState()
+  val nearbyHaranya = PlayerCacheInteractor.nearbyHaraniRaidParties.collectAsState()
+  val nearbyPirate = PlayerCacheInteractor.nearbyPirateRaidParties.collectAsState()
 
   Box(
     modifier = Modifier
@@ -78,13 +80,13 @@ fun RaidOverlay(wm: WindowManager? = null) {
           ) {
             // if not in a raid, show a text saying "No Raid Detected"
             if (mainRaid.value.isEmpty() && coRaid.value.isEmpty()) {
-              Column((Modifier.fillMaxWidth())) {
+              Box((Modifier.fillMaxWidth().fillMaxHeight())) {
                 Text(
-                  modifier = Modifier.align(Alignment.CenterHorizontally),
-                  text = "< Please join a raid to see raid frames here >",
+                  text = "Please join a raid to use management features. You must have the Lua Addon installed and running",
                   color = Color.LightGray,
                   fontWeight = FontWeight.Bold,
-                  fontSize = 16.sp
+                  fontSize = 16.sp,
+                  modifier = Modifier.align(Alignment.Center)
                 )
               }
               return@Column
@@ -135,16 +137,37 @@ fun RaidOverlay(wm: WindowManager? = null) {
 
             var includeMain by rememberSaveable { mutableStateOf(true) }
             var includeCo by rememberSaveable { mutableStateOf(true) }
-            var includeNearby by rememberSaveable { mutableStateOf(false) }
+            var includeNearbySameFaction by rememberSaveable { mutableStateOf(false) }
+            var includeNearbyOppositeFaction by rememberSaveable { mutableStateOf(false) }
 
             val attendanceNames = run {
               val names = mutableListOf<String>()
               if (includeMain) names += mainRaid.value.flatten().mapNotNull { it.playerName }
               if (includeCo) names += coRaid.value.flatten().mapNotNull { it.playerName }
-              if (includeNearby) {
-                names += nearbyHaranya.value.mapNotNull { it.name }
-                names += nearbyNuia.value.mapNotNull { it.name }
-                names += nearbyPirate.value.mapNotNull { it.name }
+              if (includeNearbySameFaction) {
+                when (playerFaction) {
+                  Faction.HARANYA -> names += nearbyHaranya.value.mapNotNull { it.name }
+                  Faction.NUIA -> names += nearbyNuia.value.mapNotNull { it.name }
+                  Faction.PIRATE -> names += nearbyPirate.value.mapNotNull { it.name }
+                  else -> {}
+                }
+              }
+              if (includeNearbyOppositeFaction) {
+                when (playerFaction) {
+                  Faction.HARANYA -> {
+                    names += nearbyNuia.value.mapNotNull { it.name }
+                    names += nearbyPirate.value.mapNotNull { it.name }
+                  }
+                  Faction.NUIA -> {
+                    names += nearbyHaranya.value.mapNotNull { it.name }
+                    names += nearbyPirate.value.mapNotNull { it.name }
+                  }
+                  Faction.PIRATE -> {
+                    names += nearbyHaranya.value.mapNotNull { it.name }
+                    names += nearbyNuia.value.mapNotNull { it.name }
+                  }
+                  else -> {}
+                }
               }
               names.filter { it.isNotBlank() }.distinct().joinToString(", ")
             }
@@ -179,14 +202,21 @@ fun RaidOverlay(wm: WindowManager? = null) {
                 )
               }
               Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = includeNearby, onCheckedChange = { includeNearby = it })
+                Checkbox(checked = includeNearbySameFaction, onCheckedChange = { includeNearbySameFaction = it })
                 Text(
-                  text = "Include Nearby",
+                  text = "Include Nearby Same-Faction Players",
                   color = Color.White,
                   modifier = Modifier.padding(start = 8.dp)
                 )
               }
-
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = includeNearbyOppositeFaction, onCheckedChange = { includeNearbyOppositeFaction = it })
+                Text(
+                  text = "Include Nearby Opposite-Faction Players",
+                  color = Color.White,
+                  modifier = Modifier.padding(start = 8.dp)
+                )
+              }
               SelectableTextField(
                 value = attendanceNames,
                 modifier = Modifier
@@ -209,7 +239,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
           Divider(color = Color.LightGray, thickness = 1.dp)
 
           Text(
-            text = "Unknown Raid / No Raid / Casting Nearby",
+            text = "Out-of-Raid / Opposite Faction / Nearby Players",
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp
@@ -229,14 +259,14 @@ fun RaidOverlay(wm: WindowManager? = null) {
               verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
               Text(
-                text = "Haranya Faction",
+                text = "Haranya Faction (${nearbyHaranya.value.size})",
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
               )
               RaidComponent(
                 parties = nearbyHaranya.value.mapIndexed { index, card ->
-                  RaidFramePayload(slot = index, playerName = card.name, role = 1)
+                  RaidFramePayload(slot = index, playerName = card.name, role = card.guessPlayerRole().value)
                 }.chunked(5),
                 modifier = Modifier.wrapContentSize()
               )
@@ -251,14 +281,14 @@ fun RaidOverlay(wm: WindowManager? = null) {
               verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
               Text(
-                text = "Nuian Faction",
+                text = "Nuian Faction (${nearbyNuia.value.size})",
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
               )
               RaidComponent(
                 parties = nearbyNuia.value.mapIndexed { index, card ->
-                  RaidFramePayload(slot = index, playerName = card.name)
+                  RaidFramePayload(slot = index, playerName = card.name, role = card.guessPlayerRole().value)
                 }.chunked(5),
                 modifier = Modifier.wrapContentSize()
               )
@@ -273,14 +303,14 @@ fun RaidOverlay(wm: WindowManager? = null) {
               verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
               Text(
-                text = "Pirate Faction",
+                text = "Pirate Faction (${nearbyPirate.value.size})",
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
               )
               RaidComponent(
                 parties = nearbyPirate.value.mapIndexed { index, card ->
-                  RaidFramePayload(slot = index, playerName = card.name)
+                  RaidFramePayload(slot = index, playerName = card.name, role = card.guessPlayerRole().value)
                 }.chunked(5),
                 modifier = Modifier.wrapContentSize()
               )

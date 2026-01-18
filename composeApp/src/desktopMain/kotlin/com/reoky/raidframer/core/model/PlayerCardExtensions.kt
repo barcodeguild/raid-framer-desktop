@@ -1,5 +1,11 @@
 package com.reoky.raidframer.core.model
 
+import com.reoky.raidframer.core.definitions.META_CC_SPECS
+import com.reoky.raidframer.core.definitions.META_DANCER_SPECS
+import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
+import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
+import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
+import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
@@ -184,17 +190,20 @@ fun PlayerCard.postDeathEvent(timestamp: Long, killerName: String?): PlayerCard 
   )
 }
 
-//fun PlayerCard.guessPlayerRole(): PlayerRole {
-//  // Simple heuristic based on recent casts and heals
-//  val totalCasts = this.recentCastSuccessfulCastEvents.size
-//  val totalHeals = this.recentHealEvents.size
-//
-//  if (totalHeals > totalCasts * 0.5) {
-//    return PlayerRole.HEALER
-//  }
-//
-//  // Further heuristics can be added here based on abilities used, items, etc.
-//
-//  return PlayerRole.DPS // Default to DPS if no other role is determined
-//}
+/*
+ * Guess the player's role based on their recent actions / spec / past roles. Really whatever we can glean.
+ * This is going to be kind of rough and ready at first.
+ */
+fun PlayerCard.guessPlayerRole(): PlayerRole {
+  val spec = SpecType.fromName(this.currentBuild)
+
+  // First handle all the META classes
+  if (spec in META_CC_SPECS) return PlayerRole.GREEN
+  if (spec in META_HEALER_SPECS) return PlayerRole.PINK
+  if (spec in META_MAGE_SPECS) return PlayerRole.RED
+  if (spec in META_MELEE_SPECS) return PlayerRole.GREEN // ?
+  if (spec in META_DANCER_SPECS) return PlayerRole.PURPLE
+
+  return PlayerRole.BLUE
+}
 
