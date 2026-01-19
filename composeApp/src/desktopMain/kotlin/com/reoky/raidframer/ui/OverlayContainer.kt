@@ -19,7 +19,7 @@ import com.reoky.raidframer.ui.overlay.MiniOverlay
 import com.reoky.raidframer.ui.overlay.PokemonOverlay
 import com.reoky.raidframer.ui.overlay.RaidOverlay
 import com.reoky.raidframer.ui.overlay.SettingsOverlay
-import com.reoky.raidframer.ui.overlay.SummaryOverlay
+import com.reoky.raidframer.ui.overlay.PlayerCardOverlay
 import com.reoky.raidframer.ui.overlay.TrackerOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -58,7 +58,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.POKEMON -> PokemonOverlay(wm)
           OverlayType.TRACKER -> TrackerOverlay(wm)
           OverlayType.RAID -> RaidOverlay(wm)
-          OverlayType.SUMMARY -> SummaryOverlay(wm)
+          OverlayType.PLAYER_CARD -> PlayerCardOverlay(wm)
           else -> {}//throw Exception("Overlay type $type not implemented")
         }
 

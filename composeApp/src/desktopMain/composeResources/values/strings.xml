@@ -28,7 +28,29 @@
     <string name="settings_toggle_pvp_damage">Show only PvP damage</string>
     <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
 
+    <!-- Player Card -->
+    <string name="player_card_recent_damage">Recent Damage</string>
+    <string name="player_card_recent_heals">Recent Heals</string>
+    <string name="player_card_recent_kd">Recent Kills &amp; Deaths</string>
+    <string name="player_card_recent_items">Item Skill Uses</string>
+    <string name="player_card_recent_buffs">Buffs Applied</string>
+    <string name="player_card_recent_debuffs">Debuffs Applied</string>
+    <string name="player_card_session_totals">Session Totals</string>
+    <string name="player_card_lifetime_totals">Lifetime Totals</string>
 
+    <string name="player_card_stat_damage">Total Damage</string>
+    <string name="player_card_stat_healing">Total Healing</string>
+    <string name="player_card_stat_cc">CC Delivered</string>
+    <string name="player_card_stat_debuffs">Debuffs</string>
+    <string name="player_card_stat_charms">Charms</string>
+    <string name="player_card_stat_distress">Distresses</string>
+    <string name="player_card_stat_silence">Silences</string>
+    <string name="player_card_stat_glider">Glider Uses</string>
+    <string name="player_card_stat_items">Item Uses</string>
+    <string name="player_card_stat_potions">Potions</string>
+    <string name="player_card_stat_kills">Kills</string>
+    <string name="player_card_stat_deaths">Deaths</string>
+    <string name="player_card_damage_taken">Damage Taken</string>
 
     <!-- General Strings -->
     <string name="general_metric_type_damage">Damage</string>

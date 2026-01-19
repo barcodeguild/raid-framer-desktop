@@ -69,6 +69,7 @@ fun main(args: Array<String>) = application {
   RFConfig.init(RFDao.configDao)
 
   // Start core of the app
+  LoggingInteractor.initialize() // prunes old logs
   LoggingInteractor.start()
   PlayerCacheInteractor.start()
   //GameMonitorInteractor.start()

@@ -14,7 +14,6 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
-import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.WindowStateEntity
 import com.sun.jna.Pointer
 import java.awt.Point
@@ -193,7 +192,7 @@ class OverlayWindowShape(
 }
 
 enum class OverlayType {
-  COMBAT, SETTINGS, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, AGGRO, SUMMARY, FILTERS, DUMMY
+  COMBAT, SETTINGS, SUMMARY, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, AGGRO, PLAYER_CARD, FILTERS, DUMMY
 }
 
 enum class OverlayWindowType {
@@ -213,7 +212,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       isVisible = true
     )
 
-    OverlayType.SUMMARY -> WindowStateEntity(
+    OverlayType.PLAYER_CARD -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 100f,
@@ -310,6 +309,16 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 300f,
       lastWidthDp = 500f,
       lastHeightDp = 720f,
+      isVisible = false
+    )
+
+    OverlayType.SUMMARY -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
+      lastPositionXDp = 0f,
+      lastPositionYDp = 0f,
+      lastWidthDp = 100f,
+      lastHeightDp = 100f,
       isVisible = false
     )
 

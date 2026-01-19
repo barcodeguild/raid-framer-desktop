@@ -19,6 +19,7 @@ typealias Log = LoggingInteractor // make this easy to reference all throughout 
 
 object LoggingInteractor : Interactor() {
 
+  private const val TAG = "LoggingInteractor"
   private val queue = ConcurrentLinkedQueue<LogEntry>()
   private val seq = AtomicLong(0)
   private val writeMutex = Mutex()
@@ -47,6 +48,19 @@ object LoggingInteractor : Interactor() {
   private fun formatLine(entry: LogEntry): String {
     val ts = timestampFormatter.format(entry.timestamp)
     return "$ts ${entry.level.letter}/${entry.tag}: ${entry.message}"
+  }
+
+  /*
+   * Added this because the log file can get really big over time. Truncates the log file on every app startup so we don't
+   * end up with multiple gigabyte log files over time.
+   */
+  fun initialize() {
+    try {
+      Files.deleteIfExists(loggingFilePath)
+      Log.info(TAG, "Log file truncated on startup")
+    } catch (e: Exception) {
+      Log.error(TAG, "Failed to truncate log file: ${e.message}")
+    }
   }
 
   override suspend fun interact() {

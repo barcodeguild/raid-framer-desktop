@@ -7,7 +7,6 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.material.Button
-import androidx.compose.material.Checkbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +29,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.RaidComponent
 import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.component.CheckBoxComponent
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 
@@ -94,8 +94,8 @@ fun RaidOverlay(wm: WindowManager? = null) {
 
               // --- Main Raid Section ---
               Column(
-                modifier = Modifier.width(IntrinsicSize.Min),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier.width(IntrinsicSize.Min).padding(0.5.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
               ) {
                 Text(
                   modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -114,7 +114,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
 
               // --- Co-Raid Section ---
               Column(
-                modifier = Modifier.width(IntrinsicSize.Min),
+                modifier = Modifier.width(IntrinsicSize.Min).padding(0.5.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
               ) {
                 Text(
@@ -131,8 +131,28 @@ fun RaidOverlay(wm: WindowManager? = null) {
                     .align(Alignment.CenterHorizontally)
                 )
               }
-            }
 
+              // Players Who Left Raid: left-aligned under the two columns, can expand across if content wide
+//              Column(
+//                modifier = Modifier
+//                  .fillMaxWidth()
+//                  .padding(top = 4.dp),
+//                verticalArrangement = Arrangement.spacedBy(4.dp)
+//              ) {
+//                Text(
+//                  text = "Players Who Left Raid",
+//                  color = Color.White,
+//                  fontWeight = FontWeight.Bold,
+//                  fontSize = 14.sp
+//                )
+//                RaidComponent(
+//                  parties = coRaid.value,
+//                  modifier = Modifier
+//                    .wrapContentSize()
+//                    .align(Alignment.Start)
+//                )
+//              }
+            }
             Spacer(modifier = Modifier.weight(1f))
 
             var includeMain by rememberSaveable { mutableStateOf(true) }
@@ -185,38 +205,42 @@ fun RaidOverlay(wm: WindowManager? = null) {
                 fontSize = 14.sp,
                 modifier = Modifier.padding(bottom = 4.dp)
               )
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = includeMain, onCheckedChange = { includeMain = it })
-                Text(
-                  text = "Include Main",
-                  color = Color.White,
-                  modifier = Modifier.padding(start = 8.dp)
-                )
-              }
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = includeCo, onCheckedChange = { includeCo = it })
-                Text(
-                  text = "Include Co",
-                  color = Color.White,
-                  modifier = Modifier.padding(start = 8.dp)
-                )
-              }
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = includeNearbySameFaction, onCheckedChange = { includeNearbySameFaction = it })
-                Text(
-                  text = "Include Nearby Same-Faction Players",
-                  color = Color.White,
-                  modifier = Modifier.padding(start = 8.dp)
-                )
-              }
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = includeNearbyOppositeFaction, onCheckedChange = { includeNearbyOppositeFaction = it })
-                Text(
-                  text = "Include Nearby Opposite-Faction Players",
-                  color = Color.White,
-                  modifier = Modifier.padding(start = 8.dp)
-                )
-              }
+              CheckBoxComponent(
+                label = "Include Main",
+                initialChecked = includeMain,
+                onCheckedChange = { includeMain = it },
+                textColor = Color.White
+              )
+              CheckBoxComponent(
+                label = "Include Co",
+                initialChecked = includeCo,
+                onCheckedChange = { includeCo = it },
+                textColor = Color.White
+              )
+              CheckBoxComponent(
+                label = "Include Nearby Same-Faction Players",
+                initialChecked = includeNearbySameFaction,
+                onCheckedChange = { includeNearbySameFaction = it },
+                textColor = Color.White
+              )
+              CheckBoxComponent(
+                label = "Include Nearby Opposite-Faction Players",
+                initialChecked = includeNearbyOppositeFaction,
+                onCheckedChange = { includeNearbyOppositeFaction = it },
+                textColor = Color.White
+              )
+              CheckBoxComponent(
+                label = "Require at least some PvP participation (25k dmg, 25k heals, or 25+ cc points to filter non-combatants)",
+                initialChecked = includeNearbyOppositeFaction,
+                onCheckedChange = { includeNearbyOppositeFaction = it },
+                textColor = Color.White
+              )
+              CheckBoxComponent(
+                label = "Include players that left raid",
+                initialChecked = includeNearbyOppositeFaction,
+                onCheckedChange = { includeNearbyOppositeFaction = it },
+                textColor = Color.White
+              )
               SelectableTextField(
                 value = attendanceNames,
                 modifier = Modifier

@@ -190,7 +190,7 @@ function RF.Combat.handleCombatMessage(...)
   end
 
   -- dump any newly discovered event types for future implementation
-  RF:Log("Unimplemented combat event type to tell Reoky about: " .. tostring(meta.type))
+  --RF:Log("Unimplemented combat event type to tell Reoky about: " .. tostring(meta.type))
 end
 
 --

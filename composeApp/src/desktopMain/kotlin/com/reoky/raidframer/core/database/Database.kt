@@ -39,6 +39,7 @@ fun initialize(): AppDatabase {
   )
   .setDriver(BundledSQLiteDriver())
   .fallbackToDestructiveMigrationFrom(true, 1) // still developing, wipe from v1
+  .addMigrations(MIGRATION_2_3) // added kill methods and basic migration for testing migrations to (2 -> 3 : 01/18/26)
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

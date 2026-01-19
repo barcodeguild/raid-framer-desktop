@@ -38,6 +38,7 @@ data class PlayerCard (
   val recentDebuffEndedEvents: List<DebuffEndedEvent> = listOf(),
   val recentKills: Map<Long, String> = mapOf(), // Timestamp -> Victim Name
   val recentKilledBys: Map<Long, String> = mapOf(), // Timestamp -> Killer Name (stored in reverse for ez lookup)
+  val recentSkillItemUsages: Map<Long, String> = mapOf(), // Timestamp -> Item Name
 
   // cost more memory but useful for quick access and uses less CPU than scanning all events on all cards
   // this solution is similar to what facebook did before switching to graph databases; effectively storing some data twice by stashing it all in memcached

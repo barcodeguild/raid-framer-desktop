@@ -233,7 +233,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           Text(text = "⛨ CC Delivered ⛨", color = Color.White)
         }
         IconButton(
-          onClick = { wm?.openWindow(OverlayType.SUMMARY) },
+          onClick = { wm?.openWindow(OverlayType.PLAYER_CARD) },
           modifier = Modifier
             .size(32.dp)
             .padding(top = 3.dp)
@@ -336,7 +336,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 onClick = {
                   AppState.selectPlayer(card.name)
                   AppState.selectMetricType(GraphMetricType.DAMAGE)
-                  wm?.openWindow(OverlayType.SUMMARY)
+                  wm?.openWindow(OverlayType.PLAYER_CARD)
                 }
               )
             }
@@ -368,7 +368,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 onClick = {
                   AppState.selectPlayer(card.name)
                   AppState.selectMetricType(GraphMetricType.HEALING)
-                  wm?.openWindow(OverlayType.SUMMARY)
+                  wm?.openWindow(OverlayType.PLAYER_CARD)
                 }
               )
             }
@@ -400,7 +400,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                 onClick = {
                   AppState.selectPlayer(card.name)
                   AppState.selectMetricType(GraphMetricType.CC)
-                  wm?.openWindow(OverlayType.SUMMARY)
+                  wm?.openWindow(OverlayType.PLAYER_CARD)
                 }
               )
             }

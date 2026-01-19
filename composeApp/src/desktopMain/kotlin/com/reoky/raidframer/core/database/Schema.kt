@@ -6,7 +6,7 @@ import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.FactionStatus
 import com.reoky.raidframer.ui.OverlayWindowType
 
-const val SCHEMA_VERSION = 2 // increment this when making schema changes
+const val SCHEMA_VERSION = 3 // increment this when making schema changes
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -37,7 +37,7 @@ data class ConfigEntity(
   val gameScheduleHotkeyEnabled: Boolean = false,
   val useSadlyDotEyeOhhh: Boolean = false,
   val dragonBreathOverlayEnabled: Boolean = false,
-  //val killCounterMode: String = KillCounterMode.KILLING_BLOW.name,
+  val killCounterMode: String = KillCounterMode.MOST_DAMAGE.name,
   val firstLaunch: Boolean = true,
   val playerName: String = "", // player's own name
   val playerFaction: String = "", // player's own faction

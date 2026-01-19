@@ -118,7 +118,6 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
     RF.Raid.recentlyJoined = false
     RF.Raid.Prepare() -- reset roster
     RF:Log("Left raid, clearing co-raid status.")
-    return
   end
   
   -- something must have changed: scan raid slots and update roster (scan both raids if co-raid)

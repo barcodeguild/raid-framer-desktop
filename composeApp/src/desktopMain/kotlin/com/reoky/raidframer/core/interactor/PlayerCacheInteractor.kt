@@ -24,9 +24,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.collections.addAll
+import kotlin.collections.containsKey
 import kotlin.collections.get
+import kotlin.collections.remove
 import kotlin.rem
 import kotlin.text.chunked
+import kotlin.text.clear
 import kotlin.text.get
 import kotlin.text.set
 
@@ -35,6 +39,7 @@ import kotlin.text.set
  * from the database (if it exists) or created new (if it doesn't). Cards are held in memory, and continually written
  * back to the database for persistence. This allows the app to remember that a player is real vs an NPC across sessions,
  * instead of having to re-discover players every time the app is launched. (Which reduces accuracy of PvP vs PvE damage stats.)
+ * We have to do this to accurately keep track of damage totals and raid status over time.
  */
 object PlayerCacheInteractor : Interactor() {
 
@@ -43,6 +48,8 @@ object PlayerCacheInteractor : Interactor() {
   // Mapping of all the players (and NPCs) sorted in no particular order
   val realtimeComputer = RealtimeComputer(windowBuckets = 60, bucketMillis = 10_000L)
   private val raids = mutableStateMapOf<Int, List<Party>>()
+  private val raidAttendance = mutableStateMapOf<Int, MutableSet<String>>()
+  private val raidDepartures = mutableStateMapOf<Int, MutableSet<String>>()
   private val cards = mutableStateMapOf<String, PlayerCard>()
   private val petCards = mutableStateMapOf<String, PetCard>()
   private val mutex = Mutex() // to protect critical sections during player card updates from other threads
@@ -131,6 +138,8 @@ object PlayerCacheInteractor : Interactor() {
         }
       }
     }
+
+    updateRaidAttendance()
   }
 
   /*
@@ -259,6 +268,67 @@ object PlayerCacheInteractor : Interactor() {
   // gets a list of player cards matching a filter predicate
   fun getGroupCards(filter: (PlayerCard) -> Boolean): List<PlayerCard> {
     return cards.values.filter(filter)
+  }
+
+  /**
+   * Tracks attendance by detecting players who joined or left raids.
+   * Players who were in a raid but are no longer present are moved to departures.
+   */
+  private suspend fun updateRaidAttendance() {
+    mutex.withLock {
+      raids.forEach { (raidId, parties) ->
+        val currentMembers = parties.flatten().map { it.playerName }.toSet()
+
+        // Initialize attendance set if needed
+        if (!raidAttendance.containsKey(raidId)) {
+          raidAttendance[raidId] = mutableSetOf()
+        }
+        if (!raidDepartures.containsKey(raidId)) {
+          raidDepartures[raidId] = mutableSetOf()
+        }
+
+        // Add all current members to attendance (set prevents duplicates)
+        raidAttendance[raidId]?.addAll(currentMembers)
+
+        // Find members who left (were in attendance but not currently in raid)
+        val leftMembers = raidAttendance[raidId]?.filter { it !in currentMembers } ?: emptyList()
+        raidDepartures[raidId]?.addAll(leftMembers)
+      }
+    }
+  }
+
+  /**
+   * Clears raid attendance records.
+   * @param raidId The raid to clear, or null to clear all raids
+   * @param playerName Specific player to remove, or null to clear all players for the raid
+   */
+  fun clearRaidAttendance(raidId: Int? = null, playerName: String? = null) {
+    scope.launch {
+      mutex.withLock {
+        when {
+          // Clear specific player from specific raid
+          raidId != null && playerName != null -> {
+            raidAttendance[raidId]?.remove(playerName)
+            raidDepartures[raidId]?.remove(playerName)
+          }
+          // Clear all players from specific raid
+          raidId != null -> {
+            raidAttendance.remove(raidId)
+            raidDepartures.remove(raidId)
+          }
+          // Clear specific player from all raids
+          playerName != null -> {
+            raidAttendance.values.forEach { it.remove(playerName) }
+            raidDepartures.values.forEach { it.remove(playerName) }
+          }
+          // Clear everything
+          else -> {
+            raidAttendance.clear()
+            raidDepartures.clear()
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -495,6 +565,10 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   /* UI Subscriptions */
+  fun observeCard(name: String): StateFlow<PlayerCard?> {
+    return snapshotFlow { cards[name] }
+      .stateIn(scope, SharingStarted.WhileSubscribed(5000), cards[name])
+  }
   var topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards -> cards.filter { it.isRealPlayer && it.sessionDamageTotal > 0 }.sortedByDescending { it.sessionDamageTotal }.take(100) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
