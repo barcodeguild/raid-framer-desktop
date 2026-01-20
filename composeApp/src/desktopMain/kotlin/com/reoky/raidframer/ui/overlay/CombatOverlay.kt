@@ -23,12 +23,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
-import com.reoky.raidframer.core.helpers.FontsHelper.FaSolid
+import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.WindowManager
-import lol.rfcloud.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.ui.dialog.exitDialog
 import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
@@ -152,7 +152,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           val closeInteractionSource = remember { MutableInteractionSource() }
           Text(
             text = "\uf00d", // Close icon
-            fontFamily = FaSolid,
+            fontFamily = FontsHelper.faSolid(),
             fontSize = 16.sp,
             color = if (closeInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
             textAlign = TextAlign.Center,
@@ -175,7 +175,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           val petsInteractionSource = remember { MutableInteractionSource() }
           Text(
             text = "\uf6d5", // Dragon icon
-            fontFamily = FaSolid,
+            fontFamily = FontsHelper.faSolid(),
             fontSize = 13.sp,
             color = if (petsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
             textAlign = TextAlign.Center,
@@ -198,7 +198,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           val raidInteractionSource = remember { MutableInteractionSource() }
           Text(
             text = "\uf500", // Party / Raid Icon
-            fontFamily = FaSolid,
+            fontFamily = FontsHelper.faSolid(),
             fontSize = 13.sp,
             color = if (raidInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
             textAlign = TextAlign.Center,
@@ -248,7 +248,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           val summaryInteractionSource = remember { MutableInteractionSource() }
           Text(
             text = "\uf200", // Pie Chart Icon
-            fontFamily = FaSolid,
+            fontFamily = FontsHelper.faSolid(),
             fontSize = 13.sp,
             color = if (summaryInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
             textAlign = TextAlign.Center,
@@ -271,7 +271,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           val settingsInteractionSource = remember { MutableInteractionSource() }
           Text(
             text = "\uf013", // Gear Icon
-            fontFamily = FaSolid,
+            fontFamily = FontsHelper.faSolid(),
             fontSize = 13.sp,
             color = if (settingsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
             textAlign = TextAlign.Center,
@@ -294,7 +294,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           val settingsInteractionSource = remember { MutableInteractionSource() }
           Text(
             text = "\u002b", // Plus Icon
-            fontFamily = FaSolid,
+            fontFamily = FontsHelper.faSolid(),
             fontSize = 15.sp,
             color = if (settingsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White,
             textAlign = TextAlign.Center,

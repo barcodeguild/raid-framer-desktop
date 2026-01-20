@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
-import lol.rfcloud.core.helpers.openWebLink
+import com.reoky.raidframer.core.helpers.openWebLink
 
 @Preview
 @Composable

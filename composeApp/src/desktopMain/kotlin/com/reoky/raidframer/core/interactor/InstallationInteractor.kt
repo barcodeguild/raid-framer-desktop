@@ -4,6 +4,8 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.helpers.sha256
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import raid_framer_desktop.composeapp.generated.resources.Res
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.io.path.isDirectory
@@ -24,22 +26,9 @@ object InstallationInteractor : Interactor() {
   // list of resource lua files to install to the addons directory from the app's resources
   val RF_ADDON_DIRECTORY = "RaidFramer"
   val RF_ADDON_META = listOf(
-    "toc.g",
-    "apitypes.lua",
-    "windowcommon.lua",
-    "window.lua",
-    "config.lua",
-    "buttoncommon.lua",
-    "button.lua",
-    "combobox.lua",
-    "parsers.lua",
-    "debug.lua",
-    "json.lua",
-    "combat.lua",
-    "chat.lua",
-    "raid.lua",
-    "ipc.lua",
-    "reload.lua",
+    "toc.g", "apitypes.lua", "windowcommon.lua", "window.lua", "config.lua",
+    "buttoncommon.lua", "button.lua", "combobox.lua", "parsers.lua", "debug.lua",
+    "json.lua", "combat.lua", "chat.lua", "raid.lua", "ipc.lua", "reload.lua",
     "raidframer.lua"
   )
 
@@ -91,8 +80,10 @@ object InstallationInteractor : Interactor() {
 
     // How to install something.. Well friends.. You check the hashes of the resource files vs the installed files..
     // and if she don't match you copy ~
+    // Note: computeResourceFileHashes is now a suspend function oh eek
     val knownGoodHashes = computeResourceFileHashes()
     val installedHashes = computeInstalledAddonHashes(arAddonsPath.resolve(RF_ADDON_DIRECTORY).toString())
+
     for ((file, hash) in installedHashes) {
       val isValid = knownGoodHashes[file]?.let { it == hash } ?: false
       if (isValid) continue // skip logging valid files
@@ -104,28 +95,20 @@ object InstallationInteractor : Interactor() {
       }
     }
 
-    // Now copy over any missing or outdated files
+    // Install missing/outdated files
     for ((file, knownHash) in knownGoodHashes) {
       val installedHash = installedHashes[file]
-      val needsInstall = installedHash == null || installedHash != knownHash
-      if (needsInstall) {
-        // copy from resources to addon directory
-        val resourcePath = "/$RF_ADDON_DIRECTORY/$file"
-        val inputStream = this::class.java.getResourceAsStream(resourcePath)
-        if (inputStream != null) {
+      if (installedHash == null || installedHash != knownHash) {
+        val resourcePath = "files/$RF_ADDON_DIRECTORY/$file"
+        try {
+          val fileBytes = Res.readBytes(resourcePath) // Read bytes from JAR/MSI via Compose Resources
           val outputFilePath = rfAddonPath.resolve(file)
-          try {
-            withContext(Dispatchers.IO) {
-              outputFilePath.toFile().outputStream().use { output ->
-                inputStream.copyTo(output)
-              }
-            }
-            Log.info(TAG, "Installed addon file: $outputFilePath")
-          } catch (e: Exception) {
-            Log.error(TAG, "Failed to install addon file: $outputFilePath")
+          withContext(Dispatchers.IO) {
+            outputFilePath.toFile().writeBytes(fileBytes)
           }
-        } else {
-          Log.error(TAG, "Resource file not found for installation: $resourcePath")
+          Log.info(TAG, "Installed addon file: $outputFilePath")
+        } catch (e: Exception) {
+          Log.error(TAG, "Failed to install addon file ($resourcePath): ${e.message}")
         }
       }
     }
@@ -138,6 +121,7 @@ object InstallationInteractor : Interactor() {
       "show_raid_status" to config.companionShowRaidStatus.toString(),
       "show_charmed_in_chat" to config.companionShowCharmedInChat.toString(),
       "show_silenced_in_chat" to config.companionShowSilencedInChat.toString(),
+      "play_charm_sound" to config.companionPlayCharmSound.toString(),
       "mark_hvt_healers" to config.companionMarkHVTHealers.toString(),
       "mark_hvt_dps" to config.companionMarkHVTDPS.toString(),
       "mark_hvt_cc" to config.companionMarkHVTCrowdControl.toString(),
@@ -172,20 +156,16 @@ object InstallationInteractor : Interactor() {
   /*
    * Function that uses File.sha256() extension to compute map of file paths to SHA256 hashes from the resource files.
    */
-  fun computeResourceFileHashes(): Map<String, String> {
+  @OptIn(ExperimentalResourceApi::class)
+  suspend fun computeResourceFileHashes(): Map<String, String> {
     val result = mutableMapOf<String, String>()
     for (fileName in RF_ADDON_META) {
-      val resourcePath = "/$RF_ADDON_DIRECTORY/$fileName"
-      val inputStream = this::class.java.getResourceAsStream(resourcePath)
-      if (inputStream != null) {
-        val tempFile = kotlin.io.path.createTempFile()
-        tempFile.toFile().outputStream().use { output ->
-          inputStream.copyTo(output)
-        }
-        val hash = tempFile.toFile().sha256()
+      val resourcePath = "files/$RF_ADDON_DIRECTORY/$fileName"
+      try {
+        val bytes = Res.readBytes(resourcePath) // into memory
+        val hash = bytes.sha256() // get the hash from in-memory bytes
         result[fileName] = hash
-        tempFile.toFile().delete()
-      } else {
+      } catch (e: Exception) {
         Log.error(TAG, "Resource file not found for hashing: $resourcePath")
       }
     }
@@ -204,8 +184,6 @@ object InstallationInteractor : Interactor() {
       if (file.exists() && file.isFile) {
         val hash = file.sha256()
         result[fileName] = hash
-      } else {
-        Log.error(TAG, "Installed addon file not found for hashing: $filePath")
       }
     }
     return result

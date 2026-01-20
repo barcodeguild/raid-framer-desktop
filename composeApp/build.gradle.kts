@@ -59,7 +59,7 @@ compose.desktop {
       packageName = APP_NAME
       packageVersion = APP_VERSION
       description = APP_NAME
-      copyright = "© 2025 Raid Framer. All rights reserved."
+      copyright = "© 2026 Raid Framer. All rights reserved."
       vendor = "by ~ catreo ~"
 
       /* MSI Package Meta */

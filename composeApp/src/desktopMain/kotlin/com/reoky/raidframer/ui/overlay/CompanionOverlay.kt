@@ -24,6 +24,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CheckBoxComponent
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.companion_description
 import raid_framer_desktop.composeapp.generated.resources.companion_toggl_display_mark_hvt_healers
@@ -34,6 +35,9 @@ import raid_framer_desktop.composeapp.generated.resources.companion_toggle_displ
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_sac_dancers
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_silenced
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_raid_status
+import raid_framer_desktop.composeapp.generated.resources.kotlin
+import raid_framer_desktop.composeapp.generated.resources.lua
+import raid_framer_desktop.composeapp.generated.resources.svg
 
 @Preview
 @Composable
@@ -56,9 +60,8 @@ fun CompanionOverlay(wm: WindowManager? = null) {
 
       // lua + kotlin row
       Row {
-
-        val luaPainter = painterResource("svg/lua.svg")
-        val kotlinPainter = painterResource("svg/kotlin.svg")
+        val luaPainter = vectorResource(Res.drawable.lua)
+        val kotlinPainter = vectorResource(Res.drawable.kotlin)
 
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -66,7 +69,7 @@ fun CompanionOverlay(wm: WindowManager? = null) {
           horizontalArrangement = Arrangement.Center
         ) {
           Image(
-            painter = luaPainter,
+            imageVector = luaPainter,
             contentDescription = "Lua logo",
             modifier = Modifier.size(92.dp)
           )
@@ -80,7 +83,7 @@ fun CompanionOverlay(wm: WindowManager? = null) {
           )
 
           Image(
-            painter = kotlinPainter,
+            imageVector = kotlinPainter,
             contentDescription = "Kotlin logo",
             modifier = Modifier.size(128.dp)
           )

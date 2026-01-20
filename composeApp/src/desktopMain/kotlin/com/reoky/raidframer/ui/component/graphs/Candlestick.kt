@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.*
 import java.util.*
-import lol.rfcloud.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 
 data class CandlestickDataFrame(
   val xValues: List<String>,

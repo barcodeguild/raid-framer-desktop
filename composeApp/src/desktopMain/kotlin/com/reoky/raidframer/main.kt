@@ -31,10 +31,13 @@ import dorkbox.systemTray.SystemTray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.raidframer
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Locale
 import kotlin.system.exitProcess
+import kotlin.text.get
 
 const val TAG = "Main"
 
@@ -190,11 +193,14 @@ fun messageBox(title: String, message: String) {
 @Composable
 fun spawnSystemTray(wm: WindowManager): SystemTray {
   val tray = SystemTray.get()
-  val iconImage = painterResource("raidframer.ico").toAwtImage(
+
+  // Updated to use the type-safe Res accessor
+  val iconImage = org.jetbrains.compose.resources.painterResource(Res.drawable.raidframer).toAwtImage(
     density = Density(1f),
     layoutDirection = LayoutDirection.Ltr,
     size = Size(32f, 32f)
   )
+
   val titleMenuItem = MenuItem(".: Raid Framer :.")
   titleMenuItem.setImage(iconImage)
   tray.menu.add(titleMenuItem)

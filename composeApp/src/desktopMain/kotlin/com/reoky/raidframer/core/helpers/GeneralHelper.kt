@@ -1,4 +1,4 @@
-package lol.rfcloud.core.helpers
+package com.reoky.raidframer.core.helpers
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color

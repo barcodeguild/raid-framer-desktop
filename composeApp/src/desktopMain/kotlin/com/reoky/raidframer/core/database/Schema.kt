@@ -6,7 +6,7 @@ import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.FactionStatus
 import com.reoky.raidframer.ui.OverlayWindowType
 
-const val SCHEMA_VERSION = 3 // increment this when making schema changes
+const val SCHEMA_VERSION = 4 // increment this when making schema changes
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -47,7 +47,7 @@ data class ConfigEntity(
   val companionShowRaidStatus: Boolean = true,
   val companionShowCharmedInChat: Boolean = true,
   val companionShowSilencedInChat: Boolean = true,
-  //val companionPlaySoundWhenYouCharmTargets: Boolean = false,
+  val companionPlayCharmSound: Boolean = true,
 
   // future-proofing for more companion marks
   // currently in lua we can only track the location / mark one target at a time

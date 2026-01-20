@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
-import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.helpers.renderDebuffThumbnailGrid
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.DamageEvent
@@ -40,8 +39,8 @@ import com.reoky.raidframer.core.model.HealEvent
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CloseButton
-import lol.rfcloud.core.helpers.annotatedStringForAttack
-import lol.rfcloud.core.helpers.annotatedStringForHeal
+import com.reoky.raidframer.core.helpers.annotatedStringForAttack
+import com.reoky.raidframer.core.helpers.annotatedStringForHeal
 import kotlinx.coroutines.delay
 
 @Preview

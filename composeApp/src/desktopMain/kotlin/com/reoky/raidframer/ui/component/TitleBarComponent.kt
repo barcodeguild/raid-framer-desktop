@@ -73,7 +73,7 @@ fun TitleBarComponent(
       color = Color.White,
       modifier = Modifier.align(Alignment.Center),
       style = TextStyle(
-        fontFamily = FontsHelper.ARKorean
+        fontFamily = FontsHelper.arKorean()
       )
     )
 

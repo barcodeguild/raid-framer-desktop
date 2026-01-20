@@ -95,7 +95,7 @@ fun RaidMemberFrame(member: RaidFramePayload) {
         Text(
           text = member.playerName,
           color = Color.LightGray,
-          fontFamily = FontsHelper.ARKorean,
+          fontFamily = FontsHelper.arKorean(),
           fontSize = 11.sp,
           fontWeight = FontWeight.Normal,
           maxLines = 1,
