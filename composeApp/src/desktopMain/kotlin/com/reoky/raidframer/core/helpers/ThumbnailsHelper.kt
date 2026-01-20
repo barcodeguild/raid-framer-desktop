@@ -107,7 +107,7 @@ fun renderTinySkillTreeIconFor(treeName: String): Painter {
     "malediction" -> Res.drawable.malediction
     "swiftblade" -> Res.drawable.swiftblade
     "gunslinger" -> Res.drawable.gunslinger
-    "splelldance" -> Res.drawable.spelldance // assuming typo or specific name
+    "spelldance" -> Res.drawable.spelldance // assuming typo or specific name
     else -> Res.drawable.not_found
   }
   return painterResource(resource)

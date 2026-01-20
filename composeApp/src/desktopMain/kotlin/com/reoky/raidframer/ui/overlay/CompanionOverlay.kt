@@ -12,13 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
-import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CheckBoxComponent
@@ -37,7 +35,6 @@ import raid_framer_desktop.composeapp.generated.resources.companion_toggle_displ
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_raid_status
 import raid_framer_desktop.composeapp.generated.resources.kotlin
 import raid_framer_desktop.composeapp.generated.resources.lua
-import raid_framer_desktop.composeapp.generated.resources.svg
 
 @Preview
 @Composable
