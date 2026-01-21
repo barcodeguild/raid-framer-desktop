@@ -21,6 +21,7 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CheckBoxComponent
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -57,20 +58,18 @@ fun CompanionOverlay(wm: WindowManager? = null) {
 
       // lua + kotlin row
       Row {
-        val luaPainter = vectorResource(Res.drawable.lua)
-        val kotlinPainter = vectorResource(Res.drawable.kotlin)
-
+        val luaPainter = painterResource(Res.drawable.lua)
+        val kotlinPainter = painterResource(Res.drawable.kotlin)
         Row(
           modifier = Modifier.fillMaxWidth(),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.Center
         ) {
           Image(
-            imageVector = luaPainter,
+            painter = luaPainter,
             contentDescription = "Lua logo",
-            modifier = Modifier.size(92.dp)
+            modifier = Modifier.size(92.dp),
           )
-
           Text(
             text = "+",
             color = Color.White,
@@ -78,9 +77,8 @@ fun CompanionOverlay(wm: WindowManager? = null) {
             fontSize = 64.sp,
             modifier = Modifier.padding(horizontal = 24.dp)
           )
-
           Image(
-            imageVector = kotlinPainter,
+            painter = kotlinPainter,
             contentDescription = "Kotlin logo",
             modifier = Modifier.size(128.dp)
           )

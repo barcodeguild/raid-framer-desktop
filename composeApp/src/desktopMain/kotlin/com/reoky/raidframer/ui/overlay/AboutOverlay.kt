@@ -19,6 +19,11 @@ import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CloseButton
+import org.jetbrains.compose.resources.painterResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.catreo
+import raid_framer_desktop.composeapp.generated.resources.haranyanseal
+import raid_framer_desktop.composeapp.generated.resources.raidframer
 
 @Preview
 @Composable
@@ -49,7 +54,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
       // Header Logo and Version
       Row {
         Column(modifier = Modifier.weight(0.33f)) {
-          val image = painterResource("raidframer.ico")
+          val image = painterResource(Res.drawable.raidframer)
           Image(
             painter = image,
             contentDescription = "Raid Framer Icon",
@@ -152,7 +157,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
       Row {
         Column(modifier = Modifier.weight(1f).padding(8.dp)) {
           Image(
-            painter = painterResource("catreo.png"),
+            painter = painterResource(Res.drawable.catreo),
             contentDescription = "Cute Reoky Icon"
           )
           Spacer(modifier = Modifier.height(16.dp))
@@ -184,7 +189,9 @@ fun AboutOverlay(wm: WindowManager? = null) {
         }
         Column(modifier = Modifier.weight(1f).padding(8.dp)) {
           Image(
-            painter = painterResource("haranyanseal.png"),
+            painter = painterResource(Res.drawable.haranyanseal
+
+            ),
             contentDescription = "Raid Framer Icon",
             modifier = Modifier.align(Alignment.CenterHorizontally).padding(start = 24.dp, end = 24.dp)
           )
