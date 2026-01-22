@@ -1,11 +1,5 @@
 package com.reoky.raidframer.core.model
 
-import com.reoky.raidframer.core.definitions.META_CC_SPECS
-import com.reoky.raidframer.core.definitions.META_DANCER_SPECS
-import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
-import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
-import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
-import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
@@ -138,16 +132,30 @@ fun PlayerCard.postDeathEvent(timestamp: Long): PlayerCard {
  */
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
+  val isCharm = event.debuff == "Charmed"
+  val isDistress = event.debuff == "Distressed"
+  val isSilence = event.debuff == "Silence"
+  val isGlider = event.debuff == "Preparing Glider" && System.currentTimeMillis() - this.lastGliderUse > 1000L // glider debuff applied, but only count if more than 1 second since last use to avoid double-counting from game bug
   if (isCC) Log.info("PlayerCardExt", "CC: ${event.source} applied ${event.debuff} to ${event.target} with ts ${event.timestamp}")
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCCDelivered = if (isCC) cache.lifetimeTotalCCDelivered + 1 else cache.lifetimeTotalCCDelivered
+      lifetimeTotalDebuffsApplied = cache.lifetimeTotalDebuffsApplied + 1,
+      lifetimeTotalCCDelivered = if (isCC) cache.lifetimeTotalCCDelivered + 1 else cache.lifetimeTotalCCDelivered,
+      lifetimeTotalCharms = if (isCharm) cache.lifetimeTotalCharms + 1 else cache.lifetimeTotalCharms,
+      lifetimeTotalGliderUses = if (isGlider) cache.lifetimeTotalGliderUses + 1 else cache.lifetimeTotalGliderUses,
+      lifetimeTotalDistresses = if (isDistress) cache.lifetimeTotalDistresses + 1 else cache.lifetimeTotalDistresses,
+      lifetimeTotalSilences = if (isSilence) cache.lifetimeTotalSilences + 1 else cache.lifetimeTotalSilences
     ),
     recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
+    sessionCharmTotal = if (isCharm) sessionCharmTotal + 1 else sessionCharmTotal,
+    sessionDistressTotal = if (isDistress) sessionDistressTotal + 1 else sessionDistressTotal,
+    sessionSilenceTotal = if (isSilence) sessionSilenceTotal + 1 else sessionSilenceTotal,
+    sessionGliderTotal = if (isGlider) sessionGliderTotal + 1 else sessionGliderTotal,
     sessionCCTotal = if (isCC) this.sessionCCTotal + 1 else this.sessionCCTotal,
+    lastGliderUse = if (isGlider) event.timestamp else this.lastGliderUse, // update glider use timestamp if applicable
   )
 }
 
@@ -184,26 +192,23 @@ fun PlayerCard.postDeathEvent(timestamp: Long, killerName: String?): PlayerCard 
 
   return this.copy(
     lastEvent = timestamp,
-    cache = cache?.copy(lastSeen = timestamp),
+    cache = cache?.copy(
+      lastSeen = timestamp,
+      lifetimeTotalDeaths = cache.lifetimeTotalDeaths + 1
+    ),
     sessionDeathTotal = this.sessionDeathTotal + 1,
     recentKilledBys = updatedKilledBys
   )
 }
 
-/*
- * Guess the player's role based on their recent actions / spec / past roles. Really whatever we can glean.
- * This is going to be kind of rough and ready at first.
- */
-fun PlayerCard.guessPlayerRole(): PlayerRole {
-  val spec = SpecType.fromName(this.currentBuild)
-
-  // First handle all the META classes
-  if (spec in META_CC_SPECS) return PlayerRole.GREEN
-  if (spec in META_HEALER_SPECS) return PlayerRole.PINK
-  if (spec in META_MAGE_SPECS) return PlayerRole.RED
-  if (spec in META_MELEE_SPECS) return PlayerRole.GREEN // ?
-  if (spec in META_DANCER_SPECS) return PlayerRole.PURPLE
-
-  return PlayerRole.BLUE
+fun PlayerCard.updatePlayerLeadership(newLeadership: Int): PlayerCard {
+  val timestamp = System.currentTimeMillis()
+  return this.copy(
+    leaderships = if (newLeadership in 1..5) newLeadership else 0, // zero is regular player
+    lastEvent = timestamp,
+    cache = this.cache?.copy(
+      leaderships = if (newLeadership in 1..5) newLeadership else 0,
+      lastSeen = timestamp
+    )
+  )
 }
-

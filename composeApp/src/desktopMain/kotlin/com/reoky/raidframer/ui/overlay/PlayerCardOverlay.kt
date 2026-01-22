@@ -5,12 +5,17 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +39,7 @@ import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.GroupSpec
 import com.reoky.raidframer.ui.component.graphs.MultiPlayerMetricLineChart
 import com.reoky.raidframer.core.helpers.pickNextColor
+import com.reoky.raidframer.ui.component.PlayerDetailsSection
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_trend_graph
@@ -96,7 +102,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
           mode = GameMonitorInteractor.currentMode,
           modifier = Modifier
             .fillMaxWidth()
-            .height(350.dp)
+            .height(480.dp)
             .padding(12.dp),
         )
 
@@ -109,7 +115,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               .padding(horizontal = 12.dp, vertical = 8.dp)
           ) {
 
-            // ROW 1: Recent Damage, Heals, Debuffs
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Recent Damage, Heals, Debuffs
             Row(modifier = Modifier.fillMaxWidth().height(200.dp)) {
               // Damage
               EventListColumn(
@@ -131,7 +139,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Heals
               EventListColumn(
                 title = str("Recent Heals"),
-                items = card.recentHealEvents.take(50),
+                items = card.recentHealEvents.take(200).sortedByDescending { it.timestamp },
                 modifier = Modifier.weight(1f)
               ) { evt ->
                 RowItemWithTime(evt.timestamp) {
@@ -148,7 +156,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Debuffs
               EventListColumn(
                 title = str("Debuffs Applied"),
-                items = card.recentDebuffAppliedEvents.take(50),
+                items = card.recentDebuffAppliedEvents.take(200).sortedByDescending { it.timestamp },
                 modifier = Modifier.weight(1f)
               ) { evt ->
                 RowItemWithTime(evt.timestamp) {
@@ -165,10 +173,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
             // ROW 2: Buffs, Items, K/D
             Row(modifier = Modifier.fillMaxWidth().height(200.dp)) {
-              // Buffs
               EventListColumn(
                 title = str("Buffs Applied"),
-                items = card.recentBuffAppliedEvents.take(50),
+                items = card.recentBuffAppliedEvents.take(200).sortedByDescending { it.timestamp },
                 modifier = Modifier.weight(1f)
               ) { evt ->
                 RowItemWithTime(evt.timestamp) {
@@ -199,7 +206,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               }
 
               // K/D
-              // Use Triple(Timestamp, Type, Name)
+              // Use Triple(Timestamp, Type, Name) literally just merging these together because there's no field that has both
               val kills: List<Triple<Long, String, String>> = card.recentKills.map {
                 Triple(it.key, "Killed", it.value)
               }
@@ -228,14 +235,33 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Divider(color = Color.DarkGray)
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Player Details Section
+            Row(Modifier.fillMaxWidth()) {
+              PlayerDetailsSection(
+                card = card,
+                onLeadershipChange = { newLeadership ->
+                  PlayerCacheInteractor.updatePlayerLeadershipFor(playerName, newLeadership)
+                }
+              )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Row 3: Totals
+            // Totals Row
             Row(modifier = Modifier.fillMaxWidth()) {
-              // Session Totals
-              Column(modifier = Modifier.weight(1f)) {
+
+              // ~~~ Session Totals ~~~
+              Column(modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .background(
+                  Color.DarkGray.copy(alpha = 0.3f),
+                  shape = RoundedCornerShape(8.dp)
+                )
+                .padding(12.dp)
+              ) {
                 Text(
                   text = str("Session Totals"),
                   color = Color.White,
@@ -259,8 +285,16 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
               Spacer(modifier = Modifier.width(32.dp))
 
-              // Lifetime Totals
-              Column(modifier = Modifier.weight(1f)) {
+              // ~~~ Lifetime Totals ~~~
+              Column(modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .background(
+                  Color.DarkGray.copy(alpha = 0.3f),
+                  shape = RoundedCornerShape(8.dp)
+                )
+                .padding(12.dp)
+              ) {
                 Text(
                   text = str("Lifetime Totals"),
                   color = Color.White,

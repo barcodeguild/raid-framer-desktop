@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
-import com.reoky.raidframer.core.model.guessPlayerRole
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -82,10 +81,10 @@ fun RaidOverlay(wm: WindowManager? = null) {
             if (mainRaid.value.isEmpty() && coRaid.value.isEmpty()) {
               Box((Modifier.fillMaxWidth().fillMaxHeight())) {
                 Text(
-                  text = "Please join a raid to use management features. You must have the Lua Addon installed and running",
+                  text = "Please join a raid to use raid management features. You must have the Lua Addon installed. Windows with title bars are not overlays, consider placing on another monitor to avoid covering the game UI.",
                   color = Color.LightGray,
                   fontWeight = FontWeight.Bold,
-                  fontSize = 16.sp,
+                  fontSize = 11.sp,
                   modifier = Modifier.align(Alignment.Center)
                 )
               }
@@ -198,13 +197,6 @@ fun RaidOverlay(wm: WindowManager? = null) {
               verticalArrangement = Arrangement.spacedBy(8.dp),
               horizontalAlignment = Alignment.Start
             ) {
-              Text(
-                text = "Attendance",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 4.dp)
-              )
               CheckBoxComponent(
                 label = "Include Main",
                 initialChecked = includeMain,
@@ -212,7 +204,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
                 textColor = Color.White
               )
               CheckBoxComponent(
-                label = "Include Co",
+                label = "Include Co-Raid",
                 initialChecked = includeCo,
                 onCheckedChange = { includeCo = it },
                 textColor = Color.White
@@ -290,7 +282,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
               )
               RaidComponent(
                 parties = nearbyHaranya.value.mapIndexed { index, card ->
-                  RaidFramePayload(slot = index, playerName = card.name, role = card.guessPlayerRole().value)
+                  RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
                 }.chunked(5),
                 modifier = Modifier.wrapContentSize()
               )
@@ -312,7 +304,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
               )
               RaidComponent(
                 parties = nearbyNuia.value.mapIndexed { index, card ->
-                  RaidFramePayload(slot = index, playerName = card.name, role = card.guessPlayerRole().value)
+                  RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
                 }.chunked(5),
                 modifier = Modifier.wrapContentSize()
               )
@@ -334,7 +326,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
               )
               RaidComponent(
                 parties = nearbyPirate.value.mapIndexed { index, card ->
-                  RaidFramePayload(slot = index, playerName = card.name, role = card.guessPlayerRole().value)
+                  RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
                 }.chunked(5),
                 modifier = Modifier.wrapContentSize()
               )

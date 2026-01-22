@@ -5,8 +5,16 @@ import androidx.room.PrimaryKey
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.FactionStatus
 import com.reoky.raidframer.ui.OverlayWindowType
+import org.jetbrains.compose.resources.StringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.leadership_faction_hero
+import raid_framer_desktop.composeapp.generated.resources.leadership_gm
+import raid_framer_desktop.composeapp.generated.resources.leadership_guild_lead
+import raid_framer_desktop.composeapp.generated.resources.leadership_none
+import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
+import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 4 // increment this when making schema changes
+const val SCHEMA_VERSION = 5 // increment this when making schema changes
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -73,6 +81,7 @@ data class PlayerCacheEntity(
   val lastSeen: Long = System.currentTimeMillis(),
   val lastKnownSpec: String = "",
   val lastKnownLevel: Int = 0,
+  val leaderships: Int = LeadershipRole.NONE.value,
 
   // future proofing
   val lastKnownGearScore: Int = 0,
@@ -143,6 +152,32 @@ enum class KillCounterMode {
   companion object {
     fun fromString(value: String): KillCounterMode {
       return entries.find { it.name == value } ?: KILLING_BLOW
+    }
+  }
+}
+
+// Leadership roles enum
+enum class LeadershipRole(val value: Int) {
+  NONE(0),
+  RAID_LEAD(1),
+  GUILD_LEAD(2),
+  FACTION_HERO(3),
+  SHOT_CALLER(4),
+  GM(5);
+
+  val friendlyNameRes: StringResource
+    get() = when (this) {
+      NONE -> Res.string.leadership_none
+      RAID_LEAD -> Res.string.leadership_raid_lead
+      GUILD_LEAD -> Res.string.leadership_guild_lead
+      FACTION_HERO -> Res.string.leadership_faction_hero
+      SHOT_CALLER -> Res.string.leadership_shot_caller
+      GM -> Res.string.leadership_gm
+    }
+
+  companion object {
+    fun fromInt(value: Int): LeadershipRole {
+      return entries.firstOrNull { it.value == value } ?: NONE
     }
   }
 }

@@ -41,6 +41,7 @@ fun initialize(): AppDatabase {
   .fallbackToDestructiveMigrationFrom(true, 1) // still developing, wipe from v1
   .addMigrations(MIGRATION_2_3) // added kill methods and basic migration for testing migrations to (2 -> 3 : 01/18/26)
   .addMigrations(MIGRATION_3_4) // added charm sounds conf entry (3 -> 4 : 01/19/26)
+  .addMigrations(MIGRATION_4_5) // added leaderships to cache (4 -> 5 : 01/21/26)
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

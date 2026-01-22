@@ -62,4 +62,12 @@
 
     <string name="general_instructions_dragging_overlays">Shift + Click to Drag Overlays</string>
 
+    <!-- Leadership Roles -->
+    <string name="leadership_none">None</string>
+    <string name="leadership_raid_lead">Raid Lead</string>
+    <string name="leadership_guild_lead">Guild Lead</string>
+    <string name="leadership_faction_hero">Faction Hero</string>
+    <string name="leadership_shot_caller">Shot Caller</string>
+    <string name="leadership_gm">GM</string>
+
 </resources>

@@ -19,3 +19,12 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
     }
   }
 }
+
+// added int   val leaderships: Int = 0, to PlayerCacheEntity
+val MIGRATION_4_5 = object : Migration(4, 5) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN leaderships INTEGER NOT NULL DEFAULT 0").use {
+      it.step()
+    }
+  }
+}

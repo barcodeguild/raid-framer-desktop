@@ -8,6 +8,7 @@ data class TargetUpdatedPayload(
   val name: String = "",
   val type: String = "", // npc / character etc
   @SerialName("class") val classMap: Map<String, Int>, // Corresponds to the "class" key in JSON
+  val gearScore: Int = 0,
   val factionStatus: String = "", // friendly / hostile / neutral
   val faction: String = "", // nuia / haranya / pirate / unknown
   val guild: String = ""

@@ -3,14 +3,16 @@ package com.reoky.raidframer.core.interactor
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshotFlow
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.calc.ArrangementMode
 import com.reoky.raidframer.core.calc.MetricRawSample
+import com.reoky.raidframer.core.calc.RaidOrganizer
 import com.reoky.raidframer.core.calc.RealtimeComputer
-import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
 import com.reoky.raidframer.core.helpers.createCacheObject
+import com.reoky.raidframer.core.helpers.guessPlayerRole
 import com.reoky.raidframer.core.model.*
 import com.reoky.raidframer.core.serialization.Party
 import com.reoky.raidframer.core.serialization.RaidFramePayload
@@ -24,15 +26,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.collections.addAll
-import kotlin.collections.containsKey
 import kotlin.collections.get
-import kotlin.collections.remove
-import kotlin.rem
-import kotlin.text.chunked
-import kotlin.text.clear
 import kotlin.text.get
-import kotlin.text.set
 
 /**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
@@ -125,6 +120,7 @@ object PlayerCacheInteractor : Interactor() {
           cards[name]?.let { currentCard ->
             val updatedCard = currentCard.copy(
               currentBuild = determinedSpec.name,
+              currentRole = (SpecType.fromName(determinedSpec.name)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value),
               cache = card.createCacheObject(specOverride = determinedSpec.name)
             )
             cards[name] = updatedCard
@@ -165,18 +161,24 @@ object PlayerCacheInteractor : Interactor() {
       val cached = runBlocking {
         RFDao.playerCacheDao.getPlayerCacheFor(playerName)
       }
+      val previousSpec = cached?.lastKnownSpec ?: SpecType.UNKNOWN.name
       // pre-populate card fields from cache. Very important to get this right so we don't overwrite data and for isRealPlayer flag
       val card = PlayerCard(
         name = playerName,
         recentCids = cid?.let { listOf(it) } ?: listOf(),
         lastEvent = System.currentTimeMillis(), // because an event triggered this load from db
-        lastKnownFaction = Faction.fromString(cached?.lastKnownFaction ?: Faction.UNKNOWN.value).value, // fixes bad data over time by fitting into the enum
-        lastKnownFactionStatus = FactionStatus.fromString(cached?.lastKnownFactionStatus ?: Faction.UNKNOWN.value).value, // always code defensive
+        lastKnownFaction = Faction.fromString(
+          cached?.lastKnownFaction ?: Faction.UNKNOWN.value
+        ).value, // fixes bad data over time by fitting into the enum
+        lastKnownFactionStatus = FactionStatus.fromString(
+          cached?.lastKnownFactionStatus ?: Faction.UNKNOWN.value
+        ).value, // always code defensive
         lastKnownGuild = cached?.lastKnownGuild ?: "",
         isLoaded = true,
         isRealPlayer = cached != null, // cache is for players not NPCs, Mounts, Pets, Vehicles, etc
         cache = cached, // everything
-        currentBuild = cached?.lastKnownSpec ?: SpecType.UNKNOWN.name
+        currentBuild = previousSpec,
+        currentRole = SpecType.fromName(previousSpec)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value
       )
       cards[playerName] = card
     }
@@ -332,6 +334,27 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   /**
+   * Updates a player's leadership status and persists the change.
+   */
+  fun updatePlayerLeadershipFor(playerName: String, newLeadership: Int) {
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(playerName = playerName)
+        cards[playerName]?.let { card ->
+          val updatedCard = card.updatePlayerLeadership(newLeadership)
+          cards[playerName] = updatedCard
+
+          // Persist to DB
+          updatedCard.cache?.let {
+            RFDao.playerCacheDao.insert(it)
+          }
+        }
+      }
+    }
+  }
+
+
+    /**
    * Helps upgrade an NPC card to a real player card immediately based on metadata from the game proving it's a player.
    * Also persists the updated cache to the database right away. (which we didn't use to do and records got lost eek!)
    **/
@@ -345,6 +368,7 @@ object PlayerCacheInteractor : Interactor() {
           val updated = card.copy(
             isRealPlayer = true,
             currentBuild = if (spec != SpecType.UNKNOWN) spec.name else card.currentBuild,
+            currentRole = if (spec != SpecType.UNKNOWN) spec.guessPlayerRole().value else card.currentRole,
             recentCids = cid?.let { (card.recentCids + it).distinct().takeLast(50) } ?: card.recentCids,
             cache = card.createCacheObject(specOverride = spec.name)
           )
@@ -397,7 +421,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postHeal(event: HealEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid,event.caster)
+        createCardIfNoneExists(cid = event.cid, event.caster)
         cards[event.caster]?.let { card ->
           cards[event.caster] = card.postHealEvent(event)
         }
@@ -408,7 +432,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postCasting(event: CastingEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid,event.caster)
+        createCardIfNoneExists(cid = event.cid, event.caster)
         cards[event.caster]?.let { card ->
           cards[event.caster] = card.postCastingEvent(event)
         }
@@ -419,7 +443,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postSuccessfulCast(event: SuccessfulCastEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid,event.caster)
+        createCardIfNoneExists(cid = event.cid, event.caster)
         cards[event.caster]?.let { card ->
           cards[event.caster] = card.postSuccessfulCastEvent(event)
         }
@@ -430,9 +454,24 @@ object PlayerCacheInteractor : Interactor() {
   private fun postBuffGained(event: BuffGainedEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid,event.target)
+        createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postBuffGainedEvent(event)
+        }
+
+        // credit the source because they are the buffer
+        event.source?.let { source ->
+          cards[source]?.let { card ->
+            cards[source] = card.postBuffAppliedEvent(
+              BuffAppliedEvent(
+                cid = event.cid,
+                timestamp = event.timestamp,
+                source = event.source,
+                target = event.target,
+                buff = event.buff
+              )
+            )
+          }
         }
       }
     }
@@ -441,7 +480,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postBuffEnded(event: BuffEndedEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid,event.target)
+        createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postBuffEndedEvent(event)
         }
@@ -452,22 +491,23 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDebuffGained(event: DebuffGainedEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid,event.target)
+        createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postDebuffGainedEvent(event)
         }
 
         // give credit to the source
         event.source?.let { source ->
-          createCardIfNoneExists(cid = event.cid,source)
           cards[source]?.let { card ->
-            cards[source] = card.postDebuffAppliedEvent(DebuffAppliedEvent(
-              cid = event.cid,
-              timestamp = event.timestamp,
-              source = event.source,
-              target = event.target,
-              debuff = event.debuff
-            ))
+            cards[source] = card.postDebuffAppliedEvent(
+              DebuffAppliedEvent(
+                cid = event.cid,
+                timestamp = event.timestamp,
+                source = event.source,
+                target = event.target,
+                debuff = event.debuff
+              )
+            )
           }
         }
       }
@@ -477,7 +517,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDebuffEnded(event: DebuffEndedEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid,event.target)
+        createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postDebuffEndedEvent(event)
         }
@@ -512,19 +552,22 @@ object PlayerCacheInteractor : Interactor() {
             ?.copy(
               lastKnownFaction = if (faction != Faction.UNKNOWN) faction.value else card.lastKnownFaction,
               lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value,
-              lastKnownGuild = target.guild
+              lastKnownGuild = target.guild,
+              lastKnownGearScore = target.gearScore
             )
-            // Otherwise build a full cache object (fills timestamps and defaults) and apply overrides
+          // Otherwise build a full cache object (fills timestamps and defaults) and apply overrides
             ?: card.createCacheObject().copy(
               lastKnownFaction = if (faction != Faction.UNKNOWN) faction.value else card.lastKnownFaction,
               lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value,
-              lastKnownGuild = target.guild
+              lastKnownGuild = target.guild,
+              lastKnownGearScore = target.gearScore
             )
 
           cards[target.name] = card.copy(
             lastKnownFactionStatus = updatedCache.lastKnownFactionStatus,
             lastKnownFaction = updatedCache.lastKnownFaction,
             lastKnownGuild = updatedCache.lastKnownGuild,
+            lastKnownGearScore = updatedCache.lastKnownGearScore,
             cache = updatedCache
           )
         }
@@ -533,7 +576,7 @@ object PlayerCacheInteractor : Interactor() {
     if (target.type == "character") {
       stronglyAssertIsPlayer(cid = null, name = target.name, classMap = target.classMap)
     }
-    Log.info(TAG, "Player's tab-target switched to ${target.name} with faction $faction.")
+    Log.info(TAG, "Player's tab-target switched to ${target.name} with faction $faction and gear score of ${target.gearScore}.")
   }
 
   /*
@@ -564,85 +607,95 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  /**
+   * You can, like, feed these Comparators to sortedWith() and it allows you compare against a running sequence by returning
+   */
+  private val gearComparator = Comparator<PlayerCard> { a, b ->
+    b.lastKnownGearScore.compareTo(a.lastKnownGearScore)
+  }
+
+
   /* UI Subscriptions */
   fun observeCard(name: String): StateFlow<PlayerCard?> {
-    return snapshotFlow { cards[name] }
-      .stateIn(scope, SharingStarted.WhileSubscribed(5000), cards[name])
+    return snapshotFlow {
+      cards[name]?.copy() // force a new instance on each emission
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), cards[name])
   }
+
   var topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
-    .map { cards -> cards.filter { it.isRealPlayer && it.sessionDamageTotal > 0 }.sortedByDescending { it.sessionDamageTotal }.take(100) }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionDamageTotal > 0 }.sortedByDescending { it.sessionDamageTotal }
+        .take(100)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topHeals: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
-    .map { cards -> cards.filter { it.isRealPlayer && it.sessionHealTotal > 0 }.sortedByDescending { it.sessionHealTotal }.take(100) }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionHealTotal > 0 }.sortedByDescending { it.sessionHealTotal }.take(100)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topCC: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
-    .map { cards -> cards.filter { it.isRealPlayer && it.sessionCCTotal > 0 }.sortedByDescending { it.sessionCCTotal }.take(100) }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionCCTotal > 0 }.sortedByDescending { it.sessionCCTotal }.take(100)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topDebuff: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
-    .map { cards -> cards.filter { it.isRealPlayer && it.sessionDebuffTotal > 0 }.sortedByDescending { it.sessionDebuffTotal }.take(100) }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionDebuffTotal > 0 }.sortedByDescending { it.sessionDebuffTotal }
+        .take(100)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  var topCharmers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer && it.sessionCharmTotal > 0 }.sortedByDescending { it.sessionCharmTotal }.take(100) }
+  var topCharmers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionCharmTotal > 0 }.sortedByDescending { it.sessionCharmTotal }.take(100)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer && it.sessionGliderTotal > 0 }.sortedByDescending { it.sessionGliderTotal }.take(100) }
+  var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionGliderTotal > 0 }.sortedByDescending { it.sessionGliderTotal }
+        .take(100)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  var topPotters: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer && it.sessionPotionTotal > 0 }.sortedByDescending { it.sessionPotionTotal }.take(100) }
+  var topPotters: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionPotionTotal > 0 }.sortedByDescending { it.sessionPotionTotal }
+        .take(100)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  var topItemSkillCasters : StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer && it.sessionItemSkillTotal > 0 }.sortedByDescending { it.sessionItemSkillTotal }.take(100) }
+  var topItemSkillCasters: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionItemSkillTotal > 0 }.sortedByDescending { it.sessionItemSkillTotal }
+        .take(100)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  val topDeaths: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList()  }
-    .map { cards -> cards.filter { it.isRealPlayer && it.sessionDeathTotal > 0 }.sortedByDescending { it.sessionDeathTotal }.take(100) }
+  val topDeaths: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionDeathTotal > 0 }.sortedByDescending { it.sessionDeathTotal }.take(100)
+    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  private val _rolePriority = mapOf(
-    PlayerRole.GREEN to 0,
-    PlayerRole.RED to 1,
-    PlayerRole.BLUE to 2,
-    PlayerRole.PURPLE to 3,
-    PlayerRole.UNKNOWN to 4,
-    PlayerRole.PINK to 5
-  )
-
-  /*
-   * You can, like, feed these Comparators to sortedWith() and it allows you compare against a running sequence by returning
-   */
-  private val roleComparator = Comparator<PlayerCard> { a, b ->
-    val ra = _rolePriority[a.guessPlayerRole()] ?: Int.MAX_VALUE // max is an impossible role, but it goes to the end
-    val rb = _rolePriority[b.guessPlayerRole()] ?: Int.MAX_VALUE
-    if (ra != rb) ra - rb else a.name.compareTo(b.name)
-  }
-
-  /*
-   * Nearby Nuia faction players, sorted by their guessed raid roles, excluding those already in the player's own raid.
-   */
   val nearbyNuianRaidParties: StateFlow<List<PlayerCard>> = snapshotFlow {
     val cardList = cards.values.toList()
     val combinedParties = (raids[0] ?: emptyList()) + (raids[1] ?: emptyList())
     Pair(cardList, combinedParties)
+  }.map { (allCards, combinedParties) ->
+    val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
+    val candidates = allCards
+      .filter { it.isRealPlayer && it.lastKnownFaction == Faction.NUIA.value && it.name !in raidNames }
+      .sortedWith(gearComparator)
+
+    RaidOrganizer.organize(candidates, ArrangementMode.CLASSIC_ROLES).take(400)
   }
-    .map { (allCards, combinedParties) ->
-      val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
-      allCards
-        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.NUIA.value && it.name !in raidNames }
-        .sortedWith(roleComparator)
-        .take(400)
-    }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  /*
-   * Nearby Haranya faction players, sorted by their guessed raid roles, excluding those already in the player's own raid.
-   */
   val nearbyHaraniRaidParties: StateFlow<List<PlayerCard>> = snapshotFlow {
     val cardList = cards.values.toList()
     val combinedParties = (raids[0] ?: emptyList()) + (raids[1] ?: emptyList())
@@ -650,16 +703,14 @@ object PlayerCacheInteractor : Interactor() {
   }
     .map { (allCards, combinedParties) ->
       val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
-      allCards
+      val candidates = allCards
         .filter { it.isRealPlayer && it.lastKnownFaction == Faction.HARANYA.value && it.name !in raidNames }
-        .sortedWith(roleComparator)
-        .take(400)
+        .sortedWith(gearComparator)
+
+      RaidOrganizer.organize(candidates, ArrangementMode.CLASSIC_ROLES).take(400)
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  /*
-    * Nearby Pirate faction players, sorted by their guessed raid roles, excluding those already in the player's own raid.
-   */
   val nearbyPirateRaidParties: StateFlow<List<PlayerCard>> = snapshotFlow {
     val cardList = cards.values.toList()
     val combinedParties = (raids[0] ?: emptyList()) + (raids[1] ?: emptyList())
@@ -667,10 +718,11 @@ object PlayerCacheInteractor : Interactor() {
   }
     .map { (allCards, combinedParties) ->
       val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
-      allCards
+      val candidates = allCards
         .filter { it.isRealPlayer && it.lastKnownFaction == Faction.PIRATE.value && it.name !in raidNames }
-        .sortedWith(roleComparator)
-        .take(400)
+        .sortedWith(gearComparator)
+
+      RaidOrganizer.organize(candidates, ArrangementMode.CLASSIC_ROLES).take(400)
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -687,6 +739,5 @@ object PlayerCacheInteractor : Interactor() {
     return snapshotFlow { raids[raidId] ?: listOf() }
       .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
   }
-
 
 }

@@ -72,11 +72,19 @@ function RF.Combat.handleTargetChanged(...)
     RF:Log("Target " .. unitInfo["name"] .. " is missing statue buff. If you mention this to them please be kind! =^_^=")
   end
 
+  local gearScore = X2Unit:UnitGearScore("target", true)
+  if gearScore then
+    unitInfo["gearScore"] = gearScore
+  else
+    unitInfo["gearScore"] = -1 -- not actually sure what to do with this because it is possible to have a gear score of 0 right?
+  end
+
   -- send target update to desktop app
   RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.TARGET_UPDATE, {
     name = unitInfo["name"],
     type = unitInfo["type"],
     class = unitInfo["class"],
+    gearScore = unitInfo["gearScore"],
     factionStatus = unitInfo["faction"],
     faction = playerFaction,
     guild = unitInfo["expeditionName"]

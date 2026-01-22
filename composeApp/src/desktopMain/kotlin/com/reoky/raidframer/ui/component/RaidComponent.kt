@@ -57,7 +57,7 @@ private fun RaidPartyColumn(party: List<RaidFramePayload>) {
   Column(
     modifier = Modifier
       .width(PARTY_WIDTH)
-      .background(Color.Black.copy(alpha = 0.25F), RoundedCornerShape(2.dp))
+      .background(Color.Black.copy(alpha = 0.40F), RoundedCornerShape(2.dp))
       .padding(bottom = 1.dp),
     verticalArrangement = Arrangement.spacedBy(1.dp)
   ) {

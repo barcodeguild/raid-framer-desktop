@@ -14,11 +14,16 @@ data class PlayerCard (
   val lastKnownFaction: String = Faction.UNKNOWN.value, // see Faction definitions
   val lastKnownFactionStatus: String = FactionStatus.UNKNOWN.value, // friendly / hostile / neutral
   val lastKnownGuild: String = "", // string (not used for anything yet, thinking maybe dominion / duels support for future release)
+  val lastKnownGearScore: Int = 0, // cached gear score for quick access
+  val lastGliderUse: Long = 0L, // this is because of a game bug where the glider debuff is applied twice for every wing closing event (we simply don't allow more than one open in the same second as a safeguard)
   val currentBuild: String,
+  val currentRole: Int = -1, // current spec / role int value
+  val leaderships: Int = 0, // 0 = none, 1 = raid lead, 2 = guild lead, 3 = faction hero, 4 = shot-caller, 5 = gm (reserved for admins use if they use this)
 
   // cache management for player data
   val isLoaded: Boolean = false,
   val isRealPlayer: Boolean = false, // determined after some analysis
+  val isShotcaller: Boolean = false, // is the player a shotcaller (frequently issues commands in voice chat, determined externally)
   val cache: PlayerCacheEntity?, // saved to the database
 
   // important buffs/debuffs currently active on the player
