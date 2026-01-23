@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 5 // increment this when making schema changes
+const val SCHEMA_VERSION = 6 // increment this when making schema changes
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -42,6 +42,7 @@ data class ConfigEntity(
   val tabbedDetectionEnabled: Boolean = false,
   val miniGraphEnabled: Boolean = false,
   val splitChatEnabled: Boolean = false,
+  val allowPVEDamage: Boolean = false,
   val gameScheduleHotkeyEnabled: Boolean = false,
   val useSadlyDotEyeOhhh: Boolean = false,
   val dragonBreathOverlayEnabled: Boolean = false,

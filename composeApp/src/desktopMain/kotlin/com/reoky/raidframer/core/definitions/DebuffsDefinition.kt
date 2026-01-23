@@ -41,6 +41,7 @@ data class DebuffsDefinition(
     Debuff(name = "Bubble Trap", consideredCC = true), // can't move or cast
     Debuff(name = "Snare", consideredCC = true), // target can't move
     Debuff(name = "Banshee Wail", consideredCC = true), // feared (the spell also applies slow)
+    Debuff(name = "Phantasm's Wail", consideredCC = true), // feared (aoe spell also applies slow)
     Debuff(name = "Concussion", consideredCC = true), // prevents target from standing
     Debuff(name = "Shackle", consideredCC = true), // Melee and range skills are restrained for 2 sec.
     Debuff(name = "Overpowered", consideredCC = true), // Prevents movement and periodically deals Melee Damage.

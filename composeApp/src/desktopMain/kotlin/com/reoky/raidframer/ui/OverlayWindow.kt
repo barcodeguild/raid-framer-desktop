@@ -247,18 +247,18 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 500f,
       lastPositionYDp = 70f,
-      lastWidthDp = 560f,
-      lastHeightDp = 800f,
+      lastWidthDp = 480f,
+      lastHeightDp = 760f,
       isVisible = false
     )
 
     OverlayType.RAID -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 200f,
-      lastPositionYDp = 200f,
-      lastWidthDp = 600f,
-      lastHeightDp = 400f,
+      lastPositionXDp = 250f,
+      lastPositionYDp = 250f,
+      lastWidthDp = 1024f,
+      lastHeightDp = 1000f,
       isVisible = false
     )
 

@@ -4,13 +4,21 @@ import com.reoky.raidframer.core.database.WindowStateEntity
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.reoky.raidframer.core.database.WindowStateDao
+import com.reoky.raidframer.core.interactor.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.text.get
+import kotlin.text.insert
 
 class WindowManager(
   private val scope: CoroutineScope,
   private val dao: WindowStateDao? = null // Optional
 ) {
+
+  companion object {
+    private const val TAG = "WindowManager"
+  }
+
   // Holds actual state for each window
   private val windowStates: MutableMap<OverlayType, MutableState<WindowStateEntity>> = mutableMapOf()
 
@@ -105,4 +113,29 @@ class WindowManager(
       println("Updated window state for $type: $newState")
     }
   }
+
+  /*
+   * Used when the user freaks out and doesn't know where their windows went. Ensures they are all back to default positions and foregrounded.
+   */
+  fun resetAllWindowPositions() {
+    scope.launch {
+      // Close all windows first
+      OverlayType.entries.forEach { type ->
+        visibilityStates[type]?.value = false
+      }
+
+      // Reset each window to its default state
+      OverlayType.entries.forEach { type ->
+        val defaultState = defaultWindowStateForTypeFor(type)
+        windowStates[type]?.value = defaultState
+        visibilityStates[type]?.value = defaultState.isVisible
+
+        // Persist to database
+        dao?.insert(defaultState)
+      }
+
+      Log.info(TAG, "Reset all window positions to defaults upon user request.")
+    }
+  }
+
 }

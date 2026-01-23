@@ -1,5 +1,6 @@
 package com.reoky.raidframer.core.helpers
 
+import com.reoky.raidframer.core.database.LeadershipRole
 import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.model.PlayerCard
 
@@ -14,7 +15,8 @@ fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntit
     lastSeen = this.lastEvent,
     lastKnownSpec = specOverride ?: (c?.lastKnownSpec ?: this.currentBuild),
     lastKnownLevel = c?.lastKnownLevel ?: 0,
-    lastKnownGearScore = c?.lastKnownGearScore ?: 0,
+    lastKnownGearScore = if (this.lastKnownGearScore > 0) this.lastKnownGearScore else (c?.lastKnownGearScore ?: 0),
+    leaderships = this.leaderships,
     lastKnownFaction = c?.lastKnownFaction ?: this.lastKnownFaction,
     lastKnownFactionStatus = c?.lastKnownFactionStatus ?: this.lastKnownFactionStatus,
     lastKnownGuild = c?.lastKnownGuild ?: this.lastKnownGuild,

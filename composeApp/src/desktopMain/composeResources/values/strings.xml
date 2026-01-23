@@ -27,6 +27,9 @@
     <string name="settings_data_sourcing_sidenote">Technically, you do not need ArcheRage installed if you only want to view historical combat.log files. Just right-click on the .log or .rf (battle slice export file) and choose 'Open-With → Raid Framer' in the Windows Explorer context menu to view a replay.</string>
     <string name="settings_toggle_pvp_damage">Show only PvP damage</string>
     <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
+    <string name="settings_lua_options_title">Lua Options</string>
+    <string name="settings_uninstall_title">Uninstall Raid Framer</string>
+    <string name="settings_uninstall_description">Uninstalling via this menu cleanly removes the Lua addon from the game folder, it also closes the app, and triggers the regular un-installation process. If you decide to cancel the installer, opening raid framer again will allow you to re-install the Lua component automatically.</string>
 
     <!-- Player Card -->
     <string name="player_card_recent_damage">Recent Damage</string>
@@ -59,8 +62,10 @@
     <string name="general_metric_type_healing_short">HEALS</string>
     <string name="general_metric_type_cc">Crowd Control</string>
     <string name="general_metric_type_cc_short">CC</string>
-
     <string name="general_instructions_dragging_overlays">Shift + Click to Drag Overlays</string>
+
+    <!-- Help Strings -->
+    <string name="general_help_window_postions_reset">All window positions have been reset! Please remember: If you have alt-tab detection enabled, any overlays (those without a title bar) may not appear until you switch back to the game window.</string>
 
     <!-- Leadership Roles -->
     <string name="leadership_none">None</string>

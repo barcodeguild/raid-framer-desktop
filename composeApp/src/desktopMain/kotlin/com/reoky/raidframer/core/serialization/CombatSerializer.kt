@@ -100,6 +100,24 @@ sealed class CombatEventPayload {
     val f11: Int
   ) : CombatEventPayload()
 
+  @Serializable
+  @SerialName("MELEE_DAMAGE")
+  data class MeleeDamagePayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
+    val timestamp: Long,
+    val cid: String,
+    val source: String = "Unknown Target",
+    val target: String = "Unknown Target",
+    val amount: Int,
+    val pool: String, // HEALTH / MANA
+    val result: String, // HIT
+    val f8: Int,
+    val f9: Int,
+    val f10: Boolean,
+    val f11: String, // sometimes false sometime 0
+    val f12: Boolean
+  ) : CombatEventPayload()
+
 
   // if a person heals after a duel we've seen this event come through
   // as a healing from the source to themselves
@@ -116,6 +134,41 @@ sealed class CombatEventPayload {
     val damageType: String, // HOLY
     val amount: Int,
     val pool: String, // MANA / HEALTH / HOLY
+  ) : CombatEventPayload()
+
+  @Serializable
+  @SerialName("SPELL_MISSED")
+  data class SpellMissedPayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
+    val timestamp: Long,
+    val cid: String,
+    val source: String = "Unknown Target",
+    val target: String = "Unknown Target",
+    val unknownInt: Int,
+    val spell: String,
+    val damageType: String, // PHYSICAL / FIRE / HOLY
+    val result: String, // BLOCK / IMMUNNE
+    val amount: Int,
+    val f10: Int,
+    val f11: Int,
+    val f12: Boolean,
+    val f13: Int
+  ) : CombatEventPayload()
+
+  @Serializable
+  @SerialName("MELEE_MISSED")
+  data class MeleeMissedPayload(
+    @Serializable(with = SecondsToMillisSerializer::class)
+    val timestamp: Long,
+    val cid: String,
+    val source: String = "Unknown Target",
+    val target: String = "Unknown Target",
+    val result: String, // BLOCK / IMMUNE
+    val amount: Int,
+    val f7: Int,
+    val f8: Int,
+    val f9: Boolean,
+    val f10: String // string bool
   ) : CombatEventPayload()
 
   // Thinking this means damage as a result of a spell like burning and earthen grip's damage

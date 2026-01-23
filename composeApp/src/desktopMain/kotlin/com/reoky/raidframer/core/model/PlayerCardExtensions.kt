@@ -1,5 +1,6 @@
 package com.reoky.raidframer.core.model
 
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
@@ -22,14 +23,14 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
  * Add a damage event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
-  val targetIsPlayer = PlayerCacheInteractor.isRealPlayer(event.target)
+  if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
     ),
     recentDamageEvents = (this.recentDamageEvents + event), // optional to takeLast(n)
-    sessionDamageTotal = if (targetIsPlayer) this.sessionDamageTotal + event.damage else this.sessionDamageTotal
+    sessionDamageTotal = this.sessionDamageTotal + event.damage
   )
 }
 
@@ -37,14 +38,14 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
  * Add a heal event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
-  val targetIsPlayer = PlayerCacheInteractor.isRealPlayer(event.target)
+  if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
     ),
     recentHealEvents = (this.recentHealEvents + event), // optional to takeLast(n)
-    sessionHealTotal = if (targetIsPlayer) this.sessionHealTotal + event.amount else this.sessionHealTotal
+    sessionHealTotal = this.sessionHealTotal + event.amount
   )
 }
 
@@ -74,6 +75,7 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
  * Add a buff gained event to the PlayerCard, updating recent events.
  */
 fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
+  //val isBDGlider = if (event.buffId)
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
@@ -131,6 +133,7 @@ fun PlayerCard.postDeathEvent(timestamp: Long): PlayerCard {
  * makes analysis way easier later on, and uses less CPU to compute. (See: Graph Databases vs Relational Databases heh)
  */
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
+  if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
   val isCharm = event.debuff == "Charmed"
   val isDistress = event.debuff == "Distressed"

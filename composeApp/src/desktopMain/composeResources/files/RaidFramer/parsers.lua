@@ -113,7 +113,75 @@ function RF.Parser.ParseHealEvent(t)
   return event
 end
 
--- SPELL_DAMAGE
+-- MELEE_DAMAGE
+function RF.Parser.ParseMeleeDamageEvent(t)
+  local event = {}
+
+  event.timestamp    = os.time()
+  event.cid            = t[1] -- always entity id
+  event.type           = t[2] -- always event type
+  event.source         = t[3] -- always source name
+  event.target         = t[4] -- always target name
+
+  -- specific fields for damage events
+  event.amount        = t[5] -- integer (negative means removed health)
+  event.pool          = t[6] -- HEALTH / MANA
+  event.result        = t[7] -- string HIT
+  event.f8            = t[8] -- zero int
+  event.f9            = t[9] -- zero int
+  event.f10           = t[10] -- bool
+  event.f11           = t[11] -- string bool
+  event.f12           = t[12] -- bool
+
+  return event
+end
+
+-- SPELL_MISSED
+function RF.Parser.ParseSpellMissedEvent(t)
+  local event = {}
+
+  event.timestamp    = os.time()
+  event.cid            = t[1] -- always entity id
+  event.type           = t[2] -- always event type
+  event.source         = t[3] -- always source name
+  event.target         = t[4] -- always target name
+
+  -- specific fields for spell missed events
+  event.unknownInt    = t[5] -- always seems to be zero
+  event.spell         = t[6] -- name of spell
+  event.damageType    = t[7] -- PHYSICAL / FIRE / HOLY
+  event.result        = t[8] -- string BLOCK / IMMUNNE
+  event.amount        = t[9] -- amount removed anyways (a lot of times it's just one hp)
+  event.f10           = t[10] -- zero int
+  event.f11           = t[11] -- zero int
+  event.f12           = t[12] -- bool
+  event.f13           = t[13] -- zero int
+
+  return event
+end
+
+-- MELEE_MISSED
+function RF.Parser.ParseMeleeMissedEvent(t)
+  local event = {}
+
+  event.timestamp    = os.time()
+  event.cid            = t[1] -- always entity id
+  event.type           = t[2] -- always event type
+  event.source         = t[3] -- always source name
+  event.target         = t[4] -- always target name
+
+  -- specific fields for MELEE_MISSED events
+  event.result        = t[5] -- BLOCK / IMMUNE
+  event.amount        = t[6] -- health removed
+  event.f7            = t[7] -- zero int
+  event.f8            = t[8] -- zero int
+  event.f9            = t[9] -- bool
+  event.f10           = t[10] -- string bool
+
+  return event
+end
+
+-- SPELL_ENERGIZE
 function RF.Parser.ParseEnergizeEvent(t)
   local event = {}
 

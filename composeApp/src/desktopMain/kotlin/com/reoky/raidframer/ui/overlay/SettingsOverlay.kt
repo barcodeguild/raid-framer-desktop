@@ -292,6 +292,25 @@ fun GlobalOptionsPanel() {
             color = Color.White
           )
         }
+        // allow PvE damage option
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Checkbox(
+            checked = config.allowPVEDamage,
+            onCheckedChange = {
+              isChecked ->
+              RFConfig.update { it.copy(allowPVEDamage = isChecked) }
+            },
+            colors = CheckboxDefaults.colors(
+              checkmarkColor = Color.White,
+              checkedColor = Color.Red,
+              uncheckedColor = Color.White
+            )
+          )
+          Text(
+            text = "Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)",
+            color = Color.White
+          )
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
           Checkbox(
             checked = config.gameScheduleHotkeyEnabled,

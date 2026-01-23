@@ -5,4 +5,5 @@ object GliderDefinition : SkillItemDefinition {
   override val skills: List<Skill> = listOf(
 
   )
+
 }

@@ -12,6 +12,7 @@ data class DamageEvent(
   val target: String,
   val damage: Int,
   val spell: String,
+  val spellId: Int,
   val critical: Boolean,
 ) : CombatEvent
 
@@ -22,6 +23,7 @@ data class HealEvent(
   val target: String,
   val amount: Int,
   val spell: String,
+  val spellId: Int,
   val critical: Boolean,
 ) : CombatEvent
 
@@ -30,14 +32,16 @@ data class CastingEvent(
   override val cid: String,
   val caster: String,
   val spell: String,
-) : CombatEvent
+  val spellId: Int,
+  ) : CombatEvent
 
 data class SuccessfulCastEvent(
   override val timestamp: Long,
   override val cid: String,
   val caster: String,
   val spell: String,
-) : CombatEvent
+  val spellId: Int,
+  ) : CombatEvent
 
 data class BuffGainedEvent(
   override val timestamp: Long,
@@ -45,6 +49,7 @@ data class BuffGainedEvent(
   val source: String? = null,
   val target: String,
   val buff: String,
+  val buffId: Int,
 ) : CombatEvent
 
 data class BuffEndedEvent(
@@ -53,6 +58,7 @@ data class BuffEndedEvent(
   val source: String? = null,
   val target: String,
   val buff: String,
+  val buffId: Int,
 ) : CombatEvent
 
 data class DebuffGainedEvent(
@@ -61,6 +67,7 @@ data class DebuffGainedEvent(
   val source: String? = null,
   val target: String,
   val debuff: String,
+  val debuffId: Int,
 ) : CombatEvent
 
 data class DebuffEndedEvent(
@@ -69,6 +76,7 @@ data class DebuffEndedEvent(
   val source: String? = null,
   val target: String,
   val debuff: String,
+  val debuffId: Int,
 ) : CombatEvent
 
 data class DebuffAppliedEvent(
@@ -77,6 +85,7 @@ data class DebuffAppliedEvent(
   val source: String? = null,
   val target: String,
   val debuff: String,
+  val debuffId: Int,
 ) : CombatEvent
 
 data class BuffAppliedEvent(
@@ -85,4 +94,5 @@ data class BuffAppliedEvent(
   val source: String? = null,
   val target: String,
   val buff: String,
+  val buffId: Int,
 ) : CombatEvent

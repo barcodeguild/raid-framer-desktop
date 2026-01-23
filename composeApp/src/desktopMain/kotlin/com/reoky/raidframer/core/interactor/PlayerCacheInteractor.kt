@@ -26,8 +26,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.collections.containsKey
 import kotlin.collections.get
 import kotlin.text.get
+import kotlin.text.insert
+import kotlin.text.set
 
 /**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
@@ -121,7 +124,7 @@ object PlayerCacheInteractor : Interactor() {
             val updatedCard = currentCard.copy(
               currentBuild = determinedSpec.name,
               currentRole = (SpecType.fromName(determinedSpec.name)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value),
-              cache = card.createCacheObject(specOverride = determinedSpec.name)
+              cache = currentCard.createCacheObject(specOverride = determinedSpec.name)
             )
             cards[name] = updatedCard
 
@@ -174,6 +177,8 @@ object PlayerCacheInteractor : Interactor() {
           cached?.lastKnownFactionStatus ?: Faction.UNKNOWN.value
         ).value, // always code defensive
         lastKnownGuild = cached?.lastKnownGuild ?: "",
+        lastKnownGearScore = cached?.lastKnownGearScore ?: 0,
+        leaderships = cached?.leaderships ?: 0,
         isLoaded = true,
         isRealPlayer = cached != null, // cache is for players not NPCs, Mounts, Pets, Vehicles, etc
         cache = cached, // everything
@@ -353,7 +358,6 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
-
     /**
    * Helps upgrade an NPC card to a real player card immediately based on metadata from the game proving it's a player.
    * Also persists the updated cache to the database right away. (which we didn't use to do and records got lost eek!)
@@ -468,7 +472,8 @@ object PlayerCacheInteractor : Interactor() {
                 timestamp = event.timestamp,
                 source = event.source,
                 target = event.target,
-                buff = event.buff
+                buff = event.buff,
+                buffId = event.buffId
               )
             )
           }
@@ -505,7 +510,8 @@ object PlayerCacheInteractor : Interactor() {
                 timestamp = event.timestamp,
                 source = event.source,
                 target = event.target,
-                debuff = event.debuff
+                debuff = event.debuff,
+                debuffId = event.debuffId
               )
             )
           }

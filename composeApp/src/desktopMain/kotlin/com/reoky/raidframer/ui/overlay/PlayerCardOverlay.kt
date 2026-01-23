@@ -118,7 +118,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             Spacer(modifier = Modifier.height(8.dp))
 
             // Recent Damage, Heals, Debuffs
-            Row(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+            Row(modifier = Modifier.fillMaxWidth().height(300.dp)) {
               // Damage
               EventListColumn(
                 title = str("Recent Damage"),
@@ -172,7 +172,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // ROW 2: Buffs, Items, K/D
-            Row(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+            Row(modifier = Modifier.fillMaxWidth().height(300.dp)) {
               EventListColumn(
                 title = str("Buffs Applied"),
                 items = card.recentBuffAppliedEvents.take(200).sortedByDescending { it.timestamp },

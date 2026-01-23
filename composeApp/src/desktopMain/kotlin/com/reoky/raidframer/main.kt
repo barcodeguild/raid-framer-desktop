@@ -31,7 +31,10 @@ import dorkbox.systemTray.SystemTray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
+import raid_framer_desktop.composeapp.generated.resources.general_metric_type_cc_short
 import raid_framer_desktop.composeapp.generated.resources.raidframer
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -193,6 +196,7 @@ fun messageBox(title: String, message: String) {
 @Composable
 fun spawnSystemTray(wm: WindowManager): SystemTray {
   val tray = SystemTray.get()
+  val helpString = stringResource(Res.string.general_help_window_postions_reset)
 
   // Updated to use the type-safe Res accessor
   val iconImage = org.jetbrains.compose.resources.painterResource(Res.drawable.raidframer).toAwtImage(
@@ -210,6 +214,29 @@ fun spawnSystemTray(wm: WindowManager): SystemTray {
   tray.menu.add(MenuItem("About") {
     wm.openWindow(OverlayType.ABOUT)
   })
+  tray.menu.add(MenuItem("Reset Window Positions") {
+    wm.resetAllWindowPositions()
+    messageBox(AppGlobals.APP_NAME, helpString)
+  })
+  tray.menu.add(MenuItem("Quit RF 2.0") {
+    cleanShutdown()
+  })
   tray.setImage(iconImage)
   return tray
+}
+
+/*
+ * Stops all the interactors and exits the application cleanly.
+ */
+fun cleanShutdown() {
+  Log.info(TAG, "Shutting down Raid Framer...")
+  PlayerCacheInteractor.stop()
+  GameMonitorInteractor.stop()
+  DeathAccumulatorInteractor.stop()
+  CompanionInteractor.stop()
+  InstallationInteractor.stop()
+  tray?.shutdown()
+  tray?.remove()
+  LoggingInteractor.stop() // should be last because this is the thing that logs shutdown message
+  exitProcess(0)
 }

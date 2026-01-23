@@ -71,6 +71,7 @@ object EventParserHelper {
           damage = matcher.group(6).toInt().absoluteValue,
           spell = matcher.group(5),
           critical = false,
+          spellId = 43
         )
         events.add(event)
         continue
@@ -87,6 +88,7 @@ object EventParserHelper {
           damage = matcher.group(5).toInt().absoluteValue,
           spell = "Auto-Attack",
           critical = false,
+          spellId = 43
         )
         events.add(event)
         continue
@@ -103,6 +105,7 @@ object EventParserHelper {
           damage = matcher.group(6).toInt().absoluteValue,
           spell = matcher.group(5),
           critical = false,
+          spellId = 43
         )
         events.add(event)
         continue
@@ -119,6 +122,7 @@ object EventParserHelper {
           amount = matcher.group(6).toInt(),
           spell = matcher.group(5),
           critical = false,
+          spellId = 43
         )
         events.add(event)
         continue
@@ -132,6 +136,7 @@ object EventParserHelper {
           timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           spell = matcher.group(4),
+          spellId = 43
         )
         events.add(event)
         continue
@@ -145,6 +150,7 @@ object EventParserHelper {
           timestamp = parseLogTimestamp(matcher.group(1)),
           caster = matcher.group(3),
           spell = matcher.group(4),
+          spellId = 43
         )
         events.add(event)
         continue
@@ -158,6 +164,7 @@ object EventParserHelper {
           timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           buff = matcher.group(4),
+          buffId = 43
         )
         events.add(event)
         continue
@@ -171,6 +178,7 @@ object EventParserHelper {
           timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           buff = matcher.group(4),
+          buffId = 43
         )
         events.add(event)
         continue
@@ -184,6 +192,7 @@ object EventParserHelper {
           timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           debuff = matcher.group(4),
+          debuffId = 43
         )
         events.add(event)
         continue
@@ -197,6 +206,7 @@ object EventParserHelper {
           timestamp = parseLogTimestamp(matcher.group(1)),
           target = matcher.group(3),
           debuff = matcher.group(4),
+          debuffId = 43
         )
         events.add(event)
         continue

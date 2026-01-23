@@ -24,7 +24,11 @@ function RF.Combat.handleDuelEnded()
   RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_ENDED, os.time())
 end
 function RF.Combat.handleTargetChanged(...)
-  local unitInfo = X2Unit:GetUnitInfoById(X2Unit:GetUnitId("target"))
+  local targetId = X2Unit:GetUnitId("target")
+  if not targetId then
+    return
+  end
+  local unitInfo = X2Unit:GetUnitInfoById(targetId)
 
   -- GUARD: not nil
   if not unitInfo then
@@ -117,7 +121,7 @@ function RF.Combat.handleCombatMessage(...)
   -- populate the local player info cache and dispatch player meta info to desktop app
   -- if it's something we've never seen before (like someone just spawned a dragon and we
   -- need to know right meow)
-  if not RF.Combat.ENTITY_REPORT_COOLDOWNS[meta.target] or (meta.timestamp - RF.Combat.ENTITY_REPORT_COOLDOWNS[meta.target]) >= RF.Combat.REPORT_COOLDOWN  or meta.cid == "0" then
+  if not RF.Combat.ENTITY_REPORT_COOLDOWNS[meta.target] or (meta.timestamp - RF.Combat.ENTITY_REPORT_COOLDOWNS[meta.target]) >= RF.Combat.REPORT_COOLDOWN or meta.cid == "0" then
     local result = X2Unit:GetUnitInfoById(meta.cid)
     if (result) then
       result["cid"] = meta.cid -- ensure cid is included in the result
@@ -145,6 +149,8 @@ function RF.Combat.handleCombatMessage(...)
     RF.Combat.ENTITY_REPORT_COOLDOWNS[meta.target] = meta.timestamp
   end
 
+  -- ORDER OF EVENT HANDLING BELOW MATTERS FOR PERFORMANCE
+
   -- SPELL_CAST_START
   if (meta.type == "SPELL_CAST_START") then
     RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(RF.Parser.ParseCastEvent(combatEvent)))
@@ -171,6 +177,13 @@ function RF.Combat.handleCombatMessage(...)
     return
   end
 
+  -- MELEE_DAMAGE
+  -- Not so important but still useful to track
+  if (meta.type == "MELEE_DAMAGE") then
+    RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(RF.Parser.ParseMeleeDamageEvent(combatEvent)))
+    return
+  end
+
   -- SPELL_DOT_DAMAGE : Condition Damage / Buff Damage over Time
   if (meta.type == "SPELL_DOT_DAMAGE") then
     RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(RF.Parser.ParseDamageEvent(combatEvent))) -- same as normal damage event
@@ -184,9 +197,21 @@ function RF.Combat.handleCombatMessage(...)
   end
 
   -- SPELL_ENERGIZE
-  -- like if a person heals after dueling they get this
+  -- like if a person heals after dueling they get this, meow!
   if (meta.type == "SPELL_ENERGIZE") then
     RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(RF.Parser.ParseEnergizeEvent(combatEvent)))
+    return
+  end
+
+  -- SPELL_MISSED
+  if (meta.type == "SPELL_MISSED") then
+    RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(RF.Parser.ParseSpellMissedEvent(combatEvent)))
+    return
+  end
+
+  -- MELEE_MISSED
+  if (meta.type == "MELEE_MISSED") then
+    RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(RF.Parser.ParseMeleeMissedEvent(combatEvent)))
     return
   end
 
@@ -198,7 +223,7 @@ function RF.Combat.handleCombatMessage(...)
   end
 
   -- dump any newly discovered event types for future implementation
-  --RF:Log("Unimplemented combat event type to tell Reoky about: " .. tostring(meta.type))
+  RF:Log("Unimplemented combat event type to tell Reoky about: " .. tostring(meta.type) .. " (oh eek!)")
 end
 
 --

@@ -1,6 +1,5 @@
 package com.reoky.raidframer.core.interactor
 
-import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
@@ -14,9 +13,7 @@ import com.reoky.raidframer.core.serialization.AppJson
 import com.reoky.raidframer.core.serialization.CombatEventPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.PlayerInfoPayload
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -146,6 +143,7 @@ object CompanionInteractor : Interactor() {
           }
         }
         is IPCMessagePayload.CombatEvent -> {
+          println(message)
           when (val event = message.payload) {
             is CombatEventPayload.SpellCastStartPayload -> {
               //Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
@@ -154,7 +152,8 @@ object CompanionInteractor : Interactor() {
                   timestamp = event.timestamp,
                   cid = event.cid,
                   caster = event.source,
-                  spell = event.spellName
+                  spell = event.spellName,
+                  spellId = 43
                 )
               )
             }
@@ -167,6 +166,7 @@ object CompanionInteractor : Interactor() {
                   cid = event.cid,
                   caster = event.source,
                   spell = event.spellName,
+                  spellId = 43
                 )
               )
             }
@@ -181,7 +181,8 @@ object CompanionInteractor : Interactor() {
                   target = event.target,
                   damage = abs(event.amount),
                   spell = event.spell,
-                  critical = event.f13
+                  critical = event.f13,
+                  spellId = 43
                 )
               )
             }
@@ -196,7 +197,8 @@ object CompanionInteractor : Interactor() {
                   target = event.target,
                   amount = abs(event.amount),
                   spell = event.spell,
-                  critical = event.f10
+                  critical = event.f10,
+                  spellId = 43
                 )
               )
             }
@@ -210,7 +212,8 @@ object CompanionInteractor : Interactor() {
                     cid = event.cid,
                     source = event.source,
                     target = event.target,
-                    debuff = event.buffName
+                    debuff = event.buffName,
+                    debuffId = event.buffId,
                   )
                 )
               } else {
@@ -220,7 +223,8 @@ object CompanionInteractor : Interactor() {
                     cid = event.cid,
                     source = event.source,
                     target = event.target,
-                    buff = event.buffName
+                    buff = event.buffName,
+                    buffId = event.buffId,
                   )
                 )
               }
@@ -234,7 +238,53 @@ object CompanionInteractor : Interactor() {
                   cid = event.cid,
                   source = event.source,
                   target = event.target,
-                  buff = event.buffName
+                  buff = event.buffName,
+                  buffId = event.buffId
+                )
+              )
+            }
+            is CombatEventPayload.MeleeDamagePayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.source} melee damaged ${event.target} for ${abs(event.amount)}.")
+              PlayerCacheInteractor.postEvent(
+                DamageEvent(
+                  timestamp = event.timestamp,
+                  cid = event.cid,
+                  caster = event.source,
+                  target = event.target,
+                  damage = abs(event.amount),
+                  spell = "Basic Melee",
+                  critical = event.f10,
+                  spellId = 43
+                )
+              )
+            }
+            is CombatEventPayload.MeleeMissedPayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s melee attack (miss).")
+              PlayerCacheInteractor.postEvent(
+                DamageEvent(
+                  timestamp = event.timestamp,
+                  cid = event.cid,
+                  caster = event.source,
+                  target = event.target,
+                  damage = abs(event.amount),
+                  spell = "Melee Missed (Smol Scratch)",
+                  critical = false,
+                  spellId = 43
+                )
+              )
+            }
+            is CombatEventPayload.SpellMissedPayload -> {
+              Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s ${event.spell} spell (miss).")
+              PlayerCacheInteractor.postEvent(
+                DamageEvent(
+                  timestamp = event.timestamp,
+                  cid = event.cid,
+                  caster = event.source,
+                  target = event.target,
+                  damage = abs(event.amount),
+                  spell = "Spell Missed (hehe)",
+                  critical = false,
+                  spellId = 43
                 )
               )
             }
@@ -254,7 +304,8 @@ object CompanionInteractor : Interactor() {
                   target = event.target,
                   damage = abs(event.amount),
                   spell = event.spell,
-                  critical = event.f13
+                  critical = event.f13,
+                  spellId = 43
                 )
               )
             }
