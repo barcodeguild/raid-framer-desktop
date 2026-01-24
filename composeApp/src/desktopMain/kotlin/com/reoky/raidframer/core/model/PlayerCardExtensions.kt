@@ -4,6 +4,7 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import kotlin.plus
 
 
 /**
@@ -64,9 +65,11 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
  * Add a successful cast event to the PlayerCard, updating recent events.
  */
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
+  val shouldIncrementPotionUses = event.spell in (listOf("Mana Potion", "Minor Mana Potion", "Healing Potion", "Minor Healing Potion", "Found Wild Ginseng!"))
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
+    sessionPotionTotal = if (shouldIncrementPotionUses) this.sessionPotionTotal + 1 else this.sessionPotionTotal,
     recentCastSuccessfulCastEvents = (this.recentCastSuccessfulCastEvents + event) // optional to takeLast(n)
   )
 }
@@ -201,6 +204,49 @@ fun PlayerCard.postDeathEvent(timestamp: Long, killerName: String?): PlayerCard 
     ),
     sessionDeathTotal = this.sessionDeathTotal + 1,
     recentKilledBys = updatedKilledBys
+  )
+}
+
+/**
+ * Record that this player killed someone (Killing Blow method).
+ */
+fun PlayerCard.postKillEventKB(timestamp: Long, victimName: String): PlayerCard {
+  return this.copy(
+    lastEvent = timestamp,
+    recentKillsKB = this.recentKillsKB + (timestamp to victimName),
+    sessionKillTotalKB = this.sessionKillTotalKB + 1
+  )
+}
+
+/**
+ * Increment the death counter and record who did it (both methods).
+ */
+fun PlayerCard.postDeathEvent(
+  timestamp: Long,
+  killerMostDamage: String?,
+  killerKillingBlow: String?
+): PlayerCard {
+  val updatedKilledBys = if (killerMostDamage != null) {
+    this.recentKilledBys + (timestamp to killerMostDamage)
+  } else {
+    this.recentKilledBys
+  }
+
+  val updatedKilledBysKB = if (killerKillingBlow != null) {
+    this.recentKilledByKB + (timestamp to killerKillingBlow)
+  } else {
+    this.recentKilledByKB
+  }
+
+  return this.copy(
+    lastEvent = timestamp,
+    cache = cache?.copy(
+      lastSeen = timestamp,
+      lifetimeTotalDeaths = cache.lifetimeTotalDeaths + 1
+    ),
+    sessionDeathTotal = this.sessionDeathTotal + 1,
+    recentKilledBys = updatedKilledBys,
+    recentKilledByKB = updatedKilledBysKB
   )
 }
 

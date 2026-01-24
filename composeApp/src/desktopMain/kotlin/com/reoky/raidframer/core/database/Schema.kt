@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 6 // increment this when making schema changes
+const val SCHEMA_VERSION = 7 // increment this when making schema changes
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -141,6 +141,7 @@ data class PlayerCacheEntity(
   val lifetimeTotalGliderUses: Long = 0L,
   val lifetimeTotalItemSkillsUsed: Long = 0L,
   val lifetimeTotalKills: Long = 0L,
+  val lifetimeTotalKillsKB: Long = 0L,
   val lifetimeTotalDeaths: Long = 0L,
   val lifetimeTotalDamageTaken: Long = 0L,
 )

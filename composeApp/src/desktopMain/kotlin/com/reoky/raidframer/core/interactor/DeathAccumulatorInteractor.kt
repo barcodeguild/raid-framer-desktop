@@ -9,13 +9,7 @@ import kotlin.math.abs
 
 /**
  * Validates death events by cross-referencing them with damage events from other players.
- * Uses a batch processing approach to efficiently scan for killers across multiple deaths simultaneously.
- * Reasons we have to do this:
- * 1. What if the events arrived slightly out of order due to log lag?
- * 2. What if multiple players damaged the victim within the time window?
- * 3. What if, like, a lot of friends died in that time window, and we'd have to scan all the buckets that many times to find each killer?
- * Basically, this allows us to batch up deaths in a big RvR battle and process them all at once, minimizing redundant scans and reducing the
- * time complexity from O(players * deaths) to O(players)/O(players + deaths), which for a large number of deaths is orders of magnitude faster.
+ * Computes BOTH killing blow and most damage attributions in parallel for complete statistics.
  */
 object DeathAccumulatorInteractor : Interactor() {
 
@@ -27,6 +21,13 @@ object DeathAccumulatorInteractor : Interactor() {
   private val localMutex = Mutex()
 
   data class PendingDeath(val playerName: String, val timestamp: Long)
+
+  data class DeathAttribution(
+    val victimName: String,
+    val timestamp: Long,
+    val killerMostDamage: String?,
+    val killerKillingBlow: String?
+  )
 
   private val pendingDeaths = mutableListOf<PendingDeath>()
 
@@ -42,9 +43,6 @@ object DeathAccumulatorInteractor : Interactor() {
     val now = System.currentTimeMillis()
     val safeLookAhead = LOOK_AHEAD_MS + 2000L
 
-    // Get current mode from config
-    val mode = KillCounterMode.fromString(RFConfig.state.value.killCounterMode)
-
     val deathsToProcess = mutableListOf<PendingDeath>()
     localMutex.withLock {
       val iterator = pendingDeaths.iterator()
@@ -59,24 +57,26 @@ object DeathAccumulatorInteractor : Interactor() {
 
     if (deathsToProcess.isEmpty()) return
 
-    Log.info(TAG, "Processing batch of ${deathsToProcess.size} players deaths (mode: $mode)")
+    Log.info(TAG, "Processing batch of ${deathsToProcess.size} player deaths (computing both methods)")
 
     val candidatesSnapshot = PlayerCacheInteractor.getRealPlayersSnapshot()
     val victimLookup = deathsToProcess.groupBy { it.playerName.normalizePlayerName() }
 
-    val matches = when (mode) {
-      KillCounterMode.KILLING_BLOW -> findKillingBlows(candidatesSnapshot, victimLookup, deathsToProcess)
-      KillCounterMode.MOST_DAMAGE -> findMostDamage(candidatesSnapshot, victimLookup, deathsToProcess)
-    }
+    // Compute both attributions in parallel
+    val killingBlowMatches = findKillingBlows(candidatesSnapshot, victimLookup, deathsToProcess)
+    val mostDamageMatches = findMostDamage(candidatesSnapshot, victimLookup, deathsToProcess)
 
     val results = deathsToProcess.map { death ->
-      val killer = matches[death]
-      if (killer != null) {
-        Log.info(TAG, "Attributed kill of ${death.playerName} to ${killer.name} ($mode)")
+      val killerKB = killingBlowMatches[death]?.name
+      val killerMD = mostDamageMatches[death]?.name
+
+      if (killerKB != null || killerMD != null) {
+        Log.info(TAG, "Death of ${death.playerName}: KB=${killerKB ?: "none"}, MD=${killerMD ?: "none"}")
       } else {
-        Log.debug(TAG, "Death of ${death.playerName} was unattributed.")
+        Log.debug(TAG, "Death of ${death.playerName} was unattributed by both methods.")
       }
-      Triple(death.playerName, death.timestamp, killer?.name)
+
+      DeathAttribution(death.playerName, death.timestamp, killerMD, killerKB)
     }
 
     PlayerCacheInteractor.processDeathBatch(results)
@@ -92,18 +92,12 @@ object DeathAccumulatorInteractor : Interactor() {
     candidates.forEach { potentialKiller ->
       potentialKiller.recentDamageEvents.forEach { event ->
         val normalizedTarget = event.target.normalizePlayerName()
-
         victimLookup[normalizedTarget]?.forEach { death ->
-          val minTime = death.timestamp - LOOK_BEHIND_MS
-          val maxTime = death.timestamp + LOOK_AHEAD_MS
-
-          if (event.timestamp in minTime..maxTime) {
-            val delta = abs(event.timestamp - death.timestamp)
-            val currentBest = matches[death]
-
-            if (currentBest == null || delta < currentBest.second) {
-              matches[death] = potentialKiller to delta
-              Log.debug(TAG, "${potentialKiller.name} hit ${death.playerName} (delta: ${delta}ms)")
+          val timeDiff = abs(event.timestamp - death.timestamp)
+          if (timeDiff <= LOOK_AHEAD_MS && event.timestamp <= death.timestamp) {
+            val existingMatch = matches[death]
+            if (existingMatch == null || timeDiff < existingMatch.second) {
+              matches[death] = Pair(potentialKiller, timeDiff)
             }
           }
         }
@@ -118,31 +112,25 @@ object DeathAccumulatorInteractor : Interactor() {
     victimLookup: Map<String, List<PendingDeath>>,
     deaths: List<PendingDeath>
   ): Map<PendingDeath, PlayerCard> {
-    // Map: Death -> Map of (Killer -> TotalDamage)
     val damageAccumulator = mutableMapOf<PendingDeath, MutableMap<PlayerCard, Long>>()
 
     candidates.forEach { potentialKiller ->
       potentialKiller.recentDamageEvents.forEach { event ->
         val normalizedTarget = event.target.normalizePlayerName()
-
         victimLookup[normalizedTarget]?.forEach { death ->
-          val minTime = death.timestamp - LOOK_BEHIND_MS
-          val maxTime = death.timestamp + LOOK_AHEAD_MS
-
-          if (event.timestamp in minTime..maxTime) {
-            val damageMap = damageAccumulator.getOrPut(death) { mutableMapOf() }
-            damageMap[potentialKiller] = damageMap.getOrDefault(potentialKiller, 0L) + event.damage
+          if (event.timestamp <= death.timestamp &&
+            event.timestamp >= death.timestamp - LOOK_BEHIND_MS) {
+            damageAccumulator
+              .getOrPut(death) { mutableMapOf() }
+              .merge(potentialKiller, event.damage.toLong()) { old, new -> old + new }
           }
         }
       }
     }
 
-    // Find player with most damage for each death
     return damageAccumulator.mapValues { (death, damageMap) ->
       damageMap.maxByOrNull { it.value }?.key.also { killer ->
-        if (killer != null) {
-          Log.debug(TAG, "${killer.name} dealt ${damageMap[killer]} total damage to ${death.playerName}")
-        }
+        Log.debug(TAG, "Most damage to ${death.playerName}: ${killer?.name} with ${damageMap[killer]} total")
       }
     }.filterValues { it != null }.mapValues { it.value!! }
   }
@@ -152,7 +140,6 @@ object DeathAccumulatorInteractor : Interactor() {
   }
 }
 
-// new modes for kill counting
 enum class KillCounterMode {
   KILLING_BLOW,
   MOST_DAMAGE;

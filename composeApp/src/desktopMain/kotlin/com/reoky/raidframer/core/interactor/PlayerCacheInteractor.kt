@@ -245,7 +245,16 @@ object PlayerCacheInteractor : Interactor() {
               sessionDamageTotal = 0L,
               sessionHealTotal = 0L,
               sessionCCTotal = 0,
-              sessionDebuffTotal = 0
+              sessionDebuffTotal = 0,
+              sessionCharmTotal = 0,
+              sessionKillTotal = 0,
+              sessionKillTotalKB = 0,
+              sessionDeathTotal = 0,
+              sessionGliderTotal = 0,
+              sessionPotionTotal = 0,
+              sessionSilenceTotal = 0,
+              sessionDistressTotal = 0,
+              sessionItemSkillTotal = 0
             )
           }
         }
@@ -591,21 +600,38 @@ object PlayerCacheInteractor : Interactor() {
    * This doesn't do the calculation of who killed whom, just applies the results to the cache.
    * The calculation is performed in the DeathAccumulatorInteractor. ^_^
    */
-  fun processDeathBatch(batchResults: List<Triple<String, Long, String?>>) {
+  fun processDeathBatch(batchResults: List<DeathAccumulatorInteractor.DeathAttribution>) {
     scope.launch {
       mutex.withLock {
-        batchResults.forEach { (victimName, timestamp, killerName) ->
-          // 1. Update Victim
-          createCardIfNoneExists(playerName = victimName)
-          cards[victimName]?.let { victim ->
-            // Update victim stats and record who killed them (if known)
-            cards[victimName] = victim.postDeathEvent(timestamp, killerName)
+        batchResults.forEach { attribution ->
+
+          // First we update the victim with both kill methods
+          createCardIfNoneExists(playerName = attribution.victimName)
+          cards[attribution.victimName]?.let { victim ->
+            cards[attribution.victimName] = victim.postDeathEvent(
+              timestamp = attribution.timestamp,
+              killerMostDamage = attribution.killerMostDamage,
+              killerKillingBlow = attribution.killerKillingBlow
+            )
           }
 
-          // 2. Update Killer (only if a killer was identified)
-          if (killerName != null) {
+          // 2. Update Killer (Most Damage method)
+          attribution.killerMostDamage?.let { killerName ->
             cards[killerName]?.let { killer ->
-              cards[killerName] = killer.postKillEvent(timestamp, victimName)
+              cards[killerName] = killer.postKillEvent(
+                timestamp = attribution.timestamp,
+                victimName = attribution.victimName
+              )
+            }
+          }
+
+          // 3. Update Killer (Killing Blow method)
+          attribution.killerKillingBlow?.let { killerName ->
+            cards[killerName]?.let { killer ->
+              cards[killerName] = killer.postKillEventKB(
+                timestamp = attribution.timestamp,
+                victimName = attribution.victimName
+              )
             }
           }
         }
@@ -678,6 +704,20 @@ object PlayerCacheInteractor : Interactor() {
   var topItemSkillCasters: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionItemSkillTotal > 0 }.sortedByDescending { it.sessionItemSkillTotal }
+        .take(100)
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topKills: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 }.sortedByDescending { it.sessionKillTotal }.take(100)
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topKillsKB: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionKillTotalKB > 0 }
+        .sortedByDescending { it.sessionKillTotalKB }
         .take(100)
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())

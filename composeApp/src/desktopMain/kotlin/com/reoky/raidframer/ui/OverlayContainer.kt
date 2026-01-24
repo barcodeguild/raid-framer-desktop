@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.WindowPosition
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.ui.overlay.AboutOverlay
+import com.reoky.raidframer.ui.overlay.SummaryOverlay
 import com.reoky.raidframer.ui.overlay.CombatOverlay
 import com.reoky.raidframer.ui.overlay.CompanionOverlay
 import com.reoky.raidframer.ui.overlay.MiniOverlay
@@ -52,6 +53,7 @@ fun OverlayContainer(wm: WindowManager) {
         when (type) {
           OverlayType.ABOUT -> AboutOverlay(wm)
           OverlayType.COMBAT -> CombatOverlay(wm)
+          OverlayType.SUMMARY -> SummaryOverlay(wm)
           OverlayType.MINI -> MiniOverlay(wm)
           OverlayType.SETTINGS -> SettingsOverlay(wm)
           OverlayType.COMPANION -> CompanionOverlay(wm)

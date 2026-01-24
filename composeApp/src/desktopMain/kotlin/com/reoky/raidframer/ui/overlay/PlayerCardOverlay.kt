@@ -279,7 +279,8 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 StatRow(str("Glider Uses"), card.sessionGliderTotal.toLong())
                 StatRow(str("Item Uses"), card.sessionItemSkillTotal.toLong())
                 StatRow(str("Potions"), card.sessionPotionTotal.toLong())
-                StatRow(str("Kills"), card.sessionKillTotal.toLong())
+                StatRow(str("Kills (Most Damage)"), card.sessionKillTotal.toLong())
+                StatRow(str("Kills (Killing Blow)"), card.sessionKillTotalKB.toLong())
                 StatRow(str("Deaths"), card.sessionDeathTotal.toLong())
               }
 
@@ -313,7 +314,8 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(str("Silences"), cache.lifetimeTotalSilences)
                   StatRow(str("Glider Uses"), cache.lifetimeTotalGliderUses)
                   StatRow(str("Item Uses"), cache.lifetimeTotalItemSkillsUsed)
-                  StatRow(str("Kills"), cache.lifetimeTotalKills)
+                  StatRow(str("Kills (Most Damage)"), cache.lifetimeTotalKills)
+                  StatRow(str("Kills (Killing Blow)"), cache.lifetimeTotalKillsKB)
                   StatRow(str("Deaths"), cache.lifetimeTotalDeaths)
                   StatRow(str("Damage Taken"), cache.lifetimeTotalDamageTaken)
                 } else {

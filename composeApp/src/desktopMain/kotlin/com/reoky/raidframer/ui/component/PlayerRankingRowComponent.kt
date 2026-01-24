@@ -8,6 +8,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -24,8 +25,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.core.model.PlayerCard
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.text.font.FontWeight
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.helpers.RaidColors
+import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.renderTinySkillTreeIconFor
+import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.FactionStatus
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -60,6 +67,7 @@ fun PlayerRankingRow(
       text = "${index + 1}. ",
       color = Color.White,
       overflow = TextOverflow.Ellipsis,
+      fontWeight = FontWeight.SemiBold,
       maxLines = 1
     )
 
@@ -95,13 +103,29 @@ fun PlayerRankingRow(
     }
 
     // 3. name only
-    Text(
-      text = card.name,
-      color = Color.White,
-      overflow = TextOverflow.Ellipsis,
-      maxLines = 1,
-      modifier = Modifier.weight(1f)
-    )
+
+    Row(
+      modifier = Modifier.weight(1f),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        text = card.name,
+        color = Color.White,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1
+      )
+
+      Spacer(modifier = Modifier.width(4.dp))
+
+      Box(
+        modifier = Modifier
+          .size(6.dp)
+          .offset(y = 1.dp)
+          .background(Faction.fromString(RFConfig.state.value.playerFaction).getFactionHighlightColor(Faction.fromString(card.lastKnownFaction)), CircleShape)
+      )
+    }
+
+    Spacer(modifier = Modifier.width(6.dp))
 
     // 4. Value (Totals)
     // Fixed width ensures large numbers (e.g. 203.4k) are not cut off by the weight distribution
@@ -109,8 +133,7 @@ fun PlayerRankingRow(
       text = valueText,
       color = valueColor,
       maxLines = 1,
-      textAlign = TextAlign.End,
-      modifier = Modifier.width(60.dp)
+      textAlign = TextAlign.End
     )
 
     // 5. Retribution Icon

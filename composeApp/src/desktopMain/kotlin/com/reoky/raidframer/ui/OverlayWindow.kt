@@ -226,7 +226,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 500f,
-      lastPositionYDp = 70f,
+      lastPositionYDp = 170f,
       lastWidthDp = 560f,
       lastHeightDp = 800f,
       isVisible = false
@@ -236,7 +236,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
       lastPositionXDp = 500f,
-      lastPositionYDp = 70f,
+      lastPositionYDp = 200f,
       lastWidthDp = 560f,
       lastHeightDp = 800f,
       isVisible = false
@@ -315,10 +315,10 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.SUMMARY -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 0f,
-      lastPositionYDp = 0f,
-      lastWidthDp = 100f,
-      lastHeightDp = 100f,
+      lastPositionXDp = 250f,
+      lastPositionYDp = 250f,
+      lastWidthDp = 960f,
+      lastHeightDp = 1024f,
       isVisible = false
     )
 

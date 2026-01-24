@@ -43,6 +43,8 @@ data class PlayerCard (
   val recentDebuffEndedEvents: List<DebuffEndedEvent> = listOf(),
   val recentKills: Map<Long, String> = mapOf(), // Timestamp -> Victim Name
   val recentKilledBys: Map<Long, String> = mapOf(), // Timestamp -> Killer Name (stored in reverse for ez lookup)
+  val recentKillsKB: Map<Long, String> = mapOf(), // Timestamp -> Victim Name (Killing Blow Method)
+  val recentKilledByKB: Map<Long, String> = mapOf(), // Timestamp -> Killer Name (Killing Blow Method)
   val recentSkillItemUsages: Map<Long, String> = mapOf(), // Timestamp -> Item Name
 
   // cost more memory but useful for quick access and uses less CPU than scanning all events on all cards
@@ -63,6 +65,7 @@ data class PlayerCard (
   val sessionItemSkillTotal: Int = 0,
   val sessionPotionTotal: Int = 0,
   val sessionKillTotal: Int = 0,
+  val sessionKillTotalKB: Int = 0,
   val sessionDeathTotal: Int = 0
 )
 

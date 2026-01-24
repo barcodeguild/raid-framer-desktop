@@ -233,7 +233,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
           Text(text = "⛨ CC Delivered ⛨", color = Color.White)
         }
         IconButton(
-          onClick = { wm?.openWindow(OverlayType.PLAYER_CARD) },
+          onClick = { wm?.openWindow(OverlayType.SUMMARY) },
           modifier = Modifier
             .size(32.dp)
             .padding(top = 3.dp)

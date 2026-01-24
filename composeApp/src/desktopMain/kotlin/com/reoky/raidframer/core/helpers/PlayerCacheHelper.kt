@@ -68,6 +68,7 @@ fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntit
     lifetimeTotalGliderUses = c?.lifetimeTotalGliderUses ?: 0L,
     lifetimeTotalItemSkillsUsed = c?.lifetimeTotalItemSkillsUsed ?: 0L,
     lifetimeTotalKills = c?.lifetimeTotalKills ?: 0L,
+    lifetimeTotalKillsKB = c?.lifetimeTotalKillsKB ?: 0L,
     lifetimeTotalDeaths = c?.lifetimeTotalDeaths ?: 0L,
     lifetimeTotalDamageTaken = c?.lifetimeTotalDamageTaken ?: 0L
   )

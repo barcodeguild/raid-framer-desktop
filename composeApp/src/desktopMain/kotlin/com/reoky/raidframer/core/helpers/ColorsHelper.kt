@@ -1,6 +1,8 @@
 package com.reoky.raidframer.core.helpers
 
 import androidx.compose.ui.graphics.Color
+import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerRole
 
 /*
@@ -55,6 +57,34 @@ object RaidColors {
   val Blue = Color(0xFF4F93C0)
   val FrameBorder = Color(0xFF3E3E3E)
   val ManaBarBlue = Color(0xFF204ABF)
+}
+
+/*
+ * Get the highlight color associated with a player faction based on a given faction's perspective
+ * of another player's faction.
+ */
+fun Faction.getFactionHighlightColor(faction: Faction): Color {
+  return when (this) {
+    Faction.HARANYA -> when (faction) {
+      Faction.HARANYA -> Color(0xFF36F1CC)
+      Faction.NUIA -> Color.Red.copy(alpha = 0.75f)
+      Faction.PIRATE -> Color(0xFFE56CAB)
+      Faction.UNKNOWN -> Color.Transparent
+    }
+    Faction.NUIA -> when (faction) {
+      Faction.HARANYA -> Color.Red.copy(alpha = 0.75f)
+      Faction.NUIA -> Color(0xFF36F1CC)
+      Faction.PIRATE -> Color(0xFFE56CAB)
+      Faction.UNKNOWN -> Color.Transparent
+    }
+    Faction.PIRATE -> when (faction) {
+      Faction.HARANYA -> Color(0xFFE56CAB)
+      Faction.NUIA -> Color.Red.copy(alpha = 0.75f)
+      Faction.PIRATE -> Color.Yellow.copy(alpha = 0.75f)
+      Faction.UNKNOWN -> Color.Transparent
+    }
+    Faction.UNKNOWN -> Color.Transparent
+  }
 }
 
 /*

@@ -37,3 +37,12 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
     }
   }
 }
+
+// added   val lifetimeTotalKillsKB: Long = 0L, to PlayerCacheEntity to support computing both kill methods in parallel
+val MIGRATION_6_7 = object : Migration(6, 7) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalKillsKB INTEGER NOT NULL DEFAULT 0").use {
+      it.step()
+    }
+  }
+}
