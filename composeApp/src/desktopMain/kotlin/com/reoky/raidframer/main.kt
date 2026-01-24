@@ -39,6 +39,7 @@ import raid_framer_desktop.composeapp.generated.resources.raidframer
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Locale
+import javax.swing.JOptionPane
 import kotlin.system.exitProcess
 import kotlin.text.get
 
@@ -181,11 +182,11 @@ fun quit() {
  * Displays a simple Windows style message box with the given title and message.
  */
 fun messageBox(title: String, message: String) {
-  javax.swing.JOptionPane.showMessageDialog(
+  JOptionPane.showMessageDialog(
     null,
     message,
     title,
-    javax.swing.JOptionPane.INFORMATION_MESSAGE
+    JOptionPane.INFORMATION_MESSAGE
   )
 }
 

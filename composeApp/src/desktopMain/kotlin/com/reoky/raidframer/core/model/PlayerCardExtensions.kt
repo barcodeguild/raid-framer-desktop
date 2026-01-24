@@ -165,11 +165,19 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   )
 }
 
+/*
+ * Used to measure buff applications from this player to others.
+ */
 fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
+  if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   return this.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(lastSeen = event.timestamp),
-    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event) // optional to takeLast(n)
+    cache = cache?.copy(
+      lastSeen = event.timestamp,
+      //lifetimeTotalBuffsApplied = cache.lifetimeTotalBuffsApplied + 1
+    ),
+    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event), // optional to takeLast(n)
+    sessionBuffTotal = this.sessionBuffTotal + 1
   )
 }
 

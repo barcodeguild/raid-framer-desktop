@@ -7,6 +7,7 @@ import com.reoky.raidframer.core.calc.ArrangementMode
 import com.reoky.raidframer.core.calc.MetricRawSample
 import com.reoky.raidframer.core.calc.RaidOrganizer
 import com.reoky.raidframer.core.calc.RealtimeComputer
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
@@ -26,11 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.collections.containsKey
-import kotlin.collections.get
-import kotlin.text.get
-import kotlin.text.insert
-import kotlin.text.set
+
 
 /**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
@@ -640,6 +637,47 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   /**
+   * Categorizes players into raid members (same faction) and opposition (other factions).
+   * Returns Pair(raidMembers, opposition)
+   */
+  private fun categorizePlayers(): Pair<List<PlayerCard>, List<PlayerCard>> {
+    val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
+
+    // Get all player names currently in any raid
+    val raidMemberNames = raids.values
+      .flatten()
+      .flatten()
+      .map { it.playerName }
+      .toSet()
+
+    // Filter cards for same-faction raid members
+    val raidMembers = cards.values.filter { card ->
+      card.isRealPlayer &&
+          card.name in raidMemberNames &&
+          Faction.fromString(card.lastKnownFaction) == playerFaction
+    }
+
+    // Determine opposition factions
+    val oppositionFactions = when (playerFaction) {
+      Faction.HARANYA -> setOf(Faction.NUIA, Faction.PIRATE)
+      Faction.NUIA -> setOf(Faction.HARANYA, Faction.PIRATE)
+      Faction.PIRATE -> setOf(Faction.HARANYA, Faction.NUIA)
+      Faction.UNKNOWN -> emptySet()
+    }
+
+    // Filter cards for opposition (recently seen, not in our raids)
+    val opposition = cards.values.filter { card ->
+      card.isRealPlayer &&
+          card.name !in raidMemberNames &&
+          oppositionFactions.contains(Faction.fromString(card.lastKnownFaction)) &&
+          (System.currentTimeMillis() - card.lastEvent) < 300_000 // seen in last 5 minutes
+    }
+
+    return Pair(raidMembers, opposition)
+  }
+
+
+  /**
    * You can, like, feed these Comparators to sortedWith() and it allows you compare against a running sequence by returning
    */
   private val gearComparator = Comparator<PlayerCard> { a, b ->
@@ -671,6 +709,13 @@ object PlayerCacheInteractor : Interactor() {
   var topCC: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionCCTotal > 0 }.sortedByDescending { it.sessionCCTotal }.take(100)
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  var topBuffs: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionBuffTotal > 0 }.sortedByDescending { it.sessionBuffTotal }
+        .take(100)
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -771,6 +816,43 @@ object PlayerCacheInteractor : Interactor() {
       RaidOrganizer.organize(candidates, ArrangementMode.CLASSIC_ROLES).take(400)
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  /**
+   * Compares average charm totals between raid members and opposition.
+   * Returns a map with "Our Raid" and "Opposition" as keys.
+   */
+  val raidCharmComparison: StateFlow<Map<String, Float>> = snapshotFlow {
+    categorizePlayers()
+  }.map { (raidMembers, opposition) ->
+    mapOf(
+      "Our Raid" to raidMembers.sumOf { it.sessionCharmTotal }.toFloat(),
+      "Opposition" to opposition.sumOf { it.sessionCharmTotal }.toFloat()
+    )
+  }.stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+
+  /**
+   * Compares total targets affected by silence between raid members and opposition.
+   */
+  val raidSilenceComparison: StateFlow<Map<String, Float>> = snapshotFlow {
+    categorizePlayers()
+  }.map { (raidMembers, opposition) ->
+    mapOf(
+      "Our Raid" to raidMembers.sumOf { it.sessionSilenceTotal }.toFloat(),
+      "Opposition" to opposition.sumOf { it.sessionSilenceTotal }.toFloat()
+    )
+  }.stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+
+  /**
+   * Compares total targets affected by distressed debuff between raid members and opposition.
+   */
+  val raidDistressComparison: StateFlow<Map<String, Float>> = snapshotFlow {
+    categorizePlayers()
+  }.map { (raidMembers, opposition) ->
+    mapOf(
+      "Our Raid" to raidMembers.sumOf { it.sessionDistressTotal }.toFloat(),
+      "Opposition" to opposition.sumOf { it.sessionDistressTotal }.toFloat()
+    )
+  }.stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
 
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .map { pets ->
