@@ -56,7 +56,7 @@ function RF.Combat.handleTargetChanged(...)
         end
 
         -- west faction
-        if (buffId == 30766) or (buffId == 9002340) or (buffIf == 30760) or (buffId == 9002339) or (buffIf == 30770) or (buffId == 30771) then
+        if (buffId == 30766) or (buffId == 9002340) or (buffId == 30760) or (buffId == 9002339) or (buffId == 30770) or (buffId == 30771) then
           playerFaction = "Nuia"
           break
         end

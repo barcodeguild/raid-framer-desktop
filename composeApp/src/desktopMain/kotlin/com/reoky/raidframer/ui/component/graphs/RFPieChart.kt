@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.helpers.RFGraphColor
 import com.reoky.raidframer.core.helpers.pickNextColor
@@ -28,7 +29,10 @@ data class PieChartSlice(
 fun RFPieChart(
   data: List<PieChartSlice>,
   modifier: Modifier = Modifier,
-  showLabels: Boolean = true
+  showLabels: Boolean = true,
+  chartSize: Dp = 150.dp,
+  labelMarkerSize: Dp = 10.dp,
+  labelsSpacerHeight: Dp = 8.dp
 ) {
   val usedColors = remember(data) {
     val colors = mutableSetOf<RFGraphColor>()
@@ -51,7 +55,7 @@ fun RFPieChart(
   ) {
     Box(
       modifier = Modifier
-        .size(200.dp)
+        .size(chartSize)
         .background(Color.Transparent)
         .graphicsLayer(alpha = 0.99f) // Forces hardware acceleration
     ) {
@@ -59,13 +63,16 @@ fun RFPieChart(
         values = values,
         modifier = Modifier.fillMaxSize(),
         slice = { index ->
-          DefaultSlice(usedColors[index])
+          DefaultSlice(
+            color = usedColors[index],
+            antiAlias = true
+          )
         }
       )
     }
 
     if (showLabels) {
-      Spacer(modifier = Modifier.height(16.dp))
+      Spacer(modifier = Modifier.height(labelsSpacerHeight))
 
       Column(
         modifier = Modifier.fillMaxWidth(),
@@ -81,7 +88,7 @@ fun RFPieChart(
           ) {
             Box(
               modifier = Modifier
-                .size(12.dp)
+                .size(labelMarkerSize)
                 .background(color, shape = MaterialTheme.shapes.small)
             )
             Spacer(modifier = Modifier.width(8.dp))

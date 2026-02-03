@@ -44,6 +44,8 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_4_5) // added leaderships to cache (4 -> 5 : 01/21/26)
   .addMigrations(MIGRATION_5_6) // 01/22/26 added PVE damage flag
   .addMigrations(MIGRATION_6_7) // 01/23/26 added lifetimeTotalKillsKB to cache
+  .addMigrations(MIGRATION_7_8) // 01/26/26 added lifetimeTotalSongs to cache
+  .addMigrations(MIGRATION_8_9) // 01/25/26 added lifetimeTotalBuffsApplied to cache
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

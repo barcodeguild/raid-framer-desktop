@@ -18,59 +18,59 @@ import kotlinx.coroutines.withContext
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
+import kotlin.compareTo
 import kotlin.io.path.exists
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
+import kotlin.io.readLines
+import kotlin.io.resolve
 import kotlin.math.abs
+import kotlin.text.get
 
 object CompanionInteractor : Interactor() {
 
   private const val TAG = "CompanionInteractor"
   private const val ADDON_RELATIVE_PATH = "Addon/RaidFramer"
-  private const val IPC_IN_FILENAME = "ipc.rfin"   // App writes to this file (Lua reads)
-  private const val IPC_OUT_FILENAME = "ipc.rfout" // App reads from this file (Lua writes)
+  private const val IPC_IN_FILENAME = "ipc.rfin"
+  private const val IPC_OUT_FILENAME = "ipc.rfout"
 
   private var shouldNotifyCompanion: Boolean = false
   private var didATestPing: Boolean = false
+  private var lastProcessedLineCount: Int = 0  // Track lines processed
 
 
   override suspend fun interact() {
     val gameDirectory = RFConfig.state.value.defaultArcheRageDirectory
-
-    // Only read on even seconds, the lua code only writes on odd seconds
-    val currentSecond = System.currentTimeMillis() / 1000
-    if (currentSecond % 2 != 0L) return
-
-    // If config is not set, just return (poll again later)
     if (gameDirectory.isBlank()) return
 
-    val addonDirectory = Paths.get(gameDirectory, ADDON_RELATIVE_PATH)
-
-    // If addon directory doesn't exist yet (InstallationInteractor hasn't run?), return
+    val addonDirectory = Paths.get(gameDirectory, CompanionInteractor.ADDON_RELATIVE_PATH)
     if (!addonDirectory.exists()) return
 
-    val outFile = addonDirectory.resolve(IPC_OUT_FILENAME)
+    val outFile = addonDirectory.resolve(CompanionInteractor.IPC_OUT_FILENAME)
 
-    // Check if there are messages to read
     if (outFile.exists()) {
       try {
-        val lines = withContext(Dispatchers.IO) {
-          val readLines = outFile.readLines()
-          if (readLines.isNotEmpty()) {
-            // Clear the file immediately after reading to consume messages
-            // This mirrors the Lua logic which reads then truncates
-            outFile.writeText("")
-          }
-          readLines
+        val allLines = withContext(Dispatchers.IO) {
+          outFile.readLines()
         }
 
-        // Process each line
-        lines.filter { it.isNotBlank() }.forEach { line ->
-          handleInboundIPCMessage(line)
+        val totalLines = allLines.size
+
+        // If file was truncated (Lua's 100MB reset), reset our counter
+        if (totalLines < lastProcessedLineCount) {
+          lastProcessedLineCount = 0
         }
 
-      } catch (e: Exception) {
-        Log.error(TAG, "Error reading IPC out file: ${e.message}")
+        // Only process new lines
+        if (totalLines > lastProcessedLineCount) {
+          allLines
+            .drop(lastProcessedLineCount)
+            .filter { it.isNotBlank() }
+            .forEach { line -> handleInboundIPCMessage(line) }
+
+          lastProcessedLineCount = totalLines
+        }} catch (e: Exception) {
+        Log.error(CompanionInteractor.TAG, "Error reading IPC out file: ${e.message}")
       }
     }
 
@@ -144,12 +144,13 @@ object CompanionInteractor : Interactor() {
         is IPCMessagePayload.CombatEvent -> {
           when (val event = message.payload) {
             is CombatEventPayload.SpellCastStartPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
               PlayerCacheInteractor.postEvent(
                 CastingEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  caster = event.source,
+                  source = event.source,
+                  target = event.target,
                   spell = event.spellName,
                   spellId = 43
                 )
@@ -162,7 +163,8 @@ object CompanionInteractor : Interactor() {
                 SuccessfulCastEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  caster = event.source,
+                  source = event.source,
+                  target = event.target,
                   spell = event.spellName,
                   spellId = 43
                 )
@@ -175,7 +177,7 @@ object CompanionInteractor : Interactor() {
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  caster = event.source,
+                  source = event.source,
                   target = event.target,
                   damage = abs(event.amount),
                   spell = event.spell,
@@ -186,12 +188,12 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.HealPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} healed ${event.target} for ${event.amount} using ${event.spell}.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.source} healed ${event.target} for ${event.amount} using ${event.spell}.")
               PlayerCacheInteractor.postEvent(
                 HealEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  caster = event.source,
+                  source = event.source,
                   target = event.target,
                   amount = abs(event.amount),
                   spell = event.spell,
@@ -242,12 +244,12 @@ object CompanionInteractor : Interactor() {
               )
             }
             is CombatEventPayload.MeleeDamagePayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.source} melee damaged ${event.target} for ${abs(event.amount)}.")
+              Log.info(TAG, "At ${event.timestamp} ${event.source} melee damaged ${event.target} for ${abs(event.amount)}.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  caster = event.source,
+                  source = event.source,
                   target = event.target,
                   damage = abs(event.amount),
                   spell = "Basic Melee",
@@ -262,7 +264,7 @@ object CompanionInteractor : Interactor() {
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  caster = event.source,
+                  source = event.source,
                   target = event.target,
                   damage = abs(event.amount),
                   spell = "Melee Missed (Smol Scratch)",
@@ -272,12 +274,12 @@ object CompanionInteractor : Interactor() {
               )
             }
             is CombatEventPayload.SpellMissedPayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s ${event.spell} spell (miss).")
+              Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s ${event.spell} spell (miss for ${event.amount} dmg) ${event.result}.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  caster = event.source,
+                  source = event.source,
                   target = event.target,
                   damage = abs(event.amount),
                   spell = "Spell Missed (hehe)",
@@ -290,7 +292,7 @@ object CompanionInteractor : Interactor() {
               //Log.info(TAG, "At ${event.timestamp} ${event.target} energized after a duel healing ${event.amount} health.")
             }
             is CombatEventPayload.EnvironmentalDamagePayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target} took ${abs(event.amount)} ${event.damageType} damage.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.target} took ${abs(event.amount)} ${event.damageType} damage.")
             }
             is CombatEventPayload.ConditionDamagePayload -> {
               //Log.info(TAG, "At ${event.timestamp} ${event.target} suffered ${abs(event.amount)} damage to their ${event.pool} because of ${event.source}'s ${event.spell} spell.")
@@ -298,7 +300,7 @@ object CompanionInteractor : Interactor() {
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  caster = event.source,
+                  source = event.source,
                   target = event.target,
                   damage = abs(event.amount),
                   spell = event.spell,

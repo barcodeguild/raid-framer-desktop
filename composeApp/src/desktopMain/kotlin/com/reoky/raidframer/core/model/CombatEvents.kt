@@ -3,13 +3,15 @@ package com.reoky.raidframer.core.model
 interface CombatEvent {
   val timestamp: Long
   val cid: String
+  val source: String
+  val target: String
 }
 
 data class DamageEvent(
   override val timestamp: Long,
   override val cid: String,
-  val caster: String,
-  val target: String,
+  override val source: String,
+  override val target: String,
   val damage: Int,
   val spell: String,
   val spellId: Int,
@@ -19,8 +21,8 @@ data class DamageEvent(
 data class HealEvent(
   override val timestamp: Long,
   override val cid: String,
-  val caster: String,
-  val target: String,
+  override val source: String,
+  override val target: String,
   val amount: Int,
   val spell: String,
   val spellId: Int,
@@ -30,7 +32,8 @@ data class HealEvent(
 data class CastingEvent(
   override val timestamp: Long,
   override val cid: String,
-  val caster: String,
+  override val source: String,
+  override val target: String,
   val spell: String,
   val spellId: Int,
   ) : CombatEvent
@@ -38,7 +41,8 @@ data class CastingEvent(
 data class SuccessfulCastEvent(
   override val timestamp: Long,
   override val cid: String,
-  val caster: String,
+  override val source: String,
+  override val target: String,
   val spell: String,
   val spellId: Int,
   ) : CombatEvent
@@ -46,8 +50,8 @@ data class SuccessfulCastEvent(
 data class BuffGainedEvent(
   override val timestamp: Long,
   override val cid: String,
-  val source: String? = null,
-  val target: String,
+  override val source: String,
+  override val target: String,
   val buff: String,
   val buffId: Int,
 ) : CombatEvent
@@ -55,8 +59,8 @@ data class BuffGainedEvent(
 data class BuffEndedEvent(
   override val timestamp: Long,
   override val cid: String,
-  val source: String? = null,
-  val target: String,
+  override val source: String,
+  override val target: String,
   val buff: String,
   val buffId: Int,
 ) : CombatEvent
@@ -64,8 +68,8 @@ data class BuffEndedEvent(
 data class DebuffGainedEvent(
   override val timestamp: Long,
   override val cid: String,
-  val source: String? = null,
-  val target: String,
+  override val source: String,
+  override val target: String,
   val debuff: String,
   val debuffId: Int,
 ) : CombatEvent
@@ -73,8 +77,8 @@ data class DebuffGainedEvent(
 data class DebuffEndedEvent(
   override val timestamp: Long,
   override val cid: String,
-  val source: String? = null,
-  val target: String,
+  override val source: String,
+  override val target: String,
   val debuff: String,
   val debuffId: Int,
 ) : CombatEvent
@@ -82,8 +86,8 @@ data class DebuffEndedEvent(
 data class DebuffAppliedEvent(
   override val timestamp: Long,
   override val cid: String,
-  val source: String? = null,
-  val target: String,
+  override val source: String,
+  override val target: String,
   val debuff: String,
   val debuffId: Int,
 ) : CombatEvent
@@ -91,8 +95,8 @@ data class DebuffAppliedEvent(
 data class BuffAppliedEvent(
   override val timestamp: Long,
   override val cid: String,
-  val source: String? = null,
-  val target: String,
+  override val source: String,
+  override val target: String,
   val buff: String,
   val buffId: Int,
 ) : CombatEvent

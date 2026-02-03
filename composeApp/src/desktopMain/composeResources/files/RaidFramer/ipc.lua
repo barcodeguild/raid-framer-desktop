@@ -82,7 +82,11 @@ function RF.IPC.interact()
 
 
   -- Remove processed messages from queue
-  RF.IPC.MESSAGE_WRITE_QUEUE = {}
+  local remaining = {}
+  for i = batchSize + 1, #RF.IPC.MESSAGE_WRITE_QUEUE do
+    remaining[#remaining + 1] = RF.IPC.MESSAGE_WRITE_QUEUE[i]
+  end
+  RF.IPC.MESSAGE_WRITE_QUEUE = remaining
 end
 
 -- Queues a message to be sent later; returns the JSON string

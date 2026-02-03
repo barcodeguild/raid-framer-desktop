@@ -28,9 +28,18 @@ fun packItemUsageLong(uses: Long, lastUsed: Date): Long {
 fun Long.unpackItemUsageCounter(): Long = this and ITEM_USAGE_COUNTER_MASK
 
 /**
- * Unpack the last-used timestamp (as Date) from a packed item usage Long.
+ * Unpack just the last-used timestamp (as a Date object) from a previously-packed Long.
  */
 fun Long.unpackItemUsageDate(): Date {
   val seconds = (this ushr 32) and ITEM_USAGE_TIMESTAMP_MAX_SECONDS
   return Date(seconds * 1000L)
+}
+
+/**
+ * Used to safely increment the item usage counter without accidentally overwriting the timestamp or the timestamp.
+ */
+fun incrementPackedItemUsage(packed: Long): Long {
+  val currentUses = packed.unpackItemUsageCounter()
+  val lastUsedDate = Date()
+  return packItemUsageLong(currentUses + 1, lastUsedDate)
 }

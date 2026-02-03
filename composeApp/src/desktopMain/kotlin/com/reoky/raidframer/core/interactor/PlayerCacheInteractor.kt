@@ -27,7 +27,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-
+import org.jetbrains.compose.resources.StringResource
+import kotlin.compareTo
+import kotlin.text.chunked
+import kotlin.text.clear
+import kotlin.text.toFloat
 
 /**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
@@ -134,7 +138,6 @@ object PlayerCacheInteractor : Interactor() {
         }
       }
     }
-
     updateRaidAttendance()
   }
 
@@ -144,6 +147,11 @@ object PlayerCacheInteractor : Interactor() {
   fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
     scope.launch {
       mutex.withLock {
+        // improvement to the code where if the first raid is empty we clear all raids (because the player left the raid)
+        if (raidId == 0 && members.isEmpty()) {
+          raids.clear()
+          return@withLock
+        }
         raids[raidId] = members.chunked(5).take(20)
         members.forEach { member ->
           createCardIfNoneExists(playerName = member.playerName)
@@ -186,8 +194,16 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
-  fun buildPetNameKey(owner: String, petName: String): String {
-    return "pet_id_${owner.lowercase().replace(" ", "_")}_${petName.lowercase().replace(" ", "_")}"
+  /*
+   * Using this to standardize pet ID keys everywhere. The owner is concatenated with the pet name because pet names can
+   * be the same across different owners. This isn't a perfect solution unless the game api were to expose the NPC ID of the source
+   * in addition to the target across combat events. That's ok though friends we can filter by spells to count important things like breaths
+   * without needing to know. ~
+   */
+  fun buildPetNameKey(owner: String, petName: String, petType: String): String {
+    // build 4 character hex has of pet type to append to the key to avoid collisions (some pets have really long names hence the hash)
+    val petTypeHash = petType.hashCode().and(0xFFFF).toString(16).padStart(4, '0')
+    return "pet_id_${owner.lowercase().replace(" ", "_")}_${petName.lowercase().replace(" ", "_")}_{$petTypeHash}"
   }
 
   /*
@@ -200,7 +216,7 @@ object PlayerCacheInteractor : Interactor() {
         if (!petCards.containsKey(key)) {
           petCards[key] = PetCard(
             // id is owner + pet name to ensure uniqueness
-            petId = buildPetNameKey(owner, petName),
+            petId = buildPetNameKey(owner, petName, petType),
             name = petName,
             owner = owner,
             recentCids = cid?.let { listOf(it) } ?: listOf(),
@@ -265,11 +281,13 @@ object PlayerCacheInteractor : Interactor() {
     return cards.values.any { it.isRealPlayer && it.name == playerName }
   }
 
-  /* Card Management */
-  fun addOrUpdateCard(card: PlayerCard) {
+  /*
+   * Clears all raids and their parties from memory when the user leaves or gets kicked_by_self from the game client.
+   */
+  fun clearAllRaids() {
     scope.launch {
       mutex.withLock {
-        cards[card.name] = card
+        raids.clear()
       }
     }
   }
@@ -414,15 +432,9 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDamage(event: DamageEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid, playerName = event.caster)
-        //realtimeComputer.push(MetricRawSample(event.timestamp, event.damage.toDouble()))
-        //  search pet cards for matching cid from event.cid to see if this is a pet damage event
-        val pet = petCards.values.find { it.recentCids.contains(event.cid) }
-        if (pet != null) {
-          Log.debug(TAG, "Pet dealt damage: ${pet.name} (${pet.owner}) - ${event.damage} damage with ${event.spell}")
-        }
-        cards[event.caster]?.let { card ->
-          cards[event.caster] = card.postDamageEvent(event)
+        createCardIfNoneExists(cid = event.cid, playerName = event.source)
+        cards[event.source]?.let { card ->
+          cards[event.source] = card.postDamageEvent(event)
         }
       }
     }
@@ -431,9 +443,9 @@ object PlayerCacheInteractor : Interactor() {
   private fun postHeal(event: HealEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid, event.caster)
-        cards[event.caster]?.let { card ->
-          cards[event.caster] = card.postHealEvent(event)
+        createCardIfNoneExists(cid = event.cid, event.source)
+        cards[event.source]?.let { card ->
+          cards[event.source] = card.postHealEvent(event)
         }
       }
     }
@@ -442,9 +454,9 @@ object PlayerCacheInteractor : Interactor() {
   private fun postCasting(event: CastingEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid, event.caster)
-        cards[event.caster]?.let { card ->
-          cards[event.caster] = card.postCastingEvent(event)
+        createCardIfNoneExists(cid = event.cid, event.source)
+        cards[event.source]?.let { card ->
+          cards[event.source] = card.postCastingEvent(event)
         }
       }
     }
@@ -453,9 +465,9 @@ object PlayerCacheInteractor : Interactor() {
   private fun postSuccessfulCast(event: SuccessfulCastEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid, event.caster)
-        cards[event.caster]?.let { card ->
-          cards[event.caster] = card.postSuccessfulCastEvent(event)
+        createCardIfNoneExists(cid = event.cid, event.source)
+        cards[event.source]?.let { card ->
+          cards[event.source] = card.postSuccessfulCastEvent(event)
         }
       }
     }
@@ -637,45 +649,71 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   /**
-   * Categorizes players into raid members (same faction) and opposition (other factions).
-   * Returns Pair(raidMembers, opposition)
+   * Categorize players by faction instead of by raid membership.
+   * Returns Pair(ourFactionPlayers, oppositionPlayers) where opposition aggregates all opposing factions
+   * (only includes players seen in the last 30 minutes).
    */
-  private fun categorizePlayers(): Pair<List<PlayerCard>, List<PlayerCard>> {
-    val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
-
-    // Get all player names currently in any raid
-    val raidMemberNames = raids.values
-      .flatten()
-      .flatten()
-      .map { it.playerName }
-      .toSet()
-
-    // Filter cards for same-faction raid members
-    val raidMembers = cards.values.filter { card ->
-      card.isRealPlayer &&
-          card.name in raidMemberNames &&
-          Faction.fromString(card.lastKnownFaction) == playerFaction
-    }
-
-    // Determine opposition factions
-    val oppositionFactions = when (playerFaction) {
-      Faction.HARANYA -> setOf(Faction.NUIA, Faction.PIRATE)
-      Faction.NUIA -> setOf(Faction.HARANYA, Faction.PIRATE)
-      Faction.PIRATE -> setOf(Faction.HARANYA, Faction.NUIA)
-      Faction.UNKNOWN -> emptySet()
-    }
-
-    // Filter cards for opposition (recently seen, not in our raids)
-    val opposition = cards.values.filter { card ->
-      card.isRealPlayer &&
-          card.name !in raidMemberNames &&
-          oppositionFactions.contains(Faction.fromString(card.lastKnownFaction)) &&
-          (System.currentTimeMillis() - card.lastEvent) < 300_000 // seen in last 5 minutes
-    }
-
-    return Pair(raidMembers, opposition)
+  private fun aggregateSessionLongByFaction(selector: (PlayerCard) -> Number, timeWindowMillis: Long = 1_800_000L): Map<Faction, Float> {
+    val now = System.currentTimeMillis()
+    val totals = mutableMapOf(
+      Faction.HARANYA to 0L,
+      Faction.NUIA to 0L,
+      Faction.PIRATE to 0L
+    )
+    // iterate snapshot of cards to avoid concurrent modification issues
+    cards.values
+      .filter { it.isRealPlayer }
+      .forEach { card ->
+        if ((now - card.lastEvent) < timeWindowMillis) {
+          val faction = Faction.fromString(card.lastKnownFaction)
+          if (faction == Faction.HARANYA || faction == Faction.NUIA || faction == Faction.PIRATE) {
+            totals[faction] = totals.getOrDefault(faction, 0L) + selector(card).toLong()
+          }
+        }
+      }
+    return totals.mapValues { it.value.toFloat() }
   }
 
+  data class SpellDamage(val spell: String, val total: Double)
+  private fun aggregateDamageBySpellForFaction(faction: Faction): List<SpellDamage> {
+    val totals = mutableMapOf<String, Double>()
+    cards.values
+      .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == faction }
+      .forEach { card ->
+        card.recentDamageEvents.forEach { ev ->
+          val spell = ev.spell.ifBlank { "Unknown" }
+          val damage = try {
+            ev.damage.toDouble()
+          } catch (_: Throwable) {
+            0.0
+          }
+          totals[spell] = totals.getOrDefault(spell, 0.0) + damage
+        }
+      }
+
+    return totals.entries
+      .map { SpellDamage(it.key, it.value) }
+      .sortedByDescending { it.total }
+      .take(100)
+  }
+
+  data class ItemUsage(val itemName: StringResource, val count: Int)
+  private fun aggregateItemUsesByFaction(faction: Faction): List<ItemUsage> {
+    val totals = mutableMapOf<StringResource, Int>()
+    cards.values
+      .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == faction }
+      .forEach { card ->
+        card.recentSkillItemUsages.forEach { triple ->
+          val itemRes = triple.second
+          totals[itemRes] = totals.getOrDefault(itemRes, 0) + 1
+        }
+      }
+
+    return totals.entries
+      .map { ItemUsage(it.key, it.value) }
+      .sortedByDescending { it.count }
+      .take(100)
+  }
 
   /**
    * You can, like, feed these Comparators to sortedWith() and it allows you compare against a running sequence by returning
@@ -683,7 +721,6 @@ object PlayerCacheInteractor : Interactor() {
   private val gearComparator = Comparator<PlayerCard> { a, b ->
     b.lastKnownGearScore.compareTo(a.lastKnownGearScore)
   }
-
 
   /* UI Subscriptions */
   fun observeCard(name: String): StateFlow<PlayerCard?> {
@@ -702,13 +739,13 @@ object PlayerCacheInteractor : Interactor() {
 
   var topHeals: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
-      cards.filter { it.isRealPlayer && it.sessionHealTotal > 0 }.sortedByDescending { it.sessionHealTotal }.take(100)
+      cards.filter { it.isRealPlayer && it.sessionHealTotal > 0 }.sortedByDescending { it.sessionHealTotal }
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   var topCC: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
-      cards.filter { it.isRealPlayer && it.sessionCCTotal > 0 }.sortedByDescending { it.sessionCCTotal }.take(100)
+      cards.filter { it.isRealPlayer && it.sessionCCTotal > 0 }.sortedByDescending { it.sessionCCTotal }
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -726,9 +763,30 @@ object PlayerCacheInteractor : Interactor() {
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  var topCharmers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topCharms: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
-      cards.filter { it.isRealPlayer && it.sessionCharmTotal > 0 }.sortedByDescending { it.sessionCharmTotal }.take(100)
+      cards.filter { it.isRealPlayer && it.sessionCharmTotal > 0 }.sortedByDescending { it.sessionCharmTotal }
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topSilences: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionSilenceTotal > 0 }.sortedByDescending { it.sessionSilenceTotal }
+        .take(100)
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topSongs: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionSongsTotal > 0 }.sortedByDescending { it.sessionSongsTotal }
+        .take(100)
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topDistresses: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionDistressTotal > 0 }.sortedByDescending { it.sessionDistressTotal }
+        .take(100)
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -755,7 +813,7 @@ object PlayerCacheInteractor : Interactor() {
 
   val topKills: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
-      cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 }.sortedByDescending { it.sessionKillTotal }.take(100)
+      cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 }.sortedByDescending { it.sessionKillTotal }
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -769,7 +827,7 @@ object PlayerCacheInteractor : Interactor() {
 
   val topDeaths: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
-      cards.filter { it.isRealPlayer && it.sessionDeathTotal > 0 }.sortedByDescending { it.sessionDeathTotal }.take(100)
+      cards.filter { it.isRealPlayer && it.sessionDeathTotal > 0 }.sortedByDescending { it.sessionDeathTotal }
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -817,42 +875,101 @@ object PlayerCacheInteractor : Interactor() {
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+  // Faction Comparisons
+
+  val topDamageSpellsHaranya: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
+    .map { aggregateDamageBySpellForFaction(Faction.HARANYA) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topDamageSpellsNuia: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
+    .map { aggregateDamageBySpellForFaction(Faction.NUIA) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topDamageSpellsPirate: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
+    .map { aggregateDamageBySpellForFaction(Faction.PIRATE) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topItemUsesHaranya: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
+    .map { aggregateItemUsesByFaction(Faction.HARANYA) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topItemUsesNuia: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
+    .map { aggregateItemUsesByFaction(Faction.NUIA) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val topItemUsesPirate: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
+    .map { aggregateItemUsesByFaction(Faction.PIRATE) }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
   /**
    * Compares average charm totals between raid members and opposition.
    * Returns a map with "Our Raid" and "Opposition" as keys.
    */
-  val raidCharmComparison: StateFlow<Map<String, Float>> = snapshotFlow {
-    categorizePlayers()
-  }.map { (raidMembers, opposition) ->
-    mapOf(
-      "Our Raid" to raidMembers.sumOf { it.sessionCharmTotal }.toFloat(),
-      "Opposition" to opposition.sumOf { it.sessionCharmTotal }.toFloat()
-    )
-  }.stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
 
-  /**
-   * Compares total targets affected by silence between raid members and opposition.
-   */
-  val raidSilenceComparison: StateFlow<Map<String, Float>> = snapshotFlow {
-    categorizePlayers()
-  }.map { (raidMembers, opposition) ->
-    mapOf(
-      "Our Raid" to raidMembers.sumOf { it.sessionSilenceTotal }.toFloat(),
-      "Opposition" to opposition.sumOf { it.sessionSilenceTotal }.toFloat()
-    )
-  }.stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+  // three-way compare
+  val factionCharmComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionCharmTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
 
-  /**
-   * Compares total targets affected by distressed debuff between raid members and opposition.
-   */
-  val raidDistressComparison: StateFlow<Map<String, Float>> = snapshotFlow {
-    categorizePlayers()
-  }.map { (raidMembers, opposition) ->
-    mapOf(
-      "Our Raid" to raidMembers.sumOf { it.sessionDistressTotal }.toFloat(),
-      "Opposition" to opposition.sumOf { it.sessionDistressTotal }.toFloat()
-    )
-  }.stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+  val factionSilenceComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionSilenceTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+
+  val factionDistressComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionDistressTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+
+  // two-way compare
+  val factionCharmComparison: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionCharmTotal })
+      val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
+      val our = totals[playerFaction] ?: 0f
+      val opposition = totals.filterKeys { it != playerFaction }.values.sum()
+      mapOf("Our Faction" to our, "Opposition" to opposition)
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+
+  val factionSilenceComparison: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionSilenceTotal })
+      val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
+      val our = totals[playerFaction] ?: 0f
+      val opposition = totals.filterKeys { it != playerFaction }.values.sum()
+      mapOf("Our Faction" to our, "Opposition" to opposition)
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+
+  val factionDistressComparison: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionDistressTotal })
+      val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
+      val our = totals[playerFaction] ?: 0f
+      val opposition = totals.filterKeys { it != playerFaction }.values.sum()
+      mapOf("Our Faction" to our, "Opposition" to opposition)
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
 
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .map { pets ->

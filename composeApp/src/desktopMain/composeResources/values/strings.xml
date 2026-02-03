@@ -63,6 +63,7 @@
     <string name="general_metric_type_cc">Crowd Control</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_instructions_dragging_overlays">Shift + Click to Drag Overlays</string>
+    <string name="general_no_data_available">No Data Available</string>
 
     <!-- Help Strings -->
     <string name="general_help_window_postions_reset">All window positions have been reset! Please remember: If you have alt-tab detection enabled, any overlays (those without a title bar) may not appear until you switch back to the game window.</string>
@@ -74,5 +75,32 @@
     <string name="leadership_faction_hero">Faction Hero</string>
     <string name="leadership_shot_caller">Shot Caller</string>
     <string name="leadership_gm">GM</string>
+
+    <!-- Game Items -->
+    <string name="item_name_kraken_scepter">Kraken Scepter</string>
+    <string name="item_name_lib_shield">Library Shield</string>
+    <string name="item_name_library_greatclub">Library Greatclub</string>
+    <string name="item_name_honor_nodachi">Honor's Frenzied Nodachi</string>
+    <string name="item_name_jola_shield">Jola's Grudge</string>
+    <string name="item_name_halcy_neck">Halcy Necklace</string>
+    <string name="item_name_soul_neck">Soul Necklace</string>
+    <string name="item_name_doomshadow_nodachi">Doomshadow Nodachi</string>
+    <string name="item_name_lib_bow">Library/Immortal Warden's Bow</string>
+    <string name="item_name_lib_dagger">Library/Immortal Warden's Dagger</string>
+    <string name="item_name_lib_shortspear">Library/Immortal Warden's Shortspear</string>
+    <string name="item_name_lib_staff">Library/Immortal Warden's Staff</string>
+    <string name="item_name_snake_greatsword">Snake Greatsword (Edge)</string>
+    <string name="item_name_snake_shield">Snake Shield (Bulwark)</string>
+    <string name="item_name_snake_sword">Snake Sword (Razor)</string>
+    <string name="item_name_snake_greataxe">Snake Axe (Cleaver Target)</string>
+    <string name="item_name_snake_scepter">Snake Scepter (Snepter/Leech)</string>
+    <string name="item_name_snake_gun">Snake Gun (Bullet)</string>
+    <string name="item_name_bd_shield">Black Dragon Shield</string>
+    <string name="item_name_bd_club">Black Dragon Club</string>
+    <string name="item_name_bd_bow">Black Dragon Bow (Eye-Splitter)</string>
+    <string name="item_name_bd_gun">Black Dragon Gun (Bite)</string>
+    <string name="item_name_bd_staff">Black Dragon Staff (Roar)</string>
+    <string name="item_name_bd_sword">Black Dragon Sword (Tail-Reaper)</string>
+    <string name="item_name_bd_2h_sword">Black Dragon 2H Sword (Wing-Reaper)</string>
 
 </resources>

@@ -46,3 +46,22 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
     }
   }
 }
+
+// added songs to player cache for tracking song applications (ballad, chanty etc)
+val MIGRATION_7_8 = object : Migration(7, 8) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalSongs INTEGER NOT NULL DEFAULT 0").use {
+      it.step()
+    }
+  }
+}
+
+
+// added buffs applied to player cache for tracking buff applications (all buffs)
+val MIGRATION_8_9 = object : Migration(8, 9) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBuffsApplied INTEGER NOT NULL DEFAULT 0").use {
+      it.step()
+    }
+  }
+}

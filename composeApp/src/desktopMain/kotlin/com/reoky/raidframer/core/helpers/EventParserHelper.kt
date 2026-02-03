@@ -66,7 +66,7 @@ object EventParserHelper {
         val event = DamageEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
-          caster = matcher.group(3),
+          source = matcher.group(3),
           target = matcher.group(4),
           damage = matcher.group(6).toInt().absoluteValue,
           spell = matcher.group(5),
@@ -83,7 +83,7 @@ object EventParserHelper {
         val event = DamageEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
-          caster = matcher.group(3),
+          source = matcher.group(3),
           target = matcher.group(4),
           damage = matcher.group(5).toInt().absoluteValue,
           spell = "Auto-Attack",
@@ -100,7 +100,7 @@ object EventParserHelper {
         val event = DamageEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
-          caster = matcher.group(3),
+          source = matcher.group(3),
           target = matcher.group(4),
           damage = matcher.group(6).toInt().absoluteValue,
           spell = matcher.group(5),
@@ -117,7 +117,7 @@ object EventParserHelper {
         val event = HealEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
-          caster = matcher.group(3),
+          source = matcher.group(3),
           target = matcher.group(4),
           amount = matcher.group(6).toInt(),
           spell = matcher.group(5),
@@ -134,7 +134,8 @@ object EventParserHelper {
         val event = CastingEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
-          caster = matcher.group(3),
+          source = matcher.group(3),
+          target = "", // No target captured in this log line
           spell = matcher.group(4),
           spellId = 43
         )
@@ -148,7 +149,8 @@ object EventParserHelper {
         val event = SuccessfulCastEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
-          caster = matcher.group(3),
+          source = matcher.group(3),
+          target = "", // No target captured in this log line
           spell = matcher.group(4),
           spellId = 43
         )
@@ -162,6 +164,7 @@ object EventParserHelper {
         val event = BuffGainedEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
+          source = "", // No source captured in this log line
           target = matcher.group(3),
           buff = matcher.group(4),
           buffId = 43
@@ -176,6 +179,7 @@ object EventParserHelper {
         val event = BuffEndedEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
+          source = "", // No source captured in this log line
           target = matcher.group(3),
           buff = matcher.group(4),
           buffId = 43
@@ -190,6 +194,7 @@ object EventParserHelper {
         val event = DebuffGainedEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
+          source = "", // No source captured in this log line
           target = matcher.group(3),
           debuff = matcher.group(4),
           debuffId = 43
@@ -204,6 +209,7 @@ object EventParserHelper {
         val event = DebuffEndedEvent(
           cid = "", // CID is not captured in this log line
           timestamp = parseLogTimestamp(matcher.group(1)),
+          source = "", // No source captured in this log line
           target = matcher.group(3),
           debuff = matcher.group(4),
           debuffId = 43

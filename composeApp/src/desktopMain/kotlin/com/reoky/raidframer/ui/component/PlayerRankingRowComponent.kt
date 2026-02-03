@@ -103,7 +103,6 @@ fun PlayerRankingRow(
     }
 
     // 3. name only
-
     Row(
       modifier = Modifier.weight(1f),
       verticalAlignment = Alignment.CenterVertically

@@ -6,36 +6,34 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
 import java.awt.Desktop
-import java.awt.Toolkit
 import java.net.URI
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
+import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.ranges.contains
 
 /*
  * Extension function to abbreviate a numeric values by thousands, millions, billions, etc.
  */
 fun Long.humanReadableAbbreviation(): String {
-  val value = this.toDouble()
-  val suffixes = arrayOf("", "k", "M", "B", "T")
-  val suffixNum = when {
-    value < 1_000_000 -> 1
-    value < 1_000_000_000 -> 2
-    else -> 3
-  }
-  val divisor = Math.pow(10.0, suffixNum * 3.toDouble())
-  var shortValue = value / divisor
-  return String.format("%.1f", shortValue) + suffixes[suffixNum]
+  if (this in -999..999) return this.toString() // No abbreviation needed cause we're under 1,000
+  val absVal = abs(this.toDouble())
+  val exp = (ln(absVal) / ln(1000.0)).toInt().coerceAtLeast(1)
+  val suffixes = "kMGTPE"
+  val idx = (exp - 1).coerceAtMost(suffixes.lastIndex)
+  val scaled = this / 1000.0.pow(exp.toDouble())
+  return String.format("%.1f%c", scaled, suffixes[idx])
 }
 
 
-/*
+/**
  * Opens a browser window to the specified URL.
  */
 fun openWebLink(url: String) {
@@ -45,17 +43,8 @@ fun openWebLink(url: String) {
 }
 
 /*
- * Finds the width and height of the screen in dp. So we can calculate where to put the overlay windows and not
- * on completely over or undershoot on friend's tiny displays.
+ * Simple extension function to convert epoch milliseconds to a local time string.
  */
-fun getScreenSizeInDp(): Pair<Dp, Dp> {
-  val screenSize = Toolkit.getDefaultToolkit().screenSize
-  val density = Toolkit.getDefaultToolkit().screenResolution / 160.0f
-  val widthInDp = (screenSize.width / density).dp
-  val heightInDp = (screenSize.height / density).dp
-  return Pair(widthInDp, heightInDp)
-}
-
 fun Long.toLocalTimeString(): String {
   val instant = Instant.ofEpochMilli(this)
   val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.of("UTC"))
@@ -70,7 +59,7 @@ fun Long.toLocalTimeString(): String {
 fun annotatedStringForAttack(event: DamageEvent): AnnotatedString {
   return buildAnnotatedString {
     withStyle(style = SpanStyle(color = Color(249, 191, 59))) {
-      append(event.caster)
+      append(event.source)
     }
     withStyle(style = SpanStyle(color = Color.White)) {
       append(" attacked ")
@@ -112,7 +101,7 @@ fun annotatedStringForHeal(event: HealEvent): AnnotatedString {
       append(" was healed by ")
     }
     withStyle(style = SpanStyle(color = Color(249, 191, 59))) {
-      append(event.caster)
+      append(event.source)
     }
     withStyle(style = SpanStyle(color = Color.White)) {
       append(" using ")
@@ -134,15 +123,3 @@ fun annotatedStringForHeal(event: HealEvent): AnnotatedString {
     }
   }
 }
-
-/*
- * Simple extension function to shorten people's names to not overflow the page.
- */
-fun String.ellipsis(chars: Int): String {
-  return if (length > chars) {
-    substring(0, chars) + ".."
-  } else {
-    this
-  }
-}
-

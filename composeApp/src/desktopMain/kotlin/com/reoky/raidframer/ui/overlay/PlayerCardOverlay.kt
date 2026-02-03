@@ -10,12 +10,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +27,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
@@ -40,11 +37,14 @@ import com.reoky.raidframer.ui.component.graphs.GroupSpec
 import com.reoky.raidframer.ui.component.graphs.MultiPlayerMetricLineChart
 import com.reoky.raidframer.core.helpers.pickNextColor
 import com.reoky.raidframer.ui.component.PlayerDetailsSection
+import org.jetbrains.compose.resources.InternalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_trend_graph
 import java.text.SimpleDateFormat
 import java.util.Date
+import kotlin.math.ln
+import kotlin.math.pow
 
 // Temporary placeholder for resources
 fun str(s: String): String = s
@@ -61,6 +61,7 @@ fun PreviewPlayerCardOverlay() {
   }
 }
 
+@OptIn(InternalResourceApi::class)
 @Composable
 fun PlayerCardOverlay(wm: WindowManager? = null) {
 
@@ -102,7 +103,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
           mode = GameMonitorInteractor.currentMode,
           modifier = Modifier
             .fillMaxWidth()
-            .height(480.dp)
+            .height(420.dp)
             .padding(12.dp),
         )
 
@@ -122,7 +123,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Damage
               EventListColumn(
                 title = str("Recent Damage"),
-                items = card.recentDamageEvents.take(50),
+                items = card.recentDamageEvents.take(200),
                 modifier = Modifier.weight(1f)
               ) { evt ->
                 RowItemWithTime(evt.timestamp) {
@@ -189,9 +190,12 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
               // Item Uses
               // Explicitly map usage to Pairs for clarity
-              val skillsSorted = card.recentSkillItemUsages.toList()
-                .sortedByDescending { it.first }
+              val skillsSorted: List<Pair<Long, String>> = card.recentSkillItemUsages
+                .sortedByDescending { it.first } // Triple.first is the timestamp
                 .take(50)
+                .map { triple ->
+                  triple.first to "${stringResource(triple.second)} -> ${triple.third}"
+                }
 
               EventListColumn(
                 title = str("Item Uses"),
@@ -396,7 +400,7 @@ fun StatRow(label: String, value: Long) {
     horizontalArrangement = Arrangement.SpaceBetween
   ) {
     Text(text = label, color = Color.LightGray, fontSize = 13.sp)
-    Text(text = formatNumber(value), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+    Text(text = value.humanReadableAbbreviation(), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
   }
 }
 
@@ -405,8 +409,3 @@ private fun formatTime(ts: Long): String {
   return sdf.format(Date(ts))
 }
 
-private fun formatNumber(count: Long): String {
-  if (count < 1000) return count.toString()
-  val exp = (Math.log(count.toDouble()) / Math.log(1000.0)).toInt()
-  return String.format("%.1f%c", count / Math.pow(1000.0, exp.toDouble()), "kMGTPE"[exp - 1])
-}

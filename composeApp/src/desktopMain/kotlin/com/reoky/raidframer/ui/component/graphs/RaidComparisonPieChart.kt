@@ -16,6 +16,9 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
 import kotlinx.coroutines.flow.StateFlow
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.general_no_data_available
 
 @Composable
 fun RaidComparisonPieChart(
@@ -67,15 +70,19 @@ fun RaidComparisonPieChart(
         contentAlignment = Alignment.Center
       ) {
         Text(
-          text = "No data available",
+          text = stringResource(Res.string.general_no_data_available),
           color = RFColors.TextSecondary,
           style = MaterialTheme.typography.caption
         )
       }
     } else {
+      // pass a smaller chartSize so the total component height is reduced (~250dp total)
       RFPieChart(
         data = pieData,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        chartSize = 120.dp,
+        labelMarkerSize = 10.dp,
+        labelsSpacerHeight = 8.dp
       )
     }
   }
