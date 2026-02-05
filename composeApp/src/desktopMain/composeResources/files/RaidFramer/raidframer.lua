@@ -30,6 +30,13 @@ local function colorize(text, color)
     return string.format("%s%s|r", c, text)
 end
 
+function RF:contains(v, t)
+  for _, x in ipairs(t) do
+    if x == v then return true end
+  end
+  return false
+end
+
 function RF:Log(msg)
   local time = os.date("%H:%M:%S")
   local line = string.format(
