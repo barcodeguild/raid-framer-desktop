@@ -22,6 +22,10 @@ fun findDebuffByName(query: String): Debuff? {
   }
 }
 
+val charmedDebuffIds = listOf(771, 13916, 15995, 21432, 21434, 21162)
+val silencedDebuffIds = listOf(245, 257, 266, 1098 , 1177, 2115, 2116, 2743, 3868, 3928, 4039, 5525, 6147, 6366, 6893, 6981, 7040, 7400, 14730, 15721, 15937, 16100, 16989, 21161, 21987, 22013, 22239, 22520, 22538, 23358, 23469, 23523, 23524, 23815, 24168, 25234, 25718, 26965, 27145, 27345, 27681, 28595, 28646, 28676, 28682, 28683, 29667, 29668, 29926, 29987, 30935, 31862)
+val distressedDebuffIds = listOf(828, 6896, 14284, 15175, 24925)
+
 data class DebuffsDefinition(
   override val debuffs: List<Debuff> = listOf(
     Debuff(ids = listOf(771, 21432), name = "Charmed", consideredCC = false),

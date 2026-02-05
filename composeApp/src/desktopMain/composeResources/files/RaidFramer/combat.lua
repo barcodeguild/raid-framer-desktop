@@ -232,8 +232,11 @@ end
 
 -- basically just local stuff that we want to do when certain buffs are applied/removed
 function RF.Combat.postEventsForBuff(buff)
+  local charmedDebuffIds = { 771, 13916, 15995, 21432, 21434, 21162 } -- charms
+  local silencedDebuffIds = { 245, 257, 266, 1098 , 1177, 2115, 2116, 2743, 3868, 3928, 4039, 5525, 6147, 6366, 6893, 6981, 7040, 7400, 14730, 15721, 15937, 16100, 16989, 21161, 21987, 22013, 22239, 22520, 22538, 23358, 23469, 23523, 23524, 23815, 24168, 25234, 25718, 26965, 27145, 27345, 27681, 28595, 28646, 28676, 28682, 28683, 29667, 29668, 29926, 29987, 30935, 31862 } -- some of these are applied by mobs / every way to get silenced in the game beside aoe zone effects and the drowned souls of the gulf or whatever
+  local distressedDebuffIds = { 828, 6896, 14284, 15175, 24925 } -- distress debuffs from various skills
   -- charmed
-  if (buff.buffName == "Charmed" and buff.type == "SPELL_AURA_APPLIED") then
+  if (RF:contains(buff.buffId, charmedDebuffIds) and buff.type == "SPELL_AURA_APPLIED") then
     if (RF.Config.SHOW_CHARMED_IN_CHAT) then
       RF:Log(tostring(buff.source) .. " charmed " .. tostring(buff.target))
     end
@@ -243,14 +246,14 @@ function RF.Combat.postEventsForBuff(buff)
   end
 
   -- silenced
-  if (buff.buffName == "Silence" and buff.type == "SPELL_AURA_APPLIED") then
+  if (RF:contains(buff.buffId, silencedDebuffIds) and buff.type == "SPELL_AURA_APPLIED") then
     if (RF.Config.SHOW_SILENCED_IN_CHAT) then
       RF:Log(tostring(buff.source) .. " silenced " .. tostring(buff.target))
     end
   end
 
   -- distressed
-  if (buff.buffName == "Distressed" and buff.type == "SPELL_AURA_APPLIED") then
+  if (RF:contains(buff.buffId, distressedDebuffIds) and buff.type == "SPELL_AURA_APPLIED") then
     if (RF.Config.SHOW_DISTRESSED_IN_CHAT) then
       RF:Log(tostring(buff.source) .. " distressed " .. tostring(buff.target))
     end

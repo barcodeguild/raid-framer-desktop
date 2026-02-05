@@ -1,8 +1,11 @@
 package com.reoky.raidframer.core.model
 
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.definitions.charmedDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithUtilityItemDetectionMiddleWare
+import com.reoky.raidframer.core.definitions.distressedDebuffIds
 import com.reoky.raidframer.core.definitions.findDebuffByName
+import com.reoky.raidframer.core.definitions.silencedDebuffIds
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
@@ -139,9 +142,9 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
-  val isCharm = event.debuff == "Charmed"
-  val isDistress = event.debuff == "Distressed"
-  val isSilence = event.debuff == "Silence"
+  val isCharm = event.debuffId in charmedDebuffIds
+  val isDistress = event.debuffId in distressedDebuffIds
+  val isSilence = event.debuffId in silencedDebuffIds
   val isGlider = event.debuff == "Preparing Glider" && System.currentTimeMillis() - this.lastGliderUse > 5000L // glider debuff applied, but only count if more than 5 second since last use to avoid double-counting from game bug
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
