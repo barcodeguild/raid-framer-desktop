@@ -14,7 +14,7 @@ sealed class CombatEventPayload {
     val cid: String,
     val source: String = "Unknown Target",
     val target: String = "Unknown Target",
-    val spellId: String,
+    val spellId: Int,
     val spellName: String,
     val damageType: String
   ) : CombatEventPayload()
@@ -27,7 +27,7 @@ sealed class CombatEventPayload {
     val cid: String,
     val source: String = "Unknown Target",
     val target: String = "Unknown Target",
-    val spellId: String,
+    val spellId: Int,
     val spellName: String,
     val damageType: String
   ) : CombatEventPayload()

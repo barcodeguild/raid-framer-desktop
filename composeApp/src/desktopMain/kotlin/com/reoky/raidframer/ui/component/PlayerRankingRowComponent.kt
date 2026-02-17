@@ -27,12 +27,11 @@ import com.reoky.raidframer.core.model.PlayerCard
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.text.font.FontWeight
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
-import com.reoky.raidframer.core.helpers.RaidColors
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
-import com.reoky.raidframer.core.helpers.renderTinySkillTreeIconFor
+import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
 import com.reoky.raidframer.core.model.Faction
-import com.reoky.raidframer.core.model.FactionStatus
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -82,7 +81,7 @@ fun PlayerRankingRow(
       verticalAlignment = Alignment.CenterVertically
     ) {
       if (spec == null || spec == SpecType.UNKNOWN) {
-        val unknownPainter = renderTinySkillTreeIconFor("UNKNOWN")
+        val unknownPainter = skillTreeIconPainterFor(null)
         for (i in 1..3) {
           Image(
             painter = unknownPainter,
@@ -92,7 +91,7 @@ fun PlayerRankingRow(
         }
       } else {
         spec.trees.take(3).forEach { treeName ->
-          val painter = renderTinySkillTreeIconFor(treeName.name)
+          val painter = skillTreeIconPainterFor(treeName)
           Image(
             painter = painter,
             contentDescription = "Eek",

@@ -5,8 +5,10 @@ import com.reoky.raidframer.core.definitions.charmedDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithUtilityItemDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.distressedDebuffIds
 import com.reoky.raidframer.core.definitions.findDebuffByName
+import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
 import com.reoky.raidframer.core.definitions.silencedDebuffIds
-import com.reoky.raidframer.core.interactor.Log
+import com.reoky.raidframer.core.definitions.findPotionByEvent
+import com.reoky.raidframer.core.definitions.PotionDefinition
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 /**
@@ -72,7 +74,8 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
  */
 
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
-  val shouldIncrementPotionUses = event.spell in (listOf("Mana Potion", "Minor Mana Potion", "Healing Potion", "Minor Healing Potion", "Found Wild Ginseng!"))
+  val matchedPotion = findPotionByEvent(event)
+  val shouldIncrementPotionUses = matchedPotion != null
   val isMarasNineTails = event.spell == "Charm (Rider Skill)" && (PlayerCacheInteractor.isRealPlayer(event.target) || RFConfig.state.value.allowPVEDamage)
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
@@ -145,7 +148,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isCharm = event.debuffId in charmedDebuffIds
   val isDistress = event.debuffId in distressedDebuffIds
   val isSilence = event.debuffId in silencedDebuffIds
-  val isGlider = event.debuff == "Preparing Glider" && System.currentTimeMillis() - this.lastGliderUse > 5000L // glider debuff applied, but only count if more than 5 second since last use to avoid double-counting from game bug
+  val isGlider = event.debuffId in gliderUsageDebuffIds && System.currentTimeMillis() - this.lastGliderUse > 5000L // glider debuff applied, but only count if more than 5 second since last use to avoid double-counting from game bug
+  val isSongs = event.debuffId == 853 || event.debuffId == 847 || event.debuffId == 31367 || event.debuffId == 772 // Unguarded, Lethargy, Weakened Energy, Unpleasant Sensation
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
@@ -154,6 +158,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       lifetimeTotalDebuffsApplied = cache.lifetimeTotalDebuffsApplied + 1,
       lifetimeTotalCCDelivered = if (isCC) cache.lifetimeTotalCCDelivered + 1 else cache.lifetimeTotalCCDelivered,
       lifetimeTotalCharms = if (isCharm) cache.lifetimeTotalCharms + 1 else cache.lifetimeTotalCharms,
+      lifetimeTotalSongs = if (isSongs) cache.lifetimeTotalSongs + 1 else cache.lifetimeTotalSongs,
       lifetimeTotalGliderUses = if (isGlider) cache.lifetimeTotalGliderUses + 1 else cache.lifetimeTotalGliderUses,
       lifetimeTotalDistresses = if (isDistress) cache.lifetimeTotalDistresses + 1 else cache.lifetimeTotalDistresses,
       lifetimeTotalSilences = if (isSilence) cache.lifetimeTotalSilences + 1 else cache.lifetimeTotalSilences
@@ -161,6 +166,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
     sessionCharmTotal = if (isCharm) sessionCharmTotal + 1 else sessionCharmTotal,
+    sessionSongsTotal = if (isSongs) this.sessionSongsTotal + 1 else this.sessionSongsTotal,
     sessionDistressTotal = if (isDistress) sessionDistressTotal + 1 else sessionDistressTotal,
     sessionSilenceTotal = if (isSilence) sessionSilenceTotal + 1 else sessionSilenceTotal,
     sessionGliderTotal = if (isGlider) sessionGliderTotal + 1 else sessionGliderTotal,
@@ -180,11 +186,9 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalSongs = if (isSongs) cache.lifetimeTotalSongs + 1 else cache.lifetimeTotalSongs,
       lifetimeTotalBuffsApplied = cache.lifetimeTotalBuffsApplied + 1
     ),
     recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event), // optional to takeLast(n)
-    sessionSongsTotal = if (isSongs) this.sessionSongsTotal + 1 else this.sessionSongsTotal,
     sessionBuffTotal = this.sessionBuffTotal + 1
   )
 }
@@ -256,3 +260,41 @@ fun PlayerCard.updatePlayerLeadership(newLeadership: Int): PlayerCard {
     )
   )
 }
+
+/**
+ * Check if a successful cast event pertains to any potion for the current player.
+ * This extension is similar to UtilityItem checking but simpler since potions don't
+ * have complex buff tracking or card update lambdas.
+ */
+fun PlayerCard.pertainsToPotion(event: SuccessfulCastEvent): PotionDefinition? {
+  return findPotionByEvent(event)
+}
+
+/**
+ * Optional: Track detailed potion usage with cooldown management.
+ * Similar to copiedWithUtilityItemDetectionMiddleWare but for potions.
+ * This is useful if you want to track which specific potion was used and when.
+ */
+fun PlayerCard.withPotionTracking(event: SuccessfulCastEvent): Pair<PlayerCard, PotionDefinition?> {
+  val now = System.currentTimeMillis()
+  val matchedPotion = findPotionByEvent(event) ?: return Pair(this, null)
+
+  // Check if this potion is still on cooldown
+  val cooldownMillis = (matchedPotion.cooldown * 1000).toLong()
+  val isOnCooldown = recentSkillItemUsages
+    .filter { it.second == matchedPotion.friendlyNameRes }
+    .any { now - it.first < cooldownMillis }
+
+  if (isOnCooldown) {
+    return Pair(this, null) // Don't count if on cooldown
+  }
+
+  // Record the usage
+  val updatedCard = this.copy(
+    lastEvent = now,
+    recentSkillItemUsages = recentSkillItemUsages + Triple(now, matchedPotion.friendlyNameRes, event.target)
+  )
+
+  return Pair(updatedCard, matchedPotion)
+}
+

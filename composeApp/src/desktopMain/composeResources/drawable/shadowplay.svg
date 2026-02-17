@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" shape-rendering="geometricPrecision">
 <circle cx="32" cy="32" r="26" fill="none" stroke="#dcdcdc" stroke-width="3"/>
-<path d="M 18 28 Q 18 16 32 16 Q 46 16 46 28 L 46 40 L 42 46 L 36 42 L 32 46 L 28 42 L 22 46 L 18 40 Z" fill="#78dcff"/>
-<rect x="20" y="30" width="24" height="4" fill="#5ac8eb"/>
-<circle cx="27" cy="22" r="2" fill="#ffffff" opacity="0.8"/>
-<circle cx="37" cy="22" r="2" fill="#ffffff" opacity="0.8"/>
-<ellipse cx="32" cy="28" rx="3" ry="5" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+
+<g>
+  <!-- ghost body -->
+  <path d="M20 42
+           C19 28 23 18 32 18
+           C41 18 45 28 44 42
+           C41 41 39 41 36 43
+           C34 44 32 44 30 43
+           C27 41 25 41 20 42 Z"
+        fill="#74c7ff"/>
+  <!-- arms -->
+  <path d="M16 34 C14 34 13 36 13 38 C13 40 15 42 18 41 L21 40 L21 36 L18 35 C17 34 16.5 34 16 34 Z"
+        fill="#74c7ff"/>
+  <path d="M48 34 C50 34 51 36 51 38 C51 40 49 42 46 41 L43 40 L43 36 L46 35 C47 34 47.5 34 48 34 Z"
+        fill="#74c7ff"/>
+  <!-- face -->
+  <circle cx="28" cy="30" r="2.2" fill="#0b2b44"/>
+  <circle cx="36" cy="30" r="2.2" fill="#0b2b44"/>
+  <path d="M28 35 C30.5 37.5 33.5 37.5 36 35" fill="none" stroke="#0b2b44" stroke-width="2.4" stroke-linecap="round"/>
+  <!-- inner highlight -->
+  <path d="M26 22 C22 28 23 38 26 40" fill="none" stroke="#bfe9ff" stroke-width="2.4" stroke-linecap="round" opacity="0.9"/>
+</g>
+
 </svg>

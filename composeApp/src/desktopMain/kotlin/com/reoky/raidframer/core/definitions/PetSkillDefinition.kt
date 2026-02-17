@@ -18,3 +18,40 @@ package com.reoky.raidframer.core.definitions
 //2026-01-29 19:05:38.885 I/CompanionInteractor: At 1769735133000 Siege Risopoda (12d62) damaged Reoky for 3042 using Guided Missiles.
 //2026-01-29 19:05:38.886 I/CompanionInteractor: At 1769735133000 Siege Risopoda (12d62) damaged Reoky for 3133 using Guided Missiles.
 //2026-01-29 19:05:38.886 I/CompanionInteractor: At 1769735133000 Siege Risopoda (12d62) damaged Reoky for 3064 using Guided Missiles.
+
+
+/*
+ * Whitelisted pet skills that are accumulated and turned into pet damage / casting / debuff events for tracking. There's no way to definitively
+ * detect if a combat event is from a pet or not, so we have to whitelist known pet skills here.
+ */
+val petSkillWhitelist = listOf(
+  Skill(
+    id = 46055,
+    name = "Guided Missiles",
+    castTime = 0.0,
+    cooldown = 60.0,
+    possibleNames = listOf("Guided Missiles")
+  ),
+  Skill(
+    id = 46058,
+    name = "Guided Missiles (Rider)",
+    castTime = 0.0,
+    cooldown = 60.0,
+    possibleNames = listOf("Guided Missiles (Rider)")
+  ),
+
+  // Mara's scratch ~
+  Skill(
+    id = 8001707,
+    name = "Scratch",
+    castTime = 0.0,
+    cooldown = 18.0,
+    possibleNames = listOf("Scratch")
+  ),
+  Skill(
+    id = 8001708,
+    name = "Scratch (Rider)",
+    castTime = 0.0,
+    cooldown = 18.0,
+    possibleNames = listOf("Scratch (Rider)"))
+)

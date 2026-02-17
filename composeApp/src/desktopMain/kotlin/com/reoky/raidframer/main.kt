@@ -22,6 +22,7 @@ import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.InstallationInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
+import com.reoky.raidframer.core.interactor.PetAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
@@ -84,6 +85,7 @@ fun main(args: Array<String>) = application {
   CompanionInteractor.start(delay = 1000L) // delay to allow game monitor to start first
   OverlayInteractor.start(delay = 150L) // show to allow for hiding overlays quickly
   DeathAccumulatorInteractor.start()
+  PetAccumulatorInteractor.start()
 
   // file path args processing
   val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }

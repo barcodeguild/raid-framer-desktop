@@ -4,6 +4,7 @@ import com.reoky.raidframer.core.database.incrementPackedItemUsage
 import com.reoky.raidframer.core.model.PlayerCard
 import org.jetbrains.compose.resources.StringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.item_name_anth_set_pull
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_2h_sword
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_bow
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_club
@@ -12,6 +13,7 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_bd_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_sword
 import raid_framer_desktop.composeapp.generated.resources.item_name_doomshadow_nodachi
+import raid_framer_desktop.composeapp.generated.resources.item_name_garden_anth_set_pull
 import raid_framer_desktop.composeapp.generated.resources.item_name_halcy_neck
 import raid_framer_desktop.composeapp.generated.resources.item_name_honor_nodachi
 import raid_framer_desktop.composeapp.generated.resources.item_name_jola_shield
@@ -261,5 +263,21 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_bd_2h_sword,
     possibleSpellNames = listOf("Black Dragon's Fury")
+  ),
+  ANTH_SET_PULL(
+    itemSpecificSkillIds = listOf(19063), // Black Dragon's Fury, Ferocious Black Dragon's Fury
+    itemSpecificBuffIds = listOf(4272), // Necromantic Flame - Pull #2
+    castTime = 2.0,
+    cooldown = 180.0,
+    friendlyNameRes = Res.string.item_name_anth_set_pull,
+    possibleSpellNames = listOf("Necromantic Flame")
+  ),
+  GARDEN_ANTH_SET_PULL(
+    itemSpecificSkillIds = listOf(44652), //  Necromantic Flame
+    itemSpecificBuffIds = listOf(25075), //  Necromantic Flame - Pull #3
+    castTime = 2.0,
+    cooldown = 180.0,
+    friendlyNameRes = Res.string.item_name_garden_anth_set_pull,
+    possibleSpellNames = listOf("Necromantic Flame")
   );
 }

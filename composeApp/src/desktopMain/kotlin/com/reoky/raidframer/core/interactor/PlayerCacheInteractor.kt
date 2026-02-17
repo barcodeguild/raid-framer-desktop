@@ -12,6 +12,7 @@ import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
+import com.reoky.raidframer.core.definitions.petSkillWhitelist
 import com.reoky.raidframer.core.helpers.createCacheObject
 import com.reoky.raidframer.core.helpers.guessPlayerRole
 import com.reoky.raidframer.core.model.*
@@ -31,7 +32,9 @@ import org.jetbrains.compose.resources.StringResource
 import kotlin.compareTo
 import kotlin.text.chunked
 import kotlin.text.clear
+import kotlin.text.get
 import kotlin.text.toFloat
+import kotlin.text.toLong
 
 /**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
@@ -203,7 +206,7 @@ object PlayerCacheInteractor : Interactor() {
   fun buildPetNameKey(owner: String, petName: String, petType: String): String {
     // build 4 character hex has of pet type to append to the key to avoid collisions (some pets have really long names hence the hash)
     val petTypeHash = petType.hashCode().and(0xFFFF).toString(16).padStart(4, '0')
-    return "pet_id_${owner.lowercase().replace(" ", "_")}_${petName.lowercase().replace(" ", "_")}_{$petTypeHash}"
+    return "pet_id_${owner.lowercase().replace(" ", "_")}_${petName.lowercase().replace(" ", "_")}_$petTypeHash"
   }
 
   /*
@@ -430,6 +433,10 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   private fun postDamage(event: DamageEvent) {
+//    if (event.spellId in petSkillWhitelist.map { it.id }) {
+//      PetAccumulatorInteractor.postEvent(event)
+//      return
+//    }
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, playerName = event.source)
@@ -463,6 +470,11 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   private fun postSuccessfulCast(event: SuccessfulCastEvent) {
+//    if (event.spellId in petSkillWhitelist.map { it.id }) {
+//      Log.info("yanynaynayanay",  "Forwarding pet successful cast event: $event")
+//      PetAccumulatorInteractor.postEvent(event)
+//      return
+//    }
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, event.source)
@@ -548,6 +560,64 @@ object PlayerCacheInteractor : Interactor() {
       }
     }
   }
+
+
+  // Posting Pet Events
+  /**
+   * Called by PetAccumulatorInteractor to apply pet damage to a specific pet card key.
+   * `petKey` is the internal key format used by petCards: "$owner:$petName".
+   */
+  fun postPetDamage(petKey: String, event: DamageEvent) {
+    Log.info(TAG, "Posting pet damage event to petKey=$petKey: $event")
+    scope.launch {
+      mutex.withLock {
+        // ensure card exists
+        val existing = petCards[petKey]
+        if (existing == null) {
+          // nothing to do if we don't have metadata for this pet yet
+          return@withLock
+        }
+        val updated = existing.copy(
+          recentDamageEvents = (existing.recentDamageEvents + event).takeLast(100),
+          sessionDamageTotal = existing.sessionDamageTotal + event.damage.toLong(),
+          recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
+          lastEvent = event.timestamp
+        )
+        petCards[petKey] = updated
+      }
+    }
+  }
+
+  /**
+   * Called by PetAccumulatorInteractor to record pet successful casts (helpful for correlation).
+   */
+  fun postPetSuccessfulCast(petKey: String, event: SuccessfulCastEvent) {
+    Log.info(TAG, "Posting pet successful cast event to petKey=$petKey: $event")
+    scope.launch {
+      mutex.withLock {
+        val existing = petCards[petKey]
+        if (existing == null) {
+          return@withLock
+        }
+        val updated = existing.copy(
+          recentDebuffAppliedEvents = existing.recentDebuffAppliedEvents, // keep if needed elsewhere
+          recentDamageEvents = existing.recentDamageEvents, // no change here
+          recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
+          lastEvent = event.timestamp
+        )
+        petCards[petKey] = updated
+      }
+    }
+  }
+
+  /**
+   * Lightweight accessor used by PetAccumulatorInteractor to search petCards by pet name.
+   * Returns list of Map.Entry\<String, PetCard\> to preserve the internal key.
+   */
+  fun getPetEntriesByName(petName: String): List<Map.Entry<String, com.reoky.raidframer.core.model.PetCard>> {
+    return petCards.entries.filter { it.value.name.equals(petName, ignoreCase = true) }
+  }
+
 
   /*
    * Returns a list of real players to be used by analysis interactors. (Like the accumulator)
@@ -651,24 +721,21 @@ object PlayerCacheInteractor : Interactor() {
   /**
    * Categorize players by faction instead of by raid membership.
    * Returns Pair(ourFactionPlayers, oppositionPlayers) where opposition aggregates all opposing factions
-   * (only includes players seen in the last 30 minutes).
    */
-  private fun aggregateSessionLongByFaction(selector: (PlayerCard) -> Number, timeWindowMillis: Long = 1_800_000L): Map<Faction, Float> {
-    val now = System.currentTimeMillis()
+  private fun aggregateSessionLongByFaction(selector: (PlayerCard) -> Number): Map<Faction, Float> {
     val totals = mutableMapOf(
       Faction.HARANYA to 0L,
       Faction.NUIA to 0L,
       Faction.PIRATE to 0L
     )
+
     // iterate snapshot of cards to avoid concurrent modification issues
     cards.values
       .filter { it.isRealPlayer }
       .forEach { card ->
-        if ((now - card.lastEvent) < timeWindowMillis) {
-          val faction = Faction.fromString(card.lastKnownFaction)
-          if (faction == Faction.HARANYA || faction == Faction.NUIA || faction == Faction.PIRATE) {
-            totals[faction] = totals.getOrDefault(faction, 0L) + selector(card).toLong()
-          }
+        val faction = Faction.fromString(card.lastKnownFaction)
+        if (faction == Faction.HARANYA || faction == Faction.NUIA || faction == Faction.PIRATE) {
+          totals[faction] = totals.getOrDefault(faction, 0L) + selector(card).toLong()
         }
       }
     return totals.mapValues { it.value.toFloat() }
@@ -940,7 +1007,7 @@ object PlayerCacheInteractor : Interactor() {
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
 
-  // two-way compare
+  // two-way compare (maybe deprecated later)
   val factionCharmComparison: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionCharmTotal })
@@ -973,7 +1040,7 @@ object PlayerCacheInteractor : Interactor() {
 
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .map { pets ->
-      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 }
+      pets.filter { it.sessionDamageTotal > -1 || it.sessionDebuffTotal > 0 }
         .sortedByDescending { it.sessionDamageTotal }
         .take(50)
     }

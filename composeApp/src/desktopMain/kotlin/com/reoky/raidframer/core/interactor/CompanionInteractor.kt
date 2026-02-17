@@ -152,7 +152,7 @@ object CompanionInteractor : Interactor() {
                   source = event.source,
                   target = event.target,
                   spell = event.spellName,
-                  spellId = 43
+                  spellId = event.spellId
                 )
               )
             }
@@ -166,7 +166,7 @@ object CompanionInteractor : Interactor() {
                   source = event.source,
                   target = event.target,
                   spell = event.spellName,
-                  spellId = 43
+                  spellId = event.spellId
                 )
               )
             }
@@ -182,13 +182,13 @@ object CompanionInteractor : Interactor() {
                   damage = abs(event.amount),
                   spell = event.spell,
                   critical = event.f13,
-                  spellId = 43
+                  spellId = 0
                 )
               )
             }
 
             is CombatEventPayload.HealPayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.source} healed ${event.target} for ${event.amount} using ${event.spell}.")
+              Log.info(TAG, "At ${event.timestamp} ${event.source} healed ${event.target} for ${event.amount} using ${event.spell}.")
               PlayerCacheInteractor.postEvent(
                 HealEvent(
                   timestamp = event.timestamp,
@@ -198,7 +198,7 @@ object CompanionInteractor : Interactor() {
                   amount = abs(event.amount),
                   spell = event.spell,
                   critical = event.f10,
-                  spellId = 43
+                  spellId = 0
                 )
               )
             }
@@ -231,7 +231,7 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.BuffEndedPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target}'s ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) caused by ${event.source} ended.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.target}'s ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) caused by ${event.source} ended.")
               PlayerCacheInteractor.postEvent(
                 BuffEndedEvent(
                   timestamp = event.timestamp,
@@ -244,7 +244,7 @@ object CompanionInteractor : Interactor() {
               )
             }
             is CombatEventPayload.MeleeDamagePayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} melee damaged ${event.target} for ${abs(event.amount)}.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.source} melee damaged ${event.target} for ${abs(event.amount)}.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
@@ -254,7 +254,7 @@ object CompanionInteractor : Interactor() {
                   damage = abs(event.amount),
                   spell = "Basic Melee",
                   critical = event.f10,
-                  spellId = 43
+                  spellId = 0
                 )
               )
             }
@@ -269,12 +269,12 @@ object CompanionInteractor : Interactor() {
                   damage = abs(event.amount),
                   spell = "Melee Missed (Smol Scratch)",
                   critical = false,
-                  spellId = 43
+                  spellId = 0
                 )
               )
             }
             is CombatEventPayload.SpellMissedPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s ${event.spell} spell (miss for ${event.amount} dmg) ${event.result}.")
+              //Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s ${event.spell} spell (miss for ${event.amount} dmg) ${event.result}.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
@@ -284,7 +284,7 @@ object CompanionInteractor : Interactor() {
                   damage = abs(event.amount),
                   spell = "Spell Missed (hehe)",
                   critical = false,
-                  spellId = 43
+                  spellId = 0
                 )
               )
             }
@@ -295,7 +295,7 @@ object CompanionInteractor : Interactor() {
               //Log.info(TAG, "At ${event.timestamp} ${event.target} took ${abs(event.amount)} ${event.damageType} damage.")
             }
             is CombatEventPayload.ConditionDamagePayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.target} suffered ${abs(event.amount)} damage to their ${event.pool} because of ${event.source}'s ${event.spell} spell.")
+              Log.info(TAG, "At ${event.timestamp} ${event.target} suffered ${abs(event.amount)} damage to their ${event.pool} because of ${event.source}'s ${event.spell} spell.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
@@ -305,7 +305,7 @@ object CompanionInteractor : Interactor() {
                   damage = abs(event.amount),
                   spell = event.spell,
                   critical = event.f13,
-                  spellId = 43
+                  spellId = 0
                 )
               )
             }

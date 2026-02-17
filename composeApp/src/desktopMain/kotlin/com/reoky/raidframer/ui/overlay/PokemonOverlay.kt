@@ -66,7 +66,7 @@ fun PokemonOverlay(wm: WindowManager? = null) {
         itemsIndexed(activePets.value, key = { _, card -> card.petId }) { index, card ->
           PetListItem(
             petName = card.name,
-            owner = card.petId,
+            owner = card.owner,
             damage = card.sessionDamageTotal,
             debuffs = card.recentDebuffAppliedEvents.map { it.debuff }.distinct(),
             petType = card.petType,

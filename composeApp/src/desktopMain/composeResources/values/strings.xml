@@ -76,7 +76,7 @@
     <string name="leadership_shot_caller">Shot Caller</string>
     <string name="leadership_gm">GM</string>
 
-    <!-- Game Items -->
+    <!-- Game Utility Items -->
     <string name="item_name_kraken_scepter">Kraken Scepter</string>
     <string name="item_name_lib_shield">Library Shield</string>
     <string name="item_name_library_greatclub">Library Greatclub</string>
@@ -102,5 +102,23 @@
     <string name="item_name_bd_staff">Black Dragon Staff (Roar)</string>
     <string name="item_name_bd_sword">Black Dragon Sword (Tail-Reaper)</string>
     <string name="item_name_bd_2h_sword">Black Dragon 2H Sword (Wing-Reaper)</string>
+    <string name="item_name_anth_set_pull">Sungold Anth Set Pull</string>
+    <string name="item_name_garden_anth_set_pull">Garden Anth Set Pull</string>
+
+    <!-- Game Potions -->
+    <string name="potion_name_minor_healing_rank_one">Veiled Flame (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_two">Hushed Star (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_three">Afternoon Sun (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_four">Midsummer Meteor (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_five">Sun's Glory (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_six">Desert Fire (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_seven">Sweet Starlight (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_eight">Blazing Comet (Minor Healing Potion)</string>
+
+    <string name="potion_name_healing_rank_one_through_seven">Healing Potion (Major Healing Potion Rank 1-7)</string>
+
+
+    <string name="potion_name_minor_healing_titan">Titan's Healing Potion (Minor Healing Potion)</string>
+
 
 </resources>

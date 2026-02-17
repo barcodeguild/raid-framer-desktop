@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
+import com.reoky.raidframer.core.definitions.SkillTreeType
 // New Resource Imports
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.DrawableResource
@@ -89,26 +90,26 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
 
 /*
  * We use this for the skill-tree icons.
- * Migrated to compile-time safe lookup.
+ * Migrated to compile-time safe lookup via SkillTreeType
  */
 @Composable
-fun renderTinySkillTreeIconFor(treeName: String): Painter {
-  val resource = when (treeName.lowercase().trim()) {
-    "archery" -> Res.drawable.archery
-    "auramancy" -> Res.drawable.auramancy
-    "battlerage" -> Res.drawable.battlerage
-    "defense" -> Res.drawable.defense
-    "occultism" -> Res.drawable.occultism
-    "shadowplay" -> Res.drawable.shadowplay
-    "songcraft" -> Res.drawable.songcraft
-    "sorcery" -> Res.drawable.sorcery
-    "vitalism" -> Res.drawable.vitalism
-    "witchcraft" -> Res.drawable.witchcraft
-    "malediction" -> Res.drawable.malediction
-    "swiftblade" -> Res.drawable.swiftblade
-    "gunslinger" -> Res.drawable.gunslinger
-    "spelldance" -> Res.drawable.spelldance // assuming typo or specific name
-    else -> Res.drawable.not_found
+fun skillTreeIconPainterFor(tree: SkillTreeType?): Painter {
+  val resource = when (tree) {
+    SkillTreeType.ARCHERY -> Res.drawable.archery
+    SkillTreeType.AURAMANCY -> Res.drawable.auramancy
+    SkillTreeType.BATTLERAGE -> Res.drawable.battlerage
+    SkillTreeType.DEFENSE -> Res.drawable.defense
+    SkillTreeType.OCCULTISM -> Res.drawable.occultism
+    SkillTreeType.SHADOWPLAY -> Res.drawable.shadowplay
+    SkillTreeType.SONGCRAFT -> Res.drawable.songcraft
+    SkillTreeType.SORCERY -> Res.drawable.sorcery
+    SkillTreeType.VITALISM -> Res.drawable.vitalism
+    SkillTreeType.WITCHCRAFT -> Res.drawable.witchcraft
+    SkillTreeType.MALEDICTION -> Res.drawable.malediction
+    SkillTreeType.SWIFTBLADE -> Res.drawable.swiftblade
+    SkillTreeType.GUNSLINGER -> Res.drawable.gunslinger
+    SkillTreeType.SPELLDANCE -> Res.drawable.spelldance
+    else -> Res.drawable.unknown
   }
   return painterResource(resource)
 }
@@ -139,7 +140,7 @@ fun getPetIcon(petType: String): Painter {
     "Typhoon Drake" -> Res.drawable.typhoon_drake
     "Deathmaw" -> Res.drawable.deathmaw
     "Maahes" -> Res.drawable.maahes
-    else -> Res.drawable.unknown_tiny
+    else -> Res.drawable.unknown
   }
   return painterResource(resource)
 }
