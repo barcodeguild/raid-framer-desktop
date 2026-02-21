@@ -85,7 +85,8 @@ API_TYPE = {
     COMBAT_RESOURCE = { id = 83, apiname = "X2CombatResource"},
     ROSTER = { id = 84, apiname = "X2Roster"},
     MINI_SCOREBOARD = { id = 85, apiname = "X2MiniScoreboard"},
-    SURVEY_FORM = { id = 86, apiname = "X2SurveyForm"}
+    SURVEY_FORM = { id = 86, apiname = "X2SurveyForm"},
+    INSTANCE = { id = 87, apiname = "X2Instance"}
 }
 
 OBJECT_TYPE = {

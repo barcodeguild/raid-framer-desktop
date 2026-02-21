@@ -13,7 +13,10 @@ RF.IPC.BATCH_SIZE = 300 -- 300 events per every other second
 RF.IPC.BATCH_COOLDOWN = 1 -- seconds
 RF.IPC.LAST_INTERACT_TIME = 0
 
+-- Convert the simple array into a head/tail queue to avoid expensive copies when trimming the front
 RF.IPC.MESSAGE_WRITE_QUEUE = {}
+RF.IPC.MESSAGE_WRITE_QUEUE_HEAD = 1
+RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = 0
 
 RF.IPC.MESSAGE_TYPES = {
   COMBAT_EVENT = "COMBAT_EVENT", -- see game monitor branch (not used yet)
@@ -49,8 +52,10 @@ function RF.IPC.interact()
   -- First check if there's anything to read
   RF.IPC.ReadMessages()
 
-  -- GUARD: Anything to write? (Done before call to os.time for efficiency?)
-  if #RF.IPC.MESSAGE_WRITE_QUEUE == 0 then
+  -- GUARD: Anything to write? (use head/tail math rather than # which doesn't work with nil holes)
+  local head = RF.IPC.MESSAGE_WRITE_QUEUE_HEAD
+  local tail = RF.IPC.MESSAGE_WRITE_QUEUE_TAIL
+  if tail < head then
     return
   end
 
@@ -65,35 +70,83 @@ function RF.IPC.interact()
   end
 
   -- Determine batch size (process up to BATCH_SIZE messages)
-  local batchSize = math.min(RF.IPC.BATCH_SIZE, #RF.IPC.MESSAGE_WRITE_QUEUE)
+  local available = tail - head + 1
+  local batchSize = math.min(RF.IPC.BATCH_SIZE, available)
 
   -- Open file once for batch write
   file = io.open(RF.IPC.CHANNEL_OUT_FILE, "a")
   if not file then return end
 
-  -- Write batch of messages
-  for i = 1, batchSize do
-    local json = RF.IPC.MESSAGE_WRITE_QUEUE[i]
-    file:write(json)
-    file:write("\n")
+  -- Write batch of messages using head/tail indices, nil out entries so GC can reclaim them
+  for i = 0, batchSize - 1 do
+    local idx = head + i
+    local json = RF.IPC.MESSAGE_WRITE_QUEUE[idx]
+    if json then
+      file:write(json)
+      file:write("\n")
+      RF.IPC.MESSAGE_WRITE_QUEUE[idx] = nil
+    end
   end
   file:close()
 
+  -- Move head forward
+  RF.IPC.MESSAGE_WRITE_QUEUE_HEAD = head + batchSize
 
-
-  -- Remove processed messages from queue
-  local remaining = {}
-  for i = batchSize + 1, #RF.IPC.MESSAGE_WRITE_QUEUE do
-    remaining[#remaining + 1] = RF.IPC.MESSAGE_WRITE_QUEUE[i]
+  -- Periodic compaction to avoid head/tail numbers growing without bound and to reclaim table memory
+  -- Only compact when the head index grows past a threshold to keep this cheap
+  local COMPACT_THRESHOLD = 4096
+  if RF.IPC.MESSAGE_WRITE_QUEUE_HEAD > COMPACT_THRESHOLD then
+    local newQueue = {}
+    local newTail = 0
+    for i = RF.IPC.MESSAGE_WRITE_QUEUE_HEAD, RF.IPC.MESSAGE_WRITE_QUEUE_TAIL do
+      newTail = newTail + 1
+      newQueue[newTail] = RF.IPC.MESSAGE_WRITE_QUEUE[i]
+    end
+    -- log compaction for diagnostics (should be rare)
+    RF:Log("IPC: Compacting write queue (old head=" .. tostring(RF.IPC.MESSAGE_WRITE_QUEUE_HEAD) .. ", old tail=" .. tostring(RF.IPC.MESSAGE_WRITE_QUEUE_TAIL) .. ")")
+    RF.IPC.MESSAGE_WRITE_QUEUE = newQueue
+    RF.IPC.MESSAGE_WRITE_QUEUE_HEAD = 1
+    RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = newTail
   end
-  RF.IPC.MESSAGE_WRITE_QUEUE = remaining
+
+  -- Safety: if head/tail numbers somehow grew extremely large, reset indices to avoid numeric issues
+  local ABSOLUTE_INDEX_RESET = 1000000000
+  if RF.IPC.MESSAGE_WRITE_QUEUE_TAIL > ABSOLUTE_INDEX_RESET then
+    -- rebuild queue into a fresh one
+    local rebuild = {}
+    local rt = 0
+    for i = RF.IPC.MESSAGE_WRITE_QUEUE_HEAD, RF.IPC.MESSAGE_WRITE_QUEUE_TAIL do
+      rt = rt + 1
+      rebuild[rt] = RF.IPC.MESSAGE_WRITE_QUEUE[i]
+    end
+    RF.IPC.MESSAGE_WRITE_QUEUE = rebuild
+    RF.IPC.MESSAGE_WRITE_QUEUE_HEAD = 1
+    RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = rt
+    RF:Log("IPC: Forcefully rebuilt huge queue to avoid index overflow")
+  end
 end
 
 -- Queues a message to be sent later; returns the JSON string
 function RF.IPC.EnqueueWriteMessage(msgType, payload)
   local message = RF.IPC.BuildIPCMessage(msgType, payload)
   local json = RF.JSON.json_encode(message)
-  table.insert(RF.IPC.MESSAGE_WRITE_QUEUE, json)
+
+  -- Safety: if backlog grows unboundedly, bypass the queue and write directly to file to avoid
+  -- spending CPU time compacting/allocating huge tables during interact(). Choosing to write
+  -- immediately here is preferable to causing the game UI to lag later.
+  local backlog = RF.IPC.MESSAGE_WRITE_QUEUE_TAIL - RF.IPC.MESSAGE_WRITE_QUEUE_HEAD + 1
+  if backlog < 0 then backlog = 0 end
+  local MAX_BACKLOG = 100000 -- arbitrary large cap; tune if needed
+  if backlog > MAX_BACKLOG then
+    -- write immediately to avoid growing the in-memory queue further
+    RF:Log("IPC: Queue backlog exceeded " .. tostring(MAX_BACKLOG) .. ", writing directly to file to avoid buildup")
+    RF.IPC.WriteMessage(msgType, payload)
+    return json
+  end
+
+  -- push to tail
+  RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = RF.IPC.MESSAGE_WRITE_QUEUE_TAIL + 1
+  RF.IPC.MESSAGE_WRITE_QUEUE[RF.IPC.MESSAGE_WRITE_QUEUE_TAIL] = json
   return json
 end
 
