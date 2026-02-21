@@ -129,6 +129,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 RowItemWithTime(evt.timestamp) {
                   append(buildAnnotatedString {
                     withStyle(SpanStyle(color = Color(0xFF4FC3F7))) { append(evt.spell) } // Light Blue
+                    append("(")
+                    withStyle(SpanStyle(color = Color(0xFF29B6F6))) { append(evt.spellId.toString()) } // Blue
+                    append(")")
                     append(" -> ")
                     withStyle(SpanStyle(color = Color(0xFFEF5350))) { append(evt.target) } // Red
                     append(": ")
@@ -146,6 +149,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 RowItemWithTime(evt.timestamp) {
                   append(buildAnnotatedString {
                     withStyle(SpanStyle(color = Color(0xFF66BB6A))) { append(evt.spell) } // Green
+                    append("(")
+                    withStyle(SpanStyle(color = Color(0xFF43A047))) { append(evt.spellId.toString()) } // Dark Green
+                    append(")")
                     append(" -> ")
                     withStyle(SpanStyle(color = Color(0xFFA5D6A7))) { append(evt.target) } // Light Green
                     append(": ")
@@ -163,6 +169,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 RowItemWithTime(evt.timestamp) {
                   append(buildAnnotatedString {
                     withStyle(SpanStyle(color = Color(0xFFAB47BC))) { append(evt.debuff) } // Purple
+                    append("(")
+                    withStyle(SpanStyle(color = Color(0xFF8E24AA))) { append(evt.debuffId.toString()) } // Dark Purple
+                    append(")")
                     append(" -> ")
                     withStyle(SpanStyle(color = Color.White)) { append(evt.target) }
                   })
@@ -182,6 +191,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 RowItemWithTime(evt.timestamp) {
                   append(buildAnnotatedString {
                     withStyle(SpanStyle(color = Color(0xFFFFCA28))) { append(evt.buff) } // Amber
+                    append("(")
+                    withStyle(SpanStyle(color = Color(0xFFFFA000))) { append(evt.buffId.toString()) } // Dark Amber
+                    append(")")
                     append(" -> ")
                     withStyle(SpanStyle(color = Color.White)) { append(evt.target) }
                   })
