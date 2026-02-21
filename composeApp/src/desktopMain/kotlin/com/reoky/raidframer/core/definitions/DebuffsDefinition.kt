@@ -72,5 +72,6 @@ data class DebuffsDefinition(
     Debuff(ids = listOf(4844), name = "Dominator's Curse", consideredCC = true), // Kraken Scepter
     Debuff(ids = listOf(24543), name = "Unable to use Potions", consideredCC = true), // Banishment Combo
     Debuff(ids = listOf(24544), name = "Glider Disabled", consideredCC = true), // Banishment Combo
+    Debuff(ids = listOf(25230), name = "Decreases Move Speed", consideredCC = true), // Decreases Move Speed (id:25230) from Absorb Lifeforce: Wave
   )
 ) : DebuffsDefinitions()
