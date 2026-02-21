@@ -180,7 +180,6 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
  */
 fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
-  val isSongs = event.buff.contains("Bulwark Ballad (Rank") || event.buff.contains("Bloody Chanty (Rank")
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
