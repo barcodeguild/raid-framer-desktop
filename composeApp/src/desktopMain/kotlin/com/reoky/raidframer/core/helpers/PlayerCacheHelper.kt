@@ -69,9 +69,52 @@ fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntit
     lifetimeTotalSilences = c?.lifetimeTotalSilences ?: 0L,
     lifetimeTotalGliderUses = c?.lifetimeTotalGliderUses ?: 0L,
     lifetimeTotalItemSkillsUsed = c?.lifetimeTotalItemSkillsUsed ?: 0L,
+    lifetimeTotalPotionUsages = c?.lifetimeTotalPotionUsages ?: 0L,
     lifetimeTotalKills = c?.lifetimeTotalKills ?: 0L,
     lifetimeTotalKillsKB = c?.lifetimeTotalKillsKB ?: 0L,
     lifetimeTotalDeaths = c?.lifetimeTotalDeaths ?: 0L,
-    lifetimeTotalDamageTaken = c?.lifetimeTotalDamageTaken ?: 0L
+    lifetimeTotalDamageTaken = c?.lifetimeTotalDamageTaken ?: 0L,
+    lifetimeTotalHealsReceived = c?.lifetimeTotalHealsReceived ?: 0L
+  )
+}
+
+/**
+ * Returns a copy of this PlayerCard with all session totals and recent event lists reset to zero/empty.
+ * Preserves all persistent/cache fields and player identity (name, faction, gear score, etc.). This is to consolidate
+ * the logical to a singular location and to reduce code bulk in the player cache interactor. tyty
+ */
+fun PlayerCard.resetSession(): PlayerCard {
+  return this.copy(
+    // Recent event buffers
+    recentCastSuccessfulCastEvents = listOf(),
+    recentCastEvents = listOf(),
+    recentDamageEvents = listOf(),
+    recentHealEvents = listOf(),
+    recentBuffGainedEvents = listOf(),
+    recentBuffEndedEvents = listOf(),
+    recentBuffAppliedEvents = listOf(),
+    recentDebuffGainedEvents = listOf(),
+    recentDebuffEndedEvents = listOf(),
+    recentDebuffAppliedEvents = listOf(),
+    recentSkillItemUsages = listOf(),
+
+    // Session totals
+    sessionDamageTotal = 0L,
+    sessionHealTotal = 0L,
+    sessionCCTotal = 0,
+    sessionDebuffTotal = 0,
+    sessionBuffTotal = 0,
+    sessionCharmTotal = 0,
+    sessionKillTotal = 0,
+    sessionKillTotalKB = 0,
+    sessionDeathTotal = 0,
+    sessionGliderTotal = 0,
+    sessionSilenceTotal = 0,
+    sessionDistressTotal = 0,
+    sessionItemSkillTotal = 0,
+    sessionPotionTotal = 0,
+    sessionSongsTotal = 0,
+    sessionDamageTakenTotal = 0,
+    sessionHealsReceivedTotal = 0
   )
 }

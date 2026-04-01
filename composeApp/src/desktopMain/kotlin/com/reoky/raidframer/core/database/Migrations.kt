@@ -65,3 +65,30 @@ val MIGRATION_8_9 = object : Migration(8, 9) {
     }
   }
 }
+
+// migration to add   val lifetimeTotalHealsReceived: Long = 0L, to PlayerCacheEntity for tracking heals received over time
+val MIGRATION_9_10 = object : Migration(9, 10) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalHealsReceived INTEGER NOT NULL DEFAULT 0").use {
+      it.step()
+    }
+  }
+}
+
+// add val lifetimeTotalPotionUsages: Long = 0L,
+val MIGRATION_10_11 = object : Migration(10, 11) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPotionUsages INTEGER NOT NULL DEFAULT 0").use {
+      it.step()
+    }
+  }
+}
+
+// added val lastKrakenShield: Long = 0L,
+val MIGRATION_11_12 = object : Migration(11, 12) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastKrakenShield INTEGER NOT NULL DEFAULT 0").use {
+      it.step()
+    }
+  }
+}

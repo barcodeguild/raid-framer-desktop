@@ -7,8 +7,7 @@ import com.reoky.raidframer.core.definitions.distressedDebuffIds
 import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
 import com.reoky.raidframer.core.definitions.silencedDebuffIds
-import com.reoky.raidframer.core.definitions.findPotionByEvent
-import com.reoky.raidframer.core.definitions.PotionDefinition
+import com.reoky.raidframer.core.definitions.copiedWithPotionDetectionMiddleWare
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 /**
@@ -45,6 +44,7 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  val isOde = if (event.spell == "Ode to Recovery") true else false // is this ode?
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
@@ -52,7 +52,40 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
       lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount
     ),
     recentHealEvents = (this.recentHealEvents + event), // optional to takeLast(n)
-    sessionHealTotal = this.sessionHealTotal + event.amount
+    sessionHealTotal = this.sessionHealTotal + event.amount,
+    sessionOdeHealsTotal = if (isOde) this.sessionOdeHealsTotal + event.amount else this.sessionOdeHealsTotal
+  )
+}
+
+/*
+ * When a damage event is posted a damage and a damage taken event are posted to the source and target player card's respectively. This way we can handle
+ * manipulations to the target card separately from crediting the source. (This is the player card of the target)
+ */
+fun PlayerCard.postDamageTakenEvent(event: DamageEvent): PlayerCard {
+  if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  return this.copy(
+    lastEvent = event.timestamp,
+    cache = cache?.copy(
+      lastSeen = event.timestamp,
+      lifetimeTotalDamageTaken = cache.lifetimeTotalDamageTaken + event.damage
+    ),
+    sessionDamageTakenTotal = this.sessionDamageTakenTotal + event.damage
+  )
+}
+
+/*
+ * When a heals event is posted a player heal event and a heals received event are posted to the healer and the target respectively. The difference being
+ * the player card of the healer gets credit for heals done and the player card of the target gets credit for heals received. (This is the player card of the target)
+ */
+fun PlayerCard.postHealsReceivedEvent(event: HealEvent): PlayerCard {
+  if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  return this.copy(
+    lastEvent = event.timestamp,
+    cache = cache?.copy(
+      lastSeen = event.timestamp,
+      lifetimeTotalHealsReceived = cache.lifetimeTotalHealsReceived + event.amount
+    ),
+    sessionHealsReceivedTotal = this.sessionHealsReceivedTotal + event.amount
   )
 }
 
@@ -72,21 +105,20 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
 /**
  * Add a successful cast event to the PlayerCard, updating recent events.
  */
-
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
-  val matchedPotion = findPotionByEvent(event)
-  val shouldIncrementPotionUses = matchedPotion != null
   val isMarasNineTails = event.spell == "Charm (Rider Skill)" && (PlayerCacheInteractor.isRealPlayer(event.target) || RFConfig.state.value.allowPVEDamage)
-  val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
+
+  var card = this.copiedWithUtilityItemDetectionMiddleWare(event) // handles item spells
+  card = card.copiedWithPotionDetectionMiddleWare(event) // increments potion usages
+
   return card.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(
+    cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCharms = if (isMarasNineTails) cache.lifetimeTotalCharms + 1 else cache.lifetimeTotalCharms
+      lifetimeTotalCharms = if (isMarasNineTails) (card.cache?.lifetimeTotalCharms ?: 0) + 1 else (card.cache?.lifetimeTotalCharms ?: 0)
     ),
-    sessionPotionTotal = if (shouldIncrementPotionUses) this.sessionPotionTotal + 1 else this.sessionPotionTotal,
-    sessionCharmTotal = if (isMarasNineTails) this.sessionCharmTotal + 1 else this.sessionCharmTotal,
-    recentCastSuccessfulCastEvents = (this.recentCastSuccessfulCastEvents + event) // optional to takeLast(n)
+    sessionCharmTotal = if (isMarasNineTails) card.sessionCharmTotal + 1 else card.sessionCharmTotal,
+    recentCastSuccessfulCastEvents = (card.recentCastSuccessfulCastEvents + event)
   )
 }
 
@@ -198,6 +230,10 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
 fun PlayerCard.postKillEvent(timestamp: Long, victimName: String): PlayerCard {
   return this.copy(
     lastEvent = timestamp,
+    cache = cache?.copy(
+      lastSeen = timestamp,
+      lifetimeTotalKills = cache.lifetimeTotalKills + 1
+    ),
     // Add to recent kills map
     recentKills = this.recentKills + (timestamp to victimName),
     // Increment kill score
@@ -211,6 +247,10 @@ fun PlayerCard.postKillEvent(timestamp: Long, victimName: String): PlayerCard {
 fun PlayerCard.postKillEventKB(timestamp: Long, victimName: String): PlayerCard {
   return this.copy(
     lastEvent = timestamp,
+    cache = cache?.copy(
+      lastSeen = timestamp,
+      lifetimeTotalKillsKB = cache.lifetimeTotalKillsKB + 1
+    ),
     recentKillsKB = this.recentKillsKB + (timestamp to victimName),
     sessionKillTotalKB = this.sessionKillTotalKB + 1
   )
@@ -259,41 +299,3 @@ fun PlayerCard.updatePlayerLeadership(newLeadership: Int): PlayerCard {
     )
   )
 }
-
-/**
- * Check if a successful cast event pertains to any potion for the current player.
- * This extension is similar to UtilityItem checking but simpler since potions don't
- * have complex buff tracking or card update lambdas.
- */
-fun PlayerCard.pertainsToPotion(event: SuccessfulCastEvent): PotionDefinition? {
-  return findPotionByEvent(event)
-}
-
-/**
- * Optional: Track detailed potion usage with cooldown management.
- * Similar to copiedWithUtilityItemDetectionMiddleWare but for potions.
- * This is useful if you want to track which specific potion was used and when.
- */
-fun PlayerCard.withPotionTracking(event: SuccessfulCastEvent): Pair<PlayerCard, PotionDefinition?> {
-  val now = System.currentTimeMillis()
-  val matchedPotion = findPotionByEvent(event) ?: return Pair(this, null)
-
-  // Check if this potion is still on cooldown
-  val cooldownMillis = (matchedPotion.cooldown * 1000).toLong()
-  val isOnCooldown = recentSkillItemUsages
-    .filter { it.second == matchedPotion.friendlyNameRes }
-    .any { now - it.first < cooldownMillis }
-
-  if (isOnCooldown) {
-    return Pair(this, null) // Don't count if on cooldown
-  }
-
-  // Record the usage
-  val updatedCard = this.copy(
-    lastEvent = now,
-    recentSkillItemUsages = recentSkillItemUsages + Triple(now, matchedPotion.friendlyNameRes, event.target)
-  )
-
-  return Pair(updatedCard, matchedPotion)
-}
-

@@ -1,6 +1,5 @@
 package com.reoky.raidframer.core.definitions
 
-import com.reoky.raidframer.core.database.incrementPackedItemUsage
 import com.reoky.raidframer.core.model.BuffAppliedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CombatEvent
@@ -9,19 +8,6 @@ import com.reoky.raidframer.core.model.DebuffAppliedEvent
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
 import org.jetbrains.compose.resources.StringResource
-import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.item_name_halcy_neck
-import raid_framer_desktop.composeapp.generated.resources.item_name_honor_nodachi
-import raid_framer_desktop.composeapp.generated.resources.item_name_jola_shield
-import raid_framer_desktop.composeapp.generated.resources.item_name_kraken_scepter
-import raid_framer_desktop.composeapp.generated.resources.item_name_lib_shield
-import raid_framer_desktop.composeapp.generated.resources.item_name_library_greatclub
-import raid_framer_desktop.composeapp.generated.resources.item_name_soul_neck
-import kotlin.compareTo
-import kotlin.plus
-import kotlin.text.toLong
-import kotlin.times
-
 
 /**
  * Common contract for any utility item category (items, gliders, potions, etc). This is the magic right here friends. ~

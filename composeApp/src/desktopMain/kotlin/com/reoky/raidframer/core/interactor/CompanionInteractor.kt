@@ -117,11 +117,11 @@ object CompanionInteractor : Interactor() {
               PlayerCacheInteractor.stronglyAssertIsPlayer(payload.cid, payload.name, payload.classMap)
             }
             is PlayerInfoPayload.Npc -> {
-              //println("Metadata for NPC ${payload.name} received.")
+              //println("Metadata for NPC ${payload.name} ${payload.isPortal} received.")
             }
             // Fixed: Added 'Mate' branch to make 'when' exhaustive
             is PlayerInfoPayload.Mate -> {
-              //println("Metadata for companion pet ${payload.name} owned by ${payload.ownerName} with cid ${payload.cid} type ${payload.mateNpcName} received.")
+              println("Metadata for companion pet ${payload.name} owned by ${payload.ownerName} with cid ${payload.cid} type ${payload.mateNpcName} received.")
               val petName = payload.name
               if (petName.isBlank()) return
               PlayerCacheInteractor.createOrUpdatePetCard(
@@ -144,7 +144,7 @@ object CompanionInteractor : Interactor() {
         is IPCMessagePayload.CombatEvent -> {
           when (val event = message.payload) {
             is CombatEventPayload.SpellCastStartPayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
+              Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
               PlayerCacheInteractor.postEvent(
                 CastingEvent(
                   timestamp = event.timestamp,
@@ -231,7 +231,7 @@ object CompanionInteractor : Interactor() {
             }
 
             is CombatEventPayload.BuffEndedPayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.target}'s ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) caused by ${event.source} ended.")
+              Log.info(TAG, "At ${event.timestamp} ${event.target}'s ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) caused by ${event.source} ended.")
               PlayerCacheInteractor.postEvent(
                 BuffEndedEvent(
                   timestamp = event.timestamp,
@@ -244,7 +244,7 @@ object CompanionInteractor : Interactor() {
               )
             }
             is CombatEventPayload.MeleeDamagePayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.source} melee damaged ${event.target} for ${abs(event.amount)}.")
+              Log.info(TAG, "At ${event.timestamp} ${event.source} melee damaged ${event.target} for ${abs(event.amount)}.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
@@ -259,7 +259,7 @@ object CompanionInteractor : Interactor() {
               )
             }
             is CombatEventPayload.MeleeMissedPayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s melee attack (miss).")
+              Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s melee attack (miss).")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
@@ -274,7 +274,7 @@ object CompanionInteractor : Interactor() {
               )
             }
             is CombatEventPayload.SpellMissedPayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s ${event.spell} spell (miss for ${event.amount} dmg) ${event.result}.")
+              Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s ${event.spell} spell (miss for ${event.amount} dmg) ${event.result}.")
               PlayerCacheInteractor.postEvent(
                 DamageEvent(
                   timestamp = event.timestamp,
@@ -289,10 +289,10 @@ object CompanionInteractor : Interactor() {
               )
             }
             is CombatEventPayload.EnergizePayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.target} energized after a duel healing ${event.amount} health.")
+              Log.info(TAG, "At ${event.timestamp} ${event.target} energized after a duel healing ${event.amount} health.")
             }
             is CombatEventPayload.EnvironmentalDamagePayload -> {
-              //Log.info(TAG, "At ${event.timestamp} ${event.target} took ${abs(event.amount)} ${event.damageType} damage.")
+              Log.info(TAG, "At ${event.timestamp} ${event.target} took ${abs(event.amount)} ${event.damageType} damage.")
             }
             is CombatEventPayload.ConditionDamagePayload -> {
               Log.info(TAG, "At ${event.timestamp} ${event.target} suffered ${abs(event.amount)} damage to their ${event.pool} because of ${event.source}'s ${event.spell} spell.")

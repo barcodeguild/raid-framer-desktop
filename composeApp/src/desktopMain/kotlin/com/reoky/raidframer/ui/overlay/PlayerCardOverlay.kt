@@ -41,6 +41,20 @@ import org.jetbrains.compose.resources.InternalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_trend_graph
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_cc
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_charms
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_debuffs
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_distress
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_glider
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_healing
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_items
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_kills_killing_blow
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_kills_most_damage
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_potions
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_silence
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_damage_taken
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_heals_received
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.math.ln
@@ -285,19 +299,20 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   fontSize = 18.sp,
                   modifier = Modifier.padding(bottom = 8.dp)
                 )
-                StatRow(str("Total Damage"), card.sessionDamageTotal)
-                StatRow(str("Total Healing"), card.sessionHealTotal)
-                StatRow(str("CC Delivered"), card.sessionCCTotal.toLong())
-                StatRow(str("Debuffs"), card.sessionDebuffTotal.toLong())
-                StatRow(str("Charms"), card.sessionCharmTotal.toLong())
-                StatRow(str("Distresses"), card.sessionDistressTotal.toLong())
-                StatRow(str("Silences"), card.sessionSilenceTotal.toLong())
-                StatRow(str("Glider Uses"), card.sessionGliderTotal.toLong())
-                StatRow(str("Item Uses"), card.sessionItemSkillTotal.toLong())
-                StatRow(str("Potions"), card.sessionPotionTotal.toLong())
-                StatRow(str("Kills (Most Damage)"), card.sessionKillTotal.toLong())
-                StatRow(str("Kills (Killing Blow)"), card.sessionKillTotalKB.toLong())
-                StatRow(str("Deaths"), card.sessionDeathTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_damage), card.sessionDamageTotal)
+                StatRow(stringResource(Res.string.player_card_stat_healing), card.sessionHealTotal)
+                StatRow(stringResource(Res.string.player_card_stat_cc), card.sessionCCTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_debuffs), card.sessionDebuffTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_charms), card.sessionCharmTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_distress), card.sessionDistressTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_silence), card.sessionSilenceTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_glider), card.sessionGliderTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_items), card.sessionItemSkillTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_potions), card.sessionPotionTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_kills_most_damage), card.sessionKillTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_kills_killing_blow), card.sessionKillTotalKB.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_total_damage_taken), card.sessionDamageTakenTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_total_heals_received), card.sessionHealsReceivedTotal.toLong())
               }
 
               Spacer(modifier = Modifier.width(32.dp))
@@ -321,19 +336,20 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 )
                 val cache = card.cache
                 if (cache != null) {
-                  StatRow(str("Total Damage"), cache.lifetimeTotalDamage)
-                  StatRow(str("Total Healing"), cache.lifetimeTotalHealing)
-                  StatRow(str("CC Delivered"), cache.lifetimeTotalCCDelivered)
-                  StatRow(str("Debuffs"), cache.lifetimeTotalDebuffsApplied)
-                  StatRow(str("Charms"), cache.lifetimeTotalCharms)
-                  StatRow(str("Distresses"), cache.lifetimeTotalDistresses)
-                  StatRow(str("Silences"), cache.lifetimeTotalSilences)
-                  StatRow(str("Glider Uses"), cache.lifetimeTotalGliderUses)
-                  StatRow(str("Item Uses"), cache.lifetimeTotalItemSkillsUsed)
-                  StatRow(str("Kills (Most Damage)"), cache.lifetimeTotalKills)
-                  StatRow(str("Kills (Killing Blow)"), cache.lifetimeTotalKillsKB)
-                  StatRow(str("Deaths"), cache.lifetimeTotalDeaths)
-                  StatRow(str("Damage Taken"), cache.lifetimeTotalDamageTaken)
+                  StatRow(stringResource(Res.string.player_card_stat_damage), cache.lifetimeTotalDamage)
+                  StatRow(stringResource(Res.string.player_card_stat_healing), cache.lifetimeTotalHealing)
+                  StatRow(stringResource(Res.string.player_card_stat_cc), cache.lifetimeTotalCCDelivered)
+                  StatRow(stringResource(Res.string.player_card_stat_debuffs), cache.lifetimeTotalDebuffsApplied)
+                  StatRow(stringResource(Res.string.player_card_stat_charms), cache.lifetimeTotalCharms)
+                  StatRow(stringResource(Res.string.player_card_stat_distress), cache.lifetimeTotalDistresses)
+                  StatRow(stringResource(Res.string.player_card_stat_silence), cache.lifetimeTotalSilences)
+                  StatRow(stringResource(Res.string.player_card_stat_glider), cache.lifetimeTotalGliderUses)
+                  StatRow(stringResource(Res.string.player_card_stat_items), cache.lifetimeTotalItemSkillsUsed)
+                  StatRow(stringResource(Res.string.player_card_stat_potions), cache.lifetimeTotalPotionUsages)
+                  StatRow(stringResource(Res.string.player_card_stat_kills_most_damage), cache.lifetimeTotalKills)
+                  StatRow(stringResource(Res.string.player_card_stat_kills_killing_blow), cache.lifetimeTotalKillsKB)
+                  StatRow(stringResource(Res.string.player_card_stat_total_damage_taken), cache.lifetimeTotalDamageTaken)
+                  StatRow(stringResource(Res.string.player_card_stat_total_heals_received), cache.lifetimeTotalHealsReceived)
                 } else {
                   Text("No cached data available.", color = Color.Gray)
                 }

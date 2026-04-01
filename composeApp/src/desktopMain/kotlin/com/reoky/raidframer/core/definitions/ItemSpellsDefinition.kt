@@ -4,7 +4,7 @@ import com.reoky.raidframer.core.database.incrementPackedItemUsage
 import com.reoky.raidframer.core.model.PlayerCard
 import org.jetbrains.compose.resources.StringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.item_name_anth_set_pull
+import raid_framer_desktop.composeapp.generated.resources.item_name_sungold_anth_set_pull
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_2h_sword
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_bow
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_club
@@ -18,6 +18,8 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_halcy_neck
 import raid_framer_desktop.composeapp.generated.resources.item_name_honor_nodachi
 import raid_framer_desktop.composeapp.generated.resources.item_name_jola_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_kraken_scepter
+import raid_framer_desktop.composeapp.generated.resources.item_name_kraken_shield
+import raid_framer_desktop.composeapp.generated.resources.item_name_kraken_spear
 import raid_framer_desktop.composeapp.generated.resources.item_name_lib_bow
 import raid_framer_desktop.composeapp.generated.resources.item_name_lib_dagger
 import raid_framer_desktop.composeapp.generated.resources.item_name_lib_shield
@@ -55,6 +57,28 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
       cache = card.cache?.copy(lastKrakenScepter = incrementPackedItemUsage(card.cache.lastKrakenScepter))
     )} // lambda to increment the usage count on the cache because most items won't have a cache update
   ),
+  KRAKEN_SPEAR(
+    itemSpecificSkillIds = listOf(36734), // Desolate Sea Pillager
+    itemSpecificBuffIds = listOf(), // gives slow and snare but no unique buff id
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_kraken_spear,
+    possibleSpellNames = listOf("Desolate Sea Pillager"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastKrakenSpear = incrementPackedItemUsage(card.cache.lastKrakenSpear))
+    )}
+  ),
+  KRAKEN_SHIELD(
+    itemSpecificSkillIds = listOf(36735), // Desolate Sea Guardian
+    itemSpecificBuffIds = listOf(), // gives slow and snare but no unique buff id
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_kraken_shield,
+    possibleSpellNames = listOf("Desolate Sea Guardian"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastKrakenShield = incrementPackedItemUsage(card.cache.lastKrakenShield))
+    )}
+  ),
   LIB_GREATCLUB(
     itemSpecificSkillIds = listOf(45099, 39452, 41234),
     itemSpecificBuffIds = listOf(23216, 24395),
@@ -62,6 +86,9 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_library_greatclub,
     possibleSpellNames = listOf("Disciple's Greatclub", "Immortals's Greatclub"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastGreatclub = incrementPackedItemUsage(card.cache.lastGreatclub))
+    )}
   ),
   LIB_SHIELD(
     itemSpecificSkillIds = listOf(39451),
@@ -265,11 +292,11 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     possibleSpellNames = listOf("Black Dragon's Fury")
   ),
   ANTH_SET_PULL(
-    itemSpecificSkillIds = listOf(19063), // Black Dragon's Fury, Ferocious Black Dragon's Fury
+    itemSpecificSkillIds = listOf(19063), // Necromantic Flame
     itemSpecificBuffIds = listOf(4272), // Necromantic Flame - Pull #2
     castTime = 2.0,
     cooldown = 180.0,
-    friendlyNameRes = Res.string.item_name_anth_set_pull,
+    friendlyNameRes = Res.string.item_name_sungold_anth_set_pull,
     possibleSpellNames = listOf("Necromantic Flame")
   ),
   GARDEN_ANTH_SET_PULL(

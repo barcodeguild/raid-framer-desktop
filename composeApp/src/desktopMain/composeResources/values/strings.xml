@@ -32,6 +32,8 @@
     <string name="settings_uninstall_description">Uninstalling via this menu cleanly removes the Lua addon from the game folder, it also closes the app, and triggers the regular un-installation process. If you decide to cancel the installer, opening raid framer again will allow you to re-install the Lua component automatically.</string>
 
     <!-- Player Card -->
+    <string name="player_card_recent_item_uses">Item Uses</string>
+    <string name="player_card_recent_kd_short">Recent K/D</string>
     <string name="player_card_recent_damage">Recent Damage</string>
     <string name="player_card_recent_heals">Recent Heals</string>
     <string name="player_card_recent_kd">Recent Kills &amp; Deaths</string>
@@ -41,6 +43,7 @@
     <string name="player_card_session_totals">Session Totals</string>
     <string name="player_card_lifetime_totals">Lifetime Totals</string>
 
+    <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">Total Damage</string>
     <string name="player_card_stat_healing">Total Healing</string>
     <string name="player_card_stat_cc">CC Delivered</string>
@@ -53,7 +56,10 @@
     <string name="player_card_stat_potions">Potions</string>
     <string name="player_card_stat_kills">Kills</string>
     <string name="player_card_stat_deaths">Deaths</string>
-    <string name="player_card_damage_taken">Damage Taken</string>
+    <string name="player_card_stat_kills_most_damage">Kills (Most Damage)</string>
+    <string name="player_card_stat_kills_killing_blow">Kills (Killing Blow)</string>
+    <string name="player_card_stat_total_damage_taken">Total Damage Taken</string>
+    <string name="player_card_stat_total_heals_received">Total Heals Received</string>
 
     <!-- General Strings -->
     <string name="general_metric_type_damage">Damage</string>
@@ -78,6 +84,8 @@
 
     <!-- Game Utility Items -->
     <string name="item_name_kraken_scepter">Kraken Scepter</string>
+    <string name="item_name_kraken_spear">Kraken Spear</string>
+    <string name="item_name_kraken_shield">Kraken Shield</string>
     <string name="item_name_lib_shield">Library Shield</string>
     <string name="item_name_library_greatclub">Library Greatclub</string>
     <string name="item_name_honor_nodachi">Honor's Frenzied Nodachi</string>
@@ -102,7 +110,7 @@
     <string name="item_name_bd_staff">Black Dragon Staff (Roar)</string>
     <string name="item_name_bd_sword">Black Dragon Sword (Tail-Reaper)</string>
     <string name="item_name_bd_2h_sword">Black Dragon 2H Sword (Wing-Reaper)</string>
-    <string name="item_name_anth_set_pull">Sungold Anth Set Pull</string>
+    <string name="item_name_sungold_anth_set_pull">Sungold Anth Set Pull</string>
     <string name="item_name_garden_anth_set_pull">Garden Anth Set Pull</string>
 
     <!-- Game Potions -->
@@ -115,10 +123,26 @@
     <string name="potion_name_minor_healing_rank_seven">Sweet Starlight (Minor Healing Potion)</string>
     <string name="potion_name_minor_healing_rank_eight">Blazing Comet (Minor Healing Potion)</string>
 
-    <string name="potion_name_healing_rank_one_through_seven">Healing Potion (Major Healing Potion Rank 1-7)</string>
 
+    <string name="potion_name_healing_guild_courage">Guild Courage (37% Healing Potion)</string>
+
+    <string name="potion_name_healing_rank_one_through_six">Healing Potion (Major Healing Potion Rank 1-7)</string>
+    <string name="potion_name_healing_rank_seven">Alluvion Love (Major Healing Potion Rank 7)</string>
+    <string name="potion_name_healing_rank_eight">Burning Desire (Major Healing Potion Rank 8)</string>
+
+    <string name="potion_name_minor_mana_rank_one">Mage's Vapor (Minor Mana Rank 1)</string>
+    <string name="potion_name_minor_mana_rank_two">Misty Memory (Minor Mana Rank 2)</string>
+    <string name="potion_name_minor_mana_rank_three">Morning Dew (Minor Mana Rank 3)</string>
+    <string name="potion_name_minor_mana_rank_four">Meadow Stream (Minor Mana Rank 4)</string>
+    <string name="potion_name_minor_mana_rank_five">Time's River (Minor Mana Rank 5)</string>
+    <string name="potion_name_minor_mana_rank_six">Mossy Pool (Minor Mana Rank 6)</string>
+    <string name="potion_name_minor_mana_rank_seven">Faint Memory (Minor Mana Rank 7)</string>
+    <string name="potion_name_minor_mana_rank_eight">Hazy Reflection (Minor Mana Rank 8)</string>
 
     <string name="potion_name_minor_healing_titan">Titan's Healing Potion (Minor Healing Potion)</string>
+    <string name="potion_name_minor_mana_titan">Titan's Mana Potion (Minor Mana Potion)</string>
 
+    <string name="potion_name_phoenix_tears_tincture">Phoenix Tears Tincture</string>
+    <string name="potion_name_wild_ginseng">Wild Ginseng! (What a lucky friend!)</string>
 
 </resources>

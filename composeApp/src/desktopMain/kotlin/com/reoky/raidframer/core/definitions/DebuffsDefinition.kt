@@ -32,8 +32,9 @@ data class DebuffsDefinition(
     Debuff(ids = listOf(771, 21432), name = "Charmed", consideredCC = false),
     Debuff(ids = listOf(23358), name = "Silence", consideredCC = true), // can move but can't cast
     Debuff(ids = listOf(828), name = "Distressed", consideredCC = true), // reduced movement speed, can't heal
-    Debuff(ids = listOf(5784), name = "Slow", consideredCC = true), // reduced movement speed
-    Debuff(ids = listOf(), name = "Tripped", consideredCC = true), // can't move
+    Debuff(ids = listOf(5784, 21461), name = "Slow", consideredCC = true), // reduced movement speed
+    Debuff(ids = listOf(27631), name = "Tripped", consideredCC = true), // can't move
+    Debuff(ids = listOf(7649), name = "Weak (Rank 4)", consideredCC = true), // increases confinement duration
     Debuff(ids = listOf(), name = "Stunned", consideredCC = true), // can't move can't cast
     Debuff(ids = listOf(), name = "Impaled", consideredCC = true), // can't move
     Debuff(ids = listOf(), name = "Flame Hell Spear", consideredCC = true), // same as impaled
@@ -48,13 +49,13 @@ data class DebuffsDefinition(
     Debuff(ids = listOf(), name = "Sleep", consideredCC = true), // can't move or cast
     Debuff(ids = listOf(), name = "Fear", consideredCC = true), // can't cast, move uncontrollably
     Debuff(ids = listOf(502, 24060), name = "Provoked", consideredCC = true), // can't target others
-    Debuff(ids = listOf(), name = "Bubble Trap", consideredCC = true), // can't move or cast
+    Debuff(ids = listOf(21401), name = "Bubble Trap", consideredCC = true), // can't move or cast
     Debuff(ids = listOf(4843), name = "Snare", consideredCC = true), // target can't move
-    Debuff(ids = listOf(), name = "Banshee Wail", consideredCC = true), // feared (the spell also applies slow)
+    Debuff(ids = listOf(21402), name = "Banshee Wail", consideredCC = true), // feared (the spell also applies slow)
     Debuff(ids = listOf(), name = "Phantasm's Wail", consideredCC = true), // feared (aoe spell also applies slow)
     Debuff(ids = listOf(), name = "Concussion", consideredCC = true), // prevents target from standing
     Debuff(ids = listOf(206), name = "Shackle", consideredCC = true), // Melee and range skills are restrained for 2 sec.
-    Debuff(ids = listOf(), name = "Overpowered", consideredCC = true), // Prevents movement and periodically deals Melee Damage.
+    Debuff(ids = listOf(22253), name = "Overpowered", consideredCC = true), // Prevents movement and periodically deals Melee Damage.
     Debuff(ids = listOf(), name = "Wraith's Curse", consideredCC = true), // Similar to slow but also reduces attack speed and cast time.
     Debuff(ids = listOf(), name = "Crippling Mire", consideredCC = true), // Reduces movement speed significantly.
     Debuff(ids = listOf(), name = "Earthen Grip", consideredCC = true), // prevents movement and turning

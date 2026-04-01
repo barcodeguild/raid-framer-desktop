@@ -29,7 +29,6 @@ import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.RaidComparisonPieChart
 import org.jetbrains.compose.resources.stringResource
 import java.text.DateFormat
-import kotlin.toString
 
 @Preview
 @Composable
@@ -60,21 +59,33 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val topGliderGamers by PlayerCacheInteractor.topGliderGamers.collectAsState()
   val topPotters by PlayerCacheInteractor.topPotters.collectAsState()
   val topItemSkillCasters by PlayerCacheInteractor.topItemSkillCasters.collectAsState()
-  val topKillsDamage by PlayerCacheInteractor.topKills.collectAsState()
-  val topKillsKillingBlow by PlayerCacheInteractor.topKillsKB.collectAsState()
-  val topDeaths by PlayerCacheInteractor.topDeaths.collectAsState()
+  val topKillsHaranya by PlayerCacheInteractor.topKillsHaranya.collectAsState()
+  val topKillsNuia by PlayerCacheInteractor.topKillsNuia.collectAsState()
+  val topKillsPirate by PlayerCacheInteractor.topKillsPirate.collectAsState()
+//  val topKillsDamage by PlayerCacheInteractor.topKills.collectAsState()
+//  val topKillsKillingBlow by PlayerCacheInteractor.topKillsKB.collectAsState()
+//  val topKillsLifetime by PlayerCacheInteractor.topKillsLifetime.collectAsState()
+  val topDamageTaken by PlayerCacheInteractor.topDamageTaken.collectAsState()
+  val tophealsReceived by PlayerCacheInteractor.topHealsReceived.collectAsState()
   val topBuffers by PlayerCacheInteractor.topBuffs.collectAsState()
+
+  // subscribe to the build count flows
+  val buildCountsHaranya by PlayerCacheInteractor.buildCountsHaranya.collectAsState()
+  val buildCountsNuia by PlayerCacheInteractor.buildCountsNuia.collectAsState()
+  val buildCountsPirate by PlayerCacheInteractor.buildCountsPirate.collectAsState()
 
   val humanReadableDateString = DateFormat.getDateInstance(DateFormat.SHORT).format(System.currentTimeMillis())
 
   var selectedTabIndex by remember { mutableStateOf(0) }
   val tabs = listOf(
-    "Key Debuffs",
-    "Top Spells",
-    "Buffs / Debuffs",
-    "Kills / Deaths",
-    "Top Item Uses",
-    "Utility / Items"
+    "Debuffs",
+    "Spells",
+    "Buffs",
+    "K/D",
+    "Received",
+    "Items",
+    "Utility",
+    "Specs"
   )
 
   Column(
@@ -160,21 +171,32 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           wm = wm
         )
         3 -> KillsDeathsTab(
-          topKillsDamage = topKillsDamage,
-          topKillsKillingBlow = topKillsKillingBlow,
-          topDeaths = topDeaths,
+          topKillsHaranya = topKillsHaranya,
+          topKillsNuia = topKillsNuia,
+          topKillsPirate = topKillsPirate,
           wm = wm
         )
-        4 -> UtilityItemsByFaction(
+        4 -> DamageTakenHealsReceived(
+          topDamageTaken = topDamageTaken,
+          topHealsReceived = tophealsReceived,
+          wm = wm
+        )
+        5 -> UtilityItemsByFaction(
           topItemUsesHaranya = topItemUsesHaranya,
           topItemUsesNuia = topItemUsesNuia,
           topItemUsesPirate = topItemUsesPirate,
           wm = wm
         )
-        5 -> UtilityItemsTab(
+        6 -> UtilityItemsTab(
           topPotters = topPotters,
           topGliderGamers = topGliderGamers,
           topItemSkillCasters = topItemSkillCasters,
+          wm = wm
+        )
+        7 -> PlayerBuildsTab(
+          buildCountsHaranya = buildCountsHaranya,
+          buildCountsNuia = buildCountsNuia,
+          buildCountsPirate = buildCountsPirate,
           wm = wm
         )
       }
@@ -317,9 +339,9 @@ private fun BuffsDebuffsTab(
 
 @Composable
 private fun KillsDeathsTab(
-  topKillsDamage: List<PlayerCard>,
-  topKillsKillingBlow: List<PlayerCard>,
-  topDeaths: List<PlayerCard>,
+  topKillsHaranya: List<PlayerCard>,
+  topKillsNuia: List<PlayerCard>,
+  topKillsPirate: List<PlayerCard>,
   wm: WindowManager?
 ) {
   Row(
@@ -327,8 +349,8 @@ private fun KillsDeathsTab(
   ) {
     StatColumn(
       icon = "\uF54C",
-      title = "Top Kills (DMG)",
-      cards = topKillsDamage,
+      title = "Top Kills Haranya",
+      cards = topKillsHaranya,
       valueExtractor = { it.sessionKillTotal.toString() },
       valueColor = Color(0xFF66BB6A),
       modifier = Modifier.weight(1f)
@@ -339,8 +361,8 @@ private fun KillsDeathsTab(
 
     StatColumn(
       icon = "\uF54C",
-      title = "Top Kills (KB)",
-      cards = topKillsKillingBlow,
+      title = "Top Kills Nuia",
+      cards = topKillsNuia,
       valueExtractor = { it.sessionKillTotalKB.toString() },
       valueColor = Color(0xFFFFA726),
       modifier = Modifier.weight(1f)
@@ -351,10 +373,45 @@ private fun KillsDeathsTab(
 
     StatColumn(
       icon = "\uF54C",
-      title = "Top Deaths",
-      cards = topDeaths,
-      valueExtractor = { it.sessionDeathTotal.toString() },
+      title = "Top Kills Pirate",
+      cards = topKillsPirate,
+      valueExtractor = { it.cache?.lifetimeTotalKills?.toString() ?: "0" },
       valueColor = Color(0xFFEF5350),
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+  }
+}
+
+@Composable
+private fun DamageTakenHealsReceived(
+  topDamageTaken: List<PlayerCard>,
+  topHealsReceived: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(
+    modifier = Modifier.fillMaxSize()
+  ) {
+    StatColumn(
+      icon = "",
+      title = "\uD83D\uDD25 Top Damage Taken \uD83D\uDD25",
+      cards = topDamageTaken,
+      valueExtractor = { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation() },
+      valueColor = Color(0xFFEF5350),
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+
+    StatColumn(
+      icon = "",
+      title = "\uD83D\uDC89 Top Heals Received \uD83D\uDC89",
+      cards = topHealsReceived,
+      valueExtractor = { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() },
+      valueColor = Color(0xFF66BB6A),
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -564,7 +621,6 @@ private fun ItemStatColumn(
   }
 }
 
-
 @Composable
 private fun SpellStatColumn(
   icon: String,
@@ -618,3 +674,92 @@ private fun SpellStatColumn(
     }
   }
 }
+
+// New: Player Builds tab and helper column
+@Composable
+private fun PlayerBuildsTab(
+  buildCountsHaranya: Map<String, Int>,
+  buildCountsNuia: Map<String, Int>,
+  buildCountsPirate: Map<String, Int>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    BuildStatColumn(
+      icon = "\u2694",
+      title = "Haranya Builds",
+      builds = buildCountsHaranya,
+      valueColor = Color(0xFFAB47BC),
+      modifier = Modifier.weight(1f)
+    ) { /* optional click */ }
+
+    BuildStatColumn(
+      icon = "\u2694",
+      title = "Nuia Builds",
+      builds = buildCountsNuia,
+      valueColor = Color(0xFFEC407A),
+      modifier = Modifier.weight(1f)
+    ) { }
+
+    BuildStatColumn(
+      icon = "\u2694",
+      title = "Pirate Builds",
+      builds = buildCountsPirate,
+      valueColor = Color(0xFF7E57C2),
+      modifier = Modifier.weight(1f)
+    ) { }
+  }
+}
+
+@Composable
+private fun BuildStatColumn(
+  icon: String,
+  title: String,
+  builds: Map<String, Int>,
+  valueColor: Color,
+  modifier: Modifier = Modifier,
+  onClick: (Pair<String, Int>) -> Unit
+) {
+  Column(
+    modifier = modifier
+      .fillMaxHeight()
+      .padding(horizontal = 4.dp),
+    horizontalAlignment = Alignment.CenterHorizontally
+  ) {
+    // Header
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.Center,
+      modifier = Modifier.padding(bottom = 8.dp)
+    ) {
+      Text(
+        text = icon,
+        fontFamily = FontsHelper.faSolid(),
+        fontSize = 14.sp,
+        color = Color.White,
+        modifier = Modifier.padding(end = 4.dp)
+      )
+      Text(
+        text = title.lowercase().capitalize(),
+        color = Color.White,
+        textAlign = TextAlign.Center
+      )
+    }
+
+    LazyColumn(
+      contentPadding = PaddingValues(0.dp),
+      modifier = Modifier.fillMaxWidth()
+    ) {
+      val sorted = builds.entries.sortedByDescending { it.value }
+      itemsIndexed(sorted, key = { _, entry -> entry.key }) { index, entry ->
+        SimpleRankingRow(
+          index = index,
+          name = entry.key.ifBlank { "Unknown" },
+          valueText = entry.value.toString(),
+          valueColor = valueColor,
+          onClick = { onClick(entry.key to entry.value) }
+        )
+      }
+    }
+  }
+}
+

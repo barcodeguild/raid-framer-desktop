@@ -9,7 +9,7 @@ RF.IPC.CHANNEL_IN_FILE  = RF.IPC.BASE_DIR .. "ipc.rfin"
 RF.IPC.MESSAGE_VERSION = 1
 
 -- queue structure that holds future messages to be written to the ipc file
-RF.IPC.BATCH_SIZE = 300 -- 300 events per every other second
+RF.IPC.BATCH_SIZE = 10000 -- 10000 events per every other second
 RF.IPC.BATCH_COOLDOWN = 1 -- seconds
 RF.IPC.LAST_INTERACT_TIME = 0
 
@@ -17,6 +17,9 @@ RF.IPC.LAST_INTERACT_TIME = 0
 RF.IPC.MESSAGE_WRITE_QUEUE = {}
 RF.IPC.MESSAGE_WRITE_QUEUE_HEAD = 1
 RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = 0
+
+-- Persistent output file handle to avoid repeated open/close
+RF.IPC.OUT_FH = nil
 
 RF.IPC.MESSAGE_TYPES = {
   COMBAT_EVENT = "COMBAT_EVENT", -- see game monitor branch (not used yet)
@@ -34,6 +37,26 @@ RF.IPC.MESSAGE_TYPES = {
   TEST_PING = "TEST_PING", -- companion replies with a "pong" payload (used for the lua companion indicator LED)
   CONFIG_UPDATE = "CONFIG_UPDATE" -- app notifies addon that config has changed, prompts a reload from disk
 }
+
+-- Helper: open persistent output file handle (append mode). Returns file handle or nil.
+function RF.IPC.OpenOutFile()
+  -- if we already have a handle, check it's still valid
+  if RF.IPC.OUT_FH then
+    local ok = pcall(function() RF.IPC.OUT_FH:seek("cur") end)
+    if ok then
+      return RF.IPC.OUT_FH
+    end
+    -- if invalid, try to close it safely
+    pcall(function() RF.IPC.OUT_FH:close() end)
+    RF.IPC.OUT_FH = nil
+  end
+
+  local f = io.open(RF.IPC.CHANNEL_OUT_FILE, "a")
+  if f then
+    RF.IPC.OUT_FH = f
+  end
+  return RF.IPC.OUT_FH
+end
 
 -- Flushes batches of the write queue to the output file by calling write message
 -- poke does some work and then returns; this is called periodically by the main addon loop
@@ -60,10 +83,10 @@ function RF.IPC.interact()
   end
 
   -- reset file if size is >100MB to prevent bloat
-  local file = io.open(RF.IPC.CHANNEL_OUT_FILE, "r")
-  if file then
-    local size = file:seek("end")
-    file:close()
+  local sizeCheck = io.open(RF.IPC.CHANNEL_OUT_FILE, "r")
+  if sizeCheck then
+    local size = sizeCheck:seek("end")
+    sizeCheck:close()
     if size > 100 * 1024 * 1024 then -- 100MB
       RF.IPC.ResetOutputFile()
     end
@@ -73,21 +96,48 @@ function RF.IPC.interact()
   local available = tail - head + 1
   local batchSize = math.min(RF.IPC.BATCH_SIZE, available)
 
-  -- Open file once for batch write
-  file = io.open(RF.IPC.CHANNEL_OUT_FILE, "a")
+  -- Open persistent file handle once for batch write
+  local file = RF.IPC.OpenOutFile()
   if not file then return end
 
   -- Write batch of messages using head/tail indices, nil out entries so GC can reclaim them
   for i = 0, batchSize - 1 do
     local idx = head + i
-    local json = RF.IPC.MESSAGE_WRITE_QUEUE[idx]
-    if json then
-      file:write(json)
-      file:write("\n")
+    local entry = RF.IPC.MESSAGE_WRITE_QUEUE[idx]
+    if entry then
+      local json
+      if type(entry) == "string" then
+        -- already-encoded JSON (older code path); write as-is
+        json = entry
+      else
+        -- encode table into JSON now (lazy encode)
+        local ok, enc = pcall(RF.JSON.json_encode, entry)
+        if ok and enc then
+          json = enc
+        else
+          RF:Log("IPC: Failed to encode queued message: " .. tostring(enc))
+          json = nil
+        end
+      end
+
+      if json then
+        -- write and newline; use pcall to avoid throwing into game loop
+        local wrote_ok = pcall(function()
+          file:write(json)
+          file:write("\n")
+        end)
+        if not wrote_ok then
+          -- if write failed, we can't do much; stop processing this batch
+          break
+        end
+      end
+
       RF.IPC.MESSAGE_WRITE_QUEUE[idx] = nil
     end
   end
-  file:close()
+
+  -- flush to ensure data is pushed to OS (may help reduce stalls later)
+  pcall(function() file:flush() end)
 
   -- Move head forward
   RF.IPC.MESSAGE_WRITE_QUEUE_HEAD = head + batchSize
@@ -122,32 +172,27 @@ function RF.IPC.interact()
     RF.IPC.MESSAGE_WRITE_QUEUE = rebuild
     RF.IPC.MESSAGE_WRITE_QUEUE_HEAD = 1
     RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = rt
-    RF:Log("IPC: Forcefully rebuilt huge queue to avoid index overflow")
+    RF:Log("[Performance] - Forcefully rebuilt huge IPC write queue to avoid index overflow..")
   end
 end
 
--- Queues a message to be sent later; returns the JSON string
+-- Queues a message to be sent later; returns nothing (avoid heavy work on hot path)
 function RF.IPC.EnqueueWriteMessage(msgType, payload)
+  -- Build message table but do NOT stringify here to keep hot path cheap
   local message = RF.IPC.BuildIPCMessage(msgType, payload)
-  local json = RF.JSON.json_encode(message)
 
-  -- Safety: if backlog grows unboundedly, bypass the queue and write directly to file to avoid
-  -- spending CPU time compacting/allocating huge tables during interact(). Choosing to write
-  -- immediately here is preferable to causing the game UI to lag later.
+  -- Safety: warn if backlog grows large, but always enqueue (never drop).
   local backlog = RF.IPC.MESSAGE_WRITE_QUEUE_TAIL - RF.IPC.MESSAGE_WRITE_QUEUE_HEAD + 1
   if backlog < 0 then backlog = 0 end
-  local MAX_BACKLOG = 100000 -- arbitrary large cap; tune if needed
+  local MAX_BACKLOG = 300000 -- arbitrary large cap; tune if needed
   if backlog > MAX_BACKLOG then
-    -- write immediately to avoid growing the in-memory queue further
-    RF:Log("IPC: Queue backlog exceeded " .. tostring(MAX_BACKLOG) .. ", writing directly to file to avoid buildup")
-    RF.IPC.WriteMessage(msgType, payload)
-    return json
+    RF:Log("[Performance] - IPC write queue backlog exceeded " .. tostring(MAX_BACKLOG) .. " (" .. tostring(backlog) .. " pending). Consider increasing BATCH_SIZE or BATCH_COOLDOWN.")
   end
 
-  -- push to tail
+  -- push to tail (cheap table insert)
   RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = RF.IPC.MESSAGE_WRITE_QUEUE_TAIL + 1
-  RF.IPC.MESSAGE_WRITE_QUEUE[RF.IPC.MESSAGE_WRITE_QUEUE_TAIL] = json
-  return json
+  RF.IPC.MESSAGE_WRITE_QUEUE[RF.IPC.MESSAGE_WRITE_QUEUE_TAIL] = message
+  return nil
 end
 
 -- Immediately writes a message to the output file
@@ -157,11 +202,13 @@ end
 function RF.IPC.WriteMessage(msgType, payload)
   local message = RF.IPC.BuildIPCMessage(msgType, payload)
   local json = RF.JSON.json_encode(message)
-  local f = io.open(RF.IPC.CHANNEL_OUT_FILE, "a")
+  local f = RF.IPC.OpenOutFile()
   if not f then return end
-  f:write(json)
-  f:write("\n")  -- newline-delimited JSON (important!)
-  f:close()
+  pcall(function()
+    f:write(json)
+    f:write("\n")  -- newline-delimited JSON (important!)
+    f:flush()
+  end)
 end
 
 -- Will clear the input file after reading because of the problem where the file
@@ -200,6 +247,11 @@ function RF.IPC.BuildIPCMessage(msgType, payload)
 end
 
 function RF.IPC.ResetOutputFile()
+  -- close persistent handle first to ensure truncation works reliably
+  if RF.IPC.OUT_FH then
+    pcall(function() RF.IPC.OUT_FH:close() end)
+    RF.IPC.OUT_FH = nil
+  end
   local f = io.open(RF.IPC.CHANNEL_OUT_FILE, "w")
   if f then
     f:write("")  -- truncate

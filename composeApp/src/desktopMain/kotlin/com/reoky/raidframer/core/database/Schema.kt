@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 9 // increment this when making schema changes
+const val SCHEMA_VERSION = 12 // increment this when making schema changes
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -101,6 +101,7 @@ data class PlayerCacheEntity(
   // utility item usages
   val lastKrakenScepter: Long = 0L,
   val lastKrakenSpear: Long = 0L,
+  val lastKrakenShield: Long = 0L,
   val lastLibShieldPull: Long = 0L,
   val lastGreatclub: Long = 0L,
   val lastHalcyNecklace: Long = 0L,
@@ -142,10 +143,12 @@ data class PlayerCacheEntity(
   val lifetimeTotalSilences: Long = 0L,
   val lifetimeTotalGliderUses: Long = 0L,
   val lifetimeTotalItemSkillsUsed: Long = 0L,
+  val lifetimeTotalPotionUsages: Long = 0L,
   val lifetimeTotalKills: Long = 0L,
   val lifetimeTotalKillsKB: Long = 0L,
   val lifetimeTotalDeaths: Long = 0L,
   val lifetimeTotalDamageTaken: Long = 0L,
+  val lifetimeTotalHealsReceived: Long = 0L,
 )
 
 // global enums below for consolidation

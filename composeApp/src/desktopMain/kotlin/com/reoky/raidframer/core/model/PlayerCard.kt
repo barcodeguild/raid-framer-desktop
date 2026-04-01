@@ -70,6 +70,9 @@ data class PlayerCard (
   val sessionPotionTotal: Int = 0,
   val sessionKillTotal: Int = 0,
   val sessionKillTotalKB: Int = 0,
-  val sessionDeathTotal: Int = 0
+  val sessionDeathTotal: Int = 0,
+  val sessionDamageTakenTotal: Int = 0,
+  val sessionHealsReceivedTotal: Int = 0,
+  val sessionOdeHealsTotal: Long = 0,
 )
 
