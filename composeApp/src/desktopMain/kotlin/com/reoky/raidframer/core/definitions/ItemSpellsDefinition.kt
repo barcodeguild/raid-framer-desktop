@@ -26,6 +26,7 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_lib_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_lib_shortspear
 import raid_framer_desktop.composeapp.generated.resources.item_name_lib_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_library_greatclub
+import raid_framer_desktop.composeapp.generated.resources.item_name_serp_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_greataxe
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_greatsword
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_gun
@@ -306,5 +307,13 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     cooldown = 180.0,
     friendlyNameRes = Res.string.item_name_garden_anth_set_pull,
     possibleSpellNames = listOf("Necromantic Flame")
+  ),
+  SERP_STAFF(
+    itemSpecificSkillIds = listOf(22438),
+    itemSpecificBuffIds = listOf(6136), //  Corrupted Wit
+    castTime = 2.0,
+    cooldown = 180.0,
+    friendlyNameRes = Res.string.item_name_serp_staff,
+    possibleSpellNames = listOf("Corrupted Wit")
   );
 }

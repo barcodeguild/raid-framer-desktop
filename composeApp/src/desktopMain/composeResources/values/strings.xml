@@ -112,6 +112,8 @@
     <string name="item_name_bd_2h_sword">Black Dragon 2H Sword (Wing-Reaper)</string>
     <string name="item_name_sungold_anth_set_pull">Sungold Anth Set Pull</string>
     <string name="item_name_garden_anth_set_pull">Garden Anth Set Pull</string>
+    <string name="item_name_serp_staff">Corrupted Wit</string>
+
 
     <!-- Game Potions -->
     <string name="potion_name_minor_healing_rank_one">Veiled Flame (Minor Healing Potion)</string>

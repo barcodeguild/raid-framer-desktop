@@ -44,7 +44,7 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
-  val isOde = if (event.spell == "Ode to Recovery") true else false // is this ode?
+  val isOde = if (event.spell.contains("Ode to Recovery")) true else false // is this ode?
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
