@@ -997,7 +997,7 @@ object PlayerCacheInteractor : Interactor() {
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
   val topKillsPirate: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
-      cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 }.sortedByDescending { it.sessionKillTotal }
+      cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 && it.lastKnownFaction == Faction.PIRATE.value }.sortedByDescending { it.sessionKillTotal }
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 

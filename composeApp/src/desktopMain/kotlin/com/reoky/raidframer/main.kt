@@ -163,6 +163,7 @@ fun main(args: Array<String>) = application {
         wm.openWindow(OverlayType.ABOUT)
         RFDao.configDao.insert(config.copy(firstLaunch = false))
       }
+      if (config.miniGraphEnabled) wm.openWindow(OverlayType.MINI)
     }
   }
 }

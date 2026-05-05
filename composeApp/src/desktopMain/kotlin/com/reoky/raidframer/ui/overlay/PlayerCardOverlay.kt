@@ -137,7 +137,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Damage
               EventListColumn(
                 title = str("Recent Damage"),
-                items = card.recentDamageEvents.take(200),
+                items = card.recentDamageEvents.take(200).sortedByDescending { it.timestamp },
                 modifier = Modifier.weight(1f)
               ) { evt ->
                 RowItemWithTime(evt.timestamp) {

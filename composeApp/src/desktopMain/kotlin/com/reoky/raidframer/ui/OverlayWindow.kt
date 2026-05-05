@@ -269,7 +269,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 50f,
       lastWidthDp = 380f,
       lastHeightDp = 160f,
-      isVisible = true
+      isVisible = false
     )
 
     OverlayType.TRACKER -> WindowStateEntity(
@@ -279,7 +279,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 50f,
       lastWidthDp = 300f,
       lastHeightDp = 400f,
-      isVisible = false
+      isVisible = true
     )
 
     OverlayType.AGGRO -> WindowStateEntity(

@@ -83,8 +83,8 @@ fun TrackerOverlay(wm: WindowManager? = null) {
 
 
   val isCharmed = remember { mutableStateOf(false) }
-  val recentDamageEvents = remember { mutableStateListOf<DamageEvent>() }
-  val recentHealEvents = remember { mutableStateListOf<HealEvent>() }
+  var recentDamageEvents by remember { mutableStateOf<List<DamageEvent>>(emptyList()) }
+  var recentHealEvents by remember { mutableStateOf<List<HealEvent>>(emptyList()) }
   val activeDebuffs = remember { mutableStateListOf<String>() }
 
   // poll for recent heals and damage events
@@ -93,10 +93,8 @@ fun TrackerOverlay(wm: WindowManager? = null) {
       playerName?.let { name ->
         PlayerCacheInteractor.getCard(name)?.let { player ->
           isCharmed.value = player.isCharmed
-          recentDamageEvents.clear()
-          recentDamageEvents.addAll(player.recentDamageEvents)
-          recentHealEvents.clear()
-          recentHealEvents.addAll(player.recentHealEvents)
+          recentDamageEvents = player.recentDamageEvents  // single atomic assignment
+          recentHealEvents = player.recentHealEvents      // single atomic assignment
           activeDebuffs.clear()
           //activeDebuffs.addAll(player.activeDebuffs)
         }

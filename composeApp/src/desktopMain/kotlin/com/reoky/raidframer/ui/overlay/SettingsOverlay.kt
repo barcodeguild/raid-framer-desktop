@@ -22,6 +22,9 @@ import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_description
@@ -139,7 +142,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         }
       }
 
-      GlobalOptionsPanel()
+      GlobalOptionsPanel(wm)
     }
     // looked too weird to keep
     // VerticalScrollbar(
@@ -152,7 +155,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 }
 
 @Composable
-fun GlobalOptionsPanel() {
+fun GlobalOptionsPanel(wm: WindowManager? = null) {
   val config by RFConfig.state.collectAsState() // single source of truth
   Box(
     modifier = Modifier
@@ -245,7 +248,10 @@ fun GlobalOptionsPanel() {
           Checkbox(
             checked = config.miniGraphEnabled,
             onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(miniGraphEnabled = isChecked) }
+              CoroutineScope(Dispatchers.Main).launch {
+                RFConfig.update { it.copy(miniGraphEnabled = isChecked) }
+                if (isChecked) wm?.openWindow(OverlayType.MINI) else wm?.closeWindow(OverlayType.MINI)
+              }
             },
             colors = CheckboxDefaults.colors(
               checkmarkColor = Color.White,

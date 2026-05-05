@@ -34,7 +34,7 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalDamage = cache.lifetimeTotalDamage + event.damage
     ),
-    recentDamageEvents = (this.recentDamageEvents + event), // optional to takeLast(n)
+    recentDamageEvents = (this.recentDamageEvents + event).takeLast(200),
     sessionDamageTotal = this.sessionDamageTotal + event.damage
   )
 }
@@ -51,7 +51,7 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount
     ),
-    recentHealEvents = (this.recentHealEvents + event), // optional to takeLast(n)
+    recentHealEvents = (this.recentHealEvents + event).takeLast(200),
     sessionHealTotal = this.sessionHealTotal + event.amount,
     sessionOdeHealsTotal = if (isOde) this.sessionOdeHealsTotal + event.amount else this.sessionOdeHealsTotal
   )
@@ -98,7 +98,7 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
     cache = cache?.copy(
       lastSeen = event.timestamp
     ),
-    recentCastEvents = (this.recentCastEvents + event) // optional to takeLast(n)
+    recentCastEvents = (this.recentCastEvents + event).takeLast(200) // optional to takeLast(n)
   )
 }
 
@@ -118,7 +118,7 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
       lifetimeTotalCharms = if (isMarasNineTails) (card.cache?.lifetimeTotalCharms ?: 0) + 1 else (card.cache?.lifetimeTotalCharms ?: 0)
     ),
     sessionCharmTotal = if (isMarasNineTails) card.sessionCharmTotal + 1 else card.sessionCharmTotal,
-    recentCastSuccessfulCastEvents = (card.recentCastSuccessfulCastEvents + event)
+    recentCastSuccessfulCastEvents = (card.recentCastSuccessfulCastEvents + event).takeLast(200)
   )
 }
 
@@ -132,7 +132,7 @@ fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
     cache = cache?.copy(
       lastSeen = event.timestamp
     ),
-    recentBuffGainedEvents = (this.recentBuffGainedEvents + event) // optional to takeLast(n)
+    recentBuffGainedEvents = (this.recentBuffGainedEvents + event).takeLast(200) // optional to takeLast(n)
   )
 }
 
@@ -143,7 +143,7 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
-    recentBuffEndedEvents = (this.recentBuffEndedEvents + event) // optional to takeLast(n)
+    recentBuffEndedEvents = (this.recentBuffEndedEvents + event).takeLast(200) // optional to takeLast(n)
   )
 }
 
@@ -154,7 +154,7 @@ fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
-    recentDebuffGainedEvents = (this.recentDebuffGainedEvents + event), // optional to takeLast(n)
+    recentDebuffGainedEvents = (this.recentDebuffGainedEvents + event).takeLast(200), // optional to takeLast(n)
   )
 }
 
@@ -165,7 +165,7 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
-    recentDebuffEndedEvents = (this.recentDebuffEndedEvents + event), // optional to takeLast(n)
+    recentDebuffEndedEvents = (this.recentDebuffEndedEvents + event).takeLast(200), // optional to takeLast(n)
   )
 }
 
@@ -195,7 +195,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       lifetimeTotalDistresses = if (isDistress) cache.lifetimeTotalDistresses + 1 else cache.lifetimeTotalDistresses,
       lifetimeTotalSilences = if (isSilence) cache.lifetimeTotalSilences + 1 else cache.lifetimeTotalSilences
     ),
-    recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event), // optional to takeLast(n)
+    recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
     sessionCharmTotal = if (isCharm) sessionCharmTotal + 1 else sessionCharmTotal,
     sessionSongsTotal = if (isSongs) this.sessionSongsTotal + 1 else this.sessionSongsTotal,
@@ -219,7 +219,7 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalBuffsApplied = cache.lifetimeTotalBuffsApplied + 1
     ),
-    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event), // optional to takeLast(n)
+    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
     sessionBuffTotal = this.sessionBuffTotal + 1
   )
 }

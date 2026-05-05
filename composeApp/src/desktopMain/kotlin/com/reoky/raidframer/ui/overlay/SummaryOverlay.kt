@@ -363,7 +363,7 @@ private fun KillsDeathsTab(
       icon = "\uF54C",
       title = "Top Kills Nuia",
       cards = topKillsNuia,
-      valueExtractor = { it.sessionKillTotalKB.toString() },
+      valueExtractor = { it.sessionKillTotal.toString() },
       valueColor = Color(0xFFFFA726),
       modifier = Modifier.weight(1f)
     ) { card ->
@@ -375,7 +375,7 @@ private fun KillsDeathsTab(
       icon = "\uF54C",
       title = "Top Kills Pirate",
       cards = topKillsPirate,
-      valueExtractor = { it.cache?.lifetimeTotalKills?.toString() ?: "0" },
+      valueExtractor = { it.sessionKillTotal.toString() },
       valueColor = Color(0xFFEF5350),
       modifier = Modifier.weight(1f)
     ) { card ->
