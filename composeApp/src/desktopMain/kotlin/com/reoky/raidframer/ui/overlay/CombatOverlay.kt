@@ -359,15 +359,10 @@ fun CombatOverlay(wm: WindowManager? = null) {
               .fillMaxWidth()
           ) {
             itemsIndexed(sortedHeals, key = { _, card -> card.name }) { index, card ->
-              val odePercent = if (card.sessionHealsReceivedTotal > 0) {
-                ((card.sessionOdeHealsTotal.toDouble() / card.sessionHealsReceivedTotal.toDouble()) * 100.0).roundToInt()
-              } else {
-                0
-              }
               PlayerRankingRow(
                 index = index,
                 card = card,
-                valueText = "${card.sessionHealTotal.humanReadableAbbreviation()} (${card.sessionOdeHealsTotal.humanReadableAbbreviation()} Ode)",
+                valueText = card.sessionHealTotal.humanReadableAbbreviation(),
                 valueColor = RFColors.healsGreen,
                 isRetribution = card.isBuildingAggression,
                 flashingColor = flashingColorState.value,

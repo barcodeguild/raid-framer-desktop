@@ -7,8 +7,7 @@
     <string name="graphs_one_minute">1 Minute</string>
 
     <!-- Companion Addon Settings Strings -->
-    <string name="companion_description">The Lua Addon (dubbed the 'companion') provides additional functionality by loading a native Lua addon. This allows for native-only functionality like target-based debuff tracking, raid management, and in-game visual/audible effects. Without the companion some features won't work as intended. \n\nNote that: The "mark" features below are purely visual and do not automatically target or apply raid marks to targets.</string>
-    <string name="companion_toggle">Enable Lua Companion. (Disabling the addon will retract the Lua code from the game at the next character switch automatically!)</string>
+    <string name="companion_description">The Lua Addon sources combat data from the game. It's what allows for native-only functionality like target-based debuff tracking, raid management, and in-game visual/audible effects. If you remove the lua addon from the game features won't work as intended.</string>
     <string name="companion_toggle_raid_status">Display the main / co-raid member count when players join or leave the raid.</string>
     <string name="companion_toggle_display_charmed">Display 'Charmed' targets in game chat window.</string>
     <string name="companion_toggle_display_silenced">Display 'Silenced' targets in game chat window.</string>
@@ -23,7 +22,7 @@
     <!-- Settings Strings -->
     <string name="settings_title">Raid Framer Desktop Settings</string>
     <string name="settings_data_sourcing_title">Data Sourcing</string>
-    <string name="settings_data_sourcing_description">Please be careful to enter the correct ArcheRage directory below. This field may have been populated automatically.</string>
+    <string name="settings_data_sourcing_description">Please be careful to enter the correct ArcheRage directory below. This field was likely populated automatically: </string>
     <string name="settings_data_sourcing_sidenote">Technically, you do not need ArcheRage installed if you only want to view historical combat.log files. Just right-click on the .log or .rf (battle slice export file) and choose 'Open-With → Raid Framer' in the Windows Explorer context menu to view a replay.</string>
     <string name="settings_toggle_pvp_damage">Show only PvP damage</string>
     <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
@@ -92,7 +91,7 @@
     <string name="item_name_jola_shield">Jola's Grudge</string>
     <string name="item_name_halcy_neck">Halcy Necklace</string>
     <string name="item_name_soul_neck">Soul Necklace</string>
-    <string name="item_name_doomshadow_nodachi">Doomshadow Nodachi</string>
+    <string name="item_name_mist_nodachi">Doomshadow Nodachi</string>
     <string name="item_name_lib_bow">Library/Immortal Warden's Bow</string>
     <string name="item_name_lib_dagger">Library/Immortal Warden's Dagger</string>
     <string name="item_name_lib_shortspear">Library/Immortal Warden's Shortspear</string>
@@ -112,7 +111,9 @@
     <string name="item_name_bd_2h_sword">Black Dragon 2H Sword (Wing-Reaper)</string>
     <string name="item_name_sungold_anth_set_pull">Sungold Anth Set Pull</string>
     <string name="item_name_garden_anth_set_pull">Garden Anth Set Pull</string>
-    <string name="item_name_serp_staff">Corrupted Wit</string>
+    <string name="item_name_serp_staff">Corrupted Wit (Serpentis)</string>
+    <string name="item_name_mist_dagger">Mistsong Wicked Whisper Dagger</string>
+    <string name="item_name_mist_shield">Mistsong Stealthfang Shield</string>
 
 
     <!-- Game Potions -->

@@ -109,6 +109,8 @@ fun main(args: Array<String>) = application {
       messageBox(AppGlobals.APP_NAME, "Failed to open the specified combat log file: $incoming")
       exitProcess(1)
     }
+
+  // not viewing a replay so pick the path from settings
   } else {
     // choose game path default automatically
     context.launch(Dispatchers.IO) {
@@ -141,14 +143,14 @@ fun main(args: Array<String>) = application {
   }
 
   // start the game monitor
-  context.launch(Dispatchers.IO) {
-    GameMonitorInteractor.locateArcheRageDirectory()
-  }
-  LaunchedEffect(GameMonitorInteractor.isSearching) {
-    GameMonitorInteractor.possiblePaths.value.onEach { path ->
-      Log.info(TAG, "Found possible combat log at: ")
-    }
-  }
+//  context.launch(Dispatchers.IO) {
+//    GameMonitorInteractor.locateArcheRageDirectory()
+//  }
+//  LaunchedEffect(GameMonitorInteractor.isSearching) {
+//    GameMonitorInteractor.possiblePaths.value.onEach { path ->
+//      Log.info(TAG, "Found possible combat log at: ")
+//    }
+//  }
 
   // spawn the system tray
   tray = spawnSystemTray(wm)

@@ -23,11 +23,9 @@ import com.reoky.raidframer.ui.component.CheckBoxComponent
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.companion_description
 import raid_framer_desktop.composeapp.generated.resources.companion_toggl_display_mark_hvt_healers
-import raid_framer_desktop.composeapp.generated.resources.companion_toggle
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_charmed
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_hvt_cc
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_hvt_dps
@@ -97,16 +95,6 @@ fun CompanionOverlay(wm: WindowManager? = null) {
 
       val scrollState = rememberScrollState()
       Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp).verticalScroll(scrollState)) {
-        // main toggle
-        Row {
-          CheckBoxComponent(
-            label = stringResource(Res.string.companion_toggle),
-            initialChecked = RFConfig.state.value.companionEnabled,
-            onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(companionEnabled = isChecked) }
-            }
-          )
-        }
 
         // chat display raid stats toggle
         Row {
@@ -115,6 +103,17 @@ fun CompanionOverlay(wm: WindowManager? = null) {
             initialChecked = RFConfig.state.value.companionShowRaidStatus,
             onCheckedChange = { isChecked ->
               RFConfig.update { it.copy(companionShowRaidStatus = isChecked) }
+            }
+          )
+        }
+
+        // chat silenced toggle
+        Row {
+          CheckBoxComponent(
+            label = stringResource(Res.string.companion_toggle_display_silenced),
+            initialChecked = RFConfig.state.value.companionShowSilencedInChat,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionShowSilencedInChat = isChecked) }
             }
           )
         }
@@ -130,13 +129,13 @@ fun CompanionOverlay(wm: WindowManager? = null) {
           )
         }
 
-        // chat silenced toggle
+        // chat distressed toggle
         Row {
           CheckBoxComponent(
-            label = stringResource(Res.string.companion_toggle_display_silenced),
-            initialChecked = RFConfig.state.value.companionShowSilencedInChat,
+            label = stringResource(Res.string.companion_toggle_display_charmed),
+            initialChecked = RFConfig.state.value.companionShowDistressedInChat,
             onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(companionShowSilencedInChat = isChecked) }
+              RFConfig.update { it.copy(companionShowDistressedInChat = isChecked) }
             }
           )
         }

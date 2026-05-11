@@ -62,6 +62,11 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val topKillsHaranya by PlayerCacheInteractor.topKillsHaranya.collectAsState()
   val topKillsNuia by PlayerCacheInteractor.topKillsNuia.collectAsState()
   val topKillsPirate by PlayerCacheInteractor.topKillsPirate.collectAsState()
+
+  val topOdeHaranya by PlayerCacheInteractor.topOdeHaranya.collectAsState()
+  val topOdeNuia by PlayerCacheInteractor.topOdeNuia.collectAsState()
+  val topOdePirate by PlayerCacheInteractor.topOdePirate.collectAsState()
+
 //  val topKillsDamage by PlayerCacheInteractor.topKills.collectAsState()
 //  val topKillsKillingBlow by PlayerCacheInteractor.topKillsKB.collectAsState()
 //  val topKillsLifetime by PlayerCacheInteractor.topKillsLifetime.collectAsState()
@@ -81,6 +86,7 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     "Debuffs",
     "Spells",
     "Buffs",
+    "Ode",
     "K/D",
     "Received",
     "Items",
@@ -170,30 +176,36 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           topBuffers = topBuffers,
           wm = wm
         )
-        3 -> KillsDeathsTab(
+        3 -> OdeTab(
+          topOdeHaranya = topOdeHaranya,
+          topOdeNuia = topOdeNuia,
+          topOdePirate = topOdePirate,
+          wm = wm
+        )
+        4 -> KillsDeathsTab(
           topKillsHaranya = topKillsHaranya,
           topKillsNuia = topKillsNuia,
           topKillsPirate = topKillsPirate,
           wm = wm
         )
-        4 -> DamageTakenHealsReceived(
+        5 -> DamageTakenHealsReceived(
           topDamageTaken = topDamageTaken,
           topHealsReceived = tophealsReceived,
           wm = wm
         )
-        5 -> UtilityItemsByFaction(
+        6 -> UtilityItemsByFaction(
           topItemUsesHaranya = topItemUsesHaranya,
           topItemUsesNuia = topItemUsesNuia,
           topItemUsesPirate = topItemUsesPirate,
           wm = wm
         )
-        6 -> UtilityItemsTab(
+        7 -> UtilityItemsTab(
           topPotters = topPotters,
           topGliderGamers = topGliderGamers,
           topItemSkillCasters = topItemSkillCasters,
           wm = wm
         )
-        7 -> PlayerBuildsTab(
+        8 -> PlayerBuildsTab(
           buildCountsHaranya = buildCountsHaranya,
           buildCountsNuia = buildCountsNuia,
           buildCountsPirate = buildCountsPirate,
@@ -338,6 +350,54 @@ private fun BuffsDebuffsTab(
 }
 
 @Composable
+private fun OdeTab(
+  topOdeHaranya: List<PlayerCard>,
+  topOdeNuia: List<PlayerCard>,
+  topOdePirate: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(
+    modifier = Modifier.fillMaxSize()
+  ) {
+    StatColumn(
+      icon = "",
+      title = "♪ Top Ode Haranya ♪",
+      cards = topOdeHaranya,
+      valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
+      valueColor = RFColors.healsGreen,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+
+    StatColumn(
+      icon = "",
+      title = "♪ Top Ode Nuia ♪",
+      cards = topOdeNuia,
+      valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
+      valueColor =  RFColors.healsGreen,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+
+    StatColumn(
+      icon = "",
+      title = "♪ Top Ode Pirate ♪",
+      cards = topOdePirate,
+      valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
+      valueColor =  RFColors.healsGreen,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+  }
+}
+
+@Composable
 private fun KillsDeathsTab(
   topKillsHaranya: List<PlayerCard>,
   topKillsNuia: List<PlayerCard>,
@@ -399,7 +459,7 @@ private fun DamageTakenHealsReceived(
       title = "\uD83D\uDD25 Top Damage Taken \uD83D\uDD25",
       cards = topDamageTaken,
       valueExtractor = { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation() },
-      valueColor = Color(0xFFEF5350),
+      valueColor = RFColors.dpsOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -411,7 +471,7 @@ private fun DamageTakenHealsReceived(
       title = "\uD83D\uDC89 Top Heals Received \uD83D\uDC89",
       cards = topHealsReceived,
       valueExtractor = { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() },
-      valueColor = Color(0xFF66BB6A),
+      valueColor = RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)

@@ -1001,6 +1001,25 @@ object PlayerCacheInteractor : Interactor() {
     }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+  val topOdeHaranya: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 && it.lastKnownFaction == Faction.HARANYA.value }
+        .sortedByDescending { it.sessionOdeHealsTotal }
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+  val topOdeNuia: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 && it.lastKnownFaction == Faction.NUIA.value }
+        .sortedByDescending { it.sessionOdeHealsTotal }
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+  val topOdePirate: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 && it.lastKnownFaction == Faction.PIRATE.value }
+        .sortedByDescending { it.sessionOdeHealsTotal }
+    }
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
   /**
    * Compares average charm totals between raid members and opposition.
    * Returns a map with "Our Raid" and "Opposition" as keys.

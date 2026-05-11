@@ -92,3 +92,21 @@ val MIGRATION_11_12 = object : Migration(11, 12) {
     }
   }
 }
+
+// added val companionShowDistressedInChat: Boolean = true, to ConfigEntity
+val MIGRATION_12_13 = object : Migration(12, 13) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN companionShowDistressedInChat INTEGER NOT NULL DEFAULT 1").use {
+      it.step()
+    }
+  }
+}
+
+// added val installationFinalized: Boolean = false,
+val MIGRATION_13_14 = object : Migration(13, 14) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN installationFinalized INTEGER NOT NULL DEFAULT 0").use {
+      it.step()
+    }
+  }
+}

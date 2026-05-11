@@ -121,6 +121,7 @@ object InstallationInteractor : Interactor() {
       "show_raid_status" to config.companionShowRaidStatus.toString(),
       "show_charmed_in_chat" to config.companionShowCharmedInChat.toString(),
       "show_silenced_in_chat" to config.companionShowSilencedInChat.toString(),
+      "show_distressed_in_chat" to config.companionShowDistressedInChat.toString(),
       "play_charm_sound" to config.companionPlayCharmSound.toString(),
       "mark_hvt_healers" to config.companionMarkHVTHealers.toString(),
       "mark_hvt_dps" to config.companionMarkHVTDPS.toString(),

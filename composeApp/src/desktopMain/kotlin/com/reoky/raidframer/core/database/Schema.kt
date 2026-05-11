@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 12 // increment this when making schema changes
+const val SCHEMA_VERSION = 14 // increment this when making schema changes
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -48,6 +48,7 @@ data class ConfigEntity(
   val dragonBreathOverlayEnabled: Boolean = false,
   val killCounterMode: String = KillCounterMode.MOST_DAMAGE.name,
   val firstLaunch: Boolean = true,
+  val installationFinalized: Boolean = false, // user confirmed their game directory
   val playerName: String = "", // player's own name
   val playerFaction: String = "", // player's own faction
 
@@ -56,6 +57,7 @@ data class ConfigEntity(
   val companionShowRaidStatus: Boolean = true,
   val companionShowCharmedInChat: Boolean = true,
   val companionShowSilencedInChat: Boolean = true,
+  val companionShowDistressedInChat: Boolean = true,
   val companionPlayCharmSound: Boolean = true,
 
   // future-proofing for more companion marks

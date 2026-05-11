@@ -12,7 +12,7 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_bd_gun
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_sword
-import raid_framer_desktop.composeapp.generated.resources.item_name_doomshadow_nodachi
+import raid_framer_desktop.composeapp.generated.resources.item_name_mist_nodachi
 import raid_framer_desktop.composeapp.generated.resources.item_name_garden_anth_set_pull
 import raid_framer_desktop.composeapp.generated.resources.item_name_halcy_neck
 import raid_framer_desktop.composeapp.generated.resources.item_name_honor_nodachi
@@ -26,6 +26,8 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_lib_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_lib_shortspear
 import raid_framer_desktop.composeapp.generated.resources.item_name_lib_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_library_greatclub
+import raid_framer_desktop.composeapp.generated.resources.item_name_mist_dagger
+import raid_framer_desktop.composeapp.generated.resources.item_name_mist_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_serp_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_greataxe
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_greatsword
@@ -47,6 +49,10 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_soul_neck
  * updateCache: Lambda function code that gets executed on the player cache to update any relevant info (like usage counts)
  */
 enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val itemSpecificBuffIds: List<Int>, override val castTime: Double, override val cooldown: Double, override val friendlyNameRes: StringResource, override val possibleSpellNames: List<String>, override val updateCard: (PlayerCard) -> PlayerCard = { it }) : UtilityItem {
+
+  //
+  // Kraken Weapons and Shield
+  //
   KRAKEN_SCEPTER(
     itemSpecificSkillIds = listOf(36733),
     itemSpecificBuffIds = listOf(), // gives slow and snare but no unique buff id
@@ -80,29 +86,6 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
       cache = card.cache?.copy(lastKrakenShield = incrementPackedItemUsage(card.cache.lastKrakenShield))
     )}
   ),
-  LIB_GREATCLUB(
-    itemSpecificSkillIds = listOf(45099, 39452, 41234),
-    itemSpecificBuffIds = listOf(23216, 24395),
-    castTime = 0.0,
-    cooldown = 45.0,
-    friendlyNameRes = Res.string.item_name_library_greatclub,
-    possibleSpellNames = listOf("Disciple's Greatclub", "Immortals's Greatclub"),
-    updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastGreatclub = incrementPackedItemUsage(card.cache.lastGreatclub))
-    )}
-  ),
-  LIB_SHIELD(
-    itemSpecificSkillIds = listOf(39451),
-    itemSpecificBuffIds = listOf(),
-    castTime = 4.0,
-    cooldown = 45.0,
-    friendlyNameRes = Res.string.item_name_lib_shield,
-    possibleSpellNames = listOf("Disciple's Shield", "Immortal Warden's Shield"),
-    updateCard = { card -> card.copy(
-      sessionCCTotal = card.sessionCCTotal + 1, // allows us to count lib shield as cc points even though there's no visible debuff
-      cache = card.cache?.copy(lastLibShieldPull = incrementPackedItemUsage(card.cache.lastLibShieldPull))
-    )} // lambda to increment the usage count on the cache because most items won't have a cache update
-  ),
   HONOR_NODACHI(
     itemSpecificSkillIds = listOf(14975, 14976), // Rank 1 and 2
     itemSpecificBuffIds = listOf(2114, 2113), // Berserk buff
@@ -114,6 +97,11 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
       cache = card.cache?.copy(lastHonorNodachi = incrementPackedItemUsage(card.cache.lastHonorNodachi))
     )}
   ),
+
+
+  //
+  // JMG Items
+  //
   JOLAS_GRUDGE(
     itemSpecificSkillIds = listOf(23954),
     itemSpecificBuffIds = listOf(7018),
@@ -126,6 +114,10 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
       cache = card.cache?.copy(lastJolaShield = incrementPackedItemUsage(card.cache.lastJolaShield))
     )}
   ),
+
+  //
+  // Our nation's many necklace ~
+  //
   HALCY_NECKLACE(
     itemSpecificSkillIds = listOf(38036), // the skill that applies the buff
     itemSpecificBuffIds = listOf(6765, 6766, 6767, 15077, 15078, 17361, 22111), // rank 2 - 8 of deliverance shield
@@ -148,46 +140,10 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
       cache = card.cache?.copy(lastSoulNecklace = incrementPackedItemUsage(card.cache.lastSoulNecklace))
     )}
   ),
-  DOOMSHADOW_NODACHI(
-    itemSpecificSkillIds = listOf(32321, 32428, 33602), // Superior Doomshadow Nodachi, Prime Doomshadow Nodachi, Supreme Doomshadow Nodachi (Amplified Black Magic skill name)
-    itemSpecificBuffIds = listOf(16767, 16842, 18169), // Pervasive Black Magic Rank 1, Pervasive Black Magic Rank 2, Pervasive Black Magic Rank 3
-    castTime = 0.0,
-    cooldown = 45.0,
-    friendlyNameRes = Res.string.item_name_doomshadow_nodachi,
-    possibleSpellNames = listOf("Pervasive Black Magic", "Amplified Black Magic")
-  ),
-  LIB_BOW(
-    itemSpecificSkillIds = listOf(39450, 41232, 45106), // Disciple's, Radiant Disciple's and Immortal Warden's Bow
-    itemSpecificBuffIds = listOf(23212, 27127), // Bleeding from bow
-    castTime = 0.0,
-    cooldown = 45.0,
-    friendlyNameRes = Res.string.item_name_lib_bow,
-    possibleSpellNames = listOf("Disciple's Bow", "Radiant Disciple's Bow", "Immortal Warden's Bow")
-  ),
-  LIB_DAGGER(
-    itemSpecificSkillIds = listOf(39446, 41228, 45097), // Immortal Warden's Dagger
-    itemSpecificBuffIds = listOf(23193, 27121), // DEADLY POISON BUFF
-    castTime = 0.0,
-    cooldown = 45.0,
-    friendlyNameRes = Res.string.item_name_lib_dagger,
-    possibleSpellNames = listOf("Immortal Warden's Dagger")
-  ),
-  LIB_SHORTSPEAR(
-    itemSpecificSkillIds = listOf(339448, 41230, 45104), // Disciple's, Radiant Disciple's and Immortal Warden's Shortspear
-    itemSpecificBuffIds = listOf(23192), // Provoked
-    castTime = 0.0,
-    cooldown = 45.0,
-    friendlyNameRes = Res.string.item_name_lib_shortspear,
-    possibleSpellNames = listOf("Immortal Warden's Shortspear")
-  ),
-  LIB_STAFF(
-    itemSpecificSkillIds = listOf(39462, 41231, 45105), // Disciple's, Radiant Disciple's and Immortal Warden's Staff
-    itemSpecificBuffIds = listOf(27124),
-    castTime = 0.0,
-    cooldown = 45.0,
-    friendlyNameRes = Res.string.item_name_lib_staff,
-    possibleSpellNames = listOf("Immortal Warden's Staff")
-  ),
+
+  //
+  // Snake Weapons and Shield
+  //
   SNAKE_GREATSOWRD(
     itemSpecificSkillIds = listOf(45765, 45886), // Soulslake Edge, Eminent Soulslake Edge
     itemSpecificBuffIds = listOf(27821, 27822, 27949),
@@ -236,6 +192,10 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     friendlyNameRes = Res.string.item_name_snake_gun,
     possibleSpellNames = listOf("Soulslake Bullet", "Eminent Soulslake Bullet")
   ),
+
+  //
+  // Black Dragon related items
+  //
   BD_SHIELD(
     itemSpecificSkillIds = listOf(40538, 44634), // Black Dragon Fireguard , Ferocious Black Dragon Fireguard
     itemSpecificBuffIds = listOf(23931, 26723), // Black Dragon's Self-Recovery , Ferocious Black Dragon's Self-Recovery
@@ -292,6 +252,10 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     friendlyNameRes = Res.string.item_name_bd_2h_sword,
     possibleSpellNames = listOf("Black Dragon's Fury")
   ),
+
+  //
+  // Anthalon Arche Items
+  //
   ANTH_SET_PULL(
     itemSpecificSkillIds = listOf(19063), // Necromantic Flame
     itemSpecificBuffIds = listOf(4272), // Necromantic Flame - Pull #2
@@ -308,12 +272,103 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     friendlyNameRes = Res.string.item_name_garden_anth_set_pull,
     possibleSpellNames = listOf("Necromantic Flame")
   ),
+
+  //
+  // Library Dungeon Items
+  //
+  LIB_BOW(
+    itemSpecificSkillIds = listOf(39450, 41232, 45106), // Disciple's, Radiant Disciple's and Immortal Warden's Bow
+    itemSpecificBuffIds = listOf(23212, 27127), // Bleeding from bow
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_lib_bow,
+    possibleSpellNames = listOf("Disciple's Bow", "Radiant Disciple's Bow", "Immortal Warden's Bow")
+  ),
+  LIB_DAGGER(
+    itemSpecificSkillIds = listOf(39446, 41228, 45097), // Immortal Warden's Dagger
+    itemSpecificBuffIds = listOf(23193, 27121), // DEADLY POISON BUFF
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_lib_dagger,
+    possibleSpellNames = listOf("Immortal Warden's Dagger")
+  ),
+  LIB_SHORTSPEAR(
+    itemSpecificSkillIds = listOf(339448, 41230, 45104), // Disciple's, Radiant Disciple's and Immortal Warden's Shortspear
+    itemSpecificBuffIds = listOf(23192), // Provoked
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_lib_shortspear,
+    possibleSpellNames = listOf("Immortal Warden's Shortspear")
+  ),
+  LIB_STAFF(
+    itemSpecificSkillIds = listOf(39462, 41231, 45105), // Disciple's, Radiant Disciple's and Immortal Warden's Staff
+    itemSpecificBuffIds = listOf(27124),
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_lib_staff,
+    possibleSpellNames = listOf("Immortal Warden's Staff")
+  ),
+  LIB_GREATCLUB(
+    itemSpecificSkillIds = listOf(45099, 39452, 41234),
+    itemSpecificBuffIds = listOf(23216, 24395),
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_library_greatclub,
+    possibleSpellNames = listOf("Disciple's Greatclub", "Immortals's Greatclub"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastGreatclub = incrementPackedItemUsage(card.cache.lastGreatclub))
+    )}
+  ),
+  LIB_SHIELD(
+    itemSpecificSkillIds = listOf(39451),
+    itemSpecificBuffIds = listOf(),
+    castTime = 4.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_lib_shield,
+    possibleSpellNames = listOf("Disciple's Shield", "Immortal Warden's Shield"),
+    updateCard = { card -> card.copy(
+      sessionCCTotal = card.sessionCCTotal + 1, // allows us to count lib shield as cc points even though there's no visible debuff
+      cache = card.cache?.copy(lastLibShieldPull = incrementPackedItemUsage(card.cache.lastLibShieldPull))
+    )} // lambda to increment the usage count on the cache because most items won't have a cache update
+  ),
+
+  //
+  // Serpentis Dungeon Items
+  //
   SERP_STAFF(
     itemSpecificSkillIds = listOf(22438),
     itemSpecificBuffIds = listOf(6136), //  Corrupted Wit
-    castTime = 2.0,
+    castTime = 0.0,
     cooldown = 180.0,
     friendlyNameRes = Res.string.item_name_serp_staff,
     possibleSpellNames = listOf("Corrupted Wit")
+  ),
+
+  //
+  // Mistsong Dungeon Stuff
+  //
+  MIST_DOOMSHADOW_NODACHI(
+    itemSpecificSkillIds = listOf(32321, 32428, 33602), // Superior Doomshadow Nodachi, Prime Doomshadow Nodachi, Supreme Doomshadow Nodachi (Amplified Black Magic skill name)
+    itemSpecificBuffIds = listOf(16767, 16842, 18169), // Pervasive Black Magic Rank 1, Pervasive Black Magic Rank 2, Pervasive Black Magic Rank 3
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_mist_nodachi,
+    possibleSpellNames = listOf("Pervasive Black Magic", "Amplified Black Magic")
+  ),
+  MIST_DAGGER(
+    itemSpecificSkillIds = listOf(32322), // Spell Cast for Dagger Wicked Whisper Dagger, Prime Wicked Whisper Dagger, Supreme Wicked Whisper Dagger
+    itemSpecificBuffIds = listOf(16765), // Wicked Whisper Dagger debuff
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_mist_dagger,
+    possibleSpellNames = listOf("Wicked Whisper Dagger", "Prime Wicked Whisper Dagger", "Supreme Wicked Whisper Dagger ")
+  ),
+  MIST_SHIELD(
+    itemSpecificSkillIds = listOf(32415, 32416, 33603), // Bewitching Talisman
+    itemSpecificBuffIds = listOf(16825, 16826, 18171), // Healing Talisman
+    castTime = 0.0,
+    cooldown = 45.0,
+    friendlyNameRes = Res.string.item_name_mist_shield,
+    possibleSpellNames = listOf("Healing Talisman", "Mistsong Bewitching Talisman")
   );
 }

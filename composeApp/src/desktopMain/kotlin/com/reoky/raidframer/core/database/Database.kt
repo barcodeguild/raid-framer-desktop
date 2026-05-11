@@ -49,6 +49,8 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_9_10) // 02/22/26 added lifetimeTotalHealsReceived to cache
   .addMigrations(MIGRATION_10_11) // 02/22/26 added lifetimeTotalPotionUsages to cache
   .addMigrations(MIGRATION_11_12) // 02/22/26 added val lastKrakenShield: Long = 0L, to cache
+  .addMigrations(MIGRATION_12_13) // 05/10/26 added val companionShowDistressedInChat: Boolean = true, to config
+  .addMigrations(MIGRATION_13_14)
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)
