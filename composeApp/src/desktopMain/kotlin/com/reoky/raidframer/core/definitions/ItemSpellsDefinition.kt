@@ -356,7 +356,7 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     possibleSpellNames = listOf("Pervasive Black Magic", "Amplified Black Magic")
   ),
   MIST_DAGGER(
-    itemSpecificSkillIds = listOf(32322), // Spell Cast for Dagger Wicked Whisper Dagger, Prime Wicked Whisper Dagger, Supreme Wicked Whisper Dagger
+    itemSpecificSkillIds = listOf(32322, 32426, 33600), // Spell Cast for Dagger Wicked Whisper Dagger, Prime Wicked Whisper Dagger, Supreme Wicked Whisper Dagger
     itemSpecificBuffIds = listOf(16765), // Wicked Whisper Dagger debuff
     castTime = 0.0,
     cooldown = 45.0,
