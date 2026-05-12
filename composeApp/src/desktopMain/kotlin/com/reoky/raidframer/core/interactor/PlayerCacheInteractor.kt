@@ -247,7 +247,9 @@ object PlayerCacheInteractor : Interactor() {
         cards.keys.toList().forEach { name ->
           cards[name] = cards[name]?.resetSession() ?: return@forEach
         }
-        cards.clear()
+        petCards.keys.toList().forEach { petId ->
+          petCards[petId] = petCards[petId]?.resetSession() ?: return@forEach
+        }
       }
     }
   }
@@ -1149,7 +1151,7 @@ object PlayerCacheInteractor : Interactor() {
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .sample(250L) // Only take the latest emitted value every 250ms to limit UI recomposition
     .map { pets ->
-      pets.filter { it.sessionDamageTotal > -1 || it.sessionDebuffTotal > 0 }
+      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 }
         .sortedByDescending { it.sessionDamageTotal }
         .take(50)
     }

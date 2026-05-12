@@ -1,8 +1,8 @@
 package com.reoky.raidframer.core.helpers
 
-import com.reoky.raidframer.core.database.LeadershipRole
 import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.model.PetCard
 
 /**
  * Build a PlayerCacheEntity from this PlayerCard while preserving any previously persisted
@@ -116,5 +116,18 @@ fun PlayerCard.resetSession(): PlayerCard {
     sessionSongsTotal = 0,
     sessionDamageTakenTotal = 0,
     sessionHealsReceivedTotal = 0
+  )
+}
+
+/**
+ * Returns a copy of this PetCard with session totals and recent event lists reset to zero/empty.
+ * Preserves identity metadata tying it to its owner.
+ */
+fun PetCard.resetSession(): PetCard {
+  return this.copy(
+    recentDamageEvents = listOf(),
+    recentDebuffAppliedEvents = listOf(),
+    sessionDamageTotal = 0L,
+    sessionDebuffTotal = 0
   )
 }
