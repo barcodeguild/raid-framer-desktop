@@ -1,0 +1,151 @@
+<resources>
+
+    <!-- Graphs Strings -->
+    <string name="graphs_trend_graph">Trend Graph</string>
+    <string name="graphs_no_recent_data">No Recent Data</string>
+    <string name="graphs_player_metric_format">%1$s's %2$s</string>
+    <string name="graphs_one_minute">1 Minute</string>
+
+    <!-- Companion Addon Settings Strings -->
+    <string name="companion_description">The Lua Addon sources combat data from the game. It's what allows for native-only functionality like target-based debuff tracking, raid management, and in-game visual/audible effects. If you remove the lua addon from the game features won't work as intended.</string>
+    <string name="companion_toggle_raid_status">Display the main / co-raid member count when players join or leave the raid.</string>
+    <string name="companion_toggle_display_charmed">Display 'Charmed' targets in game chat window.</string>
+    <string name="companion_toggle_display_silenced">Display 'Silenced' targets in game chat window.</string>
+    <string name="companion_toggl_display_mark_hvt_healers">Show a [Heart Mark] over highest-value enemy healers. (Top 3 enemy healers based on cumulative PvP healing.)</string>
+    <string name="companion_toggle_display_mark_hvt_dps">Show a [Crossed-Swords Mark] over highest-value enemy DPS. (Top 3 enemy DPS based on cumulative PvP damage.)</string>
+    <string name="companion_toggle_display_mark_hvt_cc">Show a [Shield Mark] over high-value enemy CC mages to stay away from. (Top 3 enemy CC based on cumulative PvP crowd control time.)</string>
+    <string name="companion_toggle_display_mark_sac_dancers">Sheen a God ray over sacrifice dancers while they are channeling. (Easier to spot than default game effect.)</string>
+    <string name="companion_toggle_display_mark_charmed_targets">Show a [Purple Dot] over player's heads to indicate that they are Charmed.</string>
+    <string name="companion_toggle_display_mark_silenced_targets">Show a [Black Dot] over player's heads to indicate that they are Silenced.</string>
+    <string name="companion_toggle_display_mark_distressed_targets">Show a [Blue Dot] over player's heads to indicate that they are Distressed.</string>
+
+    <!-- Settings Strings -->
+    <string name="settings_title">Raid Framer Desktop Settings</string>
+    <string name="settings_data_sourcing_title">Data Sourcing</string>
+    <string name="settings_data_sourcing_description">Please be careful to enter the correct ArcheRage directory below. This field was likely populated automatically: </string>
+    <string name="settings_data_sourcing_sidenote">Technically, you do not need ArcheRage installed if you only want to view historical combat.log files. Just right-click on the .log or .rf (battle slice export file) and choose 'Open-With → Raid Framer' in the Windows Explorer context menu to view a replay.</string>
+    <string name="settings_toggle_pvp_damage">Show only PvP damage</string>
+    <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
+    <string name="settings_lua_options_title">Lua Options</string>
+    <string name="settings_uninstall_title">Uninstall Raid Framer</string>
+    <string name="settings_uninstall_description">Uninstalling via this menu cleanly removes the Lua addon from the game folder, it also closes the app, and triggers the regular un-installation process. If you decide to cancel the installer, opening raid framer again will allow you to re-install the Lua component automatically.</string>
+
+    <!-- Player Card -->
+    <string name="player_card_recent_item_uses">Item Uses</string>
+    <string name="player_card_recent_kd_short">Recent K/D</string>
+    <string name="player_card_recent_damage">Recent Damage</string>
+    <string name="player_card_recent_heals">Recent Heals</string>
+    <string name="player_card_recent_kd">Recent Kills &amp; Deaths</string>
+    <string name="player_card_recent_items">Item Skill Uses</string>
+    <string name="player_card_recent_buffs">Buffs Applied</string>
+    <string name="player_card_recent_debuffs">Debuffs Applied</string>
+    <string name="player_card_session_totals">Session Totals</string>
+    <string name="player_card_lifetime_totals">Lifetime Totals</string>
+
+    <!-- More specific stat labels used in totals -->
+    <string name="player_card_stat_damage">Total Damage</string>
+    <string name="player_card_stat_healing">Total Healing</string>
+    <string name="player_card_stat_cc">CC Delivered</string>
+    <string name="player_card_stat_debuffs">Debuffs</string>
+    <string name="player_card_stat_charms">Charms</string>
+    <string name="player_card_stat_distress">Distresses</string>
+    <string name="player_card_stat_silence">Silences</string>
+    <string name="player_card_stat_glider">Glider Uses</string>
+    <string name="player_card_stat_items">Item Uses</string>
+    <string name="player_card_stat_potions">Potions</string>
+    <string name="player_card_stat_kills">Kills</string>
+    <string name="player_card_stat_deaths">Deaths</string>
+    <string name="player_card_stat_kills_most_damage">Kills (Most Damage)</string>
+    <string name="player_card_stat_kills_killing_blow">Kills (Killing Blow)</string>
+    <string name="player_card_stat_total_damage_taken">Total Damage Taken</string>
+    <string name="player_card_stat_total_heals_received">Total Heals Received</string>
+
+    <!-- General Strings -->
+    <string name="general_metric_type_damage">Damage</string>
+    <string name="general_metric_type_damage_short">DMG</string>
+    <string name="general_metric_type_healing">Healing</string>
+    <string name="general_metric_type_healing_short">HEALS</string>
+    <string name="general_metric_type_cc">Crowd Control</string>
+    <string name="general_metric_type_cc_short">CC</string>
+    <string name="general_instructions_dragging_overlays">Shift + Click to Drag Overlays</string>
+    <string name="general_no_data_available">No Data Available</string>
+
+    <!-- Help Strings -->
+    <string name="general_help_window_postions_reset">All window positions have been reset! Please remember: If you have alt-tab detection enabled, any overlays (those without a title bar) may not appear until you switch back to the game window.</string>
+
+    <!-- Leadership Roles -->
+    <string name="leadership_none">None</string>
+    <string name="leadership_raid_lead">Raid Lead</string>
+    <string name="leadership_guild_lead">Guild Lead</string>
+    <string name="leadership_faction_hero">Faction Hero</string>
+    <string name="leadership_shot_caller">Shot Caller</string>
+    <string name="leadership_gm">GM</string>
+
+    <!-- Game Utility Items -->
+    <string name="item_name_kraken_scepter">Kraken Scepter</string>
+    <string name="item_name_kraken_spear">Kraken Spear</string>
+    <string name="item_name_kraken_shield">Kraken Shield</string>
+    <string name="item_name_lib_shield">Library Shield</string>
+    <string name="item_name_library_greatclub">Library Greatclub</string>
+    <string name="item_name_honor_nodachi">Honor's Frenzied Nodachi</string>
+    <string name="item_name_jola_shield">Jola's Grudge</string>
+    <string name="item_name_halcy_neck">Halcy Necklace</string>
+    <string name="item_name_soul_neck">Soul Necklace</string>
+    <string name="item_name_mist_nodachi">Doomshadow Nodachi</string>
+    <string name="item_name_lib_bow">Library/Immortal Warden's Bow</string>
+    <string name="item_name_lib_dagger">Library/Immortal Warden's Dagger</string>
+    <string name="item_name_lib_shortspear">Library/Immortal Warden's Shortspear</string>
+    <string name="item_name_lib_staff">Library/Immortal Warden's Staff</string>
+    <string name="item_name_snake_greatsword">Snake Greatsword (Edge)</string>
+    <string name="item_name_snake_shield">Snake Shield (Bulwark)</string>
+    <string name="item_name_snake_sword">Snake Sword (Razor)</string>
+    <string name="item_name_snake_greataxe">Snake Axe (Cleaver Target)</string>
+    <string name="item_name_snake_scepter">Snake Scepter (Snepter/Leech)</string>
+    <string name="item_name_snake_gun">Snake Gun (Bullet)</string>
+    <string name="item_name_bd_shield">Black Dragon Shield</string>
+    <string name="item_name_bd_club">Black Dragon Club</string>
+    <string name="item_name_bd_bow">Black Dragon Bow (Eye-Splitter)</string>
+    <string name="item_name_bd_gun">Black Dragon Gun (Bite)</string>
+    <string name="item_name_bd_staff">Black Dragon Staff (Roar)</string>
+    <string name="item_name_bd_sword">Black Dragon Sword (Tail-Reaper)</string>
+    <string name="item_name_bd_2h_sword">Black Dragon 2H Sword (Wing-Reaper)</string>
+    <string name="item_name_sungold_anth_set_pull">Sungold Anth Set Pull</string>
+    <string name="item_name_garden_anth_set_pull">Garden Anth Set Pull</string>
+    <string name="item_name_serp_staff">Corrupted Wit (Serpentis)</string>
+    <string name="item_name_mist_dagger">Mistsong Wicked Whisper Dagger</string>
+    <string name="item_name_mist_shield">Mistsong Stealthfang Shield</string>
+
+
+    <!-- Game Potions -->
+    <string name="potion_name_minor_healing_rank_one">Veiled Flame (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_two">Hushed Star (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_three">Afternoon Sun (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_four">Midsummer Meteor (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_five">Sun's Glory (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_six">Desert Fire (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_seven">Sweet Starlight (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_eight">Blazing Comet (Minor Healing Potion)</string>
+
+
+    <string name="potion_name_healing_guild_courage">Guild Courage (37% Healing Potion)</string>
+
+    <string name="potion_name_healing_rank_one_through_six">Healing Potion (Major Healing Potion Rank 1-7)</string>
+    <string name="potion_name_healing_rank_seven">Alluvion Love (Major Healing Potion Rank 7)</string>
+    <string name="potion_name_healing_rank_eight">Burning Desire (Major Healing Potion Rank 8)</string>
+
+    <string name="potion_name_minor_mana_rank_one">Mage's Vapor (Minor Mana Rank 1)</string>
+    <string name="potion_name_minor_mana_rank_two">Misty Memory (Minor Mana Rank 2)</string>
+    <string name="potion_name_minor_mana_rank_three">Morning Dew (Minor Mana Rank 3)</string>
+    <string name="potion_name_minor_mana_rank_four">Meadow Stream (Minor Mana Rank 4)</string>
+    <string name="potion_name_minor_mana_rank_five">Time's River (Minor Mana Rank 5)</string>
+    <string name="potion_name_minor_mana_rank_six">Mossy Pool (Minor Mana Rank 6)</string>
+    <string name="potion_name_minor_mana_rank_seven">Faint Memory (Minor Mana Rank 7)</string>
+    <string name="potion_name_minor_mana_rank_eight">Hazy Reflection (Minor Mana Rank 8)</string>
+
+    <string name="potion_name_minor_healing_titan">Titan's Healing Potion (Minor Healing Potion)</string>
+    <string name="potion_name_minor_mana_titan">Titan's Mana Potion (Minor Mana Potion)</string>
+
+    <string name="potion_name_phoenix_tears_tincture">Phoenix Tears Tincture</string>
+    <string name="potion_name_wild_ginseng">Wild Ginseng! (What a lucky friend!)</string>
+
+</resources>

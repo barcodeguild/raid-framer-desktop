@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" shape-rendering="geometricPrecision">
+<circle cx="32" cy="32" r="26" fill="none" stroke="#dcdcdc" stroke-width="3"/>
+
+<g>
+  <!-- butterfly wings -->
+  <path d="M32 34
+           C27 22 18 22 18 30
+           C18 38 26 40 32 34 Z"
+        fill="#9d4dff"/>
+  <path d="M32 34
+           C37 22 46 22 46 30
+           C46 38 38 40 32 34 Z"
+        fill="#9d4dff"/>
+  <!-- upper wing lobes -->
+  <path d="M32 32
+           C26 18 18 16 16 22
+           C14 28 22 32 32 32 Z"
+        fill="#b87bff"/>
+  <path d="M32 32
+           C38 18 46 16 48 22
+           C50 28 42 32 32 32 Z"
+        fill="#b87bff"/>
+  <!-- body -->
+  <rect x="30.6" y="26" width="2.8" height="18" rx="1.4" fill="#2b0a52"/>
+  <circle cx="32" cy="25" r="2" fill="#2b0a52"/>
+  <!-- antenna -->
+  <path d="M31 23 C29 21 28 20 26.5 19" fill="none" stroke="#2b0a52" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M33 23 C35 21 36 20 37.5 19" fill="none" stroke="#2b0a52" stroke-width="1.8" stroke-linecap="round"/>
+</g>
+
+</svg>

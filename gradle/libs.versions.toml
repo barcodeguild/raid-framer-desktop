@@ -1,0 +1,38 @@
+[versions]
+androidx-lifecycle = "2.9.3" # https://developer.android.com/jetpack/androidx/versions
+composeHotReload = "1.0.0-beta6" # https://github.com/JetBrains/compose-hot-reload/releases
+composeMultiplatform = "1.8.2" # https://github.com/JetBrains/compose-multiplatform/releases/
+junit = "4.13.2"# https://search.maven.org/artifact/junit/junit
+kotlin = "2.2.10" # https://github.com/JetBrains/kotlin/releases/
+kotlinx-coroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases/
+dorkbox-systemTray = "4.4" # https://github.com/dorkbox/SystemTray/releases
+room = "2.7.2" # https://maven.google.com/web/index.html?q=room-gra#androidx.room:room-gradle-plugin
+sqlite = "2.5.2" # https://maven.google.com/web/index.html?q=sqlite#androidx.sqlite:sqlite
+ksp = "2.2.10-2.0.2" # https://github.com/google/ksp/releases
+koala = "0.10.3" # https://github.com/KoalaPlot/koalaplot-core
+kotlinx-serialization = "1.9.0" # https://github.com/Kotlin/kotlinx.serialization/
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+junit = { module = "junit:junit", version.ref = "junit" }
+androidx-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+room-gradle-plugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
+
+dorkbox-systemTray = { module = "com.dorkbox:SystemTray", version.ref = "dorkbox-systemTray" }
+koala-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koala" }
+
+[plugins]
+composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
