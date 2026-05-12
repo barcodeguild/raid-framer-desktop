@@ -27,6 +27,8 @@ import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.companion_description
 import raid_framer_desktop.composeapp.generated.resources.companion_toggl_display_mark_hvt_healers
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_charmed
+import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_distressed
+import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_distressed_targets
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_hvt_cc
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_hvt_dps
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_sac_dancers
@@ -132,7 +134,7 @@ fun CompanionOverlay(wm: WindowManager? = null) {
         // chat distressed toggle
         Row {
           CheckBoxComponent(
-            label = stringResource(Res.string.companion_toggle_display_charmed),
+            label = stringResource(Res.string.companion_toggle_display_distressed),
             initialChecked = RFConfig.state.value.companionShowDistressedInChat,
             onCheckedChange = { isChecked ->
               RFConfig.update { it.copy(companionShowDistressedInChat = isChecked) }
