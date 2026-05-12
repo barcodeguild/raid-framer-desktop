@@ -11,6 +11,7 @@
     <string name="companion_toggle_raid_status">Display the main / co-raid member count when players join or leave the raid.</string>
     <string name="companion_toggle_display_charmed">Display 'Charmed' targets in game chat window.</string>
     <string name="companion_toggle_display_silenced">Display 'Silenced' targets in game chat window.</string>
+    <string name="companion_toggle_display_distressed">Display 'Distressed' targets in game chat window.</string>
     <string name="companion_toggl_display_mark_hvt_healers">Show a [Heart Mark] over highest-value enemy healers. (Top 3 enemy healers based on cumulative PvP healing.)</string>
     <string name="companion_toggle_display_mark_hvt_dps">Show a [Crossed-Swords Mark] over highest-value enemy DPS. (Top 3 enemy DPS based on cumulative PvP damage.)</string>
     <string name="companion_toggle_display_mark_hvt_cc">Show a [Shield Mark] over high-value enemy CC mages to stay away from. (Top 3 enemy CC based on cumulative PvP crowd control time.)</string>
