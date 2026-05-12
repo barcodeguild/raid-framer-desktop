@@ -186,17 +186,17 @@ fun CompanionOverlay(wm: WindowManager? = null) {
         }
 
         // enemy cc (purple = charmed, black = silenced)
-        Row {
-          CheckBoxComponent(
-            label = "Apply CC dots over players heads to indicate that they are charmed (purple), distressed (blue) or silenced (black). (Slightly more visible than default game effect.)",
-            initialChecked = (RFConfig.state.value.companionMarkCharmedTargets && RFConfig.state.value.companionMarkDistressedTargets && RFConfig.state.value.companionMarkSilencedTargets),
-            onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(companionMarkCharmedTargets = isChecked) }
-              RFConfig.update { it.copy(companionMarkDistressedTargets = isChecked) }
-              RFConfig.update { it.copy(companionMarkSilencedTargets = isChecked) }
-            }
-          )
-        }
+//        Row {
+//          CheckBoxComponent(
+//            label = "Apply CC dots over players heads to indicate that they are charmed (purple), distressed (blue) or silenced (black). (Slightly more visible than default game effect.)",
+//            initialChecked = (RFConfig.state.value.companionMarkCharmedTargets && RFConfig.state.value.companionMarkDistressedTargets && RFConfig.state.value.companionMarkSilencedTargets),
+//            onCheckedChange = { isChecked ->
+//              RFConfig.update { it.copy(companionMarkCharmedTargets = isChecked) }
+//              RFConfig.update { it.copy(companionMarkDistressedTargets = isChecked) }
+//              RFConfig.update { it.copy(companionMarkSilencedTargets = isChecked) }
+//            }
+//          )
+//        }
       }
 
     }

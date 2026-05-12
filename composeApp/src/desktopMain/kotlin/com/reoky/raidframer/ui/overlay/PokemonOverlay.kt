@@ -26,7 +26,7 @@ fun PokemonOverlay() {
       .fillMaxSize()
       .background(Color.Black)
   ) {
-    PokemonOverlay()
+    PokemonOverlay(wm = null)
   }
 }
 
@@ -87,6 +87,6 @@ fun PokemonOverlayPreview() {
       .height(600.dp)
       .background(Color.Black)
   ) {
-    PokemonOverlay()
+    PokemonOverlay(wm = null)
   }
 }

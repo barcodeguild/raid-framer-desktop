@@ -13,6 +13,7 @@ import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
+import com.reoky.raidframer.core.definitions.petSkillWhitelist
 import com.reoky.raidframer.core.helpers.createCacheObject
 import com.reoky.raidframer.core.helpers.guessPlayerRole
 import com.reoky.raidframer.core.helpers.resetSession
@@ -23,7 +24,9 @@ import com.reoky.raidframer.core.serialization.TargetUpdatedPayload
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -402,11 +405,31 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  fun postEventInternal(event: CombatEvent) {
+    when (event) {
+      is DamageEvent -> postDamageInternal(event)
+      is HealEvent -> postHeal(event)
+      is CastingEvent -> postCasting(event)
+      is SuccessfulCastEvent -> postSuccessfulCastInternal(event)
+      is BuffGainedEvent -> postBuffGained(event)
+      is BuffEndedEvent -> postBuffEnded(event)
+      is DebuffGainedEvent -> postDebuffGained(event)
+      is DebuffEndedEvent -> postDebuffEnded(event)
+      else -> {} // no-op for other event types
+    }
+  }
+
   private fun postDamage(event: DamageEvent) {
-//    if (event.spellId in petSkillWhitelist.map { it.id }) {
-//      PetAccumulatorInteractor.postEvent(event)
-//      return
-//    }
+    val cleanSource = event.source.replace("\\s*\\([^)]*\\)$".toRegex(), "").trim()
+    val eventSourceIsPet = getPetEntriesByName(cleanSource).isNotEmpty()
+    if (eventSourceIsPet || petSkillWhitelist.any { it.id == event.spellId }) {
+      PetAccumulatorInteractor.postEvent(event)
+      return
+    }
+    postDamageInternal(event)
+  }
+
+  private fun postDamageInternal(event: DamageEvent) {
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, playerName = event.source)
@@ -450,11 +473,16 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   private fun postSuccessfulCast(event: SuccessfulCastEvent) {
-//    if (event.spellId in petSkillWhitelist.map { it.id }) {
-//      Log.info("yanynaynayanay",  "Forwarding pet successful cast event: $event")
-//      PetAccumulatorInteractor.postEvent(event)
-//      return
-//    }
+    val cleanSource = event.source.replace("\\s*\\([^)]*\\)$".toRegex(), "").trim()
+    val eventSourceIsPet = getPetEntriesByName(cleanSource).isNotEmpty()
+    if (eventSourceIsPet || petSkillWhitelist.any { it.id == event.spellId }) {
+      PetAccumulatorInteractor.postEvent(event)
+      return
+    }
+    postSuccessfulCastInternal(event)
+  }
+
+  private fun postSuccessfulCastInternal(event: SuccessfulCastEvent) {
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, event.source)
@@ -1119,6 +1147,7 @@ object PlayerCacheInteractor : Interactor() {
     .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
 
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
+    .sample(250L) // Only take the latest emitted value every 250ms to limit UI recomposition
     .map { pets ->
       pets.filter { it.sessionDamageTotal > -1 || it.sessionDebuffTotal > 0 }
         .sortedByDescending { it.sessionDamageTotal }

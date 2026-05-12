@@ -45,9 +45,13 @@ object PetAccumulatorInteractor : Interactor() {
   }
 
   private fun handleDamage(event: DamageEvent) {
+    val cleanSource = cleanName(event.source)
+    val isKnownPet = PlayerCacheInteractor.getPetEntriesByName(cleanSource).isNotEmpty()
     val isPetSkill = isPetRelatedSkill(event.spellId, event.spell)
-    if (!isPetSkill) {
-      PlayerCacheInteractor.postEvent(event)
+    
+    if (!isKnownPet && !isPetSkill) {
+      // It's neither known as a pet nor uses a pet skill, send it to PlayerCache
+      PlayerCacheInteractor.postEventInternal(event)
       return
     }
 
@@ -61,8 +65,15 @@ object PetAccumulatorInteractor : Interactor() {
 
   private fun handleSuccessfulCast(event: SuccessfulCastEvent) {
     val petSkill = petSkillWhitelist.find { it.id == event.spellId }
-    if (petSkill == null) return
+    val cleanSource = cleanName(event.source)
+    val isKnownPet = PlayerCacheInteractor.getPetEntriesByName(cleanSource).isNotEmpty()
 
+    if (petSkill == null && !isKnownPet) {
+        PlayerCacheInteractor.postEventInternal(event)
+        return
+    }
+    
+    // We may not have a petSkill here if it's a known pet doing a non-whitelisted spell, but we still log it.
     Log.info(TAG, "Recording pet cast: ${event.source} cast ${event.spell} (id:${event.spellId})")
 
     scope.launch {
@@ -70,7 +81,7 @@ object PetAccumulatorInteractor : Interactor() {
         accumulatedCastEvents.add(event)
 
         // If this is a rider spell, create an attribution window
-        if (isRiderSpell(event.spell)) {
+        if (petSkill != null && isRiderSpell(event.spell)) {
           val windowDuration = calculateWindowDuration(petSkill.cooldown)
           riderCastWindow.add(
             CastWindow(

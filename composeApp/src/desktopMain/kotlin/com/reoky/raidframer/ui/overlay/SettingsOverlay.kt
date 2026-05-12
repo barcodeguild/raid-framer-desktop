@@ -272,12 +272,12 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
             },
             colors = CheckboxDefaults.colors(
               checkmarkColor = Color.White,
-              checkedColor = Color.Red,
+              checkedColor = Color.Gray,
               uncheckedColor = Color.White
             )
           )
           Text(
-            text = "Enable OSRS-style split-chat window overlay. [EXPERIMENTAL]",
+            text = "Enable OSRS-style split-chat window overlay. (Coming Soon)",
             color = Color.White
           )
         }
@@ -326,12 +326,12 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
             },
             colors = CheckboxDefaults.colors(
               checkmarkColor = Color.White,
-              checkedColor = Color.Red,
+              checkedColor = Color.Gray,
               uncheckedColor = Color.White
             )
           )
           Text(
-            text = "Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay.",
+            text = "Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay. (Coming Soon)",
             color = Color.White
           )
         }
@@ -344,12 +344,12 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
             },
             colors = CheckboxDefaults.colors(
               checkmarkColor = Color.White,
-              checkedColor = Color.Red,
+              checkedColor = Color.Gray,
               uncheckedColor = Color.White
             )
           )
           Text(
-            text = "I'd prefer to use Sadly.io for in-game schedule data.",
+            text = "I'd prefer to use Sadly.io for in-game schedule data. (Coming Soon)",
             color = Color.White
           )
         }
@@ -362,28 +362,28 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
             },
             colors = CheckboxDefaults.colors(
               checkmarkColor = Color.White,
-              checkedColor = Color.Red,
+              checkedColor = Color.Gray,
               uncheckedColor = Color.White
             )
           )
           Text(
-            text = "Enable dragon breath detector and counter overlay. (Note: You still have be in 100 meter range of the dragon rider to witness the breaths, this isn't magic!)",
+            text = "Enable dragon breath detector and counter overlay. (Note: You still have be in 100 meter range of the dragon rider to witness the breaths, this isn't magic friends!) (Coming Soon)",
             color = Color.White
           )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Button(
-            onClick = {},
-            colors = ButtonDefaults.buttonColors(Color.White),
-            modifier = Modifier.padding(16.dp)
-          ) {
-            Text(
-              text = "Player Re-mappings, PvP Duels & Filters",
-              maxLines = 1,
-              color = Color.Black
-            )
-          }
-        }
+//        Row(verticalAlignment = Alignment.CenterVertically) {
+//          Button(
+//            onClick = {},
+//            colors = ButtonDefaults.buttonColors(Color.White),
+//            modifier = Modifier.padding(16.dp)
+//          ) {
+//            Text(
+//              text = "Player Re-mappings, PvP Duels & Filters",
+//              maxLines = 1,
+//              color = Color.Black
+//            )
+//          }
+//        }
       }
     }
   }
