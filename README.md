@@ -43,12 +43,13 @@ Finally, how can I see charms though? Yep, so where you want to go to is the "Ba
   - Pie charts that show faction break-downs for [Haranya], [Nuia], and the [Pirates].
   - The idea behind the charts is to help raid leads identify what the raid is doing right, and what they could be doing better.
 
+<img width="1181" height="183" alt="image" src="https://github.com/user-attachments/assets/7a0cb306-0fb6-4b46-8284-f722f1d08b99" />
+
 ## Custom RF Format
 Raid Framer exposes its own game event logging format for ArcheAge called RF. Other devs may be interested in RF format for their own addons and tools because it's easy to implement quickly. Compared to the game's built-in logging format, the .rf format has the following improvements:
   - The format is text-based and each line of the log is written in a universal serialization format. (chronological lines of JSON)
   - All timestamps are cleansed and saved in UTC time, not the user's own local time, for privacy reasons. (This is a common practice in the software industry, and makes it easier for developers to work with the logs without having to worry about timezone conversions.)
   - Has custom message types and metadata fields that are not present in the original log format surrounding buff applications, pet ownership, world events, raid frames and presence, player classes, player class changes, duel start/ended events, player deaths (surprisingly not in the orginal logs), portal ownership, vehicle ownership, death attributions, and evnironmental damage.
-  - RF formatted logs can be exported in "time slices" to scope the log to a specific battle or duel.
   - Resolves certain key pieces of information that were missing from the logs such as who was responsible for inflicting a debuff. So instead of "X was struck by a Charmed debuff", you might see something like "Y applied a Charmed debuff to X". Another example is Library Greatclub. If someone casts Library GreatClub on the aggro holder, the default logging format doesn't show who inflicted the buff.
   - Logs are cleaned of chat effects and colors that provided no additional benefit, making them easier to parse by future addons/tools that read this new format. Also removes the need to parse and filter logs via complex regular expressions. (Could potentially reduce the compute-time footprint of working with game logs. This was as actually done to make it easier for other developers to work with the logs)
 
