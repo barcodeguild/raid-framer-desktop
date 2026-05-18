@@ -31,8 +31,10 @@ import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing
 import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_sidenote
 import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_title
 import raid_framer_desktop.composeapp.generated.resources.settings_title
+import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_done_text
 import java.util.Locale.getDefault
-
+import kotlin.system.exitProcess
+import com.reoky.raidframer.core.interactor.CompanionInteractor
 
 @Composable
 fun SettingsOverlay(wm: WindowManager? = null) {
@@ -41,6 +43,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
   val scrollState = rememberScrollState()
   val showDialog = remember { mutableStateOf(false) }
+  val showUninstallConfirmDialog = remember { mutableStateOf(false) }
+  val showUninstallDoneDialog = remember { mutableStateOf(false) }
 
   Box(
     modifier = Modifier
@@ -143,6 +147,15 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       }
 
       GlobalOptionsPanel(wm)
+
+      Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.Center) {
+        Button(
+          onClick = { showUninstallConfirmDialog.value = true },
+          colors = ButtonDefaults.buttonColors(Color.Red)
+        ) {
+          Text(text = "Uninstall Lua Addon & App", color = Color.White)
+        }
+      }
     }
     // looked too weird to keep
     // VerticalScrollbar(
@@ -152,6 +165,52 @@ fun SettingsOverlay(wm: WindowManager? = null) {
   }
 
   //FileSelectionDialog(showDialog, config.defaultArcheRageDirectory)
+
+  if (showUninstallConfirmDialog.value) {
+    AlertDialog(
+      onDismissRequest = { showUninstallConfirmDialog.value = false },
+      title = { Text("Confirm Uninstall", color = Color.White) },
+      text = { Text("Are you sure you want to uninstall the Lua Addon? This will remove the game integration.\n\nPlease close the game before continuing, otherwise files will be left over.", color = Color.White) },
+      backgroundColor = Color.DarkGray,
+      confirmButton = {
+        Button(
+          onClick = {
+            showUninstallConfirmDialog.value = false
+            CompanionInteractor.uninstall()
+            showUninstallDoneDialog.value = true
+          },
+          colors = ButtonDefaults.buttonColors(Color.Red)
+        ) {
+          Text("Uninstall", color = Color.White)
+        }
+      },
+      dismissButton = {
+        Button(onClick = { showUninstallConfirmDialog.value = false }, colors = ButtonDefaults.buttonColors(Color.Gray)) {
+          Text("Cancel", color = Color.White)
+        }
+      }
+    )
+  }
+
+  if (showUninstallDoneDialog.value) {
+    AlertDialog(
+      onDismissRequest = {
+        Runtime.getRuntime().exec("control appwiz.cpl")
+        exitProcess(0)
+      },
+      title = { Text("Uninstall Complete", color = Color.White) },
+      text = { Text(stringResource(Res.string.settings_uninstall_done_text), color = Color.White) },
+      backgroundColor = Color.DarkGray,
+      confirmButton = {
+        Button(onClick = {
+          Runtime.getRuntime().exec("control appwiz.cpl")
+          exitProcess(0)
+        }, colors = ButtonDefaults.buttonColors(Color.White)) {
+          Text("Exit", color = Color.Black)
+        }
+      }
+    )
+  }
 }
 
 @Composable
@@ -183,7 +242,8 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               value = config.playerName,
               onValueChange = {
                 RFConfig.update { config ->
-                  val newPlayerName = it.lowercase(getDefault()).capitalize()
+                  val newPlayerName = it.lowercase(getDefault())
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(getDefault()) else it.toString() }
                   config.copy(playerName = newPlayerName)
                 }
               },
