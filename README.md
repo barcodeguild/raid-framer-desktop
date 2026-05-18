@@ -15,6 +15,8 @@
   - Player class detection: Raid framer uses the timestamps of recently-casted spells, and a mapping of all castable spells to guess what skill-trees characters are playing. It's over 90% accurate. Also uses the Lua API to assert player builds more accurately over time to fill in some remaining gaps. (Note that accuracy improves with time because of this!)
   - Tabbed-detection: Optionally can close game overlays (since these are just regular windows) when the game itself closes, or when it's minimized. This is so overlays don't get in the way of other stuff on your screen.
 
+<img width="3136" height="1475" alt="marcala_siege_022026" src="https://github.com/user-attachments/assets/f1def92f-b50f-4f43-88b8-73e916845e5e" />
+
 ## Future Features Coming Soon
   - Dragon breath tracking and pet damage.
   - Once explicitly enabled in [Settings], Pressing and Holding TAB to bring up the official game schedule. The reason you have to hold tab is so this doesn't interfere with the in-game tab-targetting system. No part of this addon is designed to interfere with or automate gameplay.
