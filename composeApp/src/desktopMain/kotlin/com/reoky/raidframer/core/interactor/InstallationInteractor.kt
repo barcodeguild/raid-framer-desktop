@@ -23,7 +23,7 @@ object InstallationInteractor : Interactor() {
   const val AR_CONFIG_FILE_NAME = "system.cfg"
   const val AR_ADDONS_DIRECTORY = "Addon"
 
-  // list of resource lua files to install to the addons directory from the app's resources
+  // list of resource Lua files to install to the addons directory from the app's resources
   val RF_ADDON_DIRECTORY = "RaidFramer"
   val RF_ADDON_META = listOf(
     "toc.g", "apitypes.lua", "windowcommon.lua", "window.lua", "config.lua",
@@ -32,7 +32,7 @@ object InstallationInteractor : Interactor() {
     "raidframer.lua"
   )
 
-  // main event loop oh eekm
+  // main event loop oh eek
   override suspend fun interact() {
     super.interact()
 

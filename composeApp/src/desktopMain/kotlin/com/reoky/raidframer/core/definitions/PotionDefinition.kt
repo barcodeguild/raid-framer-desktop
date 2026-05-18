@@ -31,7 +31,7 @@ import kotlin.times
 interface PotionItem {
   val skillId: Int
   val cooldown: Double
-  val friendlyNameRes: StringResource // name of potion casted
+  val friendlyNameRes: StringResource // name of potion cast
   val possibleSpellNames: List<String> // spell names that might appear in logs
 }
 
@@ -68,10 +68,7 @@ enum class PotionDefinition(
 
   // misc
   PhoenixTearTincture(9002233, 180.0, Res.string.potion_name_phoenix_tears_tincture, listOf("Phoenix Tears Tincture")),
-  WildGinseng(12333, 600.0, Res.string.potion_name_wild_ginseng, listOf("Found Wild Ginseng!")),
-
-
-  ;
+  WildGinseng(12333, 600.0, Res.string.potion_name_wild_ginseng, listOf("Found Wild Ginseng!"));
 }
 
 /**

@@ -43,10 +43,10 @@ object CompanionInteractor : Interactor() {
     val gameDirectory = RFConfig.state.value.defaultArcheRageDirectory
     if (gameDirectory.isBlank()) return
 
-    val addonDirectory = Paths.get(gameDirectory, CompanionInteractor.ADDON_RELATIVE_PATH)
+    val addonDirectory = Paths.get(gameDirectory, ADDON_RELATIVE_PATH)
     if (!addonDirectory.exists()) return
 
-    val outFile = addonDirectory.resolve(CompanionInteractor.IPC_OUT_FILENAME)
+    val outFile = addonDirectory.resolve(IPC_OUT_FILENAME)
 
     if (outFile.exists()) {
       try {
@@ -70,11 +70,11 @@ object CompanionInteractor : Interactor() {
 
           lastProcessedLineCount = totalLines
         }} catch (e: Exception) {
-        Log.error(CompanionInteractor.TAG, "Error reading IPC out file: ${e.message}")
+        Log.error(TAG, "Error reading IPC out file: ${e.message}")
       }
     }
 
-    // Send a test ping once to establish communication. (We don't know if app or lua code was started first, this syncs them)
+    // Send a test ping once to establish communication. (We don't know if app or Lua code was started first, this syncs them)
     if (!didATestPing) {
       sendMessage(IPCMessagePayload.TestPing())
       didATestPing = true
@@ -133,6 +133,7 @@ object CompanionInteractor : Interactor() {
             }
             is PlayerInfoPayload.Slave -> {
               //println("Metadata for vehicle summon ${payload.name} owned by ${payload.ownerName} received.")
+              // we could do something with this in the future.. god do we love farm carts..
             }
           }
         }
@@ -229,7 +230,6 @@ object CompanionInteractor : Interactor() {
                 )
               }
             }
-
             is CombatEventPayload.BuffEndedPayload -> {
               Log.info(TAG, "At ${event.timestamp} ${event.target}'s ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) caused by ${event.source} ended.")
               PlayerCacheInteractor.postEvent(
@@ -367,6 +367,31 @@ object CompanionInteractor : Interactor() {
    */
   fun notifyConfigUpdated() {
     shouldNotifyCompanion = true
+  }
+
+
+  /**
+   * Stops the interact loop and cleanly removes the Lua addon and folder.
+   */
+  fun uninstall() {
+    stop()
+    InstallationInteractor.stop()
+
+    val gameDirectory = RFConfig.state.value.defaultArcheRageDirectory
+    if (gameDirectory.isBlank()) {
+      Log.error(TAG, "Cannot uninstall Lua addon: Game directory not set.")
+      return
+    }
+
+    val addonDirectory = Paths.get(gameDirectory, ADDON_RELATIVE_PATH)
+    if (addonDirectory.exists()) {
+      try {
+        addonDirectory.toFile().deleteRecursively()
+        Log.info(TAG, "Successfully uninstalled Lua addon and removed folder.")
+      } catch (e: Exception) {
+        Log.error(TAG, "Failed to uninstall Lua addon: ${e.message}")
+      }
+    }
   }
 
 }
