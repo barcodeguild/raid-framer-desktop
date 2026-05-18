@@ -1,5 +1,6 @@
 
-# Raid Framer 2.0+ : Track ArcheRage PvP Combat Metadata in Real-Time, Study and Visualize Data to Learn what Your Team Could be Doing Better to Succeed!
+# Raid Framer 2.0+
+## Track ArcheRage PvP Combat Metadata in Real-Time, Study and Visualize Data to Learn what Your Team Could be Doing Better to Succeed!
 
 <img width="535" height="755" alt="image" src="https://github.com/user-attachments/assets/d8e5fbad-20e3-4285-b48e-ea5b5bf270f3" />
 
