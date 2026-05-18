@@ -13,7 +13,7 @@
   - Raid management features for large raids and out-of-raid same-faction participation tracking. Considerable CPU usage occurs after 100 v 100 engagements, but large 200+ player PvP is supported.
   - Attendance copy-to-clipboard feature with minimum participation thresholds. Supports including same-faction out-of-raid players who meet the participation threshold. (Defaults to 25k PvP Damage OR 25k PvP Heals OR At least 25 CC stacks delivered to enemy players to count for attendance. These thresholds will be customizable in the future.)
   - Player class detection: Raid framer uses the timestamps of recently-casted spells, and a mapping of all castable spells to guess what skill-trees characters are playing. It's over 90% accurate. Also uses the Lua API to assert player builds more accurately over time to fill in some remaining gaps. (Note that accuracy improves with time because of this!)
-  - Tabbed-detection: Optionally can close game overlays (since these are just regular windows) when the game itself closes, or when it's minimized. This is so overlays don't get in the way of other stuff on your screen.
+  - Tabbed-detection: Optionally can close game overlays (since these are just regular windows) when the game itself closes, or when it's minimized. This is so overlays don't get in the way of other stuff on your screen. (Note: If for some reason your overlays aren't showing, make sure to try un-checking this option!)
   - Red, Blue and Pink dots indicate faction.
   - Tracks damage of the pets too (because we love the pets!).
   - Clean install and uninstall process. Newer versions can be installed over the previous and the lua addon gets copied over automatically. (it does sha256 hashing to make sure the files match)
@@ -77,6 +77,8 @@ This is a Kotlin Multiplatform project that targets Windows. It's been tested on
   - The debug log is written to %USERPROFILE%\.raidframer\debug.log in Logcat format.
 
 <img width="911" height="434" alt="image" src="https://github.com/user-attachments/assets/f00db6c6-3856-4b73-a417-3ae907f66e8c" />
+
+<img width="1556" height="671" alt="image" src="https://github.com/user-attachments/assets/335a2c85-07ef-4dc2-88cc-d8ea344b6f7d" />
 
 ## SO ANYWAYS.. ABOUT THE BUILDING..
 IntelliJ has now been consolidated into a single 'version'. There used to be Pro and Community versions. Get the latest IntelliJ (https://www.jetbrains.com/idea/download/?section=windows) and open the project with that. The IDE should recognize the Gradle build files and pick up on the project's sub-modules.
