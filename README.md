@@ -17,6 +17,8 @@
 
 <img width="3136" height="1475" alt="marcala_siege_022026" src="https://github.com/user-attachments/assets/f1def92f-b50f-4f43-88b8-73e916845e5e" />
 
+<img width="752" height="620" alt="image" src="https://github.com/user-attachments/assets/241b63c0-280b-4250-ab84-8d9f051b989b" />
+
 ## Future Features Coming Soon
   - Dragon breath tracking and pet damage.
   - Once explicitly enabled in [Settings], Pressing and Holding TAB to bring up the official game schedule. The reason you have to hold tab is so this doesn't interfere with the in-game tab-targetting system. No part of this addon is designed to interfere with or automate gameplay.
@@ -68,6 +70,8 @@ This is a Kotlin Multiplatform project that targets Windows. It's been tested on
   - It also implements the Logcat logging format for debug logging because why not. You should be able to open the debug logger with any tools that support reading Logcat logs. (including any text editors)
   - The app's use of Realm Database has been deprecated in favor of SQLite. Everyone knows SQL. The database is written here: %USERPROFILE%\.raidframer\raidframer.db (If something goes wrong with the app, you can delete this file to reset the database. This will cause you to lose player cache and settings, but it can be useful for troubleshooting. The app will simply create a new one if it doesn't find one.)
   - The debug log is written to %USERPROFILE%\.raidframer\debug.log in Logcat format.
+
+<img width="911" height="434" alt="image" src="https://github.com/user-attachments/assets/f00db6c6-3856-4b73-a417-3ae907f66e8c" />
 
 ## SO ANYWAYS.. ABOUT THE BUILDING..
 IntelliJ has now been consolidated into a single 'version'. There used to be Pro and Community versions. Get the latest IntelliJ (https://www.jetbrains.com/idea/download/?section=windows) and open the project with that. The IDE should recognize the Gradle build files and pick up on the project's sub-modules.
