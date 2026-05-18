@@ -1,5 +1,5 @@
 
-# Raid Framer (Version 2.0+ Features)
+# Raid Framer 2.0+ : Track ArcheRage PvP Combat Metadata in Real-Time, Study and Visualize Data to Learn what Your Team Could be Doing Better to Succeed!
 
 <img width="535" height="755" alt="image" src="https://github.com/user-attachments/assets/d8e5fbad-20e3-4285-b48e-ea5b5bf270f3" />
 
@@ -14,6 +14,10 @@
   - Attendance copy-to-clipboard feature with minimum participation thresholds. Supports including same-faction out-of-raid players who meet the participation threshold. (Defaults to 25k PvP Damage OR 25k PvP Heals OR At least 25 CC stacks delivered to enemy players to count for attendance. These thresholds will be customizable in the future.)
   - Player class detection: Raid framer uses the timestamps of recently-casted spells, and a mapping of all castable spells to guess what skill-trees characters are playing. It's over 90% accurate. Also uses the Lua API to assert player builds more accurately over time to fill in some remaining gaps. (Note that accuracy improves with time because of this!)
   - Tabbed-detection: Optionally can close game overlays (since these are just regular windows) when the game itself closes, or when it's minimized. This is so overlays don't get in the way of other stuff on your screen.
+  - Red, Blue and Pink dots indicate faction.
+  - Tracks damage of the pets too (because we love the pets!).
+  - Clean install and uninstall process. Newer versions can be installed over the previous and the lua addon gets copied over automatically. (it does sha256 hashing to make sure the files match)
+  - Help your team grow by studying the combat logs of each battle. Know when you're being cheesed by pay-to-win gear, cheap tricks, and be able to prove it. You already know these games are cursed, let's them less cursed together friends. <3
 
 <img width="3136" height="1475" alt="marcala_siege_022026" src="https://github.com/user-attachments/assets/f1def92f-b50f-4f43-88b8-73e916845e5e" />
 
@@ -23,6 +27,7 @@
   - Dragon breath tracking and pet damage.
   - Once explicitly enabled in [Settings], Pressing and Holding TAB to bring up the official game schedule. The reason you have to hold tab is so this doesn't interfere with the in-game tab-targetting system. No part of this addon is designed to interfere with or automate gameplay.
   - Internationalization support targeting English, Korean, Brazilian, Russian, Chinese, German, Australian, Pirate Speak, Cat Speak, and Trash Talk.
+  - Many features are in development and testing. We need to be sure that they won't affect stability of the app or the game.
 
 ## What counts as CC?
 This has been a huge headache friends, let me tell you. ~ The truth is everyone wants it to work differently, so the solution ended-up being to do break-downs by debuff. You'll notice that there's a "PvP CC" column. When you see the phrase CC used throughout the APP, RF is referring to any spells or utility items that:
