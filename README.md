@@ -4,7 +4,8 @@ Track ArcheRage PvP Combat Metadata in Real-Time, Study and Visualize Data to Le
 
 <img width="535" height="755" alt="image" src="https://github.com/user-attachments/assets/d8e5fbad-20e3-4285-b48e-ea5b5bf270f3" />
 
-Click to Watch the Gource for this Repo: https://github.com/barcodeguild/raid-framer-desktop/raw/refs/heads/main/documentation/gource.mp4](https://github.com/barcodeguild/raid-framer-desktop/raw/refs/heads/main/documentation/gource.mp
+
+Watch the Gource for this Repo -> https://github.com/barcodeguild/raid-framer-desktop/raw/refs/heads/main/documentation/gource.mp4](https://github.com/barcodeguild/raid-framer-desktop/raw/refs/heads/main/documentation/gource.mp4 <-
 
 ## Overall Features
   - Tracks in-game combat events in real-time, and provides detailed analytics, metrics and visualizations.
