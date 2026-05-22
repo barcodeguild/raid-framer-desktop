@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.*
-import io.github.koalaplot.core.line.AreaBaseline
 import io.github.koalaplot.core.line.AreaBaseline.ConstantLine
 import io.github.koalaplot.core.line.AreaPlot2
 import io.github.koalaplot.core.line.LinePlot2
@@ -35,15 +34,8 @@ import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_no_recent_data
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.get
-import kotlin.compareTo
-import kotlin.div
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.text.compareTo
-import kotlin.text.get
-import kotlin.text.toFloat
-import kotlin.times
 
 private data class TimeSample(val timestamp: Long, val valueSum: Long)
 private data class Peak(val index: Int, val value: Float) // used for the white line

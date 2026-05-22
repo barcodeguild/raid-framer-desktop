@@ -9,7 +9,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toAwtImage
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.application
@@ -29,20 +28,19 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.jetbrains.compose.resources.stringResource
-import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
-import raid_framer_desktop.composeapp.generated.resources.general_metric_type_cc_short
-import raid_framer_desktop.composeapp.generated.resources.raidframer
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Locale
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
-import kotlin.text.get
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
+import raid_framer_desktop.composeapp.generated.resources.raidframer
 
 const val TAG = "Main"
 
@@ -171,19 +169,6 @@ fun main(args: Array<String>) = application {
 }
 
 /*
- * Cleans up the application by stopping the interactors, closing all the windows, removing listeners, and
- * finally exiting the application.
- */
-fun quit() {
-  PlayerCacheInteractor.stop()
-  GameMonitorInteractor.stop()
-  tray?.shutdown()
-  tray?.remove()
-  LoggingInteractor.stop() // should be last because this is the thing that logs shutdown messages
-  exitProcess(0)
-}
-
-/*
  * Displays a simple Windows style message box with the given title and message.
  */
 fun messageBox(title: String, message: String) {
@@ -205,7 +190,7 @@ fun spawnSystemTray(wm: WindowManager): SystemTray {
   val helpString = stringResource(Res.string.general_help_window_postions_reset)
 
   // Updated to use the type-safe Res accessor
-  val iconImage = org.jetbrains.compose.resources.painterResource(Res.drawable.raidframer).toAwtImage(
+  val iconImage = painterResource(Res.drawable.raidframer).toAwtImage(
     density = Density(1f),
     layoutDirection = LayoutDirection.Ltr,
     size = Size(32f, 32f)
@@ -224,8 +209,8 @@ fun spawnSystemTray(wm: WindowManager): SystemTray {
     wm.resetAllWindowPositions()
     messageBox(AppGlobals.APP_NAME, helpString)
   })
-  tray.menu.add(MenuItem("Quit RF 2.0") {
-    cleanShutdown()
+  tray.menu.add(MenuItem("Exit") {
+    quit()
   })
   tray.setImage(iconImage)
   return tray
@@ -234,7 +219,7 @@ fun spawnSystemTray(wm: WindowManager): SystemTray {
 /*
  * Stops all the interactors and exits the application cleanly.
  */
-fun cleanShutdown() {
+fun quit() {
   Log.info(TAG, "Shutting down Raid Framer...")
   PlayerCacheInteractor.stop()
   GameMonitorInteractor.stop()

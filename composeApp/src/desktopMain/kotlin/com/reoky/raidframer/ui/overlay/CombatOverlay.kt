@@ -32,7 +32,6 @@ import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.ui.dialog.exitDialog
 import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
-import kotlin.math.roundToInt
 
 @Preview
 @Composable

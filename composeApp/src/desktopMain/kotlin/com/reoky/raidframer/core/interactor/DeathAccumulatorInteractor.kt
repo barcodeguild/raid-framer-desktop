@@ -1,6 +1,5 @@
 package com.reoky.raidframer.core.interactor
 
-import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.model.PlayerCard
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -9,7 +8,7 @@ import kotlin.math.abs
 
 /**
  * Validates death events by cross-referencing them with damage events from other players.
- * Computes BOTH killing blow and most damage attributions in parallel for complete statistics.
+ * Computes `killing blow` and `most damage` attributions in parallel for complete statistics.
  */
 object DeathAccumulatorInteractor : Interactor() {
 
