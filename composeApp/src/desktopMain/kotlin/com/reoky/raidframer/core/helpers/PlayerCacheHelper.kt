@@ -115,7 +115,8 @@ fun PlayerCard.resetSession(): PlayerCard {
     sessionPotionTotal = 0,
     sessionSongsTotal = 0,
     sessionDamageTakenTotal = 0,
-    sessionHealsReceivedTotal = 0
+    sessionHealsReceivedTotal = 0,
+    sessionOdeHealsTotal = 0
   )
 }
 

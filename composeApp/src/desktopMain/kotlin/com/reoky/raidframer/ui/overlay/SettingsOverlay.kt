@@ -32,6 +32,26 @@ import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing
 import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_title
 import raid_framer_desktop.composeapp.generated.resources.settings_title
 import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_done_text
+import raid_framer_desktop.composeapp.generated.resources.settings_arche_rage_directory_label
+import raid_framer_desktop.composeapp.generated.resources.settings_specify_directory_hint
+import raid_framer_desktop.composeapp.generated.resources.settings_lua_companion_options
+import raid_framer_desktop.composeapp.generated.resources.general_about
+import raid_framer_desktop.composeapp.generated.resources.settings_your_current_character
+import raid_framer_desktop.composeapp.generated.resources.settings_character_note
+import raid_framer_desktop.composeapp.generated.resources.settings_enter_name_placeholder
+import raid_framer_desktop.composeapp.generated.resources.settings_mini_graph_description
+import raid_framer_desktop.composeapp.generated.resources.settings_split_chat
+import raid_framer_desktop.composeapp.generated.resources.settings_tabbed_detection
+import raid_framer_desktop.composeapp.generated.resources.settings_allow_pve_damage
+import raid_framer_desktop.composeapp.generated.resources.settings_game_schedule_hotkey
+import raid_framer_desktop.composeapp.generated.resources.settings_use_sadly
+import raid_framer_desktop.composeapp.generated.resources.settings_dragon_breath_overlay
+import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_title
+import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_text
+import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_button
+import raid_framer_desktop.composeapp.generated.resources.general_cancel
+import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_done_title
+import raid_framer_desktop.composeapp.generated.resources.general_exit
 import java.util.Locale.getDefault
 import kotlin.system.exitProcess
 import com.reoky.raidframer.core.interactor.CompanionInteractor
@@ -83,7 +103,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
           Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 8.dp, vertical = 4.dp)) {
             if (config.defaultArcheRageDirectory.isNotBlank()) {
               Text(
-                text = "ArcheRage Documents Directory:",
+                text = stringResource(Res.string.settings_arche_rage_directory_label),
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
@@ -99,7 +119,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
               )
             } else {
               Text(
-                text = "Please Specify Directory (It's the folder that has a system.cfg file inside it!)",
+                text = stringResource(Res.string.settings_specify_directory_hint),
                 color = Color.Red,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
@@ -116,7 +136,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
               modifier = Modifier.weight(1f).padding(16.dp)
             ) {
               Text(
-                text = "Lua Companion Options",
+                text = stringResource(Res.string.settings_lua_companion_options),
                 maxLines = 1,
                 color = Color.Black
               )
@@ -129,7 +149,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
               modifier = Modifier.weight(1f).padding(16.dp)
             ) {
               Text(
-                text = "About",
+                text = stringResource(Res.string.general_about),
                 maxLines = 1,
                 color = Color.Black
               )
@@ -169,8 +189,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
   if (showUninstallConfirmDialog.value) {
     AlertDialog(
       onDismissRequest = { showUninstallConfirmDialog.value = false },
-      title = { Text("Confirm Uninstall", color = Color.White) },
-      text = { Text("Are you sure you want to uninstall the Lua Addon? This will remove the game integration.\n\nPlease close the game before continuing, otherwise files will be left over.", color = Color.White) },
+      title = { Text(stringResource(Res.string.settings_uninstall_confirm_title), color = Color.White) },
+      text = { Text(stringResource(Res.string.settings_uninstall_confirm_text), color = Color.White) },
       backgroundColor = Color.DarkGray,
       confirmButton = {
         Button(
@@ -181,12 +201,12 @@ fun SettingsOverlay(wm: WindowManager? = null) {
           },
           colors = ButtonDefaults.buttonColors(Color.Red)
         ) {
-          Text("Uninstall", color = Color.White)
+          Text(stringResource(Res.string.settings_uninstall_confirm_button), color = Color.White)
         }
       },
       dismissButton = {
         Button(onClick = { showUninstallConfirmDialog.value = false }, colors = ButtonDefaults.buttonColors(Color.Gray)) {
-          Text("Cancel", color = Color.White)
+          Text(stringResource(Res.string.general_cancel), color = Color.White)
         }
       }
     )
@@ -198,7 +218,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         Runtime.getRuntime().exec("control appwiz.cpl")
         exitProcess(0)
       },
-      title = { Text("Uninstall Complete", color = Color.White) },
+      title = { Text(stringResource(Res.string.settings_uninstall_done_title), color = Color.White) },
       text = { Text(stringResource(Res.string.settings_uninstall_done_text), color = Color.White) },
       backgroundColor = Color.DarkGray,
       confirmButton = {
@@ -206,7 +226,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
           Runtime.getRuntime().exec("control appwiz.cpl")
           exitProcess(0)
         }, colors = ButtonDefaults.buttonColors(Color.White)) {
-          Text("Exit", color = Color.Black)
+          Text(stringResource(Res.string.general_exit), color = Color.Black)
         }
       }
     )
@@ -223,7 +243,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
   ) {
     Column {
       Text(
-        text = "Your Current Character",
+        text = stringResource(Res.string.settings_your_current_character),
         color = Color.White,
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
@@ -235,7 +255,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
         Row(verticalAlignment = Alignment.CenterVertically) {
           Column {
             Text(
-              text = "Please ensure that your character and faction are specified correctly and kept up-to-date. ${AppGlobals.APP_NAME} uses this information to deduce friendly and hostile characters over time.",
+              text = stringResource(Res.string.settings_character_note, AppGlobals.APP_NAME),
               color = Color.White
             )
             TextField(
@@ -253,7 +273,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               ),
               singleLine = true,
               maxLines = 1,
-              placeholder = { Text("Enter Name Here") },
+              placeholder = { Text(stringResource(Res.string.settings_enter_name_placeholder)) },
               colors = TextFieldDefaults.textFieldColors(
                 textColor = Color.White,
                 backgroundColor = Color.Transparent,
@@ -294,7 +314,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
                     )
                   )
                   Text(
-                    text = option,
+                        text = option,
                     color = Color.White,
                     modifier = Modifier.padding(start = 4.dp)
                   )
@@ -319,10 +339,10 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               uncheckedColor = Color.White
             )
           )
-          Text(
-            text = "Enable DPS/HEALS/CC Mini-Graph. Shows performance over time.",
-            color = Color.White
-          )
+              Text(
+                text = stringResource(Res.string.settings_mini_graph_description),
+                color = Color.White
+              )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
           Checkbox(
@@ -336,10 +356,10 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               uncheckedColor = Color.White
             )
           )
-          Text(
-            text = "Enable OSRS-style split-chat window overlay. (Coming Soon)",
-            color = Color.White
-          )
+              Text(
+                text = stringResource(Res.string.settings_split_chat),
+                color = Color.White
+              )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
           Checkbox(
@@ -353,10 +373,10 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               uncheckedColor = Color.White
             )
           )
-          Text(
-            text = "Automatically hide game overlay's while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).",
-            color = Color.White
-          )
+              Text(
+                text = stringResource(Res.string.settings_tabbed_detection),
+                color = Color.White
+              )
         }
         // allow PvE damage option
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -372,10 +392,10 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               uncheckedColor = Color.White
             )
           )
-          Text(
-            text = "Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)",
-            color = Color.White
-          )
+              Text(
+                text = stringResource(Res.string.settings_allow_pve_damage),
+                color = Color.White
+              )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
           Checkbox(
@@ -390,10 +410,10 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               uncheckedColor = Color.White
             )
           )
-          Text(
-            text = "Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay. (Coming Soon)",
-            color = Color.White
-          )
+              Text(
+                text = stringResource(Res.string.settings_game_schedule_hotkey),
+                color = Color.White
+              )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
           Checkbox(
@@ -408,10 +428,10 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               uncheckedColor = Color.White
             )
           )
-          Text(
-            text = "I'd prefer to use Sadly.io for in-game schedule data. (Coming Soon)",
-            color = Color.White
-          )
+              Text(
+                text = stringResource(Res.string.settings_use_sadly),
+                color = Color.White
+              )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
           Checkbox(
@@ -426,10 +446,10 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               uncheckedColor = Color.White
             )
           )
-          Text(
-            text = "Enable dragon breath detector and counter overlay. (Note: You still have be in 100 meter range of the dragon rider to witness the breaths, this isn't magic friends!) (Coming Soon)",
-            color = Color.White
-          )
+              Text(
+                text = stringResource(Res.string.settings_dragon_breath_overlay),
+                color = Color.White
+              )
         }
 //        Row(verticalAlignment = Alignment.CenterVertically) {
 //          Button(
