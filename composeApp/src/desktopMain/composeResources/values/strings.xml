@@ -29,29 +29,11 @@
     <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
     <string name="settings_lua_options_title">Lua Options</string>
     <string name="settings_uninstall_title">Uninstall Raid Framer</string>
+    <string name="settings_name_placeholder">Game Character Select</string>
     <string name="settings_uninstall_description">Uninstalling via this menu cleanly removes the Lua addon from the game folder, it also closes the app, and triggers the regular un-installation process. If you decide to cancel the installer, opening raid framer again will allow you to re-install the Lua component automatically.</string>
     <string name="settings_uninstall_done_text">The Lua Addon has been safely removed from your game folder.\n\n**HOWEVER**\n\nYou should still complete the uninstallation of the main application by uninstalling "Raid Framer" via the Windows Control Panel. (that's this app) If you don't uninstall, and decide to open the app again, the Lua addon will be copied back to your game folder in the interest of the addon still functioning. (at your desire) Thanks! Exiting now!</string>
-    <string name="settings_arche_rage_directory_label">ArcheRage Documents Directory:</string>
-    <string name="settings_specify_directory_hint">Please Specify Directory (It's the folder that has a system.cfg file inside it!)</string>
-    <string name="settings_lua_companion_options">Lua Companion Options</string>
-
-    <string name="settings_your_current_character">Your Current Character</string>
-    <string name="settings_character_note">Please ensure that your character and faction are specified correctly and kept up-to-date. %1$s uses this information to deduce friendly and hostile characters over time.</string>
-    <string name="settings_enter_name_placeholder">Character Select</string>
-
-    <string name="settings_mini_graph_description">Enable DPS/HEALS/CC Mini-Graph. Shows performance over time.</string>
-    <string name="settings_split_chat">Enable OSRS-style split-chat window overlay. (Coming Soon)</string>
-    <string name="settings_tabbed_detection">Automatically hide game overlays while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).</string>
-    <string name="settings_allow_pve_damage">Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)</string>
-    <string name="settings_game_schedule_hotkey">Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay. (Coming Soon)</string>
-    <string name="settings_use_sadly">I'd prefer to use Sadly.io for in-game schedule data. (Coming Soon)</string>
-    <string name="settings_dragon_breath_overlay">Enable dragon breath detector and counter overlay. (Note: You still have be in 100 meter range of the dragon rider to witness the breaths, this isn't magic friends!) (Coming Soon)</string>
-
-    <string name="settings_uninstall_confirm_title">Confirm Uninstall</string>
-    <string name="settings_uninstall_confirm_text">Are you sure you want to uninstall the Lua Addon? This will remove the game integration.\n\nPlease close the game before continuing, otherwise files will be left over.</string>
-    <string name="settings_uninstall_confirm_button">Uninstall</string>
-    <string name="settings_uninstall_done_title">Uninstall Complete</string>
-
+    <string name="settings_character_description">Your character and faction are determined automatically when you switch characters. Raid Framer uses this information to deduce friendly and hostile characters over time.</string>
+    <string name="settings_character_title">Current Character</string>
 
     <!-- Player Card -->
     <string name="player_card_recent_item_uses">Item Uses</string>
