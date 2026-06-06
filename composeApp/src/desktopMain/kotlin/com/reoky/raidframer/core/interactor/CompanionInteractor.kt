@@ -34,7 +34,7 @@ object CompanionInteractor : Interactor() {
   private var didATestPing: Boolean = false
   private var lastProcessedLineCount: Int = 0  // Track lines processed
   private var ipcFilesInitialized: Boolean = false
-  
+
   private fun initializeIpcFilesIfNeeded() {
     if (ipcFilesInitialized) return
     try {
