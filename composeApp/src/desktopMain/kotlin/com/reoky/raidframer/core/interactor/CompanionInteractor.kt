@@ -18,14 +18,10 @@ import kotlinx.coroutines.withContext
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import kotlin.compareTo
 import kotlin.io.path.exists
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
-import kotlin.io.readLines
-import kotlin.io.resolve
 import kotlin.math.abs
-import kotlin.text.get
 
 object CompanionInteractor : Interactor() {
 
@@ -37,11 +33,43 @@ object CompanionInteractor : Interactor() {
   private var shouldNotifyCompanion: Boolean = false
   private var didATestPing: Boolean = false
   private var lastProcessedLineCount: Int = 0  // Track lines processed
-
+  private var ipcFilesInitialized: Boolean = false
+  
+  private fun initializeIpcFilesIfNeeded() {
+    if (ipcFilesInitialized) return
+    try {
+      val gameDirectory = RFConfig.state.value.defaultArcheRageDirectory
+      Log.info(TAG, "(init) Game directory from config: '$gameDirectory'")
+      if (gameDirectory.isNotBlank()) {
+        val addonDirectory = Paths.get(gameDirectory, ADDON_RELATIVE_PATH)
+        if (addonDirectory.exists()) {
+          val inFile = addonDirectory.resolve(IPC_IN_FILENAME)
+          val outFile = addonDirectory.resolve(IPC_OUT_FILENAME)
+          try {
+            if (inFile.exists()) {
+              inFile.writeText("") // truncate/blank the file; don't delete
+            }
+            if (outFile.exists()) {
+              outFile.writeText("")
+            }
+            Log.info(TAG, "Cleared IPC files on CompanionInteractor initialization.")
+          } catch (e: Exception) {
+            Log.error(TAG, "Failed to clear IPC files: ${e.message}")
+          }
+        }
+      }
+    } catch (e: Exception) {
+      Log.error(TAG, "Error during CompanionInteractor initialization clearing IPC files: ${e.message}")
+    } finally {
+      ipcFilesInitialized = true
+    }
+  }
 
   override suspend fun interact() {
     val gameDirectory = RFConfig.state.value.defaultArcheRageDirectory
     if (gameDirectory.isBlank()) return
+
+    initializeIpcFilesIfNeeded()
 
     val addonDirectory = Paths.get(gameDirectory, ADDON_RELATIVE_PATH)
     if (!addonDirectory.exists()) return

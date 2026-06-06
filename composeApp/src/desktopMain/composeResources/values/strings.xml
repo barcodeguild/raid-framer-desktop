@@ -29,8 +29,11 @@
     <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
     <string name="settings_lua_options_title">Lua Options</string>
     <string name="settings_uninstall_title">Uninstall Raid Framer</string>
+    <string name="settings_name_placeholder">Game Character Select</string>
     <string name="settings_uninstall_description">Uninstalling via this menu cleanly removes the Lua addon from the game folder, it also closes the app, and triggers the regular un-installation process. If you decide to cancel the installer, opening raid framer again will allow you to re-install the Lua component automatically.</string>
     <string name="settings_uninstall_done_text">The Lua Addon has been safely removed from your game folder.\n\n**HOWEVER**\n\nYou should still complete the uninstallation of the main application by uninstalling "Raid Framer" via the Windows Control Panel. (that's this app) If you don't uninstall, and decide to open the app again, the Lua addon will be copied back to your game folder in the interest of the addon still functioning. (at your desire) Thanks! Exiting now!</string>
+    <string name="settings_character_description">Your character and faction are determined automatically when you switch characters. Raid Framer uses this information to deduce friendly and hostile characters over time.</string>
+    <string name="settings_character_title">Current Character</string>
 
     <!-- Player Card -->
     <string name="player_card_recent_item_uses">Item Uses</string>

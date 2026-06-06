@@ -35,6 +35,9 @@ import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_don
 import java.util.Locale.getDefault
 import kotlin.system.exitProcess
 import com.reoky.raidframer.core.interactor.CompanionInteractor
+import raid_framer_desktop.composeapp.generated.resources.settings_character_description
+import raid_framer_desktop.composeapp.generated.resources.settings_character_title
+import raid_framer_desktop.composeapp.generated.resources.settings_name_placeholder
 
 @Composable
 fun SettingsOverlay(wm: WindowManager? = null) {
@@ -223,7 +226,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
   ) {
     Column {
       Text(
-        text = "Your Current Character",
+        text = stringResource(Res.string.settings_character_title),
         color = Color.White,
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
@@ -235,14 +238,14 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
         Row(verticalAlignment = Alignment.CenterVertically) {
           Column {
             Text(
-              text = "Please ensure that your character and faction are specified correctly and kept up-to-date. ${AppGlobals.APP_NAME} uses this information to deduce friendly and hostile characters over time.",
+              text = stringResource(Res.string.settings_character_description),
               color = Color.White
             )
             TextField(
               value = config.playerName,
-              onValueChange = {
+              onValueChange = { newValue ->
                 RFConfig.update { config ->
-                  val newPlayerName = it.lowercase(getDefault())
+                  val newPlayerName = newValue.lowercase(getDefault())
                     .replaceFirstChar { if (it.isLowerCase()) it.titlecase(getDefault()) else it.toString() }
                   config.copy(playerName = newPlayerName)
                 }
@@ -253,7 +256,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               ),
               singleLine = true,
               maxLines = 1,
-              placeholder = { Text("Enter Name Here") },
+              placeholder = { Text(stringResource(Res.string.settings_name_placeholder)) },
               colors = TextFieldDefaults.textFieldColors(
                 textColor = Color.White,
                 backgroundColor = Color.Transparent,
