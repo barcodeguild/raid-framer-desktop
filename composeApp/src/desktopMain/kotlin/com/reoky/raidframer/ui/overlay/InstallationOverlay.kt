@@ -9,20 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CloseButton
 import org.jetbrains.compose.resources.painterResource
 import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.catreo
-import raid_framer_desktop.composeapp.generated.resources.haranyanseal
 import raid_framer_desktop.composeapp.generated.resources.raidframer
 
 @Preview

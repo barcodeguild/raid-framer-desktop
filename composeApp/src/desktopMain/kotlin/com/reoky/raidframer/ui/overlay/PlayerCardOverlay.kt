@@ -57,8 +57,6 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_heals_received
 import java.text.SimpleDateFormat
 import java.util.Date
-import kotlin.math.ln
-import kotlin.math.pow
 
 // Temporary placeholder for resources
 fun str(s: String): String = s

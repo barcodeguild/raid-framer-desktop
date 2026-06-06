@@ -64,7 +64,7 @@ fun findSkillByName(query: String): Skill? {
 
 /**
  * Return the SkillTreeDefinition that contains the provided Skill, or null if none found.
- * find any where one of the possible names for a spell matches the skill name
+ * find anywhere one of the possible names for a spell matches the skill name
  */
 fun findSkillTreeForSkill(skill: Skill): SkillTreeType? {
   return SkillTreeType.entries.find { treeType ->

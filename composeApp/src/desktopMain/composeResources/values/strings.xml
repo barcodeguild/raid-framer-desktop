@@ -20,7 +20,7 @@
     <string name="companion_toggle_display_mark_silenced_targets">Show a [Black Dot] over player's heads to indicate that they are Silenced.</string>
     <string name="companion_toggle_display_mark_distressed_targets">Show a [Blue Dot] over player's heads to indicate that they are Distressed.</string>
 
-    <!-- Settings Strings -->
+    <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Settings</string>
     <string name="settings_data_sourcing_title">Data Sourcing</string>
     <string name="settings_data_sourcing_description">Please be careful to enter the correct ArcheRage directory below. This field was likely populated automatically: </string>
@@ -66,13 +66,16 @@
     <string name="player_card_stat_total_heals_received">Total Heals Received</string>
 
     <!-- General Strings -->
+    <string name="general_about">About</string>
+    <string name="general_cancel">Cancel</string>
+    <string name="general_exit">Exit</string>
+    <string name="general_instructions_dragging_overlays">Shift + Click to Drag Overlays</string>
+    <string name="general_metric_type_cc">Crowd Control</string>
+    <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">Damage</string>
     <string name="general_metric_type_damage_short">DMG</string>
     <string name="general_metric_type_healing">Healing</string>
     <string name="general_metric_type_healing_short">HEALS</string>
-    <string name="general_metric_type_cc">Crowd Control</string>
-    <string name="general_metric_type_cc_short">CC</string>
-    <string name="general_instructions_dragging_overlays">Shift + Click to Drag Overlays</string>
     <string name="general_no_data_available">No Data Available</string>
 
     <!-- Help Strings -->

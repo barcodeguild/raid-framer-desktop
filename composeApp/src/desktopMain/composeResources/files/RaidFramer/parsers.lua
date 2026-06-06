@@ -150,7 +150,7 @@ function RF.Parser.ParseSpellMissedEvent(t)
   event.unknownInt    = t[5] -- always seems to be zero
   event.spell         = t[6] -- name of spell
   event.damageType    = t[7] -- PHYSICAL / FIRE / HOLY
-  event.result        = t[8] -- string BLOCK / IMMUNNE
+  event.result        = t[8] -- string BLOCK / IMMUNE
   event.amount        = t[9] -- amount removed anyways (a lot of times it's just one hp)
   event.f10           = t[10] -- zero int
   event.f11           = t[11] -- zero int
