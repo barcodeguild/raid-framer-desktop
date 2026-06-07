@@ -57,6 +57,8 @@ import raid_framer_desktop.composeapp.generated.resources.settings_name_placehol
 import raid_framer_desktop.composeapp.generated.resources.settings_show_cc_column
 import raid_framer_desktop.composeapp.generated.resources.settings_show_damage_column
 import raid_framer_desktop.composeapp.generated.resources.settings_show_heals_column
+import raid_framer_desktop.composeapp.generated.resources.settings_combat_overlay_title
+import raid_framer_desktop.composeapp.generated.resources.settings_combat_fade_controls
 
 @Composable
 fun SettingsOverlay(wm: WindowManager? = null) {
@@ -478,7 +480,7 @@ fun CombatOverlaySettingsPanel(wm: WindowManager? = null) {
   val config by RFConfig.state.collectAsState()
   Column(modifier = Modifier.padding(16.dp)) {
     Text(
-      text = "Combat Overlay",
+      text = stringResource(Res.string.settings_combat_overlay_title),
       color = Color.White,
       textAlign = TextAlign.Center,
       fontWeight = FontWeight.Bold,
@@ -523,6 +525,19 @@ fun CombatOverlaySettingsPanel(wm: WindowManager? = null) {
         )
       )
       Text(text = stringResource(Res.string.settings_show_cc_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Checkbox(
+        checked = config.combatControlsFadeEnabled,
+        onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatControlsFadeEnabled = isChecked) } },
+        colors = CheckboxDefaults.colors(
+          checkmarkColor = Color.White,
+          checkedColor = Color.Red,
+          uncheckedColor = Color.White
+        )
+      )
+      Text(text = stringResource(Res.string.settings_combat_fade_controls), color = Color.White, modifier = Modifier.padding(start = 8.dp))
     }
   }
 }

@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 15 // incremented to reflect combat overlay columns added
+const val SCHEMA_VERSION = 16 // incremented to add combatControlsFadeEnabled to config
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -74,7 +74,10 @@ data class ConfigEntity(
   // Combat overlay column visibility toggles
   val combatShowDamageColumn: Boolean = true,
   val combatShowHealsColumn: Boolean = true,
-  val combatShowCCColumn: Boolean = true
+  val combatShowCCColumn: Boolean = true,
+
+  // Combat overlay UX
+  val combatControlsFadeEnabled: Boolean = true // fade icon controls out when cursor leaves the overlay
 )
 
 /*

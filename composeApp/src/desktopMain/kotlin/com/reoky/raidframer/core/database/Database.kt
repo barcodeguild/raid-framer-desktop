@@ -52,6 +52,7 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_12_13) // 05/10/26 added val companionShowDistressedInChat: Boolean = true, to config
   .addMigrations(MIGRATION_13_14)
   .addMigrations(MIGRATION_14_15) // 06/07/26 added three checkboxes in settings for combat overlay columns
+  .addMigrations(MIGRATION_15_16) // 06/07/26 added combatControlsFadeEnabled to config
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

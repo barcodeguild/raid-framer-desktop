@@ -42,6 +42,8 @@
     <string name="settings_show_heals_column">Show Heals Column</string>
     <string name="settings_show_cc_column">Show CC Column</string>
     <string name="settings_show_damage_column">Show Damage Column</string>
+    <string name="settings_combat_overlay_title">Combat Overlay</string>
+    <string name="settings_combat_fade_controls">Auto-fade icon controls when the cursor leaves the overlay.</string>
     <string name="settings_split_chat">Enable OSRS-style split-chat window overlay. (Coming Soon)</string>
     <string name="settings_tabbed_detection">Automatically hide game overlay's while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).</string>
     <string name="settings_allow_pve_damage">Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)</string>
