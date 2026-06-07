@@ -17,11 +17,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
@@ -57,7 +55,6 @@ fun PreviewCombatOverlay() {
   }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CombatOverlay(wm: WindowManager? = null) {
 
@@ -90,9 +87,17 @@ fun CombatOverlay(wm: WindowManager? = null) {
   } }
 
   // --- Controls fade logic ---
-  var isOverlayHovered by remember { mutableStateOf(false) }
+  // Use hoverable + collectIsHoveredAsState so no experimental API is needed
+  val overlayInteractionSource = remember { MutableInteractionSource() }
+  val isOverlayHovered by overlayInteractionSource.collectIsHoveredAsState()
   val controlsAlpha by animateFloatAsState(
     targetValue = if (!config.combatControlsFadeEnabled || isOverlayHovered) 1f else 0f,
+    animationSpec = tween(durationMillis = 500)
+  )
+  // Animate the title padding to match the icon row width (3 × 32dp = 96dp) so titles
+  // expand into the space the icons occupied as they fade out.
+  val controlsPaddingFloat by animateFloatAsState(
+    targetValue = if (!config.combatControlsFadeEnabled || isOverlayHovered) 96f else 0f,
     animationSpec = tween(durationMillis = 500)
   )
 
@@ -139,10 +144,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
   Column(
     modifier = Modifier
       .fillMaxSize()
-      .pointerMoveFilter(
-        onEnter = { isOverlayHovered = true; false },
-        onExit = { isOverlayHovered = false; false }
-      ),
+      .hoverable(interactionSource = overlayInteractionSource),
     verticalArrangement = Arrangement.Top,
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
@@ -151,10 +153,38 @@ fun CombatOverlay(wm: WindowManager? = null) {
         .fillMaxSize()
     ) {
       if (anyColumnVisibleGlobal) {
-        // Header row: left icons, centered titles, right icons. Titles centered relative to each other.
-        Row(modifier = Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 0.dp).zIndex(1f), verticalAlignment = Alignment.CenterVertically) {
-          // left icons
-          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(controlsAlpha)) {
+        // Header: icon rows overlaid at edges so they never steal layout space from the titles.
+        // Title padding animates in sync with the controls alpha so titles expand into the
+        // space that the icons were occupying as they fade out.
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 32.dp)
+            .padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 0.dp)
+            .zIndex(1f)
+        ) {
+          // center titles — full width, padded to avoid icons when visible
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(horizontal = controlsPaddingFloat.dp)
+              .align(Alignment.Center),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            if (config.combatShowDamageColumn) {
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_pvp_damage), color = Color.White) }
+            }
+            if (config.combatShowHealsColumn) {
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_pvp_heals), color = Color.White) }
+            }
+            if (config.combatShowCCColumn) {
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_cc), color = Color.White) }
+            }
+          }
+
+          // left icons — overlaid at start edge, never affects title layout
+          Row(modifier = Modifier.align(Alignment.CenterStart).alpha(controlsAlpha), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { shouldShowExitDialog.value = true }, modifier = Modifier.size(32.dp)) {
               val closeInteractionSource = remember { MutableInteractionSource() }
               Text(text = "\uf00d", fontFamily = FontsHelper.faSolid(), fontSize = 16.sp, color = if (closeInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = closeInteractionSource))
@@ -169,23 +199,8 @@ fun CombatOverlay(wm: WindowManager? = null) {
             }
           }
 
-          // center titles area
-          Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-              if (config.combatShowDamageColumn) {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_pvp_damage), color = Color.White) }
-              }
-              if (config.combatShowHealsColumn) {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_pvp_heals), color = Color.White) }
-              }
-              if (config.combatShowCCColumn) {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_cc), color = Color.White) }
-              }
-            }
-          }
-
-          // right icons
-          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(controlsAlpha)) {
+          // right icons — overlaid at end edge, never affects title layout
+          Row(modifier = Modifier.align(Alignment.CenterEnd).alpha(controlsAlpha), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { wm?.openWindow(OverlayType.SUMMARY) }, modifier = Modifier.size(32.dp)) {
               val summaryInteractionSource = remember { MutableInteractionSource() }
               Text(text = "\uf200", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (summaryInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = summaryInteractionSource))
