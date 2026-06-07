@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 14 // increment this when making schema changes
+const val SCHEMA_VERSION = 15 // incremented to reflect combat overlay columns added
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -70,6 +70,11 @@ data class ConfigEntity(
   val companionMarkCharmedTargets: Boolean = true,
   val companionMarkSilencedTargets: Boolean = true,
   val companionMarkDistressedTargets: Boolean = true
+  ,
+  // Combat overlay column visibility toggles
+  val combatShowDamageColumn: Boolean = true,
+  val combatShowHealsColumn: Boolean = true,
+  val combatShowCCColumn: Boolean = true
 )
 
 /*

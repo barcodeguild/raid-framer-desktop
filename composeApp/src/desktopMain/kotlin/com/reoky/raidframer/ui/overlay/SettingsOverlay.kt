@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.OverlayType
@@ -36,9 +35,6 @@ import raid_framer_desktop.composeapp.generated.resources.settings_arche_rage_di
 import raid_framer_desktop.composeapp.generated.resources.settings_specify_directory_hint
 import raid_framer_desktop.composeapp.generated.resources.settings_lua_companion_options
 import raid_framer_desktop.composeapp.generated.resources.general_about
-import raid_framer_desktop.composeapp.generated.resources.settings_your_current_character
-import raid_framer_desktop.composeapp.generated.resources.settings_character_note
-import raid_framer_desktop.composeapp.generated.resources.settings_enter_name_placeholder
 import raid_framer_desktop.composeapp.generated.resources.settings_mini_graph_description
 import raid_framer_desktop.composeapp.generated.resources.settings_split_chat
 import raid_framer_desktop.composeapp.generated.resources.settings_tabbed_detection
@@ -58,6 +54,9 @@ import com.reoky.raidframer.core.interactor.CompanionInteractor
 import raid_framer_desktop.composeapp.generated.resources.settings_character_description
 import raid_framer_desktop.composeapp.generated.resources.settings_character_title
 import raid_framer_desktop.composeapp.generated.resources.settings_name_placeholder
+import raid_framer_desktop.composeapp.generated.resources.settings_show_cc_column
+import raid_framer_desktop.composeapp.generated.resources.settings_show_damage_column
+import raid_framer_desktop.composeapp.generated.resources.settings_show_heals_column
 
 @Composable
 fun SettingsOverlay(wm: WindowManager? = null) {
@@ -171,7 +170,9 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
       GlobalOptionsPanel(wm)
 
-      Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.Center) {
+          CombatOverlaySettingsPanel(wm)
+
+          Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.Center) {
         Button(
           onClick = { showUninstallConfirmDialog.value = true },
           colors = ButtonDefaults.buttonColors(Color.Red)
@@ -468,6 +469,60 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
 //          }
 //        }
       }
+    }
+  }
+}
+
+@Composable
+fun CombatOverlaySettingsPanel(wm: WindowManager? = null) {
+  val config by RFConfig.state.collectAsState()
+  Column(modifier = Modifier.padding(16.dp)) {
+    Text(
+      text = "Combat Overlay",
+      color = Color.White,
+      textAlign = TextAlign.Center,
+      fontWeight = FontWeight.Bold,
+      fontSize = 18.sp,
+      modifier = Modifier.padding(bottom = 8.dp)
+    )
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Checkbox(
+        checked = config.combatShowDamageColumn,
+        onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowDamageColumn = isChecked) } },
+        colors = CheckboxDefaults.colors(
+          checkmarkColor = Color.White,
+          checkedColor = Color.Red,
+          uncheckedColor = Color.White
+        )
+      )
+      Text(text = stringResource(Res.string.settings_show_damage_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Checkbox(
+        checked = config.combatShowHealsColumn,
+        onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowHealsColumn = isChecked) } },
+        colors = CheckboxDefaults.colors(
+          checkmarkColor = Color.White,
+          checkedColor = Color.Red,
+          uncheckedColor = Color.White
+        )
+      )
+      Text(text = stringResource(Res.string.settings_show_heals_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Checkbox(
+        checked = config.combatShowCCColumn,
+        onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowCCColumn = isChecked) } },
+        colors = CheckboxDefaults.colors(
+          checkmarkColor = Color.White,
+          checkedColor = Color.Red,
+          uncheckedColor = Color.White
+        )
+      )
+      Text(text = stringResource(Res.string.settings_show_cc_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
     }
   }
 }
