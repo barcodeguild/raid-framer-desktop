@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -41,6 +42,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
   val nearbyNuia = PlayerCacheInteractor.nearbyNuianRaidParties.collectAsState()
   val nearbyHaranya = PlayerCacheInteractor.nearbyHaraniRaidParties.collectAsState()
   val nearbyPirate = PlayerCacheInteractor.nearbyPirateRaidParties.collectAsState()
+  val raidDepartures = PlayerCacheInteractor.raidDeparturesFlow.collectAsState()
 
   Box(
     modifier = Modifier
@@ -130,27 +132,6 @@ fun RaidOverlay(wm: WindowManager? = null) {
                     .align(Alignment.CenterHorizontally)
                 )
               }
-
-              // Players Who Left Raid: left-aligned under the two columns, can expand across if content wide
-//              Column(
-//                modifier = Modifier
-//                  .fillMaxWidth()
-//                  .padding(top = 4.dp),
-//                verticalArrangement = Arrangement.spacedBy(4.dp)
-//              ) {
-//                Text(
-//                  text = "Players Who Left Raid",
-//                  color = Color.White,
-//                  fontWeight = FontWeight.Bold,
-//                  fontSize = 14.sp
-//                )
-//                RaidComponent(
-//                  parties = coRaid.value,
-//                  modifier = Modifier
-//                    .wrapContentSize()
-//                    .align(Alignment.Start)
-//                )
-//              }
             }
             Spacer(modifier = Modifier.weight(1f))
 
@@ -158,38 +139,57 @@ fun RaidOverlay(wm: WindowManager? = null) {
             var includeCo by rememberSaveable { mutableStateOf(true) }
             var includeNearbySameFaction by rememberSaveable { mutableStateOf(false) }
             var includeNearbyOppositeFaction by rememberSaveable { mutableStateOf(false) }
+            var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
+            var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
+
+            fun hasPvPParticipation(card: PlayerCard): Boolean =
+              card.sessionDamageTotal >= 25_000L ||
+              card.sessionHealTotal >= 25_000L ||
+              card.sessionCCTotal >= 25
+
+            fun String.meetsPvP(): Boolean =
+              if (!requirePvPParticipation) true
+              else PlayerCacheInteractor.getCard(this)?.let(::hasPvPParticipation) ?: false
 
             val attendanceNames = run {
               val names = mutableListOf<String>()
-              if (includeMain) names += mainRaid.value.flatten().mapNotNull { it.playerName }
-              if (includeCo) names += coRaid.value.flatten().mapNotNull { it.playerName }
+              if (includeMain) {
+                names += mainRaid.value.flatten().mapNotNull { it.playerName }.filter { it.meetsPvP() }
+              }
+              if (includeCo) {
+                names += coRaid.value.flatten().mapNotNull { it.playerName }.filter { it.meetsPvP() }
+              }
               if (includeNearbySameFaction) {
-                when (playerFaction) {
-                  Faction.HARANYA -> names += nearbyHaranya.value.mapNotNull { it.name }
-                  Faction.NUIA -> names += nearbyNuia.value.mapNotNull { it.name }
-                  Faction.PIRATE -> names += nearbyPirate.value.mapNotNull { it.name }
-                  else -> {}
+                val sameFactionCards: List<PlayerCard> = when (playerFaction) {
+                  Faction.HARANYA -> nearbyHaranya.value
+                  Faction.NUIA -> nearbyNuia.value
+                  Faction.PIRATE -> nearbyPirate.value
+                  else -> emptyList()
                 }
+                names += sameFactionCards
+                  .let { if (requirePvPParticipation) it.filter(::hasPvPParticipation) else it }
+                  .map { it.name }
               }
               if (includeNearbyOppositeFaction) {
-                when (playerFaction) {
-                  Faction.HARANYA -> {
-                    names += nearbyNuia.value.mapNotNull { it.name }
-                    names += nearbyPirate.value.mapNotNull { it.name }
-                  }
-                  Faction.NUIA -> {
-                    names += nearbyHaranya.value.mapNotNull { it.name }
-                    names += nearbyPirate.value.mapNotNull { it.name }
-                  }
-                  Faction.PIRATE -> {
-                    names += nearbyHaranya.value.mapNotNull { it.name }
-                    names += nearbyNuia.value.mapNotNull { it.name }
-                  }
-                  else -> {}
+                val oppCards: List<PlayerCard> = when (playerFaction) {
+                  Faction.HARANYA -> nearbyNuia.value + nearbyPirate.value
+                  Faction.NUIA -> nearbyHaranya.value + nearbyPirate.value
+                  Faction.PIRATE -> nearbyHaranya.value + nearbyNuia.value
+                  else -> emptyList()
                 }
+                names += oppCards
+                  .let { if (requirePvPParticipation) it.filter(::hasPvPParticipation) else it }
+                  .map { it.name }
+              }
+              if (includePlayersThatLeftRaid) {
+                val departed: Set<String> =
+                  (raidDepartures.value[0] ?: emptySet()) +
+                  (raidDepartures.value[1] ?: emptySet())
+                names += departed.filter { it.meetsPvP() }
               }
               names.filter { it.isNotBlank() }.distinct().joinToString(", ")
             }
+
             Column(
               modifier = Modifier
                 .widthIn(min = 300.dp)
@@ -223,14 +223,14 @@ fun RaidOverlay(wm: WindowManager? = null) {
               )
               CheckBoxComponent(
                 label = "Require at least some PvP participation (25k dmg, 25k heals, or 25+ cc points to filter non-combatants)",
-                initialChecked = includeNearbyOppositeFaction,
-                onCheckedChange = { includeNearbyOppositeFaction = it },
+                initialChecked = requirePvPParticipation,
+                onCheckedChange = { requirePvPParticipation = it },
                 textColor = Color.White
               )
               CheckBoxComponent(
                 label = "Include players that left raid",
-                initialChecked = includeNearbyOppositeFaction,
-                onCheckedChange = { includeNearbyOppositeFaction = it },
+                initialChecked = includePlayersThatLeftRaid,
+                onCheckedChange = { includePlayersThatLeftRaid = it },
                 textColor = Color.White
               )
               SelectableTextField(
