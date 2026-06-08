@@ -110,3 +110,20 @@ val MIGRATION_13_14 = object : Migration(13, 14) {
     }
   }
 }
+
+// added combat overlay visibility flags to ConfigEntity
+val MIGRATION_14_15 = object : Migration(14, 15) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN combatShowDamageColumn INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN combatShowHealsColumn INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN combatShowCCColumn INTEGER NOT NULL DEFAULT 1").use { it.step() }
+  }
+}
+
+// added combatControlsFadeEnabled to ConfigEntity (06/07/26)
+val MIGRATION_15_16 = object : Migration(15, 16) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN combatControlsFadeEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

@@ -13,16 +13,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.quit
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.exit_dialog_title
+import raid_framer_desktop.composeapp.generated.resources.exit_dialog_message
+import raid_framer_desktop.composeapp.generated.resources.exit_dialog_dismiss
+import raid_framer_desktop.composeapp.generated.resources.general_exit
 
 @Composable
 fun exitDialog(shouldShowExitDialog: MutableState<Boolean>) {
   if (shouldShowExitDialog.value) {
     AlertDialog(
       onDismissRequest = { shouldShowExitDialog.value = false },
-      title = { Text("Are you sure?", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) },
+      title = { Text(stringResource(Res.string.exit_dialog_title), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) },
       text = {
         Text(
-          "This will exit and close any open overlay windows. You can launch .:Raid Framer:. again from the Windows Start Menu..",
+          stringResource(Res.string.exit_dialog_message),
           color = Color.White
         )
       },
@@ -33,7 +39,7 @@ fun exitDialog(shouldShowExitDialog: MutableState<Boolean>) {
           colors = ButtonDefaults.buttonColors(Color.Red.copy(alpha = 0.75f)),
           modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)
         ) {
-          Text("Exit", color = Color.White)
+          Text(stringResource(Res.string.general_exit), color = Color.White)
         }
       },
       dismissButton = {
@@ -42,7 +48,7 @@ fun exitDialog(shouldShowExitDialog: MutableState<Boolean>) {
           colors = ButtonDefaults.buttonColors(Color.White),
           modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)
         ) {
-          Text("Nope", color = Color.Black)
+          Text(stringResource(Res.string.exit_dialog_dismiss), color = Color.Black)
         }
       }
     )

@@ -1,6 +1,5 @@
 package com.reoky.raidframer.core.interactor
 
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshotFlow
 import com.reoky.raidframer.AppState
@@ -22,8 +21,10 @@ import com.reoky.raidframer.core.serialization.Party
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.core.serialization.TargetUpdatedPayload
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
@@ -49,6 +50,8 @@ object PlayerCacheInteractor : Interactor() {
   private val raids = mutableStateMapOf<Int, List<Party>>()
   private val raidAttendance = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidDepartures = mutableStateMapOf<Int, MutableSet<String>>()
+  private val _raidDeparturesFlow = MutableStateFlow<Map<Int, Set<String>>>(emptyMap())
+  val raidDeparturesFlow: StateFlow<Map<Int, Set<String>>> = _raidDeparturesFlow.asStateFlow()
   private val cards = mutableStateMapOf<String, PlayerCard>()
   private val petCards = mutableStateMapOf<String, PetCard>()
   private val mutex = Mutex() // to protect critical sections during player card updates from other threads
@@ -302,6 +305,8 @@ object PlayerCacheInteractor : Interactor() {
         val leftMembers = raidAttendance[raidId]?.filter { it !in currentMembers } ?: emptyList()
         raidDepartures[raidId]?.addAll(leftMembers)
       }
+      // Emit an immutable snapshot so observers can react to changes
+      _raidDeparturesFlow.value = raidDepartures.mapValues { it.value.toSet() }
     }
   }
 
@@ -335,6 +340,7 @@ object PlayerCacheInteractor : Interactor() {
             raidDepartures.clear()
           }
         }
+        _raidDeparturesFlow.value = raidDepartures.mapValues { it.value.toSet() }
       }
     }
   }
