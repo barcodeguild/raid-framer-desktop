@@ -63,15 +63,17 @@ object GameMonitorInteractor : Interactor() {
 
     val oneDriveDocumentsPath = Paths.get(System.getProperty("user.home"), "OneDrive", "Documents", "ArcheRage")
     val documentsPath = Paths.get(System.getProperty("user.home"), "Documents", "ArcheRage")
+    val archeRageRootDocuments = Paths.get("C:", "ArcheRage", "Documents")
     val everywherePath = Paths.get(System.getProperty("user.home"))
 
-    val searchPaths = mutableListOf<Path>(oneDriveDocumentsPath, documentsPath)
+    val searchPaths = mutableListOf<Path>(oneDriveDocumentsPath, documentsPath, archeRageRootDocuments)
 
     if (searchEverywhere) {
       if (Files.exists(everywherePath)) searchPaths.add(everywherePath)
     } else {
       if (Files.exists(oneDriveDocumentsPath)) searchPaths.add(oneDriveDocumentsPath)
       if (Files.exists(documentsPath)) searchPaths.add(documentsPath)
+      if (Files.exists(archeRageRootDocuments)) searchPaths.add(archeRageRootDocuments)
     }
 
     val possibleArcheRageDirectories = mutableListOf<Path>()
