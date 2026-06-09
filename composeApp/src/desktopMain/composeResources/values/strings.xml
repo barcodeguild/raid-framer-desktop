@@ -57,6 +57,22 @@
     <string name="settings_character_description">Your character and faction are determined automatically when you switch characters. Raid Framer uses this information to deduce friendly and hostile characters over time.</string>
     <string name="settings_character_title">Current Character</string>
 
+    <!-- About Overlay Strings -->
+    <string name="about_app_title">Raid Framer Desktop</string>
+    <string name="about_version_label">Version:</string>
+    <string name="about_package_label">Package:</string>
+    <string name="about_source_label">Source:</string>
+    <string name="about_read_settings_instruction">Please before use. -></string>
+    <string name="about_go_to_settings_button">Go to Settings</string>
+    <string name="about_author_label">Author:</string>
+    <string name="about_author_name">~ Reoky ~</string>
+    <string name="about_dedication_text">Dedicated to all of our friends on the East and out in the virtual world. May this code be used for good, and not evil.</string>
+    <string name="about_thanks_label">Ty ty from</string>
+    <string name="about_thanks_location">United East</string>
+    <string name="about_community_dedication">To the ArcheRage community for their support and feedback. ~</string>
+    <string name="about_staff_dedication">To the ArcheRage staff for their dedication and hard work. ~</string>
+    <string name="about_dev_dedication">To the ArcheRage developers for their continued support and updates. ~</string>
+
     <!-- Player Card -->
     <string name="player_card_recent_item_uses">Item Uses</string>
     <string name="player_card_recent_kd_short">Recent K/D</string>

@@ -20,6 +20,18 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CloseButton
 import org.jetbrains.compose.resources.painterResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.about_app_title
+import raid_framer_desktop.composeapp.generated.resources.about_author_label
+import raid_framer_desktop.composeapp.generated.resources.about_author_name
+import raid_framer_desktop.composeapp.generated.resources.about_community_dedication
+import raid_framer_desktop.composeapp.generated.resources.about_dev_dedication
+import raid_framer_desktop.composeapp.generated.resources.about_dedication_text
+import raid_framer_desktop.composeapp.generated.resources.about_go_to_settings_button
+import raid_framer_desktop.composeapp.generated.resources.about_package_label
+import raid_framer_desktop.composeapp.generated.resources.about_read_settings_instruction
+import raid_framer_desktop.composeapp.generated.resources.about_source_label
+import raid_framer_desktop.composeapp.generated.resources.about_thanks_label
+import raid_framer_desktop.composeapp.generated.resources.about_thanks_location
 import raid_framer_desktop.composeapp.generated.resources.catreo
 import raid_framer_desktop.composeapp.generated.resources.haranyanseal
 import raid_framer_desktop.composeapp.generated.resources.raidframer
@@ -63,7 +75,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
         Column(modifier = Modifier.weight(0.67f)) {
           Spacer(modifier = Modifier.height(8.dp))
           Text(
-            text = "Raid Framer Desktop",
+            text = stringResource(Res.string.about_app_title),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start,
             fontSize = 24.sp,
@@ -73,7 +85,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           Spacer(modifier = Modifier.height(8.dp))
           Row {
             Text(
-              text = "Version:",
+              text = stringResource(Res.string.about_version_label),
               modifier = Modifier.padding(2.dp),
               textAlign = TextAlign.Start,
               fontSize = 16.sp,
@@ -91,7 +103,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           Spacer(modifier = Modifier.height(8.dp))
           Row {
             Text(
-              text = "Package:",
+              text = stringResource(Res.string.about_package_label),
               modifier = Modifier.padding(2.dp),
               textAlign = TextAlign.Start,
               fontSize = 16.sp,
@@ -109,7 +121,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           Spacer(modifier = Modifier.height(8.dp))
           Row {
             Text(
-              text = "Source:",
+              text = stringResource(Res.string.about_source_label),
               modifier = Modifier.padding(2.dp),
               textAlign = TextAlign.Start,
               fontSize = 16.sp,
@@ -129,7 +141,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
           ) {
             Text(
-              text = "Please before use. ->",
+              text = stringResource(Res.string.about_read_settings_instruction),
               modifier = Modifier
                 .weight(1f)
                 .padding(2.dp),
@@ -145,7 +157,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
               colors = ButtonDefaults.buttonColors(Color.White),
               modifier = Modifier.padding(bottom = 8.dp, end = 8.dp)
             ) {
-              Text(text = "Go to Settings", color = Color.Black)
+              Text(text = stringResource(Res.string.about_go_to_settings_button), color = Color.Black)
             }
           }
         }
@@ -162,7 +174,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           Spacer(modifier = Modifier.height(16.dp))
           Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
             Text(
-              text = "Author:",
+              text = stringResource(Res.string.about_author_label),
               fontWeight = FontWeight.W200,
               textAlign = TextAlign.Start,
               fontSize = 16.sp,
@@ -170,7 +182,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-              text = "~ Reoky ~",
+              text = stringResource(Res.string.about_author_name),
               fontWeight = FontWeight.Bold,
               textAlign = TextAlign.Start,
               fontSize = 16.sp,
@@ -179,7 +191,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           }
           Spacer(modifier = Modifier.height(16.dp))
           Text(
-            text = "Dedicated to all of our friends on the East and out in the virtual world. May this code be used for good, and not evil.",
+            text = stringResource(Res.string.about_dedication_text),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontSize = 16.sp,
@@ -196,7 +208,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           )
           Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
             Text(
-              text = "Ty ty from",
+              text = stringResource(Res.string.about_thanks_label),
               modifier = Modifier.padding(2.dp),
               textAlign = TextAlign.Start,
               fontSize = 16.sp,
@@ -204,7 +216,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
               color = Color.LightGray,
             )
             Text(
-              text = "United East",
+              text = stringResource(Res.string.about_thanks_location),
               modifier = Modifier.padding(2.dp),
               textAlign = TextAlign.Start,
               fontSize = 16.sp,
@@ -214,7 +226,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           }
           Spacer(modifier = Modifier.height(16.dp))
           Text(
-            text = "To the ArcheRage community for their support and feedback. ~",
+            text = stringResource(Res.string.about_community_dedication),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontSize = 16.sp,
@@ -222,7 +234,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           )
           Spacer(modifier = Modifier.height(16.dp))
           Text(
-            text = "To the ArcheRage staff for their dedication and hard work. ~",
+            text = stringResource(Res.string.about_staff_dedication),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontSize = 16.sp,
@@ -230,7 +242,7 @@ fun AboutOverlay(wm: WindowManager? = null) {
           )
           Spacer(modifier = Modifier.height(16.dp))
           Text(
-            text = "To the ArcheRage developers for their continued support and updates. ~",
+            text = stringResource(Res.string.about_dev_dedication),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontSize = 16.sp,
