@@ -19,6 +19,7 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CloseButton
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.about_app_title
 import raid_framer_desktop.composeapp.generated.resources.about_author_label
@@ -30,8 +31,10 @@ import raid_framer_desktop.composeapp.generated.resources.about_go_to_settings_b
 import raid_framer_desktop.composeapp.generated.resources.about_package_label
 import raid_framer_desktop.composeapp.generated.resources.about_read_settings_instruction
 import raid_framer_desktop.composeapp.generated.resources.about_source_label
+import raid_framer_desktop.composeapp.generated.resources.about_staff_dedication
 import raid_framer_desktop.composeapp.generated.resources.about_thanks_label
 import raid_framer_desktop.composeapp.generated.resources.about_thanks_location
+import raid_framer_desktop.composeapp.generated.resources.about_version_label
 import raid_framer_desktop.composeapp.generated.resources.catreo
 import raid_framer_desktop.composeapp.generated.resources.haranyanseal
 import raid_framer_desktop.composeapp.generated.resources.raidframer
