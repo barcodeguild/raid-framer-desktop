@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.hasPvPParticipation
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
@@ -142,14 +143,10 @@ fun RaidOverlay(wm: WindowManager? = null) {
             var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
             var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
 
-            fun hasPvPParticipation(card: PlayerCard): Boolean =
-              card.sessionDamageTotal >= 25_000L ||
-              card.sessionHealTotal >= 25_000L ||
-              card.sessionCCTotal >= 25
-
+            // Use centralized PlayerCard.hasPvPParticipation() extension
             fun String.meetsPvP(): Boolean =
               if (!requirePvPParticipation) true
-              else PlayerCacheInteractor.getCard(this)?.let(::hasPvPParticipation) ?: false
+              else PlayerCacheInteractor.getCard(this)?.hasPvPParticipation() ?: false
 
             val attendanceNames = run {
               val names = mutableListOf<String>()
@@ -167,7 +164,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
                   else -> emptyList()
                 }
                 names += sameFactionCards
-                  .let { if (requirePvPParticipation) it.filter(::hasPvPParticipation) else it }
+                  .let { if (requirePvPParticipation) it.filter { c -> c.hasPvPParticipation() } else it }
                   .map { it.name }
               }
               if (includeNearbyOppositeFaction) {
@@ -178,7 +175,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
                   else -> emptyList()
                 }
                 names += oppCards
-                  .let { if (requirePvPParticipation) it.filter(::hasPvPParticipation) else it }
+                  .let { if (requirePvPParticipation) it.filter { c -> c.hasPvPParticipation() } else it }
                   .map { it.name }
               }
               if (includePlayersThatLeftRaid) {

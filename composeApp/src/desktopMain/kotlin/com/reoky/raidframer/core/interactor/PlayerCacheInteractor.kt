@@ -1097,7 +1097,7 @@ object PlayerCacheInteractor : Interactor() {
   val buildCountsHaranya: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
       cards.values
-        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.HARANYA }
+        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.HARANYA && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
     }
@@ -1106,7 +1106,7 @@ object PlayerCacheInteractor : Interactor() {
   val buildCountsNuia: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
       cards.values
-        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.NUIA }
+        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.NUIA && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
     }
@@ -1115,7 +1115,7 @@ object PlayerCacheInteractor : Interactor() {
   val buildCountsPirate: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
       cards.values
-        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.PIRATE }
+        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.PIRATE && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
     }

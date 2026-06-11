@@ -299,3 +299,12 @@ fun PlayerCard.updatePlayerLeadership(newLeadership: Int): PlayerCard {
     )
   )
 }
+
+/**
+ * Returns true if this player card meets the minimum PvP participation thresholds.
+ * Default thresholds: 25k damage OR 25k heals OR 25 points of CC.
+ */
+fun PlayerCard.hasPvPParticipation(): Boolean {
+  return this.sessionDamageTotal >= 25_000L || this.sessionHealTotal >= 25_000L || this.sessionCCTotal >= 25
+}
+
