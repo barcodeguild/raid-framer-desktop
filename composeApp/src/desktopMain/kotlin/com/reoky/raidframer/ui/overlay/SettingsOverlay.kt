@@ -59,6 +59,8 @@ import raid_framer_desktop.composeapp.generated.resources.settings_show_damage_c
 import raid_framer_desktop.composeapp.generated.resources.settings_show_heals_column
 import raid_framer_desktop.composeapp.generated.resources.settings_combat_overlay_title
 import raid_framer_desktop.composeapp.generated.resources.settings_combat_fade_controls
+import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_button
+import raid_framer_desktop.composeapp.generated.resources.settings_player_remappings_button
 
 @Composable
 fun SettingsOverlay(wm: WindowManager? = null) {
@@ -179,7 +181,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
           onClick = { showUninstallConfirmDialog.value = true },
           colors = ButtonDefaults.buttonColors(Color.Red)
         ) {
-          Text(text = "Uninstall Lua Addon & App", color = Color.White)
+          Text(text = stringResource(Res.string.settings_uninstall_button), color = Color.White)
         }
       }
     }
@@ -464,7 +466,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
 //            modifier = Modifier.padding(16.dp)
 //          ) {
 //            Text(
-//              text = "Player Re-mappings, PvP Duels & Filters",
+//              text = stringResource(Res.string.settings_player_remappings_button),
 //              maxLines = 1,
 //              color = Color.Black
 //            )
