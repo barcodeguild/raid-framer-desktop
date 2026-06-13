@@ -43,28 +43,32 @@ import raid_framer_desktop.composeapp.generated.resources.settings_use_sadly
 import raid_framer_desktop.composeapp.generated.resources.settings_dragon_breath_overlay
 import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_title
 import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_text
-import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_button
-import raid_framer_desktop.composeapp.generated.resources.general_cancel
-import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_done_title
-import raid_framer_desktop.composeapp.generated.resources.general_exit
-import java.util.Locale.getDefault
-import kotlin.system.exitProcess
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.graphics.toArgb
+import com.reoky.raidframer.core.helpers.colorToSliderValue
+import com.reoky.raidframer.core.helpers.sliderValueToColor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.ui.LocalDragLock
+import java.util.Locale.getDefault
+import kotlin.system.exitProcess
+import raid_framer_desktop.composeapp.generated.resources.general_cancel
+import raid_framer_desktop.composeapp.generated.resources.general_exit
 import raid_framer_desktop.composeapp.generated.resources.settings_character_description
 import raid_framer_desktop.composeapp.generated.resources.settings_character_title
+import raid_framer_desktop.composeapp.generated.resources.settings_combat_fade_controls
+import raid_framer_desktop.composeapp.generated.resources.settings_combat_overlay_title
+import raid_framer_desktop.composeapp.generated.resources.settings_general_description
+import raid_framer_desktop.composeapp.generated.resources.settings_general_opacity_slider
+import raid_framer_desktop.composeapp.generated.resources.settings_general_tint_slider
+import raid_framer_desktop.composeapp.generated.resources.settings_general_title
 import raid_framer_desktop.composeapp.generated.resources.settings_name_placeholder
 import raid_framer_desktop.composeapp.generated.resources.settings_show_cc_column
 import raid_framer_desktop.composeapp.generated.resources.settings_show_damage_column
 import raid_framer_desktop.composeapp.generated.resources.settings_show_heals_column
-import raid_framer_desktop.composeapp.generated.resources.settings_combat_overlay_title
-import raid_framer_desktop.composeapp.generated.resources.settings_combat_fade_controls
-import raid_framer_desktop.composeapp.generated.resources.settings_general_description
-import raid_framer_desktop.composeapp.generated.resources.settings_general_opacity_slider
-import raid_framer_desktop.composeapp.generated.resources.settings_general_title
 import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_button
+import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_button
+import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_done_title
 
 @Composable
 fun SettingsOverlay(wm: WindowManager? = null) {
@@ -239,11 +243,20 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
 
   // Lock window dragging while the slider thumb is being dragged
   val sliderInteractionSource = remember { MutableInteractionSource() }
+  // track whether the slider is actively being dragged so we don't sync the local slider
+  // value from the global config mid-drag (and avoid the thumb jumping on release).
+  val isSliderDragging = remember { mutableStateOf(false) }
   LaunchedEffect(sliderInteractionSource) {
     sliderInteractionSource.interactions.collect { interaction ->
       when (interaction) {
-        is DragInteraction.Start -> dragLock.value = true
-        is DragInteraction.Stop, is DragInteraction.Cancel -> dragLock.value = false
+        is DragInteraction.Start -> {
+          dragLock.value = true
+          isSliderDragging.value = true
+        }
+        is DragInteraction.Stop, is DragInteraction.Cancel -> {
+          dragLock.value = false
+          isSliderDragging.value = false
+        }
       }
     }
   }
@@ -368,6 +381,43 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
             interactionSource = sliderInteractionSource,
             modifier = Modifier
               .padding(horizontal = 8.dp),
+            colors = SliderDefaults.colors(
+              thumbColor = Color.Red,
+              activeTrackColor = Color.Red,
+              inactiveTrackColor = Color.Gray
+            )
+          )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column {
+          Text(
+            text = stringResource(Res.string.settings_general_tint_slider),
+            color = Color.White,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(start = 8.dp)
+          )
+
+          val windowColorSlider = remember { mutableStateOf(colorToSliderValue(config.windowColor)) }
+          LaunchedEffect(config.windowColor) {
+            if (isSliderDragging.value) return@LaunchedEffect
+            val newVal = colorToSliderValue(config.windowColor)
+            val currentColorFromSlider = sliderValueToColor(windowColorSlider.value)
+            if (currentColorFromSlider == config.windowColor) return@LaunchedEffect
+            if (kotlin.math.abs(newVal - windowColorSlider.value) > 0.0001f) { // 0 is black, 1 is white
+              windowColorSlider.value = newVal
+            }
+          }
+
+          Slider(
+            value = windowColorSlider.value,
+            onValueChange = { value ->
+              windowColorSlider.value = value
+              RFConfig.update { it.copy(windowColor = sliderValueToColor(value)) } // set color continuously
+            },
+            interactionSource = sliderInteractionSource,
+            modifier = Modifier.padding(horizontal = 8.dp),
             colors = SliderDefaults.colors(
               thumbColor = Color.Red,
               activeTrackColor = Color.Red,

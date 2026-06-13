@@ -134,3 +134,10 @@ val MIGRATION_16_17 = object : Migration(16, 17) {
   }
 }
 
+// added val windowColor: Int = 0, added to ConfigEntity
+val MIGRATION_17_18 = object : Migration(17, 18) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN windowColor INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

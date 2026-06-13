@@ -109,10 +109,11 @@ fun OverlayWindow(
     composeWindow.addMouseMotionListener(mouseListener)
 
     CompositionLocalProvider(LocalDragLock provides dragLocked) {
+      val windowColor = Color(config.windowColor).copy(alpha = config.windowOpacity)
       if (windowType == OverlayWindowType.TOOLTIP) {
         Box(
           modifier = Modifier
-            .background(Color(0f, 0f, 0f, config.windowOpacity))
+            .background(windowColor)
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.60f))
         ) {
@@ -121,7 +122,7 @@ fun OverlayWindow(
       } else {
         Box(
           modifier = Modifier
-            .background(Color(0f, 0f, 0f, config.windowOpacity))
+            .background(windowColor)
             .fillMaxSize()
         ) {
           windowContent(composeWindow)

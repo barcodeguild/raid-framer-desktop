@@ -54,6 +54,7 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_14_15) // 06/07/26 added three checkboxes in settings for combat overlay columns
   .addMigrations(MIGRATION_15_16) // 06/07/26 added combatControlsFadeEnabled to config
   .addMigrations(MIGRATION_16_17) // 06/13/26 added val windowOpacity: Float = 0.43f, to config
+  .addMigrations(MIGRATION_17_18) // 06/13/26 added windowColor to config
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)
