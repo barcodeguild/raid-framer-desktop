@@ -230,5 +230,6 @@
     <string name="raid_nuian_faction">Nuian Faction (%d)</string>
     <string name="raid_pirate_faction">Pirate Faction (%d)</string>
     <string name="raid_close">Close</string>
+    <string name="app_already_running">Raid Framer is already running.</string>
 
 </resources>

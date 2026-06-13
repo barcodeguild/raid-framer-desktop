@@ -30,6 +30,9 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.channels.FileChannel
+import java.nio.channels.FileLock
+import java.nio.file.StandardOpenOption
 import java.util.Locale
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
@@ -39,15 +42,46 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.app_already_running
 import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
 import raid_framer_desktop.composeapp.generated.resources.raidframer
 
 const val TAG = "Main"
 
+private val lockFile = Paths.get(System.getProperty("user.home"), ".RaidFramer", ".raidframer.lock")
+private var lockChannel: FileChannel? = null
+
+private fun acquireLock(): Boolean {
+    return try {
+        // Ensure the parent directory exists (same directory as the database)
+        Files.createDirectories(lockFile.parent)
+        lockChannel = FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+        val fileLock = lockChannel?.tryLock()
+        if (fileLock == null) {
+            lockChannel?.close()
+            lockChannel = null
+            false
+        } else {
+            true
+        }
+    } catch (e: Exception) {
+        // If we can't lock, allow running
+        lockChannel?.close()
+        lockChannel = null
+        true
+    }
+}
+
 var tray: SystemTray? = null
 
 /* ~ Entry Point ~ */
 fun main(args: Array<String>) = application {
+
+  // Prevent duplicate launch
+  if (!acquireLock()) {
+    messageBox(AppGlobals.APP_NAME, stringResource(Res.string.app_already_running))
+    exitProcess(1)
+  }
 
   val context = rememberCoroutineScope() // correct context for Compose
   var languageCode by remember { mutableStateOf(Locale.getDefault().language) } // default system language
@@ -229,5 +263,6 @@ fun quit() {
   tray?.shutdown()
   tray?.remove()
   LoggingInteractor.stop() // should be last because this is the thing that logs shutdown message
+  lockChannel?.close()
   exitProcess(0)
 }
