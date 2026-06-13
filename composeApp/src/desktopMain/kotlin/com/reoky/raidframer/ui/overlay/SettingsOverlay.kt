@@ -173,8 +173,15 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         }
       }
 
+      Divider(color = Color.DarkGray, thickness = 1.dp)
+
       GlobalOptionsPanel(wm)
+
+      Divider(color = Color.DarkGray, thickness = 1.dp)
+
       CombatOverlaySettingsPanel(wm)
+
+      Divider(color = Color.DarkGray, thickness = 1.dp)
 
       Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.Center) {
         Button(
@@ -262,7 +269,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
   }
   Box(
     modifier = Modifier
-      .padding(16.dp)
+      .padding(horizontal = 16.dp, vertical = 8.dp)
       .wrapContentSize()
   ) {
     Column {
@@ -347,7 +354,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
             }
           }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Divider(color = Color.DarkGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
         Column {
           Text(
             text = stringResource(Res.string.settings_general_title),
@@ -426,9 +433,9 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
           )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Divider(color = Color.DarkGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
           Checkbox(
             checked = config.miniGraphEnabled,
             onCheckedChange = { isChecked ->
@@ -448,7 +455,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
             color = Color.White
           )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
           Checkbox(
             checked = config.splitChatEnabled,
             onCheckedChange = { isChecked ->
@@ -465,7 +472,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
                 color = Color.White
               )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
           Checkbox(
             checked = config.tabbedDetectionEnabled,
             onCheckedChange = { isChecked ->
@@ -483,7 +490,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               )
         }
         // allow PvE damage option
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
           Checkbox(
             checked = config.allowPVEDamage,
             onCheckedChange = {
@@ -501,7 +508,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
                 color = Color.White
               )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
           Checkbox(
             checked = config.gameScheduleHotkeyEnabled,
             onCheckedChange = {
@@ -519,7 +526,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
                 color = Color.White
               )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
           Checkbox(
             checked = config.useSadlyDotEyeOhhh,
             onCheckedChange = {
@@ -537,7 +544,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
                 color = Color.White
               )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
           Checkbox(
             checked = config.dragonBreathOverlayEnabled,
             onCheckedChange = {
@@ -577,7 +584,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
 @Composable
 fun CombatOverlaySettingsPanel(wm: WindowManager? = null) {
   val config by RFConfig.state.collectAsState()
-  Column(modifier = Modifier.padding(16.dp)) {
+  Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
     Text(
       text = stringResource(Res.string.settings_combat_overlay_title),
       color = Color.White,
@@ -587,7 +594,7 @@ fun CombatOverlaySettingsPanel(wm: WindowManager? = null) {
       modifier = Modifier.padding(bottom = 8.dp)
     )
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
       Checkbox(
         checked = config.combatShowDamageColumn,
         onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowDamageColumn = isChecked) } },
@@ -600,7 +607,7 @@ fun CombatOverlaySettingsPanel(wm: WindowManager? = null) {
       Text(text = stringResource(Res.string.settings_show_damage_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
       Checkbox(
         checked = config.combatShowHealsColumn,
         onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowHealsColumn = isChecked) } },
@@ -613,7 +620,7 @@ fun CombatOverlaySettingsPanel(wm: WindowManager? = null) {
       Text(text = stringResource(Res.string.settings_show_heals_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
       Checkbox(
         checked = config.combatShowCCColumn,
         onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowCCColumn = isChecked) } },
@@ -626,7 +633,7 @@ fun CombatOverlaySettingsPanel(wm: WindowManager? = null) {
       Text(text = stringResource(Res.string.settings_show_cc_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
       Checkbox(
         checked = config.combatControlsFadeEnabled,
         onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatControlsFadeEnabled = isChecked) } },
