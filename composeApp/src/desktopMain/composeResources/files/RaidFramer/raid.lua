@@ -229,5 +229,9 @@ function RF.Raid.handleCoraidEstablished()
 end
 function RF.Raid.handleCoraidBroken()
   RF.Raid.hasCoRaid = false
+  -- Clear the second raid slots to prevent stale data
+  for i = 51, 100 do
+    RF.Raid.Roster[i] = RF.Raid.NewRaidMember(i)
+  end
   RF:Log("[Raid] Joint raid broken")
 end

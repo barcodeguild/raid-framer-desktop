@@ -147,16 +147,20 @@ object PlayerCacheInteractor : Interactor() {
   /*
    * Builds parties of five from the ordered list of raid members and stores them under the raid ID.
    */
-  fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
-    scope.launch {
-      mutex.withLock {
-        // improvement to the code where if the first raid is empty we clear all raids (because the player left the raid)
-        if (raidId == 0 && members.isEmpty()) {
-          raids.clear()
-          return@withLock
-        }
-        raids[raidId] = members.chunked(5).take(20)
-        members.forEach { member ->
+  suspend fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
+    mutex.withLock {
+      // improvement to the code where if the first raid is empty we clear all raids (because the player left the raid)
+      if (raidId == 0 && members.isEmpty()) {
+        raids.clear()
+        return@withLock
+      }
+      raids[raidId] = members.chunked(5).take(20)
+      // Guard: if main raid has zero real players, also clear co-raid data (ghost raid)
+      if (raidId == 0 && members.all { it.playerName.isBlank() }) {
+        raids.remove(1)
+      }
+      members.forEach { member ->
+        if (member.playerName.isNotBlank()) {
           createCardIfNoneExists(playerName = member.playerName)
         }
       }
