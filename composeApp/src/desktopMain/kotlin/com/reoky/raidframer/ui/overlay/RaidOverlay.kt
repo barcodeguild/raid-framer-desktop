@@ -1,42 +1,70 @@
-package com.reoky.raidframer.ui.overlay
-
+﻿package com.reoky.raidframer.ui.overlay
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
-import com.reoky.raidframer.core.model.hasPvPParticipation
 import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.model.hasPvPParticipation
+import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.CheckBoxComponent
 import com.reoky.raidframer.ui.component.RaidComponent
 import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
-import com.reoky.raidframer.ui.component.CheckBoxComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.raid_attendance_title
+import raid_framer_desktop.composeapp.generated.resources.raid_close
+import raid_framer_desktop.composeapp.generated.resources.raid_copy_attendance
+import raid_framer_desktop.composeapp.generated.resources.raid_coraid_label
+import raid_framer_desktop.composeapp.generated.resources.raid_haranya_faction
+import raid_framer_desktop.composeapp.generated.resources.raid_include_coraid
+import raid_framer_desktop.composeapp.generated.resources.raid_include_departed
+import raid_framer_desktop.composeapp.generated.resources.raid_include_main_raid
+import raid_framer_desktop.composeapp.generated.resources.raid_include_nearby_opposite_faction
+import raid_framer_desktop.composeapp.generated.resources.raid_include_nearby_same_faction
+import raid_framer_desktop.composeapp.generated.resources.raid_main_raid_label
+import raid_framer_desktop.composeapp.generated.resources.raid_no_raid_detected
+import raid_framer_desktop.composeapp.generated.resources.raid_nuian_faction
+import raid_framer_desktop.composeapp.generated.resources.raid_pirate_faction
+import raid_framer_desktop.composeapp.generated.resources.raid_require_pvp_filter
+import raid_framer_desktop.composeapp.generated.resources.raid_tab_attendance
+import raid_framer_desktop.composeapp.generated.resources.raid_tab_nearby
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
-
+private enum class RaidTab { ATTENDANCE, NEARBY }
 @Composable
 fun RaidOverlay(wm: WindowManager? = null) {
-  // Collect data for both raids
   val playerFaction = Faction.fromString(RFConfig.state.collectAsState().value.playerFaction)
   val mainRaid = PlayerCacheInteractor.getRaidById(0).collectAsState()
   val coRaid = PlayerCacheInteractor.getRaidById(1).collectAsState()
@@ -44,292 +72,498 @@ fun RaidOverlay(wm: WindowManager? = null) {
   val nearbyHaranya = PlayerCacheInteractor.nearbyHaraniRaidParties.collectAsState()
   val nearbyPirate = PlayerCacheInteractor.nearbyPirateRaidParties.collectAsState()
   val raidDepartures = PlayerCacheInteractor.raidDeparturesFlow.collectAsState()
-
-  Box(
-    modifier = Modifier
-      .fillMaxSize()
-  ) {
-    Column(
-      modifier = Modifier.fillMaxSize(),
-      verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-      TitleBarComponent(
-        title = "Raid Management, Attendance, and Nearby Players",
-        onClose = { wm?.closeWindow(OverlayType.RAID) }
-      )
-
-      // Main Content Area
-      Box(
-        modifier = Modifier
-          .fillMaxWidth()
-          .weight(1f)
-          .padding(4.dp),
-        contentAlignment = Alignment.TopStart
+  var selectedTab by remember { mutableStateOf(RaidTab.ATTENDANCE) }
+  Box(modifier = Modifier.fillMaxSize()) {
+    if (mainRaid.value.isEmpty() && coRaid.value.isEmpty()) {
+      Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
       ) {
-        // Wrap content in a Column to prevent stacking on top of each other
+        Text(
+          text = stringResource(Res.string.raid_no_raid_detected),
+          color = Color.LightGray,
+          fontWeight = FontWeight.Bold,
+          fontSize = 14.sp,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.padding(horizontal = 24.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Button(
+            onClick = {
+              CoroutineScope(Dispatchers.Main).launch {
+                CompanionInteractor.sendMessage(IPCMessagePayload.TestPing())
+              }
+            },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
+          ) {
+            Text("Refresh", color = Color.Black)
+          }
+          Button(
+            onClick = { wm?.closeWindow(OverlayType.RAID) },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
+          ) {
+            Text(text = stringResource(Res.string.raid_close), color = Color.Black)
+          }
+        }
+      }
+    } else {
+      Column(modifier = Modifier.fillMaxSize()) {
+        TitleBarComponent(
+          title = stringResource(Res.string.raid_attendance_title),
+          onClose = { wm?.closeWindow(OverlayType.RAID) }
+        )
         Column(
           modifier = Modifier
-            .wrapContentWidth()
-            .verticalScroll(rememberScrollState()), // Allow scrolling if list gets too long
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(24.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-          Row(
+          // RaidHeaderStrip() I might want something like this in the future
+          Box(
             modifier = Modifier
               .fillMaxWidth()
-              .padding(start = 8.dp),
-            horizontalArrangement = Arrangement.Start
+              .background(Color(0xFF141414).copy(alpha = 0.78f), RoundedCornerShape(14.dp))
+              .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
+              .padding(horizontal = 4.dp, vertical = 2.dp)
           ) {
-            // if not in a raid, show a text saying "No Raid Detected"
-            if (mainRaid.value.isEmpty() && coRaid.value.isEmpty()) {
-              Box((Modifier.fillMaxWidth().fillMaxHeight())) {
-                Text(
-                  text = "Please join a raid to use raid management features. You must have the Lua Addon installed. Windows with title bars are not overlays, consider placing on another monitor to avoid covering the game UI.",
-                  color = Color.LightGray,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 11.sp,
-                  modifier = Modifier.align(Alignment.Center)
-                )
-              }
-              return@Column
-            } else {
-
-              // --- Main Raid Section ---
-              Column(
-                modifier = Modifier.width(IntrinsicSize.Min).padding(0.5.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-              ) {
-                Text(
-                  modifier = Modifier.align(Alignment.CenterHorizontally),
-                  text = "Main Raid",
-                  color = Color.White,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 14.sp
-                )
-                RaidComponent(
-                  parties = mainRaid.value,
-                  modifier = Modifier
-                    .wrapContentSize()
-                    .align(Alignment.CenterHorizontally)
-                )
-              }
-
-              // --- Co-Raid Section ---
-              Column(
-                modifier = Modifier.width(IntrinsicSize.Min).padding(0.5.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-              ) {
-                Text(
-                  modifier = Modifier.align(Alignment.CenterHorizontally),
-                  text = "Co-Raid",
-                  color = Color.White,
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 14.sp
-                )
-                RaidComponent(
-                  parties = coRaid.value,
-                  modifier = Modifier
-                    .wrapContentSize()
-                    .align(Alignment.CenterHorizontally)
-                )
-              }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-
-            var includeMain by rememberSaveable { mutableStateOf(true) }
-            var includeCo by rememberSaveable { mutableStateOf(true) }
-            var includeNearbySameFaction by rememberSaveable { mutableStateOf(false) }
-            var includeNearbyOppositeFaction by rememberSaveable { mutableStateOf(false) }
-            var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
-            var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
-
-            // Use centralized PlayerCard.hasPvPParticipation() extension
-            fun String.meetsPvP(): Boolean =
-              if (!requirePvPParticipation) true
-              else PlayerCacheInteractor.getCard(this)?.hasPvPParticipation() ?: false
-
-            val attendanceNames = run {
-              val names = mutableListOf<String>()
-              if (includeMain) {
-                names += mainRaid.value.flatten().mapNotNull { it.playerName }.filter { it.meetsPvP() }
-              }
-              if (includeCo) {
-                names += coRaid.value.flatten().mapNotNull { it.playerName }.filter { it.meetsPvP() }
-              }
-              if (includeNearbySameFaction) {
-                val sameFactionCards: List<PlayerCard> = when (playerFaction) {
-                  Faction.HARANYA -> nearbyHaranya.value
-                  Faction.NUIA -> nearbyNuia.value
-                  Faction.PIRATE -> nearbyPirate.value
-                  else -> emptyList()
-                }
-                names += sameFactionCards
-                  .let { if (requirePvPParticipation) it.filter { c -> c.hasPvPParticipation() } else it }
-                  .map { it.name }
-              }
-              if (includeNearbyOppositeFaction) {
-                val oppCards: List<PlayerCard> = when (playerFaction) {
-                  Faction.HARANYA -> nearbyNuia.value + nearbyPirate.value
-                  Faction.NUIA -> nearbyHaranya.value + nearbyPirate.value
-                  Faction.PIRATE -> nearbyHaranya.value + nearbyNuia.value
-                  else -> emptyList()
-                }
-                names += oppCards
-                  .let { if (requirePvPParticipation) it.filter { c -> c.hasPvPParticipation() } else it }
-                  .map { it.name }
-              }
-              if (includePlayersThatLeftRaid) {
-                val departed: Set<String> =
-                  (raidDepartures.value[0] ?: emptySet()) +
-                  (raidDepartures.value[1] ?: emptySet())
-                names += departed.filter { it.meetsPvP() }
-              }
-              names.filter { it.isNotBlank() }.distinct().joinToString(", ")
-            }
-
-            Column(
-              modifier = Modifier
-                .widthIn(min = 300.dp)
-                .padding(8.dp),
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-              horizontalAlignment = Alignment.Start
+            TabRow(
+              selectedTabIndex = selectedTab.ordinal,
+              backgroundColor = Color.Transparent,
+              contentColor = Color.White,
+              divider = {},
+              indicator = {},
+              modifier = Modifier.fillMaxWidth()
             ) {
-              CheckBoxComponent(
-                label = "Include Main",
-                initialChecked = includeMain,
-                onCheckedChange = { includeMain = it },
-                textColor = Color.White
+              val tabs = listOf(
+                RaidTab.ATTENDANCE to Res.string.raid_tab_attendance,
+                RaidTab.NEARBY to Res.string.raid_tab_nearby
               )
-              CheckBoxComponent(
-                label = "Include Co-Raid",
-                initialChecked = includeCo,
-                onCheckedChange = { includeCo = it },
-                textColor = Color.White
-              )
-              CheckBoxComponent(
-                label = "Include Nearby Same-Faction Players",
-                initialChecked = includeNearbySameFaction,
-                onCheckedChange = { includeNearbySameFaction = it },
-                textColor = Color.White
-              )
-              CheckBoxComponent(
-                label = "Include Nearby Opposite-Faction Players",
-                initialChecked = includeNearbyOppositeFaction,
-                onCheckedChange = { includeNearbyOppositeFaction = it },
-                textColor = Color.White
-              )
-              CheckBoxComponent(
-                label = "Require at least some PvP participation (25k dmg, 25k heals, or 25+ cc points to filter non-combatants)",
-                initialChecked = requirePvPParticipation,
-                onCheckedChange = { requirePvPParticipation = it },
-                textColor = Color.White
-              )
-              CheckBoxComponent(
-                label = "Include players that left raid",
-                initialChecked = includePlayersThatLeftRaid,
-                onCheckedChange = { includePlayersThatLeftRaid = it },
-                textColor = Color.White
-              )
-              SelectableTextField(
-                value = attendanceNames,
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .heightIn(min = 56.dp)
-              )
-
-              Button(
-                onClick = {
-                  val clipboard = Toolkit.getDefaultToolkit().systemClipboard
-                  clipboard.setContents(StringSelection(attendanceNames), null)
-                },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
-              ) {
-                Text(text = "Copy Attendance", color = Color.Black)
+              tabs.forEach { (tab, label) ->
+                Tab(
+                  selected = selectedTab == tab,
+                  onClick = { selectedTab = tab },
+                  text = {
+                    Text(
+                      text = stringResource(label),
+                      color = if (selectedTab == tab) Color.White else Color.LightGray
+                    )
+                  }
+                )
               }
-            }
-          }
-
-          Divider(color = Color.LightGray, thickness = 1.dp)
-
-          Text(
-            text = "Out-of-Raid / Opposite Faction / Nearby Players",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp
-          )
-
-          // --- Row: Nearby Players (Below Raids) ---
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-          ) {
-            // Haranya
-            Column(
-              modifier = Modifier
-                .weight(1f)
-                .padding(4.dp),
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-              Text(
-                text = "Haranya Faction (${nearbyHaranya.value.size})",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-              )
-              RaidComponent(
-                parties = nearbyHaranya.value.mapIndexed { index, card ->
-                  RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
-                }.chunked(5),
-                modifier = Modifier.wrapContentSize()
-              )
-            }
-
-            // Nuian
-            Column(
-              modifier = Modifier
-                .weight(1f)
-                .padding(4.dp),
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-              Text(
-                text = "Nuian Faction (${nearbyNuia.value.size})",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-              )
-              RaidComponent(
-                parties = nearbyNuia.value.mapIndexed { index, card ->
-                  RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
-                }.chunked(5),
-                modifier = Modifier.wrapContentSize()
-              )
-            }
-
-            // Pirate
-            Column(
-              modifier = Modifier
-                .weight(1f)
-                .padding(4.dp),
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-              Text(
-                text = "Pirate Faction (${nearbyPirate.value.size})",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-              )
-              RaidComponent(
-                parties = nearbyPirate.value.mapIndexed { index, card ->
-                  RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
-                }.chunked(5),
-                modifier = Modifier.wrapContentSize()
-              )
             }
           }
         }
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+          contentAlignment = Alignment.TopStart
+        ) {
+          when (selectedTab) {
+            RaidTab.ATTENDANCE -> AttendanceTab(
+              mainRaid = mainRaid.value,
+              coRaid = coRaid.value,
+              nearbyNuia = nearbyNuia.value,
+              nearbyHaranya = nearbyHaranya.value,
+              nearbyPirate = nearbyPirate.value,
+              playerFaction = playerFaction,
+              raidDepartures = raidDepartures.value
+            )
+            RaidTab.NEARBY -> NearbyTab(
+              nearbyNuia = nearbyNuia.value,
+              nearbyHaranya = nearbyHaranya.value,
+              nearbyPirate = nearbyPirate.value
+            )
+          }
+        }
+      }
+    }
+  }
+}
+@Composable
+private fun RaidHeaderStrip() {
+  Column(
+    modifier = Modifier
+      .fillMaxWidth()
+      .background(Color(0xFF161616).copy(alpha = 0.80f), RoundedCornerShape(14.dp))
+      .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp))
+      .padding(horizontal = 14.dp, vertical = 10.dp),
+    verticalArrangement = Arrangement.spacedBy(6.dp)
+  ) {
+    Text(
+      text = "Raid Control Deck",
+      color = Color.White,
+      fontWeight = FontWeight.Bold,
+      fontSize = 15.sp
+    )
+    Text(
+      text = "Raid roster on the left, controls on the right, with nearby intel tucked neatly underneath.",
+      color = Color.LightGray,
+      fontSize = 12.sp
+    )
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      RaidHeaderChip("Roster left")
+      RaidHeaderChip("Controls right")
+      RaidHeaderChip("Tabs below")
+    }
+  }
+}
+@Composable
+private fun RaidHeaderChip(label: String) {
+  Box(
+    modifier = Modifier
+      .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(999.dp))
+      .padding(horizontal = 10.dp, vertical = 4.dp)
+  ) {
+    Text(
+      text = label,
+      color = Color.White,
+      fontSize = 11.sp,
+      fontWeight = FontWeight.Medium
+    )
+  }
+}
+@Composable
+private fun AttendanceTab(
+  mainRaid: List<List<RaidFramePayload>>,
+  coRaid: List<List<RaidFramePayload>>,
+  nearbyNuia: List<PlayerCard>,
+  nearbyHaranya: List<PlayerCard>,
+  nearbyPirate: List<PlayerCard>,
+  playerFaction: Faction,
+  raidDepartures: Map<Int, Set<String>>
+) {
+  val scrollState = rememberScrollState()
+  var includeMain by rememberSaveable { mutableStateOf(true) }
+  var includeCo by rememberSaveable { mutableStateOf(true) }
+  var includeNearbySameFaction by rememberSaveable { mutableStateOf(false) }
+  var includeNearbyOppositeFaction by rememberSaveable { mutableStateOf(false) }
+  var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
+  var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
+  fun String.meetsPvP(): Boolean =
+    if (!requirePvPParticipation) true
+    else PlayerCacheInteractor.getCard(this)?.hasPvPParticipation() ?: false
+  val attendanceNames = run {
+    val names = mutableListOf<String>()
+    if (includeMain) {
+      names += mainRaid.flatten().mapNotNull { frame -> frame.playerName.takeIf { it.isNotBlank() } }.filter { it.meetsPvP() }
+    }
+    if (includeCo) {
+      names += coRaid.flatten().mapNotNull { frame -> frame.playerName.takeIf { it.isNotBlank() } }.filter { it.meetsPvP() }
+    }
+    if (includeNearbySameFaction) {
+      val sameFactionCards: List<PlayerCard> = when (playerFaction) {
+        Faction.HARANYA -> nearbyHaranya
+        Faction.NUIA -> nearbyNuia
+        Faction.PIRATE -> nearbyPirate
+        else -> emptyList()
+      }
+      names += sameFactionCards
+        .let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
+        .map { it.name }
+    }
+    if (includeNearbyOppositeFaction) {
+      val oppCards: List<PlayerCard> = when (playerFaction) {
+        Faction.HARANYA -> nearbyNuia + nearbyPirate
+        Faction.NUIA -> nearbyHaranya + nearbyPirate
+        Faction.PIRATE -> nearbyHaranya + nearbyNuia
+        else -> emptyList()
+      }
+      names += oppCards
+        .let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
+        .map { it.name }
+    }
+    if (includePlayersThatLeftRaid) {
+      val departed: Set<String> =
+        (raidDepartures[0] ?: emptySet()) +
+          (raidDepartures[1] ?: emptySet())
+      names += departed.filter { it.meetsPvP() }
+    }
+    names.filter { it.isNotBlank() }.distinct().joinToString(", ")
+  }
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .verticalScroll(scrollState),
+    verticalArrangement = Arrangement.spacedBy(12.dp)
+  ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+      val wideEnoughForTwoColumns = maxWidth >= 760.dp
+      if (wideEnoughForTwoColumns) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+          verticalAlignment = Alignment.Top
+        ) {
+          AttendanceRaidPane(
+            mainRaid = mainRaid,
+            coRaid = coRaid,
+            modifier = Modifier.weight(1f)
+          )
+          AttendanceControlsPane(
+            includeMain = includeMain,
+            onIncludeMainChange = { includeMain = it },
+            includeCo = includeCo,
+            onIncludeCoChange = { includeCo = it },
+            includeNearbySameFaction = includeNearbySameFaction,
+            onIncludeNearbySameFactionChange = { includeNearbySameFaction = it },
+            includeNearbyOppositeFaction = includeNearbyOppositeFaction,
+            onIncludeNearbyOppositeFactionChange = { includeNearbyOppositeFaction = it },
+            requirePvPParticipation = requirePvPParticipation,
+            onRequirePvPParticipationChange = { requirePvPParticipation = it },
+            includePlayersThatLeftRaid = includePlayersThatLeftRaid,
+            onIncludePlayersThatLeftRaidChange = { includePlayersThatLeftRaid = it },
+            attendanceNames = attendanceNames,
+            modifier = Modifier.widthIn(min = 320.dp, max = 390.dp)
+          )
+        }
+      } else {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          AttendanceRaidPane(
+            mainRaid = mainRaid,
+            coRaid = coRaid,
+            modifier = Modifier.fillMaxWidth()
+          )
+          AttendanceControlsPane(
+            includeMain = includeMain,
+            onIncludeMainChange = { includeMain = it },
+            includeCo = includeCo,
+            onIncludeCoChange = { includeCo = it },
+            includeNearbySameFaction = includeNearbySameFaction,
+            onIncludeNearbySameFactionChange = { includeNearbySameFaction = it },
+            includeNearbyOppositeFaction = includeNearbyOppositeFaction,
+            onIncludeNearbyOppositeFactionChange = { includeNearbyOppositeFaction = it },
+            requirePvPParticipation = requirePvPParticipation,
+            onRequirePvPParticipationChange = { requirePvPParticipation = it },
+            includePlayersThatLeftRaid = includePlayersThatLeftRaid,
+            onIncludePlayersThatLeftRaidChange = { includePlayersThatLeftRaid = it },
+            attendanceNames = attendanceNames,
+            modifier = Modifier.fillMaxWidth()
+          )
+        }
+      }
+    }
+  }
+}
+@Composable
+private fun AttendanceRaidPane(
+  mainRaid: List<List<RaidFramePayload>>,
+  coRaid: List<List<RaidFramePayload>>,
+  modifier: Modifier = Modifier
+) {
+  Column(
+    modifier = modifier
+      .background(Color(0xFF1A1A1A).copy(alpha = 0.78f), RoundedCornerShape(14.dp))
+      .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp))
+      .padding(12.dp),
+    verticalArrangement = Arrangement.spacedBy(10.dp),
+    horizontalAlignment = Alignment.CenterHorizontally
+  ) {
+    FlowRow(
+      modifier = Modifier.wrapContentWidth(),
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+      if (mainRaid.isNotEmpty()) {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+          Text(
+            text = stringResource(Res.string.raid_main_raid_label),
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp
+          )
+          RaidComponent(
+            parties = mainRaid,
+            modifier = Modifier.wrapContentSize()
+          )
+        }
+      }
+      if (coRaid.isNotEmpty()) {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+          Text(
+            text = stringResource(Res.string.raid_coraid_label),
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp
+          )
+          RaidComponent(
+            parties = coRaid,
+            modifier = Modifier.wrapContentSize()
+          )
+        }
+      }
+    }
+  }
+}
+@Composable
+private fun AttendanceControlsPane(
+  includeMain: Boolean,
+  onIncludeMainChange: (Boolean) -> Unit,
+  includeCo: Boolean,
+  onIncludeCoChange: (Boolean) -> Unit,
+  includeNearbySameFaction: Boolean,
+  onIncludeNearbySameFactionChange: (Boolean) -> Unit,
+  includeNearbyOppositeFaction: Boolean,
+  onIncludeNearbyOppositeFactionChange: (Boolean) -> Unit,
+  requirePvPParticipation: Boolean,
+  onRequirePvPParticipationChange: (Boolean) -> Unit,
+  includePlayersThatLeftRaid: Boolean,
+  onIncludePlayersThatLeftRaidChange: (Boolean) -> Unit,
+  attendanceNames: String,
+  modifier: Modifier = Modifier
+) {
+  Column(
+    modifier = modifier
+      .background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp))
+      .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp))
+      .padding(12.dp),
+    verticalArrangement = Arrangement.spacedBy(6.dp)
+  ) {
+    CheckBoxComponent(
+      label = stringResource(Res.string.raid_include_main_raid),
+      initialChecked = includeMain,
+      onCheckedChange = onIncludeMainChange,
+      textColor = Color.White
+    )
+    CheckBoxComponent(
+      label = stringResource(Res.string.raid_include_coraid),
+      initialChecked = includeCo,
+      onCheckedChange = onIncludeCoChange,
+      textColor = Color.White
+    )
+    CheckBoxComponent(
+      label = stringResource(Res.string.raid_include_nearby_same_faction),
+      initialChecked = includeNearbySameFaction,
+      onCheckedChange = onIncludeNearbySameFactionChange,
+      textColor = Color.White
+    )
+    CheckBoxComponent(
+      label = stringResource(Res.string.raid_include_nearby_opposite_faction),
+      initialChecked = includeNearbyOppositeFaction,
+      onCheckedChange = onIncludeNearbyOppositeFactionChange,
+      textColor = Color.White
+    )
+    CheckBoxComponent(
+      label = stringResource(Res.string.raid_require_pvp_filter),
+      initialChecked = requirePvPParticipation,
+      onCheckedChange = onRequirePvPParticipationChange,
+      textColor = Color.White
+    )
+    CheckBoxComponent(
+      label = stringResource(Res.string.raid_include_departed),
+      initialChecked = includePlayersThatLeftRaid,
+      onCheckedChange = onIncludePlayersThatLeftRaidChange,
+      textColor = Color.White
+    )
+    SelectableTextField(
+      value = attendanceNames,
+      modifier = Modifier
+        .fillMaxWidth()
+        .heightIn(min = 48.dp)
+    )
+    Button(
+      onClick = {
+        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+        clipboard.setContents(StringSelection(attendanceNames), null)
+      },
+      colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+      modifier = Modifier.padding(top = 2.dp)
+    ) {
+      Text(text = stringResource(Res.string.raid_copy_attendance), color = Color.Black)
+    }
+  }
+}
+@Composable
+private fun NearbyTab(
+  nearbyNuia: List<PlayerCard>,
+  nearbyHaranya: List<PlayerCard>,
+  nearbyPirate: List<PlayerCard>
+) {
+  val scrollState = rememberScrollState()
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .verticalScroll(scrollState),
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+      Column(
+        modifier = Modifier
+          .weight(1f)
+          .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        Text(
+          text = stringResource(Res.string.raid_haranya_faction, nearbyHaranya.size),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        RaidComponent(
+          parties = nearbyHaranya.mapIndexed { index, card ->
+            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
+          }.chunked(5),
+          modifier = Modifier.wrapContentSize()
+        )
+      }
+      Column(
+        modifier = Modifier
+          .weight(1f)
+          .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        Text(
+          text = stringResource(Res.string.raid_nuian_faction, nearbyNuia.size),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        RaidComponent(
+          parties = nearbyNuia.mapIndexed { index, card ->
+            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
+          }.chunked(5),
+          modifier = Modifier.wrapContentSize()
+        )
+      }
+      Column(
+        modifier = Modifier
+          .weight(1f)
+          .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        Text(
+          text = stringResource(Res.string.raid_pirate_faction, nearbyPirate.size),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        RaidComponent(
+          parties = nearbyPirate.mapIndexed { index, card ->
+            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
+          }.chunked(5),
+          modifier = Modifier.wrapContentSize()
+        )
       }
     }
   }

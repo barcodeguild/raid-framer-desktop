@@ -212,4 +212,23 @@
     <string name="potion_name_phoenix_tears_tincture">Phoenix Tears Tincture</string>
     <string name="potion_name_wild_ginseng">Wild Ginseng! (What a lucky friend!)</string>
 
+    <!-- Raid / Attendance Overlay -->
+    <string name="raid_attendance_title">Raid Management &amp; Attendance</string>
+    <string name="raid_tab_attendance">Attendance</string>
+    <string name="raid_tab_nearby">Nearby</string>
+    <string name="raid_no_raid_detected">Please join a raid to use raid management features. You must have the Lua Addon installed. Windows with title bars are not overlays, consider placing on another monitor to avoid covering the game UI.</string>
+    <string name="raid_main_raid_label">Main Raid</string>
+    <string name="raid_coraid_label">Co-Raid</string>
+    <string name="raid_include_main_raid">Include Main Raid</string>
+    <string name="raid_include_coraid">Include Co-Raid</string>
+    <string name="raid_include_nearby_same_faction">Include Nearby Same-Faction Players</string>
+    <string name="raid_include_nearby_opposite_faction">Include Nearby Opposite-Faction Players</string>
+    <string name="raid_require_pvp_filter">Require at least some PvP participation (25k dmg, 25k heals, or 25+ cc points to filter non-combatants)</string>
+    <string name="raid_include_departed">Include players that left raid</string>
+    <string name="raid_copy_attendance">Copy Attendance</string>
+    <string name="raid_haranya_faction">Haranya Faction (%d)</string>
+    <string name="raid_nuian_faction">Nuian Faction (%d)</string>
+    <string name="raid_pirate_faction">Pirate Faction (%d)</string>
+    <string name="raid_close">Close</string>
+
 </resources>
