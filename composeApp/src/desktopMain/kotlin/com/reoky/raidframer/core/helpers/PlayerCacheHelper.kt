@@ -99,6 +99,7 @@ fun PlayerCard.resetSession(): PlayerCard {
     recentSkillItemUsages = listOf(),
 
     // Session totals
+    sessionSpellDamageMap = mapOf(),
     sessionDamageTotal = 0L,
     sessionHealTotal = 0L,
     sessionCCTotal = 0,

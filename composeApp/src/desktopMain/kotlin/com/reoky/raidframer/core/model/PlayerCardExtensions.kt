@@ -35,6 +35,10 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
       lifetimeTotalDamage = cache.lifetimeTotalDamage + event.damage
     ),
     recentDamageEvents = (this.recentDamageEvents + event).takeLast(200),
+    sessionSpellDamageMap = run {
+      val spellKey = event.spell.ifBlank { "Unknown" }
+      this.sessionSpellDamageMap + (spellKey to ((this.sessionSpellDamageMap[spellKey] ?: 0L) + event.damage))
+    },
     sessionDamageTotal = this.sessionDamageTotal + event.damage
   )
 }

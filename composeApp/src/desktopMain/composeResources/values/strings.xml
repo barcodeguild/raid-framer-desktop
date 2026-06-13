@@ -23,8 +23,7 @@
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Settings</string>
     <string name="settings_data_sourcing_title">Data Sourcing</string>
-    <string name="settings_data_sourcing_description">Please be careful to enter the correct ArcheRage directory below. This field was likely populated automatically: </string>
-    <string name="settings_data_sourcing_sidenote">Technically, you do not need ArcheRage installed if you only want to view historical combat.log files. Just right-click on the .log or .rf (battle slice export file) and choose 'Open-With → Raid Framer' in the Windows Explorer context menu to view a replay.</string>
+    <string name="settings_data_sourcing_description">Please confirm that you see the correct ArcheRage documents directory below. Your game's documents directory was detected automatically. If you don't see the correct directory, or the text below is red, you should report a bug.</string>
     <string name="settings_toggle_pvp_damage">Show only PvP damage</string>
     <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
     <string name="settings_lua_options_title">Lua Options</string>
@@ -58,6 +57,11 @@
     <string name="settings_uninstall_done_title">Uninstall Complete</string>
     <string name="settings_character_description">Your character and faction are determined automatically when you switch characters. Raid Framer uses this information to deduce friendly and hostile characters over time.</string>
     <string name="settings_character_title">Current Character</string>
+    <string name="settings_general_opacity_slider">Overlay Opacity</string>
+    <string name="settings_general_tint_slider">Overlay Color</string>
+    <string name="settings_general_title">General Settings</string>
+    <string name="settings_general_description">Settings pertaining to the overall operation of the APP and UI aesthetics.</string>
+
 
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>

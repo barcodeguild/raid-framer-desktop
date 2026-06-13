@@ -27,7 +27,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_description
-import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_sidenote
 import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_title
 import raid_framer_desktop.composeapp.generated.resources.settings_title
 import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_done_text
@@ -50,7 +49,10 @@ import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_don
 import raid_framer_desktop.composeapp.generated.resources.general_exit
 import java.util.Locale.getDefault
 import kotlin.system.exitProcess
+import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.reoky.raidframer.core.interactor.CompanionInteractor
+import com.reoky.raidframer.ui.LocalDragLock
 import raid_framer_desktop.composeapp.generated.resources.settings_character_description
 import raid_framer_desktop.composeapp.generated.resources.settings_character_title
 import raid_framer_desktop.composeapp.generated.resources.settings_name_placeholder
@@ -59,8 +61,10 @@ import raid_framer_desktop.composeapp.generated.resources.settings_show_damage_c
 import raid_framer_desktop.composeapp.generated.resources.settings_show_heals_column
 import raid_framer_desktop.composeapp.generated.resources.settings_combat_overlay_title
 import raid_framer_desktop.composeapp.generated.resources.settings_combat_fade_controls
+import raid_framer_desktop.composeapp.generated.resources.settings_general_description
+import raid_framer_desktop.composeapp.generated.resources.settings_general_opacity_slider
+import raid_framer_desktop.composeapp.generated.resources.settings_general_title
 import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_button
-import raid_framer_desktop.composeapp.generated.resources.settings_player_remappings_button
 
 @Composable
 fun SettingsOverlay(wm: WindowManager? = null) {
@@ -95,7 +99,6 @@ fun SettingsOverlay(wm: WindowManager? = null) {
               fontWeight = FontWeight.Bold
             )
           }
-
           Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
             Text(
               text = stringResource(Res.string.settings_data_sourcing_description),
@@ -105,6 +108,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
               fontSize = 14.sp
             )
           }
+
+          Spacer(modifier = Modifier.height(8.dp))
 
           Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 8.dp, vertical = 4.dp)) {
             if (config.defaultArcheRageDirectory.isNotBlank()) {
@@ -161,22 +166,13 @@ fun SettingsOverlay(wm: WindowManager? = null) {
               )
             }
           }
-          Row(Modifier.padding(start = 8.dp, end = 8.dp)) {
-            Text(
-              text = stringResource(Res.string.settings_data_sourcing_sidenote),
-              color = Color.White,
-              textAlign = TextAlign.Start,
-              fontWeight = FontWeight.W400,
-              fontSize = 14.sp)
-          }
         }
       }
 
       GlobalOptionsPanel(wm)
+      CombatOverlaySettingsPanel(wm)
 
-          CombatOverlaySettingsPanel(wm)
-
-          Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.Center) {
+      Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.Center) {
         Button(
           onClick = { showUninstallConfirmDialog.value = true },
           colors = ButtonDefaults.buttonColors(Color.Red)
@@ -185,11 +181,6 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         }
       }
     }
-    // looked too weird to keep
-    // VerticalScrollbar(
-    //   modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-    //   adapter = rememberScrollbarAdapter(scrollState)
-    // )
   }
 
   //FileSelectionDialog(showDialog, config.defaultArcheRageDirectory)
@@ -244,6 +235,18 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 @Composable
 fun GlobalOptionsPanel(wm: WindowManager? = null) {
   val config by RFConfig.state.collectAsState() // single source of truth
+  val dragLock = LocalDragLock.current
+
+  // Lock window dragging while the slider thumb is being dragged
+  val sliderInteractionSource = remember { MutableInteractionSource() }
+  LaunchedEffect(sliderInteractionSource) {
+    sliderInteractionSource.interactions.collect { interaction ->
+      when (interaction) {
+        is DragInteraction.Start -> dragLock.value = true
+        is DragInteraction.Stop, is DragInteraction.Cancel -> dragLock.value = false
+      }
+    }
+  }
   Box(
     modifier = Modifier
       .padding(16.dp)
@@ -332,6 +335,49 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
           }
         }
         Spacer(modifier = Modifier.height(8.dp))
+        Column {
+          Text(
+            text = stringResource(Res.string.settings_general_title),
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            modifier = Modifier.padding(bottom = 8.dp)
+          )
+          Text(
+            text = stringResource(Res.string.settings_general_description),
+            color = Color.White,
+            textAlign = TextAlign.Start,
+            fontWeight = FontWeight.W400,
+            fontSize = 14.sp
+          )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column {
+          Text(
+            text = stringResource(Res.string.settings_general_opacity_slider),
+            color = Color.White,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(start = 8.dp)
+          )
+          Slider(
+            value = config.windowOpacity,
+            onValueChange = { newOpacity -> RFConfig.update { it.copy(windowOpacity = newOpacity) } },
+            interactionSource = sliderInteractionSource,
+            modifier = Modifier
+              .padding(horizontal = 8.dp),
+            colors = SliderDefaults.colors(
+              thumbColor = Color.Red,
+              activeTrackColor = Color.Red,
+              inactiveTrackColor = Color.Gray
+            )
+          )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Row(verticalAlignment = Alignment.CenterVertically) {
           Checkbox(
             checked = config.miniGraphEnabled,
@@ -347,10 +393,10 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
               uncheckedColor = Color.White
             )
           )
-              Text(
-                text = stringResource(Res.string.settings_mini_graph_description),
-                color = Color.White
-              )
+          Text(
+            text = stringResource(Res.string.settings_mini_graph_description),
+            color = Color.White
+          )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
           Checkbox(
@@ -459,6 +505,7 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
                 color = Color.White
               )
         }
+
 //        Row(verticalAlignment = Alignment.CenterVertically) {
 //          Button(
 //            onClick = {},

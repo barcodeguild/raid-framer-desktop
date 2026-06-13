@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 16 // incremented to add combatControlsFadeEnabled to config
+const val SCHEMA_VERSION = 17 // incremented to add combatControlsFadeEnabled to config
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -45,6 +45,7 @@ data class ConfigEntity(
   val allowPVEDamage: Boolean = false,
   val gameScheduleHotkeyEnabled: Boolean = false,
   val useSadlyDotEyeOhhh: Boolean = false,
+  val windowOpacity: Float = 0.43f,
   val dragonBreathOverlayEnabled: Boolean = false,
   val killCounterMode: String = KillCounterMode.MOST_DAMAGE.name,
   val firstLaunch: Boolean = true,

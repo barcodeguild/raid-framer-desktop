@@ -757,19 +757,13 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   data class SpellDamage(val spell: String, val total: Double)
-  private fun aggregateDamageBySpellForFaction(faction: Faction): List<SpellDamage> {
+  private fun aggregateDamageBySpellForFaction(cards: List<PlayerCard>, faction: Faction): List<SpellDamage> {
     val totals = mutableMapOf<String, Double>()
-    cards.values
+    cards
       .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == faction }
       .forEach { card ->
-        card.recentDamageEvents.forEach { ev ->
-          val spell = ev.spell.ifBlank { "Unknown" }
-          val damage = try {
-            ev.damage.toDouble()
-          } catch (_: Throwable) {
-            0.0
-          }
-          totals[spell] = totals.getOrDefault(spell, 0.0) + damage
+        card.sessionSpellDamageMap.forEach { (spell, damage) ->
+          totals[spell] = totals.getOrDefault(spell, 0.0) + damage.toDouble() // accumulate from cards instead of recent events yayaya
         }
       }
 
@@ -780,9 +774,9 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   data class ItemUsage(val itemName: StringResource, val count: Int)
-  private fun aggregateItemUsesByFaction(faction: Faction): List<ItemUsage> {
+  private fun aggregateItemUsesByFaction(cards: List<PlayerCard>, faction: Faction): List<ItemUsage> {
     val totals = mutableMapOf<StringResource, Int>()
-    cards.values
+    cards
       .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == faction }
       .forEach { card ->
         card.recentSkillItemUsages.forEach { triple ->
@@ -994,27 +988,27 @@ object PlayerCacheInteractor : Interactor() {
   /////////////////////////
 
   val topDamageSpellsHaranya: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateDamageBySpellForFaction(Faction.HARANYA) }
+    .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.HARANYA) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topDamageSpellsNuia: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateDamageBySpellForFaction(Faction.NUIA) }
+    .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.NUIA) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topDamageSpellsPirate: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateDamageBySpellForFaction(Faction.PIRATE) }
+    .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.PIRATE) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topItemUsesHaranya: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateItemUsesByFaction(Faction.HARANYA) }
+    .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.HARANYA) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topItemUsesNuia: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateItemUsesByFaction(Faction.NUIA) }
+    .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.NUIA) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topItemUsesPirate: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateItemUsesByFaction(Faction.PIRATE) }
+    .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.PIRATE) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   // top kills haranya, nuia, and pirate
