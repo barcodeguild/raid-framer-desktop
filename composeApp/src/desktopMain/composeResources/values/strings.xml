@@ -23,8 +23,7 @@
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Settings</string>
     <string name="settings_data_sourcing_title">Data Sourcing</string>
-    <string name="settings_data_sourcing_description">Please be careful to enter the correct ArcheRage directory below. This field was likely populated automatically: </string>
-    <string name="settings_data_sourcing_sidenote">Technically, you do not need ArcheRage installed if you only want to view historical combat.log files. Just right-click on the .log or .rf (battle slice export file) and choose 'Open-With → Raid Framer' in the Windows Explorer context menu to view a replay.</string>
+    <string name="settings_data_sourcing_description">Please confirm that you see the correct ArcheRage documents directory below. Your game's documents directory was detected automatically. If you don't see the correct directory, or the text below is red, you should report a bug.</string>
     <string name="settings_toggle_pvp_damage">Show only PvP damage</string>
     <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
     <string name="settings_lua_options_title">Lua Options</string>
@@ -53,9 +52,35 @@
     <string name="settings_uninstall_confirm_title">Confirm Uninstall</string>
     <string name="settings_uninstall_confirm_text">Are you sure you want to uninstall the Lua Addon? This will remove the game integration.\n\nPlease close the game before continuing, otherwise files will be left over.</string>
     <string name="settings_uninstall_confirm_button">Uninstall</string>
+    <string name="settings_uninstall_button">Uninstall Lua Addon &amp; App</string>
+    <string name="settings_player_remappings_button">Player Re-mappings, PvP Duels &amp; Filters</string>
     <string name="settings_uninstall_done_title">Uninstall Complete</string>
     <string name="settings_character_description">Your character and faction are determined automatically when you switch characters. Raid Framer uses this information to deduce friendly and hostile characters over time.</string>
     <string name="settings_character_title">Current Character</string>
+    <string name="settings_general_opacity_slider">Overlay Opacity</string>
+    <string name="settings_general_tint_slider">Overlay Color</string>
+    <string name="settings_general_title">General Settings</string>
+    <string name="settings_general_description">Toggle additional overlay features and parsing options.</string>
+    <string name="settings_general_overlay_title">General Overlay Settings</string>
+    <string name="settings_general_overlay_description">Some friends may wish to adjust the transparency and color of their overlays.</string>
+
+
+
+    <!-- About Overlay Strings -->
+    <string name="about_app_title">Raid Framer Desktop</string>
+    <string name="about_version_label">Version:</string>
+    <string name="about_package_label">Package:</string>
+    <string name="about_source_label">Source:</string>
+    <string name="about_read_settings_instruction">Please before use. -></string>
+    <string name="about_go_to_settings_button">Go to Settings</string>
+    <string name="about_author_label">Author:</string>
+    <string name="about_author_name">~ Reoky ~</string>
+    <string name="about_dedication_text">Dedicated to all of our friends on the East and out in the virtual world. May this code be used for good, and not evil.</string>
+    <string name="about_thanks_label">Ty ty from</string>
+    <string name="about_thanks_location">United East</string>
+    <string name="about_community_dedication">To the ArcheRage community for their support and feedback. ~</string>
+    <string name="about_staff_dedication">To the ArcheRage staff for their dedication and hard work. ~</string>
+    <string name="about_dev_dedication">To the ArcheRage developers for their continued support and updates. ~</string>
 
     <!-- Player Card -->
     <string name="player_card_recent_item_uses">Item Uses</string>
@@ -189,5 +214,25 @@
 
     <string name="potion_name_phoenix_tears_tincture">Phoenix Tears Tincture</string>
     <string name="potion_name_wild_ginseng">Wild Ginseng! (What a lucky friend!)</string>
+
+    <!-- Raid / Attendance Overlay -->
+    <string name="raid_attendance_title">Raid Management &amp; Attendance</string>
+    <string name="raid_tab_attendance">Attendance</string>
+    <string name="raid_tab_nearby">Nearby</string>
+    <string name="raid_no_raid_detected">Please join a raid to use raid management features. You must have the Lua Addon installed. Windows with title bars are not overlays, consider placing on another monitor to avoid covering the game UI.</string>
+    <string name="raid_main_raid_label">Main Raid</string>
+    <string name="raid_coraid_label">Co-Raid</string>
+    <string name="raid_include_main_raid">Include Main Raid</string>
+    <string name="raid_include_coraid">Include Co-Raid</string>
+    <string name="raid_include_nearby_same_faction">Include Nearby Same-Faction Players</string>
+    <string name="raid_include_nearby_opposite_faction">Include Nearby Opposite-Faction Players</string>
+    <string name="raid_require_pvp_filter">Require at least some PvP participation (25k dmg, 25k heals, or 25+ cc points to filter non-combatants)</string>
+    <string name="raid_include_departed">Include players that left raid</string>
+    <string name="raid_copy_attendance">Copy Attendance</string>
+    <string name="raid_haranya_faction">Haranya Faction (%d)</string>
+    <string name="raid_nuian_faction">Nuian Faction (%d)</string>
+    <string name="raid_pirate_faction">Pirate Faction (%d)</string>
+    <string name="raid_close">Close</string>
+    <string name="app_already_running">Raid Framer is already running.</string>
 
 </resources>

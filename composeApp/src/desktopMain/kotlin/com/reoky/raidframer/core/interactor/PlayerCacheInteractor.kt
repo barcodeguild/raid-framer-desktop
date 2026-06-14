@@ -147,16 +147,20 @@ object PlayerCacheInteractor : Interactor() {
   /*
    * Builds parties of five from the ordered list of raid members and stores them under the raid ID.
    */
-  fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
-    scope.launch {
-      mutex.withLock {
-        // improvement to the code where if the first raid is empty we clear all raids (because the player left the raid)
-        if (raidId == 0 && members.isEmpty()) {
-          raids.clear()
-          return@withLock
-        }
-        raids[raidId] = members.chunked(5).take(20)
-        members.forEach { member ->
+  suspend fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
+    mutex.withLock {
+      // improvement to the code where if the first raid is empty we clear all raids (because the player left the raid)
+      if (raidId == 0 && members.isEmpty()) {
+        raids.clear()
+        return@withLock
+      }
+      raids[raidId] = members.chunked(5).take(20)
+      // Guard: if main raid has zero real players, also clear co-raid data (ghost raid)
+      if (raidId == 0 && members.all { it.playerName.isBlank() }) {
+        raids.remove(1)
+      }
+      members.forEach { member ->
+        if (member.playerName.isNotBlank()) {
           createCardIfNoneExists(playerName = member.playerName)
         }
       }
@@ -757,19 +761,13 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   data class SpellDamage(val spell: String, val total: Double)
-  private fun aggregateDamageBySpellForFaction(faction: Faction): List<SpellDamage> {
+  private fun aggregateDamageBySpellForFaction(cards: List<PlayerCard>, faction: Faction): List<SpellDamage> {
     val totals = mutableMapOf<String, Double>()
-    cards.values
+    cards
       .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == faction }
       .forEach { card ->
-        card.recentDamageEvents.forEach { ev ->
-          val spell = ev.spell.ifBlank { "Unknown" }
-          val damage = try {
-            ev.damage.toDouble()
-          } catch (_: Throwable) {
-            0.0
-          }
-          totals[spell] = totals.getOrDefault(spell, 0.0) + damage
+        card.sessionSpellDamageMap.forEach { (spell, damage) ->
+          totals[spell] = totals.getOrDefault(spell, 0.0) + damage.toDouble() // accumulate from cards instead of recent events yayaya
         }
       }
 
@@ -780,9 +778,9 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   data class ItemUsage(val itemName: StringResource, val count: Int)
-  private fun aggregateItemUsesByFaction(faction: Faction): List<ItemUsage> {
+  private fun aggregateItemUsesByFaction(cards: List<PlayerCard>, faction: Faction): List<ItemUsage> {
     val totals = mutableMapOf<StringResource, Int>()
-    cards.values
+    cards
       .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == faction }
       .forEach { card ->
         card.recentSkillItemUsages.forEach { triple ->
@@ -994,27 +992,27 @@ object PlayerCacheInteractor : Interactor() {
   /////////////////////////
 
   val topDamageSpellsHaranya: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateDamageBySpellForFaction(Faction.HARANYA) }
+    .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.HARANYA) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topDamageSpellsNuia: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateDamageBySpellForFaction(Faction.NUIA) }
+    .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.NUIA) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topDamageSpellsPirate: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateDamageBySpellForFaction(Faction.PIRATE) }
+    .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.PIRATE) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topItemUsesHaranya: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateItemUsesByFaction(Faction.HARANYA) }
+    .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.HARANYA) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topItemUsesNuia: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateItemUsesByFaction(Faction.NUIA) }
+    .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.NUIA) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val topItemUsesPirate: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
-    .map { aggregateItemUsesByFaction(Faction.PIRATE) }
+    .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.PIRATE) }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   // top kills haranya, nuia, and pirate
@@ -1097,7 +1095,7 @@ object PlayerCacheInteractor : Interactor() {
   val buildCountsHaranya: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
       cards.values
-        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.HARANYA }
+        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.HARANYA && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
     }
@@ -1106,7 +1104,7 @@ object PlayerCacheInteractor : Interactor() {
   val buildCountsNuia: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
       cards.values
-        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.NUIA }
+        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.NUIA && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
     }
@@ -1115,7 +1113,7 @@ object PlayerCacheInteractor : Interactor() {
   val buildCountsPirate: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
       cards.values
-        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.PIRATE }
+        .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.PIRATE && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
     }

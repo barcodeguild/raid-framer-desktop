@@ -1,7 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 val APP_NAME = "Raid Framer"
-val APP_VERSION = "2.0.5"
+val APP_VERSION = "2.0.6"
 val PACKAGE_ID = "com.reoky.raidframer"
 
 plugins {

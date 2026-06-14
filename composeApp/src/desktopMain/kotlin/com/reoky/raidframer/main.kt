@@ -30,42 +30,40 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.Locale
+import java.nio.channels.FileChannel
+import java.nio.file.StandardOpenOption
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.app_already_running
 import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
 import raid_framer_desktop.composeapp.generated.resources.raidframer
 
 const val TAG = "Main"
 
-var tray: SystemTray? = null
+private val lockFile = Paths.get(System.getProperty("user.home"), ".RaidFramer", ".raidframer.lock")
+private var lockChannel: FileChannel? = null
+private var tray: SystemTray? = null
 
 /* ~ Entry Point ~ */
 fun main(args: Array<String>) = application {
 
-  val context = rememberCoroutineScope() // correct context for Compose
-  var languageCode by remember { mutableStateOf(Locale.getDefault().language) } // default system language
-
-  fun updateLanguage(newCode: String) {
-    if (newCode == languageCode) return
-    val locale = Locale.Builder().setLanguage(newCode).build()
-    Locale.setDefault(locale)
-    languageCode = newCode
+  // Prevent duplicate launch
+  if (!acquireLock()) {
+    messageBox(AppGlobals.APP_NAME, stringResource(Res.string.app_already_running))
+    exitProcess(1)
   }
 
+  val context = rememberCoroutineScope()
+
   // Initialize the database : critical that this occurs first and only once
-  val database = remember {
+  remember {
     try {
-      // This will create the database and tables if they don't exist
-      initialize().also { db ->
-        RFDao.init(db)
-      }
+      initialize().also { db -> RFDao.init(db) }
     } catch (e: Exception) {
       println("Oh eek, the database wouldn't open, friend: ${e.message}")
       exitProcess(1)
@@ -117,10 +115,9 @@ fun main(args: Array<String>) = application {
     }
     LaunchedEffect(GameMonitorInteractor.isSearching) {
       val automaticLogPath = GameMonitorInteractor.possiblePaths.value.firstOrNull()
-      automaticLogPath?.let {
-        it
-        Log.info(TAG, "Automatically choosing the combat log file here: $it")
-        GameMonitorInteractor.chooseCombatLog(it)
+      automaticLogPath?.let { path ->
+        Log.info(TAG, "Automatically choosing the combat log file here: $path")
+        GameMonitorInteractor.chooseCombatLog(path)
         GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.MONITOR, 0L, Long.MAX_VALUE)
       }
     }
@@ -130,34 +127,15 @@ fun main(args: Array<String>) = application {
     WindowManager(scope = context, dao = RFDao.windowStateDao)
   }
 
-  // at least one window has to be open on app start to prevent immediate exit
-  // however, we also want to load saved states of windows before opening them
-  runBlocking {
-    if (AppGlobals.DEBUG_WIPE_DB_AND_CACHE_ON_LAUNCH) RFDao.windowStateDao.deleteAll() // clear saved window positions and sizes for testing
+  var statesLoaded by remember { mutableStateOf(false) }
+
+  LaunchedEffect(Unit) {
+    if (AppGlobals.DEBUG_WIPE_DB_AND_CACHE_ON_LAUNCH) RFDao.windowStateDao.deleteAll()
     val startTime: Long = System.currentTimeMillis()
     Log.info(TAG, "Loading saved window states...")
     wm.loadStates()
     Log.info(TAG, "Finished loading saved window states. Took ${System.currentTimeMillis() - startTime} ms")
-  }
 
-  // start the game monitor
-//  context.launch(Dispatchers.IO) {
-//    GameMonitorInteractor.locateArcheRageDirectory()
-//  }
-//  LaunchedEffect(GameMonitorInteractor.isSearching) {
-//    GameMonitorInteractor.possiblePaths.value.onEach { path ->
-//      Log.info(TAG, "Found possible combat log at: ")
-//    }
-//  }
-
-  // spawn the system tray
-  tray = spawnSystemTray(wm)
-
-  Log.info(TAG, "Opening default windows...")
-  OverlayContainer(wm)
-
-  // gets the config and show the about window on first launch then updates the firstLaunch flag
-  LaunchedEffect(Unit) {
     RFDao.configDao.getConfig()?.let { config ->
       if (config.firstLaunch) {
         wm.openWindow(OverlayType.ABOUT)
@@ -165,6 +143,14 @@ fun main(args: Array<String>) = application {
       }
       if (config.miniGraphEnabled) wm.openWindow(OverlayType.MINI)
     }
+
+    statesLoaded = true
+  }
+
+  if (statesLoaded) {
+    tray = spawnSystemTray(wm)
+    Log.info(TAG, "Opening default windows...")
+    OverlayContainer(wm)
   }
 }
 
@@ -216,6 +202,25 @@ fun spawnSystemTray(wm: WindowManager): SystemTray {
   return tray
 }
 
+private fun acquireLock(): Boolean {
+  return try {
+    Files.createDirectories(lockFile.parent)
+    lockChannel = FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+    val fileLock = lockChannel?.tryLock()
+    if (fileLock == null) {
+      lockChannel?.close()
+      lockChannel = null
+      false
+    } else {
+      true
+    }
+  } catch (e: Exception) {
+    lockChannel?.close()
+    lockChannel = null
+    true
+  }
+}
+
 /*
  * Stops all the interactors and exits the application cleanly.
  */
@@ -229,5 +234,6 @@ fun quit() {
   tray?.shutdown()
   tray?.remove()
   LoggingInteractor.stop() // should be last because this is the thing that logs shutdown message
+  lockChannel?.close()
   exitProcess(0)
 }

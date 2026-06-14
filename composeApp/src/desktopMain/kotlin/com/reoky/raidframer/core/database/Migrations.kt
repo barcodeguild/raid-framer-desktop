@@ -127,3 +127,17 @@ val MIGRATION_15_16 = object : Migration(15, 16) {
   }
 }
 
+// added val windowOpacity: Float = 0.43f, added to ConfigEntity (06/13/26)
+val MIGRATION_16_17 = object : Migration(16, 17) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN windowOpacity REAL NOT NULL DEFAULT 0.43").use { it.step() }
+  }
+}
+
+// added val windowColor: Int = 0, added to ConfigEntity
+val MIGRATION_17_18 = object : Migration(17, 18) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN windowColor INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

@@ -14,8 +14,12 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.WindowStateEntity
 import com.sun.jna.Pointer
+import com.sun.jna.platform.win32.User32
+import com.sun.jna.platform.win32.WinDef.HWND
+import com.sun.jna.platform.win32.WinUser
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.Shape
@@ -23,11 +27,15 @@ import java.awt.Window
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.geom.*
-import com.sun.jna.platform.win32.User32
-import com.sun.jna.platform.win32.WinUser
-import com.sun.jna.platform.win32.WinDef.HWND
-import kotlinx.coroutines.delay
 import java.lang.reflect.Field
+import kotlinx.coroutines.delay
+
+/**
+ * A CompositionLocal that child composables can use to signal that the window should not
+ * be dragged right now (e.g. while the user is interacting with a Slider thumb).
+ * Set the value to `true` to lock dragging, `false` to release it.
+ */
+val LocalDragLock = compositionLocalOf<MutableState<Boolean>> { mutableStateOf(false) }
 
 @Composable
 fun OverlayWindow(
@@ -44,6 +52,9 @@ fun OverlayWindow(
   onWindowCreated: (ComposeWindow) -> Unit = {}, // callback to deliver the real window
   windowContent: @Composable (ComposeWindow) -> Unit
 ) {
+
+  val config by RFConfig.state.collectAsState() // injected into every window
+
   val windowState = rememberWindowState(
     width = initialSize.width.coerceIn(0.dp, 1000.dp),
     height = initialSize.height.coerceIn(0.dp, 1000.dp),
@@ -91,26 +102,31 @@ fun OverlayWindow(
     }
 
     // shift-click mouse listener to allow dragging the window around (tooltips always draggable without shift)
-    val mouseListener = createMouseListener(windowState, windowType)
+    val dragLocked = remember { mutableStateOf(false) }
+
+    val mouseListener = createMouseListener(windowState, windowType) { dragLocked.value }
     composeWindow.addMouseListener(mouseListener)
     composeWindow.addMouseMotionListener(mouseListener)
 
-    if (windowType == OverlayWindowType.TOOLTIP) {
-      Box(
-        modifier = Modifier
-          .background(Color(0f, 0f, 0f, 0.43f))
-          .fillMaxSize()
-          .background(Color.Black.copy(alpha = 0.60f))
-      ) {
-        windowContent(composeWindow)
-      }
-    } else {
-      Box(
-        modifier = Modifier
-          .background(Color(0f, 0f, 0f, 0.43f))
-          .fillMaxSize()
-      ) {
-        windowContent(composeWindow)
+    CompositionLocalProvider(LocalDragLock provides dragLocked) {
+      val windowColor = Color(config.windowColor).copy(alpha = config.windowOpacity)
+      if (windowType == OverlayWindowType.TOOLTIP) {
+        Box(
+          modifier = Modifier
+            .background(windowColor)
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.60f))
+        ) {
+          windowContent(composeWindow)
+        }
+      } else {
+        Box(
+          modifier = Modifier
+            .background(windowColor)
+            .fillMaxSize()
+        ) {
+          windowContent(composeWindow)
+        }
       }
     }
   }
@@ -118,8 +134,14 @@ fun OverlayWindow(
 
 /*
  * A custom shift-click listener that allows the user to drag the window around the screen.
+ * Pass a non-null [isDragLocked] lambda to temporarily suppress dragging (e.g. while a
+ * Slider thumb is being interacted with). (This is what was making sliders un-slidable friends!)
  */
-fun createMouseListener(windowState: WindowState, overlayWindowType: OverlayWindowType): MouseAdapter {
+fun createMouseListener(
+  windowState: WindowState,
+  overlayWindowType: OverlayWindowType,
+  isDragLocked: () -> Boolean = { false } // activate this when friends are interacting with a dragable/slideable control
+): MouseAdapter {
   return object : MouseAdapter() {
     private val cornerOffset = Point()
     private var isDragAllowed = false
@@ -127,6 +149,7 @@ fun createMouseListener(windowState: WindowState, overlayWindowType: OverlayWind
     // calculate offset from the top-left corner of the window where the user clicked
     override fun mousePressed(e: MouseEvent) {
       isDragAllowed = false
+      if (isDragLocked()) return
       if (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP) {
         // Define a margin for resizing (e.g. 10 pixels)
         val resizeMargin = 10
@@ -147,7 +170,7 @@ fun createMouseListener(windowState: WindowState, overlayWindowType: OverlayWind
     }
 
     override fun mouseDragged(e: MouseEvent) {
-      if (isDragAllowed && (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP)) {
+      if (isDragAllowed && !isDragLocked() && (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP)) {
         val newPositionX = e.locationOnScreen.x - cornerOffset.x
         val newPositionY = e.locationOnScreen.y - cornerOffset.y
         windowState.position = WindowPosition(newPositionX.dp, newPositionY.dp)

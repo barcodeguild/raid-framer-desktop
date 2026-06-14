@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.helpers
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerRole
@@ -112,4 +113,62 @@ fun pickNextColor(usedColors: Set<RFGraphColor>): RFGraphColor {
     return unusedColors.random()
   }
   return RFGraphColor.ORANGE // default if all colors are used
+}
+
+/**
+ * Maps a 0.0-1.0 value to a color spectrum: Black -> Hue Cycle -> White. This takes a slider float from 0f to 1f
+ * and gibs a color from that.
+ */
+fun sliderValueToColor(value: Float): Int {
+  return when {
+    value <= 0f -> Color.Black.toArgb()
+    value >= 1f -> Color.White.toArgb()
+    value < 0.1f -> {
+      // Smooth transition from Black to full saturation
+      val v = value * 10f
+      Color.hsv(0f, 1f, v).toArgb()
+    }
+    value > 0.9f -> {
+      // Smooth transition from full saturation to White
+      val v = (value - 0.9f) * 10f
+      Color.hsv(0f, 1f - v, 1f).toArgb()
+    }
+    else -> {
+      // Hue cycle
+      val hue = ((value - 0.1f) / 0.8f) * 360f
+      Color.hsv(hue, 1f, 1f).toArgb()
+    }
+  }
+}
+
+/**
+ * Maps an ARGB color back to a 0.0-1.0 slider value.
+ */
+fun colorToSliderValue(colorInt: Int): Float {
+  val c = Color(colorInt)
+  val r = c.red
+  val g = c.green
+  val b = c.blue
+  val max = maxOf(r, maxOf(g, b))
+  val min = minOf(r, minOf(g, b))
+  val delta = max - min
+  val saturation = if (max == 0f) 0f else delta / max
+  val value = max
+
+  return when {
+    max == 0f -> 0f
+    max == 1f && saturation == 0f -> 1f
+    saturation > 0.1f -> {
+      val hue = if (delta == 0f) 0f else {
+        val h = when {
+          max == r -> (g - b) / delta
+          max == g -> 2f + (b - r) / delta
+          else -> 4f + (r - g) / delta
+        }
+        (h * 60f).let { if (it < 0) it + 360f else it }
+      }
+      (hue / 360f * 0.8f) + 0.1f
+    }
+    else -> value
+  }
 }

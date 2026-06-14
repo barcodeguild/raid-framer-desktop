@@ -3,7 +3,7 @@
 -- https://github.com/barcodeguild/raid-framer-desktop
 -- Author: Reoky
 RF = RF or {}
-RF.TAG = "Raid Framer 2.0.5"
+RF.TAG = "Raid Framer 2.0.6"
 
 RF.PLAYER_NAME = ""
 RF.FACTION = ""
@@ -67,7 +67,7 @@ function RF:Init()
   RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.SELF_UPDATE, RF.PLAYER_NAME)
 
   self:Log("Good news, " .. RF.PLAYER_NAME .. "! If you can read this message, then the " .. RF.TAG .. " Lua component is working!")
-  self:Log("Please be sure to launch the " .. RF.TAG .. " Desktop App to access the multi-monitor game overlay.")
+  self:Log("Please be sure to launch the desktop app to access the multi-monitor game overlay.")
 
   registerForEvents()
 end

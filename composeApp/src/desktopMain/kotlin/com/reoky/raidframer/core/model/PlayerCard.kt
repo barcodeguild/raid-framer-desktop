@@ -56,6 +56,7 @@ data class PlayerCard (
   val recentDebuffAppliedEvents: List<DebuffAppliedEvent> = listOf(),
 
   // session counter totals : when a new session starts, these reset to 0 and the totals are written to the database cache
+  val sessionSpellDamageMap: Map<String, Long> = mapOf(), // spell name -> total damage dealt this session (never capped, used for accurate spell breakdown)
   val sessionDamageTotal: Long = 0L,
   val sessionHealTotal: Long = 0L,
   val sessionCCTotal: Int = 0, // only crowd control effects (Snare, Stun, Silence, Trip, etc)

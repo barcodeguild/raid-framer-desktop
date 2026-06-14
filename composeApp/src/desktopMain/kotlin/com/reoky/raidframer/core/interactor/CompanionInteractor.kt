@@ -120,7 +120,7 @@ object CompanionInteractor : Interactor() {
    * automatically deserializes the JSON into the correct subclass based on the "type" field. This is why
    * we can use a 'when' statement here to switch on the actual message type. (It took a while to get this right!)
    */
-  private fun handleInboundIPCMessage(rawJson: String) {
+  private suspend fun handleInboundIPCMessage(rawJson: String) {
     try {
       when (val message = AppJson.decodeFromString<IPCMessagePayload>(rawJson)) {
         is IPCMessagePayload.SelfUpdate -> {
@@ -166,7 +166,8 @@ object CompanionInteractor : Interactor() {
           }
         }
         is IPCMessagePayload.FramesUpdate -> { // Was "BatchUpdate"
-          message.payload.chunked(50).take(2).forEachIndexed { index, chunk ->
+          val chunks = message.payload.chunked(50).take(2)
+          for ((index, chunk) in chunks.withIndex()) {
             PlayerCacheInteractor.updatePlayersForRaidById(index, chunk)
           }
         }
