@@ -2,9 +2,13 @@ package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -17,7 +21,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.colorToSliderValue
+import com.reoky.raidframer.core.helpers.sliderValueToColor
+import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -25,64 +34,93 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_description
-import raid_framer_desktop.composeapp.generated.resources.settings_data_sourcing_title
-import raid_framer_desktop.composeapp.generated.resources.settings_title
-import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_done_text
-import raid_framer_desktop.composeapp.generated.resources.settings_arche_rage_directory_label
-import raid_framer_desktop.composeapp.generated.resources.settings_specify_directory_hint
-import raid_framer_desktop.composeapp.generated.resources.settings_lua_companion_options
-import raid_framer_desktop.composeapp.generated.resources.general_about
-import raid_framer_desktop.composeapp.generated.resources.settings_mini_graph_description
-import raid_framer_desktop.composeapp.generated.resources.settings_split_chat
-import raid_framer_desktop.composeapp.generated.resources.settings_tabbed_detection
-import raid_framer_desktop.composeapp.generated.resources.settings_allow_pve_damage
-import raid_framer_desktop.composeapp.generated.resources.settings_game_schedule_hotkey
-import raid_framer_desktop.composeapp.generated.resources.settings_use_sadly
-import raid_framer_desktop.composeapp.generated.resources.settings_dragon_breath_overlay
-import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_title
-import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_text
-import androidx.compose.foundation.interaction.DragInteraction
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.ui.graphics.toArgb
-import com.reoky.raidframer.core.helpers.colorToSliderValue
-import com.reoky.raidframer.core.helpers.sliderValueToColor
-import com.reoky.raidframer.core.interactor.CompanionInteractor
-import com.reoky.raidframer.ui.LocalDragLock
+import raid_framer_desktop.composeapp.generated.resources.*
 import java.util.Locale.getDefault
 import kotlin.system.exitProcess
-import raid_framer_desktop.composeapp.generated.resources.general_cancel
-import raid_framer_desktop.composeapp.generated.resources.general_exit
-import raid_framer_desktop.composeapp.generated.resources.settings_character_description
-import raid_framer_desktop.composeapp.generated.resources.settings_character_title
-import raid_framer_desktop.composeapp.generated.resources.settings_combat_fade_controls
-import raid_framer_desktop.composeapp.generated.resources.settings_combat_overlay_title
-import raid_framer_desktop.composeapp.generated.resources.settings_general_description
-import raid_framer_desktop.composeapp.generated.resources.settings_general_opacity_slider
-import raid_framer_desktop.composeapp.generated.resources.settings_general_tint_slider
-import raid_framer_desktop.composeapp.generated.resources.settings_general_title
-import raid_framer_desktop.composeapp.generated.resources.settings_name_placeholder
-import raid_framer_desktop.composeapp.generated.resources.settings_show_cc_column
-import raid_framer_desktop.composeapp.generated.resources.settings_show_damage_column
-import raid_framer_desktop.composeapp.generated.resources.settings_show_heals_column
-import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_button
-import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_confirm_button
-import raid_framer_desktop.composeapp.generated.resources.settings_uninstall_done_title
+
+@Composable
+private fun SettingsSection(
+  title: String,
+  description: String? = null,
+  content: @Composable ColumnScope.() -> Unit
+) {
+  Surface(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 12.dp, vertical = 6.dp),
+    shape = RoundedCornerShape(10.dp),
+    color = RFColors.CardBackground,
+    elevation = 2.dp
+  ) {
+    Column(
+      modifier = Modifier
+        .border(1.dp, RFColors.CardBorder, RoundedCornerShape(10.dp))
+        .padding(16.dp)
+    ) {
+      Text(
+        text = title,
+        color = RFColors.AccentRed,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 0.5.sp
+      )
+      if (description != null) {
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = description,
+          color = RFColors.TextSecondary,
+          fontSize = 13.sp
+        )
+      }
+      Spacer(modifier = Modifier.height(12.dp))
+      content()
+    }
+  }
+}
+
+@Composable
+private fun SettingsCheckbox(
+  checked: Boolean,
+  onCheckedChange: (Boolean) -> Unit,
+  label: String,
+  accent: Boolean = true
+) {
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(vertical = 3.dp)
+  ) {
+    Checkbox(
+      checked = checked,
+      onCheckedChange = onCheckedChange,
+      colors = CheckboxDefaults.colors(
+        checkmarkColor = Color.White,
+        checkedColor = if (accent) RFColors.AccentRed else RFColors.TextSecondary,
+        uncheckedColor = RFColors.TextTertiary
+      )
+    )
+    Spacer(modifier = Modifier.width(8.dp))
+    Text(
+      text = label,
+      color = RFColors.TextPrimary,
+      fontSize = 14.sp
+    )
+  }
+}
 
 @Composable
 fun SettingsOverlay(wm: WindowManager? = null) {
 
-  val config by RFConfig.state.collectAsState() // single source of truth
-
+  val config by RFConfig.state.collectAsState()
   val scrollState = rememberScrollState()
-  val showDialog = remember { mutableStateOf(false) }
   val showUninstallConfirmDialog = remember { mutableStateOf(false) }
   val showUninstallDoneDialog = remember { mutableStateOf(false) }
 
   Box(
     modifier = Modifier
       .fillMaxSize()
+      .background(Color(0xFF121212))
       .verticalScroll(scrollState)
   ) {
     Column {
@@ -90,118 +128,118 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         title = stringResource(Res.string.settings_title),
         onClose = { wm?.closeWindow(OverlayType.SETTINGS) }
       )
-      Box(modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
-        Column {
 
-          // Data Sourcing Section
-          Row(modifier = Modifier.padding(top = 16.dp, bottom = 4.dp, start = 8.dp, end = 8.dp)) {
-            Text(
-              text = stringResource(Res.string.settings_data_sourcing_title),
-              color = Color.White,
-              textAlign = TextAlign.Start,
-              fontSize = 18.sp,
-              fontWeight = FontWeight.Bold
-            )
-          }
-          Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-            Text(
-              text = stringResource(Res.string.settings_data_sourcing_description),
-              color = Color.White,
-              textAlign = TextAlign.Start,
-              fontWeight = FontWeight.W400,
-              fontSize = 14.sp
-            )
-          }
+      Spacer(modifier = Modifier.height(8.dp))
 
-          Spacer(modifier = Modifier.height(8.dp))
-
-          Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 8.dp, vertical = 4.dp)) {
-            if (config.defaultArcheRageDirectory.isNotBlank()) {
-              Text(
-                text = stringResource(Res.string.settings_arche_rage_directory_label),
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(end = 4.dp).align(Alignment.CenterVertically)
-              )
-              Text(
-                text = config.defaultArcheRageDirectory,
-                color = Color.Green,
-                textAlign = TextAlign.Center,
-                fontSize = 14.sp,
-                modifier = Modifier.align(Alignment.CenterVertically)
-              )
-            } else {
-              Text(
-                text = stringResource(Res.string.settings_specify_directory_hint),
-                color = Color.Red,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                modifier = Modifier
-              )
-            }
-          }
-
-          Row(modifier = Modifier.fillMaxWidth()) {
-            Button(
-              onClick = { wm?.openWindow(OverlayType.COMPANION) },
-              colors = ButtonDefaults.buttonColors(Color.White),
-              modifier = Modifier.weight(1f).padding(16.dp)
-            ) {
-              Text(
-                text = stringResource(Res.string.settings_lua_companion_options),
-                maxLines = 1,
-                color = Color.Black
-              )
-            }
-            Button(
-              onClick = {
-                wm?.openWindow(OverlayType.ABOUT)
-              },
-              colors = ButtonDefaults.buttonColors(Color.White),
-              modifier = Modifier.weight(1f).padding(16.dp)
-            ) {
-              Text(
-                text = stringResource(Res.string.general_about),
-                maxLines = 1,
-                color = Color.Black
-              )
-            }
-          }
-        }
-      }
-
-      Divider(color = Color.DarkGray, thickness = 1.dp)
-
-      GlobalOptionsPanel(wm)
-
-      Divider(color = Color.DarkGray, thickness = 1.dp)
-
-      CombatOverlaySettingsPanel(wm)
-
-      Divider(color = Color.DarkGray, thickness = 1.dp)
-
-      Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.Center) {
-        Button(
-          onClick = { showUninstallConfirmDialog.value = true },
-          colors = ButtonDefaults.buttonColors(Color.Red)
+      // Data Sourcing
+      SettingsSection(
+        title = stringResource(Res.string.settings_data_sourcing_title),
+        description = stringResource(Res.string.settings_data_sourcing_description)
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.Center
         ) {
-          Text(text = stringResource(Res.string.settings_uninstall_button), color = Color.White)
+          if (config.defaultArcheRageDirectory.isNotBlank()) {
+            Text(
+              text = stringResource(Res.string.settings_arche_rage_directory_label),
+              color = RFColors.TextSecondary,
+              fontSize = 13.sp,
+              fontWeight = FontWeight.Bold,
+              modifier = Modifier.align(Alignment.CenterVertically)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+              text = config.defaultArcheRageDirectory,
+              color = Color(0xFF66BB6A),
+              fontSize = 13.sp,
+              modifier = Modifier.align(Alignment.CenterVertically)
+            )
+          } else {
+            Text(
+              text = stringResource(Res.string.settings_specify_directory_hint),
+              color = RFColors.AccentRed,
+              fontWeight = FontWeight.Bold,
+              fontSize = 13.sp
+            )
+          }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+          Button(
+            onClick = { wm?.openWindow(OverlayType.COMPANION) },
+            colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+            modifier = Modifier.weight(1f)
+          ) {
+            Text(
+              text = stringResource(Res.string.settings_lua_companion_options),
+              maxLines = 1,
+              color = Color.White,
+              fontWeight = FontWeight.SemiBold
+            )
+          }
+          Button(
+            onClick = { wm?.openWindow(OverlayType.ABOUT) },
+            colors = ButtonDefaults.buttonColors(RFColors.CardBorder),
+            modifier = Modifier.weight(1f)
+          ) {
+            Text(
+              text = stringResource(Res.string.general_about),
+              maxLines = 1,
+              color = RFColors.TextPrimary,
+              fontWeight = FontWeight.SemiBold
+            )
+          }
         }
       }
+
+      CharacterDisplayPanel()
+
+      OverlayFeaturesPanel(wm)
+
+      CombatOverlaySettingsPanel()
+
+      // Uninstall :(
+      Surface(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(10.dp),
+        color = RFColors.CardBackground,
+        elevation = 2.dp
+      ) {
+        Column(
+          modifier = Modifier
+            .border(1.dp, RFColors.CardBorder, RoundedCornerShape(10.dp))
+            .padding(16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          Button(
+            onClick = { showUninstallConfirmDialog.value = true },
+            colors = ButtonDefaults.buttonColors(Color(0xFFB71C1C))
+          ) {
+            Text(
+              text = stringResource(Res.string.settings_uninstall_button),
+              color = Color.White,
+              fontWeight = FontWeight.SemiBold
+            )
+          }
+        }
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
     }
   }
-
-  //FileSelectionDialog(showDialog, config.defaultArcheRageDirectory)
 
   if (showUninstallConfirmDialog.value) {
     AlertDialog(
       onDismissRequest = { showUninstallConfirmDialog.value = false },
-      title = { Text(stringResource(Res.string.settings_uninstall_confirm_title), color = Color.White) },
-      text = { Text(stringResource(Res.string.settings_uninstall_confirm_text), color = Color.White) },
-      backgroundColor = Color.DarkGray,
+      title = { Text(stringResource(Res.string.settings_uninstall_confirm_title), color = RFColors.TextPrimary) },
+      text = { Text(stringResource(Res.string.settings_uninstall_confirm_text), color = RFColors.TextSecondary) },
+      backgroundColor = RFColors.CardBackground,
+      shape = RoundedCornerShape(10.dp),
       confirmButton = {
         Button(
           onClick = {
@@ -209,14 +247,17 @@ fun SettingsOverlay(wm: WindowManager? = null) {
             CompanionInteractor.uninstall()
             showUninstallDoneDialog.value = true
           },
-          colors = ButtonDefaults.buttonColors(Color.Red)
+          colors = ButtonDefaults.buttonColors(Color(0xFFB71C1C))
         ) {
           Text(stringResource(Res.string.settings_uninstall_confirm_button), color = Color.White)
         }
       },
       dismissButton = {
-        Button(onClick = { showUninstallConfirmDialog.value = false }, colors = ButtonDefaults.buttonColors(Color.Gray)) {
-          Text(stringResource(Res.string.general_cancel), color = Color.White)
+        Button(
+          onClick = { showUninstallConfirmDialog.value = false },
+          colors = ButtonDefaults.buttonColors(RFColors.CardBorder)
+        ) {
+          Text(stringResource(Res.string.general_cancel), color = RFColors.TextPrimary)
         }
       }
     )
@@ -228,15 +269,16 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         Runtime.getRuntime().exec("control appwiz.cpl")
         exitProcess(0)
       },
-      title = { Text(stringResource(Res.string.settings_uninstall_done_title), color = Color.White) },
-      text = { Text(stringResource(Res.string.settings_uninstall_done_text), color = Color.White) },
-      backgroundColor = Color.DarkGray,
+      title = { Text(stringResource(Res.string.settings_uninstall_done_title), color = RFColors.TextPrimary) },
+      text = { Text(stringResource(Res.string.settings_uninstall_done_text), color = RFColors.TextSecondary) },
+      backgroundColor = RFColors.CardBackground,
+      shape = RoundedCornerShape(10.dp),
       confirmButton = {
         Button(onClick = {
           Runtime.getRuntime().exec("control appwiz.cpl")
           exitProcess(0)
-        }, colors = ButtonDefaults.buttonColors(Color.White)) {
-          Text(stringResource(Res.string.general_exit), color = Color.Black)
+        }, colors = ButtonDefaults.buttonColors(RFColors.AccentRed)) {
+          Text(stringResource(Res.string.general_exit), color = Color.White)
         }
       }
     )
@@ -244,14 +286,82 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 }
 
 @Composable
-fun GlobalOptionsPanel(wm: WindowManager? = null) {
-  val config by RFConfig.state.collectAsState() // single source of truth
+private fun CharacterDisplayPanel() {
+  val config by RFConfig.state.collectAsState()
+  SettingsSection(
+    title = stringResource(Res.string.settings_character_title),
+    description = stringResource(Res.string.settings_character_description)
+  ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      TextField(
+        value = config.playerName,
+        onValueChange = { newValue ->
+          RFConfig.update { config ->
+            val newPlayerName = newValue.lowercase(getDefault())
+              .replaceFirstChar { if (it.isLowerCase()) it.titlecase(getDefault()) else it.toString() }
+            config.copy(playerName = newPlayerName)
+          }
+        },
+        textStyle = TextStyle(
+          textAlign = TextAlign.Center,
+          fontSize = 20.sp,
+          color = RFColors.TextPrimary
+        ),
+        singleLine = true,
+        maxLines = 1,
+        placeholder = { Text(stringResource(Res.string.settings_name_placeholder), color = RFColors.TextTertiary) },
+        colors = TextFieldDefaults.textFieldColors(
+          textColor = RFColors.TextPrimary,
+          backgroundColor = Color(0xFF1E1E1E),
+          focusedIndicatorColor = RFColors.AccentRed,
+          unfocusedIndicatorColor = RFColors.CardBorder,
+          placeholderColor = RFColors.TextTertiary,
+          cursorColor = RFColors.AccentRed
+        ),
+        modifier = Modifier.width(220.dp)
+      )
+
+      Spacer(modifier = Modifier.height(12.dp))
+
+      val factionOptions = Faction.entries.filter { it != Faction.UNKNOWN }.map { it.value }
+      Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        factionOptions.forEach { option ->
+          Row(
+            modifier = Modifier
+              .padding(horizontal = 6.dp)
+              .clickable { RFConfig.update { it.copy(playerFaction = option) } },
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            RadioButton(
+              selected = (option == config.playerFaction),
+              onClick = { RFConfig.update { it.copy(playerFaction = option) } },
+              colors = RadioButtonDefaults.colors(
+                selectedColor = RFColors.AccentRed,
+                unselectedColor = RFColors.TextTertiary
+              )
+            )
+            Text(
+              text = option,
+              color = RFColors.TextPrimary,
+              fontSize = 14.sp,
+              modifier = Modifier.padding(start = 4.dp)
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
+  val config by RFConfig.state.collectAsState()
   val dragLock = LocalDragLock.current
 
-  // Lock window dragging while the slider thumb is being dragged
   val sliderInteractionSource = remember { MutableInteractionSource() }
-  // track whether the slider is actively being dragged so we don't sync the local slider
-  // value from the global config mid-drag (and avoid the thumb jumping on release).
   val isSliderDragging = remember { mutableStateOf(false) }
   LaunchedEffect(sliderInteractionSource) {
     sliderInteractionSource.interactions.collect { interaction ->
@@ -260,394 +370,163 @@ fun GlobalOptionsPanel(wm: WindowManager? = null) {
           dragLock.value = true
           isSliderDragging.value = true
         }
-        is DragInteraction.Stop, is DragInteraction.Cancel -> {
+        is DragInteraction.Stop,
+        is DragInteraction.Cancel -> {
           dragLock.value = false
           isSliderDragging.value = false
         }
       }
     }
   }
-  Box(
-    modifier = Modifier
-      .padding(horizontal = 16.dp, vertical = 8.dp)
-      .wrapContentSize()
+
+  // General Settings
+  SettingsSection(
+    title = stringResource(Res.string.settings_general_title),
+    description = stringResource(Res.string.settings_general_description)
   ) {
-    Column {
-      Text(
-        text = stringResource(Res.string.settings_character_title),
-        color = Color.White,
-        textAlign = TextAlign.Center,
-        fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        modifier = Modifier
-          .padding(bottom = 8.dp)
+    SettingsCheckbox(
+      checked = config.miniGraphEnabled,
+      onCheckedChange = { isChecked ->
+        CoroutineScope(Dispatchers.Main).launch {
+          RFConfig.update { it.copy(miniGraphEnabled = isChecked) }
+          if (isChecked) wm?.openWindow(OverlayType.MINI) else wm?.closeWindow(OverlayType.MINI)
+        }
+      },
+      label = stringResource(Res.string.settings_mini_graph_description)
+    )
+
+    SettingsCheckbox(
+      checked = config.splitChatEnabled,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(splitChatEnabled = isChecked) } },
+      label = stringResource(Res.string.settings_split_chat),
+      accent = false
+    )
+
+    SettingsCheckbox(
+      checked = config.tabbedDetectionEnabled,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(tabbedDetectionEnabled = isChecked) } },
+      label = stringResource(Res.string.settings_tabbed_detection)
+    )
+
+    SettingsCheckbox(
+      checked = config.allowPVEDamage,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(allowPVEDamage = isChecked) } },
+      label = stringResource(Res.string.settings_allow_pve_damage)
+    )
+
+    SettingsCheckbox(
+      checked = config.gameScheduleHotkeyEnabled,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) } },
+      label = stringResource(Res.string.settings_game_schedule_hotkey),
+      accent = false
+    )
+
+    SettingsCheckbox(
+      checked = config.useSadlyDotEyeOhhh,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(useSadlyDotEyeOhhh = isChecked) } },
+      label = stringResource(Res.string.settings_use_sadly),
+      accent = false
+    )
+
+    SettingsCheckbox(
+      checked = config.dragonBreathOverlayEnabled,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(dragonBreathOverlayEnabled = isChecked) } },
+      label = stringResource(Res.string.settings_dragon_breath_overlay),
+      accent = false
+    )
+
+    Spacer(modifier = Modifier.height(12.dp))
+  }
+
+  // General Overlay Settings
+  SettingsSection(
+    title = stringResource(Res.string.settings_general_overlay_title),
+    description = stringResource(Res.string.settings_general_overlay_description)
+  ) {
+    Text(
+      text = stringResource(Res.string.settings_general_opacity_slider),
+      color = RFColors.TextSecondary,
+      fontSize = 13.sp
+    )
+    Slider(
+      value = config.windowOpacity,
+      onValueChange = { newOpacity -> RFConfig.update { it.copy(windowOpacity = newOpacity) } },
+      interactionSource = sliderInteractionSource,
+      colors = SliderDefaults.colors(
+        thumbColor = RFColors.AccentRed,
+        activeTrackColor = RFColors.AccentRed,
+        inactiveTrackColor = RFColors.CardBorder
       )
-      Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Column {
-            Text(
-              text = stringResource(Res.string.settings_character_description),
-              color = Color.White
-            )
-            TextField(
-              value = config.playerName,
-              onValueChange = { newValue ->
-                RFConfig.update { config ->
-                  val newPlayerName = newValue.lowercase(getDefault())
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(getDefault()) else it.toString() }
-                  config.copy(playerName = newPlayerName)
-                }
-              },
-              textStyle = TextStyle(
-                textAlign = TextAlign.Center,
-                fontSize = 20.sp
-              ),
-              singleLine = true,
-              maxLines = 1,
-              placeholder = { Text(stringResource(Res.string.settings_name_placeholder)) },
-              colors = TextFieldDefaults.textFieldColors(
-                textColor = Color.White,
-                backgroundColor = Color.Transparent,
-                focusedIndicatorColor = Color.Red,
-                unfocusedIndicatorColor = Color.White,
-                placeholderColor = Color.LightGray,
-                cursorColor = Color.Red
-              ),
-              modifier = Modifier.width(200.dp).align(Alignment.CenterHorizontally)
-            )
+    )
 
-            // same as listing the three factions manually, except kept in sync with the enum
-            val factionOptions = Faction.entries.filter { it != Faction.UNKNOWN }.map { it. value }
+    Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-              modifier = Modifier
-                .padding(top = 8.dp)
-                .align(Alignment.CenterHorizontally),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              factionOptions.forEach { option ->
-                Row(
-                  modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .clickable {
-                      RFConfig.update { it.copy(playerFaction = option) }
-                    },
-                  verticalAlignment = Alignment.CenterVertically
-                ) {
-                  RadioButton(
-                    selected = (option == config.playerFaction),
-                    onClick = {
-                      RFConfig.update { it.copy(playerFaction = option) }
-                    },
-                    colors = RadioButtonDefaults.colors(
-                      selectedColor = Color.Red,
-                      unselectedColor = Color.White
-                    )
-                  )
-                  Text(
-                        text = option,
-                    color = Color.White,
-                    modifier = Modifier.padding(start = 4.dp)
-                  )
-                }
-              }
-            }
-          }
-        }
-        Divider(color = Color.DarkGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-        Column {
-          Text(
-            text = stringResource(Res.string.settings_general_title),
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
-          )
-          Text(
-            text = stringResource(Res.string.settings_general_description),
-            color = Color.White,
-            textAlign = TextAlign.Start,
-            fontWeight = FontWeight.W400,
-            fontSize = 14.sp
-          )
-        }
+    Text(
+      text = stringResource(Res.string.settings_general_tint_slider),
+      color = RFColors.TextSecondary,
+      fontSize = 13.sp
+    )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Column {
-          Text(
-            text = stringResource(Res.string.settings_general_opacity_slider),
-            color = Color.White,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(start = 8.dp)
-          )
-          Slider(
-            value = config.windowOpacity,
-            onValueChange = { newOpacity -> RFConfig.update { it.copy(windowOpacity = newOpacity) } },
-            interactionSource = sliderInteractionSource,
-            modifier = Modifier
-              .padding(horizontal = 8.dp),
-            colors = SliderDefaults.colors(
-              thumbColor = Color.Red,
-              activeTrackColor = Color.Red,
-              inactiveTrackColor = Color.Gray
-            )
-          )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Column {
-          Text(
-            text = stringResource(Res.string.settings_general_tint_slider),
-            color = Color.White,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(start = 8.dp)
-          )
-
-          val windowColorSlider = remember { mutableStateOf(colorToSliderValue(config.windowColor)) }
-          LaunchedEffect(config.windowColor) {
-            if (isSliderDragging.value) return@LaunchedEffect
-            val newVal = colorToSliderValue(config.windowColor)
-            val currentColorFromSlider = sliderValueToColor(windowColorSlider.value)
-            if (currentColorFromSlider == config.windowColor) return@LaunchedEffect
-            if (kotlin.math.abs(newVal - windowColorSlider.value) > 0.0001f) { // 0 is black, 1 is white
-              windowColorSlider.value = newVal
-            }
-          }
-
-          Slider(
-            value = windowColorSlider.value,
-            onValueChange = { value ->
-              windowColorSlider.value = value
-              RFConfig.update { it.copy(windowColor = sliderValueToColor(value)) } // set color continuously
-            },
-            interactionSource = sliderInteractionSource,
-            modifier = Modifier.padding(horizontal = 8.dp),
-            colors = SliderDefaults.colors(
-              thumbColor = Color.Red,
-              activeTrackColor = Color.Red,
-              inactiveTrackColor = Color.Gray
-            )
-          )
-        }
-
-        Divider(color = Color.DarkGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-          Checkbox(
-            checked = config.miniGraphEnabled,
-            onCheckedChange = { isChecked ->
-              CoroutineScope(Dispatchers.Main).launch {
-                RFConfig.update { it.copy(miniGraphEnabled = isChecked) }
-                if (isChecked) wm?.openWindow(OverlayType.MINI) else wm?.closeWindow(OverlayType.MINI)
-              }
-            },
-            colors = CheckboxDefaults.colors(
-              checkmarkColor = Color.White,
-              checkedColor = Color.Red,
-              uncheckedColor = Color.White
-            )
-          )
-          Text(
-            text = stringResource(Res.string.settings_mini_graph_description),
-            color = Color.White
-          )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-          Checkbox(
-            checked = config.splitChatEnabled,
-            onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(splitChatEnabled = isChecked) }
-            },
-            colors = CheckboxDefaults.colors(
-              checkmarkColor = Color.White,
-              checkedColor = Color.Gray,
-              uncheckedColor = Color.White
-            )
-          )
-              Text(
-                text = stringResource(Res.string.settings_split_chat),
-                color = Color.White
-              )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-          Checkbox(
-            checked = config.tabbedDetectionEnabled,
-            onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(tabbedDetectionEnabled = isChecked) }
-            },
-            colors = CheckboxDefaults.colors(
-              checkmarkColor = Color.White,
-              checkedColor = Color.Red,
-              uncheckedColor = Color.White
-            )
-          )
-              Text(
-                text = stringResource(Res.string.settings_tabbed_detection),
-                color = Color.White
-              )
-        }
-        // allow PvE damage option
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-          Checkbox(
-            checked = config.allowPVEDamage,
-            onCheckedChange = {
-              isChecked ->
-              RFConfig.update { it.copy(allowPVEDamage = isChecked) }
-            },
-            colors = CheckboxDefaults.colors(
-              checkmarkColor = Color.White,
-              checkedColor = Color.Red,
-              uncheckedColor = Color.White
-            )
-          )
-              Text(
-                text = stringResource(Res.string.settings_allow_pve_damage),
-                color = Color.White
-              )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-          Checkbox(
-            checked = config.gameScheduleHotkeyEnabled,
-            onCheckedChange = {
-              isChecked ->
-              RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) }
-            },
-            colors = CheckboxDefaults.colors(
-              checkmarkColor = Color.White,
-              checkedColor = Color.Gray,
-              uncheckedColor = Color.White
-            )
-          )
-              Text(
-                text = stringResource(Res.string.settings_game_schedule_hotkey),
-                color = Color.White
-              )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-          Checkbox(
-            checked = config.useSadlyDotEyeOhhh,
-            onCheckedChange = {
-              isChecked ->
-              RFConfig.update { it.copy(useSadlyDotEyeOhhh = isChecked) }
-            },
-            colors = CheckboxDefaults.colors(
-              checkmarkColor = Color.White,
-              checkedColor = Color.Gray,
-              uncheckedColor = Color.White
-            )
-          )
-              Text(
-                text = stringResource(Res.string.settings_use_sadly),
-                color = Color.White
-              )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-          Checkbox(
-            checked = config.dragonBreathOverlayEnabled,
-            onCheckedChange = {
-              isChecked ->
-              RFConfig.update { it.copy(dragonBreathOverlayEnabled = isChecked) }
-            },
-            colors = CheckboxDefaults.colors(
-              checkmarkColor = Color.White,
-              checkedColor = Color.Gray,
-              uncheckedColor = Color.White
-            )
-          )
-              Text(
-                text = stringResource(Res.string.settings_dragon_breath_overlay),
-                color = Color.White
-              )
-        }
-
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//          Button(
-//            onClick = {},
-//            colors = ButtonDefaults.buttonColors(Color.White),
-//            modifier = Modifier.padding(16.dp)
-//          ) {
-//            Text(
-//              text = stringResource(Res.string.settings_player_remappings_button),
-//              maxLines = 1,
-//              color = Color.Black
-//            )
-//          }
-//        }
+    val windowColorSlider = remember { mutableStateOf(colorToSliderValue(config.windowColor)) }
+    LaunchedEffect(config.windowColor) {
+      if (isSliderDragging.value) return@LaunchedEffect
+      val newVal = colorToSliderValue(config.windowColor)
+      val currentColorFromSlider = sliderValueToColor(windowColorSlider.value)
+      if (currentColorFromSlider == config.windowColor) return@LaunchedEffect
+      if (kotlin.math.abs(newVal - windowColorSlider.value) > 0.0001f) {
+        windowColorSlider.value = newVal
       }
     }
+
+    Slider(
+      value = windowColorSlider.value,
+      onValueChange = { value ->
+        windowColorSlider.value = value
+        RFConfig.update { it.copy(windowColor = sliderValueToColor(value)) }
+      },
+      interactionSource = sliderInteractionSource,
+      colors = SliderDefaults.colors(
+        thumbColor = RFColors.AccentRed,
+        activeTrackColor = RFColors.AccentRed,
+        inactiveTrackColor = RFColors.CardBorder
+      )
+    )
   }
 }
 
 @Composable
-fun CombatOverlaySettingsPanel(wm: WindowManager? = null) {
+private fun CombatOverlaySettingsPanel() {
   val config by RFConfig.state.collectAsState()
-  Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-    Text(
-      text = stringResource(Res.string.settings_combat_overlay_title),
-      color = Color.White,
-      textAlign = TextAlign.Center,
-      fontWeight = FontWeight.Bold,
-      fontSize = 18.sp,
-      modifier = Modifier.padding(bottom = 8.dp)
+
+  SettingsSection(
+    title = stringResource(Res.string.settings_combat_overlay_title),
+    description = stringResource(Res.string.settings_combat_fade_controls)
+  ) {
+    SettingsCheckbox(
+      checked = config.combatShowDamageColumn,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowDamageColumn = isChecked) } },
+      label = stringResource(Res.string.settings_show_damage_column)
     )
 
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-      Checkbox(
-        checked = config.combatShowDamageColumn,
-        onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowDamageColumn = isChecked) } },
-        colors = CheckboxDefaults.colors(
-          checkmarkColor = Color.White,
-          checkedColor = Color.Red,
-          uncheckedColor = Color.White
-        )
-      )
-      Text(text = stringResource(Res.string.settings_show_damage_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
-    }
+    SettingsCheckbox(
+      checked = config.combatShowHealsColumn,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowHealsColumn = isChecked) } },
+      label = stringResource(Res.string.settings_show_heals_column)
+    )
 
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-      Checkbox(
-        checked = config.combatShowHealsColumn,
-        onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowHealsColumn = isChecked) } },
-        colors = CheckboxDefaults.colors(
-          checkmarkColor = Color.White,
-          checkedColor = Color.Red,
-          uncheckedColor = Color.White
-        )
-      )
-      Text(text = stringResource(Res.string.settings_show_heals_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
-    }
+    SettingsCheckbox(
+      checked = config.combatShowCCColumn,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowCCColumn = isChecked) } },
+      label = stringResource(Res.string.settings_show_cc_column)
+    )
 
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-      Checkbox(
-        checked = config.combatShowCCColumn,
-        onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowCCColumn = isChecked) } },
-        colors = CheckboxDefaults.colors(
-          checkmarkColor = Color.White,
-          checkedColor = Color.Red,
-          uncheckedColor = Color.White
-        )
-      )
-      Text(text = stringResource(Res.string.settings_show_cc_column), color = Color.White, modifier = Modifier.padding(start = 8.dp))
-    }
-
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-      Checkbox(
-        checked = config.combatControlsFadeEnabled,
-        onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatControlsFadeEnabled = isChecked) } },
-        colors = CheckboxDefaults.colors(
-          checkmarkColor = Color.White,
-          checkedColor = Color.Red,
-          uncheckedColor = Color.White
-        )
-      )
-      Text(text = stringResource(Res.string.settings_combat_fade_controls), color = Color.White, modifier = Modifier.padding(start = 8.dp))
-    }
+    SettingsCheckbox(
+      checked = config.combatControlsFadeEnabled,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatControlsFadeEnabled = isChecked) } },
+      label = stringResource(Res.string.settings_combat_fade_controls)
+    )
   }
 }
-
 
 @Preview
 @Composable

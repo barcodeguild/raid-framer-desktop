@@ -60,7 +60,10 @@
     <string name="settings_general_opacity_slider">Overlay Opacity</string>
     <string name="settings_general_tint_slider">Overlay Color</string>
     <string name="settings_general_title">General Settings</string>
-    <string name="settings_general_description">Settings pertaining to the overall operation of the APP and UI aesthetics.</string>
+    <string name="settings_general_description">Toggle additional overlay features and parsing options.</string>
+    <string name="settings_general_overlay_title">General Overlay Settings</string>
+    <string name="settings_general_overlay_description">Some friends may wish to adjust the transparency and color of their overlays.</string>
+
 
 
     <!-- About Overlay Strings -->

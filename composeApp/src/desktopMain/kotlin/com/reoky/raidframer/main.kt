@@ -82,7 +82,7 @@ fun main(args: Array<String>) = application {
   OverlayInteractor.start(delay = 150L) // show to allow for hiding overlays quickly
   DeathAccumulatorInteractor.start()
   PetAccumulatorInteractor.start()
-  
+
   // file path args processing
   val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }
   if (incoming != null) {
