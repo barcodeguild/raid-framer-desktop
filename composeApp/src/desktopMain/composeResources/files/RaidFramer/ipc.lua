@@ -270,6 +270,9 @@ function RF.IPC.HandleRawMessage(rawMessage)
   -- switch based on message.type
   if message.type == RF.IPC.MESSAGE_TYPES.TEST_PING then
     RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.TEST_PING, { reply = "pong" })
+    if RF.Raid and RF.Raid.isPrepared then
+      RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.FRAMES_UPDATE, RF.Raid.GetRaidRoster())
+    end
     if RF.PLAYER_NAME ~= "" and RF.FACTION ~= "" then
       RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.SELF_UPDATE, RF.PLAYER_NAME)
       RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.SELF_FACTION, RF.FACTION)
