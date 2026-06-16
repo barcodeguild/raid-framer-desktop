@@ -77,8 +77,10 @@ fun MultiPlayerMetricLineChart(
   modifier: Modifier = Modifier
 ) {
   // clamp groups to 1..3
-  val usedGroups = groups.take(3).ifEmpty {
-    listOf(GroupSpec("All", { true }, Color(0xFFEF5350)))
+  val usedGroups = remember(groups) {
+    groups.take(3).ifEmpty {
+      listOf(GroupSpec("All", { true }, Color(0xFFEF5350)))
+    }
   }
 
   var selectedMinutes by remember(initialMinutesWindow) { mutableStateOf(initialMinutesWindow) }

@@ -12,6 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,15 +28,16 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.helpers.RFGraphColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 import com.reoky.raidframer.ui.component.graphs.GroupSpec
 import com.reoky.raidframer.ui.component.graphs.MultiPlayerMetricLineChart
-import com.reoky.raidframer.core.helpers.pickNextColor
 import com.reoky.raidframer.ui.component.PlayerDetailsSection
 import org.jetbrains.compose.resources.InternalResourceApi
 import org.jetbrains.compose.resources.stringResource
@@ -83,7 +85,13 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
   val currentDateString = java.time.LocalDate.now().let {
     "${it.monthValue}/${it.dayOfMonth}"
   }
-  val defaultColor = pickNextColor(setOf())
+  val defaultColor = remember(metricType) {
+    when (metricType) {
+      GraphMetricType.DAMAGE -> RFGraphColor.RED
+      GraphMetricType.HEALING -> RFGraphColor.GREEN
+      GraphMetricType.CC -> RFGraphColor.BLUE
+    }
+  }
 
   Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.90f))) {
     TitleBarComponent(
