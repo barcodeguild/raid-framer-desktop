@@ -28,10 +28,11 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
+import com.sun.jna.platform.win32.Kernel32
+import com.sun.jna.platform.win32.WinError
+import com.sun.jna.platform.win32.WinNT.HANDLE
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.channels.FileChannel
-import java.nio.file.StandardOpenOption
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
 import kotlinx.coroutines.Dispatchers
@@ -39,118 +40,118 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.app_already_running
 import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
 import raid_framer_desktop.composeapp.generated.resources.raidframer
 
 const val TAG = "Main"
+private const val SINGLE_INSTANCE_MUTEX = "Local\\RaidFramerDesktopSingleInstance"
 
-private val lockFile = Paths.get(System.getProperty("user.home"), ".RaidFramer", ".raidframer.lock")
-private var lockChannel: FileChannel? = null
+private var appMutexHandle: HANDLE? = null
 private var tray: SystemTray? = null
 
 /* ~ Entry Point ~ */
-fun main(args: Array<String>) = application {
-
+fun main(args: Array<String>) {
   // Prevent duplicate launch
-  if (!acquireLock()) {
-    messageBox(AppGlobals.APP_NAME, stringResource(Res.string.app_already_running))
+  if (!acquireSingleInstanceMutex()) {
+    messageBox(AppGlobals.APP_NAME, "Raid Framer is already running.")
     exitProcess(1)
   }
 
-  val context = rememberCoroutineScope()
+  application {
+    val context = rememberCoroutineScope()
 
-  // Initialize the database : critical that this occurs first and only once
-  remember {
-    try {
-      initialize().also { db -> RFDao.init(db) }
-    } catch (e: Exception) {
-      println("Oh eek, the database wouldn't open, friend: ${e.message}")
-      exitProcess(1)
-    }
-  }
-
-  RFConfig.init(RFDao.configDao)
-
-  // Start core of the app
-  LoggingInteractor.initialize() // prunes old logs
-  LoggingInteractor.start()
-  PlayerCacheInteractor.start()
-  //GameMonitorInteractor.start()
-  InstallationInteractor.start(delay = 3000L) // delay to allow user to set game path in settings if needed
-  CompanionInteractor.start(delay = 1000L) // delay to allow game monitor to start first
-  OverlayInteractor.start(delay = 150L) // show to allow for hiding overlays quickly
-  DeathAccumulatorInteractor.start()
-  PetAccumulatorInteractor.start()
-
-  // file path args processing
-  val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }
-  if (incoming != null) {
-    try {
-      // Trim surrounding quotes if any (Windows may quote paths with spaces).
-      val cleaned = incoming.trim().trim('"')
-      val p = Paths.get(cleaned)
-      if (Files.exists(p)) {
-        messageBox(AppGlobals.APP_NAME, "You are viewing a replay of combat data from: $p. Live monitoring is disabled while viewing replays.")
-        GameMonitorInteractor.chooseCombatLog(p)
-        GameMonitorInteractor.setOptions(
-          mode = GameMonitorInteractor.MonitorModes.REPLAY,
-          startMarker = 0L,
-          endMarker = Long.MAX_VALUE
-        )
-        GameMonitorInteractor.restart()
-      }
-    } catch (_: Exception) {
-      Log.error(TAG, "Failed to process incoming log path: $incoming")
-      messageBox(AppGlobals.APP_NAME, "Failed to open the specified combat log file: $incoming")
-      exitProcess(1)
-    }
-
-  // not viewing a replay so pick the path from settings
-  } else {
-    // choose game path default automatically
-    context.launch(Dispatchers.IO) {
-      Log.info(TAG, "Searching for combat log path...")
-      GameMonitorInteractor.locateArcheRageDirectory()
-    }
-    LaunchedEffect(GameMonitorInteractor.isSearching) {
-      val automaticLogPath = GameMonitorInteractor.possiblePaths.value.firstOrNull()
-      automaticLogPath?.let { path ->
-        Log.info(TAG, "Automatically choosing the combat log file here: $path")
-        GameMonitorInteractor.chooseCombatLog(path)
-        GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.MONITOR, 0L, Long.MAX_VALUE)
+    // Initialize the database: critical that this occurs first and only once
+    remember {
+      try {
+        initialize().also { db -> RFDao.init(db) }
+      } catch (e: Exception) {
+        println("Oh eek, the database wouldn't open, friend: ${e.message}")
+        exitProcess(1)
       }
     }
-  }
 
-  val wm = remember {
-    WindowManager(scope = context, dao = RFDao.windowStateDao)
-  }
+    RFConfig.init(RFDao.configDao)
 
-  var statesLoaded by remember { mutableStateOf(false) }
+    // Start core of the app
+    LoggingInteractor.initialize() // prunes old logs
+    LoggingInteractor.start()
+    PlayerCacheInteractor.start()
+    //GameMonitorInteractor.start()
+    InstallationInteractor.start(delay = 3000L) // delay to allow user to set game path in settings if needed
+    CompanionInteractor.start(delay = 1000L) // delay to allow game monitor to start first
+    OverlayInteractor.start(delay = 150L) // show to allow for hiding overlays quickly
+    DeathAccumulatorInteractor.start()
+    PetAccumulatorInteractor.start()
 
-  LaunchedEffect(Unit) {
-    if (AppGlobals.DEBUG_WIPE_DB_AND_CACHE_ON_LAUNCH) RFDao.windowStateDao.deleteAll()
-    val startTime: Long = System.currentTimeMillis()
-    Log.info(TAG, "Loading saved window states...")
-    wm.loadStates()
-    Log.info(TAG, "Finished loading saved window states. Took ${System.currentTimeMillis() - startTime} ms")
-
-    RFDao.configDao.getConfig()?.let { config ->
-      if (config.firstLaunch) {
-        wm.openWindow(OverlayType.ABOUT)
-        RFDao.configDao.insert(config.copy(firstLaunch = false))
+    // file path args processing
+    val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }
+    if (incoming != null) {
+      try {
+        // Trim surrounding quotes if any (Windows may quote paths with spaces).
+        val cleaned = incoming.trim().trim('"')
+        val p = Paths.get(cleaned)
+        if (Files.exists(p)) {
+          messageBox(AppGlobals.APP_NAME, "You are viewing a replay of combat data from: $p. Live monitoring is disabled while viewing replays.")
+          GameMonitorInteractor.chooseCombatLog(p)
+          GameMonitorInteractor.setOptions(
+            mode = GameMonitorInteractor.MonitorModes.REPLAY,
+            startMarker = 0L,
+            endMarker = Long.MAX_VALUE
+          )
+          GameMonitorInteractor.restart()
+        }
+      } catch (_: Exception) {
+        Log.error(TAG, "Failed to process incoming log path: $incoming")
+        messageBox(AppGlobals.APP_NAME, "Failed to open the specified combat log file: $incoming")
+        exitProcess(1)
       }
-      if (config.miniGraphEnabled) wm.openWindow(OverlayType.MINI)
+
+    // not viewing a replay so pick the path from settings
+    } else {
+      // choose game path default automatically
+      context.launch(Dispatchers.IO) {
+        Log.info(TAG, "Searching for combat log path...")
+        GameMonitorInteractor.locateArcheRageDirectory()
+      }
+      LaunchedEffect(GameMonitorInteractor.isSearching) {
+        val automaticLogPath = GameMonitorInteractor.possiblePaths.value.firstOrNull()
+        automaticLogPath?.let { path ->
+          Log.info(TAG, "Automatically choosing the combat log file here: $path")
+          GameMonitorInteractor.chooseCombatLog(path)
+          GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.MONITOR, 0L, Long.MAX_VALUE)
+        }
+      }
     }
 
-    statesLoaded = true
-  }
+    val wm = remember {
+      WindowManager(scope = context, dao = RFDao.windowStateDao)
+    }
 
-  if (statesLoaded) {
-    tray = spawnSystemTray(wm)
-    Log.info(TAG, "Opening default windows...")
-    OverlayContainer(wm)
+    var statesLoaded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+      if (AppGlobals.DEBUG_WIPE_DB_AND_CACHE_ON_LAUNCH) RFDao.windowStateDao.deleteAll()
+      val startTime: Long = System.currentTimeMillis()
+      Log.info(TAG, "Loading saved window states...")
+      wm.loadStates()
+      Log.info(TAG, "Finished loading saved window states. Took ${System.currentTimeMillis() - startTime} ms")
+
+      RFDao.configDao.getConfig()?.let { config ->
+        if (config.firstLaunch) {
+          wm.openWindow(OverlayType.ABOUT)
+          RFDao.configDao.insert(config.copy(firstLaunch = false))
+        }
+        if (config.miniGraphEnabled) wm.openWindow(OverlayType.MINI)
+      }
+
+      statesLoaded = true
+    }
+
+    if (statesLoaded) {
+      tray = spawnSystemTray(wm)
+      Log.info(TAG, "Opening default windows...")
+      OverlayContainer(wm)
+    }
   }
 }
 
@@ -167,7 +168,7 @@ fun messageBox(title: String, message: String) {
 }
 
 /*
- * Spawns the system tray icon and menu. I basically added this in case the overlay's go behind other windows or
+ * Spawns the system tray icon and menu. I basically added this in case overlays appear behind other windows or
  * off the screen, so the user has a way to get them back.
  */
 @Composable
@@ -202,23 +203,21 @@ fun spawnSystemTray(wm: WindowManager): SystemTray {
   return tray
 }
 
-private fun acquireLock(): Boolean {
-  return try {
-    Files.createDirectories(lockFile.parent)
-    lockChannel = FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
-    val fileLock = lockChannel?.tryLock()
-    if (fileLock == null) {
-      lockChannel?.close()
-      lockChannel = null
-      false
-    } else {
-      true
-    }
-  } catch (e: Exception) {
-    lockChannel?.close()
-    lockChannel = null
-    true
+private fun acquireSingleInstanceMutex(): Boolean {
+  val handle = Kernel32.INSTANCE.CreateMutex(null, false, SINGLE_INSTANCE_MUTEX)
+  if (handle == null) {
+    Log.error(TAG, "CreateMutex returned null for single-instance mutex")
+    return false
   }
+
+  val alreadyExists = Kernel32.INSTANCE.GetLastError() == WinError.ERROR_ALREADY_EXISTS
+  if (alreadyExists) {
+    Kernel32.INSTANCE.CloseHandle(handle)
+    return false
+  }
+
+  appMutexHandle = handle
+  return true
 }
 
 /*
@@ -234,6 +233,7 @@ fun quit() {
   tray?.shutdown()
   tray?.remove()
   LoggingInteractor.stop() // should be last because this is the thing that logs shutdown message
-  lockChannel?.close()
+  appMutexHandle?.let { Kernel32.INSTANCE.CloseHandle(it) }
+  appMutexHandle = null
   exitProcess(0)
 }
