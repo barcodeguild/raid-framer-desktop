@@ -134,16 +134,18 @@ object InstallationInteractor : Interactor() {
 
     // write config in ini format to settings.conf in the addon directory
     val settingsFilePath = rfAddonPath.resolve("settings.conf")
-    val beforeHash = if (settingsFilePath.toFile().exists()) settingsFilePath.toFile().sha256() else "missing"
-    val settingsContent = "# RaidFramer Addon Settings Managed by RaidFramer App : Not for manual editing"
+    val settingsContent = buildString {
+      append("# RaidFramer Addon Settings Managed by RaidFramer App : Not for manual editing")
+      for ((key, value) in relevantSettings) {
+        append("\n${key}=${value}")
+      }
+    }
     try {
       withContext(Dispatchers.IO) {
-        settingsFilePath.toFile().writeText(settingsContent)
-        for ((key, value) in relevantSettings) {
-          settingsFilePath.toFile().appendText("\n${key}=${value}")
-        }
-        val afterHash = settingsFilePath.toFile().sha256()
-        if (beforeHash != afterHash) {
+        val currentHash = if (settingsFilePath.toFile().exists()) settingsFilePath.toFile().sha256() else "missing"
+        val newHash = settingsContent.toByteArray().sha256()
+        if (currentHash != newHash) {
+          settingsFilePath.toFile().writeText(settingsContent)
           Log.info(TAG, "Notifying companion addon of updated config settings.")
           CompanionInteractor.notifyConfigUpdated()
         }
