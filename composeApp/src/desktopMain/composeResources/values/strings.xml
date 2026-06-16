@@ -20,6 +20,9 @@
     <string name="companion_toggle_display_mark_silenced_targets">Show a [Black Dot] over player's heads to indicate that they are Silenced.</string>
     <string name="companion_toggle_display_mark_distressed_targets">Show a [Blue Dot] over player's heads to indicate that they are Distressed.</string>
 
+    <!-- New Session Overlay -->
+    <string name="new_session_title">New Recording Session</string>
+
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Settings</string>
     <string name="settings_data_sourcing_title">Data Sourcing</string>

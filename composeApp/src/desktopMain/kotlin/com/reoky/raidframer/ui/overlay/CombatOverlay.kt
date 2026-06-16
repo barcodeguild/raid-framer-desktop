@@ -154,9 +154,6 @@ fun CombatOverlay(wm: WindowManager? = null) {
         .fillMaxSize()
     ) {
       if (anyColumnVisibleGlobal) {
-        // Header: icon rows overlaid at edges so they never steal layout space from the titles.
-        // Title padding animates in sync with the controls alpha so titles expand into the
-        // space that the icons were occupying as they fade out.
         Box(
           modifier = Modifier
             .fillMaxWidth()
@@ -210,7 +207,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
               val settingsInteractionSource = remember { MutableInteractionSource() }
               Text(text = "\uf013", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (settingsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = settingsInteractionSource))
             }
-            IconButton(onClick = { PlayerCacheInteractor.resetAllSessions() }, modifier = Modifier.size(32.dp)) {
+            IconButton(onClick = {wm?.openWindow(OverlayType.NEW_SESSION) }, modifier = Modifier.size(32.dp)) {
               val plusInteractionSource = remember { MutableInteractionSource() }
               Text(text = "\u002b", fontFamily = FontsHelper.faSolid(), fontSize = 15.sp, color = if (plusInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = plusInteractionSource))
             }
