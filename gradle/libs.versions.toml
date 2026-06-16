@@ -1,16 +1,16 @@
 [versions]
-androidx-lifecycle = "2.9.3" # https://developer.android.com/jetpack/androidx/versions
-composeHotReload = "1.0.0-beta6" # https://github.com/JetBrains/compose-hot-reload/releases
-composeMultiplatform = "1.8.2" # https://github.com/JetBrains/compose-multiplatform/releases/
+androidx-lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/versions
+composeHotReload = "1.11.1" # https://github.com/JetBrains/compose-hot-reload/releases
+composeMultiplatform = "1.11.1" # https://github.com/JetBrains/compose-multiplatform/releases/
 junit = "4.13.2"# https://search.maven.org/artifact/junit/junit
-kotlin = "2.2.10" # https://github.com/JetBrains/kotlin/releases/
-kotlinx-coroutines = "1.10.2" # https://github.com/Kotlin/kotlinx.coroutines/releases/
+kotlin = "2.4.0" # https://github.com/JetBrains/kotlin/releases/
+kotlinx-coroutines = "1.11.0" # https://github.com/Kotlin/kotlinx.coroutines/releases/
 dorkbox-systemTray = "4.4" # https://github.com/dorkbox/SystemTray/releases
-room = "2.7.2" # https://maven.google.com/web/index.html?q=room-gra#androidx.room:room-gradle-plugin
-sqlite = "2.5.2" # https://maven.google.com/web/index.html?q=sqlite#androidx.sqlite:sqlite
-ksp = "2.2.10-2.0.2" # https://github.com/google/ksp/releases
+room = "2.8.4" # https://maven.google.com/web/index.html?q=room-gra#androidx.room:room-gradle-plugin
+sqlite = "2.6.2" # https://maven.google.com/web/index.html?q=sqlite#androidx.sqlite:sqlite
+ksp = "2.3.9" # https://github.com/google/ksp/releases
 koala = "0.11.2" # https://github.com/KoalaPlot/koalaplot-core
-kotlinx-serialization = "1.9.0" # https://github.com/Kotlin/kotlinx.serialization/
+kotlinx-serialization = "1.11.0" # https://github.com/Kotlin/kotlinx.serialization/
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
