@@ -89,7 +89,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
     when (metricType) {
       GraphMetricType.DAMAGE -> RFGraphColor.RED
       GraphMetricType.HEALING -> RFGraphColor.GREEN
-      GraphMetricType.CC -> RFGraphColor.BLUE
+      GraphMetricType.CC -> RFGraphColor.CYAN
     }
   }
 
