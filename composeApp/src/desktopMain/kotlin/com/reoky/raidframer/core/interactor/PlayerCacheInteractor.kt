@@ -268,8 +268,14 @@ object PlayerCacheInteractor : Interactor() {
         )
       }
       resetAllSessions()
+      CombatLogInteractor.startRecording()
       Log.info(TAG, "Started new recording session: type=$sessionType, allowPvE=$allowPvE")
     }
+  }
+
+  fun stopSession() {
+    CombatLogInteractor.stopRecording()
+    Log.info(TAG, "Recording session stopped")
   }
 
   // filter pve damage by checking if the target is a real player
@@ -426,6 +432,9 @@ object PlayerCacheInteractor : Interactor() {
       is DebuffEndedEvent -> postDebuffEnded(event)
       else -> {} // no-op for other event types
     }
+    if (shouldRecordEvent(event)) {
+      CombatLogInteractor.recordEvent(event)
+    }
   }
 
   fun postEventInternal(event: CombatEvent) {
@@ -440,6 +449,15 @@ object PlayerCacheInteractor : Interactor() {
       is DebuffEndedEvent -> postDebuffEnded(event)
       else -> {} // no-op for other event types
     }
+    if (shouldRecordEvent(event)) {
+      CombatLogInteractor.recordEvent(event)
+    }
+  }
+
+  private fun shouldRecordEvent(event: CombatEvent): Boolean {
+    if (!CombatLogInteractor.isRecording.value) return false
+    val allowPvE = RFConfig.state.value.allowPVEDamage
+    return isRealPlayer(event.target) || allowPvE
   }
 
   private fun postDamage(event: DamageEvent) {

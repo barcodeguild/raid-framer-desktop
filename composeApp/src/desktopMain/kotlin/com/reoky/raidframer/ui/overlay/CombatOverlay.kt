@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.FontsHelper
+import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.core.helpers.RFColors
@@ -207,10 +208,34 @@ fun CombatOverlay(wm: WindowManager? = null) {
               val settingsInteractionSource = remember { MutableInteractionSource() }
               Text(text = "\uf013", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (settingsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = settingsInteractionSource))
             }
-            IconButton(onClick = {wm?.openWindow(OverlayType.NEW_SESSION) }, modifier = Modifier.size(32.dp)) {
+            IconButton(onClick = {
+              if (CombatLogInteractor.isRecording.value) {
+                PlayerCacheInteractor.stopSession()
+                RFConfig.update { it.copy(lastSessionStart = 0L) }
+              } else {
+                wm?.openWindow(OverlayType.NEW_SESSION)
+              }
+            }, modifier = Modifier.size(32.dp)) {
+              val isRecording = CombatLogInteractor.isRecording.collectAsState()
               val plusInteractionSource = remember { MutableInteractionSource() }
-              Text(text = "\u002b", fontFamily = FontsHelper.faSolid(), fontSize = 15.sp, color = if (plusInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = plusInteractionSource))
+              val icon = if (isRecording.value) "\uf04d" else "\u002b"
+              val color = if (plusInteractionSource.collectIsHoveredAsState().value) RFColors.AccentRed else if (isRecording.value) RFColors.AccentRed else Color.White
+              Text(text = icon, fontFamily = FontsHelper.faSolid(), fontSize = 15.sp, color = color, modifier = Modifier.hoverable(interactionSource = plusInteractionSource))
             }
+          }
+        }
+
+        if (CombatLogInteractor.showHint.collectAsState().value) {
+          Box(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 20.dp),
+            contentAlignment = Alignment.Center
+          ) {
+            Text(
+              text = "Press '+' to start a new recording session",
+              color = RFColors.TextTertiary,
+              fontSize = 11.sp,
+              maxLines = 1
+            )
           }
         }
 

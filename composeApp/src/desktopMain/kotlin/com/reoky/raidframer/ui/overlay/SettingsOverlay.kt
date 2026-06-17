@@ -21,10 +21,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.database.ConfigEntity
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.colorToSliderValue
 import com.reoky.raidframer.core.helpers.sliderValueToColor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
+import com.reoky.raidframer.core.interactor.CombatLogInteractor
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
@@ -32,6 +35,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.*
@@ -196,6 +200,10 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       }
 
       CharacterDisplayPanel()
+
+      if (config.lastSessionStart > 0) {
+        RecordingSessionPanel(config)
+      }
 
       OverlayFeaturesPanel(wm)
 
@@ -525,6 +533,63 @@ private fun CombatOverlaySettingsPanel() {
       onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatControlsFadeEnabled = isChecked) } },
       label = stringResource(Res.string.settings_combat_fade_controls)
     )
+  }
+}
+
+@Composable
+private fun RecordingSessionPanel(config: ConfigEntity) {
+  val mode = if (config.allowPVEDamage) "PvE" else "PvP"
+  var elapsedSeconds by remember { mutableStateOf(0L) }
+
+  LaunchedEffect(config.lastSessionStart) {
+    while (config.lastSessionStart > 0) {
+      elapsedSeconds = (System.currentTimeMillis() - config.lastSessionStart) / 1000
+      delay(1000)
+    }
+  }
+
+  val minutes = elapsedSeconds / 60
+  val seconds = elapsedSeconds % 60
+  val timeStr = String.format("%02d:%02d", minutes, seconds)
+
+  SettingsSection(
+    title = "Recording Session",
+    description = "Combat events are being recorded to ${config.lastSessionTitle}"
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Column {
+        Text(
+          text = "Type: ${config.lastSessionType} ($mode)",
+          color = RFColors.TextPrimary,
+          fontSize = 13.sp,
+          fontWeight = FontWeight.Medium
+        )
+        Text(
+          text = "Duration: $timeStr",
+          color = RFColors.TextSecondary,
+          fontSize = 12.sp,
+          fontWeight = FontWeight.Medium
+        )
+      }
+      Spacer(modifier = Modifier.weight(1f))
+      Button(
+        onClick = {
+          PlayerCacheInteractor.stopSession()
+          RFConfig.update { it.copy(lastSessionStart = 0L) }
+        },
+        colors = ButtonDefaults.buttonColors(RFColors.AccentRed)
+      ) {
+        Text(
+          text = "Stop Recording",
+          color = Color.White,
+          fontWeight = FontWeight.SemiBold,
+          fontSize = 13.sp
+        )
+      }
+    }
   }
 }
 
