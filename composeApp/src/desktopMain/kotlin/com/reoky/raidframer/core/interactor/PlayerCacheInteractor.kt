@@ -816,9 +816,7 @@ object PlayerCacheInteractor : Interactor() {
 
   /* UI Subscriptions */
   fun observeCard(name: String): StateFlow<PlayerCard?> {
-    return snapshotFlow {
-      cards[name]?.copy() // force a new instance on each emission
-    }
+    return snapshotFlow { cards[name]?.copy() }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), cards[name])
   }
 
@@ -1106,7 +1104,7 @@ object PlayerCacheInteractor : Interactor() {
 
   val buildCountsHaranya: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
-      cards.values
+      it
         .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.HARANYA && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
@@ -1115,7 +1113,7 @@ object PlayerCacheInteractor : Interactor() {
 
   val buildCountsNuia: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
-      cards.values
+      it
         .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.NUIA && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
@@ -1124,7 +1122,7 @@ object PlayerCacheInteractor : Interactor() {
 
   val buildCountsPirate: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
-      cards.values
+      it
         .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.PIRATE && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()

@@ -569,7 +569,7 @@ private fun StatColumn(
       contentPadding = PaddingValues(0.dp),
       modifier = Modifier.fillMaxWidth()
     ) {
-      itemsIndexed(cards, key = { _, card -> card.name }) { index, card ->
+      itemsIndexed(cards, key = { _, card -> "${card.name}:${card.lastKnownFaction}:${card.currentBuild}" }) { index, card ->
         PlayerRankingRow(
           index = index,
           card = card,
@@ -667,7 +667,6 @@ private fun ItemStatColumn(
       contentPadding = PaddingValues(0.dp),
       modifier = Modifier.fillMaxWidth()
     ) {
-      // use a stable key; StringResource.toString() is fine for uniqueness here
       itemsIndexed(items, key = { _, i -> i.itemName.toString() }) { index, item ->
         SimpleRankingRow(
           index = index,

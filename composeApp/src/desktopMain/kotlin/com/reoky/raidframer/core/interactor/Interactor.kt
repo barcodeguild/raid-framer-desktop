@@ -13,9 +13,12 @@ abstract class Interactor {
   // io dispatcher chosen because interact() may perform I/O operations and shouldn't update the UI directly
   // the ui layer should observe the state of the interactor and update the UI accordingly in the lol.rfcloud.main dispatcher
   val scope = CoroutineScope(Dispatchers.IO + SupervisorJob()) // supervisor job to prevent child failure from cancelling the whole scope
+  private var startJob: Job? = null
 
   open fun start(delay: Long = 3000L) {
+    if (startJob?.isActive == true) return
     scope.launch {
+      startJob = coroutineContext[Job]
       while (isActive) {
         interact()
         delay(delay)
@@ -24,6 +27,8 @@ abstract class Interactor {
   }
 
   open fun stop() {
+    startJob?.cancel()
+    startJob = null
     scope.coroutineContext.cancel()
   }
 

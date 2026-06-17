@@ -4,6 +4,8 @@ package com.reoky.raidframer.ui.overlay
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -410,15 +412,13 @@ fun <T> EventListColumn(
     )
 
     Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .verticalScroll(rememberScrollState())
-      ) {
-        if (items.isEmpty()) {
-          Text("-", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp))
-        } else {
-          items.forEach { item ->
+      if (items.isEmpty()) {
+        Text("-", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp))
+      } else {
+        LazyColumn(
+          modifier = Modifier.fillMaxSize()
+        ) {
+          itemsIndexed(items, key = { index, item -> "${title}_${index}_${item.hashCode()}" }) { _, item ->
             renderItem(item)
           }
         }

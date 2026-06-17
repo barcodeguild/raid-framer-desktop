@@ -227,9 +227,13 @@ function RF.IPC.ReadMessages()
 
   if #lines == 0 then return end
 
-  -- Clear file after reading
-  f = io.open(RF.IPC.CHANNEL_IN_FILE, "w")
-  if f then f:close() end
+  -- Clear file after reading, but only after we have the content in memory.
+  -- Re-opening in write mode truncates the file atomically on the addon side.
+  local clear = io.open(RF.IPC.CHANNEL_IN_FILE, "w")
+  if clear then
+    clear:flush()
+    clear:close()
+  end
 
   -- Process messages
   for _, line in ipairs(lines) do
