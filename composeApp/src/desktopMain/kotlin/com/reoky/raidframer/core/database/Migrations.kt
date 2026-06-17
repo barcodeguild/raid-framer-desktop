@@ -141,3 +141,12 @@ val MIGRATION_17_18 = object : Migration(17, 18) {
   }
 }
 
+// added session recording fields to ConfigEntity (lastSessionTitle, lastSessionStart, lastSessionType)
+val MIGRATION_18_19 = object : Migration(18, 19) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionTitle TEXT NOT NULL DEFAULT ''").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionStart INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionType TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}
+

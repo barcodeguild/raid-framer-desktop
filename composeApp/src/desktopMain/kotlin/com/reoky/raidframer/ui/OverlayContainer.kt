@@ -46,7 +46,7 @@ fun OverlayContainer(wm: WindowManager) {
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
         isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(state.windowType == OverlayWindowType.TOOLTIP),
         isResizable = resizable,
-        isFocusable = true,
+        isFocusable = type == OverlayType.NEW_SESSION,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->
         val scope = rememberCoroutineScope()

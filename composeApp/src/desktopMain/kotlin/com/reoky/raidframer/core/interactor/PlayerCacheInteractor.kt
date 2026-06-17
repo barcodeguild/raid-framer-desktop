@@ -260,6 +260,18 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  fun startNewSession(sessionType: String, allowPvE: Boolean) {
+    scope.launch {
+      RFConfig.update {
+        it.copy(
+          allowPVEDamage = allowPvE
+        )
+      }
+      resetAllSessions()
+      Log.info(TAG, "Started new recording session: type=$sessionType, allowPvE=$allowPvE")
+    }
+  }
+
   // filter pve damage by checking if the target is a real player
   fun isRealPlayer(playerName: String): Boolean {
     return cards.values.any { it.isRealPlayer && it.name == playerName }

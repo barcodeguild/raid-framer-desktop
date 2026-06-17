@@ -22,6 +22,15 @@
 
     <!-- New Session Overlay -->
     <string name="new_session_title">New Recording Session</string>
+    <string name="new_session_event_type_label">Event Type</string>
+    <string name="new_session_custom_name_label">Custom Session Name</string>
+    <string name="new_session_custom_name_placeholder">Enter session name (a-zA-Z0-9)</string>
+    <string name="new_session_damage_mode_label">Damage Mode</string>
+    <string name="new_session_pvp_only">PvP Damage Only</string>
+    <string name="new_session_allow_pve">Allow PvE Damage</string>
+    <string name="new_session_file_name_label">Session File Name</string>
+    <string name="new_session_start_recording">Start Recording</string>
+    <string name="new_session_cancel">Nope</string>
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Settings</string>

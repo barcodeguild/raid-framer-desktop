@@ -68,7 +68,7 @@ fun OverlayWindow(
     transparent = true,
     title = title,
     alwaysOnTop = true,
-    focusable = false,
+    focusable = isFocusable,
     undecorated = true,
     visible = isVisible.value && isEverythingVisible.value && !isObstructing.value
   ) {
