@@ -43,6 +43,7 @@ import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
 import raid_framer_desktop.composeapp.generated.resources.raidframer
+import java.util.Locale.getDefault
 
 const val TAG = "Main"
 private const val SINGLE_INSTANCE_MUTEX = "Local\\RaidFramerDesktopSingleInstance"
@@ -141,7 +142,7 @@ fun main(args: Array<String>) {
       RFDao.configDao.getConfig()?.let { config ->
         if (config.firstLaunch) {
           wm.openWindow(OverlayType.ABOUT)
-          RFDao.configDao.insert(config.copy(firstLaunch = false))
+          RFConfig.update { it.copy(firstLaunch = false) }
         }
         if (config.miniGraphEnabled) wm.openWindow(OverlayType.MINI)
       }

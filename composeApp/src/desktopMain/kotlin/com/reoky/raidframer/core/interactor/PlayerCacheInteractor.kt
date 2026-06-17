@@ -65,17 +65,14 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
-  // main event loop
+  // The main interactor event loop
+  // Takes a snapshot of values to iterate. Iterating the map directly while updates happen
+  // (even with ConcurrentHashMap/MutableStateMap) can be risky with heavy logic,
+  // and we want to perform calculations without holding a lock. Ok friends!?
   override suspend fun interact() {
-    // Take a snapshot of values to iterate. Iterating the map directly while updates happen
-    // (even with ConcurrentHashMap/MutableStateMap) can be risky with heavy logic,
-    // and we want to perform calculations without holding a lock. Ok friends!?
     val snapshot = cards.values.toList()
-
     snapshot.forEach { card ->
       val name = card.name
-
-      // 1. Logic to determine if player should be upgraded from NPC to real player
       if (!card.isRealPlayer && card.shouldUpgradeToPlayer()) {
         scope.launch {
           mutex.withLock {
@@ -417,20 +414,23 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
-  /* Event Posting */
+  ///////////////////////////
+  // Regular Event Posting //
+  ///////////////////////////
 
-  // catch all
   fun postEvent(event: CombatEvent) {
-    when (event) {
-      is DamageEvent -> postDamage(event)
-      is HealEvent -> postHeal(event)
-      is CastingEvent -> postCasting(event)
-      is SuccessfulCastEvent -> postSuccessfulCast(event)
-      is BuffGainedEvent -> postBuffGained(event)
-      is BuffEndedEvent -> postBuffEnded(event)
-      is DebuffGainedEvent -> postDebuffGained(event)
-      is DebuffEndedEvent -> postDebuffEnded(event)
-      else -> {} // no-op for other event types
+    if (CombatLogInteractor.isRecording.value) {
+      when (event) {
+        is DamageEvent -> postDamage(event)
+        is HealEvent -> postHeal(event)
+        is CastingEvent -> postCasting(event)
+        is SuccessfulCastEvent -> postSuccessfulCast(event)
+        is BuffGainedEvent -> postBuffGained(event)
+        is BuffEndedEvent -> postBuffEnded(event)
+        is DebuffGainedEvent -> postDebuffGained(event)
+        is DebuffEndedEvent -> postDebuffEnded(event)
+        else -> {} // no-op for other event types
+      }
     }
     if (shouldRecordEvent(event)) {
       CombatLogInteractor.recordEvent(event)
@@ -438,17 +438,20 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   fun postEventInternal(event: CombatEvent) {
-    when (event) {
-      is DamageEvent -> postDamageInternal(event)
-      is HealEvent -> postHeal(event)
-      is CastingEvent -> postCasting(event)
-      is SuccessfulCastEvent -> postSuccessfulCastInternal(event)
-      is BuffGainedEvent -> postBuffGained(event)
-      is BuffEndedEvent -> postBuffEnded(event)
-      is DebuffGainedEvent -> postDebuffGained(event)
-      is DebuffEndedEvent -> postDebuffEnded(event)
-      else -> {} // no-op for other event types
+    if (CombatLogInteractor.isRecording.value) {
+      when (event) {
+        is DamageEvent -> postDamageInternal(event)
+        is HealEvent -> postHeal(event)
+        is CastingEvent -> postCasting(event)
+        is SuccessfulCastEvent -> postSuccessfulCastInternal(event)
+        is BuffGainedEvent -> postBuffGained(event)
+        is BuffEndedEvent -> postBuffEnded(event)
+        is DebuffGainedEvent -> postDebuffGained(event)
+        is DebuffEndedEvent -> postDebuffEnded(event)
+        else -> {} // no-op for other event types
+      }
     }
+    // basically whitelisting event types to put in the final rf report for now
     if (shouldRecordEvent(event)) {
       CombatLogInteractor.recordEvent(event)
     }
@@ -610,20 +613,21 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  ///////////////////////
+  // Pet Event Posting //
+  ///////////////////////
 
-  // Posting Pet Events
   /**
    * Called by PetAccumulatorInteractor to apply pet damage to a specific pet card key.
    * `petKey` is the internal key format used by petCards: "$owner:$petName".
    */
   fun postPetDamage(petKey: String, event: DamageEvent) {
+    if (!CombatLogInteractor.isRecording.value) return
     Log.info(TAG, "Posting pet damage event to petKey=$petKey: $event")
     scope.launch {
       mutex.withLock {
-        // ensure card exists
         val existing = petCards[petKey]
         if (existing == null) {
-          // nothing to do if we don't have metadata for this pet yet
           return@withLock
         }
         val updated = existing.copy(
@@ -641,6 +645,7 @@ object PlayerCacheInteractor : Interactor() {
    * Called by PetAccumulatorInteractor to record pet successful casts (helpful for correlation).
    */
   fun postPetSuccessfulCast(petKey: String, event: SuccessfulCastEvent) {
+    if (!CombatLogInteractor.isRecording.value) return
     Log.info(TAG, "Posting pet successful cast event to petKey=$petKey: $event")
     scope.launch {
       mutex.withLock {
@@ -649,8 +654,8 @@ object PlayerCacheInteractor : Interactor() {
           return@withLock
         }
         val updated = existing.copy(
-          recentDebuffAppliedEvents = existing.recentDebuffAppliedEvents, // keep if needed elsewhere
-          recentDamageEvents = existing.recentDamageEvents, // no change here
+          recentDebuffAppliedEvents = existing.recentDebuffAppliedEvents,
+          recentDamageEvents = existing.recentDamageEvents,
           recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
           lastEvent = event.timestamp
         )
@@ -675,7 +680,6 @@ object PlayerCacheInteractor : Interactor() {
   fun getRealPlayersSnapshot(): List<PlayerCard> {
     return cards.values.filter { it.isRealPlayer }
   }
-
 
   /*
    * When the user tabs over a target the active target is switched here and throughout the app. This is performed inside the
@@ -729,6 +733,7 @@ object PlayerCacheInteractor : Interactor() {
    * The calculation is performed in the DeathAccumulatorInteractor. ^_^
    */
   fun processDeathBatch(batchResults: List<DeathAccumulatorInteractor.DeathAttribution>) {
+    if (!CombatLogInteractor.isRecording.value) return
     scope.launch {
       mutex.withLock {
         batchResults.forEach { attribution ->
