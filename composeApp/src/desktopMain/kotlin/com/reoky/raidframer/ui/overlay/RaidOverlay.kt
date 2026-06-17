@@ -513,7 +513,7 @@ private fun NearbyTab(
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
         Text(
-          text = stringResource(Res.string.raid_haranya_faction, nearbyHaranya.size),
+          text = String.format(stringResource(Res.string.raid_haranya_faction), nearbyHaranya.size),
           color = Color.White,
           fontWeight = FontWeight.Bold,
           fontSize = 13.sp
@@ -533,7 +533,7 @@ private fun NearbyTab(
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
         Text(
-          text = stringResource(Res.string.raid_nuian_faction, nearbyNuia.size),
+          text = String.format(stringResource(Res.string.raid_nuian_faction), nearbyNuia.size),
           color = Color.White,
           fontWeight = FontWeight.Bold,
           fontSize = 13.sp
@@ -553,7 +553,7 @@ private fun NearbyTab(
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
         Text(
-          text = stringResource(Res.string.raid_pirate_faction, nearbyPirate.size),
+          text = String.format(stringResource(Res.string.raid_pirate_faction), nearbyPirate.size),
           color = Color.White,
           fontWeight = FontWeight.Bold,
           fontSize = 13.sp
