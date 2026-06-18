@@ -132,7 +132,10 @@
     <!-- Combat Overlay -->
     <string name="combat_column_pvp_damage">🔥 PvP Damage 🔥</string>
     <string name="combat_column_pvp_heals">💉 PvP Heals 💉</string>
-    <string name="combat_column_cc">⛨ CC Delivered ⛨</string>
+    <string name="combat_column_pvp_cc">⛨ PvP CC ⛨</string>
+    <string name="combat_column_pve_damage">⚔️ PvE Damage ⚔️</string>
+    <string name="combat_column_pve_heals">💉 PvE Heals 💉</string>
+    <string name="combat_column_pve_cc">⛨ PvE CC ⛨</string>
     <string name="combat_no_columns_message">Bro.. Try Adding at Least One Category..</string>
     <string name="combat_open_settings">Open Settings</string>
 

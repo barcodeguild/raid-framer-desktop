@@ -41,7 +41,10 @@ import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_damage
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_heals
-import raid_framer_desktop.composeapp.generated.resources.combat_column_cc
+import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_cc
+import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_damage
+import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_heals
+import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_cc
 import raid_framer_desktop.composeapp.generated.resources.combat_no_columns_message
 import raid_framer_desktop.composeapp.generated.resources.combat_open_settings
 
@@ -84,6 +87,17 @@ fun CombatOverlay(wm: WindowManager? = null) {
 
   // config state for showing/hiding columns
   val config by RFConfig.state.collectAsState()
+
+  val damageColumnText = stringResource(
+    if (config.allowPVEDamage) Res.string.combat_column_pve_damage else Res.string.combat_column_pvp_damage
+  )
+  val healsColumnText = stringResource(
+    if (config.allowPVEDamage) Res.string.combat_column_pve_heals else Res.string.combat_column_pvp_heals
+  )
+  val ccColumnText = stringResource(
+    if (config.allowPVEDamage) Res.string.combat_column_pve_cc else Res.string.combat_column_pvp_cc
+  )
+
   val anyColumnVisibleGlobal by remember { derivedStateOf {
     config.combatShowDamageColumn || config.combatShowHealsColumn || config.combatShowCCColumn
   } }
@@ -172,13 +186,13 @@ fun CombatOverlay(wm: WindowManager? = null) {
             verticalAlignment = Alignment.CenterVertically
           ) {
             if (config.combatShowDamageColumn) {
-              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_pvp_damage), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = damageColumnText, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
             if (config.combatShowHealsColumn) {
-              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_pvp_heals), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = healsColumnText, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
             if (config.combatShowCCColumn) {
-              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_cc), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = ccColumnText, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
           }
 
