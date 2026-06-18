@@ -11,6 +11,7 @@ import com.reoky.raidframer.core.model.HealEvent
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
 import com.reoky.raidframer.core.serialization.AppJson
 import com.reoky.raidframer.core.serialization.CombatEventPayload
+import com.reoky.raidframer.ui.export.ImageExportInteractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -80,6 +81,7 @@ object CombatLogInteractor : Interactor() {
     scope.launch {
       flushBuffer()
       closeWriter()
+      exportSummaryImage()
       Log.info(TAG, "Combat log recording stopped")
     }
   }
@@ -149,6 +151,15 @@ object CombatLogInteractor : Interactor() {
     } catch (_: Exception) {}
     writer = null
     currentOutputFile = null
+  }
+
+  private suspend fun exportSummaryImage() {
+    try {
+      val data = ImageExportInteractor.captureSnapshot()
+      ImageExportInteractor.exportToPng(data)
+    } catch (e: Exception) {
+      Log.error(TAG, "Failed to export summary image: ${e.message}")
+    }
   }
 
   private fun CombatEvent.toCombatEventPayload(): CombatEventPayload? {

@@ -27,6 +27,8 @@ import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.SimpleRankingRow
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.RaidComparisonPieChart
+import com.reoky.raidframer.ui.export.ImageExportInteractor
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import java.text.DateFormat
 
@@ -94,13 +96,52 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     "Specs"
   )
 
+  val scope = rememberCoroutineScope()
+  var isExporting by remember { mutableStateOf(false) }
+
   Column(
     modifier = Modifier.fillMaxSize()
   ) {
-    TitleBarComponent(
-      title = "Battle Summary ($humanReadableDateString)",
-      onClose = { wm?.closeWindow(OverlayType.SUMMARY) }
-    )
+    Box(
+      modifier = Modifier.fillMaxWidth()
+    ) {
+      TitleBarComponent(
+        title = "Battle Summary ($humanReadableDateString)",
+        onClose = { wm?.closeWindow(OverlayType.SUMMARY) },
+        modifier = Modifier.fillMaxWidth()
+      )
+      Row(
+        modifier = Modifier
+          .align(Alignment.TopEnd)
+          .padding(top = 8.dp, end = 50.dp),
+        horizontalArrangement = Arrangement.End
+      ) {
+        androidx.compose.material.TextButton(
+          onClick = {
+            if (isExporting) return@TextButton
+            isExporting = true
+            scope.launch {
+              try {
+                val data = ImageExportInteractor.captureSnapshot()
+                val file = ImageExportInteractor.exportToPng(data)
+                if (file != null) {
+                  // optionally show a notification
+                }
+              } finally {
+                isExporting = false
+              }
+            }
+          },
+          enabled = !isExporting
+        ) {
+          androidx.compose.material.Text(
+            text = if (isExporting) "Exporting..." else "Export PNG",
+            color = if (isExporting) RFColors.TextSecondary else RFColors.AccentRed,
+            fontSize = 12.sp
+          )
+        }
+      }
+    }
 
     // Charts / Graphs Section
     Row(
