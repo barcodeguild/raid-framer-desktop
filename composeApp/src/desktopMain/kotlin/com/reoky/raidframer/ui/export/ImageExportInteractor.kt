@@ -1,14 +1,15 @@
 package com.reoky.raidframer.ui.export
 
 import androidx.compose.ui.graphics.Color as ComposeColor
+import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.PlayerCard
-import raid_framer_desktop.composeapp.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import raid_framer_desktop.composeapp.generated.resources.Res
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Font
@@ -36,7 +37,6 @@ object ImageExportInteractor {
 
   private val CARD_BACKGROUND = Color(35, 35, 48)
   private val BORDER_COLOR = Color(55, 55, 70)
-  private val TITLE_BG = Color(30, 30, 42)
 
   private fun toAwtColor(composeColor: ComposeColor): Color {
     return Color(composeColor.red, composeColor.green, composeColor.blue, composeColor.alpha)
@@ -61,6 +61,8 @@ object ImageExportInteractor {
   data class ExportData(
     val sessionTitle: String,
     val sessionDate: String,
+    val sessionDurationMs: Long,
+    val allowPvE: Boolean,
     val topDamage: List<PlayerCard>,
     val topHeals: List<PlayerCard>,
     val topCC: List<PlayerCard>,
@@ -98,10 +100,16 @@ object ImageExportInteractor {
   data class SpellDamage(val spell: String, val total: Double)
   data class ItemUsage(val itemName: String, val count: Int)
 
-  fun captureSnapshot(): ExportData {
+  suspend fun captureSnapshot(): ExportData {
+    val config = RFConfig.state.value
+    val sessionStart = config.lastSessionStart
+    val durationMs = if (sessionStart > 0) System.currentTimeMillis() - sessionStart else 0L
+
     return ExportData(
-      sessionTitle = RFConfig.state.value.lastSessionTitle.ifBlank { "session" },
+      sessionTitle = config.lastSessionTitle.ifBlank { "session" },
       sessionDate = DateFormat.getDateInstance(DateFormat.SHORT).format(Date()),
+      sessionDurationMs = durationMs,
+      allowPvE = config.allowPVEDamage,
       topDamage = PlayerCacheInteractor.topDamage.value.take(50),
       topHeals = PlayerCacheInteractor.topHeals.value.take(50),
       topCC = PlayerCacheInteractor.topCC.value.take(50),
@@ -174,7 +182,7 @@ object ImageExportInteractor {
     try {
       val resUri = Res.getUri("drawable/reoky_wallpaper.png")
       if (resUri != null) {
-        val wallpaper = ImageIO.read(java.net.URI(resUri.toString()).toURL())
+        val wallpaper = ImageIO.read(URI(resUri.toString()).toURL())
         if (wallpaper != null) {
           val scaled = wallpaper.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH)
           g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
@@ -196,7 +204,7 @@ object ImageExportInteractor {
 
     val pieChartBlock = makePieChartBlock(data, colWidth)
     val combatBlock = makeCombatBlock(data, colWidth)
-    val col0Height = 55 + pieChartBlock.height + 10 + combatBlock.height
+    val col0Height = 60 + pieChartBlock.height + 10 + combatBlock.height
 
     val otherBlocks = getAllCategoryBlocks(data, colWidth)
     val colHeights = mutableListOf(col0Height, 10, 10)
@@ -219,9 +227,13 @@ object ImageExportInteractor {
       drawCardBackground(g2d, x, y, w, combatH)
       val subColW = w / 3
 
-      drawSectionHeader(g2d, "DPS", x, y, subColW, toAwtColor(RFColors.dpsOrange))
-      drawSectionHeader(g2d, "HPS", x + subColW, y, subColW, toAwtColor(RFColors.healsGreen))
-      drawSectionHeader(g2d, "CC", x + subColW * 2, y, subColW, toAwtColor(RFColors.ccCyan))
+      val damageTitle = if (data.allowPvE) "⚔️ PvE Damage ⚔️" else "🔥 PvP Damage 🔥"
+      val healsTitle = if (data.allowPvE) "💉 PvE Heals 💉" else "💉 PvP Heals 💉"
+      val ccTitle = if (data.allowPvE) "⛨ PvE CC ⛨" else "⛨ PvP CC ⛨"
+
+      drawSectionHeader(g2d, damageTitle, x, y, subColW, toAwtColor(RFColors.dpsOrange))
+      drawSectionHeader(g2d, healsTitle, x + subColW, y, subColW, toAwtColor(RFColors.healsGreen))
+      drawSectionHeader(g2d, ccTitle, x + subColW * 2, y, subColW, toAwtColor(RFColors.ccCyan))
 
       var rowY = y + SECTION_HEADER_HEIGHT
       val maxRows = maxOf(data.topDamage.size, data.topHeals.size, data.topCC.size).coerceAtLeast(1)
@@ -260,7 +272,6 @@ object ImageExportInteractor {
     val colWidth = (IMAGE_WIDTH - COLUMN_GAP * 2) / 3
     val columnY = mutableListOf(10, 10, 10)
 
-    // Column 0: Title, Pie Charts, Combat
     val titleH = drawTitleCard(g2d, data, COLUMN_GAP, columnY[0], colWidth)
     columnY[0] += titleH + 5
 
@@ -272,7 +283,6 @@ object ImageExportInteractor {
     combatBlock.draw(g2d, COLUMN_GAP, columnY[0], colWidth)
     columnY[0] += combatBlock.height + 5
 
-    // Distribute other categories across all 3 columns
     val otherBlocks = getAllCategoryBlocks(data, colWidth)
     otherBlocks.forEachIndexed { index, block ->
       val col = (index + 1) % 3
@@ -283,22 +293,45 @@ object ImageExportInteractor {
   }
 
   private fun drawTitleCard(g2d: Graphics2D, data: ExportData, x: Int, y: Int, width: Int): Int {
-    val titleH = 50
-    drawCardBackground(g2d, x, y, width, titleH)
+    val titleH = 60
+
+    g2d.color = CARD_BACKGROUND
+    g2d.fillRect(x, y, width, titleH)
+    g2d.color = BORDER_COLOR
+    g2d.drawRect(x, y, width, titleH)
 
     val titleFont = createFont(Font.BOLD, 20f)
-    val dateFont = createFont(Font.PLAIN, 13f)
+    val subtitleFont = createFont(Font.PLAIN, 12f)
 
     g2d.color = TEXT_PRIMARY
     g2d.font = titleFont
-    val title = "Battle Summary - ${data.sessionTitle}"
-    g2d.drawString(title, x + 12, y + 22)
+    g2d.drawString("${AppGlobals.APP_NAME} - Battle Summary", x + 12, y + 22)
 
-    g2d.font = dateFont
+    val durationStr = formatDuration(data.sessionDurationMs)
+    g2d.font = subtitleFont
     g2d.color = toAwtColor(RFColors.TextSecondary)
-    g2d.drawString(data.sessionDate, x + 12, y + 40)
+    g2d.drawString("${data.sessionTitle}  •  ${data.sessionDate}  •  ${AppGlobals.APP_VERSION}  •  ${durationStr}", x + 12, y + 42)
+
+    g2d.font = createFont(Font.PLAIN, 10f)
+    val faded = toAwtColor(RFColors.TextSecondary)
+    g2d.color = Color(faded.red, faded.green, faded.blue, 120)
+    g2d.drawString("${AppGlobals.APP_NAME} v${AppGlobals.APP_VERSION}", x + 12, y + 55)
 
     return titleH
+  }
+
+  private fun formatDuration(ms: Long): String {
+    val totalSeconds = ms / 1000
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+    return if (hours > 0) {
+      "${hours}h ${minutes}m"
+    } else if (minutes > 0) {
+      "${minutes}m ${seconds}s"
+    } else {
+      "${seconds}s"
+    }
   }
 
   private fun drawCardBackground(g2d: Graphics2D, x: Int, y: Int, width: Int, height: Int) {
@@ -309,9 +342,11 @@ object ImageExportInteractor {
   }
 
   private fun drawSectionHeader(g2d: Graphics2D, title: String, x: Int, y: Int, width: Int, color: Color) {
-    g2d.font = createFont(Font.BOLD, 14f)
+    g2d.font = createFont(Font.BOLD, 13f)
     g2d.color = color
-    g2d.drawString(title, x + 8, y + 18)
+    val titleWidth = g2d.fontMetrics.stringWidth(title)
+    val centeredX = x + (width - titleWidth) / 2
+    g2d.drawString(title, centeredX.coerceAtLeast(x + 4), y + 18)
   }
 
   private fun drawRankingRow(g2d: Graphics2D, index: Int, card: PlayerCard, valueText: String, valueColor: Color, xOffset: Int, y: Int, width: Int) {
@@ -402,9 +437,9 @@ object ImageExportInteractor {
     blocks.add(makePlayerCardBlock("Debuffs", data.topDebuffs, { it.sessionDebuffTotal.toString() }, toAwtColor(RFColors.ccCyan), availW))
     blocks.add(makePlayerCardBlock("Songs", data.topSongs, { it.sessionSongsTotal.toString() }, toAwtColor(RFColors.dpsOrange), availW))
     blocks.add(makePlayerCardBlock("Buffs", data.topBuffs, { it.sessionBuffTotal.toString() }, toAwtColor(RFColors.healsGreen), availW))
-    blocks.add(makePlayerCardBlock("Ode (Haranya)", data.topOdeHaranya, { it.sessionOdeHealsTotal.toString() }, toAwtColor(RFColors.TextSecondary), availW))
-    blocks.add(makePlayerCardBlock("Ode (Nuia)", data.topOdeNuia, { it.sessionOdeHealsTotal.toString() }, toAwtColor(RFColors.TextSecondary), availW))
-    blocks.add(makePlayerCardBlock("Ode (Pirate)", data.topOdePirate, { it.sessionOdeHealsTotal.toString() }, toAwtColor(RFColors.TextSecondary), availW))
+    blocks.add(makePlayerCardBlock("Ode (Haranya)", data.topOdeHaranya, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.TextSecondary), availW))
+    blocks.add(makePlayerCardBlock("Ode (Nuia)", data.topOdeNuia, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.TextSecondary), availW))
+    blocks.add(makePlayerCardBlock("Ode (Pirate)", data.topOdePirate, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.TextSecondary), availW))
     blocks.add(makePlayerCardBlock("Kills (Haranya)", data.topKillsHaranya, { it.sessionKillTotal.toString() }, toAwtColor(RFColors.dpsOrange), availW))
     blocks.add(makePlayerCardBlock("Kills (Nuia)", data.topKillsNuia, { it.sessionKillTotal.toString() }, toAwtColor(RFColors.dpsOrange), availW))
     blocks.add(makePlayerCardBlock("Kills (Pirate)", data.topKillsPirate, { it.sessionKillTotal.toString() }, toAwtColor(RFColors.dpsOrange), availW))
@@ -515,7 +550,7 @@ object ImageExportInteractor {
 
           g2d.font = valueFont
           g2d.color = toAwtColor(RFColors.TextSecondary)
-          val valStr = items[i].count.toString()
+          val valStr = items[i].count.toLong().humanReadableAbbreviation()
           val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
           g2d.drawString(valStr, x + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
 
@@ -549,7 +584,7 @@ object ImageExportInteractor {
 
           g2d.font = valueFont
           g2d.color = toAwtColor(RFColors.TextSecondary)
-          val valStr = count.toString()
+          val valStr = count.toLong().humanReadableAbbreviation()
           val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
           g2d.drawString(valStr, x + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
 
@@ -560,6 +595,10 @@ object ImageExportInteractor {
   }
 
   private fun createFont(style: Int, size: Float): Font {
-    return Font("Segoe UI", style, size.toInt())
+    return try {
+      Font("Segoe UI Emoji", style, size.toInt())
+    } catch (_: Exception) {
+      Font("Segoe UI", style, size.toInt())
+    }
   }
 }
