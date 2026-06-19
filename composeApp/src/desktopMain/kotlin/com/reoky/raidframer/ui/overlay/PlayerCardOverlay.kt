@@ -45,6 +45,7 @@ import org.jetbrains.compose.resources.InternalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_trend_graph
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_buffs
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_cc
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_charms
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage
@@ -310,6 +311,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 StatRow(stringResource(Res.string.player_card_stat_damage), card.sessionDamageTotal)
                 StatRow(stringResource(Res.string.player_card_stat_healing), card.sessionHealTotal)
                 StatRow(stringResource(Res.string.player_card_stat_cc), card.sessionCCTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_buffs), card.sessionBuffTotal.toLong())
                 StatRow(stringResource(Res.string.player_card_stat_debuffs), card.sessionDebuffTotal.toLong())
                 StatRow(stringResource(Res.string.player_card_stat_charms), card.sessionCharmTotal.toLong())
                 StatRow(stringResource(Res.string.player_card_stat_distress), card.sessionDistressTotal.toLong())
@@ -347,6 +349,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_damage), cache.lifetimeTotalDamage)
                   StatRow(stringResource(Res.string.player_card_stat_healing), cache.lifetimeTotalHealing)
                   StatRow(stringResource(Res.string.player_card_stat_cc), cache.lifetimeTotalCCDelivered)
+                  StatRow(stringResource(Res.string.player_card_stat_buffs), cache.lifetimeTotalBuffsApplied)
                   StatRow(stringResource(Res.string.player_card_stat_debuffs), cache.lifetimeTotalDebuffsApplied)
                   StatRow(stringResource(Res.string.player_card_stat_charms), cache.lifetimeTotalCharms)
                   StatRow(stringResource(Res.string.player_card_stat_distress), cache.lifetimeTotalDistresses)

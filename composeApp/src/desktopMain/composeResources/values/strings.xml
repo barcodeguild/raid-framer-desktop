@@ -110,6 +110,7 @@
     <string name="player_card_stat_damage">Total Damage</string>
     <string name="player_card_stat_healing">Total Healing</string>
     <string name="player_card_stat_cc">CC Delivered</string>
+    <string name="player_card_stat_buffs">Buffs</string>
     <string name="player_card_stat_debuffs">Debuffs</string>
     <string name="player_card_stat_charms">Charms</string>
     <string name="player_card_stat_distress">Distresses</string>
