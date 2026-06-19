@@ -231,6 +231,10 @@
     <string name="potion_name_phoenix_tears_tincture">Phoenix Tears Tincture</string>
     <string name="potion_name_wild_ginseng">Wild Ginseng! (What a lucky friend!)</string>
 
+    <!-- PNG Export -->
+    <string name="export_title_battle_summary">Battle Summary</string>
+    <string name="export_no_data">No data</string>
+
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Raid Management &amp; Attendance</string>
     <string name="raid_tab_attendance">Attendance</string>

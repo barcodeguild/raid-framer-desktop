@@ -10,16 +10,18 @@ import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
 import java.awt.Desktop
 import java.net.URI
+import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.io.path.exists
 import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.ranges.contains
 
-/*
+/**
  * Extension function to abbreviate a numeric values by thousands, millions, billions, etc.
  */
 fun Long.humanReadableAbbreviation(): String {
@@ -32,6 +34,23 @@ fun Long.humanReadableAbbreviation(): String {
   return String.format("%.1f%c", scaled, suffixes[idx])
 }
 
+/**
+ * Find the Documents path. Blame Microsoft for having OneDrive mount the user's Documents inside of OneDrive
+ */
+fun getDocumentsDirectory(): String? {
+  if (System.getProperty("os.name").lowercase().contains("win")) {
+    val userProfile = System.getenv("USERPROFILE")
+    if (!userProfile.isNullOrBlank()) {
+      val oneDriveDocs = Paths.get(userProfile, "OneDrive", "Documents")
+      if (oneDriveDocs.exists()) return oneDriveDocs.toString()
+      val regularDocs = Paths.get(userProfile, "Documents")
+      if (regularDocs.exists()) return regularDocs.toString()
+    }
+  }
+  val home = System.getProperty("user.home") ?: return null
+  return Paths.get(home, "Documents").toString()
+}
+
 
 /**
  * Opens a browser window to the specified URL.
@@ -42,7 +61,7 @@ fun openWebLink(url: String) {
   }
 }
 
-/*
+/**
  * Simple extension function to convert epoch milliseconds to a local time string.
  */
 fun Long.toLocalTimeString(): String {
@@ -51,7 +70,7 @@ fun Long.toLocalTimeString(): String {
   return localDateTime.format(DateTimeFormatter.ofPattern("hh:mm:ss"))
 }
 
-/*
+/**
  * Makes a pretty-looking AnnotatedString for the attack event. I brought this code into a different file because
  * it's too and will get used multiple times potentially.
  */
