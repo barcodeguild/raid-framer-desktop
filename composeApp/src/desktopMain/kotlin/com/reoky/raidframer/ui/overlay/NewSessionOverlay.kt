@@ -88,14 +88,16 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
   }
 
   fun updateFileName() {
-    val baseName = if (isCustomEvent) {
+    val rawName = if (isCustomEvent) {
       customEventName.lowercase().replace(Regex("[^a-z0-9]"), "_")
     } else {
       selectedEventType.lowercase().replace(Regex("[^a-z0-9]"), "_")
     }
+    val baseName = rawName.replace(Regex("_+"), "_").trim('_')
     val modeSuffix = if (allowPvEDamage) "pve" else "pvp"
+    val timeSuffix = SimpleDateFormat("HHmm'Z'", Locale.US).apply { timeZone = java.util.TimeZone.getTimeZone("UTC") }.format(Date())
     val dateSuffix = SimpleDateFormat("MMddyy", Locale.US).format(Date())
-    sessionFileName = "${baseName}_${modeSuffix}_${dateSuffix}.rf"
+    sessionFileName = "${baseName}_${modeSuffix}_${timeSuffix}_${dateSuffix}.rf"
   }
 
   LaunchedEffect(selectedEventType, isCustomEvent, customEventName, allowPvEDamage) {

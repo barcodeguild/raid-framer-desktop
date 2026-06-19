@@ -21,7 +21,9 @@ import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import org.jetbrains.compose.resources.getString
 import javax.imageio.ImageIO
 import kotlin.io.path.exists
@@ -107,7 +109,13 @@ object ImageExportInteractor {
   suspend fun captureSnapshot(): ExportData {
     val config = RFConfig.state.value
     val sessionStart = config.lastSessionStart
-    val durationMs = if (sessionStart > 0) System.currentTimeMillis() - sessionStart else 0L
+    val durationMs = if (config.lastSessionDurationMs > 0) {
+      config.lastSessionDurationMs
+    } else if (sessionStart > 0) {
+      System.currentTimeMillis() - sessionStart
+    } else {
+      0L
+    }
 
     return ExportData(
       sessionTitle = config.lastSessionTitle.ifBlank { "session" },
@@ -165,8 +173,16 @@ object ImageExportInteractor {
 
         g2d.dispose()
 
-        val documentsDir = getDocumentsDirectory() ?: return@withContext null
-        val exportDir = Paths.get(documentsDir, "RFExports")
+        val config = RFConfig.state.value
+        val exportDir = if (config.lastSessionExportDir.isNotBlank()) {
+          Paths.get(config.lastSessionExportDir)
+        } else {
+          val documentsDir = getDocumentsDirectory() ?: return@withContext null
+          val now = Date()
+          val year = SimpleDateFormat("yyyy", Locale.US).format(now)
+          val month = SimpleDateFormat("MM", Locale.US).format(now)
+          Paths.get(documentsDir, "RFExports", year, month)
+        }
         Files.createDirectories(exportDir)
         val outputFile = exportDir.resolve("${data.sessionTitle}.png").toFile()
 

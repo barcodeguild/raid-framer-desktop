@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -114,9 +115,10 @@ fun SummaryOverlay(wm: WindowManager? = null) {
         modifier = Modifier
           .align(Alignment.TopEnd)
           .padding(top = 8.dp, end = 50.dp),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.End
       ) {
-        androidx.compose.material.TextButton(
+        TextButton(
           onClick = {
             if (isExporting) return@TextButton
             isExporting = true
@@ -134,7 +136,7 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           },
           enabled = !isExporting
         ) {
-          androidx.compose.material.Text(
+          Text(
             text = if (isExporting) "Exporting..." else "Export PNG",
             color = if (isExporting) RFColors.TextSecondary else RFColors.AccentRed,
             fontSize = 12.sp

@@ -81,6 +81,20 @@ object CombatLogInteractor : Interactor() {
     scope.launch {
       flushBuffer()
       closeWriter()
+      val config = RFConfig.state.value
+      val sessionTitle = config.lastSessionTitle.ifBlank { "session" }
+      val sessionStart = config.lastSessionStart
+      val sessionEnd = System.currentTimeMillis()
+      val durationMs = if (sessionStart > 0) sessionEnd - sessionStart else 0L
+      val now = Date()
+      val year = SimpleDateFormat("yyyy", Locale.US).format(now)
+      val month = SimpleDateFormat("MM", Locale.US).format(now)
+      val documentsDir = getDocumentsDirectory()
+      val exportDir = if (documentsDir != null) Paths.get(documentsDir, "RFExports", year, month).toString() else ""
+      RFConfig.update { it.copy(
+        lastSessionDurationMs = durationMs,
+        lastSessionExportDir = exportDir
+      )}
       exportSummaryImage()
       Log.info(TAG, "Combat log recording stopped")
     }

@@ -150,3 +150,10 @@ val MIGRATION_18_19 = object : Migration(18, 19) {
   }
 }
 
+val MIGRATION_19_20 = object : Migration(19, 20) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionDurationMs INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionExportDir TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}
+

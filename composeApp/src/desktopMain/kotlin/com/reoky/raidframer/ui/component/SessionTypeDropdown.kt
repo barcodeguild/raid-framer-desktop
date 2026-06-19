@@ -2,13 +2,7 @@ package com.reoky.raidframer.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
@@ -23,8 +17,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
@@ -118,7 +112,8 @@ fun SessionTypeDropdown(
       onDismissRequest = { expanded = false },
       modifier = Modifier
         .fillMaxWidth()
-        .background(RFColors.CardBackground, RoundedCornerShape(8.dp))
+        .clip(RoundedCornerShape(8.dp))
+        .background(RFColors.CardBackground)
         .border(1.dp, RFColors.CardBorder, RoundedCornerShape(8.dp))
     ) {
       SESSION_TYPES.forEach { type ->
