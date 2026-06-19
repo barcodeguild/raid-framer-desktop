@@ -179,8 +179,8 @@ object CompanionInteractor : Interactor() {
                 CastingEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  source = event.source,
-                  target = event.target,
+                  source = event.source.ifBlank { "Unknown Target" },
+                  target = event.source.ifBlank { "Unknown Target" },
                   spell = event.spellName,
                   spellId = event.spellId
                 )
@@ -193,8 +193,8 @@ object CompanionInteractor : Interactor() {
                 SuccessfulCastEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  source = event.source,
-                  target = event.target,
+                  source = event.source.ifBlank { "Unknown Target" },
+                  target = event.source.ifBlank { "Unknown Target" },
                   spell = event.spellName,
                   spellId = event.spellId
                 )
@@ -207,8 +207,8 @@ object CompanionInteractor : Interactor() {
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  source = event.source,
-                  target = event.target,
+                  source = event.source.ifBlank { "Unknown Target" },
+                  target = event.source.ifBlank { "Unknown Target" },
                   damage = abs(event.amount),
                   spell = event.spell,
                   critical = event.f13,
@@ -223,8 +223,8 @@ object CompanionInteractor : Interactor() {
                 HealEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  source = event.source,
-                  target = event.target,
+                  source = event.source.ifBlank { "Unknown Target" },
+                  target = event.source.ifBlank { "Unknown Target" },
                   amount = abs(event.amount),
                   spell = event.spell,
                   critical = event.f10,
@@ -240,8 +240,8 @@ object CompanionInteractor : Interactor() {
                   DebuffGainedEvent(
                     timestamp = event.timestamp,
                     cid = event.cid,
-                    source = event.source,
-                    target = event.target,
+                    source = event.source.ifBlank { "Unknown Target" },
+                    target = event.source.ifBlank { "Unknown Target" },
                     debuff = event.buffName,
                     debuffId = event.buffId,
                   )
@@ -251,8 +251,8 @@ object CompanionInteractor : Interactor() {
                   BuffGainedEvent(
                     timestamp = event.timestamp,
                     cid = event.cid,
-                    source = event.source,
-                    target = event.target,
+                    source = event.source.ifBlank { "Unknown Target" },
+                    target = event.source.ifBlank { "Unknown Target" },
                     buff = event.buffName,
                     buffId = event.buffId,
                   )
@@ -265,8 +265,8 @@ object CompanionInteractor : Interactor() {
                 BuffEndedEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  source = event.source,
-                  target = event.target,
+                  source = event.source.ifBlank { "Unknown Target" },
+                  target = event.source.ifBlank { "Unknown Target" },
                   buff = event.buffName,
                   buffId = event.buffId
                 )
@@ -278,8 +278,8 @@ object CompanionInteractor : Interactor() {
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  source = event.source,
-                  target = event.target,
+                  source = event.source.ifBlank { "Unknown Target" },
+                  target = event.source.ifBlank { "Unknown Target" },
                   damage = abs(event.amount),
                   spell = "Basic Melee",
                   critical = event.f10,
@@ -293,8 +293,8 @@ object CompanionInteractor : Interactor() {
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  source = event.source,
-                  target = event.target,
+                  source = event.source.ifBlank { "Unknown Target" },
+                  target = event.source.ifBlank { "Unknown Target" },
                   damage = abs(event.amount),
                   spell = "Melee Missed (Smol Scratch)",
                   critical = false,
@@ -308,8 +308,8 @@ object CompanionInteractor : Interactor() {
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  source = event.source,
-                  target = event.target,
+                  source = event.source.ifBlank { "Unknown Target" },
+                  target = event.source.ifBlank { "Unknown Target" },
                   damage = abs(event.amount),
                   spell = "Spell Missed (hehe)",
                   critical = false,
@@ -329,8 +329,8 @@ object CompanionInteractor : Interactor() {
                 DamageEvent(
                   timestamp = event.timestamp,
                   cid = event.cid,
-                  source = event.source,
-                  target = event.target,
+                  source = event.source.ifBlank { "Unknown Target" },
+                  target = event.source.ifBlank { "Unknown Target" },
                   damage = abs(event.amount),
                   spell = event.spell,
                   critical = event.f13,

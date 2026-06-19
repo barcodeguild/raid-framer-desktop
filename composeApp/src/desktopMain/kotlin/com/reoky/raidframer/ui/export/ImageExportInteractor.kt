@@ -30,7 +30,7 @@ import kotlin.io.path.exists
 
 object ImageExportInteractor {
 
-  private const val IMAGE_WIDTH = 1920
+  private const val IMAGE_WIDTH = 2280
   private const val ROW_HEIGHT = 24
   private const val SECTION_HEADER_HEIGHT = 32
   private const val CHART_HEIGHT = 170
@@ -39,8 +39,8 @@ object ImageExportInteractor {
   private const val CARD_PADDING = 8
   private const val SUPER_COL_GAP = 10
 
-  private val CARD_BACKGROUND = Color(35, 35, 48)
-  private val CARD_BACKGROUND_TRANSPARENT = Color(15, 15, 25, 200)
+  private val CARD_BACKGROUND = Color(0, 0, 0)
+  private val CARD_BACKGROUND_TRANSPARENT = Color(0, 0, 0, 110)
   private val BORDER_COLOR = Color(55, 55, 70)
   private val BORDER_COLOR_TRANSPARENT = Color(55, 55, 70, 150)
 
@@ -306,7 +306,7 @@ object ImageExportInteractor {
 
       val chartSpacing = w / 3
       val chartRadius = 45
-      val chartY = y + CARD_PADDING + 55
+      val chartY = y + CARD_PADDING + 62
 
       drawPieChart(g2d, "Silences", data.factionSilenceData, (chartSpacing / 2).toInt(), chartY, chartRadius, 0)
       drawPieChart(g2d, "Charms", data.factionCharmData, (chartSpacing / 2).toInt(), chartY, chartRadius, chartSpacing.toInt())
@@ -510,7 +510,7 @@ object ImageExportInteractor {
             title.contains("Heals Recv") -> "\uD83D\uDC89"
             title.contains("Items") -> "\uD83D\uDCE6"
             title.contains("Potion") -> "\uD83E\uDdea"
-            title.contains("Glider") -> "\uD83E\uFA82"
+            title.contains("Glider") -> "\uD83D\uDD3A"
             title.contains("Item Skills") -> "\u2699"
             title.contains("Builds") -> "\u2694"
             title.contains("Spell Damage") -> "\uD83D\uDD25"
@@ -649,7 +649,7 @@ object ImageExportInteractor {
 
     tripletBlocks.add(makeTriplet(listOf(
       "Dmg Taken" to ColumnData.CardData(data.topDamageTaken, { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation() }, toAwtColor(RFColors.dpsOrange)),
-      "Heals Recv" to ColumnData.CardData(data.topHealsReceived, { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen)),
+      "Heals Received" to ColumnData.CardData(data.topHealsReceived, { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen)),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
