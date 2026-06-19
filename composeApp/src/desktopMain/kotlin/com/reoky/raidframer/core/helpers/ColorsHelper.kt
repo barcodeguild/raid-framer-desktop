@@ -34,6 +34,11 @@ object RFColors {
   val dpsOrange = Color(249, 191, 59, 255)
   val healsGreen = Color(105, 235, 113, 255)
   val ccCyan = Color.Cyan
+
+  // Faction colors
+  val factionHaranya = Color(0xFFAB47BC)
+  val factionNuia = Color(0xFFEC407A)
+  val factionPirate = Color(0xFF7E57C2)
 }
 
 enum class RFGraphColor(val color: Color) {
