@@ -1,6 +1,7 @@
+package com.reoky.raidframer.core.interactor
+
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.config.RFConfig
-import com.reoky.raidframer.core.interactor.Interactor
 import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.Pointer

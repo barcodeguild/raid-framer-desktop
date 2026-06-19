@@ -22,6 +22,7 @@ import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.InstallationInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
+import com.reoky.raidframer.core.interactor.OverlayInteractor
 import com.reoky.raidframer.core.interactor.PetAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayContainer
@@ -43,7 +44,6 @@ import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
 import raid_framer_desktop.composeapp.generated.resources.raidframer
-import java.util.Locale.getDefault
 
 const val TAG = "Main"
 private const val SINGLE_INSTANCE_MUTEX = "Local\\RaidFramerDesktopSingleInstance"
