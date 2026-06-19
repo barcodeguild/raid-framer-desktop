@@ -111,38 +111,6 @@ fun SummaryOverlay(wm: WindowManager? = null) {
         onClose = { wm?.closeWindow(OverlayType.SUMMARY) },
         modifier = Modifier.fillMaxWidth()
       )
-      Row(
-        modifier = Modifier
-          .align(Alignment.TopEnd)
-          .padding(top = 8.dp, end = 50.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End
-      ) {
-        TextButton(
-          onClick = {
-            if (isExporting) return@TextButton
-            isExporting = true
-            scope.launch {
-              try {
-                val data = ImageExportInteractor.captureSnapshot()
-                val file = ImageExportInteractor.exportToPng(data)
-                if (file != null) {
-                  // optionally show a notification
-                }
-              } finally {
-                isExporting = false
-              }
-            }
-          },
-          enabled = !isExporting
-        ) {
-          Text(
-            text = if (isExporting) "Exporting..." else "Export PNG",
-            color = if (isExporting) RFColors.TextSecondary else RFColors.AccentRed,
-            fontSize = 12.sp
-          )
-        }
-      }
     }
 
     // Charts / Graphs Section
