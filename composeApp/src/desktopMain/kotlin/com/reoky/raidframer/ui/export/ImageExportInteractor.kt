@@ -34,6 +34,7 @@ object ImageExportInteractor {
   private const val CATEGORY_MIN_HEIGHT = 100
   private const val COLUMN_GAP = 10
   private const val CARD_PADDING = 8
+  private const val SUPER_COL_GAP = 30
 
   private val CARD_BACKGROUND = Color(35, 35, 48)
   private val BORDER_COLOR = Color(55, 55, 70)
@@ -200,24 +201,33 @@ object ImageExportInteractor {
   }
 
   private fun computeColumnHeights(data: ExportData): List<Int> {
-    val colWidth = (IMAGE_WIDTH - COLUMN_GAP * 2) / 3
+    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * 2) / 3
 
-    val pieChartBlock = makePieChartBlock(data, colWidth)
-    val combatBlock = makeCombatBlock(data, colWidth)
-    val col0Height = 60 + pieChartBlock.height + 10 + combatBlock.height
+    val pieChartBlock = makePieChartBlock(data, superColWidth)
+    val combatBlock = makeCombatBlock(data, superColWidth)
+    val col0BaseHeight = 80 + pieChartBlock.height + 10 + combatBlock.height
 
-    val otherBlocks = getAllCategoryBlocks(data, colWidth)
-    val colHeights = mutableListOf(col0Height, 10, 10)
+    val tripletBlocks = getAllCategoryBlocks(data, superColWidth)
+    val colHeights = mutableListOf(col0BaseHeight, 10, 10)
 
-    otherBlocks.forEachIndexed { index, block ->
-      val col = (index + 1) % 3
-      colHeights[col] += block.height + 5
+    tripletBlocks.forEach { block ->
+      val shortestCol = colHeights.indices.minByOrNull { colHeights[it] } ?: 0
+      colHeights[shortestCol] += block.height + 5
     }
 
     return colHeights
   }
 
   data class Block(val title: String, val height: Int, val draw: (Graphics2D, Int, Int, Int) -> Unit)
+
+  data class TripletBlock(val title: String, val blocks: List<Block>, val height: Int, val draw: (Graphics2D, Int, Int, Int) -> Unit)
+
+  sealed class ColumnData {
+    data class SpellData(val spells: List<SpellDamage>) : ColumnData()
+    data class ItemData(val items: List<ItemUsage>) : ColumnData()
+    data class BuildData(val builds: Map<String, Int>) : ColumnData()
+    data class CardData(val cards: List<PlayerCard>, val getValue: (PlayerCard) -> String, val valueColor: Color) : ColumnData()
+  }
 
   private fun makeCombatBlock(data: ExportData, colWidth: Int): Block {
     val combatRows = maxOf(data.topDamage.size, data.topHeals.size, data.topCC.size).coerceAtLeast(1)
@@ -229,7 +239,7 @@ object ImageExportInteractor {
 
       val damageTitle = if (data.allowPvE) "⚔️ PvE Damage ⚔️" else "🔥 PvP Damage 🔥"
       val healsTitle = if (data.allowPvE) "💉 PvE Heals 💉" else "💉 PvP Heals 💉"
-      val ccTitle = if (data.allowPvE) "⛨ PvE CC ⛨" else "⛨ PvP CC ⛨"
+      val ccTitle = if (data.allowPvE) "🛡️ PvE CC 🛡️" else "🛡️ PvP CC 🛡️"
 
       drawSectionHeader(g2d, damageTitle, x, y, subColW, toAwtColor(RFColors.dpsOrange))
       drawSectionHeader(g2d, healsTitle, x + subColW, y, subColW, toAwtColor(RFColors.healsGreen))
@@ -252,7 +262,115 @@ object ImageExportInteractor {
     }
   }
 
-  private fun makePieChartBlock(data: ExportData, colWidth: Int): Block {
+  private const val MAX_ROWS = 15
+
+  private fun calculateHeight(data: ColumnData): Int {
+    val numRows = when (data) {
+      is ColumnData.SpellData -> data.spells.size
+      is ColumnData.ItemData -> data.items.size
+      is ColumnData.BuildData -> data.builds.size
+      is ColumnData.CardData -> data.cards.size
+    }
+    val rows = numRows.coerceAtLeast(5).coerceAtMost(MAX_ROWS)
+    return (SECTION_HEADER_HEIGHT + (rows * ROW_HEIGHT) + CARD_PADDING * 2).coerceAtLeast(CATEGORY_MIN_HEIGHT)
+  }
+
+  private fun makeTripletBlock(columns: List<Pair<String, Pair<ColumnData, Int>>>, subColWidth: Int, availW: Int): TripletBlock {
+    val maxBlockHeight = columns.maxOfOrNull { calculateHeight(it.second.first) } ?: CATEGORY_MIN_HEIGHT
+
+    return TripletBlock("", emptyList(), maxBlockHeight) { g2d, x, y, w ->
+      columns.forEachIndexed { index, (title, dataHeight) ->
+        val xPos = x + index * (subColWidth + COLUMN_GAP)
+        drawCardBackground(g2d, xPos, y, availW + CARD_PADDING * 2, maxBlockHeight)
+        drawSectionHeader(g2d, title, xPos + CARD_PADDING, y, availW, TEXT_PRIMARY)
+
+        val labelFont = createFont(Font.PLAIN, 10f)
+        val valueFont = createFont(Font.BOLD, 10f)
+        var rowY = y + SECTION_HEADER_HEIGHT
+
+        when (val d = dataHeight.first) {
+          is ColumnData.SpellData -> {
+            if (d.spells.isEmpty()) {
+              g2d.font = labelFont
+              g2d.color = toAwtColor(RFColors.TextSecondary)
+              g2d.drawString("No data", xPos + CARD_PADDING + 8, rowY + 14)
+            } else {
+              for (i in d.spells.indices) {
+                g2d.font = labelFont
+                g2d.color = TEXT_PRIMARY
+                g2d.drawString("${i + 1}. ${d.spells[i].spell}", xPos + CARD_PADDING + 8, rowY + 14)
+                g2d.font = valueFont
+                g2d.color = toAwtColor(RFColors.dpsOrange)
+                val valStr = d.spells[i].total.toLong().humanReadableAbbreviation()
+                val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
+                g2d.drawString(valStr, xPos + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
+                rowY += ROW_HEIGHT
+              }
+            }
+          }
+          is ColumnData.ItemData -> {
+            if (d.items.isEmpty()) {
+              g2d.font = labelFont
+              g2d.color = toAwtColor(RFColors.TextSecondary)
+              g2d.drawString("No data", xPos + CARD_PADDING + 8, rowY + 14)
+            } else {
+              for (i in d.items.indices) {
+                g2d.font = labelFont
+                g2d.color = TEXT_PRIMARY
+                g2d.drawString("${i + 1}. ${d.items[i].itemName}", xPos + CARD_PADDING + 8, rowY + 14)
+                g2d.font = valueFont
+                g2d.color = toAwtColor(RFColors.TextSecondary)
+                val valStr = d.items[i].count.toLong().humanReadableAbbreviation()
+                val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
+                g2d.drawString(valStr, xPos + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
+                rowY += ROW_HEIGHT
+              }
+            }
+          }
+          is ColumnData.BuildData -> {
+            if (d.builds.isEmpty()) {
+              g2d.font = labelFont
+              g2d.color = toAwtColor(RFColors.TextSecondary)
+              g2d.drawString("No data", xPos + CARD_PADDING + 8, rowY + 14)
+            } else {
+              d.builds.entries.forEachIndexed { idx, (label, count) ->
+                g2d.font = labelFont
+                g2d.color = TEXT_PRIMARY
+                g2d.drawString("${idx + 1}. ${label}", xPos + CARD_PADDING + 8, rowY + 14)
+                g2d.font = valueFont
+                g2d.color = toAwtColor(RFColors.TextSecondary)
+                val valStr = count.toLong().humanReadableAbbreviation()
+                val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
+                g2d.drawString(valStr, xPos + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
+                rowY += ROW_HEIGHT
+              }
+            }
+          }
+          is ColumnData.CardData -> {
+            if (d.cards.isEmpty()) {
+              g2d.font = labelFont
+              g2d.color = toAwtColor(RFColors.TextSecondary)
+              g2d.drawString("No data", xPos + CARD_PADDING + 8, rowY + 14)
+            } else {
+              for (i in d.cards.indices) {
+                g2d.font = labelFont
+                g2d.color = TEXT_PRIMARY
+                g2d.drawString("${i + 1}. ${d.cards[i].name}", xPos + CARD_PADDING + 8, rowY + 14)
+                g2d.font = valueFont
+                g2d.color = d.valueColor
+                val valStr = d.getValue(d.cards[i])
+                val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
+                g2d.drawString(valStr, xPos + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
+                rowY += ROW_HEIGHT
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private fun makePieChartBlock(data: ExportData, superColWidth: Int): Block {
     val chartH = CHART_HEIGHT + CARD_PADDING * 2
 
     return Block("Charts", chartH) { g2d, x, y, w ->
@@ -269,31 +387,36 @@ object ImageExportInteractor {
   }
 
   private fun drawMasonryLayout(g2d: Graphics2D, data: ExportData) {
-    val colWidth = (IMAGE_WIDTH - COLUMN_GAP * 2) / 3
+    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * 2) / 3
     val columnY = mutableListOf(10, 10, 10)
+    val columnHeights = mutableListOf(0, 0, 0)
 
-    val titleH = drawTitleCard(g2d, data, COLUMN_GAP, columnY[0], colWidth)
+    val titleH = drawTitleCard(g2d, data, COLUMN_GAP, columnY[0], superColWidth)
     columnY[0] += titleH + 5
+    columnHeights[0] = titleH
 
-    val pieBlock = makePieChartBlock(data, colWidth)
-    pieBlock.draw(g2d, COLUMN_GAP, columnY[0], colWidth)
+    val pieBlock = makePieChartBlock(data, superColWidth)
+    pieBlock.draw(g2d, COLUMN_GAP, columnY[0], superColWidth)
     columnY[0] += pieBlock.height + 5
+    columnHeights[0] += pieBlock.height + 5
 
-    val combatBlock = makeCombatBlock(data, colWidth)
-    combatBlock.draw(g2d, COLUMN_GAP, columnY[0], colWidth)
+    val combatBlock = makeCombatBlock(data, superColWidth)
+    combatBlock.draw(g2d, COLUMN_GAP, columnY[0], superColWidth)
     columnY[0] += combatBlock.height + 5
+    columnHeights[0] += combatBlock.height + 5
 
-    val otherBlocks = getAllCategoryBlocks(data, colWidth)
-    otherBlocks.forEachIndexed { index, block ->
-      val col = (index + 1) % 3
-      val xPos = COLUMN_GAP + col * (colWidth + COLUMN_GAP)
-      block.draw(g2d, xPos, columnY[col], colWidth)
-      columnY[col] += block.height + 5
+    val tripletBlocks = getAllCategoryBlocks(data, superColWidth)
+    tripletBlocks.forEach { block ->
+      val shortestCol = columnHeights.indices.minByOrNull { columnHeights[it] } ?: 0
+      val xPos = COLUMN_GAP + shortestCol * (superColWidth + SUPER_COL_GAP)
+      block.draw(g2d, xPos, columnY[shortestCol], superColWidth)
+      columnY[shortestCol] += block.height + 5
+      columnHeights[shortestCol] += block.height + 5
     }
   }
 
   private fun drawTitleCard(g2d: Graphics2D, data: ExportData, x: Int, y: Int, width: Int): Int {
-    val titleH = 60
+    val titleH = 80
 
     g2d.color = CARD_BACKGROUND
     g2d.fillRect(x, y, width, titleH)
@@ -305,17 +428,17 @@ object ImageExportInteractor {
 
     g2d.color = TEXT_PRIMARY
     g2d.font = titleFont
-    g2d.drawString("${AppGlobals.APP_NAME} - Battle Summary", x + 12, y + 22)
+    g2d.drawString("${AppGlobals.APP_NAME} - Battle Summary", x + 12, y + 28)
 
     val durationStr = formatDuration(data.sessionDurationMs)
     g2d.font = subtitleFont
     g2d.color = toAwtColor(RFColors.TextSecondary)
-    g2d.drawString("${data.sessionTitle}  •  ${data.sessionDate}  •  ${AppGlobals.APP_VERSION}  •  ${durationStr}", x + 12, y + 42)
+    g2d.drawString("${data.sessionTitle}  •  ${data.sessionDate}  •  ${AppGlobals.APP_VERSION}  •  ${durationStr}", x + 12, y + 50)
 
     g2d.font = createFont(Font.PLAIN, 10f)
     val faded = toAwtColor(RFColors.TextSecondary)
     g2d.color = Color(faded.red, faded.green, faded.blue, 120)
-    g2d.drawString("${AppGlobals.APP_NAME} v${AppGlobals.APP_VERSION}", x + 12, y + 55)
+    g2d.drawString("${AppGlobals.APP_NAME} v${AppGlobals.APP_VERSION}", x + 12, y + 72)
 
     return titleH
   }
@@ -427,171 +550,59 @@ object ImageExportInteractor {
     }
   }
 
-  private fun getAllCategoryBlocks(data: ExportData, colWidth: Int): List<Block> {
-    val blocks = mutableListOf<Block>()
-    val availW = colWidth - CARD_PADDING * 2
+  private fun getAllCategoryBlocks(data: ExportData, superColWidth: Int): List<TripletBlock> {
+    val tripletBlocks = mutableListOf<TripletBlock>()
+    val subColWidth = (superColWidth - COLUMN_GAP * 2) / 3
+    val availW = subColWidth - CARD_PADDING * 2
 
-    blocks.add(makeDamageSpellsBlock("Dmg Spells (Haranya)", data.topDamageSpellsHaranya, availW))
-    blocks.add(makeDamageSpellsBlock("Dmg Spells (Nuia)", data.topDamageSpellsNuia, availW))
-    blocks.add(makeDamageSpellsBlock("Dmg Spells (Pirate)", data.topDamageSpellsPirate, availW))
-    blocks.add(makePlayerCardBlock("Debuffs", data.topDebuffs, { it.sessionDebuffTotal.toString() }, toAwtColor(RFColors.ccCyan), availW))
-    blocks.add(makePlayerCardBlock("Songs", data.topSongs, { it.sessionSongsTotal.toString() }, toAwtColor(RFColors.dpsOrange), availW))
-    blocks.add(makePlayerCardBlock("Buffs", data.topBuffs, { it.sessionBuffTotal.toString() }, toAwtColor(RFColors.healsGreen), availW))
-    blocks.add(makePlayerCardBlock("Ode (Haranya)", data.topOdeHaranya, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.TextSecondary), availW))
-    blocks.add(makePlayerCardBlock("Ode (Nuia)", data.topOdeNuia, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.TextSecondary), availW))
-    blocks.add(makePlayerCardBlock("Ode (Pirate)", data.topOdePirate, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.TextSecondary), availW))
-    blocks.add(makePlayerCardBlock("Kills (Haranya)", data.topKillsHaranya, { it.sessionKillTotal.toString() }, toAwtColor(RFColors.dpsOrange), availW))
-    blocks.add(makePlayerCardBlock("Kills (Nuia)", data.topKillsNuia, { it.sessionKillTotal.toString() }, toAwtColor(RFColors.dpsOrange), availW))
-    blocks.add(makePlayerCardBlock("Kills (Pirate)", data.topKillsPirate, { it.sessionKillTotal.toString() }, toAwtColor(RFColors.dpsOrange), availW))
-    blocks.add(makePlayerCardBlock("Dmg Taken", data.topDamageTaken, { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation() }, Color(0xFFE57373.toInt()), availW))
-    blocks.add(makePlayerCardBlock("Heals Recv", data.topHealsReceived, { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() }, Color(0xFF81C784.toInt()), availW))
-    blocks.add(makeItemUsageBlock("Items (Haranya)", data.topItemUsesHaranya, availW))
-    blocks.add(makeItemUsageBlock("Items (Nuia)", data.topItemUsesNuia, availW))
-    blocks.add(makeItemUsageBlock("Items (Pirate)", data.topItemUsesPirate, availW))
-    blocks.add(makePlayerCardBlock("Potters", data.topPotters, { it.sessionPotionTotal.toString() }, toAwtColor(RFColors.TextSecondary), availW))
-    blocks.add(makePlayerCardBlock("Glider Gamers", data.topGliderGamers, { it.sessionGliderTotal.toString() }, toAwtColor(RFColors.TextSecondary), availW))
-    blocks.add(makePlayerCardBlock("Item Skills", data.topItemSkillCasters, { it.sessionItemSkillTotal.toString() }, toAwtColor(RFColors.TextSecondary), availW))
-    blocks.add(makeBuildCountBlock("Builds (Haranya)", data.buildCountsHaranya, availW))
-    blocks.add(makeBuildCountBlock("Builds (Nuia)", data.buildCountsNuia, availW))
-    blocks.add(makeBuildCountBlock("Builds (Pirate)", data.buildCountsPirate, availW))
+    tripletBlocks.add(makeTripletBlock(listOf(
+      "Spell Damage Haranya" to (ColumnData.SpellData(data.topDamageSpellsHaranya) to 0),
+      "Spell Damage Nuia" to (ColumnData.SpellData(data.topDamageSpellsNuia) to 0),
+      "Spell Damage Pirate" to (ColumnData.SpellData(data.topDamageSpellsPirate) to 0),
+    ), subColWidth, availW))
 
-    return blocks
-  }
+    tripletBlocks.add(makeTripletBlock(listOf(
+      "Debuffs" to (ColumnData.CardData(data.topDebuffs, { it.sessionDebuffTotal.toString() }, toAwtColor(RFColors.ccCyan)) to 0),
+      "Songs" to (ColumnData.CardData(data.topSongs, { it.sessionSongsTotal.toString() }, toAwtColor(RFColors.dpsOrange)) to 0),
+      "Buffs" to (ColumnData.CardData(data.topBuffs, { it.sessionBuffTotal.toString() }, toAwtColor(RFColors.healsGreen)) to 0),
+    ), subColWidth, availW))
 
-  private fun makeDamageSpellsBlock(title: String, spells: List<SpellDamage>, availW: Int): Block {
-    val numRows = spells.size.coerceAtLeast(5)
-    val blockH = (SECTION_HEADER_HEIGHT + (numRows * ROW_HEIGHT) + CARD_PADDING * 2).coerceAtLeast(CATEGORY_MIN_HEIGHT)
+    tripletBlocks.add(makeTripletBlock(listOf(
+      "Ode Haranya" to (ColumnData.CardData(data.topOdeHaranya, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.TextSecondary)) to 0),
+      "Ode Nuia" to (ColumnData.CardData(data.topOdeNuia, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.TextSecondary)) to 0),
+      "Ode Pirate" to (ColumnData.CardData(data.topOdePirate, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.TextSecondary)) to 0),
+    ), subColWidth, availW))
 
-    return Block(title, blockH) { g2d, x, y, _ ->
-      drawCardBackground(g2d, x, y, availW + CARD_PADDING * 2, blockH)
-      drawSectionHeader(g2d, title, x + CARD_PADDING, y, availW, TEXT_PRIMARY)
+    tripletBlocks.add(makeTripletBlock(listOf(
+      "Kills Haranya" to (ColumnData.CardData(data.topKillsHaranya, { it.sessionKillTotal.toString() }, toAwtColor(RFColors.dpsOrange)) to 0),
+      "Kills Nuia" to (ColumnData.CardData(data.topKillsNuia, { it.sessionKillTotal.toString() }, toAwtColor(RFColors.dpsOrange)) to 0),
+      "Kills Pirate" to (ColumnData.CardData(data.topKillsPirate, { it.sessionKillTotal.toString() }, toAwtColor(RFColors.dpsOrange)) to 0),
+    ), subColWidth, availW))
 
-      val labelFont = createFont(Font.PLAIN, 10f)
-      val valueFont = createFont(Font.BOLD, 10f)
-      var rowY = y + SECTION_HEADER_HEIGHT
+    tripletBlocks.add(makeTripletBlock(listOf(
+      "Dmg Taken" to (ColumnData.CardData(data.topDamageTaken, { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation() }, Color(0xFFE57373.toInt())) to 0),
+      "Heals Recv" to (ColumnData.CardData(data.topHealsReceived, { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() }, Color(0xFF81C784.toInt())) to 0),
+    ), subColWidth, availW))
 
-      if (spells.isEmpty()) {
-        g2d.font = labelFont
-        g2d.color = toAwtColor(RFColors.TextSecondary)
-        g2d.drawString("No data", x + CARD_PADDING + 8, rowY + 14)
-      } else {
-        for (i in spells.indices) {
-          g2d.font = labelFont
-          g2d.color = TEXT_PRIMARY
-          g2d.drawString("${i + 1}. ${spells[i].spell}", x + CARD_PADDING + 8, rowY + 14)
+    tripletBlocks.add(makeTripletBlock(listOf(
+      "Items Haranya" to (ColumnData.ItemData(data.topItemUsesHaranya) to 0),
+      "Items Nuia" to (ColumnData.ItemData(data.topItemUsesNuia) to 0),
+      "Items Pirate" to (ColumnData.ItemData(data.topItemUsesPirate) to 0),
+    ), subColWidth, availW))
 
-          g2d.font = valueFont
-          g2d.color = toAwtColor(RFColors.dpsOrange)
-          val valStr = spells[i].total.toLong().humanReadableAbbreviation()
-          val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
-          g2d.drawString(valStr, x + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
+    tripletBlocks.add(makeTripletBlock(listOf(
+      "Potters" to (ColumnData.CardData(data.topPotters, { it.sessionPotionTotal.toString() }, toAwtColor(RFColors.TextSecondary)) to 0),
+      "Glider Gamers" to (ColumnData.CardData(data.topGliderGamers, { it.sessionGliderTotal.toString() }, toAwtColor(RFColors.TextSecondary)) to 0),
+      "Item Skills" to (ColumnData.CardData(data.topItemSkillCasters, { it.sessionItemSkillTotal.toString() }, toAwtColor(RFColors.TextSecondary)) to 0),
+    ), subColWidth, availW))
 
-          rowY += ROW_HEIGHT
-        }
-      }
-    }
-  }
+    tripletBlocks.add(makeTripletBlock(listOf(
+      "Builds Haranya" to (ColumnData.BuildData(data.buildCountsHaranya) to 0),
+      "Builds Nuia" to (ColumnData.BuildData(data.buildCountsNuia) to 0),
+      "Builds Pirate" to (ColumnData.BuildData(data.buildCountsPirate) to 0),
+    ), subColWidth, availW))
 
-  private fun makePlayerCardBlock(title: String, cards: List<PlayerCard>, getValue: (PlayerCard) -> String, valueColor: Color, availW: Int): Block {
-    val numRows = cards.size.coerceAtLeast(5)
-    val blockH = (SECTION_HEADER_HEIGHT + (numRows * ROW_HEIGHT) + CARD_PADDING * 2).coerceAtLeast(CATEGORY_MIN_HEIGHT)
-
-    return Block(title, blockH) { g2d, x, y, _ ->
-      drawCardBackground(g2d, x, y, availW + CARD_PADDING * 2, blockH)
-      drawSectionHeader(g2d, title, x + CARD_PADDING, y, availW, TEXT_PRIMARY)
-
-      val labelFont = createFont(Font.PLAIN, 10f)
-      val valueFont = createFont(Font.BOLD, 10f)
-      var rowY = y + SECTION_HEADER_HEIGHT
-
-      if (cards.isEmpty()) {
-        g2d.font = labelFont
-        g2d.color = toAwtColor(RFColors.TextSecondary)
-        g2d.drawString("No data", x + CARD_PADDING + 8, rowY + 14)
-      } else {
-        for (i in cards.indices) {
-          g2d.font = labelFont
-          g2d.color = TEXT_PRIMARY
-          g2d.drawString("${i + 1}. ${cards[i].name}", x + CARD_PADDING + 8, rowY + 14)
-
-          g2d.font = valueFont
-          g2d.color = valueColor
-          val valStr = getValue(cards[i])
-          val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
-          g2d.drawString(valStr, x + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
-
-          rowY += ROW_HEIGHT
-        }
-      }
-    }
-  }
-
-  private fun makeItemUsageBlock(title: String, items: List<ItemUsage>, availW: Int): Block {
-    val numRows = items.size.coerceAtLeast(5)
-    val blockH = (SECTION_HEADER_HEIGHT + (numRows * ROW_HEIGHT) + CARD_PADDING * 2).coerceAtLeast(CATEGORY_MIN_HEIGHT)
-
-    return Block(title, blockH) { g2d, x, y, _ ->
-      drawCardBackground(g2d, x, y, availW + CARD_PADDING * 2, blockH)
-      drawSectionHeader(g2d, title, x + CARD_PADDING, y, availW, TEXT_PRIMARY)
-
-      val labelFont = createFont(Font.PLAIN, 10f)
-      val valueFont = createFont(Font.BOLD, 10f)
-      var rowY = y + SECTION_HEADER_HEIGHT
-
-      if (items.isEmpty()) {
-        g2d.font = labelFont
-        g2d.color = toAwtColor(RFColors.TextSecondary)
-        g2d.drawString("No data", x + CARD_PADDING + 8, rowY + 14)
-      } else {
-        for (i in items.indices) {
-          g2d.font = labelFont
-          g2d.color = TEXT_PRIMARY
-          g2d.drawString("${i + 1}. ${items[i].itemName}", x + CARD_PADDING + 8, rowY + 14)
-
-          g2d.font = valueFont
-          g2d.color = toAwtColor(RFColors.TextSecondary)
-          val valStr = items[i].count.toLong().humanReadableAbbreviation()
-          val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
-          g2d.drawString(valStr, x + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
-
-          rowY += ROW_HEIGHT
-        }
-      }
-    }
-  }
-
-  private fun makeBuildCountBlock(title: String, builds: Map<String, Int>, availW: Int): Block {
-    val numRows = builds.size.coerceAtLeast(3)
-    val blockH = (SECTION_HEADER_HEIGHT + (numRows * ROW_HEIGHT) + CARD_PADDING * 2).coerceAtLeast(CATEGORY_MIN_HEIGHT)
-
-    return Block(title, blockH) { g2d, x, y, _ ->
-      drawCardBackground(g2d, x, y, availW + CARD_PADDING * 2, blockH)
-      drawSectionHeader(g2d, title, x + CARD_PADDING, y, availW, TEXT_PRIMARY)
-
-      val labelFont = createFont(Font.PLAIN, 10f)
-      val valueFont = createFont(Font.BOLD, 10f)
-      var rowY = y + SECTION_HEADER_HEIGHT
-
-      if (builds.isEmpty()) {
-        g2d.font = labelFont
-        g2d.color = toAwtColor(RFColors.TextSecondary)
-        g2d.drawString("No data", x + CARD_PADDING + 8, rowY + 14)
-      } else {
-        builds.entries.forEachIndexed { index, (label, count) ->
-          g2d.font = labelFont
-          g2d.color = TEXT_PRIMARY
-          g2d.drawString("${index + 1}. ${label}", x + CARD_PADDING + 8, rowY + 14)
-
-          g2d.font = valueFont
-          g2d.color = toAwtColor(RFColors.TextSecondary)
-          val valStr = count.toLong().humanReadableAbbreviation()
-          val bounds = g2d.fontMetrics.getStringBounds(valStr, g2d)
-          g2d.drawString(valStr, x + CARD_PADDING + availW - bounds.width.toInt() - 8, rowY + 14)
-
-          rowY += ROW_HEIGHT
-        }
-      }
-    }
+    return tripletBlocks
   }
 
   private fun createFont(style: Int, size: Float): Font {
