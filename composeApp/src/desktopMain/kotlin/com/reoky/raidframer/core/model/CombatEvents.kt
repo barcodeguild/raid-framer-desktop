@@ -7,6 +7,31 @@ interface CombatEvent {
   val target: String
 }
 
+// What to do if the game gives us a blank string...
+const val UNKNOWN_TARGET = "Unknown Target"
+
+/*
+ * I made this function to essentially help sanitize input from the IPC. Some events didn't have character names or
+ * the game produces blanks.
+ */
+inline fun <reified T : CombatEvent> CombatEvent.normalize(): T {
+  val s = source.ifBlank { UNKNOWN_TARGET }
+  val t = target.ifBlank { UNKNOWN_TARGET }
+  return when (this) {
+    is DamageEvent -> DamageEvent(timestamp, cid, s, t, damage, spell, spellId, critical)
+    is HealEvent -> HealEvent(timestamp, cid, s, t, amount, spell, spellId, critical)
+    is CastingEvent -> CastingEvent(timestamp, cid, s, t, spell, spellId)
+    is SuccessfulCastEvent -> SuccessfulCastEvent(timestamp, cid, s, t, spell, spellId)
+    is BuffGainedEvent -> BuffGainedEvent(timestamp, cid, s, t, buff, buffId)
+    is BuffEndedEvent -> BuffEndedEvent(timestamp, cid, s, t, buff, buffId)
+    is DebuffGainedEvent -> DebuffGainedEvent(timestamp, cid, s, t, debuff, debuffId)
+    is DebuffEndedEvent -> DebuffEndedEvent(timestamp, cid, s, t, debuff, debuffId)
+    is DebuffAppliedEvent -> DebuffAppliedEvent(timestamp, cid, s, t, debuff, debuffId)
+    is BuffAppliedEvent -> BuffAppliedEvent(timestamp, cid, s, t, buff, buffId)
+    else -> throw IllegalArgumentException("Unsupported CombatEvent subtype: ${this::class.simpleName}") // better to just crash if this were to happen because this is supposed to be type-safe friends!
+  } as T
+}
+
 data class DamageEvent(
   override val timestamp: Long,
   override val cid: String,

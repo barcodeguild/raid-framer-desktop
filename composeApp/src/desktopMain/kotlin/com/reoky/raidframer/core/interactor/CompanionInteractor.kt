@@ -8,6 +8,7 @@ import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
+import com.reoky.raidframer.core.model.normalize
 
 import com.reoky.raidframer.core.serialization.AppJson
 import com.reoky.raidframer.core.serialization.CombatEventPayload
@@ -174,148 +175,136 @@ object CompanionInteractor : Interactor() {
         is IPCMessagePayload.CombatEvent -> {
           when (val event = message.payload) {
             is CombatEventPayload.SpellCastStartPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} began casting ${event.spellName} (id:${event.spellId}) on ${event.target}.")
-              PlayerCacheInteractor.postEvent(
-                CastingEvent(
-                  timestamp = event.timestamp,
-                  cid = event.cid,
-                  source = event.source.ifBlank { "Unknown Target" },
-                  target = event.source.ifBlank { "Unknown Target" },
-                  spell = event.spellName,
-                  spellId = event.spellId
-                )
-              )
+              val combatEvent = CastingEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                spell = event.spellName,
+                spellId = event.spellId
+              ).normalize<CastingEvent>()
+              Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} began casting ${event.spellName} (id:${event.spellId}) on ${combatEvent.target}.")
+              PlayerCacheInteractor.postEvent(combatEvent)
             }
 
             is CombatEventPayload.SpellCastSuccessPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} successfully cast ${event.spellName} (id:${event.spellId}) on ${event.target}.")
-              PlayerCacheInteractor.postEvent(
-                SuccessfulCastEvent(
-                  timestamp = event.timestamp,
-                  cid = event.cid,
-                  source = event.source.ifBlank { "Unknown Target" },
-                  target = event.source.ifBlank { "Unknown Target" },
-                  spell = event.spellName,
-                  spellId = event.spellId
-                )
-              )
+              val combatEvent = SuccessfulCastEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                spell = event.spellName,
+                spellId = event.spellId
+              ).normalize<SuccessfulCastEvent>()
+              PlayerCacheInteractor.postEvent(combatEvent)
             }
 
             is CombatEventPayload.DamagePayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} (${event.cid}) damaged ${event.target} for ${abs(event.amount)} using ${event.spell}.")
-              PlayerCacheInteractor.postEvent(
-                DamageEvent(
-                  timestamp = event.timestamp,
-                  cid = event.cid,
-                  source = event.source.ifBlank { "Unknown Target" },
-                  target = event.source.ifBlank { "Unknown Target" },
-                  damage = abs(event.amount),
-                  spell = event.spell,
-                  critical = event.f13,
-                  spellId = 0
-                )
-              )
+              val combatEvent = DamageEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                damage = abs(event.amount),
+                spell = event.spell,
+                critical = event.f13,
+                spellId = 0
+              ).normalize<DamageEvent>()
+              Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} (${event.cid}) damaged ${combatEvent.target} for ${abs(event.amount)} using ${event.spell}.")
+              PlayerCacheInteractor.postEvent(combatEvent)
             }
 
             is CombatEventPayload.HealPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} healed ${event.target} for ${event.amount} using ${event.spell}.")
-              PlayerCacheInteractor.postEvent(
-                HealEvent(
-                  timestamp = event.timestamp,
-                  cid = event.cid,
-                  source = event.source.ifBlank { "Unknown Target" },
-                  target = event.source.ifBlank { "Unknown Target" },
-                  amount = abs(event.amount),
-                  spell = event.spell,
-                  critical = event.f10,
-                  spellId = 0
-                )
-              )
+              val combatEvent = HealEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                amount = abs(event.amount),
+                spell = event.spell,
+                critical = event.f10,
+                spellId = 0
+              ).normalize<HealEvent>()
+              Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} healed ${combatEvent.target} for ${event.amount} using ${event.spell}.")
+              PlayerCacheInteractor.postEvent(combatEvent)
             }
 
             is CombatEventPayload.BuffGainedPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} applied ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) to ${event.target}")
+              val combatEvent = BuffGainedEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                buff = event.buffName,
+                buffId = event.buffId,
+              ).normalize<BuffGainedEvent>()
               if (event.buffType == "DEBUFF") {
                 PlayerCacheInteractor.postEvent(
                   DebuffGainedEvent(
                     timestamp = event.timestamp,
                     cid = event.cid,
-                    source = event.source.ifBlank { "Unknown Target" },
-                    target = event.source.ifBlank { "Unknown Target" },
+                    source = combatEvent.source,
+                    target = combatEvent.target,
                     debuff = event.buffName,
                     debuffId = event.buffId,
                   )
                 )
               } else {
-                PlayerCacheInteractor.postEvent(
-                  BuffGainedEvent(
-                    timestamp = event.timestamp,
-                    cid = event.cid,
-                    source = event.source.ifBlank { "Unknown Target" },
-                    target = event.source.ifBlank { "Unknown Target" },
-                    buff = event.buffName,
-                    buffId = event.buffId,
-                  )
-                )
+                PlayerCacheInteractor.postEvent(combatEvent)
               }
             }
             is CombatEventPayload.BuffEndedPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target}'s ${event.buffName} (id:${event.buffId}) (type:${event.buffType}) caused by ${event.source} ended.")
-              PlayerCacheInteractor.postEvent(
-                BuffEndedEvent(
-                  timestamp = event.timestamp,
-                  cid = event.cid,
-                  source = event.source.ifBlank { "Unknown Target" },
-                  target = event.source.ifBlank { "Unknown Target" },
-                  buff = event.buffName,
-                  buffId = event.buffId
-                )
-              )
+              val combatEvent = BuffEndedEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                buff = event.buffName,
+                buffId = event.buffId
+              ).normalize<BuffEndedEvent>()
+              PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.MeleeDamagePayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.source} melee damaged ${event.target} for ${abs(event.amount)}.")
-              PlayerCacheInteractor.postEvent(
-                DamageEvent(
-                  timestamp = event.timestamp,
-                  cid = event.cid,
-                  source = event.source.ifBlank { "Unknown Target" },
-                  target = event.source.ifBlank { "Unknown Target" },
-                  damage = abs(event.amount),
-                  spell = "Basic Melee",
-                  critical = event.f10,
-                  spellId = 0
-                )
-              )
+              val combatEvent = DamageEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                damage = abs(event.amount),
+                spell = "Basic Melee",
+                critical = event.f10,
+                spellId = 0
+              ).normalize<DamageEvent>()
+              Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} melee damaged ${combatEvent.target} for ${abs(event.amount)}.")
+              PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.MeleeMissedPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s melee attack (miss).")
-              PlayerCacheInteractor.postEvent(
-                DamageEvent(
-                  timestamp = event.timestamp,
-                  cid = event.cid,
-                  source = event.source.ifBlank { "Unknown Target" },
-                  target = event.source.ifBlank { "Unknown Target" },
-                  damage = abs(event.amount),
-                  spell = "Melee Missed (Smol Scratch)",
-                  critical = false,
-                  spellId = 0
-                )
-              )
+              val combatEvent = DamageEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                damage = abs(event.amount),
+                spell = "Melee Missed (Smol Scratch)",
+                critical = false,
+                spellId = 0
+              ).normalize<DamageEvent>()
+              Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s melee attack (miss).")
+              PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.SpellMissedPayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target} avoided ${event.source}'s ${event.spell} spell (miss for ${event.amount} dmg) ${event.result}.")
-              PlayerCacheInteractor.postEvent(
-                DamageEvent(
-                  timestamp = event.timestamp,
-                  cid = event.cid,
-                  source = event.source.ifBlank { "Unknown Target" },
-                  target = event.source.ifBlank { "Unknown Target" },
-                  damage = abs(event.amount),
-                  spell = "Spell Missed (hehe)",
-                  critical = false,
-                  spellId = 0
-                )
-              )
+              val combatEvent = DamageEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                damage = abs(event.amount),
+                spell = "Spell Missed (hehe)",
+                critical = false,
+                spellId = 0
+              ).normalize<DamageEvent>()
+              Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s ${event.spell} spell (miss for ${event.amount} dmg) ${event.result}.")
+              PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.EnergizePayload -> {
               Log.info(TAG, "At ${event.timestamp} ${event.target} energized after a duel healing ${event.amount} health.")
@@ -324,19 +313,18 @@ object CompanionInteractor : Interactor() {
               Log.info(TAG, "At ${event.timestamp} ${event.target} took ${abs(event.amount)} ${event.damageType} damage.")
             }
             is CombatEventPayload.ConditionDamagePayload -> {
-              Log.info(TAG, "At ${event.timestamp} ${event.target} suffered ${abs(event.amount)} damage to their ${event.pool} because of ${event.source}'s ${event.spell} spell.")
-              PlayerCacheInteractor.postEvent(
-                DamageEvent(
-                  timestamp = event.timestamp,
-                  cid = event.cid,
-                  source = event.source.ifBlank { "Unknown Target" },
-                  target = event.source.ifBlank { "Unknown Target" },
-                  damage = abs(event.amount),
-                  spell = event.spell,
-                  critical = event.f13,
-                  spellId = 0
-                )
-              )
+              val combatEvent = DamageEvent(
+                timestamp = event.timestamp,
+                cid = event.cid,
+                source = event.source,
+                target = event.target,
+                damage = abs(event.amount),
+                spell = event.spell,
+                critical = event.f13,
+                spellId = 0
+              ).normalize<DamageEvent>()
+              Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} suffered ${abs(event.amount)} damage to their ${event.pool} because of ${combatEvent.source}'s ${event.spell} spell.")
+              PlayerCacheInteractor.postEvent(combatEvent)
             }
           }
         }
