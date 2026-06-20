@@ -139,6 +139,7 @@ object PlayerCacheInteractor : Interactor() {
       }
     }
     updateRaidAttendance()
+    inferAndPersistFactionForRaidMembers()
   }
 
   /*
@@ -298,6 +299,38 @@ object PlayerCacheInteractor : Interactor() {
   // gets a list of player cards matching a filter predicate
   fun getGroupCards(filter: (PlayerCard) -> Boolean): List<PlayerCard> {
     return cards.values.filter(filter)
+  }
+
+  /**
+   * Infers faction for real players in the same raid who have unknown faction.
+   * Assumes all same-raid real players share the same faction, and persists the update to cache.
+   */
+  private suspend fun inferAndPersistFactionForRaidMembers() {
+    mutex.withLock {
+      raids.forEach { (raidId, parties) ->
+        val raidMemberNames = parties.flatten().map { it.playerName }.toSet()
+        val raidCards = cards.values.filter { it.name in raidMemberNames && it.isRealPlayer }
+
+        val knownFactionCard = raidCards.find {
+          val f = Faction.fromString(it.lastKnownFaction)
+          f != Faction.UNKNOWN
+        } ?: return@forEach
+
+        val inferredFaction = Faction.fromString(knownFactionCard.lastKnownFaction)
+        val inferredStatus = FactionStatus.fromString(knownFactionCard.lastKnownFactionStatus)
+
+        raidCards.forEach { card ->
+          if (Faction.fromString(card.lastKnownFaction) == Faction.UNKNOWN) {
+            val updatedCard = card.setFaction(inferredFaction, inferredStatus)
+            cards[card.name] = updatedCard
+            updatedCard.cache?.let { cacheEntity ->
+              RFDao.playerCacheDao.insert(cacheEntity)
+            }
+            Log.info(TAG, "Inferred faction for ${card.name}: $inferredFaction / $inferredStatus (from raid $raidId)")
+          }
+        }
+      }
+    }
   }
 
   /**

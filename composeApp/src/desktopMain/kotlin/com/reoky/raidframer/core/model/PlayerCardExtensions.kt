@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.model
 
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.definitions.charmedDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithUtilityItemDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.distressedDebuffIds
@@ -310,5 +311,28 @@ fun PlayerCard.updatePlayerLeadership(newLeadership: Int): PlayerCard {
  */
 fun PlayerCard.hasPvPParticipation(): Boolean {
   return this.sessionDamageTotal >= 25_000L || this.sessionHealTotal >= 25_000L || this.sessionCCTotal >= 25
+}
+
+/**
+ * Sets the faction and faction status on a PlayerCard, updating both the card fields and the cache entity.
+ * If the cache exists, it copies the new values. If not, it creates a new cache object with the faction data.
+ */
+fun PlayerCard.setFaction(faction: Faction, factionStatus: FactionStatus): PlayerCard {
+  val updatedCache = cache
+    ?.copy(
+      lastKnownFaction = faction.value,
+      lastKnownFactionStatus = factionStatus.value
+    )
+    ?: PlayerCacheEntity(
+      playerName = this.name,
+      lastKnownFaction = faction.value,
+      lastKnownFactionStatus = factionStatus.value
+    )
+
+  return this.copy(
+    lastKnownFaction = faction.value,
+    lastKnownFactionStatus = factionStatus.value,
+    cache = updatedCache
+  )
 }
 
