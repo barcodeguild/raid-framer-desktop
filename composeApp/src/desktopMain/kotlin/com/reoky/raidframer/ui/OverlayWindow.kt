@@ -45,7 +45,6 @@ fun OverlayWindow(
   initialPosition: WindowPosition,
   initialSize: DpSize,
   windowType: OverlayWindowType,
-  isObstructing: MutableState<Boolean>,
   isVisible: MutableState<Boolean>,
   isEverythingVisible: MutableState<Boolean>,
   isResizable: MutableState<Boolean>,
@@ -72,7 +71,7 @@ fun OverlayWindow(
     alwaysOnTop = true,
     focusable = isFocusable,
     undecorated = true,
-    visible = isVisible.value && isEverythingVisible.value && !isObstructing.value
+    visible = isVisible.value && isEverythingVisible.value
   ) {
 
     // custom window shape with rounded corners

@@ -81,7 +81,7 @@ fun main(args: Array<String>) {
     //GameMonitorInteractor.start()
     InstallationInteractor.start(delay = 3000L)
     CompanionInteractor.start(delay = 1000L)
-    OverlayInteractor.start(delay = 150L)
+    OverlayInteractor.start(delay = 50L)
     DeathAccumulatorInteractor.start()
     PetAccumulatorInteractor.start()
     CombatLogInteractor.start(delay = 3000L)
@@ -146,6 +146,7 @@ fun main(args: Array<String>) {
         }
         if (config.miniGraphEnabled) wm.openWindow(OverlayType.MINI)
       }
+
 
       statesLoaded = true
     }

@@ -42,7 +42,6 @@ fun OverlayContainer(wm: WindowManager) {
         initialPosition = WindowPosition(Dp(state.lastPositionXDp), Dp(state.lastPositionYDp)),
         initialSize = DpSize(Dp(state.lastWidthDp), Dp(state.lastHeightDp)),
         windowType = state.windowType,
-        isObstructing = mutableStateOf(false),
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
         isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(state.windowType == OverlayWindowType.TOOLTIP),
         isResizable = resizable,
