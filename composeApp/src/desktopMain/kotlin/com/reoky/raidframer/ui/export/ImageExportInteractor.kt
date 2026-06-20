@@ -37,6 +37,9 @@ import javax.imageio.ImageIO
 object ImageExportInteractor {
 
   private const val IMAGE_WIDTH = 2280
+  // Keep the final PNG at the wallpaper's max width, but render content larger first.
+  private const val EXPORT_RENDER_SCALE = 2
+  private const val SVG_ICON_RENDER_SCALE = 4
   private const val ROW_HEIGHT = 24
   private const val SECTION_HEADER_HEIGHT = 32
   private const val CHART_HEIGHT = 170
@@ -69,7 +72,17 @@ object ImageExportInteractor {
   private val ITEM_SKILL_COLOR    = toAwtColor(RFColors.itemSkillYellow)
 
   // ── Skill-tree icon cache (SVG → BufferedImage via Skiko) ─────────────────
-  private val skillTreeImageCache = mutableMapOf<SkillTreeType?, BufferedImage?>()
+  private val skillTreeImageCache = mutableMapOf<Pair<SkillTreeType?, Int>, BufferedImage?>()
+
+  private fun applyHighQualityRenderingHints(g2d: Graphics2D) {
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+    g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
+    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+    g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY)
+    g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY)
+  }
 
   /**
    * Renders an SVG resource to a [BufferedImage] at the requested [targetSize].
@@ -103,13 +116,11 @@ object ImageExportInteractor {
         }
       }
 
-      // Scale to the requested display size using high-quality bilinear filtering.
+      // Scale to the requested display size using high-quality filtering.
       if (targetSize == nativeSize) return native
       val scaled = BufferedImage(targetSize, targetSize, BufferedImage.TYPE_INT_ARGB)
       val sg = scaled.createGraphics()
-      sg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
-      sg.setRenderingHint(RenderingHints.KEY_ANTIALIASING,  RenderingHints.VALUE_ANTIALIAS_ON)
-      sg.setRenderingHint(RenderingHints.KEY_RENDERING,     RenderingHints.VALUE_RENDER_QUALITY)
+      applyHighQualityRenderingHints(sg)
       sg.drawImage(native, 0, 0, targetSize, targetSize, null)
       sg.dispose()
       scaled
@@ -117,7 +128,7 @@ object ImageExportInteractor {
   }
 
   private fun loadSkillTreeImage(tree: SkillTreeType?, size: Int = 14): BufferedImage? {
-    return skillTreeImageCache.getOrPut(tree) {
+    return skillTreeImageCache.getOrPut(tree to size) {
       try {
         val name = tree?.name?.lowercase() ?: "unknown"
         val uri  = Res.getUri("drawable/$name.svg") ?: return@getOrPut null
@@ -231,17 +242,20 @@ object ImageExportInteractor {
     return withContext(Dispatchers.IO) {
       try {
         val imageHeight = calculateImageHeight(data)
-        val image = BufferedImage(IMAGE_WIDTH, imageHeight, BufferedImage.TYPE_INT_ARGB)
-        val g2d = image.createGraphics()
+        val renderWidth = IMAGE_WIDTH * EXPORT_RENDER_SCALE
+        val renderHeight = imageHeight * EXPORT_RENDER_SCALE
+        val renderedImage = BufferedImage(renderWidth, renderHeight, BufferedImage.TYPE_INT_ARGB)
+        val g2d = renderedImage.createGraphics()
 
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB)
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+        applyHighQualityRenderingHints(g2d)
+        g2d.scale(EXPORT_RENDER_SCALE.toDouble(), EXPORT_RENDER_SCALE.toDouble())
 
         drawWallpaperBackground(g2d, IMAGE_WIDTH, imageHeight)
         drawMasonryLayout(g2d, data)
 
         g2d.dispose()
+
+        val image = downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
 
         val config = RFConfig.state.value
         val exportDir = if (config.lastSessionExportDir.isNotBlank()) {
@@ -265,6 +279,15 @@ object ImageExportInteractor {
     }
   }
 
+  private fun downsampleImage(source: BufferedImage, width: Int, height: Int): BufferedImage {
+    val scaled = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+    val sg = scaled.createGraphics()
+    applyHighQualityRenderingHints(sg)
+    sg.drawImage(source, 0, 0, width, height, null)
+    sg.dispose()
+    return scaled
+  }
+
   /**
    * Puts my space wallpaper behind the exports just so that way it's not an empty / black surface.
    * Remember, we're trying to recreate the look of a UI screenshot like all the posts on Discord except
@@ -279,9 +302,8 @@ object ImageExportInteractor {
       if (resUri != null) {
         val wallpaper = ImageIO.read(URI(resUri.toString()).toURL())
         if (wallpaper != null) {
-          val scaled = wallpaper.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH)
           g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
-          g2d.drawImage(scaled, 0, 0, null)
+          g2d.drawImage(wallpaper, 0, 0, width, height, null)
           g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)
         }
       }
@@ -550,8 +572,8 @@ object ImageExportInteractor {
       listOf(null, null, null)
     }
     trees.forEach { treeType ->
-      val img = loadSkillTreeImage(treeType, iconSize)
-      if (img != null) g2d.drawImage(img, iconX, iconY, null)
+      val img = loadSkillTreeImage(treeType, iconSize * SVG_ICON_RENDER_SCALE)
+      if (img != null) g2d.drawImage(img, iconX, iconY, iconSize, iconSize, null)
       iconX += iconSize + iconGap
     }
 
