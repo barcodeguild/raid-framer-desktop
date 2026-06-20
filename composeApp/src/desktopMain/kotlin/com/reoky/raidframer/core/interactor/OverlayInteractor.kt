@@ -28,7 +28,7 @@ object OverlayInteractor : Interactor() {
       AppState.setEverythingVisible(isGameForegrounded(currentWindowTitle))
     } else {
       AppState.setEverythingVisible(true)
-      if (currentWindowTitle != lastWindowTitle) {
+      if (currentWindowTitle != lastWindowTitle && isGameForegrounded(currentWindowTitle)) {
         AppState.setEverythingVisible(false)
         CoroutineScope(Dispatchers.Main).launch {
           delay(5000.milliseconds)
