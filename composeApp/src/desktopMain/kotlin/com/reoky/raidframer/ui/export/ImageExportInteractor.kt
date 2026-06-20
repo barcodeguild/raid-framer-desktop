@@ -70,6 +70,9 @@ object ImageExportInteractor {
   private val POTION_COLOR        = toAwtColor(RFColors.potionTeal)
   private val GLIDER_COLOR        = toAwtColor(RFColors.gliderBlue)
   private val ITEM_SKILL_COLOR    = toAwtColor(RFColors.itemSkillYellow)
+  private val SILENCE_COLOR       = Color(0xAB47BC)
+  private val CHARM_COLOR         = Color(0xEC407A)
+  private val DISTRESS_COLOR      = Color(0x7E57C2)
 
   // ── Skill-tree icon cache (SVG → BufferedImage via Skiko) ─────────────────
   private val skillTreeImageCache = mutableMapOf<Pair<SkillTreeType?, Int>, BufferedImage?>()
@@ -732,6 +735,9 @@ object ImageExportInteractor {
             title.contains("Item Skills")-> "\u2699"
             title.contains("Builds")     -> "\u2694"
             title.contains("Spell Damage") -> "\uD83D\uDD25"
+            title == "Silences"  -> "\uD83D\uDD07"
+            title == "Charms"    -> "\uD83D\uDC96"
+            title == "Distresses" -> "\uD83D\uDE24"
             else -> ""
           }
           val headerTitle = if (icon.isNotEmpty()) "$icon $title $icon" else title
@@ -886,6 +892,12 @@ object ImageExportInteractor {
       "Builds Haranya" to ColumnData.BuildData(data.buildCountsHaranya),
       "Builds Nuia"    to ColumnData.BuildData(data.buildCountsNuia),
       "Builds Pirate"  to ColumnData.BuildData(data.buildCountsPirate),
+    )))
+
+    tripletBlocks.add(makeTriplet(listOf(
+      "Silences"  to ColumnData.CardData(data.topSilences,  { it.sessionSilenceTotal.toString()  }, SILENCE_COLOR),
+      "Charms"    to ColumnData.CardData(data.topCharms,    { it.sessionCharmTotal.toString()    }, CHARM_COLOR),
+      "Distresses" to ColumnData.CardData(data.topDistresses, { it.sessionDistressTotal.toString() }, DISTRESS_COLOR),
     )))
 
     return tripletBlocks
