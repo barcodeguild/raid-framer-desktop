@@ -84,15 +84,11 @@ object InstallationInteractor : Interactor() {
     val knownGoodHashes = computeResourceFileHashes()
     val installedHashes = computeInstalledAddonHashes(arAddonsPath.resolve(RF_ADDON_DIRECTORY).toString())
 
+    // List outdated addon files
     for ((file, hash) in installedHashes) {
       val isValid = knownGoodHashes[file]?.let { it == hash } ?: false
-      if (isValid) continue // skip logging valid files
-      val isMissing = knownGoodHashes[file] == null
-      if (isMissing) {
-        Log.debug(TAG, "Hash for Addon file: $file (missing) -> ????")
-      } else {
-        Log.debug(TAG, "Addon file: $file ${if (!isValid) "(outdated)" else "(valid)"} -> $hash")
-      }
+      if (isValid) continue
+      Log.debug(TAG, "Addon file: $file (outdated) -> $hash")
     }
 
     // Install missing/outdated files
@@ -114,7 +110,7 @@ object InstallationInteractor : Interactor() {
     }
 
     // pick the relevant settings from the config to write to settings.conf
-    // this is one-way write only from app to lua addon
+    // this is one-way write-only from app to lua addon
     val config = RFConfig.state.value
     val relevantSettings = mapOf(
       "companion_enabled" to config.companionEnabled.toString(),

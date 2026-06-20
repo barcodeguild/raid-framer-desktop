@@ -141,3 +141,26 @@ val MIGRATION_17_18 = object : Migration(17, 18) {
   }
 }
 
+// added session recording fields to ConfigEntity (lastSessionTitle, lastSessionStart, lastSessionType)
+val MIGRATION_18_19 = object : Migration(18, 19) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionTitle TEXT NOT NULL DEFAULT ''").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionStart INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionType TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}
+
+val MIGRATION_19_20 = object : Migration(19, 20) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionDurationMs INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionExportDir TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}
+
+// added exportIncludeRawJsonLogs to ConfigEntity (06/20/26)
+val MIGRATION_20_21 = object : Migration(20, 21) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN exportIncludeRawJsonLogs INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

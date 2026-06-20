@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +28,8 @@ import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.SimpleRankingRow
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.RaidComparisonPieChart
+import com.reoky.raidframer.ui.export.ImageExportInteractor
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import java.text.DateFormat
 
@@ -94,13 +97,21 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     "Specs"
   )
 
+  val scope = rememberCoroutineScope()
+  var isExporting by remember { mutableStateOf(false) }
+
   Column(
     modifier = Modifier.fillMaxSize()
   ) {
-    TitleBarComponent(
-      title = "Battle Summary ($humanReadableDateString)",
-      onClose = { wm?.closeWindow(OverlayType.SUMMARY) }
-    )
+    Box(
+      modifier = Modifier.fillMaxWidth()
+    ) {
+      TitleBarComponent(
+        title = "Battle Summary ($humanReadableDateString)",
+        onClose = { wm?.closeWindow(OverlayType.SUMMARY) },
+        modifier = Modifier.fillMaxWidth()
+      )
+    }
 
     // Charts / Graphs Section
     Row(
@@ -569,7 +580,7 @@ private fun StatColumn(
       contentPadding = PaddingValues(0.dp),
       modifier = Modifier.fillMaxWidth()
     ) {
-      itemsIndexed(cards, key = { _, card -> card.name }) { index, card ->
+      itemsIndexed(cards, key = { _, card -> "${card.name}:${card.lastKnownFaction}:${card.currentBuild}" }) { index, card ->
         PlayerRankingRow(
           index = index,
           card = card,
@@ -667,7 +678,6 @@ private fun ItemStatColumn(
       contentPadding = PaddingValues(0.dp),
       modifier = Modifier.fillMaxWidth()
     ) {
-      // use a stable key; StringResource.toString() is fine for uniqueness here
       itemsIndexed(items, key = { _, i -> i.itemName.toString() }) { index, item ->
         SimpleRankingRow(
           index = index,

@@ -142,49 +142,49 @@ fun CompanionOverlay(wm: WindowManager? = null) {
         }
 
         // mark enemy healers
-        Row {
-          CheckBoxComponent(
-            label = stringResource(Res.string.companion_toggl_display_mark_hvt_healers),
-            initialChecked = RFConfig.state.value.companionMarkHVTHealers,
-            onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(companionMarkHVTHealers = isChecked) }
-            }
-          )
-        }
+//        Row {
+//          CheckBoxComponent(
+//            label = stringResource(Res.string.companion_toggl_display_mark_hvt_healers),
+//            initialChecked = RFConfig.state.value.companionMarkHVTHealers,
+//            onCheckedChange = { isChecked ->
+//              RFConfig.update { it.copy(companionMarkHVTHealers = isChecked) }
+//            }
+//          )
+//        }
 
         // mark enemy dps
-        Row {
-          CheckBoxComponent(
-            label = stringResource(Res.string.companion_toggle_display_mark_hvt_dps),
-            initialChecked = RFConfig.state.value.companionMarkHVTDPS,
-            onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(companionMarkHVTDPS = isChecked) }
-            }
-          )
-        }
+ //       Row {
+//          CheckBoxComponent(
+//            label = stringResource(Res.string.companion_toggle_display_mark_hvt_dps),
+//            initialChecked = RFConfig.state.value.companionMarkHVTDPS,
+//            onCheckedChange = { isChecked ->
+//              RFConfig.update { it.copy(companionMarkHVTDPS = isChecked) }
+//            }
+//          )
+//        }
 
         // mark enemy cc
-        Row {
-          CheckBoxComponent(
-            label = stringResource(Res.string.companion_toggle_display_mark_hvt_cc),
-            initialChecked = RFConfig.state.value.companionMarkHVTCrowdControl,
-            onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(companionMarkHVTCrowdControl = isChecked) }
-            }
-          )
-        }
+//        Row {
+//          CheckBoxComponent(
+//            label = stringResource(Res.string.companion_toggle_display_mark_hvt_cc),
+//            initialChecked = RFConfig.state.value.companionMarkHVTCrowdControl,
+//            onCheckedChange = { isChecked ->
+//              RFConfig.update { it.copy(companionMarkHVTCrowdControl = isChecked) }
+//            }
+//          )
+//        }
 
         // mark sac dancers
         // mark enemy cc
-        Row {
-          CheckBoxComponent(
-            label = stringResource(Res.string.companion_toggle_display_mark_sac_dancers),
-            initialChecked = RFConfig.state.value.companionMarkHVTCrowdControl,
-            onCheckedChange = { isChecked ->
-              RFConfig.update { it.copy(companionMarkSacDancers = isChecked) }
-            }
-          )
-        }
+//        Row {
+//          CheckBoxComponent(
+//            label = stringResource(Res.string.companion_toggle_display_mark_sac_dancers),
+//            initialChecked = RFConfig.state.value.companionMarkHVTCrowdControl,
+//            onCheckedChange = { isChecked ->
+//              RFConfig.update { it.copy(companionMarkSacDancers = isChecked) }
+//            }
+//          )
+//        }
 
         // enemy cc (purple = charmed, black = silenced)
 //        Row {
@@ -198,8 +198,8 @@ fun CompanionOverlay(wm: WindowManager? = null) {
 //            }
 //          )
 //        }
-      }
 
+      }
     }
   }
 }

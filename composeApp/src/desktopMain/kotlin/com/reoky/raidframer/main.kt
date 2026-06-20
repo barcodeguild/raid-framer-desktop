@@ -16,11 +16,13 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
 import com.reoky.raidframer.core.interactor.CompanionInteractor
+import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.DeathAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.InstallationInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
+import com.reoky.raidframer.core.interactor.OverlayInteractor
 import com.reoky.raidframer.core.interactor.PetAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayContainer
@@ -77,11 +79,12 @@ fun main(args: Array<String>) {
     LoggingInteractor.start()
     PlayerCacheInteractor.start()
     //GameMonitorInteractor.start()
-    InstallationInteractor.start(delay = 3000L) // delay to allow user to set game path in settings if needed
-    CompanionInteractor.start(delay = 1000L) // delay to allow game monitor to start first
-    OverlayInteractor.start(delay = 150L) // show to allow for hiding overlays quickly
+    InstallationInteractor.start(delay = 3000L)
+    CompanionInteractor.start(delay = 1000L)
+    OverlayInteractor.start(delay = 50L)
     DeathAccumulatorInteractor.start()
     PetAccumulatorInteractor.start()
+    CombatLogInteractor.start(delay = 3000L)
 
     // file path args processing
     val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }
@@ -139,10 +142,11 @@ fun main(args: Array<String>) {
       RFDao.configDao.getConfig()?.let { config ->
         if (config.firstLaunch) {
           wm.openWindow(OverlayType.ABOUT)
-          RFDao.configDao.insert(config.copy(firstLaunch = false))
+          RFConfig.update { it.copy(firstLaunch = false) }
         }
         if (config.miniGraphEnabled) wm.openWindow(OverlayType.MINI)
       }
+
 
       statesLoaded = true
     }
@@ -230,6 +234,7 @@ fun quit() {
   DeathAccumulatorInteractor.stop()
   CompanionInteractor.stop()
   InstallationInteractor.stop()
+  CombatLogInteractor.stop()
   tray?.shutdown()
   tray?.remove()
   LoggingInteractor.stop() // should be last because this is the thing that logs shutdown message

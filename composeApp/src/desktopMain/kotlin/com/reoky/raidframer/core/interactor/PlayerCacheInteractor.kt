@@ -65,17 +65,14 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
-  // main event loop
+  // The main interactor event loop
+  // Takes a snapshot of values to iterate. Iterating the map directly while updates happen
+  // (even with ConcurrentHashMap/MutableStateMap) can be risky with heavy logic,
+  // and we want to perform calculations without holding a lock. Ok friends!?
   override suspend fun interact() {
-    // Take a snapshot of values to iterate. Iterating the map directly while updates happen
-    // (even with ConcurrentHashMap/MutableStateMap) can be risky with heavy logic,
-    // and we want to perform calculations without holding a lock. Ok friends!?
     val snapshot = cards.values.toList()
-
     snapshot.forEach { card ->
       val name = card.name
-
-      // 1. Logic to determine if player should be upgraded from NPC to real player
       if (!card.isRealPlayer && card.shouldUpgradeToPlayer()) {
         scope.launch {
           mutex.withLock {
@@ -142,6 +139,7 @@ object PlayerCacheInteractor : Interactor() {
       }
     }
     updateRaidAttendance()
+    inferAndPersistFactionForRaidMembers()
   }
 
   /*
@@ -260,6 +258,24 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  fun startNewSession(sessionType: String, allowPvE: Boolean) {
+    scope.launch {
+      RFConfig.update {
+        it.copy(
+          allowPVEDamage = allowPvE
+        )
+      }
+      resetAllSessions()
+      CombatLogInteractor.startRecording()
+      Log.info(TAG, "Started new recording session: type=$sessionType, allowPvE=$allowPvE")
+    }
+  }
+
+  fun stopSession() {
+    CombatLogInteractor.stopRecording()
+    Log.info(TAG, "Recording session stopped")
+  }
+
   // filter pve damage by checking if the target is a real player
   fun isRealPlayer(playerName: String): Boolean {
     return cards.values.any { it.isRealPlayer && it.name == playerName }
@@ -283,6 +299,38 @@ object PlayerCacheInteractor : Interactor() {
   // gets a list of player cards matching a filter predicate
   fun getGroupCards(filter: (PlayerCard) -> Boolean): List<PlayerCard> {
     return cards.values.filter(filter)
+  }
+
+  /**
+   * Infers faction for real players in the same raid who have unknown faction.
+   * Assumes all same-raid real players share the same faction, and persists the update to cache.
+   */
+  private suspend fun inferAndPersistFactionForRaidMembers() {
+    mutex.withLock {
+      raids.forEach { (raidId, parties) ->
+        val raidMemberNames = parties.flatten().map { it.playerName }.toSet()
+        val raidCards = cards.values.filter { it.name in raidMemberNames && it.isRealPlayer }
+
+        val knownFactionCard = raidCards.find {
+          val f = Faction.fromString(it.lastKnownFaction)
+          f != Faction.UNKNOWN
+        } ?: return@forEach
+
+        val inferredFaction = Faction.fromString(knownFactionCard.lastKnownFaction)
+        val inferredStatus = FactionStatus.fromString(knownFactionCard.lastKnownFactionStatus)
+
+        raidCards.forEach { card ->
+          if (Faction.fromString(card.lastKnownFaction) == Faction.UNKNOWN) {
+            val updatedCard = card.setFaction(inferredFaction, inferredStatus)
+            cards[card.name] = updatedCard
+            updatedCard.cache?.let { cacheEntity ->
+              RFDao.playerCacheDao.insert(cacheEntity)
+            }
+            Log.info(TAG, "Inferred faction for ${card.name}: $inferredFaction / $inferredStatus (from raid $raidId)")
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -399,35 +447,53 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
-  /* Event Posting */
+  ///////////////////////////
+  // Regular Event Posting //
+  ///////////////////////////
 
-  // catch all
   fun postEvent(event: CombatEvent) {
-    when (event) {
-      is DamageEvent -> postDamage(event)
-      is HealEvent -> postHeal(event)
-      is CastingEvent -> postCasting(event)
-      is SuccessfulCastEvent -> postSuccessfulCast(event)
-      is BuffGainedEvent -> postBuffGained(event)
-      is BuffEndedEvent -> postBuffEnded(event)
-      is DebuffGainedEvent -> postDebuffGained(event)
-      is DebuffEndedEvent -> postDebuffEnded(event)
-      else -> {} // no-op for other event types
+    if (CombatLogInteractor.isRecording.value) {
+      when (event) {
+        is DamageEvent -> postDamage(event)
+        is HealEvent -> postHeal(event)
+        is CastingEvent -> postCasting(event)
+        is SuccessfulCastEvent -> postSuccessfulCast(event)
+        is BuffGainedEvent -> postBuffGained(event)
+        is BuffEndedEvent -> postBuffEnded(event)
+        is DebuffGainedEvent -> postDebuffGained(event)
+        is DebuffEndedEvent -> postDebuffEnded(event)
+        else -> {} // no-op for other event types
+      }
+    }
+    if (shouldRecordEvent(event)) {
+      CombatLogInteractor.recordEvent(event)
     }
   }
 
   fun postEventInternal(event: CombatEvent) {
-    when (event) {
-      is DamageEvent -> postDamageInternal(event)
-      is HealEvent -> postHeal(event)
-      is CastingEvent -> postCasting(event)
-      is SuccessfulCastEvent -> postSuccessfulCastInternal(event)
-      is BuffGainedEvent -> postBuffGained(event)
-      is BuffEndedEvent -> postBuffEnded(event)
-      is DebuffGainedEvent -> postDebuffGained(event)
-      is DebuffEndedEvent -> postDebuffEnded(event)
-      else -> {} // no-op for other event types
+    if (CombatLogInteractor.isRecording.value) {
+      when (event) {
+        is DamageEvent -> postDamageInternal(event)
+        is HealEvent -> postHeal(event)
+        is CastingEvent -> postCasting(event)
+        is SuccessfulCastEvent -> postSuccessfulCastInternal(event)
+        is BuffGainedEvent -> postBuffGained(event)
+        is BuffEndedEvent -> postBuffEnded(event)
+        is DebuffGainedEvent -> postDebuffGained(event)
+        is DebuffEndedEvent -> postDebuffEnded(event)
+        else -> {} // no-op for other event types
+      }
     }
+    // basically whitelisting event types to put in the final rf report for now
+    if (shouldRecordEvent(event)) {
+      CombatLogInteractor.recordEvent(event)
+    }
+  }
+
+  private fun shouldRecordEvent(event: CombatEvent): Boolean {
+    if (!CombatLogInteractor.isRecording.value) return false
+    val allowPvE = RFConfig.state.value.allowPVEDamage
+    return isRealPlayer(event.target) || allowPvE
   }
 
   private fun postDamage(event: DamageEvent) {
@@ -580,20 +646,21 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  ///////////////////////
+  // Pet Event Posting //
+  ///////////////////////
 
-  // Posting Pet Events
   /**
    * Called by PetAccumulatorInteractor to apply pet damage to a specific pet card key.
    * `petKey` is the internal key format used by petCards: "$owner:$petName".
    */
   fun postPetDamage(petKey: String, event: DamageEvent) {
+    if (!CombatLogInteractor.isRecording.value) return
     Log.info(TAG, "Posting pet damage event to petKey=$petKey: $event")
     scope.launch {
       mutex.withLock {
-        // ensure card exists
         val existing = petCards[petKey]
         if (existing == null) {
-          // nothing to do if we don't have metadata for this pet yet
           return@withLock
         }
         val updated = existing.copy(
@@ -611,6 +678,7 @@ object PlayerCacheInteractor : Interactor() {
    * Called by PetAccumulatorInteractor to record pet successful casts (helpful for correlation).
    */
   fun postPetSuccessfulCast(petKey: String, event: SuccessfulCastEvent) {
+    if (!CombatLogInteractor.isRecording.value) return
     Log.info(TAG, "Posting pet successful cast event to petKey=$petKey: $event")
     scope.launch {
       mutex.withLock {
@@ -619,8 +687,8 @@ object PlayerCacheInteractor : Interactor() {
           return@withLock
         }
         val updated = existing.copy(
-          recentDebuffAppliedEvents = existing.recentDebuffAppliedEvents, // keep if needed elsewhere
-          recentDamageEvents = existing.recentDamageEvents, // no change here
+          recentDebuffAppliedEvents = existing.recentDebuffAppliedEvents,
+          recentDamageEvents = existing.recentDamageEvents,
           recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
           lastEvent = event.timestamp
         )
@@ -645,7 +713,6 @@ object PlayerCacheInteractor : Interactor() {
   fun getRealPlayersSnapshot(): List<PlayerCard> {
     return cards.values.filter { it.isRealPlayer }
   }
-
 
   /*
    * When the user tabs over a target the active target is switched here and throughout the app. This is performed inside the
@@ -699,6 +766,7 @@ object PlayerCacheInteractor : Interactor() {
    * The calculation is performed in the DeathAccumulatorInteractor. ^_^
    */
   fun processDeathBatch(batchResults: List<DeathAccumulatorInteractor.DeathAttribution>) {
+    if (!CombatLogInteractor.isRecording.value) return
     scope.launch {
       mutex.withLock {
         batchResults.forEach { attribution ->
@@ -804,9 +872,7 @@ object PlayerCacheInteractor : Interactor() {
 
   /* UI Subscriptions */
   fun observeCard(name: String): StateFlow<PlayerCard?> {
-    return snapshotFlow {
-      cards[name]?.copy() // force a new instance on each emission
-    }
+    return snapshotFlow { cards[name]?.copy() }
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), cards[name])
   }
 
@@ -815,81 +881,81 @@ object PlayerCacheInteractor : Interactor() {
       cards.filter { it.isRealPlayer && it.sessionDamageTotal > 0 }.sortedByDescending { it.sessionDamageTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topHeals: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionHealTotal > 0 }.sortedByDescending { it.sessionHealTotal }
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topCC: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionCCTotal > 0 }.sortedByDescending { it.sessionCCTotal }
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topBuffs: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionBuffTotal > 0 }.sortedByDescending { it.sessionBuffTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topDebuff: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionDebuffTotal > 0 }.sortedByDescending { it.sessionDebuffTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topCharms: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionCharmTotal > 0 }.sortedByDescending { it.sessionCharmTotal }
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topSilences: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionSilenceTotal > 0 }.sortedByDescending { it.sessionSilenceTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topSongs: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionSongsTotal > 0 }.sortedByDescending { it.sessionSongsTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topDistresses: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionDistressTotal > 0 }.sortedByDescending { it.sessionDistressTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionGliderTotal > 0 }.sortedByDescending { it.sessionGliderTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topPotters: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionPotionTotal > 0 }.sortedByDescending { it.sessionPotionTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topItemSkillCasters: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionItemSkillTotal > 0 }.sortedByDescending { it.sessionItemSkillTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topKills: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
@@ -933,7 +999,7 @@ object PlayerCacheInteractor : Interactor() {
         .sortedByDescending { it.sessionDamageTakenTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topHealsReceived: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
@@ -941,7 +1007,7 @@ object PlayerCacheInteractor : Interactor() {
         .sortedByDescending { it.sessionHealsReceivedTotal }
         .take(100)
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val nearbyNuianRaidParties: StateFlow<List<PlayerCard>> = snapshotFlow {
     val cardList = cards.values.toList()
@@ -993,27 +1059,27 @@ object PlayerCacheInteractor : Interactor() {
 
   val topDamageSpellsHaranya: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
     .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.HARANYA) }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topDamageSpellsNuia: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
     .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.NUIA) }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topDamageSpellsPirate: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
     .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.PIRATE) }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topItemUsesHaranya: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
     .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.HARANYA) }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topItemUsesNuia: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
     .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.NUIA) }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topItemUsesPirate: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
     .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.PIRATE) }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   // top kills haranya, nuia, and pirate
   val topKillsHaranya: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
@@ -1021,37 +1087,37 @@ object PlayerCacheInteractor : Interactor() {
       cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 && it.lastKnownFaction == Faction.HARANYA.value }
         .sortedByDescending { it.sessionKillTotal }
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
   val topKillsNuia: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 && it.lastKnownFaction == Faction.NUIA.value }
         .sortedByDescending { it.sessionKillTotal }
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
   val topKillsPirate: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 && it.lastKnownFaction == Faction.PIRATE.value }.sortedByDescending { it.sessionKillTotal }
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topOdeHaranya: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 && it.lastKnownFaction == Faction.HARANYA.value }
         .sortedByDescending { it.sessionOdeHealsTotal }
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
   val topOdeNuia: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 && it.lastKnownFaction == Faction.NUIA.value }
         .sortedByDescending { it.sessionOdeHealsTotal }
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
   val topOdePirate: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 && it.lastKnownFaction == Faction.PIRATE.value }
         .sortedByDescending { it.sessionOdeHealsTotal }
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   /**
    * Compares average charm totals between raid members and opposition.
@@ -1068,7 +1134,7 @@ object PlayerCacheInteractor : Interactor() {
         Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
       )
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
   val factionSilenceComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
     .map {
@@ -1079,7 +1145,7 @@ object PlayerCacheInteractor : Interactor() {
         Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
       )
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
   val factionDistressComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
     .map {
@@ -1090,34 +1156,34 @@ object PlayerCacheInteractor : Interactor() {
         Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
       )
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
   val buildCountsHaranya: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
-      cards.values
+      it
         .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.HARANYA && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyMap())
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
   val buildCountsNuia: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
-      cards.values
+      it
         .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.NUIA && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyMap())
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
   val buildCountsPirate: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
-      cards.values
+      it
         .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.PIRATE && it.hasPvPParticipation() }
         .groupingBy { it.currentBuild }
         .eachCount()
     }
-    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyMap())
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
 
   // two-way compare (maybe deprecated later)

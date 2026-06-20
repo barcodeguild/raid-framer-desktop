@@ -34,6 +34,21 @@ object RFColors {
   val dpsOrange = Color(249, 191, 59, 255)
   val healsGreen = Color(105, 235, 113, 255)
   val ccCyan = Color.Cyan
+
+  // Faction colors
+  val factionHaranya = Color(0xFFAB47BC)
+  val factionNuia = Color(0xFFEC407A)
+  val factionPirate = Color(0xFF7E57C2)
+
+  // Per-faction kill ranking colors
+  val killsHaranyaGreen = Color(0xFF66BB6A)
+  val killsNuiaOrange = Color(0xFFFFA726)
+  val killsPirateRed = Color(0xFFEF5350)
+
+  // Utility stat colors
+  val potionTeal = Color(0xFF26A69A)
+  val gliderBlue = Color(0xFF42A5F5)
+  val itemSkillYellow = Color(0xFFFFCA28)
 }
 
 enum class RFGraphColor(val color: Color) {

@@ -4,6 +4,8 @@ package com.reoky.raidframer.ui.overlay
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -43,6 +45,7 @@ import org.jetbrains.compose.resources.InternalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_trend_graph
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_buffs
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_cc
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_charms
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage
@@ -308,6 +311,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 StatRow(stringResource(Res.string.player_card_stat_damage), card.sessionDamageTotal)
                 StatRow(stringResource(Res.string.player_card_stat_healing), card.sessionHealTotal)
                 StatRow(stringResource(Res.string.player_card_stat_cc), card.sessionCCTotal.toLong())
+                StatRow(stringResource(Res.string.player_card_stat_buffs), card.sessionBuffTotal.toLong())
                 StatRow(stringResource(Res.string.player_card_stat_debuffs), card.sessionDebuffTotal.toLong())
                 StatRow(stringResource(Res.string.player_card_stat_charms), card.sessionCharmTotal.toLong())
                 StatRow(stringResource(Res.string.player_card_stat_distress), card.sessionDistressTotal.toLong())
@@ -345,6 +349,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_damage), cache.lifetimeTotalDamage)
                   StatRow(stringResource(Res.string.player_card_stat_healing), cache.lifetimeTotalHealing)
                   StatRow(stringResource(Res.string.player_card_stat_cc), cache.lifetimeTotalCCDelivered)
+                  StatRow(stringResource(Res.string.player_card_stat_buffs), cache.lifetimeTotalBuffsApplied)
                   StatRow(stringResource(Res.string.player_card_stat_debuffs), cache.lifetimeTotalDebuffsApplied)
                   StatRow(stringResource(Res.string.player_card_stat_charms), cache.lifetimeTotalCharms)
                   StatRow(stringResource(Res.string.player_card_stat_distress), cache.lifetimeTotalDistresses)
@@ -410,15 +415,13 @@ fun <T> EventListColumn(
     )
 
     Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .verticalScroll(rememberScrollState())
-      ) {
-        if (items.isEmpty()) {
-          Text("-", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp))
-        } else {
-          items.forEach { item ->
+      if (items.isEmpty()) {
+        Text("-", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp))
+      } else {
+        LazyColumn(
+          modifier = Modifier.fillMaxSize()
+        ) {
+          itemsIndexed(items, key = { index, item -> "${title}_${index}_${item.hashCode()}" }) { _, item ->
             renderItem(item)
           }
         }

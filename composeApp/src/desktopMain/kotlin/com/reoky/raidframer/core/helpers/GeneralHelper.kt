@@ -9,17 +9,21 @@ import androidx.compose.ui.text.withStyle
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
 import java.awt.Desktop
+import java.io.File
 import java.net.URI
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.io.path.exists
 import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.ranges.contains
 
-/*
+/**
  * Extension function to abbreviate a numeric values by thousands, millions, billions, etc.
  */
 fun Long.humanReadableAbbreviation(): String {
@@ -32,6 +36,45 @@ fun Long.humanReadableAbbreviation(): String {
   return String.format("%.1f%c", scaled, suffixes[idx])
 }
 
+/**
+ * Find the Documents path. Blame Microsoft for having OneDrive mount the user's Documents inside of OneDrive
+ */
+fun getDocumentsDirectory(): String? {
+  if (System.getProperty("os.name").lowercase().contains("win")) {
+    val userProfile = System.getenv("USERPROFILE")
+    if (!userProfile.isNullOrBlank()) {
+      val oneDriveDocs = Paths.get(userProfile, "OneDrive", "Documents")
+      if (oneDriveDocs.exists()) return oneDriveDocs.toString()
+      val regularDocs = Paths.get(userProfile, "Documents")
+      if (regularDocs.exists()) return regularDocs.toString()
+    }
+  }
+  val home = System.getProperty("user.home") ?: return null
+  return Paths.get(home, "Documents").toString()
+}
+
+fun getExportDirectory(): String? {
+  val documentsDir = getDocumentsDirectory() ?: return null
+  return Paths.get(documentsDir, "RFExports").toString()
+}
+
+fun getDirectorySizeBytes(directoryPath: String): Long {
+  return try {
+    val directory = File(directoryPath)
+    if (!directory.exists()) return 0L
+    directory.walkTopDown().filter { it.isFile }.map { it.length() }.sum()
+  } catch (_: Exception) {
+    0L
+  }
+}
+
+fun formatFileSize(bytes: Long): String {
+  if (bytes < 1024L) return "$bytes B"
+  if (bytes < 1024L * 1024L) return "%.1f KB".format(bytes / 1024.0)
+  if (bytes < 1024L * 1024L * 1024L) return "%.1f MB".format(bytes / (1024.0 * 1024.0))
+  return "%.2f GB".format(bytes / (1024.0 * 1024.0 * 1024.0))
+}
+
 
 /**
  * Opens a browser window to the specified URL.
@@ -42,7 +85,7 @@ fun openWebLink(url: String) {
   }
 }
 
-/*
+/**
  * Simple extension function to convert epoch milliseconds to a local time string.
  */
 fun Long.toLocalTimeString(): String {
@@ -51,7 +94,7 @@ fun Long.toLocalTimeString(): String {
   return localDateTime.format(DateTimeFormatter.ofPattern("hh:mm:ss"))
 }
 
-/*
+/**
  * Makes a pretty-looking AnnotatedString for the attack event. I brought this code into a different file because
  * it's too and will get used multiple times potentially.
  */

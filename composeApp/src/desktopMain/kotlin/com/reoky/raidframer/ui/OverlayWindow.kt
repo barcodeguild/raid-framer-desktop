@@ -21,6 +21,8 @@ import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinDef.HWND
 import com.sun.jna.platform.win32.WinUser
 import java.awt.Point
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
 import java.awt.Rectangle
 import java.awt.Shape
 import java.awt.Window
@@ -43,7 +45,6 @@ fun OverlayWindow(
   initialPosition: WindowPosition,
   initialSize: DpSize,
   windowType: OverlayWindowType,
-  isObstructing: MutableState<Boolean>,
   isVisible: MutableState<Boolean>,
   isEverythingVisible: MutableState<Boolean>,
   isResizable: MutableState<Boolean>,
@@ -68,9 +69,9 @@ fun OverlayWindow(
     transparent = true,
     title = title,
     alwaysOnTop = true,
-    focusable = false,
+    focusable = isFocusable,
     undecorated = true,
-    visible = isVisible.value && isEverythingVisible.value && !isObstructing.value
+    visible = isVisible.value && isEverythingVisible.value
   ) {
 
     // custom window shape with rounded corners
@@ -91,12 +92,28 @@ fun OverlayWindow(
       onWindowCreated(composeWindow)
     }
 
-    // does what apps like Discord do to make an overlay window that doesn't steal focus
-    LaunchedEffect(Unit) {
-      if (windowType == OverlayWindowType.OVERLAY) {
+    // Apply Discord-style overlay behavior whenever the window becomes visible
+    LaunchedEffect(window, isVisible.value, isEverythingVisible.value) {
+      if (windowType == OverlayWindowType.OVERLAY && isVisible.value && isEverythingVisible.value) {
         delay(100)
         getHWND(window)?.let { windowHandle ->
           makeDiscordStyleOverlay(windowHandle)
+          bringToTopmost(windowHandle)
+        }
+      }
+    }
+
+    // Re-assert topmost when the window gains focus/activation
+    LaunchedEffect(window) {
+      if (windowType == OverlayWindowType.OVERLAY) {
+        getHWND(window)?.let { hwnd ->
+          val adapter = object : WindowAdapter() {
+            override fun windowActivated(e: WindowEvent?) {
+              bringToTopmost(hwnd)
+            }
+          }
+          window.addWindowFocusListener(adapter)
+          window.addWindowListener(adapter)
         }
       }
     }
@@ -215,7 +232,7 @@ class OverlayWindowShape(
 }
 
 enum class OverlayType {
-  COMBAT, SETTINGS, SUMMARY, INSTALL, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, AGGRO, PLAYER_CARD, FILTERS, DUMMY
+  COMBAT, SETTINGS, SUMMARY, NEW_SESSION, INSTALL, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, AGGRO, PLAYER_CARD, FILTERS, DUMMY
 }
 
 enum class OverlayWindowType {
@@ -228,8 +245,8 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.COMBAT -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.OVERLAY,
-      lastPositionXDp = 50f,
-      lastPositionYDp = 500f,
+      lastPositionXDp = 10f,
+      lastPositionYDp = 950f,
       lastWidthDp = 650f,
       lastHeightDp = 192f,
       isVisible = true
@@ -248,8 +265,8 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.SETTINGS -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 500f,
-      lastPositionYDp = 170f,
+      lastPositionXDp = 1000f,
+      lastPositionYDp = 300f,
       lastWidthDp = 560f,
       lastHeightDp = 800f,
       isVisible = false
@@ -258,9 +275,9 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.COMPANION -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 500f,
-      lastPositionYDp = 200f,
-      lastWidthDp = 560f,
+      lastPositionXDp = 800f,
+      lastPositionYDp = 400f,
+      lastWidthDp = 580f,
       lastHeightDp = 800f,
       isVisible = false
     )
@@ -268,17 +285,17 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.POKEMON -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 500f,
-      lastPositionYDp = 70f,
-      lastWidthDp = 480f,
-      lastHeightDp = 760f,
+      lastPositionXDp = 900f,
+      lastPositionYDp = 400f,
+      lastWidthDp = 420f,
+      lastHeightDp = 420f,
       isVisible = false
     )
 
     OverlayType.RAID -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 250f,
+      lastPositionXDp = 650f,
       lastPositionYDp = 250f,
       lastWidthDp = 1024f,
       lastHeightDp = 1000f,
@@ -288,7 +305,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.MINI -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.OVERLAY,
-      lastPositionXDp = 800f,
+      lastPositionXDp = 1600f,
       lastPositionYDp = 50f,
       lastWidthDp = 380f,
       lastHeightDp = 160f,
@@ -305,10 +322,20 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       isVisible = false
     )
 
+    OverlayType.NEW_SESSION -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
+      lastPositionXDp = 1000f,
+      lastPositionYDp = 500f,
+      lastWidthDp = 350f,
+      lastHeightDp = 500f,
+      isVisible = false
+    )
+
     OverlayType.INSTALL -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 300f,
+      lastPositionXDp = 900f,
       lastPositionYDp = 300f,
       lastWidthDp = 500f,
       lastHeightDp = 720f,
@@ -338,7 +365,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.ABOUT -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 300f,
+      lastPositionXDp = 900f,
       lastPositionYDp = 300f,
       lastWidthDp = 500f,
       lastHeightDp = 720f,
@@ -348,7 +375,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.SUMMARY -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 250f,
+      lastPositionXDp = 700f,
       lastPositionYDp = 250f,
       lastWidthDp = 960f,
       lastHeightDp = 1024f,
@@ -404,4 +431,16 @@ fun makeDiscordStyleOverlay(hwnd: HWND) {
   val exStyle = user32.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE)
   val newStyle = (exStyle or 0x00000080 or WinUser.WS_EX_LAYERED) and 0x00040000.inv()
   user32.SetWindowLong(hwnd, WinUser.GWL_EXSTYLE, newStyle)
+}
+
+/*
+ * Actively brings the window to the top of the Z-order using SetWindowPos with HWND_TOPMOST.
+ * This is needed because the game can push the overlay behind it when regaining focus.
+ */
+fun bringToTopmost(hwnd: HWND) {
+  val user32 = User32.INSTANCE
+  val SWP_NOSIZE = 0x0001
+  val SWP_NOMOVE = 0x0002
+  val SWP_NOACTIVATE = 0x0010
+  user32.SetWindowPos(hwnd, HWND(Pointer(0xFFFFFFFFL)), 0, 0, 0, 0, SWP_NOSIZE or SWP_NOMOVE or SWP_NOACTIVATE)
 }

@@ -36,7 +36,7 @@ function RF.Combat.handleTargetChanged(...)
   end
 
   -- GUARD: A player target
-  if not unitInfo["type"] == "character" then
+  if unitInfo["type"] ~= "character" then
     return
   end
 
@@ -219,6 +219,13 @@ function RF.Combat.handleCombatMessage(...)
   -- falling/drowning etc
   if (meta.type == "ENVIRONMENTAL_DAMAGE") then
     RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(RF.Parser.ParseEnvironmentalDamageEvent(combatEvent)))
+    return
+  end
+
+  -- UNIT_DIED
+  -- Death events from the combat log (separate from UNIT_DEAD_NOTICE events)
+  if (meta.type == "UNIT_DIED") then
+    RF.Combat.handleUnitDead(meta.target)
     return
   end
 

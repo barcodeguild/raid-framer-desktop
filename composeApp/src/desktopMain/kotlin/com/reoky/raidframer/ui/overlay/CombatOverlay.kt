@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.FontsHelper
+import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.core.helpers.RFColors
@@ -40,7 +41,10 @@ import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_damage
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_heals
-import raid_framer_desktop.composeapp.generated.resources.combat_column_cc
+import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_cc
+import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_damage
+import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_heals
+import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_cc
 import raid_framer_desktop.composeapp.generated.resources.combat_no_columns_message
 import raid_framer_desktop.composeapp.generated.resources.combat_open_settings
 
@@ -83,6 +87,17 @@ fun CombatOverlay(wm: WindowManager? = null) {
 
   // config state for showing/hiding columns
   val config by RFConfig.state.collectAsState()
+
+  val damageColumnText = stringResource(
+    if (config.allowPVEDamage) Res.string.combat_column_pve_damage else Res.string.combat_column_pvp_damage
+  )
+  val healsColumnText = stringResource(
+    if (config.allowPVEDamage) Res.string.combat_column_pve_heals else Res.string.combat_column_pvp_heals
+  )
+  val ccColumnText = stringResource(
+    if (config.allowPVEDamage) Res.string.combat_column_pve_cc else Res.string.combat_column_pvp_cc
+  )
+
   val anyColumnVisibleGlobal by remember { derivedStateOf {
     config.combatShowDamageColumn || config.combatShowHealsColumn || config.combatShowCCColumn
   } }
@@ -154,9 +169,6 @@ fun CombatOverlay(wm: WindowManager? = null) {
         .fillMaxSize()
     ) {
       if (anyColumnVisibleGlobal) {
-        // Header: icon rows overlaid at edges so they never steal layout space from the titles.
-        // Title padding animates in sync with the controls alpha so titles expand into the
-        // space that the icons were occupying as they fade out.
         Box(
           modifier = Modifier
             .fillMaxWidth()
@@ -174,13 +186,13 @@ fun CombatOverlay(wm: WindowManager? = null) {
             verticalAlignment = Alignment.CenterVertically
           ) {
             if (config.combatShowDamageColumn) {
-              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_pvp_damage), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = damageColumnText, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
             if (config.combatShowHealsColumn) {
-              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_pvp_heals), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = healsColumnText, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
             if (config.combatShowCCColumn) {
-              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = stringResource(Res.string.combat_column_cc), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = ccColumnText, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
           }
 
@@ -210,10 +222,34 @@ fun CombatOverlay(wm: WindowManager? = null) {
               val settingsInteractionSource = remember { MutableInteractionSource() }
               Text(text = "\uf013", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (settingsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = settingsInteractionSource))
             }
-            IconButton(onClick = { PlayerCacheInteractor.resetAllSessions() }, modifier = Modifier.size(32.dp)) {
+            IconButton(onClick = {
+              if (CombatLogInteractor.isRecording.value) {
+                PlayerCacheInteractor.stopSession()
+                RFConfig.update { it.copy(lastSessionStart = 0L) }
+              } else {
+                wm?.openWindow(OverlayType.NEW_SESSION)
+              }
+            }, modifier = Modifier.size(32.dp)) {
+              val isRecording = CombatLogInteractor.isRecording.collectAsState()
               val plusInteractionSource = remember { MutableInteractionSource() }
-              Text(text = "\u002b", fontFamily = FontsHelper.faSolid(), fontSize = 15.sp, color = if (plusInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = plusInteractionSource))
+              val icon = if (isRecording.value) "\uf04d" else "\u002b"
+              val color = if (plusInteractionSource.collectIsHoveredAsState().value) RFColors.AccentRed else if (isRecording.value) RFColors.AccentRed else Color.White
+              Text(text = icon, fontFamily = FontsHelper.faSolid(), fontSize = 15.sp, color = color, modifier = Modifier.hoverable(interactionSource = plusInteractionSource))
             }
+          }
+        }
+
+        if (CombatLogInteractor.showHint.collectAsState().value) {
+          Box(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 20.dp),
+            contentAlignment = Alignment.Center
+          ) {
+            Text(
+              text = "Press '+' to start a new recording session",
+              color = RFColors.TextTertiary,
+              fontSize = 11.sp,
+              maxLines = 1
+            )
           }
         }
 

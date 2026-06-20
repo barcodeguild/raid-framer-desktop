@@ -21,20 +21,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.database.ConfigEntity
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.colorToSliderValue
+import com.reoky.raidframer.core.helpers.formatFileSize
+import com.reoky.raidframer.core.helpers.getDirectorySizeBytes
+import com.reoky.raidframer.core.helpers.getExportDirectory
 import com.reoky.raidframer.core.helpers.sliderValueToColor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
+import com.reoky.raidframer.core.interactor.CombatLogInteractor
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.AppGlobals
+import com.reoky.raidframer.core.helper.UpdateHelper
+import com.reoky.raidframer.core.helper.UpdateStatus
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.*
+import java.awt.Desktop
 import java.util.Locale.getDefault
 import kotlin.system.exitProcess
 
@@ -197,9 +208,17 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
       CharacterDisplayPanel()
 
+      if (config.lastSessionStart > 0) {
+        RecordingSessionPanel(config)
+      }
+
       OverlayFeaturesPanel(wm)
 
       CombatOverlaySettingsPanel()
+
+      ExportSettingsPanel()
+
+      VersionPanel()
 
       // Uninstall :(
       Surface(
@@ -395,12 +414,12 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       label = stringResource(Res.string.settings_mini_graph_description)
     )
 
-    SettingsCheckbox(
-      checked = config.splitChatEnabled,
-      onCheckedChange = { isChecked -> RFConfig.update { it.copy(splitChatEnabled = isChecked) } },
-      label = stringResource(Res.string.settings_split_chat),
-      accent = false
-    )
+//    SettingsCheckbox(
+//      checked = config.splitChatEnabled,
+//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(splitChatEnabled = isChecked) } },
+//      label = stringResource(Res.string.settings_split_chat),
+//      accent = false
+//    )
 
     SettingsCheckbox(
       checked = config.tabbedDetectionEnabled,
@@ -414,26 +433,26 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       label = stringResource(Res.string.settings_allow_pve_damage)
     )
 
-    SettingsCheckbox(
-      checked = config.gameScheduleHotkeyEnabled,
-      onCheckedChange = { isChecked -> RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) } },
-      label = stringResource(Res.string.settings_game_schedule_hotkey),
-      accent = false
-    )
+//    SettingsCheckbox(
+//      checked = config.gameScheduleHotkeyEnabled,
+//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) } },
+//      label = stringResource(Res.string.settings_game_schedule_hotkey),
+//      accent = false
+//    )
 
-    SettingsCheckbox(
-      checked = config.useSadlyDotEyeOhhh,
-      onCheckedChange = { isChecked -> RFConfig.update { it.copy(useSadlyDotEyeOhhh = isChecked) } },
-      label = stringResource(Res.string.settings_use_sadly),
-      accent = false
-    )
+//    SettingsCheckbox(
+//      checked = config.useSadlyDotEyeOhhh,
+//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(useSadlyDotEyeOhhh = isChecked) } },
+//      label = stringResource(Res.string.settings_use_sadly),
+//      accent = false
+//    )
 
-    SettingsCheckbox(
-      checked = config.dragonBreathOverlayEnabled,
-      onCheckedChange = { isChecked -> RFConfig.update { it.copy(dragonBreathOverlayEnabled = isChecked) } },
-      label = stringResource(Res.string.settings_dragon_breath_overlay),
-      accent = false
-    )
+//    SettingsCheckbox(
+//      checked = config.dragonBreathOverlayEnabled,
+//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(dragonBreathOverlayEnabled = isChecked) } },
+//      label = stringResource(Res.string.settings_dragon_breath_overlay),
+//      accent = false
+//    )
 
     Spacer(modifier = Modifier.height(12.dp))
   }
@@ -525,6 +544,226 @@ private fun CombatOverlaySettingsPanel() {
       onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatControlsFadeEnabled = isChecked) } },
       label = stringResource(Res.string.settings_combat_fade_controls)
     )
+  }
+}
+
+@Composable
+private fun ExportSettingsPanel() {
+  val config by RFConfig.state.collectAsState()
+  val exportDir = getExportDirectory()
+  val directorySize = remember(exportDir) {
+    if (exportDir != null) getDirectorySizeBytes(exportDir) else 0L
+  }
+
+  SettingsSection(
+    title = stringResource(Res.string.settings_export_title),
+    description = stringResource(Res.string.settings_export_description)
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text(
+            text = stringResource(Res.string.settings_export_directory_label),
+            color = RFColors.TextSecondary,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = exportDir ?: stringResource(Res.string.settings_export_directory_not_found),
+            color = if (exportDir != null) Color(0xFF66BB6A) else RFColors.AccentRed,
+            fontSize = 13.sp
+          )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = "${stringResource(Res.string.settings_export_size_label)} ${formatFileSize(directorySize)}",
+          color = RFColors.TextSecondary,
+          fontSize = 12.sp
+        )
+      }
+      Spacer(modifier = Modifier.width(12.dp))
+      Button(
+        onClick = {
+          if (exportDir != null) {
+            Desktop.getDesktop().open(java.io.File(exportDir))
+          }
+        },
+        colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+        enabled = exportDir != null
+      ) {
+        Text(
+          text = stringResource(Res.string.settings_export_open_folder),
+          color = Color.White,
+          fontWeight = FontWeight.SemiBold,
+          fontSize = 13.sp
+        )
+      }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    SettingsCheckbox(
+      checked = config.exportIncludeRawJsonLogs,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportIncludeRawJsonLogs = isChecked) } },
+      label = stringResource(Res.string.settings_export_include_raw_json),
+      accent = true
+    )
+  }
+}
+
+@Composable
+private fun VersionPanel() {
+  val currentVersion = AppGlobals.APP_VERSION
+  var updateStatus by remember { mutableStateOf<UpdateStatus>(UpdateStatus.Idle) }
+  val scope = rememberCoroutineScope()
+
+  SettingsSection(
+    title = stringResource(Res.string.settings_about_title),
+    description = stringResource(Res.string.settings_about_github_note)
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text(
+            text = stringResource(Res.string.settings_about_version_label),
+            color = RFColors.TextSecondary,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = currentVersion,
+            color = RFColors.TextPrimary,
+            fontSize = 13.sp
+          )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        when (val status = updateStatus) {
+          is UpdateStatus.Available -> Text(
+            text = stringResource(Res.string.settings_update_available, status.newVersion),
+            color = Color(0xFF66BB6A),
+            fontSize = 12.sp
+          )
+          is UpdateStatus.Checking -> Text(
+            text = stringResource(Res.string.settings_update_checking),
+            color = RFColors.TextSecondary,
+            fontSize = 12.sp
+          )
+          is UpdateStatus.UpToDate -> Text(
+            text = stringResource(Res.string.settings_update_up_to_date),
+            color = RFColors.TextSecondary,
+            fontSize = 12.sp
+          )
+          is UpdateStatus.Error -> Text(
+            text = stringResource(Res.string.settings_update_check_failed),
+            color = RFColors.AccentRed,
+            fontSize = 12.sp
+          )
+          is UpdateStatus.Idle -> {}
+        }
+      }
+      Spacer(modifier = Modifier.width(12.dp))
+      Button(
+        onClick = {
+          updateStatus = UpdateStatus.Checking
+          scope.launch(Dispatchers.IO) {
+            UpdateHelper.checkForUpdates { status ->
+              scope.launch(Dispatchers.Main) { updateStatus = status }
+            }
+          }
+        },
+        colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+        enabled = updateStatus is UpdateStatus.Idle || updateStatus is UpdateStatus.Error || updateStatus is UpdateStatus.UpToDate
+      ) {
+        Text(
+          text = stringResource(Res.string.settings_about_check_updates_button),
+          color = Color.White,
+          fontWeight = FontWeight.SemiBold,
+          fontSize = 13.sp
+        )
+      }
+    }
+
+    if (updateStatus is UpdateStatus.Available) {
+      Spacer(modifier = Modifier.height(8.dp))
+      val releaseUrl = (updateStatus as UpdateStatus.Available).releaseUrl
+      Text(
+        text = releaseUrl,
+        color = Color(0xFF64B5F6),
+        fontSize = 12.sp,
+        modifier = Modifier.clickable {
+          if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().browse(java.net.URI(releaseUrl))
+          }
+        }
+      )
+    }
+  }
+}
+
+@Composable
+private fun RecordingSessionPanel(config: ConfigEntity) {
+  val mode = if (config.allowPVEDamage) "PvE" else "PvP"
+  var elapsedSeconds by remember { mutableStateOf(0L) }
+
+  LaunchedEffect(config.lastSessionStart) {
+    while (config.lastSessionStart > 0) {
+      elapsedSeconds = (System.currentTimeMillis() - config.lastSessionStart) / 1000
+      delay(1000)
+    }
+  }
+
+  val minutes = elapsedSeconds / 60
+  val seconds = elapsedSeconds % 60
+  val timeStr = String.format("%02d:%02d", minutes, seconds)
+
+  SettingsSection(
+    title = "Recording Session",
+    description = "Combat events are being recorded to ${config.lastSessionTitle}"
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Column {
+        Text(
+          text = "Type: ${config.lastSessionType} ($mode)",
+          color = RFColors.TextPrimary,
+          fontSize = 13.sp,
+          fontWeight = FontWeight.Medium
+        )
+        Text(
+          text = "Duration: $timeStr",
+          color = RFColors.TextSecondary,
+          fontSize = 12.sp,
+          fontWeight = FontWeight.Medium
+        )
+      }
+      Spacer(modifier = Modifier.weight(1f))
+      Button(
+        onClick = {
+          PlayerCacheInteractor.stopSession()
+          RFConfig.update { it.copy(lastSessionStart = 0L) }
+        },
+        colors = ButtonDefaults.buttonColors(RFColors.AccentRed)
+      ) {
+        Text(
+          text = "Stop Recording",
+          color = Color.White,
+          fontWeight = FontWeight.SemiBold,
+          fontSize = 13.sp
+        )
+      }
+    }
   }
 }
 

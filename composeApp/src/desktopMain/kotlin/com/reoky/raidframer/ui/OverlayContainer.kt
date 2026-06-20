@@ -17,6 +17,7 @@ import com.reoky.raidframer.ui.overlay.SummaryOverlay
 import com.reoky.raidframer.ui.overlay.CombatOverlay
 import com.reoky.raidframer.ui.overlay.CompanionOverlay
 import com.reoky.raidframer.ui.overlay.MiniOverlay
+import com.reoky.raidframer.ui.overlay.NewSessionOverlay
 import com.reoky.raidframer.ui.overlay.PokemonOverlay
 import com.reoky.raidframer.ui.overlay.RaidOverlay
 import com.reoky.raidframer.ui.overlay.SettingsOverlay
@@ -41,11 +42,10 @@ fun OverlayContainer(wm: WindowManager) {
         initialPosition = WindowPosition(Dp(state.lastPositionXDp), Dp(state.lastPositionYDp)),
         initialSize = DpSize(Dp(state.lastWidthDp), Dp(state.lastHeightDp)),
         windowType = state.windowType,
-        isObstructing = mutableStateOf(false),
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
         isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(state.windowType == OverlayWindowType.TOOLTIP),
         isResizable = resizable,
-        isFocusable = true,
+        isFocusable = type == OverlayType.NEW_SESSION,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->
         val scope = rememberCoroutineScope()
@@ -59,6 +59,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.COMPANION -> CompanionOverlay(wm)
           OverlayType.POKEMON -> PokemonOverlay(wm)
           OverlayType.TRACKER -> TrackerOverlay(wm)
+          OverlayType.NEW_SESSION -> NewSessionOverlay(wm)
           OverlayType.RAID -> RaidOverlay(wm)
           OverlayType.PLAYER_CARD -> PlayerCardOverlay(wm)
           else -> {}//throw Exception("Overlay type $type not implemented")

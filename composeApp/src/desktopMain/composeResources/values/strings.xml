@@ -20,6 +20,18 @@
     <string name="companion_toggle_display_mark_silenced_targets">Show a [Black Dot] over player's heads to indicate that they are Silenced.</string>
     <string name="companion_toggle_display_mark_distressed_targets">Show a [Blue Dot] over player's heads to indicate that they are Distressed.</string>
 
+    <!-- New Session Overlay -->
+    <string name="new_session_title">New Recording Session</string>
+    <string name="new_session_event_type_label">Event Type</string>
+    <string name="new_session_custom_name_label">Custom Session Name</string>
+    <string name="new_session_custom_name_placeholder">Enter session name (a-zA-Z0-9)</string>
+    <string name="new_session_damage_mode_label">Damage Mode</string>
+    <string name="new_session_pvp_only">PvP Damage Only</string>
+    <string name="new_session_allow_pve">Allow PvE Damage</string>
+    <string name="new_session_file_name_label">Session File Name</string>
+    <string name="new_session_start_recording">Start Recording</string>
+    <string name="new_session_cancel">Nope</string>
+
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Settings</string>
     <string name="settings_data_sourcing_title">Data Sourcing</string>
@@ -98,6 +110,7 @@
     <string name="player_card_stat_damage">Total Damage</string>
     <string name="player_card_stat_healing">Total Healing</string>
     <string name="player_card_stat_cc">CC Delivered</string>
+    <string name="player_card_stat_buffs">Buffs</string>
     <string name="player_card_stat_debuffs">Debuffs</string>
     <string name="player_card_stat_charms">Charms</string>
     <string name="player_card_stat_distress">Distresses</string>
@@ -120,7 +133,10 @@
     <!-- Combat Overlay -->
     <string name="combat_column_pvp_damage">🔥 PvP Damage 🔥</string>
     <string name="combat_column_pvp_heals">💉 PvP Heals 💉</string>
-    <string name="combat_column_cc">⛨ CC Delivered ⛨</string>
+    <string name="combat_column_pvp_cc">⛨ PvP CC ⛨</string>
+    <string name="combat_column_pve_damage">⚔️ PvE Damage ⚔️</string>
+    <string name="combat_column_pve_heals">💉 PvE Heals 💉</string>
+    <string name="combat_column_pve_cc">⛨ PvE CC ⛨</string>
     <string name="combat_no_columns_message">Bro.. Try Adding at Least One Category..</string>
     <string name="combat_open_settings">Open Settings</string>
 
@@ -215,6 +231,29 @@
     <string name="potion_name_phoenix_tears_tincture">Phoenix Tears Tincture</string>
     <string name="potion_name_wild_ginseng">Wild Ginseng! (What a lucky friend!)</string>
 
+    <!-- PNG Export -->
+    <string name="export_title_battle_summary">Battle Summary</string>
+    <string name="export_no_data">No data</string>
+
+    <!-- Export Settings -->
+    <string name="settings_export_title">Export Settings</string>
+    <string name="settings_export_description">Manage export output directory and options.</string>
+    <string name="settings_export_directory_label">Export Directory:</string>
+    <string name="settings_export_size_label">Space Used:</string>
+    <string name="settings_export_open_folder">Open Folder</string>
+    <string name="settings_export_include_raw_json">Include raw JSON formatted logs when exporting. (Uses disk space)</string>
+    <string name="settings_export_directory_not_found">Directory not found</string>
+
+    <!-- About / Update Strings -->
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_version_label">Current Version:</string>
+    <string name="settings_about_check_updates_button">Check for Updates</string>
+    <string name="settings_update_available">Update available: %1$s</string>
+    <string name="settings_update_up_to_date">You are running the latest version</string>
+    <string name="settings_update_check_failed">Failed to check for updates</string>
+    <string name="settings_update_checking">Checking...</string>
+    <string name="settings_about_github_note">Checks github.com for new releases. No data is sent to any server.</string>
+
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Raid Management &amp; Attendance</string>
     <string name="raid_tab_attendance">Attendance</string>
@@ -226,13 +265,15 @@
     <string name="raid_include_coraid">Include Co-Raid</string>
     <string name="raid_include_nearby_same_faction">Include Nearby Same-Faction Players</string>
     <string name="raid_include_nearby_opposite_faction">Include Nearby Opposite-Faction Players</string>
-    <string name="raid_require_pvp_filter">Require at least some PvP participation (25k dmg, 25k heals, or 25+ cc points to filter non-combatants)</string>
+    <string name="raid_require_pvp_filter">Require at least some participation. (25k damage, 25k heals, or 25+ CC points)</string>
     <string name="raid_include_departed">Include players that left raid</string>
     <string name="raid_copy_attendance">Copy Attendance</string>
     <string name="raid_haranya_faction">Haranya Faction (%d)</string>
     <string name="raid_nuian_faction">Nuian Faction (%d)</string>
     <string name="raid_pirate_faction">Pirate Faction (%d)</string>
     <string name="raid_close">Close</string>
+    <string name="raid_nearby_disclaimer">Shows only players that have generated combat events nearby. Does not detect stealthed players.</string>
+    <string name="raid_nearby_require_pvp">Require participation (25k damage, 25k heals, or 25+ CC)</string>
     <string name="app_already_running">Raid Framer is already running.</string>
 
 </resources>

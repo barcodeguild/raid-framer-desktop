@@ -54,6 +54,8 @@ import raid_framer_desktop.composeapp.generated.resources.raid_include_main_raid
 import raid_framer_desktop.composeapp.generated.resources.raid_include_nearby_opposite_faction
 import raid_framer_desktop.composeapp.generated.resources.raid_include_nearby_same_faction
 import raid_framer_desktop.composeapp.generated.resources.raid_main_raid_label
+import raid_framer_desktop.composeapp.generated.resources.raid_nearby_disclaimer
+import raid_framer_desktop.composeapp.generated.resources.raid_nearby_require_pvp
 import raid_framer_desktop.composeapp.generated.resources.raid_no_raid_detected
 import raid_framer_desktop.composeapp.generated.resources.raid_nuian_faction
 import raid_framer_desktop.composeapp.generated.resources.raid_pirate_faction
@@ -495,6 +497,12 @@ private fun NearbyTab(
   nearbyPirate: List<PlayerCard>
 ) {
   val scrollState = rememberScrollState()
+  var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
+
+  val filteredHaranya = if (requirePvPParticipation) nearbyHaranya.filter { it.hasPvPParticipation() } else nearbyHaranya
+  val filteredNuia = if (requirePvPParticipation) nearbyNuia.filter { it.hasPvPParticipation() } else nearbyNuia
+  val filteredPirate = if (requirePvPParticipation) nearbyPirate.filter { it.hasPvPParticipation() } else nearbyPirate
+
   Column(
     modifier = Modifier
       .fillMaxSize()
@@ -513,13 +521,13 @@ private fun NearbyTab(
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
         Text(
-          text = stringResource(Res.string.raid_haranya_faction, nearbyHaranya.size),
+          text = String.format(stringResource(Res.string.raid_haranya_faction), filteredHaranya.size),
           color = Color.White,
           fontWeight = FontWeight.Bold,
           fontSize = 13.sp
         )
         RaidComponent(
-          parties = nearbyHaranya.mapIndexed { index, card ->
+          parties = filteredHaranya.mapIndexed { index, card ->
             RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
           }.chunked(5),
           modifier = Modifier.wrapContentSize()
@@ -533,13 +541,13 @@ private fun NearbyTab(
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
         Text(
-          text = stringResource(Res.string.raid_nuian_faction, nearbyNuia.size),
+          text = String.format(stringResource(Res.string.raid_nuian_faction), filteredNuia.size),
           color = Color.White,
           fontWeight = FontWeight.Bold,
           fontSize = 13.sp
         )
         RaidComponent(
-          parties = nearbyNuia.mapIndexed { index, card ->
+          parties = filteredNuia.mapIndexed { index, card ->
             RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
           }.chunked(5),
           modifier = Modifier.wrapContentSize()
@@ -553,18 +561,31 @@ private fun NearbyTab(
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
         Text(
-          text = stringResource(Res.string.raid_pirate_faction, nearbyPirate.size),
+          text = String.format(stringResource(Res.string.raid_pirate_faction), filteredPirate.size),
           color = Color.White,
           fontWeight = FontWeight.Bold,
           fontSize = 13.sp
         )
         RaidComponent(
-          parties = nearbyPirate.mapIndexed { index, card ->
+          parties = filteredPirate.mapIndexed { index, card ->
             RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
           }.chunked(5),
           modifier = Modifier.wrapContentSize()
         )
       }
     }
+    Text(
+      text = stringResource(Res.string.raid_nearby_disclaimer),
+      color = Color.LightGray,
+      fontSize = 11.sp,
+      fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+      modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+    )
+    CheckBoxComponent(
+      label = stringResource(Res.string.raid_nearby_require_pvp),
+      initialChecked = requirePvPParticipation,
+      onCheckedChange = { requirePvPParticipation = it },
+      textColor = Color.White
+    )
   }
 }
