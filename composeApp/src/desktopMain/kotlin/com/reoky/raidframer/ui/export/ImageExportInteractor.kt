@@ -456,30 +456,68 @@ object ImageExportInteractor {
    * Title card — now drawn full-width so there is no wasted space on the right.
    * The session metadata is sourced from ExportData which was salted with
    */
+  private var logoCache: BufferedImage? = null
+
+  private fun loadLogo(): BufferedImage? {
+    return logoCache ?: run {
+      try {
+        val uri = Res.getUri("drawable/raidframer.ico")
+        if (uri != null) {
+          val bytes = URI(uri.toString()).toURL().openStream().use { it.readBytes() }
+          val data = org.jetbrains.skia.Data.makeFromBytes(bytes)
+          val codec = org.jetbrains.skia.Codec.makeFromData(data)
+          val imageInfo = org.jetbrains.skia.ImageInfo.makeN32Premul(codec.width, codec.height)
+          val bitmap = org.jetbrains.skia.Bitmap()
+          bitmap.allocPixels(imageInfo)
+          codec.readPixels(bitmap, 0, 0)
+
+          val awtImage = BufferedImage(codec.width, codec.height, BufferedImage.TYPE_INT_ARGB)
+          for (py in 0 until codec.height) {
+            for (px in 0 until codec.width) {
+              awtImage.setRGB(px, py, bitmap.getColor(px, py))
+            }
+          }
+          logoCache = awtImage
+        }
+      } catch (_: Exception) { }
+      logoCache
+    }
+  }
+
   private fun drawTitleCard(g2d: Graphics2D, data: ExportData, x: Int, y: Int, width: Int): Int {
     val titleH = TITLE_CARD_HEIGHT
 
     drawCardBackgroundTransparent(g2d, x, y, width, titleH)
+
+    val logoSize = 64
+    val logo = loadLogo()
+    var textStartX = x + CARD_PADDING + 4
+    if (logo != null) {
+      val logoX = x + CARD_PADDING + (logoSize / 2)
+      val logoY = y + (titleH - logoSize) / 2
+      g2d.drawImage(logo, logoX - logoSize / 2, logoY, logoSize, logoSize, null)
+      textStartX = x + CARD_PADDING + logoSize + 12
+    }
 
     val titleFont    = createFont(Font.BOLD,  20f)
     val subtitleFont = createFont(Font.PLAIN, 12f)
 
     g2d.color = TEXT_PRIMARY
     g2d.font  = titleFont
-    g2d.drawString("${AppGlobals.APP_NAME} — ${data.battleSummaryTitle}", x + CARD_PADDING + 4, y + 32)
+    g2d.drawString("${AppGlobals.APP_NAME} — ${data.battleSummaryTitle}", textStartX, y + 32)
 
     val durationStr = formatDuration(data.sessionDurationMs)
     g2d.font  = subtitleFont
     g2d.color = toAwtColor(RFColors.TextSecondary)
     g2d.drawString(
       "${data.sessionTitle}  •  ${data.sessionDate}  •  ${AppGlobals.APP_VERSION}  •  $durationStr",
-      x + CARD_PADDING + 4, y + 56
+      textStartX, y + 56
     )
 
     g2d.font  = createFont(Font.PLAIN, 10f)
     val faded = toAwtColor(RFColors.TextSecondary)
     g2d.color = Color(faded.red, faded.green, faded.blue, 120)
-    g2d.drawString("${AppGlobals.APP_NAME} v${AppGlobals.APP_VERSION}", x + CARD_PADDING + 4, y + 78)
+    g2d.drawString("${AppGlobals.APP_NAME} v${AppGlobals.APP_VERSION}", textStartX, y + 78)
 
     return titleH
   }
