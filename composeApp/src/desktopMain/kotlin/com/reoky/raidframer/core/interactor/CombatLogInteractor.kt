@@ -78,12 +78,12 @@ object CombatLogInteractor : Interactor() {
   fun stopRecording() {
     if (!_isRecording.value) return
     _isRecording.value = false
+    val sessionStart = RFConfig.state.value.lastSessionStart
     scope.launch {
       flushBuffer()
       closeWriter()
       val config = RFConfig.state.value
       val sessionTitle = config.lastSessionTitle.ifBlank { "session" }
-      val sessionStart = config.lastSessionStart
       val sessionEnd = System.currentTimeMillis()
       val durationMs = if (sessionStart > 0) sessionEnd - sessionStart else 0L
       val now = Date()
