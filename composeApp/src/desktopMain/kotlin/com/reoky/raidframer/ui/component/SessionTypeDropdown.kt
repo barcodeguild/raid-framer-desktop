@@ -26,7 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.RFColors
 
+const val SESSION_TYPE_DONT_CARE = "Don't Care"
+
 val SESSION_TYPES = listOf(
+  SESSION_TYPE_DONT_CARE,
   "Abyssal Attack / Luscas",
   "Aegis Island",
   "Black Dragon",
@@ -58,6 +61,10 @@ val SESSION_TYPES = listOf(
   "Ocean Packs",
   "Player Duels",
   "Scrims",
+  "Siege Calmlands",
+  "Siege Heedmar",
+  "Siege Marcala",
+  "Siege Nuimari",
   "Sparring Arena",
   "Sungold CR",
   "Thunderwing Titan",

@@ -45,6 +45,7 @@ import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.SESSION_TYPE_DONT_CARE
 import com.reoky.raidframer.ui.component.SESSION_TYPES
 import com.reoky.raidframer.ui.component.SessionTypeDropdown
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -88,12 +89,13 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
   }
 
   fun updateFileName() {
-    val rawName = if (isCustomEvent) {
+    val baseName = if (selectedEventType == SESSION_TYPE_DONT_CARE) {
+      "dont_care"
+    } else if (isCustomEvent) {
       customEventName.lowercase().replace(Regex("[^a-z0-9]"), "_")
     } else {
       selectedEventType.lowercase().replace(Regex("[^a-z0-9]"), "_")
     }
-    val baseName = rawName.replace(Regex("_+"), "_").trim('_')
     val modeSuffix = if (allowPvEDamage) "pve" else "pvp"
     val timeSuffix = SimpleDateFormat("HHmm'Z'", Locale.US).apply { timeZone = java.util.TimeZone.getTimeZone("UTC") }.format(Date())
     val dateSuffix = SimpleDateFormat("MMddyy", Locale.US).format(Date())
@@ -111,16 +113,18 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
     }
     customError = null
 
+    val isDontCare = selectedEventType == SESSION_TYPE_DONT_CARE
+    val effectiveAllowPvE = if (isDontCare) (0..1).random() == 1 else allowPvEDamage
     val displayName = if (isCustomEvent) customEventName else selectedEventType
     RFConfig.update {
       it.copy(
         lastSessionTitle = sessionFileName,
         lastSessionStart = System.currentTimeMillis(),
         lastSessionType = displayName,
-        allowPVEDamage = allowPvEDamage
+        allowPVEDamage = effectiveAllowPvE
       )
     }
-    PlayerCacheInteractor.startNewSession(displayName, allowPvEDamage)
+    PlayerCacheInteractor.startNewSession(displayName, effectiveAllowPvE)
     wm?.closeWindow(OverlayType.NEW_SESSION)
   }
 
