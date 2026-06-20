@@ -32,6 +32,9 @@ import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.AppGlobals
+import com.reoky.raidframer.core.helper.UpdateHelper
+import com.reoky.raidframer.core.helper.UpdateStatus
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -214,6 +217,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       CombatOverlaySettingsPanel()
 
       ExportSettingsPanel()
+
+      VersionPanel()
 
       // Uninstall :(
       Surface(
@@ -608,6 +613,100 @@ private fun ExportSettingsPanel() {
       label = stringResource(Res.string.settings_export_include_raw_json),
       accent = true
     )
+  }
+}
+
+@Composable
+private fun VersionPanel() {
+  val currentVersion = AppGlobals.APP_VERSION
+  var updateStatus by remember { mutableStateOf<UpdateStatus>(UpdateStatus.Idle) }
+  val scope = rememberCoroutineScope()
+
+  SettingsSection(
+    title = stringResource(Res.string.settings_about_title),
+    description = stringResource(Res.string.settings_about_github_note)
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text(
+            text = stringResource(Res.string.settings_about_version_label),
+            color = RFColors.TextSecondary,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = currentVersion,
+            color = RFColors.TextPrimary,
+            fontSize = 13.sp
+          )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        when (val status = updateStatus) {
+          is UpdateStatus.Available -> Text(
+            text = stringResource(Res.string.settings_update_available, status.newVersion),
+            color = Color(0xFF66BB6A),
+            fontSize = 12.sp
+          )
+          is UpdateStatus.Checking -> Text(
+            text = stringResource(Res.string.settings_update_checking),
+            color = RFColors.TextSecondary,
+            fontSize = 12.sp
+          )
+          is UpdateStatus.UpToDate -> Text(
+            text = stringResource(Res.string.settings_update_up_to_date),
+            color = RFColors.TextSecondary,
+            fontSize = 12.sp
+          )
+          is UpdateStatus.Error -> Text(
+            text = stringResource(Res.string.settings_update_check_failed),
+            color = RFColors.AccentRed,
+            fontSize = 12.sp
+          )
+          is UpdateStatus.Idle -> {}
+        }
+      }
+      Spacer(modifier = Modifier.width(12.dp))
+      Button(
+        onClick = {
+          updateStatus = UpdateStatus.Checking
+          scope.launch(Dispatchers.IO) {
+            UpdateHelper.checkForUpdates { status ->
+              scope.launch(Dispatchers.Main) { updateStatus = status }
+            }
+          }
+        },
+        colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+        enabled = updateStatus is UpdateStatus.Idle || updateStatus is UpdateStatus.Error || updateStatus is UpdateStatus.UpToDate
+      ) {
+        Text(
+          text = stringResource(Res.string.settings_about_check_updates_button),
+          color = Color.White,
+          fontWeight = FontWeight.SemiBold,
+          fontSize = 13.sp
+        )
+      }
+    }
+
+    if (updateStatus is UpdateStatus.Available) {
+      Spacer(modifier = Modifier.height(8.dp))
+      val releaseUrl = (updateStatus as UpdateStatus.Available).releaseUrl
+      Text(
+        text = releaseUrl,
+        color = Color(0xFF64B5F6),
+        fontSize = 12.sp,
+        modifier = Modifier.clickable {
+          if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().browse(java.net.URI(releaseUrl))
+          }
+        }
+      )
+    }
   }
 }
 
