@@ -157,3 +157,10 @@ val MIGRATION_19_20 = object : Migration(19, 20) {
   }
 }
 
+// added exportIncludeRawJsonLogs to ConfigEntity (06/20/26)
+val MIGRATION_20_21 = object : Migration(20, 21) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN exportIncludeRawJsonLogs INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

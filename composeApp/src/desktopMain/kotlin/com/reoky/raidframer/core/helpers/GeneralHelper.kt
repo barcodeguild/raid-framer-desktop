@@ -9,7 +9,9 @@ import androidx.compose.ui.text.withStyle
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
 import java.awt.Desktop
+import java.io.File
 import java.net.URI
+import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDateTime
@@ -49,6 +51,28 @@ fun getDocumentsDirectory(): String? {
   }
   val home = System.getProperty("user.home") ?: return null
   return Paths.get(home, "Documents").toString()
+}
+
+fun getExportDirectory(): String? {
+  val documentsDir = getDocumentsDirectory() ?: return null
+  return Paths.get(documentsDir, "RFExports").toString()
+}
+
+fun getDirectorySizeBytes(directoryPath: String): Long {
+  return try {
+    val directory = File(directoryPath)
+    if (!directory.exists()) return 0L
+    directory.walkTopDown().filter { it.isFile }.map { it.length() }.sum()
+  } catch (_: Exception) {
+    0L
+  }
+}
+
+fun formatFileSize(bytes: Long): String {
+  if (bytes < 1024L) return "$bytes B"
+  if (bytes < 1024L * 1024L) return "%.1f KB".format(bytes / 1024.0)
+  if (bytes < 1024L * 1024L * 1024L) return "%.1f MB".format(bytes / (1024.0 * 1024.0))
+  return "%.2f GB".format(bytes / (1024.0 * 1024.0 * 1024.0))
 }
 
 

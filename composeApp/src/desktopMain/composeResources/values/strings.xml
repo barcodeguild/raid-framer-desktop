@@ -235,6 +235,15 @@
     <string name="export_title_battle_summary">Battle Summary</string>
     <string name="export_no_data">No data</string>
 
+    <!-- Export Settings -->
+    <string name="settings_export_title">Export Settings</string>
+    <string name="settings_export_description">Manage export output directory and options.</string>
+    <string name="settings_export_directory_label">Export Directory:</string>
+    <string name="settings_export_size_label">Space Used:</string>
+    <string name="settings_export_open_folder">Open Folder</string>
+    <string name="settings_export_include_raw_json">Include raw JSON formatted logs when exporting. (Uses disk space)</string>
+    <string name="settings_export_directory_not_found">Directory not found</string>
+
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Raid Management &amp; Attendance</string>
     <string name="raid_tab_attendance">Attendance</string>

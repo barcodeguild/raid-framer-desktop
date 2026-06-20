@@ -57,6 +57,7 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_17_18) // 06/13/26 added windowColor to config
   .addMigrations(MIGRATION_18_19) // 06/16/26 added session recording fields to config
   .addMigrations(MIGRATION_19_20) // 06/19/26 added lastSessionDurationMs and lastSessionExportDir to config
+  .addMigrations(MIGRATION_20_21) // 06/20/26 added exportIncludeRawJsonLogs to config
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

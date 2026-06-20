@@ -120,6 +120,8 @@ object CombatLogInteractor : Interactor() {
     val config = RFConfig.state.value
     val sessionTitle = config.lastSessionTitle.ifBlank { "session" }
 
+    if (!config.exportIncludeRawJsonLogs) return
+
     val now = Date()
     val year = SimpleDateFormat("yyyy", Locale.US).format(now)
     val month = SimpleDateFormat("MM", Locale.US).format(now)

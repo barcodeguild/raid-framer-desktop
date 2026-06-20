@@ -24,6 +24,9 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.ConfigEntity
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.colorToSliderValue
+import com.reoky.raidframer.core.helpers.formatFileSize
+import com.reoky.raidframer.core.helpers.getDirectorySizeBytes
+import com.reoky.raidframer.core.helpers.getExportDirectory
 import com.reoky.raidframer.core.helpers.sliderValueToColor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
@@ -39,6 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.*
+import java.awt.Desktop
 import java.util.Locale.getDefault
 import kotlin.system.exitProcess
 
@@ -208,6 +212,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       OverlayFeaturesPanel(wm)
 
       CombatOverlaySettingsPanel()
+
+      ExportSettingsPanel()
 
       // Uninstall :(
       Surface(
@@ -403,12 +409,12 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       label = stringResource(Res.string.settings_mini_graph_description)
     )
 
-    SettingsCheckbox(
-      checked = config.splitChatEnabled,
-      onCheckedChange = { isChecked -> RFConfig.update { it.copy(splitChatEnabled = isChecked) } },
-      label = stringResource(Res.string.settings_split_chat),
-      accent = false
-    )
+//    SettingsCheckbox(
+//      checked = config.splitChatEnabled,
+//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(splitChatEnabled = isChecked) } },
+//      label = stringResource(Res.string.settings_split_chat),
+//      accent = false
+//    )
 
     SettingsCheckbox(
       checked = config.tabbedDetectionEnabled,
@@ -422,26 +428,26 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       label = stringResource(Res.string.settings_allow_pve_damage)
     )
 
-    SettingsCheckbox(
-      checked = config.gameScheduleHotkeyEnabled,
-      onCheckedChange = { isChecked -> RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) } },
-      label = stringResource(Res.string.settings_game_schedule_hotkey),
-      accent = false
-    )
+//    SettingsCheckbox(
+//      checked = config.gameScheduleHotkeyEnabled,
+//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) } },
+//      label = stringResource(Res.string.settings_game_schedule_hotkey),
+//      accent = false
+//    )
 
-    SettingsCheckbox(
-      checked = config.useSadlyDotEyeOhhh,
-      onCheckedChange = { isChecked -> RFConfig.update { it.copy(useSadlyDotEyeOhhh = isChecked) } },
-      label = stringResource(Res.string.settings_use_sadly),
-      accent = false
-    )
+//    SettingsCheckbox(
+//      checked = config.useSadlyDotEyeOhhh,
+//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(useSadlyDotEyeOhhh = isChecked) } },
+//      label = stringResource(Res.string.settings_use_sadly),
+//      accent = false
+//    )
 
-    SettingsCheckbox(
-      checked = config.dragonBreathOverlayEnabled,
-      onCheckedChange = { isChecked -> RFConfig.update { it.copy(dragonBreathOverlayEnabled = isChecked) } },
-      label = stringResource(Res.string.settings_dragon_breath_overlay),
-      accent = false
-    )
+//    SettingsCheckbox(
+//      checked = config.dragonBreathOverlayEnabled,
+//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(dragonBreathOverlayEnabled = isChecked) } },
+//      label = stringResource(Res.string.settings_dragon_breath_overlay),
+//      accent = false
+//    )
 
     Spacer(modifier = Modifier.height(12.dp))
   }
@@ -532,6 +538,75 @@ private fun CombatOverlaySettingsPanel() {
       checked = config.combatControlsFadeEnabled,
       onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatControlsFadeEnabled = isChecked) } },
       label = stringResource(Res.string.settings_combat_fade_controls)
+    )
+  }
+}
+
+@Composable
+private fun ExportSettingsPanel() {
+  val config by RFConfig.state.collectAsState()
+  val exportDir = getExportDirectory()
+  val directorySize = remember(exportDir) {
+    if (exportDir != null) getDirectorySizeBytes(exportDir) else 0L
+  }
+
+  SettingsSection(
+    title = stringResource(Res.string.settings_export_title),
+    description = stringResource(Res.string.settings_export_description)
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text(
+            text = stringResource(Res.string.settings_export_directory_label),
+            color = RFColors.TextSecondary,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = exportDir ?: stringResource(Res.string.settings_export_directory_not_found),
+            color = if (exportDir != null) Color(0xFF66BB6A) else RFColors.AccentRed,
+            fontSize = 13.sp
+          )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = "${stringResource(Res.string.settings_export_size_label)} ${formatFileSize(directorySize)}",
+          color = RFColors.TextSecondary,
+          fontSize = 12.sp
+        )
+      }
+      Spacer(modifier = Modifier.width(12.dp))
+      Button(
+        onClick = {
+          if (exportDir != null) {
+            Desktop.getDesktop().open(java.io.File(exportDir))
+          }
+        },
+        colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+        enabled = exportDir != null
+      ) {
+        Text(
+          text = stringResource(Res.string.settings_export_open_folder),
+          color = Color.White,
+          fontWeight = FontWeight.SemiBold,
+          fontSize = 13.sp
+        )
+      }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    SettingsCheckbox(
+      checked = config.exportIncludeRawJsonLogs,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportIncludeRawJsonLogs = isChecked) } },
+      label = stringResource(Res.string.settings_export_include_raw_json),
+      accent = true
     )
   }
 }
