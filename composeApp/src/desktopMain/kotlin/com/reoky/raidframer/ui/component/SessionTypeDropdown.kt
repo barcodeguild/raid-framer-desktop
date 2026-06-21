@@ -60,6 +60,7 @@ val SESSION_TYPES = listOf(
   "Noryette Challenge",
   "Ocean Packs",
   "Player Duels",
+  "Reset Raid",
   "Scrims",
   "Siege Calmlands",
   "Siege Heedmar",
