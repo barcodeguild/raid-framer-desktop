@@ -258,6 +258,7 @@
     <string name="raid_attendance_title">Raid Management &amp; Attendance</string>
     <string name="raid_tab_attendance">Attendance</string>
     <string name="raid_tab_nearby">Nearby</string>
+    <string name="raid_tab_nearby_gear">Nearby Gear</string>
     <string name="raid_no_raid_detected">Please join a raid to use raid management features. You must have the Lua Addon installed. Windows with title bars are not overlays, consider placing on another monitor to avoid covering the game UI.</string>
     <string name="raid_main_raid_label">Main Raid</string>
     <string name="raid_coraid_label">Co-Raid</string>
