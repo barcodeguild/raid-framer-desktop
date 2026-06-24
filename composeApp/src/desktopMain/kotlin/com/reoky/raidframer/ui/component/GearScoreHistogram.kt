@@ -230,7 +230,7 @@ private fun HorizontalBarRow(
         ) {
           Column {
             Text(
-              text = stringResource(Res.string.histogram_tooltip_label, binRange),
+              text = String.format(stringResource(Res.string.histogram_tooltip_label), binRange),
               color = Color.White,
               fontSize = 10.sp,
               fontWeight = FontWeight.Bold,
@@ -246,7 +246,7 @@ private fun HorizontalBarRow(
             }
             if (players.size > TOOLTIP_MAX_PLAYERS) {
               Text(
-                text = stringResource(Res.string.histogram_more_players, players.size - TOOLTIP_MAX_PLAYERS),
+                text = String.format(stringResource(Res.string.histogram_more_players), players.size - TOOLTIP_MAX_PLAYERS),
                 color = Color.Gray,
                 fontSize = 8.sp,
                 fontStyle = FontStyle.Italic
