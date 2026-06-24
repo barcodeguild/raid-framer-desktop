@@ -275,6 +275,11 @@
     <string name="raid_close">Close</string>
     <string name="raid_nearby_disclaimer">Shows only players that have generated combat events nearby. Does not detect stealthed players.</string>
     <string name="raid_nearby_require_pvp">Require participation (25k damage, 25k heals, or 25+ CC)</string>
+    <string name="histogram_no_data">No data</string>
+    <string name="histogram_unknown_label">Unknown</string>
+    <string name="histogram_tooltip_label">Gear Score: %s</string>
+    <string name="histogram_more_players">...and %d more</string>
+    <string name="nearby_avg_gs_format">Avg GS: %d (%d tracked)</string>
     <string name="app_already_running">Raid Framer is already running.</string>
 
 </resources>

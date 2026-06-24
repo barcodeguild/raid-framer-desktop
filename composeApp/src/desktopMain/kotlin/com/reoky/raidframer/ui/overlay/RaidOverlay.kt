@@ -44,6 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.nearby_avg_gs_format
 import raid_framer_desktop.composeapp.generated.resources.raid_attendance_title
 import raid_framer_desktop.composeapp.generated.resources.raid_close
 import raid_framer_desktop.composeapp.generated.resources.raid_copy_attendance
@@ -654,7 +655,7 @@ private fun NearbyGearTab(
           fontSize = 13.sp
         )
         Text(
-          text = "Avg GS: ${avgHaranya} (${filteredHaranya.count { it.lastKnownGearScore > 0 }} tracked)",
+          text = String.format(stringResource(Res.string.nearby_avg_gs_format), avgHaranya, filteredHaranya.count { it.lastKnownGearScore > 0 }),
           color = Color.LightGray,
           fontSize = 11.sp
         )
@@ -677,7 +678,7 @@ private fun NearbyGearTab(
           fontSize = 13.sp
         )
         Text(
-          text = "Avg GS: ${avgNuia} (${filteredNuia.count { it.lastKnownGearScore > 0 }} tracked)",
+          text = String.format(stringResource(Res.string.nearby_avg_gs_format), avgNuia, filteredNuia.count { it.lastKnownGearScore > 0 }),
           color = Color.LightGray,
           fontSize = 11.sp
         )
@@ -700,7 +701,7 @@ private fun NearbyGearTab(
           fontSize = 13.sp
         )
         Text(
-          text = "Avg GS: ${avgPirate} (${filteredPirate.count { it.lastKnownGearScore > 0 }} tracked)",
+          text = String.format(stringResource(Res.string.nearby_avg_gs_format), avgPirate, filteredPirate.count { it.lastKnownGearScore > 0 }),
           color = Color.LightGray,
           fontSize = 11.sp
         )
