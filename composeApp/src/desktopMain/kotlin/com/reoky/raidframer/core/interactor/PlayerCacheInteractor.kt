@@ -1014,9 +1014,8 @@ object PlayerCacheInteractor : Interactor() {
     val combinedParties = (raids[0] ?: emptyList()) + (raids[1] ?: emptyList())
     Pair(cardList, combinedParties)
   }.map { (allCards, combinedParties) ->
-    val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
     val candidates = allCards
-      .filter { it.isRealPlayer && it.lastKnownFaction == Faction.NUIA.value && it.name !in raidNames }
+      .filter { it.isRealPlayer && it.lastKnownFaction == Faction.NUIA.value }
       .sortedWith(gearComparator)
 
     RaidOrganizer.organize(candidates, ArrangementMode.CLASSIC_ROLES).take(400)
@@ -1029,9 +1028,8 @@ object PlayerCacheInteractor : Interactor() {
     Pair(cardList, combinedParties)
   }
     .map { (allCards, combinedParties) ->
-      val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
       val candidates = allCards
-        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.HARANYA.value && it.name !in raidNames }
+        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.HARANYA.value }
         .sortedWith(gearComparator)
 
       RaidOrganizer.organize(candidates, ArrangementMode.CLASSIC_ROLES).take(400)
@@ -1044,9 +1042,8 @@ object PlayerCacheInteractor : Interactor() {
     Pair(cardList, combinedParties)
   }
     .map { (allCards, combinedParties) ->
-      val raidNames = combinedParties.flatten().map { it.playerName }.toSet()
       val candidates = allCards
-        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.PIRATE.value && it.name !in raidNames }
+        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.PIRATE.value }
         .sortedWith(gearComparator)
 
       RaidOrganizer.organize(candidates, ArrangementMode.CLASSIC_ROLES).take(400)

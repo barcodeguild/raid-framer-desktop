@@ -35,6 +35,7 @@ import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CheckBoxComponent
+import com.reoky.raidframer.ui.component.GearScoreHistogram
 import com.reoky.raidframer.ui.component.RaidComponent
 import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -43,6 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.nearby_avg_gs_format
 import raid_framer_desktop.composeapp.generated.resources.raid_attendance_title
 import raid_framer_desktop.composeapp.generated.resources.raid_close
 import raid_framer_desktop.composeapp.generated.resources.raid_copy_attendance
@@ -62,9 +64,10 @@ import raid_framer_desktop.composeapp.generated.resources.raid_pirate_faction
 import raid_framer_desktop.composeapp.generated.resources.raid_require_pvp_filter
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_attendance
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_nearby
+import raid_framer_desktop.composeapp.generated.resources.raid_tab_nearby_gear
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
-private enum class RaidTab { ATTENDANCE, NEARBY }
+private enum class RaidTab { ATTENDANCE, NEARBY, NEARBY_GEAR }
 @Composable
 fun RaidOverlay(wm: WindowManager? = null) {
   val playerFaction = Faction.fromString(RFConfig.state.collectAsState().value.playerFaction)
@@ -75,6 +78,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
   val nearbyPirate = PlayerCacheInteractor.nearbyPirateRaidParties.collectAsState()
   val raidDepartures = PlayerCacheInteractor.raidDeparturesFlow.collectAsState()
   var selectedTab by remember { mutableStateOf(RaidTab.ATTENDANCE) }
+  var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
   Box(modifier = Modifier.fillMaxSize()) {
     if (mainRaid.value.isEmpty() && coRaid.value.isEmpty()) {
       Column(
@@ -143,7 +147,8 @@ fun RaidOverlay(wm: WindowManager? = null) {
             ) {
               val tabs = listOf(
                 RaidTab.ATTENDANCE to Res.string.raid_tab_attendance,
-                RaidTab.NEARBY to Res.string.raid_tab_nearby
+                RaidTab.NEARBY to Res.string.raid_tab_nearby,
+                RaidTab.NEARBY_GEAR to Res.string.raid_tab_nearby_gear
               )
               tabs.forEach { (tab, label) ->
                 Tab(
@@ -175,12 +180,23 @@ fun RaidOverlay(wm: WindowManager? = null) {
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
               playerFaction = playerFaction,
-              raidDepartures = raidDepartures.value
+              raidDepartures = raidDepartures.value,
+              requirePvPParticipation = requirePvPParticipation,
+              onRequirePvPParticipationChange = { requirePvPParticipation = it }
             )
             RaidTab.NEARBY -> NearbyTab(
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
-              nearbyPirate = nearbyPirate.value
+              nearbyPirate = nearbyPirate.value,
+              requirePvPParticipation = requirePvPParticipation,
+              onRequirePvPParticipationChange = { requirePvPParticipation = it }
+            )
+            RaidTab.NEARBY_GEAR -> NearbyGearTab(
+              nearbyNuia = nearbyNuia.value,
+              nearbyHaranya = nearbyHaranya.value,
+              nearbyPirate = nearbyPirate.value,
+              requirePvPParticipation = requirePvPParticipation,
+              onRequirePvPParticipationChange = { requirePvPParticipation = it }
             )
           }
         }
@@ -242,14 +258,15 @@ private fun AttendanceTab(
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
   playerFaction: Faction,
-  raidDepartures: Map<Int, Set<String>>
+  raidDepartures: Map<Int, Set<String>>,
+  requirePvPParticipation: Boolean,
+  onRequirePvPParticipationChange: (Boolean) -> Unit
 ) {
   val scrollState = rememberScrollState()
   var includeMain by rememberSaveable { mutableStateOf(true) }
   var includeCo by rememberSaveable { mutableStateOf(true) }
   var includeNearbySameFaction by rememberSaveable { mutableStateOf(false) }
   var includeNearbyOppositeFaction by rememberSaveable { mutableStateOf(false) }
-  var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
   var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
   fun String.meetsPvP(): Boolean =
     if (!requirePvPParticipation) true
@@ -321,7 +338,7 @@ private fun AttendanceTab(
             includeNearbyOppositeFaction = includeNearbyOppositeFaction,
             onIncludeNearbyOppositeFactionChange = { includeNearbyOppositeFaction = it },
             requirePvPParticipation = requirePvPParticipation,
-            onRequirePvPParticipationChange = { requirePvPParticipation = it },
+            onRequirePvPParticipationChange = onRequirePvPParticipationChange,
             includePlayersThatLeftRaid = includePlayersThatLeftRaid,
             onIncludePlayersThatLeftRaidChange = { includePlayersThatLeftRaid = it },
             attendanceNames = attendanceNames,
@@ -345,7 +362,7 @@ private fun AttendanceTab(
             includeNearbyOppositeFaction = includeNearbyOppositeFaction,
             onIncludeNearbyOppositeFactionChange = { includeNearbyOppositeFaction = it },
             requirePvPParticipation = requirePvPParticipation,
-            onRequirePvPParticipationChange = { requirePvPParticipation = it },
+            onRequirePvPParticipationChange = onRequirePvPParticipationChange,
             includePlayersThatLeftRaid = includePlayersThatLeftRaid,
             onIncludePlayersThatLeftRaidChange = { includePlayersThatLeftRaid = it },
             attendanceNames = attendanceNames,
@@ -494,10 +511,11 @@ private fun AttendanceControlsPane(
 private fun NearbyTab(
   nearbyNuia: List<PlayerCard>,
   nearbyHaranya: List<PlayerCard>,
-  nearbyPirate: List<PlayerCard>
+  nearbyPirate: List<PlayerCard>,
+  requirePvPParticipation: Boolean,
+  onRequirePvPParticipationChange: (Boolean) -> Unit
 ) {
   val scrollState = rememberScrollState()
-  var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
 
   val filteredHaranya = if (requirePvPParticipation) nearbyHaranya.filter { it.hasPvPParticipation() } else nearbyHaranya
   val filteredNuia = if (requirePvPParticipation) nearbyNuia.filter { it.hasPvPParticipation() } else nearbyNuia
@@ -528,7 +546,7 @@ private fun NearbyTab(
         )
         RaidComponent(
           parties = filteredHaranya.mapIndexed { index, card ->
-            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
+            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole, gearScore = card.lastKnownGearScore)
           }.chunked(5),
           modifier = Modifier.wrapContentSize()
         )
@@ -548,7 +566,7 @@ private fun NearbyTab(
         )
         RaidComponent(
           parties = filteredNuia.mapIndexed { index, card ->
-            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
+            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole, gearScore = card.lastKnownGearScore)
           }.chunked(5),
           modifier = Modifier.wrapContentSize()
         )
@@ -568,7 +586,7 @@ private fun NearbyTab(
         )
         RaidComponent(
           parties = filteredPirate.mapIndexed { index, card ->
-            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole)
+            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole, gearScore = card.lastKnownGearScore)
           }.chunked(5),
           modifier = Modifier.wrapContentSize()
         )
@@ -584,7 +602,119 @@ private fun NearbyTab(
     CheckBoxComponent(
       label = stringResource(Res.string.raid_nearby_require_pvp),
       initialChecked = requirePvPParticipation,
-      onCheckedChange = { requirePvPParticipation = it },
+      onCheckedChange = onRequirePvPParticipationChange,
+      textColor = Color.White
+    )
+  }
+}
+
+private fun averageGearScore(players: List<PlayerCard>): Int {
+  val known = players.filter { it.lastKnownGearScore > 0 }
+  return if (known.isEmpty()) 0 else known.map { it.lastKnownGearScore }.average().toInt()
+}
+
+@Composable
+private fun NearbyGearTab(
+  nearbyNuia: List<PlayerCard>,
+  nearbyHaranya: List<PlayerCard>,
+  nearbyPirate: List<PlayerCard>,
+  requirePvPParticipation: Boolean,
+  onRequirePvPParticipationChange: (Boolean) -> Unit
+) {
+  val scrollState = rememberScrollState()
+
+  val filteredHaranya = if (requirePvPParticipation) nearbyHaranya.filter { it.hasPvPParticipation() } else nearbyHaranya
+  val filteredNuia = if (requirePvPParticipation) nearbyNuia.filter { it.hasPvPParticipation() } else nearbyNuia
+  val filteredPirate = if (requirePvPParticipation) nearbyPirate.filter { it.hasPvPParticipation() } else nearbyPirate
+
+  val avgHaranya = averageGearScore(filteredHaranya)
+  val avgNuia = averageGearScore(filteredNuia)
+  val avgPirate = averageGearScore(filteredPirate)
+
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .verticalScroll(scrollState),
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+      Column(
+        modifier = Modifier
+          .weight(1f)
+          .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        Text(
+          text = String.format(stringResource(Res.string.raid_haranya_faction), filteredHaranya.size),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        Text(
+          text = String.format(stringResource(Res.string.nearby_avg_gs_format), avgHaranya, filteredHaranya.count { it.lastKnownGearScore > 0 }),
+          color = Color.LightGray,
+          fontSize = 11.sp
+        )
+        GearScoreHistogram(
+          players = filteredHaranya,
+          modifier = Modifier.padding(top = 4.dp)
+        )
+      }
+      Column(
+        modifier = Modifier
+          .weight(1f)
+          .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        Text(
+          text = String.format(stringResource(Res.string.raid_nuian_faction), filteredNuia.size),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        Text(
+          text = String.format(stringResource(Res.string.nearby_avg_gs_format), avgNuia, filteredNuia.count { it.lastKnownGearScore > 0 }),
+          color = Color.LightGray,
+          fontSize = 11.sp
+        )
+        GearScoreHistogram(
+          players = filteredNuia,
+          modifier = Modifier.padding(top = 4.dp)
+        )
+      }
+      Column(
+        modifier = Modifier
+          .weight(1f)
+          .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        Text(
+          text = String.format(stringResource(Res.string.raid_pirate_faction), filteredPirate.size),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        Text(
+          text = String.format(stringResource(Res.string.nearby_avg_gs_format), avgPirate, filteredPirate.count { it.lastKnownGearScore > 0 }),
+          color = Color.LightGray,
+          fontSize = 11.sp
+        )
+        GearScoreHistogram(
+          players = filteredPirate,
+          modifier = Modifier.padding(top = 4.dp)
+        )
+      }
+    }
+    CheckBoxComponent(
+      label = stringResource(Res.string.raid_nearby_require_pvp),
+      initialChecked = requirePvPParticipation,
+      onCheckedChange = onRequirePvPParticipationChange,
       textColor = Color.White
     )
   }

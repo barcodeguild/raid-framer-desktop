@@ -49,6 +49,15 @@ object RFColors {
   val potionTeal = Color(0xFF26A69A)
   val gliderBlue = Color(0xFF42A5F5)
   val itemSkillYellow = Color(0xFFFFCA28)
+
+  // Gear score histogram gradient colors (low to high gear)
+  val gearRed = Color(0xFFFF1744)
+  val gearOrange = Color(0xFFFF9800)
+  val gearYellow = Color(0xFFFFEB3B)
+  val gearGreen = Color(0xFF8BC34A)
+  val gearBlue = Color(0xFF03A9F4)
+  val gearCyan = Color(0xFF00E5FF)
+  val gearUnknown = Color(0xFF666666)
 }
 
 enum class RFGraphColor(val color: Color) {
