@@ -242,22 +242,6 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
-  /*
-   * Reset all session totals and recent events for all players.
-   */
-  fun resetAllSessions() {
-    scope.launch {
-      mutex.withLock {
-        cards.keys.toList().forEach { name ->
-          cards[name] = cards[name]?.resetSession() ?: return@forEach
-        }
-        petCards.keys.toList().forEach { petId ->
-          petCards[petId] = petCards[petId]?.resetSession() ?: return@forEach
-        }
-      }
-    }
-  }
-
   fun startNewSession(sessionType: String, allowPvE: Boolean) {
     scope.launch {
       RFConfig.update {
@@ -265,7 +249,12 @@ object PlayerCacheInteractor : Interactor() {
           allowPVEDamage = allowPvE
         )
       }
-      resetAllSessions()
+      // go big or go home: better solution that resetting, just clear on start instead
+      mutex.withLock {
+        cards.clear()
+        petCards.clear()
+        raids.clear()
+      }
       CombatLogInteractor.startRecording()
       Log.info(TAG, "Started new recording session: type=$sessionType, allowPvE=$allowPvE")
     }
@@ -279,17 +268,6 @@ object PlayerCacheInteractor : Interactor() {
   // filter pve damage by checking if the target is a real player
   fun isRealPlayer(playerName: String): Boolean {
     return cards.values.any { it.isRealPlayer && it.name == playerName }
-  }
-
-  /*
-   * Clears all raids and their parties from memory when the user leaves or gets kicked_by_self from the game client.
-   */
-  fun clearAllRaids() {
-    scope.launch {
-      mutex.withLock {
-        raids.clear()
-      }
-    }
   }
 
   fun getCard(name: String): PlayerCard? {
@@ -359,41 +337,6 @@ object PlayerCacheInteractor : Interactor() {
       }
       // Emit an immutable snapshot so observers can react to changes
       _raidDeparturesFlow.value = raidDepartures.mapValues { it.value.toSet() }
-    }
-  }
-
-  /**
-   * Clears raid attendance records.
-   * @param raidId The raid to clear, or null to clear all raids
-   * @param playerName Specific player to remove, or null to clear all players for the raid
-   */
-  fun clearRaidAttendance(raidId: Int? = null, playerName: String? = null) {
-    scope.launch {
-      mutex.withLock {
-        when {
-          // Clear specific player from specific raid
-          raidId != null && playerName != null -> {
-            raidAttendance[raidId]?.remove(playerName)
-            raidDepartures[raidId]?.remove(playerName)
-          }
-          // Clear all players from specific raid
-          raidId != null -> {
-            raidAttendance.remove(raidId)
-            raidDepartures.remove(raidId)
-          }
-          // Clear specific player from all raids
-          playerName != null -> {
-            raidAttendance.values.forEach { it.remove(playerName) }
-            raidDepartures.values.forEach { it.remove(playerName) }
-          }
-          // Clear everything
-          else -> {
-            raidAttendance.clear()
-            raidDepartures.clear()
-          }
-        }
-        _raidDeparturesFlow.value = raidDepartures.mapValues { it.value.toSet() }
-      }
     }
   }
 
