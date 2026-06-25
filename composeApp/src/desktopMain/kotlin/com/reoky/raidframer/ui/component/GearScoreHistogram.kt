@@ -39,10 +39,13 @@ import raid_framer_desktop.composeapp.generated.resources.histogram_no_data
 import raid_framer_desktop.composeapp.generated.resources.histogram_tooltip_label
 import raid_framer_desktop.composeapp.generated.resources.histogram_unknown_label
 
-private const val DEFAULT_BIN_SIZE = 500
+private const val DEFAULT_BIN_SIZE = 1000
+private const val GS_FIXED_MIN = 0
+private const val GS_FIXED_MAX = 22000
+private const val LOW_GS_THRESHOLD = 10000
 private const val BAR_HEIGHT = 16
 private const val BAR_SPACING = 2
-private const val LABEL_WIDTH = 40
+private const val LABEL_WIDTH = 48
 private const val MAX_BAR_WIDTH = 280
 private const val TOOLTIP_MAX_PLAYERS = 10
 
@@ -71,38 +74,36 @@ fun GearScoreHistogram(
   val knownPlayers = players.filter { it.lastKnownGearScore > 0 }
   val unknownCount = players.size - knownPlayers.size
 
-  val minGear = knownPlayers.minOfOrNull { it.lastKnownGearScore } ?: 0
-  val maxGear = knownPlayers.maxOfOrNull { it.lastKnownGearScore } ?: 0
+  val lowGsPlayers = knownPlayers.filter { it.lastKnownGearScore < LOW_GS_THRESHOLD }
+  val binnablePlayers = knownPlayers.filter { it.lastKnownGearScore >= LOW_GS_THRESHOLD }
 
-  // round min/max to bin boundaries for clean axis labels
-  val cappedMin = (minGear / binSize) * binSize
-  val cappedMax = ((maxGear / binSize) + 1) * binSize
-
-  val numBins = if (cappedMax > cappedMin) (cappedMax - cappedMin) / binSize else 1
+  val numBins = (GS_FIXED_MAX - LOW_GS_THRESHOLD) / binSize
   val bins = List<MutableList<PlayerCard>>(numBins) { mutableListOf() }
 
-  knownPlayers.forEach { player ->
+  binnablePlayers.forEach { player ->
     val gs = player.lastKnownGearScore
-    val binIndex = ((gs - cappedMin) / binSize).coerceIn(0, numBins - 1)
+    val binIndex = ((gs - LOW_GS_THRESHOLD) / binSize).coerceIn(0, numBins - 1)
     bins[binIndex].add(player)
   }
 
-  val maxCount = bins.maxOfOrNull { it.size }?.coerceAtLeast(1) ?: 1
+  val maxCount = maxOf(bins.maxOfOrNull { it.size }?.coerceAtLeast(1) ?: 1, lowGsPlayers.size)
 
   Column(
     modifier = modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(0.dp)
   ) {
-    // render bins from highest gear to lowest (top to bottom)
+    // render bins from highest gear to lowest (top to bottom), always showing all buckets
     for (i in bins.indices.reversed()) {
       val binPlayers = bins[i]
-      if (binPlayers.isEmpty()) continue
-
       val count = binPlayers.size
-      val barWidth = (count.toFloat() / maxCount * MAX_BAR_WIDTH).toInt().coerceAtLeast(6)
+      val barWidth = if (count > 0) {
+        (count.toFloat() / maxCount * MAX_BAR_WIDTH).toInt().coerceAtLeast(6)
+      } else {
+        0
+      }
       val fraction = i.toFloat() / numBins.toFloat()
       val barColor = gearScoreColor(fraction)
-      val binStart = cappedMin + i * binSize
+      val binStart = LOW_GS_THRESHOLD + i * binSize
       val binEnd = binStart + binSize
 
       HorizontalBarRow(
@@ -114,6 +115,22 @@ fun GearScoreHistogram(
         binRange = "$binStart-${binEnd}"
       )
     }
+
+    // render low GS bucket (< 10k), always shown for alignment
+    val lowCount = lowGsPlayers.size
+    val lowBarWidth = if (lowCount > 0) {
+      (lowCount.toFloat() / maxCount * MAX_BAR_WIDTH).toInt().coerceAtLeast(6)
+    } else {
+      0
+    }
+    HorizontalBarRow(
+      label = "<10k",
+      count = lowCount,
+      barWidth = lowBarWidth,
+      color = RFColors.gearRed,
+      players = lowGsPlayers,
+      binRange = "0-${LOW_GS_THRESHOLD}"
+    )
 
     // visual separator between known and unknown gear buckets
     if (unknownCount > 0 && numBins > 0) {
@@ -178,7 +195,7 @@ private fun HorizontalBarRow(
       ) {
         Text(
           text = label,
-          color = labelColor,
+          color = if (count == 0) Color.DarkGray else labelColor,
           fontSize = if (isUnknown) 10.sp else 8.sp,
           fontWeight = if (isUnknown) FontWeight.Bold else FontWeight.Normal
         )
@@ -261,11 +278,10 @@ private fun HorizontalBarRow(
 
 private fun gearScoreColor(fraction: Float): Color {
   return when {
-    fraction < 0.2f -> lerp(RFColors.gearRed, RFColors.gearOrange, fraction / 0.2f)
-    fraction < 0.4f -> lerp(RFColors.gearOrange, RFColors.gearYellow, (fraction - 0.2f) / 0.2f)
-    fraction < 0.6f -> lerp(RFColors.gearYellow, RFColors.gearGreen, (fraction - 0.4f) / 0.2f)
-    fraction < 0.8f -> lerp(RFColors.gearGreen, RFColors.gearBlue, (fraction - 0.6f) / 0.2f)
-    else -> lerp(RFColors.gearBlue, RFColors.gearCyan, (fraction - 0.8f) / 0.2f)
+    fraction < 0.25f -> lerp(RFColors.gearOrange, RFColors.gearYellow, fraction / 0.25f)
+    fraction < 0.5f -> lerp(RFColors.gearYellow, RFColors.gearGreen, (fraction - 0.25f) / 0.25f)
+    fraction < 0.75f -> lerp(RFColors.gearGreen, RFColors.gearBlue, (fraction - 0.5f) / 0.25f)
+    else -> lerp(RFColors.gearBlue, RFColors.gearCyan, (fraction - 0.75f) / 0.25f)
   }
 }
 
