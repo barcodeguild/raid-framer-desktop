@@ -95,7 +95,7 @@ object CombatLogInteractor : Interactor() {
         lastSessionDurationMs = durationMs,
         lastSessionExportDir = exportDir
       )}
-      exportSummaryImage()
+      exportSummaryImage(durationMs)
       Log.info(TAG, "Combat log recording stopped")
     }
   }
@@ -169,9 +169,9 @@ object CombatLogInteractor : Interactor() {
     currentOutputFile = null
   }
 
-  private suspend fun exportSummaryImage() {
+  private suspend fun exportSummaryImage(durationMs: Long) {
     try {
-      val data = ImageExportInteractor.captureSnapshot()
+      val data = ImageExportInteractor.captureSnapshot(durationMs)
       ImageExportInteractor.exportToPng(data)
     } catch (e: Exception) {
       Log.error(TAG, "Failed to export summary image: ${e.message}")

@@ -186,10 +186,10 @@ object ImageExportInteractor {
   data class SpellDamage(val spell: String, val total: Double)
   data class ItemUsage(val itemName: String, val count: Int)
 
-  suspend fun captureSnapshot(): ExportData {
+  suspend fun captureSnapshot(explicitDurationMs: Long? = null): ExportData {
     val config = RFConfig.state.value
     val sessionStart = config.lastSessionStart
-    val durationMs = if (config.lastSessionDurationMs > 0) {
+    val durationMs = explicitDurationMs ?: if (config.lastSessionDurationMs > 0) {
       config.lastSessionDurationMs
     } else if (sessionStart > 0) {
       System.currentTimeMillis() - sessionStart
