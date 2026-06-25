@@ -40,7 +40,7 @@ import raid_framer_desktop.composeapp.generated.resources.histogram_tooltip_labe
 import raid_framer_desktop.composeapp.generated.resources.histogram_unknown_label
 
 private const val DEFAULT_BIN_SIZE = 1000
-private const val GS_FIXED_MIN = 0
+//private const val GS_FIXED_MIN = 0
 private const val GS_FIXED_MAX = 22000
 private const val LOW_GS_THRESHOLD = 10000
 private const val BAR_HEIGHT = 16
@@ -181,11 +181,11 @@ private fun HorizontalBarRow(
   val interactionSource = remember { MutableInteractionSource() }
   val isHovered by interactionSource.collectIsHoveredAsState()
 
-  Box {
+  Box(
+    modifier = Modifier.height(BAR_HEIGHT.dp)
+  ) {
     Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(BAR_HEIGHT.dp),
+      modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically
     ) {
       // y-axis label (gear score bin start value)

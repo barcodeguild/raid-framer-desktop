@@ -48,7 +48,7 @@ object ImageExportInteractor {
   private const val CARD_PADDING = 8
   private const val SUPER_COL_GAP = 10
 
-  // Title card is now full-width; store its fixed height so both layout functions agree.
+  // Title card is now full-width; store its fixed height, so both layout functions agree.
   private const val TITLE_CARD_HEIGHT = 90
 
   private val CARD_BACKGROUND = Color(0, 0, 0)
