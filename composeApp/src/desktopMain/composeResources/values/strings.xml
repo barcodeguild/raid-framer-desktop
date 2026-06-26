@@ -282,4 +282,18 @@
     <string name="nearby_avg_gs_format">Avg GS: %d (%d tracked)</string>
     <string name="app_already_running">Raid Framer is already running.</string>
 
+    <!-- Seed Table Strings -->
+    <string name="settings_seed_table_title">Seed Table</string>
+    <string name="settings_seed_table_description">Export or import a seed table to share player data with other installations. This helps pre-populate player faction statuses, gear-scores, classes, and guild names for improved accuracy. Player names are hashed for privacy.</string>
+    <string name="settings_seed_table_none">No seed table applied.</string>
+    <string name="settings_seed_table_applied">Seed table: %d players: %s</string>
+    <string name="settings_seed_table_export">Export</string>
+    <string name="settings_seed_table_import">Import</string>
+    <string name="settings_seed_table_remove">Remove</string>
+    <string name="settings_seed_table_date_format">%s (%dd %dh old)</string>
+    <string name="seed_table_apply_prompt">Would you like to apply the seed table from:\n%s\n\nThis will allow the app to use this seed table as a reference for player data.</string>
+    <string name="seed_table_apply_title">Apply Seed Table</string>
+    <string name="seed_table_file_not_found">The specified seed table file was not found: %s</string>
+    <string name="seed_table_applied_success">Seed table applied successfully!</string>
+
 </resources>

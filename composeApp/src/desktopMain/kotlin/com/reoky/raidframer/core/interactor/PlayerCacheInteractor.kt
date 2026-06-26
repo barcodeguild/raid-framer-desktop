@@ -9,11 +9,14 @@ import com.reoky.raidframer.core.calc.RaidOrganizer
 import com.reoky.raidframer.core.calc.RealtimeComputer
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
+import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
 import com.reoky.raidframer.core.definitions.petSkillWhitelist
 import com.reoky.raidframer.core.helpers.createCacheObject
+import com.reoky.raidframer.core.seedtable.SeedTableInteractor
+import com.reoky.raidframer.core.seedtable.SeedTableEntry
 import com.reoky.raidframer.core.helpers.guessPlayerRole
 import com.reoky.raidframer.core.helpers.resetSession
 import com.reoky.raidframer.core.model.*
@@ -171,32 +174,72 @@ object PlayerCacheInteractor : Interactor() {
    */
   private fun createCardIfNoneExists(cid: String? = null, playerName: String) {
     if (!cards.containsKey(playerName)) {
-      val cached = runBlocking {
+      var cached = runBlocking {
         RFDao.playerCacheDao.getPlayerCacheFor(playerName)
       }
+
+      val seedEntry = SeedTableInteractor.lookupPlayer(playerName)
+      if (seedEntry != null && cached != null) {
+        if (SeedTableInteractor.shouldUpdateFromSeedTable(cached.lastSeen, seedEntry)) {
+          cached = mergeFromSeedTable(cached, seedEntry)
+          Log.info(TAG, "Updated cache for $playerName from seed table (newer data)")
+        } else {
+          cached = mergeMissingFromSeedTable(cached, seedEntry)
+          Log.info(TAG, "Merged missing fields for $playerName from seed table")
+        }
+      } else if (seedEntry != null && cached == null) {
+        cached = PlayerCacheEntity(
+          playerName = playerName,
+          lastSeen = seedEntry.lastSeen,
+          lastKnownSpec = seedEntry.lastKnownSpec,
+          lastKnownFaction = seedEntry.lastKnownFaction,
+          lastKnownGearScore = seedEntry.gearScore,
+          lastKnownGuild = seedEntry.lastKnownGuild
+        )
+        Log.info(TAG, "Pre-populated cache for $playerName from seed table")
+      }
+
       val previousSpec = cached?.lastKnownSpec ?: SpecType.UNKNOWN.name
-      // pre-populate card fields from cache. Very important to get this right so we don't overwrite data and for isRealPlayer flag
       val card = PlayerCard(
         name = playerName,
         recentCids = cid?.let { listOf(it) } ?: listOf(),
-        lastEvent = System.currentTimeMillis(), // because an event triggered this load from db
+        lastEvent = System.currentTimeMillis(),
         lastKnownFaction = Faction.fromString(
           cached?.lastKnownFaction ?: Faction.UNKNOWN.value
-        ).value, // fixes bad data over time by fitting into the enum
+        ).value,
         lastKnownFactionStatus = FactionStatus.fromString(
           cached?.lastKnownFactionStatus ?: Faction.UNKNOWN.value
-        ).value, // always code defensive
+        ).value,
         lastKnownGuild = cached?.lastKnownGuild ?: "",
         lastKnownGearScore = cached?.lastKnownGearScore ?: 0,
         leaderships = cached?.leaderships ?: 0,
         isLoaded = true,
-        isRealPlayer = cached != null, // cache is for players not NPCs, Mounts, Pets, Vehicles, etc
-        cache = cached, // everything
+        isRealPlayer = cached != null,
+        cache = cached,
         currentBuild = previousSpec,
         currentRole = SpecType.fromName(previousSpec)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value
       )
       cards[playerName] = card
     }
+  }
+
+  private fun mergeFromSeedTable(cache: PlayerCacheEntity, seed: SeedTableEntry): PlayerCacheEntity {
+    return cache.copy(
+      lastSeen = seed.lastSeen,
+      lastKnownSpec = seed.lastKnownSpec,
+      lastKnownFaction = seed.lastKnownFaction,
+      lastKnownGearScore = seed.gearScore,
+      lastKnownGuild = seed.lastKnownGuild
+    )
+  }
+
+  private fun mergeMissingFromSeedTable(cache: PlayerCacheEntity, seed: SeedTableEntry): PlayerCacheEntity {
+    return cache.copy(
+      lastKnownSpec = if (cache.lastKnownSpec.isBlank()) seed.lastKnownSpec else cache.lastKnownSpec,
+      lastKnownFaction = if (Faction.fromString(cache.lastKnownFaction) == Faction.UNKNOWN) seed.lastKnownFaction else cache.lastKnownFaction,
+      lastKnownGearScore = if (cache.lastKnownGearScore == 0) seed.gearScore else cache.lastKnownGearScore,
+      lastKnownGuild = if (cache.lastKnownGuild.isBlank()) seed.lastKnownGuild else cache.lastKnownGuild
+    )
   }
 
   /*

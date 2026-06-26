@@ -164,3 +164,11 @@ val MIGRATION_20_21 = object : Migration(20, 21) {
   }
 }
 
+// added seed table config fields to ConfigEntity
+val MIGRATION_21_22 = object : Migration(21, 22) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN seedTableLastAppliedTimestamp INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN seedTableFileName TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}
+

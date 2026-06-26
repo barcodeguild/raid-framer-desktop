@@ -1,7 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 val APP_NAME = "Raid Framer"
-val APP_VERSION = "2.0.9"
+val APP_VERSION = "2.1.0"
 val PACKAGE_ID = "com.reoky.raidframer"
 
 plugins {
@@ -84,6 +84,12 @@ compose.desktop {
           mimeType = "application/x-arche-combat-log",
           extension = "rf",
           description = "Raid Framer Combat Log Slice",
+          windowsIconFile = project.file("raidframer.ico")
+        )
+        fileAssociation(
+          mimeType = "application/x-raidframer-seed-table",
+          extension = "rfst",
+          description = "Raid Framer Seed Table",
           windowsIconFile = project.file("raidframer.ico")
         )
       }

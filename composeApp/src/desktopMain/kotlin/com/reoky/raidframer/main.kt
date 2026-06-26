@@ -25,6 +25,7 @@ import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.core.interactor.OverlayInteractor
 import com.reoky.raidframer.core.interactor.PetAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -41,9 +42,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
 import raid_framer_desktop.composeapp.generated.resources.raidframer
+import raid_framer_desktop.composeapp.generated.resources.seed_table_apply_prompt
+import raid_framer_desktop.composeapp.generated.resources.seed_table_apply_title
+import raid_framer_desktop.composeapp.generated.resources.seed_table_applied_success
+import raid_framer_desktop.composeapp.generated.resources.seed_table_file_not_found
 
 const val TAG = "Main"
 private const val SINGLE_INSTANCE_MUTEX = "Local\\RaidFramerDesktopSingleInstance"
@@ -85,14 +91,32 @@ fun main(args: Array<String>) {
     DeathAccumulatorInteractor.start()
     PetAccumulatorInteractor.start()
     CombatLogInteractor.start(delay = 3000L)
+    SeedTableInteractor.start(delay = 2000L)
 
     // file path args processing
-    val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }
+    val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) || it.endsWith(".rfst", ignoreCase = true) }
     if (incoming != null) {
-      try {
-        // Trim surrounding quotes if any (Windows may quote paths with spaces).
-        val cleaned = incoming.trim().trim('"')
-        val p = Paths.get(cleaned)
+      val cleaned = incoming.trim().trim('"')
+      val p = Paths.get(cleaned)
+
+      if (cleaned.endsWith(".rfst", ignoreCase = true)) {
+        if (Files.exists(p)) {
+          val prompt = String.format(stringResource(Res.string.seed_table_apply_prompt), p.toString())
+          val result = JOptionPane.showConfirmDialog(
+            null,
+            prompt,
+            stringResource(Res.string.seed_table_apply_title),
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+          )
+          if (result == JOptionPane.YES_OPTION) {
+            SeedTableInteractor.importSeedTable(p.toFile())
+            messageBox(AppGlobals.APP_NAME, stringResource(Res.string.seed_table_applied_success))
+          }
+        } else {
+          messageBox(AppGlobals.APP_NAME, String.format(stringResource(Res.string.seed_table_file_not_found), incoming))
+        }
+      } else if (cleaned.endsWith(".log", ignoreCase = true)) {
         if (Files.exists(p)) {
           messageBox(AppGlobals.APP_NAME, "You are viewing a replay of combat data from: $p. Live monitoring is disabled while viewing replays.")
           GameMonitorInteractor.chooseCombatLog(p)
@@ -103,13 +127,7 @@ fun main(args: Array<String>) {
           )
           GameMonitorInteractor.restart()
         }
-      } catch (_: Exception) {
-        Log.error(TAG, "Failed to process incoming log path: $incoming")
-        messageBox(AppGlobals.APP_NAME, "Failed to open the specified combat log file: $incoming")
-        exitProcess(1)
       }
-
-    // not viewing a replay so pick the path from settings
     } else {
       // choose game path default automatically
       context.launch(Dispatchers.IO) {
