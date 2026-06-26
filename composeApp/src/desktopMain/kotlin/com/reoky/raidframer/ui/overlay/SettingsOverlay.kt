@@ -11,6 +11,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.ConfigEntity
+import com.reoky.raidframer.core.locale.AppLocale
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.colorToSliderValue
 import com.reoky.raidframer.core.helpers.formatFileSize
@@ -29,7 +34,6 @@ import com.reoky.raidframer.core.helpers.getDirectorySizeBytes
 import com.reoky.raidframer.core.helpers.getExportDirectory
 import com.reoky.raidframer.core.helpers.sliderValueToColor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
-import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableStatus
@@ -462,6 +466,13 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
     Spacer(modifier = Modifier.height(12.dp))
   }
 
+    SettingsSection(
+      title = stringResource(Res.string.settings_language_label),
+      description = null
+    ) {
+      LanguageDropdown(currentCode = config.preferredLanguage)
+    }
+
   // General Overlay Settings
   SettingsSection(
     title = stringResource(Res.string.settings_general_overlay_title),
@@ -515,6 +526,57 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
         inactiveTrackColor = RFColors.CardBorder
       )
     )
+  }
+}
+
+@Composable
+private fun LanguageDropdown(currentCode: String) {
+  var expanded by remember { mutableStateOf(false) }
+  val currentLabel = AppLocale.entryFor(currentCode).nativeLabel
+
+  Box(
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable { expanded = !expanded }
+  ) {
+    OutlinedTextField(
+      value = currentLabel,
+      onValueChange = {},
+      readOnly = true,
+      modifier = Modifier.fillMaxWidth(),
+      colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = RFColors.AccentRed,
+        unfocusedBorderColor = RFColors.CardBorder,
+        focusedTextColor = RFColors.TextPrimary,
+        unfocusedTextColor = RFColors.TextPrimary,
+        cursorColor = RFColors.AccentRed
+      ),
+      trailingIcon = {
+        Text(
+          text = "▼",
+          color = RFColors.TextPrimary,
+          fontSize = 12.sp
+        )
+      }
+    )
+    DropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier.fillMaxWidth(),
+      containerColor = RFColors.CardBackground,
+      tonalElevation = 4.dp
+    ) {
+      (listOf(AppLocale.SYSTEM_DEFAULT) + AppLocale.ENTRIES).forEach { entry ->
+        DropdownMenuItem(
+          text = { Text(text = entry.nativeLabel, color = RFColors.TextPrimary) },
+          onClick = {
+            RFConfig.update { it.copy(preferredLanguage = entry.code) }
+            expanded = false
+          },
+          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+        )
+      }
+    }
   }
 }
 
@@ -732,8 +794,8 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
   val timeStr = String.format("%02d:%02d", minutes, seconds)
 
   SettingsSection(
-    title = "Recording Session",
-    description = "Combat events are being recorded to ${config.lastSessionTitle}"
+    title = stringResource(Res.string.settings_recording_session_title),
+    description = stringResource(Res.string.settings_recording_session_description_format, config.lastSessionTitle)
   ) {
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -741,13 +803,13 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
     ) {
       Column {
         Text(
-          text = "Type: ${config.lastSessionType} ($mode)",
+          text = stringResource(Res.string.settings_recording_session_type_format, config.lastSessionType, mode),
           color = RFColors.TextPrimary,
           fontSize = 13.sp,
           fontWeight = FontWeight.Medium
         )
         Text(
-          text = "Duration: $timeStr",
+          text = stringResource(Res.string.settings_recording_session_duration_format, timeStr),
           color = RFColors.TextSecondary,
           fontSize = 12.sp,
           fontWeight = FontWeight.Medium
@@ -762,7 +824,7 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
         colors = ButtonDefaults.buttonColors(RFColors.AccentRed)
       ) {
         Text(
-          text = "Stop Recording",
+          text = stringResource(Res.string.settings_recording_session_stop),
           color = Color.White,
           fontWeight = FontWeight.SemiBold,
           fontSize = 13.sp

@@ -1,0 +1,382 @@
+<resources>
+
+    <!-- Graphs Strings -->
+    <string name="graphs_trend_graph">趋势图表</string>
+    <string name="graphs_no_recent_data">无近期数据</string>
+    <string name="graphs_player_metric_format">%1$s 的 %2$s</string>
+    <string name="graphs_one_minute">1分钟</string>
+
+    <!-- Companion Addon Settings Strings -->
+    <string name="companion_description">Lua插件从游戏中获取战斗数据。它使得基于原生的功能成为可能，例如基于目标减益追踪、团队管理和游戏内视觉/声音效果。如果你从游戏中移除lua插件，功能将无法按预期工作。</string>
+    <string name="companion_toggle_raid_status">当玩家加入或离开团队时显示主团队/协同团队成员数量。</string>
+    <string name="companion_toggle_display_charmed">在游戏聊天窗口中显示"魅惑"目标。</string>
+    <string name="companion_toggle_display_silenced">在游戏聊天窗口中显示"沉默"目标。</string>
+    <string name="companion_toggle_display_distressed">在游戏聊天窗口中显示"苦恼"目标。</string>
+    <string name="companion_toggl_display_mark_hvt_healers">在最有价值的敌方治疗者上显示[心形标记]。(基于累积PvP治疗量的前3名敌方治疗者。)</string>
+    <string name="companion_toggle_display_mark_hvt_dps">在最有价值的敌方DPS上显示[交叉之剑标记]。(基于累积PvP伤害的前3名敌方DPS。)</string>
+    <string name="companion_toggle_display_mark_hvt_cc">在高价值敌方控场法师上显示[盾牌标记]以便远离。(基于累积PvP控场时间的前3名敌方控场。)</string>
+    <string name="companion_toggle_display_mark_sac_dancers">在献祭舞者引导时在其身上显示上帝之光。(比默认游戏效果更容易发现。)</string>
+    <string name="companion_toggle_display_mark_charmed_targets">在玩家头上显示[紫色点]表示他们被魅惑。</string>
+    <string name="companion_toggle_display_mark_silenced_targets">在玩家头上显示[黑色点]表示他们被沉默。</string>
+    <string name="companion_toggle_display_mark_distressed_targets">在玩家头上显示[蓝色点]表示他们被苦恼。</string>
+
+    <!-- New Session Overlay -->
+    <string name="new_session_title">新录制会话</string>
+    <string name="new_session_event_type_label">事件类型</string>
+    <string name="new_session_custom_name_label">自定义会话名称</string>
+    <string name="new_session_custom_name_placeholder">输入会话名称 (a-zA-Z0-9)</string>
+    <string name="new_session_damage_mode_label">伤害模式</string>
+    <string name="new_session_pvp_only">仅PvP伤害</string>
+    <string name="new_session_allow_pve">允许PvE伤害</string>
+    <string name="new_session_file_name_label">会话文件名</string>
+    <string name="new_session_start_recording">开始录制</string>
+    <string name="new_session_cancel">不了</string>
+
+    <!-- Settings Overlay -->
+    <string name="settings_title">Raid Framer Desktop 设置</string>
+    <string name="settings_data_sourcing_title">数据源</string>
+    <string name="settings_data_sourcing_description">请确认您在下面看到正确的ArcheRage文档目录。您的游戏文档目录已被自动检测。如果您没有看到正确的目录，或者下面的文字是红色的，您应该报告一个bug。</string>
+    <string name="settings_toggle_pvp_damage">仅显示PvP伤害</string>
+    <string name="settings_toggle_show_mini_graph">启用迷你DPS/HEALS/CC图表覆盖</string>
+    <string name="settings_lua_options_title">Lua选项</string>
+    <string name="settings_uninstall_title">卸载Raid Framer</string>
+    <string name="settings_name_placeholder">游戏角色选择</string>
+    <string name="settings_uninstall_description">通过此菜单卸载可以干净地从游戏文件夹中移除Lua插件，它还会关闭应用程序，并触发常规卸载过程。如果您决定取消安装程序，再次打开raid framer将允许您自动重新安装Lua组件。</string>
+    <string name="settings_arche_rage_directory_label">ArcheRage文档目录:</string>
+    <string name="settings_specify_directory_hint">请指定目录(就是有system.cfg文件的那个文件夹!)</string>
+    <string name="settings_lua_companion_options">Lua伴侣选项</string>
+    <string name="settings_your_current_character">您当前的角色</string>
+    <string name="settings_character_note">在游戏中切换角色以自动更新此值。</string>
+    <string name="settings_enter_name_placeholder">输入角色名称</string>
+    <string name="settings_uninstall_done_text">Lua插件已从您的游戏文件夹中安全移除。\n\n**但是**\n\n您仍应通过Windows控制面板卸载"Raid Framer"来完成主应用程序的卸载。(就是这个应用)如果您不卸载，并决定再次打开应用程序，Lua插件将被复制回您的游戏文件夹，以便插件仍能正常工作。(随您的意愿)谢谢!现在退出!</string>
+    <string name="settings_mini_graph_description">启用DPS/HEALS/CC迷你图表。显示随时间变化的性能。</string>
+    <string name="settings_show_heals_column">显示治疗列</string>
+    <string name="settings_show_cc_column">显示控场列</string>
+    <string name="settings_show_damage_column">显示伤害列</string>
+    <string name="settings_combat_overlay_title">战斗覆盖</string>
+    <string name="settings_combat_fade_controls">当光标离开覆盖层时自动淡出图标控件。</string>
+    <string name="settings_split_chat">启用OSRS风格的分割聊天窗口覆盖。(即将推出)</string>
+    <string name="settings_tabbed_detection">在标签页切换出游戏时自动隐藏游戏覆盖。不适用于工具提示(那些有标题栏的)。</string>
+    <string name="settings_allow_pve_damage">允许PvE伤害计入DPS/击杀计数器。(对于想要查看对PvE目标伤害输出的单人玩家很有用)</string>
+    <string name="settings_game_schedule_hotkey">启用[按住TAB]以将官方游戏内活动时间表网站作为覆盖层显示。(即将推出)</string>
+    <string name="settings_use_sadly">我更愿意使用Sadly.io获取游戏内时间表数据。(即将推出)</string>
+    <string name="settings_dragon_breath_overlay">启用龙息检测器和计数器覆盖。(注意:您仍需在龙骑士100米范围内才能目睹龙息，这不是魔法朋友们!)(即将推出)</string>
+    <string name="settings_uninstall_confirm_title">确认卸载</string>
+    <string name="settings_uninstall_confirm_text">您确定要卸载Lua插件吗?这将移除游戏集成。\n\n请在继续之前关闭游戏，否则文件将会残留。</string>
+    <string name="settings_uninstall_confirm_button">卸载</string>
+    <string name="settings_uninstall_button">卸载Lua插件和应用</string>
+    <string name="settings_player_remappings_button">玩家重映射、PvP决斗和过滤器</string>
+    <string name="settings_uninstall_done_title">卸载完成</string>
+    <string name="settings_character_description">当您切换角色时，您的角色和阵营会自动确定。Raid Framer使用此信息来推断随时间变化的友好和敌对角色。</string>
+    <string name="settings_character_title">当前角色</string>
+    <string name="settings_general_opacity_slider">覆盖层不透明度</string>
+    <string name="settings_general_tint_slider">覆盖层颜色</string>
+    <string name="settings_general_title">常规设置</string>
+    <string name="settings_general_description">切换额外的覆盖功能和解析选项。</string>
+    <string name="settings_general_overlay_title">常规覆盖设置</string>
+    <string name="settings_general_overlay_description">一些朋友可能希望调整他们覆盖层的透明度和颜色。</string>
+    <string name="settings_language_label">语言</string>
+
+    <!-- Recording Session Panel (shown when a session is active in Settings) -->
+    <string name="settings_recording_session_title">录制会话中</string>
+    <string name="settings_recording_session_description_format">战斗事件正在记录到 %1$s</string>
+    <string name="settings_recording_session_type_format">类型：%1$s (%2$s)</string>
+    <string name="settings_recording_session_duration_format">持续时间：%1$s</string>
+    <string name="settings_recording_session_stop">停止录制</string>
+
+    <!-- About Overlay Strings -->
+    <string name="about_app_title">Raid Framer Desktop</string>
+    <string name="about_version_label">版本:</string>
+    <string name="about_package_label">包:</string>
+    <string name="about_source_label">源码:</string>
+    <string name="about_read_settings_instruction">使用前请阅读。-&gt;</string>
+    <string name="about_go_to_settings_button">前往设置</string>
+    <string name="about_author_label">作者:</string>
+    <string name="about_author_name">~ Reoky ~</string>
+    <string name="about_dedication_text">献给我们在东方和虚拟世界中的所有朋友。愿此代码用于善，而非恶。</string>
+    <string name="about_thanks_label">来自</string>
+    <string name="about_thanks_location">联合东方</string>
+    <string name="about_community_dedication">感谢ArcheRage社区的支持和反馈。~</string>
+    <string name="about_staff_dedication">感谢ArcheRage工作人员的奉献和辛勤工作。~</string>
+    <string name="about_dev_dedication">感谢ArcheRage开发者的持续支持和更新。~</string>
+
+    <!-- Player Card -->
+    <string name="player_card_no_cached_data">没有可用的缓存数据。</string>
+    <string name="player_card_title_format">%1$s 的玩家卡片</string>
+    <string name="player_card_recent_item_uses">物品使用</string>
+    <string name="player_card_recent_kd_short">近期K/D</string>
+    <string name="player_card_recent_damage">近期伤害</string>
+    <string name="player_card_recent_heals">近期治疗</string>
+    <string name="player_card_recent_kd">近期击杀和死亡</string>
+    <string name="player_card_recent_items">物品技能使用</string>
+    <string name="player_card_recent_buffs">应用的增益</string>
+    <string name="player_card_recent_debuffs">应用的减益</string>
+    <string name="player_card_session_totals">会话总计</string>
+    <string name="player_card_lifetime_totals">终身总计</string>
+
+    <!-- More specific stat labels used in totals -->
+    <string name="player_card_stat_damage">总伤害</string>
+    <string name="player_card_stat_healing">总治疗</string>
+    <string name="player_card_stat_cc">控场交付</string>
+    <string name="player_card_stat_buffs">增益</string>
+    <string name="player_card_stat_debuffs">减益</string>
+    <string name="player_card_stat_charms">魅惑</string>
+    <string name="player_card_stat_distress">苦恼</string>
+    <string name="player_card_stat_silence">沉默</string>
+    <string name="player_card_stat_glider">滑翔翼使用</string>
+    <string name="player_card_stat_items">物品使用</string>
+    <string name="player_card_stat_potions">药水</string>
+    <string name="player_card_stat_kills">击杀</string>
+    <string name="player_card_stat_deaths">死亡</string>
+    <string name="player_card_stat_kills_most_damage">击杀(最高伤害)</string>
+    <string name="player_card_stat_kills_killing_blow">击杀(最后一击)</string>
+    <string name="player_card_stat_total_damage_taken">承受总伤害</string>
+    <string name="player_card_stat_total_heals_received">接受总治疗</string>
+
+    <!-- Player Details Section -->
+    <string name="player_details_title">玩家详情</string>
+    <string name="player_details_leadership_role">领导角色</string>
+
+    <!-- Pet List Item -->
+    <string name="pet_icon_desc_format">%1$s 图标</string>
+    <string name="pet_debuffs_label">减益：</string>
+    <string name="pet_companion_dmg_label">宠物伤害</string>
+
+    <!-- Pokemon / Companions Overlay -->
+    <string name="pokemon_title">龙息、瑞索、战斗宠物及其他生物</string>
+    <string name="pokemon_no_companions">尚未检测到活动的宠物...</string>
+
+    <!-- Thumbnails Helper -->
+    <string name="thumbnail_unknown_format">未知：%1$s</string>
+
+    <!-- Filters Overlay -->
+    <string name="filters_subscriptions_title">订阅</string>
+    <string name="filters_subscriptions_description">订阅允许您创建自定义角色名称重映射。它们类似于过滤器，但优先于所有其他来源。使用它们来覆盖游戏中的法术名称、NPC 名称或战斗日志中的任何其他文本。</string>
+    <string name="filters_see_example_csv">查看 CSV 示例</string>
+    <string name="filters_use_default">使用默认</string>
+    <string name="filters_current_filters_title">当前过滤器</string>
+    <string name="filters_summary_removed_format">%1$s 将被移除。</string>
+    <string name="filters_summary_will_become_format">%1$s 将变为 %2$s。</string>
+    <string name="filters_overrides_title">覆盖</string>
+    <string name="filters_overrides_description">网络过滤器与本地过滤器合并。如果两者冲突，本地过滤器优先。</string>
+    <string name="filters_original_placeholder">原文</string>
+    <string name="filters_replacement_placeholder">替换</string>
+    <string name="filters_add_button">添加到过滤器</string>
+
+    <!-- Exit Dialog -->
+    <string name="exit_dialog_title">您确定吗？</string>
+    <string name="exit_dialog_message">这将退出并关闭任何打开的覆盖窗口。您可以从Windows开始菜单再次启动.:Raid Framer:.。</string>
+    <string name="exit_dialog_dismiss">不了</string>
+
+    <!-- File Selection Dialog -->
+    <string name="file_selection_title">选择战斗日志文件</string>
+    <string name="file_selection_searching">正在搜索有效的战斗日志.. 结果将显示在这里..</string>
+
+    <!-- Combat Overlay -->
+    <string name="combat_press_plus_to_record">按 \'+\' 开始新的录制会话</string>
+    <string name="combat_column_pvp_damage">🔥 PvP伤害 🔥</string>
+    <string name="combat_column_pvp_heals">💉 PvP治疗 💉</string>
+    <string name="combat_column_pvp_cc">⛨ PvP控场 ⛨</string>
+    <string name="combat_column_pve_damage">⚔️ PvE伤害 ⚔️</string>
+    <string name="combat_column_pve_heals">💉 PvE治疗 💉</string>
+    <string name="combat_column_pve_cc">⛨ PvE控场 ⛨</string>
+    <string name="combat_no_columns_message">兄弟.. 试着至少添加一个类别..</string>
+    <string name="combat_open_settings">打开设置</string>
+
+    <!-- Battle Summary Overlay -->
+    <string name="summary_battle_summary_title_format">战斗总结 (%1$s)</string>
+    <string name="summary_silences_by_faction">按阵营沉默</string>
+    <string name="summary_charms_by_faction">按阵营魅惑</string>
+    <string name="summary_distresses_by_faction">按阵营苦恼</string>
+    <string name="summary_top_silences">沉默之王</string>
+    <string name="summary_top_charms">魅惑之王</string>
+    <string name="summary_top_distresses">苦恼之王</string>
+    <string name="summary_top_haranya_spells_damage">哈拉尼亚法术伤害榜</string>
+    <string name="summary_top_nuia_spells_damage">努伊安法术伤害榜</string>
+    <string name="summary_top_pirate_spells_damage">海盗法术伤害榜</string>
+    <string name="summary_top_debuffs">减益榜</string>
+    <string name="summary_top_songs">歌曲榜</string>
+    <string name="summary_top_buffs">增益榜</string>
+    <string name="summary_top_ode_haranya">♪ 哈拉尼亚颂歌 ♪</string>
+    <string name="summary_top_ode_nuia">♪ 努伊安颂歌 ♪</string>
+    <string name="summary_top_ode_pirate">♪ 海盗颂歌 ♪</string>
+    <string name="summary_top_kills_haranya">哈拉尼亚击杀榜</string>
+    <string name="summary_top_kills_nuia">努伊安击杀榜</string>
+    <string name="summary_top_kills_pirate">海盗击杀榜</string>
+    <string name="summary_top_damage_taken">🔥 承受伤害榜 🔥</string>
+    <string name="summary_top_heals_received">💉 接受治疗榜 💉</string>
+    <string name="summary_top_potion_drinkers">药水达人榜</string>
+    <string name="summary_top_glider_gamers">滑翔翼高手榜</string>
+    <string name="summary_most_item_usages">物品使用榜</string>
+    <string name="summary_top_haranya_item_uses">哈拉尼亚物品使用榜</string>
+    <string name="summary_top_nuia_item_uses">努伊安物品使用榜</string>
+    <string name="summary_top_pirate_item_uses">海盗物品使用榜</string>
+    <string name="summary_haranya_builds">哈拉尼亚配装</string>
+    <string name="summary_nuia_builds">努伊安配装</string>
+    <string name="summary_pirate_builds">海盗配装</string>
+
+    <!-- General Strings -->
+    <string name="general_about">关于</string>
+    <string name="general_cancel">取消</string>
+    <string name="general_exit">退出</string>
+    <string name="general_settings">设置</string>
+    <string name="general_instructions_dragging_overlays">Shift + 点击拖动覆盖层</string>
+
+    <!-- App / Tray Menu -->
+    <string name="app_tray_title">.: Raid Framer :.</string>
+    <string name="app_tray_reset_positions">重置窗口位置</string>
+    <string name="app_replay_viewing_format">您正在查看来自以下位置的战斗数据回放：%1$s\n\n回放期间已禁用实时监控。</string>
+    <string name="general_metric_type_cc">控场</string>
+    <string name="general_metric_type_cc_short">CC</string>
+    <string name="general_metric_type_damage">伤害</string>
+    <string name="general_metric_type_damage_short">DMG</string>
+    <string name="general_metric_type_healing">治疗</string>
+    <string name="general_metric_type_healing_short">HEALS</string>
+    <string name="general_no_data_available">无可用数据</string>
+
+    <!-- Help Strings -->
+    <string name="general_help_window_postions_reset">所有窗口位置已重置!请记住:如果您启用了alt-tab检测，任何覆盖层(那些没有标题栏的)可能不会出现，直到您切换回游戏窗口。</string>
+
+    <!-- Leadership Roles -->
+    <string name="leadership_none">无</string>
+    <string name="leadership_raid_lead">团队领袖</string>
+    <string name="leadership_guild_lead">公会领袖</string>
+    <string name="leadership_faction_hero">阵营英雄</string>
+    <string name="leadership_shot_caller">战术指挥</string>
+    <string name="leadership_gm">GM</string>
+
+    <!-- Game Utility Items -->
+    <string name="item_name_kraken_scepter">克拉肯权杖</string>
+    <string name="item_name_kraken_spear">克拉肯长矛</string>
+    <string name="item_name_kraken_shield">克拉肯盾牌</string>
+    <string name="item_name_lib_shield">图书馆盾牌</string>
+    <string name="item_name_library_greatclub">图书馆大棒</string>
+    <string name="item_name_honor_nodachi">荣誉之狂太刀</string>
+    <string name="item_name_jola_shield">乔拉的怨恨</string>
+    <string name="item_name_halcy_neck">宁静项链</string>
+    <string name="item_name_soul_neck">灵魂项链</string>
+    <string name="item_name_mist_nodachi">灭影太刀</string>
+    <string name="item_name_lib_bow">图书馆/不朽守护者之弓</string>
+    <string name="item_name_lib_dagger">图书馆/不朽守护者之匕首</string>
+    <string name="item_name_lib_shortspear">图书馆/不朽守护者之短矛</string>
+    <string name="item_name_lib_staff">图书馆/不朽守护者之杖</string>
+    <string name="item_name_snake_greatsword">蛇之大剑(刃)</string>
+    <string name="item_name_snake_shield">蛇之盾(堡垒)</string>
+    <string name="item_name_snake_sword">蛇之剑(剃刀)</string>
+    <string name="item_name_snake_greataxe">蛇之斧(切肉目标)</string>
+    <string name="item_name_snake_scepter">蛇之权杖(蛇杖/水蛭)</string>
+    <string name="item_name_snake_gun">蛇之枪(子弹)</string>
+    <string name="item_name_bd_shield">黑龙盾</string>
+    <string name="item_name_bd_club">黑龙棒</string>
+    <string name="item_name_bd_bow">黑龙弓(裂眼者)</string>
+    <string name="item_name_bd_gun">黑龙枪(撕咬)</string>
+    <string name="item_name_bd_staff">黑龙杖(咆哮)</string>
+    <string name="item_name_bd_sword">黑龙剑(尾刃者)</string>
+    <string name="item_name_bd_2h_sword">黑龙双手剑(翼刃者)</string>
+    <string name="item_name_sungold_anth_set_pull">日金选集套装拉取</string>
+    <string name="item_name_garden_anth_set_pull">花园选集套装拉取</string>
+    <string name="item_name_serp_staff">腐化智慧(蛇杖)</string>
+    <string name="item_name_mist_dagger">雾歌邪恶低语匕首</string>
+    <string name="item_name_mist_shield">雾歌潜行之牙盾牌</string>
+
+    <!-- Game Potions -->
+    <string name="potion_name_minor_healing_rank_one">面纱之焰(次级治疗药水)</string>
+    <string name="potion_name_minor_healing_rank_two">寂星(次级治疗药水)</string>
+    <string name="potion_name_minor_healing_rank_three">午后阳光(次级治疗药水)</string>
+    <string name="potion_name_minor_healing_rank_four">仲夏流星(次级治疗药水)</string>
+    <string name="potion_name_minor_healing_rank_five">太阳之荣(次级治疗药水)</string>
+    <string name="potion_name_minor_healing_rank_six">沙漠之火(次级治疗药水)</string>
+    <string name="potion_name_minor_healing_rank_seven">甜蜜星光(次级治疗药水)</string>
+    <string name="potion_name_minor_healing_rank_eight">炽烈彗星(次级治疗药水)</string>
+
+    <string name="potion_name_healing_guild_courage">公会勇气(37%治疗药水)</string>
+
+    <string name="potion_name_healing_rank_one_through_six">治疗药水(强效治疗药水等级1-7)</string>
+    <string name="potion_name_healing_rank_seven">冲积之爱(强效治疗药水等级7)</string>
+    <string name="potion_name_healing_rank_eight">燃烧欲望(强效治疗药水等级8)</string>
+
+    <string name="potion_name_minor_mana_rank_one">法师蒸汽(次级法力等级1)</string>
+    <string name="potion_name_minor_mana_rank_two">迷雾记忆(次级法力等级2)</string>
+    <string name="potion_name_minor_mana_rank_three">晨露(次级法力等级3)</string>
+    <string name="potion_name_minor_mana_rank_four">草地溪流(次级法力等级4)</string>
+    <string name="potion_name_minor_mana_rank_five">时间之河(次级法力等级5)</string>
+    <string name="potion_name_minor_mana_rank_six">苔藓池塘(次级法力等级6)</string>
+    <string name="potion_name_minor_mana_rank_seven">微弱记忆(次级法力等级7)</string>
+    <string name="potion_name_minor_mana_rank_eight">朦胧倒影(次级法力等级8)</string>
+
+    <string name="potion_name_minor_healing_titan">泰坦治疗药水(次级治疗药水)</string>
+    <string name="potion_name_minor_mana_titan">泰坦法力药水(次级法力药水)</string>
+
+    <string name="potion_name_phoenix_tears_tincture">凤凰之泪酊剂</string>
+    <string name="potion_name_wild_ginseng">野生人参!(真是个幸运的朋友!)</string>
+
+    <!-- PNG Export -->
+    <string name="export_title_battle_summary">战斗总结</string>
+    <string name="export_no_data">无数据</string>
+
+    <!-- Export Settings -->
+    <string name="settings_export_title">导出设置</string>
+    <string name="settings_export_description">管理导出输出目录和选项。</string>
+    <string name="settings_export_directory_label">导出目录:</string>
+    <string name="settings_export_size_label">已用空间:</string>
+    <string name="settings_export_open_folder">打开文件夹</string>
+    <string name="settings_export_include_raw_json">导出时包含原始JSON格式日志。(使用磁盘空间)</string>
+    <string name="settings_export_directory_not_found">目录未找到</string>
+
+    <!-- About / Update Strings -->
+    <string name="settings_about_title">关于</string>
+    <string name="settings_about_version_label">当前版本:</string>
+    <string name="settings_about_check_updates_button">检查更新</string>
+    <string name="settings_update_available">有可用更新: %1$s</string>
+    <string name="settings_update_up_to_date">您正在运行最新版本</string>
+    <string name="settings_update_check_failed">检查更新失败</string>
+    <string name="settings_update_checking">检查中...</string>
+    <string name="settings_about_github_note">检查github.com获取新版本。不会向任何服务器发送数据。</string>
+
+    <!-- Raid / Attendance Overlay -->
+    <string name="raid_attendance_title">团队管理和出勤</string>
+    <string name="raid_refresh_button">刷新</string>
+    <string name="raid_control_deck_title">团队控制台</string>
+    <string name="raid_control_deck_subtitle">团队名册在左侧，控制按钮在右侧，附近情报整齐地放在下方。</string>
+    <string name="raid_tab_attendance">出勤</string>
+    <string name="raid_tab_nearby">附近</string>
+    <string name="raid_tab_nearby_gear">附近装备</string>
+    <string name="raid_no_raid_detected">请加入团队以使用团队管理功能。您必须安装Lua插件。有标题栏的窗口不是覆盖层，考虑放在另一个显示器上以避免遮挡游戏UI。</string>
+    <string name="raid_main_raid_label">主团队</string>
+    <string name="raid_coraid_label">协同团队</string>
+    <string name="raid_include_main_raid">包含主团队</string>
+    <string name="raid_include_coraid">包含协同团队</string>
+    <string name="raid_include_nearby_same_faction">包含附近同阵营玩家</string>
+    <string name="raid_include_nearby_opposite_faction">包含附近敌对阵营玩家</string>
+    <string name="raid_require_pvp_filter">要求至少一些参与。(25k伤害、25k治疗或25+控场点)</string>
+    <string name="raid_include_departed">包含离开团队的玩家</string>
+    <string name="raid_copy_attendance">复制出勤</string>
+    <string name="raid_haranya_faction">哈拉尼亚阵营(%d)</string>
+    <string name="raid_nuian_faction">努伊安阵营(%d)</string>
+    <string name="raid_pirate_faction">海盗阵营(%d)</string>
+    <string name="raid_close">关闭</string>
+    <string name="raid_nearby_disclaimer">仅显示在附近生成战斗事件的玩家。不检测潜行玩家。</string>
+    <string name="raid_nearby_require_pvp">要求参与(25k伤害、25k治疗或25+控场)</string>
+    <string name="histogram_no_data">无数据</string>
+    <string name="histogram_unknown_label">未知</string>
+    <string name="histogram_under_10k">&lt;10k</string>
+    <string name="histogram_tooltip_label">装备分: %s</string>
+    <string name="histogram_more_players">...还有%d个</string>
+    <string name="nearby_avg_gs_format">平均GS: %d (已追踪%d个)</string>
+    <string name="app_already_running">Raid Framer已在运行。</string>
+
+    <!-- Seed Table Strings -->
+    <string name="settings_seed_table_title">种子表</string>
+    <string name="settings_seed_table_description">导出或导入种子表以与其他安装共享玩家数据。这有助于预先填充玩家阵营状态、装备分、职业和公会名称以提高准确性。玩家名称已哈希以保护隐私。</string>
+    <string name="settings_seed_table_none">未应用种子表。</string>
+    <string name="settings_seed_table_applied">种子表: %d个玩家: %s</string>
+    <string name="settings_seed_table_export">导出</string>
+    <string name="settings_seed_table_import">导入</string>
+    <string name="settings_seed_table_remove">移除</string>
+    <string name="settings_seed_table_date_format">%s (%dd %dh前)</string>
+    <string name="seed_table_apply_prompt">您想应用来自以下位置的种子表吗:\n%s\n\n这将允许应用程序使用此种子表作为玩家数据的参考。</string>
+    <string name="seed_table_apply_title">应用种子表</string>
+    <string name="seed_table_file_not_found">未找到指定的种子表文件: %s</string>
+    <string name="seed_table_applied_success">种子表应用成功!</string>
+
+</resources>

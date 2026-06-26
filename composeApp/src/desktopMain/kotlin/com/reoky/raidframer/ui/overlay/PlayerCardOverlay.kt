@@ -60,11 +60,18 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_potio
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_silence
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_damage_taken
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_heals_received
+import raid_framer_desktop.composeapp.generated.resources.player_card_no_cached_data
+import raid_framer_desktop.composeapp.generated.resources.player_card_recent_buffs
+import raid_framer_desktop.composeapp.generated.resources.player_card_recent_damage
+import raid_framer_desktop.composeapp.generated.resources.player_card_recent_debuffs
+import raid_framer_desktop.composeapp.generated.resources.player_card_recent_heals
+import raid_framer_desktop.composeapp.generated.resources.player_card_recent_item_uses
+import raid_framer_desktop.composeapp.generated.resources.player_card_recent_kd_short
+import raid_framer_desktop.composeapp.generated.resources.player_card_session_totals
+import raid_framer_desktop.composeapp.generated.resources.player_card_lifetime_totals
+import raid_framer_desktop.composeapp.generated.resources.player_card_title_format
 import java.text.SimpleDateFormat
 import java.util.Date
-
-// Temporary placeholder for resources
-fun str(s: String): String = s
 
 @Preview
 @Composable
@@ -98,7 +105,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
   Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.90f))) {
     TitleBarComponent(
-      title = "PlayerCard for $currentPlayer (${
+      title = stringResource(Res.string.player_card_title_format, currentPlayer ?: "") + " (${
         defaultColor.name.lowercase().capitalize(Locale.current)
       }) - ${metricType.displayName} ${stringResource(Res.string.graphs_trend_graph)} (${currentDateString})",
       onClose = { wm?.closeWindow(OverlayType.PLAYER_CARD) }
@@ -145,7 +152,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             Row(modifier = Modifier.fillMaxWidth().height(300.dp)) {
               // Damage
               EventListColumn(
-                title = str("Recent Damage"),
+                title = stringResource(Res.string.player_card_recent_damage),
                 items = card.recentDamageEvents.take(200).sortedByDescending { it.timestamp },
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -165,7 +172,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
               // Heals
               EventListColumn(
-                title = str("Recent Heals"),
+                title = stringResource(Res.string.player_card_recent_heals),
                 items = card.recentHealEvents.take(200).sortedByDescending { it.timestamp },
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -185,7 +192,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
               // Debuffs
               EventListColumn(
-                title = str("Debuffs Applied"),
+                title = stringResource(Res.string.player_card_recent_debuffs),
                 items = card.recentDebuffAppliedEvents.take(200).sortedByDescending { it.timestamp },
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -207,7 +214,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             // ROW 2: Buffs, Items, K/D
             Row(modifier = Modifier.fillMaxWidth().height(300.dp)) {
               EventListColumn(
-                title = str("Buffs Applied"),
+                title = stringResource(Res.string.player_card_recent_buffs),
                 items = card.recentBuffAppliedEvents.take(200).sortedByDescending { it.timestamp },
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -233,7 +240,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 }
 
               EventListColumn(
-                title = str("Item Uses"),
+                title = stringResource(Res.string.player_card_recent_item_uses),
                 items = skillsSorted,
                 modifier = Modifier.weight(1f)
               ) { item ->
@@ -258,7 +265,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 .take(50)
 
               EventListColumn(
-                title = str("Recent K/D"),
+                title = stringResource(Res.string.player_card_recent_kd_short),
                 items = kdSorted,
                 modifier = Modifier.weight(1f)
               ) { item ->
@@ -302,7 +309,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 .padding(12.dp)
               ) {
                 Text(
-                  text = str("Session Totals"),
+                  text = stringResource(Res.string.player_card_session_totals),
                   color = Color.White,
                   fontWeight = FontWeight.Bold,
                   fontSize = 18.sp,
@@ -338,7 +345,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 .padding(12.dp)
               ) {
                 Text(
-                  text = str("Lifetime Totals"),
+                  text = stringResource(Res.string.player_card_lifetime_totals),
                   color = Color.White,
                   fontWeight = FontWeight.Bold,
                   fontSize = 18.sp,
@@ -362,7 +369,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_total_damage_taken), cache.lifetimeTotalDamageTaken)
                   StatRow(stringResource(Res.string.player_card_stat_total_heals_received), cache.lifetimeTotalHealsReceived)
                 } else {
-                  Text("No cached data available.", color = Color.Gray)
+                  Text(stringResource(Res.string.player_card_no_cached_data), color = Color.Gray)
                 }
               }
             }

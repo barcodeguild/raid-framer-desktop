@@ -44,7 +44,13 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.getString
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.app_replay_viewing_format
+import raid_framer_desktop.composeapp.generated.resources.app_tray_reset_positions
+import raid_framer_desktop.composeapp.generated.resources.app_tray_title
+import raid_framer_desktop.composeapp.generated.resources.general_about
+import raid_framer_desktop.composeapp.generated.resources.general_exit
 import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
+import raid_framer_desktop.composeapp.generated.resources.general_settings
 import raid_framer_desktop.composeapp.generated.resources.raidframer
 import raid_framer_desktop.composeapp.generated.resources.seed_table_apply_prompt
 import raid_framer_desktop.composeapp.generated.resources.seed_table_apply_title
@@ -69,13 +75,21 @@ fun main(args: Array<String>) {
     val context = rememberCoroutineScope()
 
     // Initialize the database: critical that this occurs first and only once
-    remember {
-      try {
-        initialize().also { db -> RFDao.init(db) }
-      } catch (e: Exception) {
-        println("Oh eek, the database wouldn't open, friend: ${e.message}")
-        exitProcess(1)
+    val db = try {
+      initialize().also { initializeDb -> RFDao.init(initializeDb) }
+    } catch (e: Exception) {
+      println("Oh eek, the database wouldn't open, friend: ${e.message}")
+      exitProcess(1)
+    }
+
+    // Apply language preference before Compose starts (must be before first composition)
+    try {
+      kotlinx.coroutines.runBlocking {
+        val lang = RFDao.configDao.getConfig()?.preferredLanguage.orEmpty()
+        com.reoky.raidframer.core.locale.AppLocale.apply(lang)
       }
+    } catch (e: Exception) {
+      println("Could not load language preference: ${e.message}")
     }
 
     RFConfig.init(RFDao.configDao)
@@ -118,7 +132,7 @@ fun main(args: Array<String>) {
         }
       } else if (cleaned.endsWith(".log", ignoreCase = true)) {
         if (Files.exists(p)) {
-          messageBox(AppGlobals.APP_NAME, "You are viewing a replay of combat data from: $p. Live monitoring is disabled while viewing replays.")
+          messageBox(AppGlobals.APP_NAME, stringResource(Res.string.app_replay_viewing_format, p.toString()))
           GameMonitorInteractor.chooseCombatLog(p)
           GameMonitorInteractor.setOptions(
             mode = GameMonitorInteractor.MonitorModes.REPLAY,
@@ -205,20 +219,20 @@ fun spawnSystemTray(wm: WindowManager): SystemTray {
     size = Size(32f, 32f)
   )
 
-  val titleMenuItem = MenuItem(".: Raid Framer :.")
+  val titleMenuItem = MenuItem(stringResource(Res.string.app_tray_title))
   titleMenuItem.setImage(iconImage)
   tray.menu.add(titleMenuItem)
-  tray.menu.add(MenuItem("Settings") {
+  tray.menu.add(MenuItem(stringResource(Res.string.general_settings)) {
     wm.openWindow(OverlayType.SETTINGS)
   })
-  tray.menu.add(MenuItem("About") {
+  tray.menu.add(MenuItem(stringResource(Res.string.general_about)) {
     wm.openWindow(OverlayType.ABOUT)
   })
-  tray.menu.add(MenuItem("Reset Window Positions") {
+  tray.menu.add(MenuItem(stringResource(Res.string.app_tray_reset_positions)) {
     wm.resetAllWindowPositions()
     messageBox(AppGlobals.APP_NAME, helpString)
   })
-  tray.menu.add(MenuItem("Exit") {
+  tray.menu.add(MenuItem(stringResource(Res.string.general_exit)) {
     quit()
   })
   tray.setImage(iconImage)

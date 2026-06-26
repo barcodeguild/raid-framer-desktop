@@ -1,14 +1,382 @@
 <resources>
 
-    <!-- Mini Graph Strings -->
-    <string name="mini_graph_no_recent_data">No Recent Data</string>
-    <string name="mini_graph_mode_dmg">DMG</string>
-    <string name="mini_graph_mode_heals">HEALS</string>
-    <string name="mini_graph_mode_cc">CC</string>
-    <string name="mini_graph_metric_dps">DPS</string>
-    <string name="mini_graph_metric_heals">Heals</string>
-    <string name="mini_graph_metric_cc">CC</string>
-    <string name="mini_graph_graph_subtitle">5-Minute</string>
-    <string name="mini_graph_player_metric_format">%1$s's %2$s</string>
+    <!-- Graphs Strings -->
+    <string name="graphs_trend_graph">Trenddiagramm</string>
+    <string name="graphs_no_recent_data">Keine aktuellen Daten</string>
+    <string name="graphs_player_metric_format">%2$s von %1$s</string>
+    <string name="graphs_one_minute">1 Minute</string>
+
+    <!-- Companion Addon Settings Strings -->
+    <string name="companion_description">Das Lua-Addon bezieht Kampfdaten aus dem Spiel. Es ermöglicht native Funktionen wie zielbasiertes Debuff-Tracking, Raid-Management und visuelle/akustische Effekte im Spiel. Wenn Sie das Lua-Addon aus dem Spiel entfernen, funktionieren die Features nicht wie beabsichtigt.</string>
+    <string name="companion_toggle_raid_status">Zeige die Haupt-/Co-Raid-Mitgliederanzahl, wenn Spieler dem Raid beitreten oder ihn verlassen.</string>
+    <string name="companion_toggle_display_charmed">Zeige \'Verzauberte\' Ziele im Spiel-Chat-Fenster.</string>
+    <string name="companion_toggle_display_silenced">Zeige \'Stille\' Ziele im Spiel-Chat-Fenster.</string>
+    <string name="companion_toggle_display_distressed">Zeige \'Bedrängte\' Ziele im Spiel-Chat-Fenster.</string>
+    <string name="companion_toggl_display_mark_hvt_healers">Zeige ein [Herz-Markierung] über den wertvollsten gegnerischen Heilern. (Top 3 gegnerische Heiler basierend auf kumulativer PvP-Heilung.)</string>
+    <string name="companion_toggle_display_mark_hvt_dps">Zeige ein [Gekreuzte-Schwerter-Markierung] über den wertvollsten gegnerischen DPS. (Top 3 gegnerischer DPS basierend auf kumulativem PvP-Schaden.)</string>
+    <string name="companion_toggle_display_mark_hvt_cc">Zeige ein [Schild-Markierung] über hochwertigen gegnerischen CC-Magi, von denen man fernbleiben sollte. (Top 3 gegnerischer CC basierend auf kumulativer PvP-Massenkontrolle.)</string>
+    <string name="companion_toggle_display_mark_sac_dancers">Zeige einen Gottesstrahl über Opfer-Tänzer, während sie kanalisieren. (Leichter zu erkennen als der Standard-Spieleffekt.)</string>
+    <string name="companion_toggle_display_mark_charmed_targets">Zeige einen [Lila Punkt] über den Köpfen der Spieler, um anzuzeigen, dass sie verzaubert sind.</string>
+    <string name="companion_toggle_display_mark_silenced_targets">Zeige einen [Schwarzen Punkt] über den Köpfen der Spieler, um anzuzeigen, dass sie zum Schweigen gebracht wurden.</string>
+    <string name="companion_toggle_display_mark_distressed_targets">Zeige einen [Blauen Punkt] über den Köpfen der Spieler, um anzuzeigen, dass sie bedrängt sind.</string>
+
+    <!-- New Session Overlay -->
+    <string name="new_session_title">Neue Aufnahmesitzung</string>
+    <string name="new_session_event_type_label">Ereignistyp</string>
+    <string name="new_session_custom_name_label">Benutzerdefinierter Sitzungsname</string>
+    <string name="new_session_custom_name_placeholder">Sitzungsnamen eingeben (a-zA-Z0-9)</string>
+    <string name="new_session_damage_mode_label">Schadensmodus</string>
+    <string name="new_session_pvp_only">Nur PvP-Schaden</string>
+    <string name="new_session_allow_pve">PvE-Schaden erlauben</string>
+    <string name="new_session_file_name_label">Sitzungsdateiname</string>
+    <string name="new_session_start_recording">Aufnahme starten</string>
+    <string name="new_session_cancel">Nein</string>
+
+    <!-- Settings Overlay -->
+    <string name="settings_title">Raid Framer Desktop Einstellungen</string>
+    <string name="settings_data_sourcing_title">Datenquelle</string>
+    <string name="settings_data_sourcing_description">Bitte bestätigen Sie, dass Sie unten das richtige ArcheRage-Dokumentenverzeichnis sehen. Ihr Spiel-Dokumentenverzeichnis wurde automatisch erkannt. Wenn Sie nicht das richtige Verzeichnis sehen oder der Text unten rot ist, sollten Sie einen Fehler melden.</string>
+    <string name="settings_toggle_pvp_damage">Nur PvP-Schaden anzeigen</string>
+    <string name="settings_toggle_show_mini_graph">Mini-DPS/HEALS/CC-Diagramm-Overlay aktivieren</string>
+    <string name="settings_lua_options_title">Lua-Optionen</string>
+    <string name="settings_uninstall_title">Raid Framer deinstallieren</string>
+    <string name="settings_name_placeholder">Spielcharakter auswählen</string>
+    <string name="settings_uninstall_description">Das Deinstallieren über dieses Menü entfernt das Lua-Addon sauber aus dem Spielordner, schließt die App und löst den regulären Deinstallationsprozess aus. Wenn Sie den Installer abbrechen, ermöglicht das erneute Öffnen von Raid Framer die automatische Neuinstallation der Lua-Komponente.</string>
+    <string name="settings_arche_rage_directory_label">ArcheRage-Dokumentenverzeichnis:</string>
+    <string name="settings_specify_directory_hint">Bitte Verzeichnis angeben (Es ist der Ordner, der eine system.cfg-Datei enthält!)</string>
+    <string name="settings_lua_companion_options">Lua-Begleiter-Optionen</string>
+    <string name="settings_your_current_character">Ihr aktueller Charakter</string>
+    <string name="settings_character_note">Wechseln Sie im Spiel den Charakter, um diesen Wert automatisch zu aktualisieren.</string>
+    <string name="settings_enter_name_placeholder">Charakternamen eingeben</string>
+    <string name="settings_uninstall_done_text">Das Lua-Addon wurde sicher aus Ihrem Spielordner entfernt.\n\n**ABER**\n\nSie sollten immer noch die Deinstallation der Hauptanwendung abschließen, indem Sie "Raid Framer" über die Windows-Systemsteuerung deinstallieren. (das ist diese App) Wenn Sie nicht deinstallieren und sich entscheiden, die App erneut zu öffnen, wird das Lua-Addon wieder in Ihren Spielordner kopiert, damit das Addon weiterhin funktioniert. (auf Ihren Wunsch) Danke! Wird jetzt beendet!</string>
+    <string name="settings_mini_graph_description">DPS/HEALS/CC-Mini-Diagramm aktivieren. Zeigt Leistung über die Zeit.</string>
+    <string name="settings_show_heals_column">Heilungsspalte anzeigen</string>
+    <string name="settings_show_cc_column">CC-Spalte anzeigen</string>
+    <string name="settings_show_damage_column">Schadensspalte anzeigen</string>
+    <string name="settings_combat_overlay_title">Kampf-Overlay</string>
+    <string name="settings_combat_fade_controls">Symbolsteuerungen automatisch ausblenden, wenn der Cursor das Overlay verlässt.</string>
+    <string name="settings_split_chat">OSRS-artiges Split-Chat-Fenster-Overlay aktivieren. (Demnächst)</string>
+    <string name="settings_tabbed_detection">Spiel-Overlays automatisch ausblenden, während aus dem Spiel herausgetabbt. Gilt nicht für Tooltips (die mit Titelleiste).</string>
+    <string name="settings_allow_pve_damage">PvE-Schaden zu DPS/Kill-Zählern zählen lassen. (Nützlich für Einzelspieler, die ihre Schadensausgabe gegen PvE-Ziele sehen möchten)</string>
+    <string name="settings_game_schedule_hotkey">[TAB HALTEN] aktivieren, um die offizielle In-Game-Eventplan-Website als Overlay anzuzeigen. (Demnächst)</string>
+    <string name="settings_use_sadly">Ich würde lieber Sadly.io für In-Game-Eventplandaten verwenden. (Demnächst)</string>
+    <string name="settings_dragon_breath_overlay">Drachenatem-Detektor und -Zähler-Overlay aktivieren. (Hinweis: Sie müssen immer noch in 100-Meter-Reichweite des Drachenreiters sein, um die Atemzüge zu sehen, das ist keine Magie Freunde!) (Demnächst)</string>
+    <string name="settings_uninstall_confirm_title">Deinstallation bestätigen</string>
+    <string name="settings_uninstall_confirm_text">Sind Sie sicher, dass Sie das Lua-Addon deinstallieren möchten? Dies entfernt die Spielintegration.\n\nBitte schließen Sie das Spiel, bevor Sie fortfahren, andernfalls bleiben Dateien übrig.</string>
+    <string name="settings_uninstall_confirm_button">Deinstallieren</string>
+    <string name="settings_uninstall_button">Lua-Addon &amp; App deinstallieren</string>
+    <string name="settings_player_remappings_button">Spieler-Neuzuordnungen, PvP-Duelle &amp; Filter</string>
+    <string name="settings_uninstall_done_title">Deinstallation abgeschlossen</string>
+    <string name="settings_character_description">Ihr Charakter und Ihre Fraktion werden automatisch bestimmt, wenn Sie den Charakter wechseln. Raid Framer verwendet diese Information, um freundliche und feindliche Charaktere im Laufe der Zeit abzuleiten.</string>
+    <string name="settings_character_title">Aktueller Charakter</string>
+    <string name="settings_general_opacity_slider">Overlay-Deckkraft</string>
+    <string name="settings_general_tint_slider">Overlay-Farbe</string>
+    <string name="settings_general_title">Allgemeine Einstellungen</string>
+    <string name="settings_general_description">Zusätzliche Overlay-Funktionen und Parseroptionen umschalten.</string>
+    <string name="settings_general_overlay_title">Allgemeine Overlay-Einstellungen</string>
+    <string name="settings_general_overlay_description">Manche Freunde möchten vielleicht die Transparenz und Farbe ihrer Overlays anpassen.</string>
+    <string name="settings_language_label">Sprache</string>
+
+    <!-- Recording Session Panel (shown when a session is active in Settings) -->
+    <string name="settings_recording_session_title">Aufnahmesitzung</string>
+    <string name="settings_recording_session_description_format">Kampfereignisse werden in %1$s aufgezeichnet</string>
+    <string name="settings_recording_session_type_format">Typ: %1$s (%2$s)</string>
+    <string name="settings_recording_session_duration_format">Dauer: %1$s</string>
+    <string name="settings_recording_session_stop">Aufnahme stoppen</string>
+
+    <!-- About Overlay Strings -->
+    <string name="about_app_title">Raid Framer Desktop</string>
+    <string name="about_version_label">Version:</string>
+    <string name="about_package_label">Paket:</string>
+    <string name="about_source_label">Quelle:</string>
+    <string name="about_read_settings_instruction">Bitte vor Gebrauch lesen. -&gt;</string>
+    <string name="about_go_to_settings_button">Zu den Einstellungen</string>
+    <string name="about_author_label">Autor:</string>
+    <string name="about_author_name">~ Reoky ~</string>
+    <string name="about_dedication_text">Gewidmet all unseren Freunden im Osten und in der virtuellen Welt. Möge dieser Code zum Guten und nicht zum Bösen verwendet werden.</string>
+    <string name="about_thanks_label">Danke danke von</string>
+    <string name="about_thanks_location">Vereinigter Osten</string>
+    <string name="about_community_dedication">An die ArcheRage-Community für ihre Unterstützung und ihr Feedback. ~</string>
+    <string name="about_staff_dedication">An die ArcheRage-Mitarbeiter für ihr Engagement und ihre harte Arbeit. ~</string>
+    <string name="about_dev_dedication">An die ArcheRage-Entwickler für ihre kontinuierliche Unterstützung und Updates. ~</string>
+
+    <!-- Player Card -->
+    <string name="player_card_no_cached_data">Keine zwischengespeicherten Daten verfügbar.</string>
+    <string name="player_card_title_format">Spielerkarte für %1$s</string>
+    <string name="player_card_recent_item_uses">Gegenstandsbenutzungen</string>
+    <string name="player_card_recent_kd_short">Aktuelle K/D</string>
+    <string name="player_card_recent_damage">Aktueller Schaden</string>
+    <string name="player_card_recent_heals">Aktuelle Heilungen</string>
+    <string name="player_card_recent_kd">Aktuelle Kills &amp; Tode</string>
+    <string name="player_card_recent_items">Gegenstandsfähigkeitsbenutzungen</string>
+    <string name="player_card_recent_buffs">Angewendete Buffs</string>
+    <string name="player_card_recent_debuffs">Angewendete Debuffs</string>
+    <string name="player_card_session_totals">Sitzungsgesamtwerte</string>
+    <string name="player_card_lifetime_totals">Lebensgesamtwerte</string>
+
+    <!-- More specific stat labels used in totals -->
+    <string name="player_card_stat_damage">Gesamtschaden</string>
+    <string name="player_card_stat_healing">Gesamtheilung</string>
+    <string name="player_card_stat_cc">Gelieferte CC</string>
+    <string name="player_card_stat_buffs">Buffs</string>
+    <string name="player_card_stat_debuffs">Debuffs</string>
+    <string name="player_card_stat_charms">Verzauberungen</string>
+    <string name="player_card_stat_distress">Bedrängnisse</string>
+    <string name="player_card_stat_silence">Stille</string>
+    <string name="player_card_stat_glider">Gleiterbenutzungen</string>
+    <string name="player_card_stat_items">Gegenstandsbenutzungen</string>
+    <string name="player_card_stat_potions">Tränke</string>
+    <string name="player_card_stat_kills">Kills</string>
+    <string name="player_card_stat_deaths">Tode</string>
+    <string name="player_card_stat_kills_most_damage">Kills (Meister Schaden)</string>
+    <string name="player_card_stat_kills_killing_blow">Kills (Todesstoß)</string>
+    <string name="player_card_stat_total_damage_taken">Gesamter erlittener Schaden</string>
+    <string name="player_card_stat_total_heals_received">Gesamte erhaltene Heilungen</string>
+
+    <!-- Player Details Section -->
+    <string name="player_details_title">Spielerdetails</string>
+    <string name="player_details_leadership_role">Führungsrolle</string>
+
+    <!-- Pet List Item -->
+    <string name="pet_icon_desc_format">%1$s-Symbol</string>
+    <string name="pet_debuffs_label">Debuffs:</string>
+    <string name="pet_companion_dmg_label">Begleiterschaden</string>
+
+    <!-- Pokemon / Companions Overlay -->
+    <string name="pokemon_title">Drachen-Atem, Risos, Kampftiere und andere Kreaturen</string>
+    <string name="pokemon_no_companions">Noch keine aktiven Begleiter erkannt...</string>
+
+    <!-- Thumbnails Helper -->
+    <string name="thumbnail_unknown_format">Unbekannt: %1$s</string>
+
+    <!-- Filters Overlay -->
+    <string name="filters_subscriptions_title">Abonnements</string>
+    <string name="filters_subscriptions_description">Mit Abonnements können Sie benutzerdefinierte Namenszuordnungen für Charaktere erstellen. Sie ähneln Filtern, haben jedoch Vorrang vor allen anderen Quellen. Verwenden Sie sie, um Zaubersprüche, NPC-Namen oder andere Texte im Kampflog zu überschreiben.</string>
+    <string name="filters_see_example_csv">Beispiel-CSV ansehen</string>
+    <string name="filters_use_default">Standard verwenden</string>
+    <string name="filters_current_filters_title">Aktuelle Filter</string>
+    <string name="filters_summary_removed_format">%1$s wird entfernt.</string>
+    <string name="filters_summary_will_become_format">%1$s wird zu %2$s.</string>
+    <string name="filters_overrides_title">Überschreibungen</string>
+    <string name="filters_overrides_description">Web-Filter werden mit lokalen Filtern kombiniert. Bei Konflikten haben lokale Filter Vorrang.</string>
+    <string name="filters_original_placeholder">Original</string>
+    <string name="filters_replacement_placeholder">Ersetzung</string>
+    <string name="filters_add_button">Zu Filtern hinzufügen</string>
+
+    <!-- Exit Dialog -->
+    <string name="exit_dialog_title">Sind Sie sicher?</string>
+    <string name="exit_dialog_message">Dies wird beendet und alle offenen Overlay-Fenster schließen. Sie können .:Raid Framer:. erneut über das Windows-Startmenü starten.</string>
+    <string name="exit_dialog_dismiss">Nein</string>
+
+    <!-- File Selection Dialog -->
+    <string name="file_selection_title">Kampflogdatei auswählen</string>
+    <string name="file_selection_searching">Suche nach gültigen Kampflogs.. Ergebnisse erscheinen hier..</string>
+
+    <!-- Combat Overlay -->
+    <string name="combat_press_plus_to_record">Drücke \'+\' um eine neue Aufnahmesitzung zu starten</string>
+    <string name="combat_column_pvp_damage">🔥 PvP-Schaden 🔥</string>
+    <string name="combat_column_pvp_heals">💉 PvP-Heilungen 💉</string>
+    <string name="combat_column_pvp_cc">⛨ PvP-CC ⛨</string>
+    <string name="combat_column_pve_damage">⚔️ PvE-Schaden ⚔️</string>
+    <string name="combat_column_pve_heals">💉 PvE-Heilungen 💉</string>
+    <string name="combat_column_pve_cc">⛨ PvE-CC ⛨</string>
+    <string name="combat_no_columns_message">Bruder.. Versuch wenigstens eine Kategorie hinzuzufügen..</string>
+    <string name="combat_open_settings">Einstellungen öffnen</string>
+
+    <!-- Battle Summary Overlay -->
+    <string name="summary_battle_summary_title_format">Kampfzusammenfassung (%1$s)</string>
+    <string name="summary_silences_by_faction">Stille nach Fraktion</string>
+    <string name="summary_charms_by_faction">Verzauberungen nach Fraktion</string>
+    <string name="summary_distresses_by_faction">Bedrängnisse nach Fraktion</string>
+    <string name="summary_top_silences">Top-Stille</string>
+    <string name="summary_top_charms">Top-Verzauberungen</string>
+    <string name="summary_top_distresses">Top-Bedrängnisse</string>
+    <string name="summary_top_haranya_spells_damage">Top Haranya-Zauberschaden</string>
+    <string name="summary_top_nuia_spells_damage">Top Nuia-Zauberschaden</string>
+    <string name="summary_top_pirate_spells_damage">Top Piraten-Zauberschaden</string>
+    <string name="summary_top_debuffs">Top-Debuffs</string>
+    <string name="summary_top_songs">Top-Lieder</string>
+    <string name="summary_top_buffs">Top-Buffs</string>
+    <string name="summary_top_ode_haranya">♪ Top Ode Haranya ♪</string>
+    <string name="summary_top_ode_nuia">♪ Top Ode Nuia ♪</string>
+    <string name="summary_top_ode_pirate">♪ Top Ode Piraten ♪</string>
+    <string name="summary_top_kills_haranya">Top-Kills Haranya</string>
+    <string name="summary_top_kills_nuia">Top-Kills Nuia</string>
+    <string name="summary_top_kills_pirate">Top-Kills Piraten</string>
+    <string name="summary_top_damage_taken">🔥 Top Erlittener Schaden 🔥</string>
+    <string name="summary_top_heals_received">💉 Top Erhaltene Heilungen 💉</string>
+    <string name="summary_top_potion_drinkers">Top-Tränke-Trinker</string>
+    <string name="summary_top_glider_gamers">Top-Gleiter-Spieler</string>
+    <string name="summary_most_item_usages">Meiste Gegenstandsbenutzungen</string>
+    <string name="summary_top_haranya_item_uses">Top Haranya-Gegenstandsbenutzungen</string>
+    <string name="summary_top_nuia_item_uses">Top Nuia-Gegenstandsbenutzungen</string>
+    <string name="summary_top_pirate_item_uses">Top Piraten-Gegenstandsbenutzungen</string>
+    <string name="summary_haranya_builds">Haranya-Builds</string>
+    <string name="summary_nuia_builds">Nuia-Builds</string>
+    <string name="summary_pirate_builds">Piraten-Builds</string>
+
+    <!-- General Strings -->
+    <string name="general_about">Über</string>
+    <string name="general_cancel">Abbrechen</string>
+    <string name="general_exit">Beenden</string>
+    <string name="general_settings">Einstellungen</string>
+    <string name="general_instructions_dragging_overlays">Umschalt + Klick zum Ziehen von Overlays</string>
+
+    <!-- App / Tray Menu -->
+    <string name="app_tray_title">.: Raid Framer :.</string>
+    <string name="app_tray_reset_positions">Fensterpositionen zurücksetzen</string>
+    <string name="app_replay_viewing_format">Sie sehen eine Wiedergabe der Kampfdaten aus: %1$s\n\nDie Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
+    <string name="general_metric_type_cc">Massenkontrolle</string>
+    <string name="general_metric_type_cc_short">CC</string>
+    <string name="general_metric_type_damage">Schaden</string>
+    <string name="general_metric_type_damage_short">DMG</string>
+    <string name="general_metric_type_healing">Heilung</string>
+    <string name="general_metric_type_healing_short">HEALS</string>
+    <string name="general_no_data_available">Keine Daten verfügbar</string>
+
+    <!-- Help Strings -->
+    <string name="general_help_window_postions_reset">Alle Fensterpositionen wurden zurückgesetzt! Denken Sie daran: Wenn Sie Alt-Tab-Erkennung aktiviert haben, erscheinen Overlays (die ohne Titelleiste) möglicherweise nicht, bis Sie zum Spielfenster zurückwechseln.</string>
+
+    <!-- Leadership Roles -->
+    <string name="leadership_none">Keine</string>
+    <string name="leadership_raid_lead">Raid-Leiter</string>
+    <string name="leadership_guild_lead">Gildenleiter</string>
+    <string name="leadership_faction_hero">Fraktionsheld</string>
+    <string name="leadership_shot_caller">Befehlsgeber</string>
+    <string name="leadership_gm">GM</string>
+
+    <!-- Game Utility Items -->
+    <string name="item_name_kraken_scepter">Kraken-Zepter</string>
+    <string name="item_name_kraken_spear">Kraken-Speer</string>
+    <string name="item_name_kraken_shield">Kraken-Schild</string>
+    <string name="item_name_lib_shield">Bibliotheksschild</string>
+    <string name="item_name_library_greatclub">Bibliotheks-Großkeule</string>
+    <string name="item_name_honor_nodachi">Ehrens rasendes Nodachi</string>
+    <string name="item_name_jola_shield">Jolas Groll</string>
+    <string name="item_name_halcy_neck">Halcy-Halskette</string>
+    <string name="item_name_soul_neck">Seelenhalskette</string>
+    <string name="item_name_mist_nodachi">Schattenschicksal Nodachi</string>
+    <string name="item_name_lib_bow">Bibliothek/Unsterblicher Wächter Bogen</string>
+    <string name="item_name_lib_dagger">Bibliothek/Unsterblicher Wächter Dolch</string>
+    <string name="item_name_lib_shortspear">Bibliothek/Unsterblicher Wächter Kurzspeer</string>
+    <string name="item_name_lib_staff">Bibliothek/Unsterblicher Wächter Stab</string>
+    <string name="item_name_snake_greatsword">Schlangen-Großschwert (Kante)</string>
+    <string name="item_name_snake_shield">Schlangenschild ( Bollwerk)</string>
+    <string name="item_name_snake_sword">Schlangenschwert (Rasiermesser)</string>
+    <string name="item_name_snake_greataxe">Schlangenaxt (Fleischer-Ziel)</string>
+    <string name="item_name_snake_scepter">Schlangen-Zepter (Snepter/Blutegel)</string>
+    <string name="item_name_snake_gun">Schlangenpistole (Kugel)</string>
+    <string name="item_name_bd_shield">Schwarzdrachenschild</string>
+    <string name="item_name_bd_club">Schwarzdrachenkeule</string>
+    <string name="item_name_bd_bow">Schwarzdrachenbogen (Augenspalter)</string>
+    <string name="item_name_bd_gun">Schwarzdrachenpistole (Biss)</string>
+    <string name="item_name_bd_staff">Schwarzdrachenstab (Brüllen)</string>
+    <string name="item_name_bd_sword">Schwarzdrachenschwert (Schwanz-Schnitter)</string>
+    <string name="item_name_bd_2h_sword">Schwarzdrachen-2H-Schwert (Flügel-Schnitter)</string>
+    <string name="item_name_sungold_anth_set_pull">Sonnengold-Anthologie-Set-Zug</string>
+    <string name="item_name_garden_anth_set_pull">Garten-Anthologie-Set-Zug</string>
+    <string name="item_name_serp_staff">Verderbter Witz (Serpentis)</string>
+    <string name="item_name_mist_dagger">Nebellied Böser Flüstern-Dolch</string>
+    <string name="item_name_mist_shield">Nebellied Schleichzahn-Schild</string>
+
+    <!-- Game Potions -->
+    <string name="potion_name_minor_healing_rank_one">Verschleierter Flamme (Geringer Heiltrank)</string>
+    <string name="potion_name_minor_healing_rank_two">Gedämpfter Stern (Geringer Heiltrank)</string>
+    <string name="potion_name_minor_healing_rank_three">Nachmittagssonne (Geringer Heiltrank)</string>
+    <string name="potion_name_minor_healing_rank_four">Mittsommer-Meteor (Geringer Heiltrank)</string>
+    <string name="potion_name_minor_healing_rank_five">Sonne Ruhm (Geringer Heiltrank)</string>
+    <string name="potion_name_minor_healing_rank_six">Wüstenfeuer (Geringer Heiltrank)</string>
+    <string name="potion_name_minor_healing_rank_seven">Süßes Sternenlicht (Geringer Heiltrank)</string>
+    <string name="potion_name_minor_healing_rank_eight">Lodernder Komet (Geringer Heiltrank)</string>
+
+    <string name="potion_name_healing_guild_courage">Gildenmut (37% Heiltrank)</string>
+
+    <string name="potion_name_healing_rank_one_through_six">Heiltrank (Großer Heiltrank Rang 1-7)</string>
+    <string name="potion_name_healing_rank_seven">Alluvion-Liebe (Großer Heiltrank Rang 7)</string>
+    <string name="potion_name_healing_rank_eight">Brennendes Verlangen (Großer Heiltrank Rang 8)</string>
+
+    <string name="potion_name_minor_mana_rank_one">Magiers Dampf (Geringes Mana Rang 1)</string>
+    <string name="potion_name_minor_mana_rank_two">Neblige Erinnerung (Geringes Mana Rang 2)</string>
+    <string name="potion_name_minor_mana_rank_three">Morgentau (Geringes Mana Rang 3)</string>
+    <string name="potion_name_minor_mana_rank_four">Wiesenstrom (Geringes Mana Rang 4)</string>
+    <string name="potion_name_minor_mana_rank_five">Zeitfluss (Geringes Mana Rang 5)</string>
+    <string name="potion_name_minor_mana_rank_six">Moosiger Teich (Geringes Mana Rang 6)</string>
+    <string name="potion_name_minor_mana_rank_seven">Schwache Erinnerung (Geringes Mana Rang 7)</string>
+    <string name="potion_name_minor_mana_rank_eight">Verschwommene Reflexion (Geringes Mana Rang 8)</string>
+
+    <string name="potion_name_minor_healing_titan">Titanen-Heiltrank (Geringer Heiltrank)</string>
+    <string name="potion_name_minor_mana_titan">Titanen-Manatrank (Geringer Manatrank)</string>
+
+    <string name="potion_name_phoenix_tears_tincture">Phönixtränen-Tinktur</string>
+    <string name="potion_name_wild_ginseng">Wilder Ginseng! (Was für ein glücklicher Freund!)</string>
+
+    <!-- PNG Export -->
+    <string name="export_title_battle_summary">Kampfzusammenfassung</string>
+    <string name="export_no_data">Keine Daten</string>
+
+    <!-- Export Settings -->
+    <string name="settings_export_title">Exporteinstellungen</string>
+    <string name="settings_export_description">Export-Ausgabeverzeichnis und Optionen verwalten.</string>
+    <string name="settings_export_directory_label">Exportverzeichnis:</string>
+    <string name="settings_export_size_label">Genutzter Speicherplatz:</string>
+    <string name="settings_export_open_folder">Ordner öffnen</string>
+    <string name="settings_export_include_raw_json">Rohe JSON-formatierte Logs beim Exportieren einschließen. (Verwendet Speicherplatz)</string>
+    <string name="settings_export_directory_not_found">Verzeichnis nicht gefunden</string>
+
+    <!-- About / Update Strings -->
+    <string name="settings_about_title">Über</string>
+    <string name="settings_about_version_label">Aktuelle Version:</string>
+    <string name="settings_about_check_updates_button">Nach Updates suchen</string>
+    <string name="settings_update_available">Update verfügbar: %1$s</string>
+    <string name="settings_update_up_to_date">Sie führen die neueste Version aus</string>
+    <string name="settings_update_check_failed">Update-Prüfung fehlgeschlagen</string>
+    <string name="settings_update_checking">Prüfe...</string>
+    <string name="settings_about_github_note">Prüft github.com auf neue Versionen. Keine Daten werden an einen Server gesendet.</string>
+
+    <!-- Raid / Attendance Overlay -->
+    <string name="raid_attendance_title">Raid-Management &amp; Anwesenheit</string>
+    <string name="raid_refresh_button">Aktualisieren</string>
+    <string name="raid_control_deck_title">Raid-Steuerungspult</string>
+    <string name="raid_control_deck_subtitle">Raid-Roster links, Steuerung rechts, mit nahegelegenen Infos ordentlich darunter.</string>
+    <string name="raid_tab_attendance">Anwesenheit</string>
+    <string name="raid_tab_nearby">In der Nähe</string>
+    <string name="raid_tab_nearby_gear">Ausrüstung in der Nähe</string>
+    <string name="raid_no_raid_detected">Bitte treten Sie einem Raid bei, um Raid-Management-Funktionen zu nutzen. Sie müssen das Lua-Addon installiert haben. Fenster mit Titelleisten sind keine Overlays, erwägen Sie, sie auf einem anderen Monitor zu platzieren, um die Spiel-UI nicht zu verdecken.</string>
+    <string name="raid_main_raid_label">Haupt-Raid</string>
+    <string name="raid_coraid_label">Co-Raid</string>
+    <string name="raid_include_main_raid">Haupt-Raid einschließen</string>
+    <string name="raid_include_coraid">Co-Raid einschließen</string>
+    <string name="raid_include_nearby_same_faction">Spieler derselben Fraktion in der Nähe einschließen</string>
+    <string name="raid_include_nearby_opposite_faction">Spieler gegnerischer Fraktion in der Nähe einschließen</string>
+    <string name="raid_require_pvp_filter">Mindestens einige Teilnahme erforderlich. (25k Schaden, 25k Heilung oder 25+ CC-Punkte)</string>
+    <string name="raid_include_departed">Spieler einschließen, die den Raid verlassen haben</string>
+    <string name="raid_copy_attendance">Anwesenheit kopieren</string>
+    <string name="raid_haranya_faction">Haranya-Fraktion (%d)</string>
+    <string name="raid_nuian_faction">Nuian-Fraktion (%d)</string>
+    <string name="raid_pirate_faction">Piraten-Fraktion (%d)</string>
+    <string name="raid_close">Schließen</string>
+    <string name="raid_nearby_disclaimer">Zeigt nur Spieler, die Kampfareignisse in der Nähe erzeugt haben. Erkennt keine getarnten Spieler.</string>
+    <string name="raid_nearby_require_pvp">Teilnahme erforderlich (25k Schaden, 25k Heilung oder 25+ CC)</string>
+    <string name="histogram_no_data">Keine Daten</string>
+    <string name="histogram_unknown_label">Unbekannt</string>
+    <string name="histogram_under_10k">&lt;10k</string>
+    <string name="histogram_tooltip_label">Ausrüstungswert: %s</string>
+    <string name="histogram_more_players">...und %d weitere</string>
+    <string name="nearby_avg_gs_format">Durchschn. GS: %d (%d verfolgt)</string>
+    <string name="app_already_running">Raid Framer läuft bereits.</string>
+
+    <!-- Seed Table Strings -->
+    <string name="settings_seed_table_title">Seed-Tabelle</string>
+    <string name="settings_seed_table_description">Exportieren oder importieren Sie eine Seed-Tabelle, um Spielerdaten mit anderen Installationen zu teilen. Dies hilft, Spielerfraktionsstatus, Ausrüstungswerte, Klassen und Gildennamen für verbesserte Genauigkeit vorab zu füllen. Spielernamen werden aus Datenschutzgründen gehasht.</string>
+    <string name="settings_seed_table_none">Keine Seed-Tabelle angewendet.</string>
+    <string name="settings_seed_table_applied">Seed-Tabelle: %d Spieler: %s</string>
+    <string name="settings_seed_table_export">Exportieren</string>
+    <string name="settings_seed_table_import">Importieren</string>
+    <string name="settings_seed_table_remove">Entfernen</string>
+    <string name="settings_seed_table_date_format">%s (%dd %dh alt)</string>
+    <string name="seed_table_apply_prompt">Möchten Sie die Seed-Tabelle von:\n%s\n\nanwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spielerdaten zu verwenden.</string>
+    <string name="seed_table_apply_title">Seed-Tabelle anwenden</string>
+    <string name="seed_table_file_not_found">Die angegebene Seed-Tabellendatei wurde nicht gefunden: %s</string>
+    <string name="seed_table_applied_success">Seed-Tabelle erfolgreich angewendet!</string>
 
 </resources>

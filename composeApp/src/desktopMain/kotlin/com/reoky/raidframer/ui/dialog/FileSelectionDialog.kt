@@ -16,6 +16,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.file_selection_searching
+import raid_framer_desktop.composeapp.generated.resources.file_selection_title
+import raid_framer_desktop.composeapp.generated.resources.raid_close
 import java.nio.file.Path
 import kotlin.io.path.pathString
 
@@ -30,11 +35,11 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
       onDismissRequest = { showDialog.value = false },
       title = {
         Text(
+          text = stringResource(Res.string.file_selection_title),
           modifier = Modifier.fillMaxWidth(),
           color = Color.White,
           fontSize = 16.sp,
           fontWeight = FontWeight.W500,
-          text = "Select Combat Logfile",
           textAlign = TextAlign.Start
         )
       },
@@ -51,7 +56,7 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
               color = Color.White,
               fontSize = 12.sp,
               textAlign = TextAlign.Center,
-              text = "Searching for valid combat logs.. Results will appear here.."
+              text = stringResource(Res.string.file_selection_searching)
             )
             Spacer(modifier = Modifier.height(16.dp))
             CircularProgressIndicator(color = Color.White)
@@ -102,7 +107,7 @@ fun FileSelectionDialog(showDialog: MutableState<Boolean>, selectedItem: Mutable
           modifier = Modifier.padding(16.dp)
         ) {
           Text(
-            text = "Close",
+            text = stringResource(Res.string.raid_close),
             color = Color.White
           )
         }

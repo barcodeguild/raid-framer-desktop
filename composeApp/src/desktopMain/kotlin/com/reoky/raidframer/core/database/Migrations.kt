@@ -172,3 +172,10 @@ val MIGRATION_21_22 = object : Migration(21, 22) {
   }
 }
 
+// added preferredLanguage to ConfigEntity
+val MIGRATION_22_23 = object : Migration(22, 23) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN preferredLanguage TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}
+

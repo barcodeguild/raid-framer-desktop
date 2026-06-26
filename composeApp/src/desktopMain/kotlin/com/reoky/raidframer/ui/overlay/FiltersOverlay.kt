@@ -25,6 +25,20 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.core.helpers.openWebLink
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.filters_add_button
+import raid_framer_desktop.composeapp.generated.resources.filters_current_filters_title
+import raid_framer_desktop.composeapp.generated.resources.filters_original_placeholder
+import raid_framer_desktop.composeapp.generated.resources.filters_overrides_description
+import raid_framer_desktop.composeapp.generated.resources.filters_overrides_title
+import raid_framer_desktop.composeapp.generated.resources.filters_replacement_placeholder
+import raid_framer_desktop.composeapp.generated.resources.filters_see_example_csv
+import raid_framer_desktop.composeapp.generated.resources.filters_subscriptions_description
+import raid_framer_desktop.composeapp.generated.resources.filters_subscriptions_title
+import raid_framer_desktop.composeapp.generated.resources.filters_summary_removed_format
+import raid_framer_desktop.composeapp.generated.resources.filters_summary_will_become_format
+import raid_framer_desktop.composeapp.generated.resources.filters_use_default
 
 @Preview
 @Composable
@@ -89,7 +103,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
     Row(modifier = Modifier.fillMaxSize().padding(8.dp)) {
       Column {
         Text(
-          text = "Subscriptions",
+          text = stringResource(Res.string.filters_subscriptions_title),
           fontSize = 24.sp,
           color = Color.White,
           fontWeight = FontWeight.Bold,
@@ -97,7 +111,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
           modifier = Modifier.padding(8.dp)
         )
         Text(
-          text = "Subscriptions allow you to create custom character name re-mappings and omissions from lists curated by your own guild or faction. You can use this functionality to remove or re-map ambiguous names like 'Ironclad' that may be of no interest. Lists are updated automatically based on the URL you enter below:",
+          text = stringResource(Res.string.filters_subscriptions_description),
           fontSize = 14.sp,
           color = Color.White,
           fontWeight = FontWeight.Light,
@@ -163,7 +177,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
             modifier = Modifier.padding(16.dp)
           ) {
             Text(
-              text = "See Example CSV",
+              text = stringResource(Res.string.filters_see_example_csv),
               maxLines = 1,
               color = Color.Black
             )
@@ -176,7 +190,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
             modifier = Modifier.padding(16.dp)
           ) {
             Text(
-              text = "Use Default",
+              text = stringResource(Res.string.filters_use_default),
               maxLines = 1,
               color = Color.Black
             )
@@ -185,7 +199,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
 
         // Current Filters
         Text(
-          text = "Current Filters",
+          text = stringResource(Res.string.filters_current_filters_title),
           fontSize = 24.sp,
           color = Color.White,
           fontWeight = FontWeight.Bold,
@@ -195,6 +209,8 @@ fun FiltersOverlay(wm: WindowManager? = null) {
 
         LazyColumn {
           items(filters.count()) { index ->
+            val key = filters[index].keys.first()
+            val value = filters[index].values.first()
             Row {
               val hoveredItem = remember { MutableInteractionSource() }
               IconButton(
@@ -219,7 +235,11 @@ fun FiltersOverlay(wm: WindowManager? = null) {
                 )
               }
               Text(
-                text = "${filters[index].keys.first()} ${if (filters[index].values.first() == "REMOVED") "will be removed." else "will become " + filters[index].values.first()}.",
+                text = if (value == "REMOVED") {
+                  stringResource(Res.string.filters_summary_removed_format, key)
+                } else {
+                  stringResource(Res.string.filters_summary_will_become_format, key, value)
+                },
                 fontSize = 14.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -234,7 +254,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
 
         // Personal Filters
         Text(
-          text = "Overrides",
+          text = stringResource(Res.string.filters_overrides_title),
           fontSize = 24.sp,
           color = Color.White,
           fontWeight = FontWeight.Bold,
@@ -242,7 +262,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
           modifier = Modifier.padding(8.dp)
         )
         Text(
-          text = "Filters from the web are combined with any local filters. Local filters always take precedence over remote ones. Use 'REMOVE' for the replacement to remove the player or NPC entirely.",
+          text = stringResource(Res.string.filters_overrides_description),
           fontSize = 14.sp,
           color = Color.White,
           fontWeight = FontWeight.Light,
@@ -255,7 +275,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
           TextField(
             value = original,
             onValueChange = { original = it.lowercase().capitalize() },
-            placeholder = { Text("Original") },
+            placeholder = { Text(stringResource(Res.string.filters_original_placeholder)) },
             modifier = Modifier.weight(1f).padding(8.dp, 0.dp),
             textStyle = TextStyle(
               textAlign = TextAlign.Center,
@@ -275,7 +295,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
           TextField(
             value = replacement,
             onValueChange = { replacement = it.capitalize() },
-            placeholder = { Text("Replacement") },
+            placeholder = { Text(stringResource(Res.string.filters_replacement_placeholder)) },
             modifier = Modifier.weight(1f).padding(8.dp, 0.dp),
             textStyle = TextStyle(
               textAlign = TextAlign.Center,
@@ -305,7 +325,7 @@ fun FiltersOverlay(wm: WindowManager? = null) {
           colors = ButtonDefaults.buttonColors(Color.White),
           modifier = Modifier.padding(16.dp)
         ) {
-          Text("Add to Filters")
+          Text(stringResource(Res.string.filters_add_button))
         }
       }
     }

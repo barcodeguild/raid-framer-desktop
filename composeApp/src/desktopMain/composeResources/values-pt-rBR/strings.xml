@@ -1,0 +1,382 @@
+<resources>
+
+    <!-- Graphs Strings -->
+    <string name="graphs_trend_graph">Gráfico de Tendência</string>
+    <string name="graphs_no_recent_data">Sem Dados Recentes</string>
+    <string name="graphs_player_metric_format">%1$s - %2$s</string>
+    <string name="graphs_one_minute">1 Minuto</string>
+
+    <!-- Companion Addon Settings Strings -->
+    <string name="companion_description">O Addon Lua obtém dados de combate do jogo. É o que permite funcionalidades nativas como rastreamento de debuffs baseado em alvo, gerenciamento de raid e efeitos visuais/sonoros no jogo. Se você remover o addon lua, os recursos não funcionarão como esperado.</string>
+    <string name="companion_toggle_raid_status">Exibir contagem de membros da raid principal/co-raid quando jogadores entrarem ou saírem.</string>
+    <string name="companion_toggle_display_charmed">Exibir alvos \'Encantados\' na janela de chat do jogo.</string>
+    <string name="companion_toggle_display_silenced">Exibir alvos \'Silenciados\' na janela de chat do jogo.</string>
+    <string name="companion_toggle_display_distressed">Exibir alvos \'Angustiados\' na janela de chat do jogo.</string>
+    <string name="companion_toggl_display_mark_hvt_healers">Mostrar um [Coração] sobre os healers inimigos de maior valor. (Top 3 healers inimigos baseado em cura cumulativa PvP.)</string>
+    <string name="companion_toggle_display_mark_hvt_dps">Mostrar um [Espadas Cruzadas] sobre os DPS inimigos de maior valor. (Top 3 DPS inimigos baseado em dano cumulativo PvP.)</string>
+    <string name="companion_toggle_display_mark_hvt_cc">Mostrar um [Escudo] sobre magos CC inimigos de alto valor para ficar longe. (Top 3 CC inimigo baseado em tempo cumulativo de controle de grupo PvP.)</string>
+    <string name="companion_toggle_display_mark_sac_dancers">Mostrar um raio divino sobre dançarinos de sacrifício enquanto estão canalizando. (Mais fácil de identificar que o efeito padrão do jogo.)</string>
+    <string name="companion_toggle_display_mark_charmed_targets">Mostrar um [Ponto Roxo] sobre a cabeça dos jogadores para indicar que estão Encantados.</string>
+    <string name="companion_toggle_display_mark_silenced_targets">Mostrar um [Ponto Preto] sobre a cabeça dos jogadores para indicar que estão Silenciados.</string>
+    <string name="companion_toggle_display_mark_distressed_targets">Mostrar um [Ponto Azul] sobre a cabeça dos jogadores para indicar que estão Angustiados.</string>
+
+    <!-- New Session Overlay -->
+    <string name="new_session_title">Nova Sessão de Gravação</string>
+    <string name="new_session_event_type_label">Tipo de Evento</string>
+    <string name="new_session_custom_name_label">Nome Personalizado da Sessão</string>
+    <string name="new_session_custom_name_placeholder">Digite o nome da sessão (a-zA-Z0-9)</string>
+    <string name="new_session_damage_mode_label">Modo de Dano</string>
+    <string name="new_session_pvp_only">Apenas Dano PvP</string>
+    <string name="new_session_allow_pve">Permitir Dano PvE</string>
+    <string name="new_session_file_name_label">Nome do Arquivo da Sessão</string>
+    <string name="new_session_start_recording">Iniciar Gravação</string>
+    <string name="new_session_cancel">Não</string>
+
+    <!-- Settings Overlay -->
+    <string name="settings_title">Configurações do Raid Framer Desktop</string>
+    <string name="settings_data_sourcing_title">Fonte de Dados</string>
+    <string name="settings_data_sourcing_description">Por favor, confirme que você vê o diretório de documentos do ArcheRage correto abaixo. O diretório de documentos do seu jogo foi detectado automaticamente. Se você não vir o diretório correto, ou o texto abaixo estiver vermelho, você deve reportar um bug.</string>
+    <string name="settings_toggle_pvp_damage">Mostrar apenas dano PvP</string>
+    <string name="settings_toggle_show_mini_graph">Ativar overlay de mini gráfico DPS/HEALS/CC</string>
+    <string name="settings_lua_options_title">Opções Lua</string>
+    <string name="settings_uninstall_title">Desinstalar Raid Framer</string>
+    <string name="settings_name_placeholder">Selecionar Personagem do Jogo</string>
+    <string name="settings_uninstall_description">Desinstalar por este menu remove limpamente o addon Lua da pasta do jogo, também fecha o app e aciona o processo regular de desinstalação. Se você cancelar o instalador, abrir o raid framer novamente permitirá reinstalar o componente Lua automaticamente.</string>
+    <string name="settings_arche_rage_directory_label">Diretório de Documentos do ArcheRage:</string>
+    <string name="settings_specify_directory_hint">Por favor, Especifique o Diretório (É a pasta que tem um arquivo system.cfg dentro!)</string>
+    <string name="settings_lua_companion_options">Opções do Companheiro Lua</string>
+    <string name="settings_your_current_character">Seu Personagem Atual</string>
+    <string name="settings_character_note">Troque de personagem no jogo para atualizar este valor automaticamente.</string>
+    <string name="settings_enter_name_placeholder">Digite o Nome do Personagem</string>
+    <string name="settings_uninstall_done_text">O Addon Lua foi removido com segurança da pasta do seu jogo.\n\n**NO ENTANTO**\n\nVocê ainda deve completar a desinstalação do aplicativo principal desinstalando "Raid Framer" pelo Painel de Controle do Windows. (esse app) Se você não desinstalar e decidir abrir o app novamente, o addon Lua será copiado de volta para a pasta do seu jogo no interesse do addon ainda funcionar. (a seu desejo) Obrigado! Saindo agora!</string>
+    <string name="settings_mini_graph_description">Ativar Mini-Gráfico DPS/HEALS/CC. Mostra desempenho ao longo do tempo.</string>
+    <string name="settings_show_heals_column">Mostrar Coluna de Curas</string>
+    <string name="settings_show_cc_column">Mostrar Coluna CC</string>
+    <string name="settings_show_damage_column">Mostrar Coluna de Dano</string>
+    <string name="settings_combat_overlay_title">Overlay de Combate</string>
+    <string name="settings_combat_fade_controls">Desvanecer controles de ícone automaticamente quando o cursor sair do overlay.</string>
+    <string name="settings_split_chat">Ativar overlay de janela split-chat estilo OSRS. (Em Breve)</string>
+    <string name="settings_tabbed_detection">Ocultar automaticamente overlays do jogo enquanto estiver fora do jogo em abas. Não se aplica a dicas de ferramenta (aquelas com barra de título).</string>
+    <string name="settings_allow_pve_damage">Permitir que Dano PvE seja contado para DPS/Contadores de Kills. (Útil para jogadores solo que querem ver sua saída de dano contra alvos PvE)</string>
+    <string name="settings_game_schedule_hotkey">Ativar [SEGURAR TAB] para trazer o site oficial de programação de eventos no jogo como overlay. (Em Breve)</string>
+    <string name="settings_use_sadly">Prefiro usar Sadly.io para dados de programação no jogo. (Em Breve)</string>
+    <string name="settings_dragon_breath_overlay">Ativar detector e contador de bafo de dragão. (Nota: Você ainda precisa estar no alcance de 100 metros do cavaleiro de dragão para testemunhar os baforos, isso não é mágica amigos!) (Em Breve)</string>
+    <string name="settings_uninstall_confirm_title">Confirmar Desinstalação</string>
+    <string name="settings_uninstall_confirm_text">Tem certeza de que deseja desinstalar o Addon Lua? Isso removerá a integração com o jogo.\n\nPor favor, feche o jogo antes de continuar, caso contrário arquivos serão deixados para trás.</string>
+    <string name="settings_uninstall_confirm_button">Desinstalar</string>
+    <string name="settings_uninstall_button">Desinstalar Addon Lua &amp; App</string>
+    <string name="settings_player_remappings_button">Re-mapeamentos de Jogador, Duelos PvP &amp; Filtros</string>
+    <string name="settings_uninstall_done_title">Desinstalação Concluída</string>
+    <string name="settings_character_description">Seu personagem e facção são determinados automaticamente quando você troca de personagem. Raid Framer usa esta informação para deduzir personagens amigáveis e hostis ao longo do tempo.</string>
+    <string name="settings_character_title">Personagem Atual</string>
+    <string name="settings_general_opacity_slider">Opacidade do Overlay</string>
+    <string name="settings_general_tint_slider">Cor do Overlay</string>
+    <string name="settings_general_title">Configurações Gerais</string>
+    <string name="settings_general_description">Ativar recursos adicionais de overlay e opções de análise.</string>
+    <string name="settings_general_overlay_title">Configurações Gerais de Overlay</string>
+    <string name="settings_general_overlay_description">Alguns amigos podem desejar ajustar a transparência e cor de seus overlays.</string>
+    <string name="settings_language_label">Idioma</string>
+
+    <!-- Recording Session Panel (shown when a session is active in Settings) -->
+    <string name="settings_recording_session_title">Sessão de Gravação</string>
+    <string name="settings_recording_session_description_format">Eventos de combate estão sendo gravados em %1$s</string>
+    <string name="settings_recording_session_type_format">Tipo: %1$s (%2$s)</string>
+    <string name="settings_recording_session_duration_format">Duração: %1$s</string>
+    <string name="settings_recording_session_stop">Parar Gravação</string>
+
+    <!-- About Overlay Strings -->
+    <string name="about_app_title">Raid Framer Desktop</string>
+    <string name="about_version_label">Versão:</string>
+    <string name="about_package_label">Pacote:</string>
+    <string name="about_source_label">Fonte:</string>
+    <string name="about_read_settings_instruction">Por favor, antes de usar. -&gt;</string>
+    <string name="about_go_to_settings_button">Ir para Configurações</string>
+    <string name="about_author_label">Autor:</string>
+    <string name="about_author_name">~ Reoky ~</string>
+    <string name="about_dedication_text">Dedicado a todos os nossos amigos no Leste e no mundo virtual. Que este código seja usado para o bem, e não para o mal.</string>
+    <string name="about_thanks_label">Obrigado obrigado de</string>
+    <string name="about_thanks_location">Leste Unido</string>
+    <string name="about_community_dedication">À comunidade ArcheRage pelo apoio e feedback. ~</string>
+    <string name="about_staff_dedication">À equipe ArcheRage pela dedicação e trabalho árduo. ~</string>
+    <string name="about_dev_dedication">Aos desenvolvedores ArcheRage pelo apoio contínuo e atualizações. ~</string>
+
+    <!-- Player Card -->
+    <string name="player_card_no_cached_data">Nenhum dado em cache disponível.</string>
+    <string name="player_card_title_format">Card de Jogador para %1$s</string>
+    <string name="player_card_recent_item_uses">Usos de Itens</string>
+    <string name="player_card_recent_kd_short">K/D Recente</string>
+    <string name="player_card_recent_damage">Dano Recente</string>
+    <string name="player_card_recent_heals">Curas Recentes</string>
+    <string name="player_card_recent_kd">Kills &amp; Deaths Recentes</string>
+    <string name="player_card_recent_items">Usos de Habilidade de Item</string>
+    <string name="player_card_recent_buffs">Buffs Aplicados</string>
+    <string name="player_card_recent_debuffs">Debuffs Aplicados</string>
+    <string name="player_card_session_totals">Totais da Sessão</string>
+    <string name="player_card_lifetime_totals">Totais Vitalícios</string>
+
+    <!-- More specific stat labels used in totals -->
+    <string name="player_card_stat_damage">Dano Total</string>
+    <string name="player_card_stat_healing">Cura Total</string>
+    <string name="player_card_stat_cc">CC Entregue</string>
+    <string name="player_card_stat_buffs">Buffs</string>
+    <string name="player_card_stat_debuffs">Debuffs</string>
+    <string name="player_card_stat_charms">Encantos</string>
+    <string name="player_card_stat_distress">Angústias</string>
+    <string name="player_card_stat_silence">Silêncios</string>
+    <string name="player_card_stat_glider">Usos de Planador</string>
+    <string name="player_card_stat_items">Usos de Itens</string>
+    <string name="player_card_stat_potions">Poções</string>
+    <string name="player_card_stat_kills">Kills</string>
+    <string name="player_card_stat_deaths">Mortes</string>
+    <string name="player_card_stat_kills_most_damage">Kills (Mais Dano)</string>
+    <string name="player_card_stat_kills_killing_blow">Kills (Golpe Final)</string>
+    <string name="player_card_stat_total_damage_taken">Dano Total Recebido</string>
+    <string name="player_card_stat_total_heals_received">Curas Totais Recebidas</string>
+
+    <!-- Player Details Section -->
+    <string name="player_details_title">Detalhes do Jogador</string>
+    <string name="player_details_leadership_role">Papel de Liderança</string>
+
+    <!-- Pet List Item -->
+    <string name="pet_icon_desc_format">ícone de %1$s</string>
+    <string name="pet_debuffs_label">Debuffs:</string>
+    <string name="pet_companion_dmg_label">Dano do Companheiro</string>
+
+    <!-- Pokemon / Companions Overlay -->
+    <string name="pokemon_title">Baforadas de Dragão, Risos, Mascotes de Batalha e Outras Criaturas</string>
+    <string name="pokemon_no_companions">Nenhum companheiro ativo detectado ainda...</string>
+
+    <!-- Thumbnails Helper -->
+    <string name="thumbnail_unknown_format">Desconhecido: %1$s</string>
+
+    <!-- Filters Overlay -->
+    <string name="filters_subscriptions_title">Assinaturas</string>
+    <string name="filters_subscriptions_description">Assinaturas permitem criar remapeamentos personalizados de nomes de personagens. São semelhantes aos filtros, mas têm prioridade sobre todas as outras fontes. Use-as para sobrescrever nomes de feitiços, NPCs ou qualquer outro texto no log de combate.</string>
+    <string name="filters_see_example_csv">Ver Exemplo de CSV</string>
+    <string name="filters_use_default">Usar Padrão</string>
+    <string name="filters_current_filters_title">Filtros Atuais</string>
+    <string name="filters_summary_removed_format">%1$s será removido.</string>
+    <string name="filters_summary_will_become_format">%1$s se tornará %2$s.</string>
+    <string name="filters_overrides_title">Substituições</string>
+    <string name="filters_overrides_description">Os filtros da web são combinados com filtros locais. Em caso de conflito, o filtro local tem prioridade.</string>
+    <string name="filters_original_placeholder">Original</string>
+    <string name="filters_replacement_placeholder">Substituição</string>
+    <string name="filters_add_button">Adicionar aos Filtros</string>
+
+    <!-- Exit Dialog -->
+    <string name="exit_dialog_title">Tem certeza?</string>
+    <string name="exit_dialog_message">Isso sairá e fechará quaisquer janelas de overlay abertas. Você pode iniciar .:Raid Framer:. novamente pelo Menu Iniciar do Windows.</string>
+    <string name="exit_dialog_dismiss">Não</string>
+
+    <!-- File Selection Dialog -->
+    <string name="file_selection_title">Selecionar Arquivo de Log de Combate</string>
+    <string name="file_selection_searching">Procurando logs de combate válidos.. Os resultados aparecerão aqui..</string>
+
+    <!-- Combat Overlay -->
+    <string name="combat_press_plus_to_record">Pressione \'+\' para iniciar uma nova sessão de gravação</string>
+    <string name="combat_column_pvp_damage">🔥 Dano PvP 🔥</string>
+    <string name="combat_column_pvp_heals">💉 Curas PvP 💉</string>
+    <string name="combat_column_pvp_cc">⛨ CC PvP ⛨</string>
+    <string name="combat_column_pve_damage">⚔️ Dano PvE ⚔️</string>
+    <string name="combat_column_pve_heals">💉 Curas PvE 💉</string>
+    <string name="combat_column_pve_cc">⛨ CC PvE ⛨</string>
+    <string name="combat_no_columns_message">Cara.. Tenta Adicionar Pelo Menos Uma Categoria..</string>
+    <string name="combat_open_settings">Abrir Configurações</string>
+
+    <!-- Battle Summary Overlay -->
+    <string name="summary_battle_summary_title_format">Resumo da Batalha (%1$s)</string>
+    <string name="summary_silences_by_faction">Silenciamentos por Facção</string>
+    <string name="summary_charms_by_faction">Encantos por Facção</string>
+    <string name="summary_distresses_by_faction">Angústias por Facção</string>
+    <string name="summary_top_silences">Top Silenciamentos</string>
+    <string name="summary_top_charms">Top Encantos</string>
+    <string name="summary_top_distresses">Top Angústias</string>
+    <string name="summary_top_haranya_spells_damage">Top Dano de Feitiços Haranya</string>
+    <string name="summary_top_nuia_spells_damage">Top Dano de Feitiços Nuian</string>
+    <string name="summary_top_pirate_spells_damage">Top Dano de Feitiços Pirata</string>
+    <string name="summary_top_debuffs">Top Debuffs</string>
+    <string name="summary_top_songs">Top Músicas</string>
+    <string name="summary_top_buffs">Top Buffs</string>
+    <string name="summary_top_ode_haranya">♪ Top Ode Haranya ♪</string>
+    <string name="summary_top_ode_nuia">♪ Top Ode Nuia ♪</string>
+    <string name="summary_top_ode_pirate">♪ Top Ode Pirata ♪</string>
+    <string name="summary_top_kills_haranya">Top Kills Haranya</string>
+    <string name="summary_top_kills_nuia">Top Kills Nuia</string>
+    <string name="summary_top_kills_pirate">Top Kills Pirata</string>
+    <string name="summary_top_damage_taken">🔥 Top Dano Recebido 🔥</string>
+    <string name="summary_top_heals_received">💉 Top Curas Recebidas 💉</string>
+    <string name="summary_top_potion_drinkers">Top Bebedores de Poção</string>
+    <string name="summary_top_glider_gamers">Top Jogadores de Planador</string>
+    <string name="summary_most_item_usages">Maior Uso de Itens</string>
+    <string name="summary_top_haranya_item_uses">Top Usos de Itens Haranya</string>
+    <string name="summary_top_nuia_item_uses">Top Usos de Itens Nuian</string>
+    <string name="summary_top_pirate_item_uses">Top Usos de Itens Pirata</string>
+    <string name="summary_haranya_builds">Builds Haranya</string>
+    <string name="summary_nuia_builds">Builds Nuia</string>
+    <string name="summary_pirate_builds">Builds Pirata</string>
+
+    <!-- General Strings -->
+    <string name="general_about">Sobre</string>
+    <string name="general_cancel">Cancelar</string>
+    <string name="general_exit">Sair</string>
+    <string name="general_settings">Configurações</string>
+    <string name="general_instructions_dragging_overlays">Shift + Clique para Arrastar Overlays</string>
+
+    <!-- App / Tray Menu -->
+    <string name="app_tray_title">.: Raid Framer :.</string>
+    <string name="app_tray_reset_positions">Redefinir Posições das Janelas</string>
+    <string name="app_replay_viewing_format">Você está vendo uma repetição dos dados de combate de: %1$s\n\nO monitoramento ao vivo está desativado durante a repetição.</string>
+    <string name="general_metric_type_cc">Controle de Grupo</string>
+    <string name="general_metric_type_cc_short">CC</string>
+    <string name="general_metric_type_damage">Dano</string>
+    <string name="general_metric_type_damage_short">DMG</string>
+    <string name="general_metric_type_healing">Cura</string>
+    <string name="general_metric_type_healing_short">HEALS</string>
+    <string name="general_no_data_available">Sem Dados Disponíveis</string>
+
+    <!-- Help Strings -->
+    <string name="general_help_window_postions_reset">Todas as posições de janela foram redefinidas! Lembre-se: Se você tiver detecção alt-tab ativada, quaisquer overlays (aqueles sem barra de título) podem não aparecer até você trocar de volta para a janela do jogo.</string>
+
+    <!-- Leadership Roles -->
+    <string name="leadership_none">Nenhum</string>
+    <string name="leadership_raid_lead">Líder da Raid</string>
+    <string name="leadership_guild_lead">Líder da Guilda</string>
+    <string name="leadership_faction_hero">Herói da Facção</string>
+    <string name="leadership_shot_caller">Comandante</string>
+    <string name="leadership_gm">GM</string>
+
+    <!-- Game Utility Items -->
+    <string name="item_name_kraken_scepter">Cetro Kraken</string>
+    <string name="item_name_kraken_spear">Lança Kraken</string>
+    <string name="item_name_kraken_shield">Escudo Kraken</string>
+    <string name="item_name_lib_shield">Escudo da Biblioteca</string>
+    <string name="item_name_library_greatclub">Porrete Grande da Biblioteca</string>
+    <string name="item_name_honor_nodachi">Nodachi Frenético da Honra</string>
+    <string name="item_name_jola_shield">Rancor de Jola</string>
+    <string name="item_name_halcy_neck">Colar Halcy</string>
+    <string name="item_name_soul_neck">Colar de Alma</string>
+    <string name="item_name_mist_nodachi">Nodachi Doomshadow</string>
+    <string name="item_name_lib_bow">Arco da Biblioteca/Guardião Imortal</string>
+    <string name="item_name_lib_dagger">Adaga da Biblioteca/Guardião Imortal</string>
+    <string name="item_name_lib_shortspear">Lança Curta da Biblioteca/Guardião Imortal</string>
+    <string name="item_name_lib_staff">Cajado da Biblioteca/Guardião Imortal</string>
+    <string name="item_name_snake_greatsword">Espada Grande Cobra (Borda)</string>
+    <string name="item_name_snake_shield">Escudo Cobra (Baluarte)</string>
+    <string name="item_name_snake_sword">Espada Cobra (Navalha)</string>
+    <string name="item_name_snake_greataxe">Machado Cobra (Cutelaria Alvo)</string>
+    <string name="item_name_snake_scepter">Cetro Cobra (Snepter/Leech)</string>
+    <string name="item_name_snake_gun">Arma Cobra (Bala)</string>
+    <string name="item_name_bd_shield">Escudo Dragão Negro</string>
+    <string name="item_name_bd_club">Clube Dragão Negro</string>
+    <string name="item_name_bd_bow">Arco Dragão Negro (Racha-Olho)</string>
+    <string name="item_name_bd_gun">Arma Dragão Negro (Mordida)</string>
+    <string name="item_name_bd_staff">Cajado Dragão Negro (Rugido)</string>
+    <string name="item_name_bd_sword">Espada Dragão Negro (Ceifador de Cauda)</string>
+    <string name="item_name_bd_2h_sword">Espada 2M Dragão Negro (Ceifador de Asa)</string>
+    <string name="item_name_sungold_anth_set_pull">Pull Set Antologia Ouro Solar</string>
+    <string name="item_name_garden_anth_set_pull">Pull Set Antologia Jardim</string>
+    <string name="item_name_serp_staff">Corrupted Wit (Serpentis)</string>
+    <string name="item_name_mist_dagger">Sussurro Perverso Mistsong (Adaga)</string>
+    <string name="item_name_mist_shield">Escudo Stealthfang Mistsong</string>
+
+    <!-- Game Potions -->
+    <string name="potion_name_minor_healing_rank_one">Chama Velada (Poção de Cura Menor)</string>
+    <string name="potion_name_minor_healing_rank_two">Estrela Silenciada (Poção de Cura Menor)</string>
+    <string name="potion_name_minor_healing_rank_three">Sol da Tarde (Poção de Cura Menor)</string>
+    <string name="potion_name_minor_healing_rank_four">Meteoro de Meio Verão (Poção de Cura Menor)</string>
+    <string name="potion_name_minor_healing_rank_five">Glória do Sol (Poção de Cura Menor)</string>
+    <string name="potion_name_minor_healing_rank_six">Fogo do Deserto (Poção de Cura Menor)</string>
+    <string name="potion_name_minor_healing_rank_seven">Luz Estelar Doce (Poção de Cura Menor)</string>
+    <string name="potion_name_minor_healing_rank_eight">Cometa Ardente (Poção de Cura Menor)</string>
+
+    <string name="potion_name_healing_guild_courage">Coragem da Guilda (Poção de Cura 37%)</string>
+
+    <string name="potion_name_healing_rank_one_through_six">Poção de Cura (Poção de Cura Maior Rank 1-7)</string>
+    <string name="potion_name_healing_rank_seven">Amor Alluvion (Poção de Cura Maior Rank 7)</string>
+    <string name="potion_name_healing_rank_eight">Desejo Ardente (Poção de Cura Maior Rank 8)</string>
+
+    <string name="potion_name_minor_mana_rank_one">Vapor do Mago (Mana Menor Rank 1)</string>
+    <string name="potion_name_minor_mana_rank_two">Memória Enevoada (Mana Menor Rank 2)</string>
+    <string name="potion_name_minor_mana_rank_three">Orvalho da Manhã (Mana Menor Rank 3)</string>
+    <string name="potion_name_minor_mana_rank_four">Córrego do Prado (Mana Menor Rank 4)</string>
+    <string name="potion_name_minor_mana_rank_five">Rio do Tempo (Mana Menor Rank 5)</string>
+    <string name="potion_name_minor_mana_rank_six">Poça Musgosa (Mana Menor Rank 6)</string>
+    <string name="potion_name_minor_mana_rank_seven">Memória Fraca (Mana Menor Rank 7)</string>
+    <string name="potion_name_minor_mana_rank_eight">Reflexo Nebuloso (Mana Menor Rank 8)</string>
+
+    <string name="potion_name_minor_healing_titan">Poção de Cura do Titã (Poção de Cura Menor)</string>
+    <string name="potion_name_minor_mana_titan">Poção de Mana do Titã (Poção de Mana Menor)</string>
+
+    <string name="potion_name_phoenix_tears_tincture">Tintura de Lágrimas de Fênix</string>
+    <string name="potion_name_wild_ginseng">Ginseng Selvagem! (Que amigo sortudo!)</string>
+
+    <!-- PNG Export -->
+    <string name="export_title_battle_summary">Resumo da Batalha</string>
+    <string name="export_no_data">Sem dados</string>
+
+    <!-- Export Settings -->
+    <string name="settings_export_title">Configurações de Exportação</string>
+    <string name="settings_export_description">Gerenciar diretório de saída de exportação e opções.</string>
+    <string name="settings_export_directory_label">Diretório de Exportação:</string>
+    <string name="settings_export_size_label">Espaço Usado:</string>
+    <string name="settings_export_open_folder">Abrir Pasta</string>
+    <string name="settings_export_include_raw_json">Incluir logs formatados JSON brutos ao exportar. (Usa espaço em disco)</string>
+    <string name="settings_export_directory_not_found">Diretório não encontrado</string>
+
+    <!-- About / Update Strings -->
+    <string name="settings_about_title">Sobre</string>
+    <string name="settings_about_version_label">Versão Atual:</string>
+    <string name="settings_about_check_updates_button">Verificar Atualizações</string>
+    <string name="settings_update_available">Atualização disponível: %1$s</string>
+    <string name="settings_update_up_to_date">Você está executando a versão mais recente</string>
+    <string name="settings_update_check_failed">Falha ao verificar atualizações</string>
+    <string name="settings_update_checking">Verificando...</string>
+    <string name="settings_about_github_note">Verifica github.com por novos lançamentos. Nenhum dado é enviado para nenhum servidor.</string>
+
+    <!-- Raid / Attendance Overlay -->
+    <string name="raid_attendance_title">Gerenciamento de Raid &amp; Frequência</string>
+    <string name="raid_refresh_button">Atualizar</string>
+    <string name="raid_control_deck_title">Painel de Controle da Raid</string>
+    <string name="raid_control_deck_subtitle">Lista da raid à esquerda, controles à direita, com informações próximas organizadas logo abaixo.</string>
+    <string name="raid_tab_attendance">Frequência</string>
+    <string name="raid_tab_nearby">Próximos</string>
+    <string name="raid_tab_nearby_gear">Equipamento Próximo</string>
+    <string name="raid_no_raid_detected">Por favor, entre em uma raid para usar recursos de gerenciamento de raid. Você deve ter o Addon Lua instalado. Janelas com barras de título não são overlays, considere colocar em outro monitor para evitar cobrir a UI do jogo.</string>
+    <string name="raid_main_raid_label">Raid Principal</string>
+    <string name="raid_coraid_label">Co-Raid</string>
+    <string name="raid_include_main_raid">Incluir Raid Principal</string>
+    <string name="raid_include_coraid">Incluir Co-Raid</string>
+    <string name="raid_include_nearby_same_faction">Incluir Jogadores Próximos da Mesma Facção</string>
+    <string name="raid_include_nearby_opposite_faction">Incluir Jogadores Próximos da Facção Oposta</string>
+    <string name="raid_require_pvp_filter">Exigir pelo menos alguma participação. (25k dano, 25k curas, ou 25+ pontos CC)</string>
+    <string name="raid_include_departed">Incluir jogadores que saíram da raid</string>
+    <string name="raid_copy_attendance">Copiar Frequência</string>
+    <string name="raid_haranya_faction">Facção Haranya (%d)</string>
+    <string name="raid_nuian_faction">Facção Nuian (%d)</string>
+    <string name="raid_pirate_faction">Facção Pirata (%d)</string>
+    <string name="raid_close">Fechar</string>
+    <string name="raid_nearby_disclaimer">Mostra apenas jogadores que geraram eventos de combate próximos. Não detecta jogadores stealthados.</string>
+    <string name="raid_nearby_require_pvp">Exigir participação (25k dano, 25k curas, ou 25+ CC)</string>
+    <string name="histogram_no_data">Sem dados</string>
+    <string name="histogram_unknown_label">Desconhecido</string>
+    <string name="histogram_under_10k">&lt;10k</string>
+    <string name="histogram_tooltip_label">Gear Score: %s</string>
+    <string name="histogram_more_players">...e mais %d</string>
+    <string name="nearby_avg_gs_format">GS Médio: %d (%d rastreados)</string>
+    <string name="app_already_running">Raid Framer já está em execução.</string>
+
+    <!-- Seed Table Strings -->
+    <string name="settings_seed_table_title">Tabela Seed</string>
+    <string name="settings_seed_table_description">Exportar ou importar uma tabela seed para compartilhar dados de jogadores com outras instalações. Isso ajuda a pré-popular status de facção de jogadores, gear-scores, classes e nomes de guildas para maior precisão. Nomes de jogadores são hasheados para privacidade.</string>
+    <string name="settings_seed_table_none">Nenhuma tabela seed aplicada.</string>
+    <string name="settings_seed_table_applied">Tabela seed: %d jogadores: %s</string>
+    <string name="settings_seed_table_export">Exportar</string>
+    <string name="settings_seed_table_import">Importar</string>
+    <string name="settings_seed_table_remove">Remover</string>
+    <string name="settings_seed_table_date_format">%s (%dd %dh atrás)</string>
+    <string name="seed_table_apply_prompt">Você gostaria de aplicar a tabela seed de:\n%s\n\nIsso permitirá que o app use esta tabela seed como referência para dados de jogadores.</string>
+    <string name="seed_table_apply_title">Aplicar Tabela Seed</string>
+    <string name="seed_table_file_not_found">O arquivo de tabela seed especificado não foi encontrado: %s</string>
+    <string name="seed_table_applied_success">Tabela seed aplicada com sucesso!</string>
+
+</resources>

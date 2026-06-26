@@ -2,6 +2,7 @@ package com.reoky.raidframer.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,6 +13,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.WindowPosition
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.locale.AppLocale
 import com.reoky.raidframer.ui.overlay.AboutOverlay
 import com.reoky.raidframer.ui.overlay.SummaryOverlay
 import com.reoky.raidframer.ui.overlay.CombatOverlay
@@ -30,6 +33,13 @@ import java.awt.event.ComponentAdapter
 @Composable
 fun OverlayContainer(wm: WindowManager) {
   println("Rendering Window Containers...")
+
+  val config by RFConfig.state.collectAsState()
+
+  LaunchedEffect(config.preferredLanguage) {
+    AppLocale.apply(config.preferredLanguage)
+  }
+
   OverlayType.entries.forEach { type ->
     val visible = wm.isVisible(type).value
     if (visible) {
@@ -62,7 +72,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.NEW_SESSION -> NewSessionOverlay(wm)
           OverlayType.RAID -> RaidOverlay(wm)
           OverlayType.PLAYER_CARD -> PlayerCardOverlay(wm)
-          else -> {}//throw Exception("Overlay type $type not implemented")
+          else -> {}
         }
 
         // initial notify

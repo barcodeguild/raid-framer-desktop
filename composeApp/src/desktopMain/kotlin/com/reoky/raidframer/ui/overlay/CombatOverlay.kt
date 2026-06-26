@@ -47,6 +47,7 @@ import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_heal
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_cc
 import raid_framer_desktop.composeapp.generated.resources.combat_no_columns_message
 import raid_framer_desktop.composeapp.generated.resources.combat_open_settings
+import raid_framer_desktop.composeapp.generated.resources.combat_press_plus_to_record
 
 @Preview
 @Composable
@@ -245,7 +246,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
             contentAlignment = Alignment.Center
           ) {
             Text(
-              text = "Press '+' to start a new recording session",
+              text = stringResource(Res.string.combat_press_plus_to_record),
               color = RFColors.TextTertiary,
               fontSize = 11.sp,
               maxLines = 1
