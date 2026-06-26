@@ -21,6 +21,11 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.getPetIcon
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.pet_companion_dmg_label
+import raid_framer_desktop.composeapp.generated.resources.pet_debuffs_label
+import raid_framer_desktop.composeapp.generated.resources.pet_icon_desc_format
 
 @Composable
 fun PetListItem(
@@ -78,7 +83,7 @@ fun PetListItem(
           ) {
             Image(
               painter = getPetIcon(petType),
-              contentDescription = "$petType icon",
+              contentDescription = stringResource(Res.string.pet_icon_desc_format, petType),
               modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { scaleX = zoom; scaleY = zoom },
@@ -110,7 +115,7 @@ fun PetListItem(
 
           if (debuffs.isNotEmpty()) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-              Text(text = "Debuffs:", fontSize = 12.sp, color = RFColors.TextTertiary)
+              Text(text = stringResource(Res.string.pet_debuffs_label), fontSize = 12.sp, color = RFColors.TextTertiary)
               Spacer(modifier = Modifier.width(8.dp))
               val displayed = debuffs.take(3)
               displayed.forEachIndexed { idx, d ->
@@ -141,7 +146,7 @@ fun PetListItem(
             fontSize = 18.sp,
             color = RFColors.dpsOrange
           )
-          Text(text = "Companion dmg", fontSize = 11.sp, color = RFColors.TextTertiary)
+          Text(text = stringResource(Res.string.pet_companion_dmg_label), fontSize = 11.sp, color = RFColors.TextTertiary)
         }
       }
     }

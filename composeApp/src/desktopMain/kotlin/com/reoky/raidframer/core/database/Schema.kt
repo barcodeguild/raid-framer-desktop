@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 21
+const val SCHEMA_VERSION = 23
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -87,7 +87,14 @@ data class ConfigEntity(
   val lastSessionType: String = "",
   val lastSessionDurationMs: Long = 0L,
   val lastSessionExportDir: String = "",
-  val exportIncludeRawJsonLogs: Boolean = false
+  val exportIncludeRawJsonLogs: Boolean = false,
+
+  // Seed table config
+  val seedTableLastAppliedTimestamp: Long = 0L,
+  val seedTableFileName: String = "",
+
+  // Language preference (empty = use system locale)
+  val preferredLanguage: String = ""
 )
 
 /*

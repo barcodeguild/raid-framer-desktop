@@ -23,7 +23,10 @@ import com.reoky.raidframer.core.definitions.SkillTreeType
 // New Resource Imports
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.*
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.thumbnail_unknown_format
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -64,7 +67,7 @@ fun renderDebuffThumbnailGrid(thumbnails: List<String>) {
             // println("No resource mapping found for: $debuffName")
             Image(
               painter = painterResource(Res.drawable.not_found),
-              contentDescription = "Unknown: $debuffName",
+              contentDescription = stringResource(Res.string.thumbnail_unknown_format, debuffName),
               modifier = Modifier.padding(2.dp).size(36.dp).border(1.dp, Color.Gray)
             )
           }

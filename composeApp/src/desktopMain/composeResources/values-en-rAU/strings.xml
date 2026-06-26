@@ -15,7 +15,7 @@
     <string name="companion_toggl_display_mark_hvt_healers">Show a [Heart Mark] over highest-value enemy healers. (Top 3 enemy healers based on cumulative PvP healing.)</string>
     <string name="companion_toggle_display_mark_hvt_dps">Show a [Crossed-Swords Mark] over highest-value enemy DPS. (Top 3 enemy DPS based on cumulative PvP damage.)</string>
     <string name="companion_toggle_display_mark_hvt_cc">Show a [Shield Mark] over high-value enemy CC mages to stay away from. (Top 3 enemy CC based on cumulative PvP crowd control time.)</string>
-    <string name="companion_toggle_display_mark_sac_dancers">Sheen a God ray over sacrifice dancers while they are channeling. (Easier to spot than default game effect.)</string>
+    <string name="companion_toggle_display_mark_sac_dancers">Shower a God ray over sacrifice dancers while they are channeling. (Easier to spot than default game effect.)</string>
     <string name="companion_toggle_display_mark_charmed_targets">Show a [Purple Dot] over player's heads to indicate that they are Charmed.</string>
     <string name="companion_toggle_display_mark_silenced_targets">Show a [Black Dot] over player's heads to indicate that they are Silenced.</string>
     <string name="companion_toggle_display_mark_distressed_targets">Show a [Blue Dot] over player's heads to indicate that they are Distressed.</string>
@@ -30,7 +30,7 @@
     <string name="new_session_allow_pve">Allow PvE Damage</string>
     <string name="new_session_file_name_label">Session File Name</string>
     <string name="new_session_start_recording">Start Recording</string>
-    <string name="new_session_cancel">Nope</string>
+    <string name="new_session_cancel">Nah</string>
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Settings</string>
@@ -96,7 +96,7 @@ Please close the game before continuing, otherwise files will be left over.</str
     <string name="about_version_label">Version:</string>
     <string name="about_package_label">Package:</string>
     <string name="about_source_label">Source:</string>
-    <string name="about_read_settings_instruction">Please read before use. -></string>
+    <string name="about_read_settings_instruction">Please before use. -&gt;</string>
     <string name="about_go_to_settings_button">Go to Settings</string>
     <string name="about_author_label">Author:</string>
     <string name="about_author_name">~ Reoky ~</string>
@@ -158,14 +158,14 @@ Please close the game before continuing, otherwise files will be left over.</str
 
     <!-- Filters Overlay -->
     <string name="filters_subscriptions_title">Subscriptions</string>
-    <string name="filters_subscriptions_description">Subscriptions allow you to create custom character name re-mappings. They are similar to filters, except subscriptions take precedence over all other sources. Use them to override game spell names, NPC names, or any other text in the combat log.</string>
+    <string name="filters_subscriptions_description">Subscriptions let you create custom character name re-mappings. They're similar to filters, except subscriptions take precedence over all other sources. Use them to override game spell names, NPC names, or any other text in the combat log.</string>
     <string name="filters_see_example_csv">See Example CSV</string>
     <string name="filters_use_default">Use Default</string>
     <string name="filters_current_filters_title">Current Filters</string>
     <string name="filters_summary_removed_format">%1$s will be removed.</string>
     <string name="filters_summary_will_become_format">%1$s will become %2$s.</string>
     <string name="filters_overrides_title">Overrides</string>
-    <string name="filters_overrides_description">Filters from the web are combined with any local filters. If a filter from the web and a local filter disagree, the local filter takes precedence.</string>
+    <string name="filters_overrides_description">Filters from the web are combined with any local filters. If a web filter and a local filter disagree, the local filter takes precedence.</string>
     <string name="filters_original_placeholder">Original</string>
     <string name="filters_replacement_placeholder">Replacement</string>
     <string name="filters_add_button">Add to Filters</string>
@@ -173,7 +173,7 @@ Please close the game before continuing, otherwise files will be left over.</str
     <!-- Exit Dialog -->
     <string name="exit_dialog_title">Are you sure?</string>
     <string name="exit_dialog_message">This will exit and close any open overlay windows. You can launch .:Raid Framer:. again from the Windows Start Menu.</string>
-    <string name="exit_dialog_dismiss">Nope</string>
+    <string name="exit_dialog_dismiss">Nah</string>
 
     <!-- File Selection Dialog -->
     <string name="file_selection_title">Select Combat Logfile</string>
@@ -235,6 +235,7 @@ Please close the game before continuing, otherwise files will be left over.</str
     <string name="app_replay_viewing_format">You are viewing a replay of combat data from: %1$s
 
 Live monitoring is disabled while viewing replays.</string>
+
     <string name="general_metric_type_cc">Crowd Control</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">Damage</string>
@@ -288,7 +289,6 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="item_name_mist_dagger">Mistsong Wicked Whisper Dagger</string>
     <string name="item_name_mist_shield">Mistsong Stealthfang Shield</string>
 
-
     <!-- Game Potions -->
     <string name="potion_name_minor_healing_rank_one">Veiled Flame (Minor Healing Potion)</string>
     <string name="potion_name_minor_healing_rank_two">Hushed Star (Minor Healing Potion)</string>
@@ -298,7 +298,6 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="potion_name_minor_healing_rank_six">Desert Fire (Minor Healing Potion)</string>
     <string name="potion_name_minor_healing_rank_seven">Sweet Starlight (Minor Healing Potion)</string>
     <string name="potion_name_minor_healing_rank_eight">Blazing Comet (Minor Healing Potion)</string>
-
 
     <string name="potion_name_healing_guild_courage">Guild Courage (37% Healing Potion)</string>
 

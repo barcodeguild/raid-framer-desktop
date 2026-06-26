@@ -11,6 +11,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.ConfigEntity
+import com.reoky.raidframer.core.locale.AppLocale
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.colorToSliderValue
 import com.reoky.raidframer.core.helpers.formatFileSize
@@ -29,8 +37,9 @@ import com.reoky.raidframer.core.helpers.getDirectorySizeBytes
 import com.reoky.raidframer.core.helpers.getExportDirectory
 import com.reoky.raidframer.core.helpers.sliderValueToColor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
-import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.seedtable.SeedTableInteractor
+import com.reoky.raidframer.core.seedtable.SeedTableStatus
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.helper.UpdateHelper
@@ -46,6 +55,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.*
 import java.awt.Desktop
+import java.text.SimpleDateFormat
 import java.util.Locale.getDefault
 import kotlin.system.exitProcess
 
@@ -217,6 +227,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       CombatOverlaySettingsPanel()
 
       ExportSettingsPanel()
+
+      SeedTableSettingsPanel(wm)
 
       VersionPanel()
 
@@ -457,6 +469,13 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
     Spacer(modifier = Modifier.height(12.dp))
   }
 
+    SettingsSection(
+      title = stringResource(Res.string.settings_language_label),
+      description = stringResource(Res.string.settings_language_restart_notice)
+    ) {
+      LanguageDropdown(currentCode = config.preferredLanguage)
+    }
+
   // General Overlay Settings
   SettingsSection(
     title = stringResource(Res.string.settings_general_overlay_title),
@@ -510,6 +529,55 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
         inactiveTrackColor = RFColors.CardBorder
       )
     )
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LanguageDropdown(currentCode: String) {
+  var expanded by remember { mutableStateOf(false) }
+  val currentLabel = AppLocale.entryFor(currentCode).nativeLabel
+
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = !expanded }
+  ) {
+    OutlinedTextField(
+      value = currentLabel,
+      onValueChange = {},
+      readOnly = true,
+      modifier = Modifier
+        .fillMaxWidth()
+        .menuAnchor(),
+      colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = RFColors.AccentRed,
+        unfocusedBorderColor = RFColors.CardBorder,
+        focusedTextColor = RFColors.TextPrimary,
+        unfocusedTextColor = RFColors.TextPrimary,
+        cursorColor = RFColors.AccentRed
+      ),
+      trailingIcon = {
+        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+      }
+    )
+    ExposedDropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier.fillMaxWidth(),
+      containerColor = RFColors.CardBackground,
+      tonalElevation = 4.dp
+    ) {
+      (listOf(AppLocale.SYSTEM_DEFAULT) + AppLocale.ENTRIES).forEach { entry ->
+        DropdownMenuItem(
+          text = { Text(text = entry.nativeLabel, color = RFColors.TextPrimary) },
+          onClick = {
+            RFConfig.update { it.copy(preferredLanguage = entry.code) }
+            expanded = false
+          },
+          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+        )
+      }
+    }
   }
 }
 
@@ -727,8 +795,8 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
   val timeStr = String.format("%02d:%02d", minutes, seconds)
 
   SettingsSection(
-    title = "Recording Session",
-    description = "Combat events are being recorded to ${config.lastSessionTitle}"
+    title = stringResource(Res.string.settings_recording_session_title),
+    description = stringResource(Res.string.settings_recording_session_description_format, config.lastSessionTitle)
   ) {
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -736,13 +804,13 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
     ) {
       Column {
         Text(
-          text = "Type: ${config.lastSessionType} ($mode)",
+          text = stringResource(Res.string.settings_recording_session_type_format, config.lastSessionType, mode),
           color = RFColors.TextPrimary,
           fontSize = 13.sp,
           fontWeight = FontWeight.Medium
         )
         Text(
-          text = "Duration: $timeStr",
+          text = stringResource(Res.string.settings_recording_session_duration_format, timeStr),
           color = RFColors.TextSecondary,
           fontSize = 12.sp,
           fontWeight = FontWeight.Medium
@@ -757,7 +825,7 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
         colors = ButtonDefaults.buttonColors(RFColors.AccentRed)
       ) {
         Text(
-          text = "Stop Recording",
+          text = stringResource(Res.string.settings_recording_session_stop),
           color = Color.White,
           fontWeight = FontWeight.SemiBold,
           fontSize = 13.sp
@@ -776,5 +844,80 @@ fun PreviewSettings() {
       .background(Color.Black)
   ) {
     SettingsOverlay()
+  }
+}
+
+@Composable
+private fun SeedTableSettingsPanel(wm: WindowManager? = null) {
+  val status by SeedTableInteractor.status.collectAsState()
+
+  SettingsSection(
+    title = stringResource(Res.string.settings_seed_table_title),
+    description = stringResource(Res.string.settings_seed_table_description)
+  ) {
+    when (val s = status) {
+      is SeedTableStatus.None -> {
+        Text(
+          text = stringResource(Res.string.settings_seed_table_none),
+          color = RFColors.TextSecondary,
+          fontSize = 13.sp
+        )
+      }
+      is SeedTableStatus.Applied -> {
+        val days = s.ageMs / (24 * 60 * 60 * 1000)
+        val hours = (s.ageMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
+        val createdDate = SimpleDateFormat("MMM d, yyyy", getDefault()).format(java.util.Date(System.currentTimeMillis() - s.ageMs))
+        val dateStr = String.format(stringResource(Res.string.settings_seed_table_date_format), createdDate, days, hours)
+        Text(
+          text = String.format(stringResource(Res.string.settings_seed_table_applied), s.playerCount, dateStr),
+          color = if (s.isStale) RFColors.AccentRed else Color(0xFF66BB6A),
+          fontSize = 13.sp,
+          fontWeight = FontWeight.Medium
+        )
+      }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Button(
+        onClick = {
+          wm?.closeWindow(OverlayType.SETTINGS)
+          SeedTableInteractor.showExportFileChooser { file ->
+            SeedTableInteractor.exportSeedTable(file)
+            wm?.openWindow(OverlayType.SETTINGS)
+          }
+        },
+        colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(stringResource(Res.string.settings_seed_table_export), color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+      }
+      Button(
+        onClick = {
+          wm?.closeWindow(OverlayType.SETTINGS)
+          SeedTableInteractor.showImportFileChooser { file ->
+            SeedTableInteractor.importSeedTable(file)
+            wm?.openWindow(OverlayType.SETTINGS)
+          }
+        },
+        colors = ButtonDefaults.buttonColors(RFColors.CardBorder),
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(stringResource(Res.string.settings_seed_table_import), color = RFColors.TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+      }
+      if (status is SeedTableStatus.Applied) {
+        Button(
+          onClick = { SeedTableInteractor.removeSeedTable() },
+          colors = ButtonDefaults.buttonColors(Color(0xFFB71C1C)),
+          modifier = Modifier.weight(1f)
+        ) {
+          Text(stringResource(Res.string.settings_seed_table_remove), color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+        }
+      }
+    }
   }
 }

@@ -25,6 +25,7 @@ import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.core.interactor.OverlayInteractor
 import com.reoky.raidframer.core.interactor.PetAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -41,9 +42,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.getString
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.app_replay_viewing_format
+import raid_framer_desktop.composeapp.generated.resources.app_tray_reset_positions
+import raid_framer_desktop.composeapp.generated.resources.app_tray_title
+import raid_framer_desktop.composeapp.generated.resources.general_about
+import raid_framer_desktop.composeapp.generated.resources.general_exit
 import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
+import raid_framer_desktop.composeapp.generated.resources.general_settings
 import raid_framer_desktop.composeapp.generated.resources.raidframer
+import raid_framer_desktop.composeapp.generated.resources.seed_table_apply_prompt
+import raid_framer_desktop.composeapp.generated.resources.seed_table_apply_title
+import raid_framer_desktop.composeapp.generated.resources.seed_table_applied_success
+import raid_framer_desktop.composeapp.generated.resources.seed_table_file_not_found
 
 const val TAG = "Main"
 private const val SINGLE_INSTANCE_MUTEX = "Local\\RaidFramerDesktopSingleInstance"
@@ -63,13 +75,21 @@ fun main(args: Array<String>) {
     val context = rememberCoroutineScope()
 
     // Initialize the database: critical that this occurs first and only once
-    remember {
-      try {
-        initialize().also { db -> RFDao.init(db) }
-      } catch (e: Exception) {
-        println("Oh eek, the database wouldn't open, friend: ${e.message}")
-        exitProcess(1)
+    val db = try {
+      initialize().also { initializeDb -> RFDao.init(initializeDb) }
+    } catch (e: Exception) {
+      println("Oh eek, the database wouldn't open, friend: ${e.message}")
+      exitProcess(1)
+    }
+
+    // Apply language preference before Compose starts (must be before first composition)
+    try {
+      kotlinx.coroutines.runBlocking {
+        val lang = RFDao.configDao.getConfig()?.preferredLanguage.orEmpty()
+        com.reoky.raidframer.core.locale.AppLocale.apply(lang)
       }
+    } catch (e: Exception) {
+      println("Could not load language preference: ${e.message}")
     }
 
     RFConfig.init(RFDao.configDao)
@@ -85,16 +105,34 @@ fun main(args: Array<String>) {
     DeathAccumulatorInteractor.start()
     PetAccumulatorInteractor.start()
     CombatLogInteractor.start(delay = 3000L)
+    SeedTableInteractor.start(delay = 2000L)
 
     // file path args processing
-    val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) }
+    val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) || it.endsWith(".rfst", ignoreCase = true) }
     if (incoming != null) {
-      try {
-        // Trim surrounding quotes if any (Windows may quote paths with spaces).
-        val cleaned = incoming.trim().trim('"')
-        val p = Paths.get(cleaned)
+      val cleaned = incoming.trim().trim('"')
+      val p = Paths.get(cleaned)
+
+      if (cleaned.endsWith(".rfst", ignoreCase = true)) {
         if (Files.exists(p)) {
-          messageBox(AppGlobals.APP_NAME, "You are viewing a replay of combat data from: $p. Live monitoring is disabled while viewing replays.")
+          val prompt = String.format(stringResource(Res.string.seed_table_apply_prompt), p.toString())
+          val result = JOptionPane.showConfirmDialog(
+            null,
+            prompt,
+            stringResource(Res.string.seed_table_apply_title),
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+          )
+          if (result == JOptionPane.YES_OPTION) {
+            SeedTableInteractor.importSeedTable(p.toFile())
+            messageBox(AppGlobals.APP_NAME, stringResource(Res.string.seed_table_applied_success))
+          }
+        } else {
+          messageBox(AppGlobals.APP_NAME, String.format(stringResource(Res.string.seed_table_file_not_found), incoming))
+        }
+      } else if (cleaned.endsWith(".log", ignoreCase = true)) {
+        if (Files.exists(p)) {
+          messageBox(AppGlobals.APP_NAME, stringResource(Res.string.app_replay_viewing_format, p.toString()))
           GameMonitorInteractor.chooseCombatLog(p)
           GameMonitorInteractor.setOptions(
             mode = GameMonitorInteractor.MonitorModes.REPLAY,
@@ -103,13 +141,7 @@ fun main(args: Array<String>) {
           )
           GameMonitorInteractor.restart()
         }
-      } catch (_: Exception) {
-        Log.error(TAG, "Failed to process incoming log path: $incoming")
-        messageBox(AppGlobals.APP_NAME, "Failed to open the specified combat log file: $incoming")
-        exitProcess(1)
       }
-
-    // not viewing a replay so pick the path from settings
     } else {
       // choose game path default automatically
       context.launch(Dispatchers.IO) {
@@ -187,20 +219,20 @@ fun spawnSystemTray(wm: WindowManager): SystemTray {
     size = Size(32f, 32f)
   )
 
-  val titleMenuItem = MenuItem(".: Raid Framer :.")
+  val titleMenuItem = MenuItem(stringResource(Res.string.app_tray_title))
   titleMenuItem.setImage(iconImage)
   tray.menu.add(titleMenuItem)
-  tray.menu.add(MenuItem("Settings") {
+  tray.menu.add(MenuItem(stringResource(Res.string.general_settings)) {
     wm.openWindow(OverlayType.SETTINGS)
   })
-  tray.menu.add(MenuItem("About") {
+  tray.menu.add(MenuItem(stringResource(Res.string.general_about)) {
     wm.openWindow(OverlayType.ABOUT)
   })
-  tray.menu.add(MenuItem("Reset Window Positions") {
+  tray.menu.add(MenuItem(stringResource(Res.string.app_tray_reset_positions)) {
     wm.resetAllWindowPositions()
     messageBox(AppGlobals.APP_NAME, helpString)
   })
-  tray.menu.add(MenuItem("Exit") {
+  tray.menu.add(MenuItem(stringResource(Res.string.general_exit)) {
     quit()
   })
   tray.setImage(iconImage)

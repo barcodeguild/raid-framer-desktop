@@ -42,6 +42,10 @@ import com.reoky.raidframer.ui.component.CloseButton
 import com.reoky.raidframer.core.helpers.annotatedStringForAttack
 import com.reoky.raidframer.core.helpers.annotatedStringForHeal
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.player_card_recent_damage
+import raid_framer_desktop.composeapp.generated.resources.player_card_recent_heals
 
 @Preview
 @Composable
@@ -262,14 +266,14 @@ fun TrackerOverlay(wm: WindowManager? = null) {
           ) {
             Tab(selected = tabIndex == 0, onClick = { tabIndex = 0 }) {
               Text(
-                text = "Recent Damage",
+                text = stringResource(Res.string.player_card_recent_damage),
                 color = Color.White,
                 modifier = Modifier.padding(6.dp)
               )
             }
             Tab(selected = tabIndex == 1, onClick = { tabIndex = 1 }) {
               Text(
-                text = "Recent Heals",
+                text = stringResource(Res.string.player_card_recent_heals),
                 color = Color.White,
                 modifier = Modifier.padding(6.dp)
               )

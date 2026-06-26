@@ -38,6 +38,7 @@ import raid_framer_desktop.composeapp.generated.resources.histogram_more_players
 import raid_framer_desktop.composeapp.generated.resources.histogram_no_data
 import raid_framer_desktop.composeapp.generated.resources.histogram_tooltip_label
 import raid_framer_desktop.composeapp.generated.resources.histogram_unknown_label
+import raid_framer_desktop.composeapp.generated.resources.histogram_under_10k
 
 private const val DEFAULT_BIN_SIZE = 1000
 //private const val GS_FIXED_MIN = 0
@@ -124,7 +125,7 @@ fun GearScoreHistogram(
       0
     }
     HorizontalBarRow(
-      label = "<10k",
+      label = stringResource(Res.string.histogram_under_10k),
       count = lowCount,
       barWidth = lowBarWidth,
       color = RFColors.gearRed,

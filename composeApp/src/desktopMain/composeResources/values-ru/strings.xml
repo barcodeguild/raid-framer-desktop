@@ -1,0 +1,394 @@
+<resources>
+
+    <!-- Graphs Strings -->
+    <string name="graphs_trend_graph">График тренда</string>
+    <string name="graphs_no_recent_data">Нет недавних данных</string>
+    <string name="graphs_player_metric_format">%2$s %1$s</string>
+    <string name="graphs_one_minute">1 минута</string>
+
+    <!-- Companion Addon Settings Strings -->
+    <string name="companion_description">Lua-аддон получает данные о бое из игры. Именно он позволяет нативные функции, такие как отслеживание дебаффов по цели, управление рейдом и визуальные/звуковые эффекты в игре. Если вы удалите lua-аддон из игры, функции не будут работать как положено.</string>
+    <string name="companion_toggle_raid_status">Отображать количество участников основного/со-рейда, когда игроки присоединяются или покидают рейд.</string>
+    <string name="companion_toggle_display_charmed">Отображать 'Очарованные' цели в окне игрового чата.</string>
+    <string name="companion_toggle_display_silenced">Oтображать 'Заблокированные' цели в окне игрового чата.</string>
+    <string name="companion_toggle_display_distressed">Отображать 'Расстроенные' цели в окне игрового чата.</string>
+    <string name="companion_toggl_display_mark_hvt_healers">Показывать [Метку сердца] над наиболее ценными вражескими хилами. (Топ-3 вражеских хила по кумулятивному PvP-исцелению.)</string>
+    <string name="companion_toggle_display_mark_hvt_dps">Показывать [Метку скрещенных мечей] над наиболее ценными вражескими DPS. (Топ-3 вражеских DPS по кумулятивному PvP-урону.)</string>
+    <string name="companion_toggle_display_mark_hvt_cc">Показывать [Метку щита] над ценными вражескими CC-магами, от которых следует держаться подальше. (Топ-3 вражеского CC по кумулятивному времени контроля в PvP.)</string>
+    <string name="companion_toggle_display_mark_sac_dancers">Показывать божественный луч над танцорами жертвоприношения во время канализации. (Легче заметить, чем стандартный игровой эффект.)</string>
+    <string name="companion_toggle_display_mark_charmed_targets">Показывать [Фиолетовую точку] над головами игроков, чтобы показать, что они очарованы.</string>
+    <string name="companion_toggle_display_mark_silenced_targets">Показывать [Черную точку] над головами игроков, чтобы показать, что они заблокированы.</string>
+    <string name="companion_toggle_display_mark_distressed_targets">Показывать [Синюю точку] над головами игроков, чтобы показать, что они расстроены.</string>
+
+    <!-- New Session Overlay -->
+    <string name="new_session_title">Новая сессия записи</string>
+    <string name="new_session_event_type_label">Тип события</string>
+    <string name="new_session_custom_name_label">Пользовательское имя сессии</string>
+    <string name="new_session_custom_name_placeholder">Введите имя сессии (a-zA-Z0-9)</string>
+    <string name="new_session_damage_mode_label">Режим урона</string>
+    <string name="new_session_pvp_only">Только PvP урон</string>
+    <string name="new_session_allow_pve">Разрешить PvE урон</string>
+    <string name="new_session_file_name_label">Имя файла сессии</string>
+    <string name="new_session_start_recording">Начать запись</string>
+    <string name="new_session_cancel">Нет</string>
+
+    <!-- Settings Overlay -->
+    <string name="settings_title">Настройки Raid Framer Desktop</string>
+    <string name="settings_data_sourcing_title">Источник данных</string>
+    <string name="settings_data_sourcing_description">Пожалуйста, подтвердите, что вы видите правильный каталог документов ArcheRage ниже. Каталог документов вашей игры был обнаружен автоматически. Если вы не видите правильный каталог или текст ниже красный, вам следует сообщить об ошибке.</string>
+    <string name="settings_toggle_pvp_damage">Показывать только PvP урон</string>
+    <string name="settings_toggle_show_mini_graph">Включить мини-оверлей графика DPS/HEALS/CC</string>
+    <string name="settings_lua_options_title">Настройки Lua</string>
+    <string name="settings_uninstall_title">Удалить Raid Framer</string>
+    <string name="settings_name_placeholder">Выбор игрового персонажа</string>
+    <string name="settings_uninstall_description">Удаление через это меню аккуратно удаляет Lua-аддон из папки игры, также закрывает приложение и запускает обычный процесс удаления. Если вы решите отменить установку, повторное открытие raid framer позволит вам автоматически переустановить Lua-компонент.</string>
+    <string name="settings_arche_rage_directory_label">Каталог документов ArcheRage:</string>
+    <string name="settings_specify_directory_hint">Пожалуйста, укажите каталог (Это папка, в которой есть файл system.cfg!)</string>
+    <string name="settings_lua_companion_options">Настройки Lua-компаньона</string>
+    <string name="settings_your_current_character">Ваш текущий персонаж</string>
+    <string name="settings_character_note">Переключите персонажа в игре, чтобы автоматически обновить это значение.</string>
+    <string name="settings_enter_name_placeholder">Введите имя персонажа</string>
+    <string name="settings_uninstall_done_text">Lua-аддон был безопасно удален из папки вашей игры.
+
+**ОДНАКО**
+
+Вам все равно следует завершить удаление основного приложения, удалив "Raid Framer" через Панель управления Windows. (это это приложение) Если вы не удалите и решите снова открыть приложение, Lua-аддон будет скопирован обратно в папку вашей игры, чтобы аддон все еще функционировал. (по вашему желанию) Спасибо! Выходим сейчас!</string>
+    <string name="settings_mini_graph_description">Включить мини-график DPS/HEALS/CC. Показывает производительность во времени.</string>
+    <string name="settings_show_heals_column">Показать столбец исцеления</string>
+    <string name="settings_show_cc_column">Показать столбец CC</string>
+    <string name="settings_show_damage_column">Показать столбец урона</string>
+    <string name="settings_combat_overlay_title">Боевой оверлей</string>
+    <string name="settings_combat_fade_controls">Автоматически скрывать иконки управления, когда курсор покидает оверлей.</string>
+    <string name="settings_split_chat">Включить оверлей окна раздельного чата в стиле OSRS. (Скоро)</string>
+    <string name="settings_tabbed_detection">Автоматически скрывать игровые оверлеи при переключении вкладок из игры. Не применяется к подсказкам (те, у которых есть заголовок).</string>
+    <string name="settings_allow_pve_damage">Разрешить PvE урон засчитываться в счетчики DPS/убийств. (Полезно для одиночных игроков, которые хотят видеть свой урон по PvE целям)</string>
+    <string name="settings_game_schedule_hotkey">Включить [УДЕРЖИВАТЬ TAB] для отображения официального веб-сайта расписания внутриигровых событий в качестве оверлея. (Скоро)</string>
+    <string name="settings_use_sadly">Я предпочитаю использовать Sadly.io для данных о расписании внутриигровых событий. (Скоро)</string>
+    <string name="settings_dragon_breath_overlay">Включить детектор и счетчик драконьего дыхания. (Примечание: вам все равно нужно быть в пределах 100 метров от драконьего всадника, чтобы наблюдать за дыханием, это не магия, друзья!) (Скоро)</string>
+    <string name="settings_uninstall_confirm_title">Подтвердить удаление</string>
+    <string name="settings_uninstall_confirm_text">Вы уверены, что хотите удалить Lua-аддон? Это удалит интеграцию с игрой.
+
+Пожалуйста, закройте игру перед продолжением, иначе файлы останутся.</string>
+    <string name="settings_uninstall_confirm_button">Удалить</string>
+    <string name="settings_uninstall_button">Удалить Lua-аддон и приложение</string>
+    <string name="settings_player_remappings_button">Переназначение игроков, PvP дуэли и фильтры</string>
+    <string name="settings_uninstall_done_title">Удаление завершено</string>
+    <string name="settings_character_description">Ваш персонаж и фракция определяются автоматически при переключении персонажей. Raid Framer использует эту информацию, чтобы со временем определить дружественных и враждебных персонажей.</string>
+    <string name="settings_character_title">Текущий персонаж</string>
+    <string name="settings_general_opacity_slider">Непрозрачность оверлея</string>
+    <string name="settings_general_tint_slider">Цвет оверлея</string>
+    <string name="settings_general_title">Общие настройки</string>
+    <string name="settings_general_description">Переключение дополнительных функций оверлея и параметров парсинга.</string>
+    <string name="settings_general_overlay_title">Общие настройки оверлея</string>
+    <string name="settings_general_overlay_description">Некоторые друзья могут пожелать настроить прозрачность и цвет своих оверлеев.</string>
+    <string name="settings_language_label">Язык</string>
+    <string name="settings_language_restart_notice">Примечание: Перезапустите приложение, чтобы изменения языка вступили в силу полностью.</string>
+
+    <!-- Recording Session Panel (shown when a session is active in Settings) -->
+    <string name="settings_recording_session_title">Сессия записи</string>
+    <string name="settings_recording_session_description_format">Боевые события записываются в %1$s</string>
+    <string name="settings_recording_session_type_format">Тип: %1$s (%2$s)</string>
+    <string name="settings_recording_session_duration_format">Длительность: %1$s</string>
+    <string name="settings_recording_session_stop">Остановить запись</string>
+
+    <!-- About Overlay Strings -->
+    <string name="about_app_title">Raid Framer Desktop</string>
+    <string name="about_version_label">Версия:</string>
+    <string name="about_package_label">Пакет:</string>
+    <string name="about_source_label">Исходник:</string>
+    <string name="about_read_settings_instruction">Пожалуйста, перед использованием. -&gt;</string>
+    <string name="about_go_to_settings_button">Перейти к настройкам</string>
+    <string name="about_author_label">Автор:</string>
+    <string name="about_author_name">~ Reoky ~</string>
+    <string name="about_dedication_text">Посвящается всем нашим друзьям на Востоке и в виртуальном мире. Пусть этот код используется во благо, а не во зло.</string>
+    <string name="about_thanks_label">Спасибо спасибо от</string>
+    <string name="about_thanks_location">Объединенный Восток</string>
+    <string name="about_community_dedication">Сообществу ArcheRage за их поддержку и обратную связь. ~</string>
+    <string name="about_staff_dedication">Сотрудникам ArcheRage за их преданность и тяжелую работу. ~</string>
+    <string name="about_dev_dedication">Разработчикам ArcheRage за их постоянную поддержку и обновления. ~</string>
+
+    <!-- Player Card -->
+    <string name="player_card_no_cached_data">Кэшированные данные недоступны.</string>
+    <string name="player_card_title_format">Карточка игрока %1$s</string>
+    <string name="player_card_recent_item_uses">Использование предметов</string>
+    <string name="player_card_recent_kd_short">Недавний K/D</string>
+    <string name="player_card_recent_damage">Недавний урон</string>
+    <string name="player_card_recent_heals">Недавние исцеления</string>
+    <string name="player_card_recent_kd">Недавние убийства и смерти</string>
+    <string name="player_card_recent_items">Использование навыков предметов</string>
+    <string name="player_card_recent_buffs">Примененные баффы</string>
+    <string name="player_card_recent_debuffs">Примененные дебаффы</string>
+    <string name="player_card_session_totals">Итоги сессии</string>
+    <string name="player_card_lifetime_totals">Итоги за все время</string>
+
+    <!-- More specific stat labels used in totals -->
+    <string name="player_card_stat_damage">Общий урон</string>
+    <string name="player_card_stat_healing">Общее исцеление</string>
+    <string name="player_card_stat_cc">Доставлено CC</string>
+    <string name="player_card_stat_buffs">Баффы</string>
+    <string name="player_card_stat_debuffs">Дебаффы</string>
+    <string name="player_card_stat_charms">Очарования</string>
+    <string name="player_card_stat_distress">Расстройства</string>
+    <string name="player_card_stat_silence">Блокировки</string>
+    <string name="player_card_stat_glider">Использования планера</string>
+    <string name="player_card_stat_items">Использования предметов</string>
+    <string name="player_card_stat_potions">Зелья</string>
+    <string name="player_card_stat_kills">Убийства</string>
+    <string name="player_card_stat_deaths">Смерти</string>
+    <string name="player_card_stat_kills_most_damage">Убийства (максимальный урон)</string>
+    <string name="player_card_stat_kills_killing_blow">Убийства (последний удар)</string>
+    <string name="player_card_stat_total_damage_taken">Всего получено урона</string>
+    <string name="player_card_stat_total_heals_received">Всего получено исцеления</string>
+
+    <!-- Player Details Section -->
+    <string name="player_details_title">Детали игрока</string>
+    <string name="player_details_leadership_role">Роль лидера</string>
+
+    <!-- Pet List Item -->
+    <string name="pet_icon_desc_format">иконка %1$s</string>
+    <string name="pet_debuffs_label">Дебаффы:</string>
+    <string name="pet_companion_dmg_label">Урон питомца</string>
+
+    <!-- Pokemon / Companions Overlay -->
+    <string name="pokemon_title">Драконье дыхание, Рисо, боевые питомцы и другие существа</string>
+    <string name="pokemon_no_companions">Активные спутники пока не обнаружены...</string>
+
+    <!-- Thumbnails Helper -->
+    <string name="thumbnail_unknown_format">Неизвестно: %1$s</string>
+
+    <!-- Filters Overlay -->
+    <string name="filters_subscriptions_title">Подписки</string>
+    <string name="filters_subscriptions_description">Подписки позволяют создавать пользовательские переназначения имён персонажей. Они похожи на фильтры, но имеют приоритет над всеми другими источниками. Используйте их для переопределения имён заклинаний, NPC или любого другого текста в боевом логе.</string>
+    <string name="filters_see_example_csv">Посмотреть пример CSV</string>
+    <string name="filters_use_default">По умолчанию</string>
+    <string name="filters_current_filters_title">Текущие фильтры</string>
+    <string name="filters_summary_removed_format">%1$s будет удалено.</string>
+    <string name="filters_summary_will_become_format">%1$s станет %2$s.</string>
+    <string name="filters_overrides_title">Переопределения</string>
+    <string name="filters_overrides_description">Веб-фильтры объединяются с локальными фильтрами. При конфликте локальный фильтр имеет приоритет.</string>
+    <string name="filters_original_placeholder">Оригинал</string>
+    <string name="filters_replacement_placeholder">Замена</string>
+    <string name="filters_add_button">Добавить в фильтры</string>
+
+    <!-- Exit Dialog -->
+    <string name="exit_dialog_title">Вы уверены?</string>
+    <string name="exit_dialog_message">Это выйдет и закроет все открытые окна оверлеев. Вы можете снова запустить .:Raid Framer:. из меню Пуск Windows.</string>
+    <string name="exit_dialog_dismiss">Нет</string>
+
+    <!-- File Selection Dialog -->
+    <string name="file_selection_title">Выберите файл боевого лога</string>
+    <string name="file_selection_searching">Поиск допустимых боевых логов.. Результаты появятся здесь..</string>
+
+    <!-- Combat Overlay -->
+    <string name="combat_press_plus_to_record">Нажмите '+' чтобы начать новую сессию записи</string>
+    <string name="combat_column_pvp_damage">🔥 PvP урон 🔥</string>
+    <string name="combat_column_pvp_heals">💉 PvP исцеление 💉</string>
+    <string name="combat_column_pvp_cc">⛨ PvP CC ⛨</string>
+    <string name="combat_column_pve_damage">⚔️ PvE урон ⚔️</string>
+    <string name="combat_column_pve_heals">💉 PvE исцеление 💉</string>
+    <string name="combat_column_pve_cc">⛨ PvE CC ⛨</string>
+    <string name="combat_no_columns_message">Брат.. Попробуй добавить хотя бы одну категорию..</string>
+    <string name="combat_open_settings">Открыть настройки</string>
+
+    <!-- Battle Summary Overlay -->
+    <string name="summary_battle_summary_title_format">Боевая сводка (%1$s)</string>
+    <string name="summary_silences_by_faction">Блокировки по фракциям</string>
+    <string name="summary_charms_by_faction">Очарования по фракциям</string>
+    <string name="summary_distresses_by_faction">Расстройства по фракциям</string>
+    <string name="summary_top_silences">Топ блокировок</string>
+    <string name="summary_top_charms">Топ очарований</string>
+    <string name="summary_top_distresses">Топ расстройств</string>
+    <string name="summary_top_haranya_spells_damage">Топ урона заклинаний Харанья</string>
+    <string name="summary_top_nuia_spells_damage">Топ урона заклинаний Нуиан</string>
+    <string name="summary_top_pirate_spells_damage">Топ урона заклинаний Пиратов</string>
+    <string name="summary_top_debuffs">Топ дебаффов</string>
+    <string name="summary_top_songs">Топ песен</string>
+    <string name="summary_top_buffs">Топ баффов</string>
+    <string name="summary_top_ode_haranya">♪ Топ Ода Харанья ♪</string>
+    <string name="summary_top_ode_nuia">♪ Топ Ода Нуиан ♪</string>
+    <string name="summary_top_ode_pirate">♪ Топ Ода Пиратов ♪</string>
+    <string name="summary_top_kills_haranya">Топ убийств Харанья</string>
+    <string name="summary_top_kills_nuia">Топ убийств Нуиан</string>
+    <string name="summary_top_kills_pirate">Топ убийств Пиратов</string>
+    <string name="summary_top_damage_taken">🔥 Топ полученного урона 🔥</string>
+    <string name="summary_top_heals_received">💉 Топ полученного исцеления 💉</string>
+    <string name="summary_top_potion_drinkers">Топ любителей зелий</string>
+    <string name="summary_top_glider_gamers">Топ планерщиков</string>
+    <string name="summary_most_item_usages">Больше всего использований предметов</string>
+    <string name="summary_top_haranya_item_uses">Топ использований предметов Харанья</string>
+    <string name="summary_top_nuia_item_uses">Топ использований предметов Нуиан</string>
+    <string name="summary_top_pirate_item_uses">Топ использований предметов Пиратов</string>
+    <string name="summary_haranya_builds">Билды Харанья</string>
+    <string name="summary_nuia_builds">Билды Нуиан</string>
+    <string name="summary_pirate_builds">Билды Пиратов</string>
+
+    <!-- General Strings -->
+    <string name="general_about">О программе</string>
+    <string name="general_cancel">Отмена</string>
+    <string name="general_exit">Выход</string>
+    <string name="general_settings">Настройки</string>
+    <string name="general_instructions_dragging_overlays">Shift + клик для перетаскивания оверлеев</string>
+
+    <!-- App / Tray Menu -->
+    <string name="app_tray_title">.: Raid Framer :.</string>
+    <string name="app_tray_reset_positions">Сбросить позиции окон</string>
+    <string name="app_replay_viewing_format">Вы просматриваете повтор боевых данных из: %1$s
+
+Прямой мониторинг отключён во время просмотра повторов.</string>
+    <string name="general_metric_type_cc">Контроль толпы</string>
+    <string name="general_metric_type_cc_short">CC</string>
+    <string name="general_metric_type_damage">Урон</string>
+    <string name="general_metric_type_damage_short">DMG</string>
+    <string name="general_metric_type_healing">Исцеление</string>
+    <string name="general_metric_type_healing_short">HEALS</string>
+    <string name="general_no_data_available">Данные недоступны</string>
+
+    <!-- Help Strings -->
+    <string name="general_help_window_postions_reset">Все позиции окон были сброшены! Помните: если у вас включено обнаружение alt-tab, любые оверлеи (те, у которых нет заголовка) могут не появиться, пока вы не переключитесь обратно на окно игры.</string>
+
+    <!-- Leadership Roles -->
+    <string name="leadership_none">Нет</string>
+    <string name="leadership_raid_lead">Лидер рейда</string>
+    <string name="leadership_guild_lead">Лидер гильдии</string>
+    <string name="leadership_faction_hero">Герой фракции</string>
+    <string name="leadership_shot_caller">Командир</string>
+    <string name="leadership_gm">GM</string>
+
+    <!-- Game Utility Items -->
+    <string name="item_name_kraken_scepter">Скипетр кракена</string>
+    <string name="item_name_kraken_spear">Копье кракена</string>
+    <string name="item_name_kraken_shield">Щит кракена</string>
+    <string name="item_name_lib_shield">Библиотечный щит</string>
+    <string name="item_name_library_greatclub">Библиотечная большая дубина</string>
+    <string name="item_name_honor_nodachi">Неистовый нодачи чести</string>
+    <string name="item_name_jola_shield">Обида Джолы</string>
+    <string name="item_name_halcy_neck">Ожерелье Хальси</string>
+    <string name="item_name_soul_neck">Ожерелье души</string>
+    <string name="item_name_mist_nodachi">Нодачи тени рока</string>
+    <string name="item_name_lib_bow">Лук библиотеки/бессмертного хранителя</string>
+    <string name="item_name_lib_dagger">Кинжал библиотеки/бессмертного хранителя</string>
+    <string name="item_name_lib_shortspear">Короткое копье библиотеки/бессмертного хранителя</string>
+    <string name="item_name_lib_staff">Посох библиотеки/бессмертного хранителя</string>
+    <string name="item_name_snake_greatsword">Змеиный великий меч (край)</string>
+    <string name="item_name_snake_shield">Змеиный щит (бастион)</string>
+    <string name="item_name_snake_sword">Zмеиный меч (бритва)</string>
+    <string name="item_name_snake_greataxe">Змеиный топор (мясницкая мишень)</string>
+    <string name="item_name_snake_scepter">Змеиный скипетр (снептер/пиявка)</string>
+    <string name="item_name_snake_gun">Змеиный пистолет (пуля)</string>
+    <string name="item_name_bd_shield">Щит черного дракона</string>
+    <string name="item_name_bd_club">Дубина черного дракона</string>
+    <string name="item_name_bd_bow">Лук черного дракона (глаз-раскалыватель)</string>
+    <string name="item_name_bd_gun">Пистолет черного дракона (укус)</string>
+    <string name="item_name_bd_staff">Посох черного дракона (рев)</string>
+    <string name="item_name_bd_sword">Меч черного дракона (собиратель хвостов)</string>
+    <string name="item_name_bd_2h_sword">Двуручный меч черного дракона (собиратель крыльев)</string>
+    <string name="item_name_sungold_anth_set_pull">Тяга набора антологии солнечного золота</string>
+    <string name="item_name_garden_anth_set_pull">Тяга набора антологии сада</string>
+    <string name="item_name_serp_staff">Развращенный ум (Серпентис)</string>
+    <string name="item_name_mist_dagger">Туманная песня злого шепота кинжал</string>
+    <string name="item_name_mist_shield">Туманная песня скрытого клыка щит</string>
+
+    <!-- Game Potions -->
+    <string name="potion_name_minor_healing_rank_one">Завуалированное пламя (слабое зелье исцеления)</string>
+    <string name="potion_name_minor_healing_rank_two">Приглушенная звезда (слабое зелье исцеления)</string>
+    <string name="potion_name_minor_healing_rank_three">Послеполуденное солнце (слабое зелье исцеления)</string>
+    <string name="potion_name_minor_healing_rank_four">Летний метеор (слабое зелье исцеления)</string>
+    <string name="potion_name_minor_healing_rank_five">Слава солнца (слабое зелье исцеления)</string>
+    <string name="potion_name_minor_healing_rank_six">Пустынный огонь (слабое зелье исцеления)</string>
+    <string name="potion_name_minor_healing_rank_seven">Сладкий звездный свет (слабое зелье исцеления)</string>
+    <string name="potion_name_minor_healing_rank_eight">Пылающая комета (слабое зелье исцеления)</string>
+
+    <string name="potion_name_healing_guild_courage">Мужество гильдии (37% зелье исцеления)</string>
+
+    <string name="potion_name_healing_rank_one_through_six">Зелье исцеления (большое зелье исцеления ранг 1-7)</string>
+    <string name="potion_name_healing_rank_seven">Аллювионная любовь (большое зелье исцеления ранг 7)</string>
+    <string name="potion_name_healing_rank_eight">Пылающее желание (большое зелье исцеления ранг 8)</string>
+
+    <string name="potion_name_minor_mana_rank_one">Пар мага (слабая мана ранг 1)</string>
+    <string name="potion_name_minor_mana_rank_two">Туманное воспоминание (слабая мана ранг 2)</string>
+    <string name="potion_name_minor_mana_rank_three">Утренняя роса (слабая мана ранг 3)</string>
+    <string name="potion_name_minor_mana_rank_four">Луговой поток (слабая мана ранг 4)</string>
+    <string name="potion_name_minor_mana_rank_five">Река времени (слабая мана ранг 5)</string>
+    <string name="potion_name_minor_mana_rank_six">Мшистый пруд (слабая мана ранг 6)</string>
+    <string name="potion_name_minor_mana_rank_seven">Слабое воспоминание (слабая мана ранг 7)</string>
+    <string name="potion_name_minor_mana_rank_eight">Туманное отражение (слабая мана ранг 8)</string>
+
+    <string name="potion_name_minor_healing_titan">Зелье исцеления титана (слабое зелье исцеления)</string>
+    <string name="potion_name_minor_mana_titan">Зелье маны титана (слабое зелье маны)</string>
+
+    <string name="potion_name_phoenix_tears_tincture">Настойка слез феникса</string>
+    <string name="potion_name_wild_ginseng">Дикий женьшень! (Какой счастливый друг!)</string>
+
+    <!-- PNG Export -->
+    <string name="export_title_battle_summary">Боевая сводка</string>
+    <string name="export_no_data">Нет данных</string>
+
+    <!-- Export Settings -->
+    <string name="settings_export_title">Настройки экспорта</string>
+    <string name="settings_export_description">Управление выходным каталогом и параметрами экспорта.</string>
+    <string name="settings_export_directory_label">Каталог экспорта:</string>
+    <string name="settings_export_size_label">Использовано места:</string>
+    <string name="settings_export_open_folder">Открыть папку</string>
+    <string name="settings_export_include_raw_json">Включать необработанные логи в формате JSON при экспорте. (Использует место на диске)</string>
+    <string name="settings_export_directory_not_found">Каталог не найден</string>
+
+    <!-- About / Update Strings -->
+    <string name="settings_about_title">О программе</string>
+    <string name="settings_about_version_label">Текущая версия:</string>
+    <string name="settings_about_check_updates_button">Проверить обновления</string>
+    <string name="settings_update_available">Доступно обновление: %1$s</string>
+    <string name="settings_update_up_to_date">Вы используете последнюю версию</string>
+    <string name="settings_update_check_failed">Не удалось проверить обновления</string>
+    <string name="settings_update_checking">Проверка...</string>
+    <string name="settings_about_github_note">Проверяет github.com на наличие новых релизов. Никакие данные не отправляются ни на какой сервер.</string>
+
+    <!-- Raid / Attendance Overlay -->
+    <string name="raid_attendance_title">Управление рейдом и посещаемость</string>
+    <string name="raid_refresh_button">Обновить</string>
+    <string name="raid_control_deck_title">Пульт управления рейдом</string>
+    <string name="raid_control_deck_subtitle">Список рейда слева, управление справа, сведения о ближайших игроках аккуратно внизу.</string>
+    <string name="raid_tab_attendance">Посещаемость</string>
+    <string name="raid_tab_nearby">Рядом</string>
+    <string name="raid_tab_nearby_gear">Снаряжение рядом</string>
+    <string name="raid_no_raid_detected">Пожалуйста, присоединитесь к рейду, чтобы использовать функции управления рейдом. У вас должен быть установлен Lua-аддон. Окна с заголовками не являются оверлеями, рассмотрите возможность размещения на другом мониторе, чтобы не закрывать игровой интерфейс.</string>
+    <string name="raid_main_raid_label">Основной рейд</string>
+    <string name="raid_coraid_label">Со-рейд</string>
+    <string name="raid_include_main_raid">Включить основной рейд</string>
+    <string name="raid_include_coraid">Включить со-рейд</string>
+    <string name="raid_include_nearby_same_faction">Включить ближайших игроков той же фракции</string>
+    <string name="raid_include_nearby_opposite_faction">Включить ближайших игроков противоположной фракции</string>
+    <string name="raid_require_pvp_filter">Требуется хотя бы некоторое участие. (25k урона, 25k исцеления или 25+ очков CC)</string>
+    <string name="raid_include_departed">Включить игроков, покинувших рейд</string>
+    <string name="raid_copy_attendance">Копировать посещаемость</string>
+    <string name="raid_haranya_faction">Фракция Харании (%d)</string>
+    <string name="raid_nuian_faction">Фракция Нуиан (%d)</string>
+    <string name="raid_pirate_faction">Пиратская фракция (%d)</string>
+    <string name="raid_close">Закрыть</string>
+    <string name="raid_nearby_disclaimer">Показывает только игроков, которые создали боевые события поблизости. Не обнаруживает скрытных игроков.</string>
+    <string name="raid_nearby_require_pvp">Требуется участие (25k урона, 25k исцеления или 25+ CC)</string>
+    <string name="histogram_no_data">Нет данных</string>
+    <string name="histogram_unknown_label">Неизвестно</string>
+    <string name="histogram_under_10k">&lt;10k</string>
+    <string name="histogram_tooltip_label">Очки снаряжения: %s</string>
+    <string name="histogram_more_players">...и еще %d</string>
+    <string name="nearby_avg_gs_format">Средний GS: %d (отслежено %d)</string>
+    <string name="app_already_running">Raid Framer уже запущен.</string>
+
+    <!-- Seed Table Strings -->
+    <string name="settings_seed_table_title">Таблица сидов</string>
+    <string name="settings_seed_table_description">Экспортируйте или импортируйте таблицу сидов, чтобы поделиться данными игроков с другими установками. Это помогает предварительно заполнить статусы фракций игроков, очки снаряжения, классы и названия гильдий для повышения точности. Имена игроков хэшируются для конфиденциальности.</string>
+    <string name="settings_seed_table_none">Таблица сидов не применена.</string>
+    <string name="settings_seed_table_applied">Таблица сидов: %d игроков: %s</string>
+    <string name="settings_seed_table_export">Экспорт</string>
+    <string name="settings_seed_table_import">Импорт</string>
+    <string name="settings_seed_table_remove">Удалить</string>
+    <string name="settings_seed_table_date_format">%s (%dd %dh назад)</string>
+    <string name="seed_table_apply_prompt">Хотите применить таблицу сидов из:
+%s
+
+Это позволит приложению использовать эту таблицу сидов в качестве справочника для данных игроков.</string>
+    <string name="seed_table_apply_title">Применить таблицу сидов</string>
+    <string name="seed_table_file_not_found">Указанный файл таблицы сидов не найден: %s</string>
+    <string name="seed_table_applied_success">Таблица сидов успешно применена!</string>
+
+</resources>

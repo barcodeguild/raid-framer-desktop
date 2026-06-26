@@ -61,10 +61,13 @@ import raid_framer_desktop.composeapp.generated.resources.raid_nearby_require_pv
 import raid_framer_desktop.composeapp.generated.resources.raid_no_raid_detected
 import raid_framer_desktop.composeapp.generated.resources.raid_nuian_faction
 import raid_framer_desktop.composeapp.generated.resources.raid_pirate_faction
+import raid_framer_desktop.composeapp.generated.resources.raid_refresh_button
 import raid_framer_desktop.composeapp.generated.resources.raid_require_pvp_filter
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_attendance
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_nearby
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_nearby_gear
+import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_subtitle
+import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_title
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 private enum class RaidTab { ATTENDANCE, NEARBY, NEARBY_GEAR }
@@ -107,7 +110,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
             },
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
           ) {
-            Text("Refresh", color = Color.Black)
+            Text(stringResource(Res.string.raid_refresh_button), color = Color.Black)
           }
           Button(
             onClick = { wm?.closeWindow(OverlayType.RAID) },
@@ -215,13 +218,13 @@ private fun RaidHeaderStrip() {
     verticalArrangement = Arrangement.spacedBy(6.dp)
   ) {
     Text(
-      text = "Raid Control Deck",
+      text = stringResource(Res.string.raid_control_deck_title),
       color = Color.White,
       fontWeight = FontWeight.Bold,
       fontSize = 15.sp
     )
     Text(
-      text = "Raid roster on the left, controls on the right, with nearby intel tucked neatly underneath.",
+      text = stringResource(Res.string.raid_control_deck_subtitle),
       color = Color.LightGray,
       fontSize = 12.sp
     )

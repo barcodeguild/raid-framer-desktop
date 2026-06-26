@@ -22,6 +22,9 @@ import com.reoky.raidframer.core.database.LeadershipRole
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.model.PlayerCard
 import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.player_details_leadership_role
+import raid_framer_desktop.composeapp.generated.resources.player_details_title
 
 @Composable
 fun PlayerDetailsSection(card: PlayerCard, onLeadershipChange: (Int) -> Unit) {
@@ -36,7 +39,7 @@ fun PlayerDetailsSection(card: PlayerCard, onLeadershipChange: (Int) -> Unit) {
       .padding(12.dp)
   ) {
     Text(
-      text = "Player Details",
+      text = stringResource(Res.string.player_details_title),
       color = Color.White,
       fontWeight = FontWeight.Bold,
       fontSize = 18.sp,
@@ -56,7 +59,7 @@ fun PlayerDetailsSection(card: PlayerCard, onLeadershipChange: (Int) -> Unit) {
 
       Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
         Text(
-          text = "Leadership Role",
+          text = stringResource(Res.string.player_details_leadership_role),
           color = Color.LightGray,
           fontSize = 14.sp,
           fontWeight = FontWeight.Bold,

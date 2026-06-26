@@ -31,6 +31,37 @@ import com.reoky.raidframer.ui.component.graphs.RaidComparisonPieChart
 import com.reoky.raidframer.ui.export.ImageExportInteractor
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.summary_battle_summary_title_format
+import raid_framer_desktop.composeapp.generated.resources.summary_charms_by_faction
+import raid_framer_desktop.composeapp.generated.resources.summary_distresses_by_faction
+import raid_framer_desktop.composeapp.generated.resources.summary_haranya_builds
+import raid_framer_desktop.composeapp.generated.resources.summary_most_item_usages
+import raid_framer_desktop.composeapp.generated.resources.summary_nuia_builds
+import raid_framer_desktop.composeapp.generated.resources.summary_pirate_builds
+import raid_framer_desktop.composeapp.generated.resources.summary_silences_by_faction
+import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
+import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
+import raid_framer_desktop.composeapp.generated.resources.summary_top_debuffs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_distresses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_gamers
+import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_item_uses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_spells_damage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_heals_received
+import raid_framer_desktop.composeapp.generated.resources.summary_top_kills_haranya
+import raid_framer_desktop.composeapp.generated.resources.summary_top_kills_nuia
+import raid_framer_desktop.composeapp.generated.resources.summary_top_kills_pirate
+import raid_framer_desktop.composeapp.generated.resources.summary_top_nuia_item_uses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_nuia_spells_damage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_ode_haranya
+import raid_framer_desktop.composeapp.generated.resources.summary_top_ode_nuia
+import raid_framer_desktop.composeapp.generated.resources.summary_top_ode_pirate
+import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_item_uses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_spells_damage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_potion_drinkers
+import raid_framer_desktop.composeapp.generated.resources.summary_top_silences
+import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
 import java.text.DateFormat
 
 @Preview
@@ -107,7 +138,7 @@ fun SummaryOverlay(wm: WindowManager? = null) {
       modifier = Modifier.fillMaxWidth()
     ) {
       TitleBarComponent(
-        title = "Battle Summary ($humanReadableDateString)",
+        title = stringResource(Res.string.summary_battle_summary_title_format, humanReadableDateString),
         onClose = { wm?.closeWindow(OverlayType.SUMMARY) },
         modifier = Modifier.fillMaxWidth()
       )
@@ -121,19 +152,19 @@ fun SummaryOverlay(wm: WindowManager? = null) {
       horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
       RaidComparisonPieChart(
-        title = "Silences by Faction",
+        title = stringResource(Res.string.summary_silences_by_faction),
         icon = "\uf57f",
         dataFlow = PlayerCacheInteractor.factionSilenceComparisonAll,
         modifier = Modifier.weight(1f)
       )
       RaidComparisonPieChart(
-        title = "Charms by Faction",
+        title = stringResource(Res.string.summary_charms_by_faction),
         icon = "\uf004",
         dataFlow = PlayerCacheInteractor.factionCharmComparisonAll,
         modifier = Modifier.weight(1f)
       )
       RaidComparisonPieChart(
-        title = "Distresses by Faction",
+        title = stringResource(Res.string.summary_distresses_by_faction),
         icon = "\uf567",
         dataFlow = PlayerCacheInteractor.factionDistressComparisonAll,
         modifier = Modifier.weight(1f)
@@ -239,7 +270,7 @@ private fun KeyDebuffsTab(
   ) {
     StatColumn(
       icon = "\uf714",
-      title = "Top Silences",
+      title = stringResource(Res.string.summary_top_silences),
       cards = topSilences,
       valueExtractor = { it.sessionSilenceTotal.toString() },
       valueColor = Color(0xFFAB47BC),
@@ -250,7 +281,7 @@ private fun KeyDebuffsTab(
     }
     StatColumn(
       icon = "\uf004",
-      title = "Top Charms",
+      title = stringResource(Res.string.summary_top_charms),
       cards = topCharms,
       valueExtractor = { it.sessionCharmTotal.toString() },
       valueColor = Color(0xFFEC407A),
@@ -261,7 +292,7 @@ private fun KeyDebuffsTab(
     }
     StatColumn(
       icon = "\uf0c1",
-      title = "Top Distresses",
+      title = stringResource(Res.string.summary_top_distresses),
       cards = topDistresses,
       valueExtractor = { it.sessionDistressTotal.toString() },
       valueColor = Color(0xFF7E57C2),
@@ -285,7 +316,7 @@ private fun SpellDamageByFaction(
   ) {
     SpellStatColumn(
       icon = "\uD83D\uDD25", // dmg icon?
-      title = "Top Haranya Spells Damage",
+      title = stringResource(Res.string.summary_top_haranya_spells_damage),
       spells = topDamageSpellsHaranya,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
       valueColor = Color(0xFFAB47BC),
@@ -294,7 +325,7 @@ private fun SpellDamageByFaction(
 
     SpellStatColumn(
       icon = "\uD83D\uDD25",
-      title = "Top Nuia Spells Damage",
+      title = stringResource(Res.string.summary_top_nuia_spells_damage),
       spells = topDamageSpellsNuia,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
       valueColor = Color(0xFFEC407A),
@@ -303,7 +334,7 @@ private fun SpellDamageByFaction(
 
     SpellStatColumn(
       icon = "\uD83D\uDD25",
-      title = "Top Pirate Spells Damage",
+      title = stringResource(Res.string.summary_top_pirate_spells_damage),
       spells = topDamageSpellsPirate,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
       valueColor = Color(0xFF7E57C2),
@@ -324,7 +355,7 @@ private fun BuffsDebuffsTab(
   ) {
     StatColumn(
       icon = "\uf714",
-      title = "Top Debuffs",
+      title = stringResource(Res.string.summary_top_debuffs),
       cards = topDebuffs,
       valueExtractor = { it.sessionDebuffTotal.toString() },
       valueColor = Color(0xFFAB47BC),
@@ -336,7 +367,7 @@ private fun BuffsDebuffsTab(
 
     StatColumn(
       icon = "\uf004",
-      title = "Top Songs",
+      title = stringResource(Res.string.summary_top_songs),
       cards = topSongs,
       valueExtractor = { it.sessionSongsTotal.toString() },
       valueColor = Color(0xFFEC407A),
@@ -348,7 +379,7 @@ private fun BuffsDebuffsTab(
 
     StatColumn(
       icon = "\uf0c1",
-      title = "Top Buffs",
+      title = stringResource(Res.string.summary_top_buffs),
       cards = topBuffers,
       valueExtractor = { it.sessionBuffTotal.toString() },
       valueColor = Color(0xFF7E57C2),
@@ -372,7 +403,7 @@ private fun OdeTab(
   ) {
     StatColumn(
       icon = "",
-      title = "♪ Top Ode Haranya ♪",
+      title = stringResource(Res.string.summary_top_ode_haranya),
       cards = topOdeHaranya,
       valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
       valueColor = RFColors.healsGreen,
@@ -384,7 +415,7 @@ private fun OdeTab(
 
     StatColumn(
       icon = "",
-      title = "♪ Top Ode Nuia ♪",
+      title = stringResource(Res.string.summary_top_ode_nuia),
       cards = topOdeNuia,
       valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
       valueColor =  RFColors.healsGreen,
@@ -396,7 +427,7 @@ private fun OdeTab(
 
     StatColumn(
       icon = "",
-      title = "♪ Top Ode Pirate ♪",
+      title = stringResource(Res.string.summary_top_ode_pirate),
       cards = topOdePirate,
       valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
       valueColor =  RFColors.healsGreen,
@@ -420,7 +451,7 @@ private fun KillsDeathsTab(
   ) {
     StatColumn(
       icon = "\uF54C",
-      title = "Top Kills Haranya",
+      title = stringResource(Res.string.summary_top_kills_haranya),
       cards = topKillsHaranya,
       valueExtractor = { it.sessionKillTotal.toString() },
       valueColor = Color(0xFF66BB6A),
@@ -432,7 +463,7 @@ private fun KillsDeathsTab(
 
     StatColumn(
       icon = "\uF54C",
-      title = "Top Kills Nuia",
+      title = stringResource(Res.string.summary_top_kills_nuia),
       cards = topKillsNuia,
       valueExtractor = { it.sessionKillTotal.toString() },
       valueColor = Color(0xFFFFA726),
@@ -444,7 +475,7 @@ private fun KillsDeathsTab(
 
     StatColumn(
       icon = "\uF54C",
-      title = "Top Kills Pirate",
+      title = stringResource(Res.string.summary_top_kills_pirate),
       cards = topKillsPirate,
       valueExtractor = { it.sessionKillTotal.toString() },
       valueColor = Color(0xFFEF5350),
@@ -467,7 +498,7 @@ private fun DamageTakenHealsReceived(
   ) {
     StatColumn(
       icon = "",
-      title = "\uD83D\uDD25 Top Damage Taken \uD83D\uDD25",
+      title = stringResource(Res.string.summary_top_damage_taken),
       cards = topDamageTaken,
       valueExtractor = { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation() },
       valueColor = RFColors.dpsOrange,
@@ -479,7 +510,7 @@ private fun DamageTakenHealsReceived(
 
     StatColumn(
       icon = "",
-      title = "\uD83D\uDC89 Top Heals Received \uD83D\uDC89",
+      title = stringResource(Res.string.summary_top_heals_received),
       cards = topHealsReceived,
       valueExtractor = { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() },
       valueColor = RFColors.healsGreen,
@@ -503,7 +534,7 @@ private fun UtilityItemsTab(
   ) {
     StatColumn(
       icon = "\uf0c3",
-      title = "Top Potion Drinkers",
+      title = stringResource(Res.string.summary_top_potion_drinkers),
       cards = topPotters,
       valueExtractor = { it.sessionPotionTotal.toString() },
       valueColor = Color(0xFF26A69A),
@@ -515,7 +546,7 @@ private fun UtilityItemsTab(
 
     StatColumn(
       icon = "\uf5b0",
-      title = "Top Glider Gamers",
+      title = stringResource(Res.string.summary_top_glider_gamers),
       cards = topGliderGamers,
       valueExtractor = { it.sessionGliderTotal.toString() },
       valueColor = Color(0xFF42A5F5),
@@ -527,7 +558,7 @@ private fun UtilityItemsTab(
 
     StatColumn(
       icon = "\uf6d1",
-      title = "Most Item Usages",
+      title = stringResource(Res.string.summary_most_item_usages),
       cards = topItemSkillCasters,
       valueExtractor = { it.sessionItemSkillTotal.toString() },
       valueColor = Color(0xFFFFCA28),
@@ -608,7 +639,7 @@ private fun UtilityItemsByFaction(
   ) {
     ItemStatColumn(
       icon = "\uF3A5",
-      title = "Top Haranya Item Uses",
+      title = stringResource(Res.string.summary_top_haranya_item_uses),
       items = topItemUsesHaranya,
       valueExtractor = { it.count.toString() },
       valueColor = Color(0xFFAB47BC),
@@ -619,7 +650,7 @@ private fun UtilityItemsByFaction(
 
     ItemStatColumn(
       icon = "\uF3A5",
-      title = "Top Nuia Item Uses",
+      title = stringResource(Res.string.summary_top_nuia_item_uses),
       items = topItemUsesNuia,
       valueExtractor = { it.count.toString() },
       valueColor = Color(0xFFEC407A),
@@ -628,7 +659,7 @@ private fun UtilityItemsByFaction(
 
     ItemStatColumn(
       icon = "\uF3A5",
-      title = "Top Pirate Item Uses",
+      title = stringResource(Res.string.summary_top_pirate_item_uses),
       items = topItemUsesPirate,
       valueExtractor = { it.count.toString() },
       valueColor = Color(0xFF7E57C2),
@@ -756,7 +787,7 @@ private fun PlayerBuildsTab(
   Row(modifier = Modifier.fillMaxSize()) {
     BuildStatColumn(
       icon = "\u2694",
-      title = "Haranya Builds",
+      title = stringResource(Res.string.summary_haranya_builds),
       builds = buildCountsHaranya,
       valueColor = Color(0xFFAB47BC),
       modifier = Modifier.weight(1f)
@@ -764,7 +795,7 @@ private fun PlayerBuildsTab(
 
     BuildStatColumn(
       icon = "\u2694",
-      title = "Nuia Builds",
+      title = stringResource(Res.string.summary_nuia_builds),
       builds = buildCountsNuia,
       valueColor = Color(0xFFEC407A),
       modifier = Modifier.weight(1f)
@@ -772,7 +803,7 @@ private fun PlayerBuildsTab(
 
     BuildStatColumn(
       icon = "\u2694",
-      title = "Pirate Builds",
+      title = stringResource(Res.string.summary_pirate_builds),
       builds = buildCountsPirate,
       valueColor = Color(0xFF7E57C2),
       modifier = Modifier.weight(1f)
