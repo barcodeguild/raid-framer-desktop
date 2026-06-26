@@ -9,9 +9,9 @@
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Das Lua-Addon bezieht Kampfdaten aus dem Spiel. Es ermöglicht native Funktionen wie zielbasiertes Debuff-Tracking, Raid-Management und visuelle/akustische Effekte im Spiel. Wenn Sie das Lua-Addon aus dem Spiel entfernen, funktionieren die Features nicht wie beabsichtigt.</string>
     <string name="companion_toggle_raid_status">Zeige die Haupt-/Co-Raid-Mitgliederanzahl, wenn Spieler dem Raid beitreten oder ihn verlassen.</string>
-    <string name="companion_toggle_display_charmed">Zeige \'Verzauberte\' Ziele im Spiel-Chat-Fenster.</string>
-    <string name="companion_toggle_display_silenced">Zeige \'Stille\' Ziele im Spiel-Chat-Fenster.</string>
-    <string name="companion_toggle_display_distressed">Zeige \'Bedrängte\' Ziele im Spiel-Chat-Fenster.</string>
+    <string name="companion_toggle_display_charmed">Zeige 'Verzauberte' Ziele im Spiel-Chat-Fenster.</string>
+    <string name="companion_toggle_display_silenced">Zeige 'Stille' Ziele im Spiel-Chat-Fenster.</string>
+    <string name="companion_toggle_display_distressed">Zeige 'Bedrängte' Ziele im Spiel-Chat-Fenster.</string>
     <string name="companion_toggl_display_mark_hvt_healers">Zeige ein [Herz-Markierung] über den wertvollsten gegnerischen Heilern. (Top 3 gegnerische Heiler basierend auf kumulativer PvP-Heilung.)</string>
     <string name="companion_toggle_display_mark_hvt_dps">Zeige ein [Gekreuzte-Schwerter-Markierung] über den wertvollsten gegnerischen DPS. (Top 3 gegnerischer DPS basierend auf kumulativem PvP-Schaden.)</string>
     <string name="companion_toggle_display_mark_hvt_cc">Zeige ein [Schild-Markierung] über hochwertigen gegnerischen CC-Magi, von denen man fernbleiben sollte. (Top 3 gegnerischer CC basierend auf kumulativer PvP-Massenkontrolle.)</string>
@@ -48,7 +48,11 @@
     <string name="settings_your_current_character">Ihr aktueller Charakter</string>
     <string name="settings_character_note">Wechseln Sie im Spiel den Charakter, um diesen Wert automatisch zu aktualisieren.</string>
     <string name="settings_enter_name_placeholder">Charakternamen eingeben</string>
-    <string name="settings_uninstall_done_text">Das Lua-Addon wurde sicher aus Ihrem Spielordner entfernt.\n\n**ABER**\n\nSie sollten immer noch die Deinstallation der Hauptanwendung abschließen, indem Sie "Raid Framer" über die Windows-Systemsteuerung deinstallieren. (das ist diese App) Wenn Sie nicht deinstallieren und sich entscheiden, die App erneut zu öffnen, wird das Lua-Addon wieder in Ihren Spielordner kopiert, damit das Addon weiterhin funktioniert. (auf Ihren Wunsch) Danke! Wird jetzt beendet!</string>
+    <string name="settings_uninstall_done_text">Das Lua-Addon wurde sicher aus Ihrem Spielordner entfernt.
+
+**ABER**
+
+Sie sollten immer noch die Deinstallation der Hauptanwendung abschließen, indem Sie "Raid Framer" über die Windows-Systemsteuerung deinstallieren. (das ist diese App) Wenn Sie nicht deinstallieren und sich entscheiden, die App erneut zu öffnen, wird das Lua-Addon wieder in Ihren Spielordner kopiert, damit das Addon weiterhin funktioniert. (auf Ihren Wunsch) Danke! Wird jetzt beendet!</string>
     <string name="settings_mini_graph_description">DPS/HEALS/CC-Mini-Diagramm aktivieren. Zeigt Leistung über die Zeit.</string>
     <string name="settings_show_heals_column">Heilungsspalte anzeigen</string>
     <string name="settings_show_cc_column">CC-Spalte anzeigen</string>
@@ -62,7 +66,9 @@
     <string name="settings_use_sadly">Ich würde lieber Sadly.io für In-Game-Eventplandaten verwenden. (Demnächst)</string>
     <string name="settings_dragon_breath_overlay">Drachenatem-Detektor und -Zähler-Overlay aktivieren. (Hinweis: Sie müssen immer noch in 100-Meter-Reichweite des Drachenreiters sein, um die Atemzüge zu sehen, das ist keine Magie Freunde!) (Demnächst)</string>
     <string name="settings_uninstall_confirm_title">Deinstallation bestätigen</string>
-    <string name="settings_uninstall_confirm_text">Sind Sie sicher, dass Sie das Lua-Addon deinstallieren möchten? Dies entfernt die Spielintegration.\n\nBitte schließen Sie das Spiel, bevor Sie fortfahren, andernfalls bleiben Dateien übrig.</string>
+    <string name="settings_uninstall_confirm_text">Sind Sie sicher, dass Sie das Lua-Addon deinstallieren möchten? Dies entfernt die Spielintegration.
+
+Bitte schließen Sie das Spiel, bevor Sie fortfahren, andernfalls bleiben Dateien übrig.</string>
     <string name="settings_uninstall_confirm_button">Deinstallieren</string>
     <string name="settings_uninstall_button">Lua-Addon &amp; App deinstallieren</string>
     <string name="settings_player_remappings_button">Spieler-Neuzuordnungen, PvP-Duelle &amp; Filter</string>
@@ -76,6 +82,7 @@
     <string name="settings_general_overlay_title">Allgemeine Overlay-Einstellungen</string>
     <string name="settings_general_overlay_description">Manche Freunde möchten vielleicht die Transparenz und Farbe ihrer Overlays anpassen.</string>
     <string name="settings_language_label">Sprache</string>
+    <string name="settings_language_restart_notice">Hinweis: Starte die App neu, damit die Sprachänderungen vollständig wirksam werden.</string>
 
     <!-- Recording Session Panel (shown when a session is active in Settings) -->
     <string name="settings_recording_session_title">Aufnahmesitzung</string>
@@ -173,7 +180,7 @@
     <string name="file_selection_searching">Suche nach gültigen Kampflogs.. Ergebnisse erscheinen hier..</string>
 
     <!-- Combat Overlay -->
-    <string name="combat_press_plus_to_record">Drücke \'+\' um eine neue Aufnahmesitzung zu starten</string>
+    <string name="combat_press_plus_to_record">Drücke '+' um eine neue Aufnahmesitzung zu starten</string>
     <string name="combat_column_pvp_damage">🔥 PvP-Schaden 🔥</string>
     <string name="combat_column_pvp_heals">💉 PvP-Heilungen 💉</string>
     <string name="combat_column_pvp_cc">⛨ PvP-CC ⛨</string>
@@ -225,7 +232,9 @@
     <!-- App / Tray Menu -->
     <string name="app_tray_title">.: Raid Framer :.</string>
     <string name="app_tray_reset_positions">Fensterpositionen zurücksetzen</string>
-    <string name="app_replay_viewing_format">Sie sehen eine Wiedergabe der Kampfdaten aus: %1$s\n\nDie Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
+    <string name="app_replay_viewing_format">Sie sehen eine Wiedergabe der Kampfdaten aus: %1$s
+
+Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="general_metric_type_cc">Massenkontrolle</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">Schaden</string>
@@ -374,7 +383,10 @@
     <string name="settings_seed_table_import">Importieren</string>
     <string name="settings_seed_table_remove">Entfernen</string>
     <string name="settings_seed_table_date_format">%s (%dd %dh alt)</string>
-    <string name="seed_table_apply_prompt">Möchten Sie die Seed-Tabelle von:\n%s\n\nanwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spielerdaten zu verwenden.</string>
+    <string name="seed_table_apply_prompt">Möchten Sie die Seed-Tabelle von:
+%s
+
+anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spielerdaten zu verwenden.</string>
     <string name="seed_table_apply_title">Seed-Tabelle anwenden</string>
     <string name="seed_table_file_not_found">Die angegebene Seed-Tabellendatei wurde nicht gefunden: %s</string>
     <string name="seed_table_applied_success">Seed-Tabelle erfolgreich angewendet!</string>

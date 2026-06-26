@@ -7,18 +7,18 @@
     <string name="graphs_one_minute">1 Minute</string>
 
     <!-- Companion Addon Settings Strings -->
-    <string name="companion_description">The Lua Addon sources combat data from the game. It\'s what allows for native-only functionality like target-based debuff tracking, raid management, and in-game visual/audible effects. If you remove the lua addon from the game features won\'t work as intended.</string>
+    <string name="companion_description">The Lua Addon sources combat data from the game. It's what allows for native-only functionality like target-based debuff tracking, raid management, and in-game visual/audible effects. If you remove the lua addon from the game features won't work as intended.</string>
     <string name="companion_toggle_raid_status">Display the main / co-raid member count when players join or leave the raid.</string>
-    <string name="companion_toggle_display_charmed">Display \'Charmed\' targets in game chat window.</string>
-    <string name="companion_toggle_display_silenced">Display \'Silenced\' targets in game chat window.</string>
-    <string name="companion_toggle_display_distressed">Display \'Distressed\' targets in game chat window.</string>
+    <string name="companion_toggle_display_charmed">Display 'Charmed' targets in game chat window.</string>
+    <string name="companion_toggle_display_silenced">Display 'Silenced' targets in game chat window.</string>
+    <string name="companion_toggle_display_distressed">Display 'Distressed' targets in game chat window.</string>
     <string name="companion_toggl_display_mark_hvt_healers">Show a [Heart Mark] over highest-value enemy healers. (Top 3 enemy healers based on cumulative PvP healing.)</string>
     <string name="companion_toggle_display_mark_hvt_dps">Show a [Crossed-Swords Mark] over highest-value enemy DPS. (Top 3 enemy DPS based on cumulative PvP damage.)</string>
     <string name="companion_toggle_display_mark_hvt_cc">Show a [Shield Mark] over high-value enemy CC mages to stay away from. (Top 3 enemy CC based on cumulative PvP crowd control time.)</string>
     <string name="companion_toggle_display_mark_sac_dancers">Shower a God ray over sacrifice dancers while they are channeling. (Easier to spot than default game effect.)</string>
-    <string name="companion_toggle_display_mark_charmed_targets">Show a [Purple Dot] over player\'s heads to indicate that they are Charmed.</string>
-    <string name="companion_toggle_display_mark_silenced_targets">Show a [Black Dot] over player\'s heads to indicate that they are Silenced.</string>
-    <string name="companion_toggle_display_mark_distressed_targets">Show a [Blue Dot] over player\'s heads to indicate that they are Distressed.</string>
+    <string name="companion_toggle_display_mark_charmed_targets">Show a [Purple Dot] over player's heads to indicate that they are Charmed.</string>
+    <string name="companion_toggle_display_mark_silenced_targets">Show a [Black Dot] over player's heads to indicate that they are Silenced.</string>
+    <string name="companion_toggle_display_mark_distressed_targets">Show a [Blue Dot] over player's heads to indicate that they are Distressed.</string>
 
     <!-- New Session Overlay -->
     <string name="new_session_title">New Recording Session</string>
@@ -35,7 +35,7 @@
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Settings</string>
     <string name="settings_data_sourcing_title">Data Sourcing</string>
-    <string name="settings_data_sourcing_description">Please confirm that you see the correct ArcheRage documents directory below. Your game\'s documents directory was detected automatically. If you don\'t see the correct directory, or the text below is red, you should report a bug.</string>
+    <string name="settings_data_sourcing_description">Please confirm that you see the correct ArcheRage documents directory below. Your game's documents directory was detected automatically. If you don't see the correct directory, or the text below is red, you should report a bug.</string>
     <string name="settings_toggle_pvp_damage">Show only PvP damage</string>
     <string name="settings_toggle_show_mini_graph">Enable mini DPS/HEALS/CC graph overlay</string>
     <string name="settings_lua_options_title">Lua Options</string>
@@ -43,12 +43,16 @@
     <string name="settings_name_placeholder">Game Character Select</string>
     <string name="settings_uninstall_description">Uninstalling via this menu cleanly removes the Lua addon from the game folder, it also closes the app, and triggers the regular un-installation process. If you decide to cancel the installer, opening raid framer again will allow you to re-install the Lua component automatically.</string>
     <string name="settings_arche_rage_directory_label">ArcheRage Documents Directory:</string>
-    <string name="settings_specify_directory_hint">Please Specify Directory (It\'s the folder that has a system.cfg file inside it!)</string>
+    <string name="settings_specify_directory_hint">Please Specify Directory (It's the folder that has a system.cfg file inside it!)</string>
     <string name="settings_lua_companion_options">Lua Companion Options</string>
     <string name="settings_your_current_character">Your Current Character</string>
     <string name="settings_character_note">Switch characters in-game to update this value automatically.</string>
     <string name="settings_enter_name_placeholder">Enter Character Name</string>
-    <string name="settings_uninstall_done_text">The Lua Addon has been safely removed from your game folder.\n\n**HOWEVER**\n\nYou should still complete the uninstallation of the main application by uninstalling "Raid Framer" via the Windows Control Panel. (that\'s this app) If you don\'t uninstall, and decide to open the app again, the Lua addon will be copied back to your game folder in the interest of the addon still functioning. (at your desire) Thanks! Exiting now!</string>
+    <string name="settings_uninstall_done_text">The Lua Addon has been safely removed from your game folder.
+
+**HOWEVER**
+
+You should still complete the uninstallation of the main application by uninstalling "Raid Framer" via the Windows Control Panel. (that's this app) If you don't uninstall, and decide to open the app again, the Lua addon will be copied back to your game folder in the interest of the addon still functioning. (at your desire) Thanks! Exiting now!</string>
     <string name="settings_mini_graph_description">Enable DPS/HEALS/CC Mini-Graph. Shows performance over time.</string>
     <string name="settings_show_heals_column">Show Heals Column</string>
     <string name="settings_show_cc_column">Show CC Column</string>
@@ -56,13 +60,15 @@
     <string name="settings_combat_overlay_title">Combat Overlay</string>
     <string name="settings_combat_fade_controls">Auto-fade icon controls when the cursor leaves the overlay.</string>
     <string name="settings_split_chat">Enable OSRS-style split-chat window overlay. (Coming Soon)</string>
-    <string name="settings_tabbed_detection">Automatically hide game overlay\'s while tabbed-out of the game. Doesn\'t apply to tool-tips (those with a title-bar).</string>
+    <string name="settings_tabbed_detection">Automatically hide game overlay's while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).</string>
     <string name="settings_allow_pve_damage">Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)</string>
     <string name="settings_game_schedule_hotkey">Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay. (Coming Soon)</string>
-    <string name="settings_use_sadly">I\'d prefer to use Sadly.io for in-game schedule data. (Coming Soon)</string>
-    <string name="settings_dragon_breath_overlay">Enable dragon breath detector and counter overlay. (Note: You still have be in 100 meter range of the dragon rider to witness the breaths, this isn\'t magic friends!) (Coming Soon)</string>
+    <string name="settings_use_sadly">I'd prefer to use Sadly.io for in-game schedule data. (Coming Soon)</string>
+    <string name="settings_dragon_breath_overlay">Enable dragon breath detector and counter overlay. (Note: You still have be in 100 meter range of the dragon rider to witness the breaths, this isn't magic friends!) (Coming Soon)</string>
     <string name="settings_uninstall_confirm_title">Confirm Uninstall</string>
-    <string name="settings_uninstall_confirm_text">Are you sure you want to uninstall the Lua Addon? This will remove the game integration.\n\nPlease close the game before continuing, otherwise files will be left over.</string>
+    <string name="settings_uninstall_confirm_text">Are you sure you want to uninstall the Lua Addon? This will remove the game integration.
+
+Please close the game before continuing, otherwise files will be left over.</string>
     <string name="settings_uninstall_confirm_button">Uninstall</string>
     <string name="settings_uninstall_button">Uninstall Lua Addon &amp; App</string>
     <string name="settings_player_remappings_button">Player Re-mappings, PvP Duels &amp; Filters</string>
@@ -76,6 +82,7 @@
     <string name="settings_general_overlay_title">General Overlay Settings</string>
     <string name="settings_general_overlay_description">Some friends may wish to adjust the transparency and color of their overlays.</string>
     <string name="settings_language_label">Language</string>
+    <string name="settings_language_restart_notice">Note: Restart the app for language changes to take full effect.</string>
 
     <!-- Recording Session Panel (shown when a session is active in Settings) -->
     <string name="settings_recording_session_title">Recording Session</string>
@@ -151,7 +158,7 @@
 
     <!-- Filters Overlay -->
     <string name="filters_subscriptions_title">Subscriptions</string>
-    <string name="filters_subscriptions_description">Subscriptions let you create custom character name re-mappings. They\'re similar to filters, except subscriptions take precedence over all other sources. Use them to override game spell names, NPC names, or any other text in the combat log.</string>
+    <string name="filters_subscriptions_description">Subscriptions let you create custom character name re-mappings. They're similar to filters, except subscriptions take precedence over all other sources. Use them to override game spell names, NPC names, or any other text in the combat log.</string>
     <string name="filters_see_example_csv">See Example CSV</string>
     <string name="filters_use_default">Use Default</string>
     <string name="filters_current_filters_title">Current Filters</string>
@@ -173,7 +180,7 @@
     <string name="file_selection_searching">Searching for valid combat logs.. Results will appear here..</string>
 
     <!-- Combat Overlay -->
-    <string name="combat_press_plus_to_record">Press \'+\' to start a new recording session</string>
+    <string name="combat_press_plus_to_record">Press '+' to start a new recording session</string>
     <string name="combat_column_pvp_damage">🔥 PvP Damage 🔥</string>
     <string name="combat_column_pvp_heals">💉 PvP Heals 💉</string>
     <string name="combat_column_pvp_cc">⛨ PvP CC ⛨</string>
@@ -225,7 +232,9 @@
     <!-- App / Tray Menu -->
     <string name="app_tray_title">.: Raid Framer :.</string>
     <string name="app_tray_reset_positions">Reset Window Positions</string>
-    <string name="app_replay_viewing_format">You are viewing a replay of combat data from: %1$s\n\nLive monitoring is disabled while viewing replays.</string>
+    <string name="app_replay_viewing_format">You are viewing a replay of combat data from: %1$s
+
+Live monitoring is disabled while viewing replays.</string>
 
     <string name="general_metric_type_cc">Crowd Control</string>
     <string name="general_metric_type_cc_short">CC</string>
@@ -252,15 +261,15 @@
     <string name="item_name_kraken_shield">Kraken Shield</string>
     <string name="item_name_lib_shield">Library Shield</string>
     <string name="item_name_library_greatclub">Library Greatclub</string>
-    <string name="item_name_honor_nodachi">Honor\'s Frenzied Nodachi</string>
-    <string name="item_name_jola_shield">Jola\'s Grudge</string>
+    <string name="item_name_honor_nodachi">Honor's Frenzied Nodachi</string>
+    <string name="item_name_jola_shield">Jola's Grudge</string>
     <string name="item_name_halcy_neck">Halcy Necklace</string>
     <string name="item_name_soul_neck">Soul Necklace</string>
     <string name="item_name_mist_nodachi">Doomshadow Nodachi</string>
-    <string name="item_name_lib_bow">Library/Immortal Warden\'s Bow</string>
-    <string name="item_name_lib_dagger">Library/Immortal Warden\'s Dagger</string>
-    <string name="item_name_lib_shortspear">Library/Immortal Warden\'s Shortspear</string>
-    <string name="item_name_lib_staff">Library/Immortal Warden\'s Staff</string>
+    <string name="item_name_lib_bow">Library/Immortal Warden's Bow</string>
+    <string name="item_name_lib_dagger">Library/Immortal Warden's Dagger</string>
+    <string name="item_name_lib_shortspear">Library/Immortal Warden's Shortspear</string>
+    <string name="item_name_lib_staff">Library/Immortal Warden's Staff</string>
     <string name="item_name_snake_greatsword">Snake Greatsword (Edge)</string>
     <string name="item_name_snake_shield">Snake Shield (Bulwark)</string>
     <string name="item_name_snake_sword">Snake Sword (Razor)</string>
@@ -285,7 +294,7 @@
     <string name="potion_name_minor_healing_rank_two">Hushed Star (Minor Healing Potion)</string>
     <string name="potion_name_minor_healing_rank_three">Afternoon Sun (Minor Healing Potion)</string>
     <string name="potion_name_minor_healing_rank_four">Midsummer Meteor (Minor Healing Potion)</string>
-    <string name="potion_name_minor_healing_rank_five">Sun\'s Glory (Minor Healing Potion)</string>
+    <string name="potion_name_minor_healing_rank_five">Sun's Glory (Minor Healing Potion)</string>
     <string name="potion_name_minor_healing_rank_six">Desert Fire (Minor Healing Potion)</string>
     <string name="potion_name_minor_healing_rank_seven">Sweet Starlight (Minor Healing Potion)</string>
     <string name="potion_name_minor_healing_rank_eight">Blazing Comet (Minor Healing Potion)</string>
@@ -296,17 +305,17 @@
     <string name="potion_name_healing_rank_seven">Alluvion Love (Major Healing Potion Rank 7)</string>
     <string name="potion_name_healing_rank_eight">Burning Desire (Major Healing Potion Rank 8)</string>
 
-    <string name="potion_name_minor_mana_rank_one">Mage\'s Vapor (Minor Mana Rank 1)</string>
+    <string name="potion_name_minor_mana_rank_one">Mage's Vapor (Minor Mana Rank 1)</string>
     <string name="potion_name_minor_mana_rank_two">Misty Memory (Minor Mana Rank 2)</string>
     <string name="potion_name_minor_mana_rank_three">Morning Dew (Minor Mana Rank 3)</string>
     <string name="potion_name_minor_mana_rank_four">Meadow Stream (Minor Mana Rank 4)</string>
-    <string name="potion_name_minor_mana_rank_five">Time\'s River (Minor Mana Rank 5)</string>
+    <string name="potion_name_minor_mana_rank_five">Time's River (Minor Mana Rank 5)</string>
     <string name="potion_name_minor_mana_rank_six">Mossy Pool (Minor Mana Rank 6)</string>
     <string name="potion_name_minor_mana_rank_seven">Faint Memory (Minor Mana Rank 7)</string>
     <string name="potion_name_minor_mana_rank_eight">Hazy Reflection (Minor Mana Rank 8)</string>
 
-    <string name="potion_name_minor_healing_titan">Titan\'s Healing Potion (Minor Healing Potion)</string>
-    <string name="potion_name_minor_mana_titan">Titan\'s Mana Potion (Minor Mana Potion)</string>
+    <string name="potion_name_minor_healing_titan">Titan's Healing Potion (Minor Healing Potion)</string>
+    <string name="potion_name_minor_mana_titan">Titan's Mana Potion (Minor Mana Potion)</string>
 
     <string name="potion_name_phoenix_tears_tincture">Phoenix Tears Tincture</string>
     <string name="potion_name_wild_ginseng">Wild Ginseng! (What a lucky friend!)</string>
@@ -375,7 +384,10 @@
     <string name="settings_seed_table_import">Import</string>
     <string name="settings_seed_table_remove">Remove</string>
     <string name="settings_seed_table_date_format">%s (%dd %dh old)</string>
-    <string name="seed_table_apply_prompt">Would you like to apply the seed table from:\n%s\n\nThis will allow the app to use this seed table as a reference for player data.</string>
+    <string name="seed_table_apply_prompt">Would you like to apply the seed table from:
+%s
+
+This will allow the app to use this seed table as a reference for player data.</string>
     <string name="seed_table_apply_title">Apply Seed Table</string>
     <string name="seed_table_file_not_found">The specified seed table file was not found: %s</string>
     <string name="seed_table_applied_success">Seed table applied successfully!</string>

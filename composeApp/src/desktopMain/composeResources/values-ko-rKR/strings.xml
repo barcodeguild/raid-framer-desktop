@@ -9,9 +9,9 @@
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Lua 애드온은 게임에서 전투 데이터를 가져옵니다. 타겟 기반 디버프 추적, 공격대 관리, 게임 내 시각/청각 효과 등 네이티브 기능만을 가능하게 합니다. lua 애드온을 게임에서 제거하면 기능이 의도대로 작동하지 않습니다.</string>
     <string name="companion_toggle_raid_status">플레이어가 공격대에 참여하거나 떠날 때 메인/공동 공격대 인원 수를 표시합니다.</string>
-    <string name="companion_toggle_display_charmed">게임 채팅 창에 \'매혹\' 대상 표시.</string>
-    <string name="companion_toggle_display_silenced">게임 채팅 창에 \'침묵\' 대상 표시.</string>
-    <string name="companion_toggle_display_distressed">게임 채팅 창에 \'고통\' 대상 표시.</string>
+    <string name="companion_toggle_display_charmed">게임 채팅 창에 '매혹' 대상 표시.</string>
+    <string name="companion_toggle_display_silenced">게임 채팅 창에 '침묵' 대상 표시.</string>
+    <string name="companion_toggle_display_distressed">게임 채팅 창에 '고통' 대상 표시.</string>
     <string name="companion_toggl_display_mark_hvt_healers">가장 가치 있는 적 힐러 위에 [하트 표시]를 표시합니다. (누적 PvP 힐량 기준 상위 3명 적 힐러.)</string>
     <string name="companion_toggle_display_mark_hvt_dps">가장 가치 있는 적 DPS 위에 [교차 검 표시]를 표시합니다. (누적 PvP 피해량 기준 상위 3명 적 DPS.)</string>
     <string name="companion_toggle_display_mark_hvt_cc">가치 있는 적 CC 마법사 위에 [방패 표시]를 표시해 멀리하세요. (누적 PvP 군중 제어 시간 기준 상위 3명 적 CC.)</string>
@@ -48,7 +48,11 @@
     <string name="settings_your_current_character">현재 캐릭터</string>
     <string name="settings_character_note">게임에서 캐릭터를 전환하면 이 값이 자동으로 업데이트됩니다.</string>
     <string name="settings_enter_name_placeholder">캐릭터 이름 입력</string>
-    <string name="settings_uninstall_done_text">Lua 애드온이 게임 폴더에서 안전하게 제거되었습니다.\n\n**그러나**\n\nWindows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 제거를 완료해야 합니다. (이 앱입니다) 제거하지 않고 앱을 다시 열면 애드온이 여전히 작동하도록 Lua 애드온이 게임 폴더에 다시 복사됩니다. (원하는 대로) 감사합니다! 지금 종료합니다!</string>
+    <string name="settings_uninstall_done_text">Lua 애드온이 게임 폴더에서 안전하게 제거되었습니다.
+
+**그러나**
+
+Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 제거를 완료해야 합니다. (이 앱입니다) 제거하지 않고 앱을 다시 열면 애드온이 여전히 작동하도록 Lua 애드온이 게임 폴더에 다시 복사됩니다. (원하는 대로) 감사합니다! 지금 종료합니다!</string>
     <string name="settings_mini_graph_description">DPS/HEALS/CC 미니 그래프 활성화. 시간에 따른 성능 표시.</string>
     <string name="settings_show_heals_column">힐 열 표시</string>
     <string name="settings_show_cc_column">CC 열 표시</string>
@@ -62,7 +66,9 @@
     <string name="settings_use_sadly">인게임 일정 데이터에 Sadly.io 사용 선호. (곧 출시)</string>
     <string name="settings_dragon_breath_overlay">드래곤 브레스 감지기 및 카운터 오버레이 활성화. (참고: 드래곤 라이더의 100미터 범위 내에 있어야 브레스를 볼 수 있습니다, 이건 마법이 아닙니다 친구들!) (곧 출시)</string>
     <string name="settings_uninstall_confirm_title">제거 확인</string>
-    <string name="settings_uninstall_confirm_text">Lua 애드온을 제거하시겠습니까? 게임 통합이 제거됩니다.\n\n계속하기 전에 게임을 종료하세요, 그렇지 않으면 파일이 남습니다.</string>
+    <string name="settings_uninstall_confirm_text">Lua 애드온을 제거하시겠습니까? 게임 통합이 제거됩니다.
+
+계속하기 전에 게임을 종료하세요, 그렇지 않으면 파일이 남습니다.</string>
     <string name="settings_uninstall_confirm_button">제거</string>
     <string name="settings_uninstall_button">Lua 애드온 및 앱 제거</string>
     <string name="settings_player_remappings_button">플레이어 재매핑, PvP 듀얼 및 필터</string>
@@ -76,6 +82,7 @@
     <string name="settings_general_overlay_title">일반 오버레이 설정</string>
     <string name="settings_general_overlay_description">일부 친구는 오버레이의 투명도와 색상을 조정하고 싶을 수 있습니다.</string>
     <string name="settings_language_label">언어</string>
+    <string name="settings_language_restart_notice">참고: 언어 변경이 완전히 적용되려면 앱을 다시 시작하세요.</string>
 
     <!-- Recording Session Panel (shown when a session is active in Settings) -->
     <string name="settings_recording_session_title">녹화 세션</string>
@@ -173,7 +180,7 @@
     <string name="file_selection_searching">유효한 전투 로그 검색 중.. 결과가 여기에 표시됩니다..</string>
 
     <!-- Combat Overlay -->
-    <string name="combat_press_plus_to_record">\'+\' 키를 눌러 새 녹화 세션을 시작하세요</string>
+    <string name="combat_press_plus_to_record">'+' 키를 눌러 새 녹화 세션을 시작하세요</string>
     <string name="combat_column_pvp_damage">🔥 PvP 피해 🔥</string>
     <string name="combat_column_pvp_heals">💉 PvP 힐 💉</string>
     <string name="combat_column_pvp_cc">⛨ PvP CC ⛨</string>
@@ -225,7 +232,9 @@
     <!-- App / Tray Menu -->
     <string name="app_tray_title">.: Raid Framer :.</string>
     <string name="app_tray_reset_positions">창 위치 재설정</string>
-    <string name="app_replay_viewing_format">다음 위치의 전투 데이터를 재생 중입니다: %1$s\n\n재생 중에는 실시간 모니터링이 비활성화됩니다.</string>
+    <string name="app_replay_viewing_format">다음 위치의 전투 데이터를 재생 중입니다: %1$s
+
+재생 중에는 실시간 모니터링이 비활성화됩니다.</string>
     <string name="general_metric_type_cc">군중 제어</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">피해</string>
@@ -374,7 +383,10 @@
     <string name="settings_seed_table_import">가져오기</string>
     <string name="settings_seed_table_remove">제거</string>
     <string name="settings_seed_table_date_format">%s (%dd %dh 전)</string>
-    <string name="seed_table_apply_prompt">다음 위치에서 시드 테이블을 적용하시겠습니까:\n%s\n\n이렇게 하면 앱이 이 시드 테이블을 플레이어 데이터 참조로 사용할 수 있습니다.</string>
+    <string name="seed_table_apply_prompt">다음 위치에서 시드 테이블을 적용하시겠습니까:
+%s
+
+이렇게 하면 앱이 이 시드 테이블을 플레이어 데이터 참조로 사용할 수 있습니다.</string>
     <string name="seed_table_apply_title">시드 테이블 적용</string>
     <string name="seed_table_file_not_found">지정된 시드 테이블 파일을 찾을 수 없습니다: %s</string>
     <string name="seed_table_applied_success">시드 테이블이 성공적으로 적용되었습니다!</string>

@@ -9,9 +9,9 @@
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">O Addon Lua obtém dados de combate do jogo. É o que permite funcionalidades nativas como rastreamento de debuffs baseado em alvo, gerenciamento de raid e efeitos visuais/sonoros no jogo. Se você remover o addon lua, os recursos não funcionarão como esperado.</string>
     <string name="companion_toggle_raid_status">Exibir contagem de membros da raid principal/co-raid quando jogadores entrarem ou saírem.</string>
-    <string name="companion_toggle_display_charmed">Exibir alvos \'Encantados\' na janela de chat do jogo.</string>
-    <string name="companion_toggle_display_silenced">Exibir alvos \'Silenciados\' na janela de chat do jogo.</string>
-    <string name="companion_toggle_display_distressed">Exibir alvos \'Angustiados\' na janela de chat do jogo.</string>
+    <string name="companion_toggle_display_charmed">Exibir alvos 'Encantados' na janela de chat do jogo.</string>
+    <string name="companion_toggle_display_silenced">Exibir alvos 'Silenciados' na janela de chat do jogo.</string>
+    <string name="companion_toggle_display_distressed">Exibir alvos 'Angustiados' na janela de chat do jogo.</string>
     <string name="companion_toggl_display_mark_hvt_healers">Mostrar um [Coração] sobre os healers inimigos de maior valor. (Top 3 healers inimigos baseado em cura cumulativa PvP.)</string>
     <string name="companion_toggle_display_mark_hvt_dps">Mostrar um [Espadas Cruzadas] sobre os DPS inimigos de maior valor. (Top 3 DPS inimigos baseado em dano cumulativo PvP.)</string>
     <string name="companion_toggle_display_mark_hvt_cc">Mostrar um [Escudo] sobre magos CC inimigos de alto valor para ficar longe. (Top 3 CC inimigo baseado em tempo cumulativo de controle de grupo PvP.)</string>
@@ -48,7 +48,11 @@
     <string name="settings_your_current_character">Seu Personagem Atual</string>
     <string name="settings_character_note">Troque de personagem no jogo para atualizar este valor automaticamente.</string>
     <string name="settings_enter_name_placeholder">Digite o Nome do Personagem</string>
-    <string name="settings_uninstall_done_text">O Addon Lua foi removido com segurança da pasta do seu jogo.\n\n**NO ENTANTO**\n\nVocê ainda deve completar a desinstalação do aplicativo principal desinstalando "Raid Framer" pelo Painel de Controle do Windows. (esse app) Se você não desinstalar e decidir abrir o app novamente, o addon Lua será copiado de volta para a pasta do seu jogo no interesse do addon ainda funcionar. (a seu desejo) Obrigado! Saindo agora!</string>
+    <string name="settings_uninstall_done_text">O Addon Lua foi removido com segurança da pasta do seu jogo.
+
+**NO ENTANTO**
+
+Você ainda deve completar a desinstalação do aplicativo principal desinstalando "Raid Framer" pelo Painel de Controle do Windows. (esse app) Se você não desinstalar e decidir abrir o app novamente, o addon Lua será copiado de volta para a pasta do seu jogo no interesse do addon ainda funcionar. (a seu desejo) Obrigado! Saindo agora!</string>
     <string name="settings_mini_graph_description">Ativar Mini-Gráfico DPS/HEALS/CC. Mostra desempenho ao longo do tempo.</string>
     <string name="settings_show_heals_column">Mostrar Coluna de Curas</string>
     <string name="settings_show_cc_column">Mostrar Coluna CC</string>
@@ -62,7 +66,9 @@
     <string name="settings_use_sadly">Prefiro usar Sadly.io para dados de programação no jogo. (Em Breve)</string>
     <string name="settings_dragon_breath_overlay">Ativar detector e contador de bafo de dragão. (Nota: Você ainda precisa estar no alcance de 100 metros do cavaleiro de dragão para testemunhar os baforos, isso não é mágica amigos!) (Em Breve)</string>
     <string name="settings_uninstall_confirm_title">Confirmar Desinstalação</string>
-    <string name="settings_uninstall_confirm_text">Tem certeza de que deseja desinstalar o Addon Lua? Isso removerá a integração com o jogo.\n\nPor favor, feche o jogo antes de continuar, caso contrário arquivos serão deixados para trás.</string>
+    <string name="settings_uninstall_confirm_text">Tem certeza de que deseja desinstalar o Addon Lua? Isso removerá a integração com o jogo.
+
+Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deixados para trás.</string>
     <string name="settings_uninstall_confirm_button">Desinstalar</string>
     <string name="settings_uninstall_button">Desinstalar Addon Lua &amp; App</string>
     <string name="settings_player_remappings_button">Re-mapeamentos de Jogador, Duelos PvP &amp; Filtros</string>
@@ -76,6 +82,7 @@
     <string name="settings_general_overlay_title">Configurações Gerais de Overlay</string>
     <string name="settings_general_overlay_description">Alguns amigos podem desejar ajustar a transparência e cor de seus overlays.</string>
     <string name="settings_language_label">Idioma</string>
+    <string name="settings_language_restart_notice">Nota: Reinicie o aplicativo para que as alterações de idioma tenham efeito completo.</string>
 
     <!-- Recording Session Panel (shown when a session is active in Settings) -->
     <string name="settings_recording_session_title">Sessão de Gravação</string>
@@ -173,7 +180,7 @@
     <string name="file_selection_searching">Procurando logs de combate válidos.. Os resultados aparecerão aqui..</string>
 
     <!-- Combat Overlay -->
-    <string name="combat_press_plus_to_record">Pressione \'+\' para iniciar uma nova sessão de gravação</string>
+    <string name="combat_press_plus_to_record">Pressione '+' para iniciar uma nova sessão de gravação</string>
     <string name="combat_column_pvp_damage">🔥 Dano PvP 🔥</string>
     <string name="combat_column_pvp_heals">💉 Curas PvP 💉</string>
     <string name="combat_column_pvp_cc">⛨ CC PvP ⛨</string>
@@ -225,7 +232,9 @@
     <!-- App / Tray Menu -->
     <string name="app_tray_title">.: Raid Framer :.</string>
     <string name="app_tray_reset_positions">Redefinir Posições das Janelas</string>
-    <string name="app_replay_viewing_format">Você está vendo uma repetição dos dados de combate de: %1$s\n\nO monitoramento ao vivo está desativado durante a repetição.</string>
+    <string name="app_replay_viewing_format">Você está vendo uma repetição dos dados de combate de: %1$s
+
+O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="general_metric_type_cc">Controle de Grupo</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">Dano</string>
@@ -374,7 +383,10 @@
     <string name="settings_seed_table_import">Importar</string>
     <string name="settings_seed_table_remove">Remover</string>
     <string name="settings_seed_table_date_format">%s (%dd %dh atrás)</string>
-    <string name="seed_table_apply_prompt">Você gostaria de aplicar a tabela seed de:\n%s\n\nIsso permitirá que o app use esta tabela seed como referência para dados de jogadores.</string>
+    <string name="seed_table_apply_prompt">Você gostaria de aplicar a tabela seed de:
+%s
+
+Isso permitirá que o app use esta tabela seed como referência para dados de jogadores.</string>
     <string name="seed_table_apply_title">Aplicar Tabela Seed</string>
     <string name="seed_table_file_not_found">O arquivo de tabela seed especificado não foi encontrado: %s</string>
     <string name="seed_table_applied_success">Tabela seed aplicada com sucesso!</string>

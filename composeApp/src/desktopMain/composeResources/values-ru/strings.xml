@@ -9,9 +9,9 @@
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Lua-аддон получает данные о бое из игры. Именно он позволяет нативные функции, такие как отслеживание дебаффов по цели, управление рейдом и визуальные/звуковые эффекты в игре. Если вы удалите lua-аддон из игры, функции не будут работать как положено.</string>
     <string name="companion_toggle_raid_status">Отображать количество участников основного/со-рейда, когда игроки присоединяются или покидают рейд.</string>
-    <string name="companion_toggle_display_charmed">Отображать \'Очарованные\' цели в окне игрового чата.</string>
-    <string name="companion_toggle_display_silenced">Oтображать \'Заблокированные\' цели в окне игрового чата.</string>
-    <string name="companion_toggle_display_distressed">Отображать \'Расстроенные\' цели в окне игрового чата.</string>
+    <string name="companion_toggle_display_charmed">Отображать 'Очарованные' цели в окне игрового чата.</string>
+    <string name="companion_toggle_display_silenced">Oтображать 'Заблокированные' цели в окне игрового чата.</string>
+    <string name="companion_toggle_display_distressed">Отображать 'Расстроенные' цели в окне игрового чата.</string>
     <string name="companion_toggl_display_mark_hvt_healers">Показывать [Метку сердца] над наиболее ценными вражескими хилами. (Топ-3 вражеских хила по кумулятивному PvP-исцелению.)</string>
     <string name="companion_toggle_display_mark_hvt_dps">Показывать [Метку скрещенных мечей] над наиболее ценными вражескими DPS. (Топ-3 вражеских DPS по кумулятивному PvP-урону.)</string>
     <string name="companion_toggle_display_mark_hvt_cc">Показывать [Метку щита] над ценными вражескими CC-магами, от которых следует держаться подальше. (Топ-3 вражеского CC по кумулятивному времени контроля в PvP.)</string>
@@ -48,7 +48,11 @@
     <string name="settings_your_current_character">Ваш текущий персонаж</string>
     <string name="settings_character_note">Переключите персонажа в игре, чтобы автоматически обновить это значение.</string>
     <string name="settings_enter_name_placeholder">Введите имя персонажа</string>
-    <string name="settings_uninstall_done_text">Lua-аддон был безопасно удален из папки вашей игры.\n\n**ОДНАКО**\n\nВам все равно следует завершить удаление основного приложения, удалив "Raid Framer" через Панель управления Windows. (это это приложение) Если вы не удалите и решите снова открыть приложение, Lua-аддон будет скопирован обратно в папку вашей игры, чтобы аддон все еще функционировал. (по вашему желанию) Спасибо! Выходим сейчас!</string>
+    <string name="settings_uninstall_done_text">Lua-аддон был безопасно удален из папки вашей игры.
+
+**ОДНАКО**
+
+Вам все равно следует завершить удаление основного приложения, удалив "Raid Framer" через Панель управления Windows. (это это приложение) Если вы не удалите и решите снова открыть приложение, Lua-аддон будет скопирован обратно в папку вашей игры, чтобы аддон все еще функционировал. (по вашему желанию) Спасибо! Выходим сейчас!</string>
     <string name="settings_mini_graph_description">Включить мини-график DPS/HEALS/CC. Показывает производительность во времени.</string>
     <string name="settings_show_heals_column">Показать столбец исцеления</string>
     <string name="settings_show_cc_column">Показать столбец CC</string>
@@ -62,7 +66,9 @@
     <string name="settings_use_sadly">Я предпочитаю использовать Sadly.io для данных о расписании внутриигровых событий. (Скоро)</string>
     <string name="settings_dragon_breath_overlay">Включить детектор и счетчик драконьего дыхания. (Примечание: вам все равно нужно быть в пределах 100 метров от драконьего всадника, чтобы наблюдать за дыханием, это не магия, друзья!) (Скоро)</string>
     <string name="settings_uninstall_confirm_title">Подтвердить удаление</string>
-    <string name="settings_uninstall_confirm_text">Вы уверены, что хотите удалить Lua-аддон? Это удалит интеграцию с игрой.\n\nПожалуйста, закройте игру перед продолжением, иначе файлы останутся.</string>
+    <string name="settings_uninstall_confirm_text">Вы уверены, что хотите удалить Lua-аддон? Это удалит интеграцию с игрой.
+
+Пожалуйста, закройте игру перед продолжением, иначе файлы останутся.</string>
     <string name="settings_uninstall_confirm_button">Удалить</string>
     <string name="settings_uninstall_button">Удалить Lua-аддон и приложение</string>
     <string name="settings_player_remappings_button">Переназначение игроков, PvP дуэли и фильтры</string>
@@ -76,6 +82,7 @@
     <string name="settings_general_overlay_title">Общие настройки оверлея</string>
     <string name="settings_general_overlay_description">Некоторые друзья могут пожелать настроить прозрачность и цвет своих оверлеев.</string>
     <string name="settings_language_label">Язык</string>
+    <string name="settings_language_restart_notice">Примечание: Перезапустите приложение, чтобы изменения языка вступили в силу полностью.</string>
 
     <!-- Recording Session Panel (shown when a session is active in Settings) -->
     <string name="settings_recording_session_title">Сессия записи</string>
@@ -173,7 +180,7 @@
     <string name="file_selection_searching">Поиск допустимых боевых логов.. Результаты появятся здесь..</string>
 
     <!-- Combat Overlay -->
-    <string name="combat_press_plus_to_record">Нажмите \'+\' чтобы начать новую сессию записи</string>
+    <string name="combat_press_plus_to_record">Нажмите '+' чтобы начать новую сессию записи</string>
     <string name="combat_column_pvp_damage">🔥 PvP урон 🔥</string>
     <string name="combat_column_pvp_heals">💉 PvP исцеление 💉</string>
     <string name="combat_column_pvp_cc">⛨ PvP CC ⛨</string>
@@ -225,7 +232,9 @@
     <!-- App / Tray Menu -->
     <string name="app_tray_title">.: Raid Framer :.</string>
     <string name="app_tray_reset_positions">Сбросить позиции окон</string>
-    <string name="app_replay_viewing_format">Вы просматриваете повтор боевых данных из: %1$s\n\nПрямой мониторинг отключён во время просмотра повторов.</string>
+    <string name="app_replay_viewing_format">Вы просматриваете повтор боевых данных из: %1$s
+
+Прямой мониторинг отключён во время просмотра повторов.</string>
     <string name="general_metric_type_cc">Контроль толпы</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">Урон</string>
@@ -374,7 +383,10 @@
     <string name="settings_seed_table_import">Импорт</string>
     <string name="settings_seed_table_remove">Удалить</string>
     <string name="settings_seed_table_date_format">%s (%dd %dh назад)</string>
-    <string name="seed_table_apply_prompt">Хотите применить таблицу сидов из:\n%s\n\nЭто позволит приложению использовать эту таблицу сидов в качестве справочника для данных игроков.</string>
+    <string name="seed_table_apply_prompt">Хотите применить таблицу сидов из:
+%s
+
+Это позволит приложению использовать эту таблицу сидов в качестве справочника для данных игроков.</string>
     <string name="seed_table_apply_title">Применить таблицу сидов</string>
     <string name="seed_table_file_not_found">Указанный файл таблицы сидов не найден: %s</string>
     <string name="seed_table_applied_success">Таблица сидов успешно применена!</string>

@@ -48,7 +48,11 @@
     <string name="settings_your_current_character">您当前的角色</string>
     <string name="settings_character_note">在游戏中切换角色以自动更新此值。</string>
     <string name="settings_enter_name_placeholder">输入角色名称</string>
-    <string name="settings_uninstall_done_text">Lua插件已从您的游戏文件夹中安全移除。\n\n**但是**\n\n您仍应通过Windows控制面板卸载"Raid Framer"来完成主应用程序的卸载。(就是这个应用)如果您不卸载，并决定再次打开应用程序，Lua插件将被复制回您的游戏文件夹，以便插件仍能正常工作。(随您的意愿)谢谢!现在退出!</string>
+    <string name="settings_uninstall_done_text">Lua插件已从您的游戏文件夹中安全移除。
+
+**但是**
+
+您仍应通过Windows控制面板卸载"Raid Framer"来完成主应用程序的卸载。(就是这个应用)如果您不卸载，并决定再次打开应用程序，Lua插件将被复制回您的游戏文件夹，以便插件仍能正常工作。(随您的意愿)谢谢!现在退出!</string>
     <string name="settings_mini_graph_description">启用DPS/HEALS/CC迷你图表。显示随时间变化的性能。</string>
     <string name="settings_show_heals_column">显示治疗列</string>
     <string name="settings_show_cc_column">显示控场列</string>
@@ -62,7 +66,9 @@
     <string name="settings_use_sadly">我更愿意使用Sadly.io获取游戏内时间表数据。(即将推出)</string>
     <string name="settings_dragon_breath_overlay">启用龙息检测器和计数器覆盖。(注意:您仍需在龙骑士100米范围内才能目睹龙息，这不是魔法朋友们!)(即将推出)</string>
     <string name="settings_uninstall_confirm_title">确认卸载</string>
-    <string name="settings_uninstall_confirm_text">您确定要卸载Lua插件吗?这将移除游戏集成。\n\n请在继续之前关闭游戏，否则文件将会残留。</string>
+    <string name="settings_uninstall_confirm_text">您确定要卸载Lua插件吗?这将移除游戏集成。
+
+请在继续之前关闭游戏，否则文件将会残留。</string>
     <string name="settings_uninstall_confirm_button">卸载</string>
     <string name="settings_uninstall_button">卸载Lua插件和应用</string>
     <string name="settings_player_remappings_button">玩家重映射、PvP决斗和过滤器</string>
@@ -76,6 +82,7 @@
     <string name="settings_general_overlay_title">常规覆盖设置</string>
     <string name="settings_general_overlay_description">一些朋友可能希望调整他们覆盖层的透明度和颜色。</string>
     <string name="settings_language_label">语言</string>
+    <string name="settings_language_restart_notice">注意：重新启动应用程序以使语言更改完全生效。</string>
 
     <!-- Recording Session Panel (shown when a session is active in Settings) -->
     <string name="settings_recording_session_title">录制会话中</string>
@@ -173,7 +180,7 @@
     <string name="file_selection_searching">正在搜索有效的战斗日志.. 结果将显示在这里..</string>
 
     <!-- Combat Overlay -->
-    <string name="combat_press_plus_to_record">按 \'+\' 开始新的录制会话</string>
+    <string name="combat_press_plus_to_record">按 '+' 开始新的录制会话</string>
     <string name="combat_column_pvp_damage">🔥 PvP伤害 🔥</string>
     <string name="combat_column_pvp_heals">💉 PvP治疗 💉</string>
     <string name="combat_column_pvp_cc">⛨ PvP控场 ⛨</string>
@@ -225,7 +232,9 @@
     <!-- App / Tray Menu -->
     <string name="app_tray_title">.: Raid Framer :.</string>
     <string name="app_tray_reset_positions">重置窗口位置</string>
-    <string name="app_replay_viewing_format">您正在查看来自以下位置的战斗数据回放：%1$s\n\n回放期间已禁用实时监控。</string>
+    <string name="app_replay_viewing_format">您正在查看来自以下位置的战斗数据回放：%1$s
+
+回放期间已禁用实时监控。</string>
     <string name="general_metric_type_cc">控场</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">伤害</string>
@@ -374,7 +383,10 @@
     <string name="settings_seed_table_import">导入</string>
     <string name="settings_seed_table_remove">移除</string>
     <string name="settings_seed_table_date_format">%s (%dd %dh前)</string>
-    <string name="seed_table_apply_prompt">您想应用来自以下位置的种子表吗:\n%s\n\n这将允许应用程序使用此种子表作为玩家数据的参考。</string>
+    <string name="seed_table_apply_prompt">您想应用来自以下位置的种子表吗:
+%s
+
+这将允许应用程序使用此种子表作为玩家数据的参考。</string>
     <string name="seed_table_apply_title">应用种子表</string>
     <string name="seed_table_file_not_found">未找到指定的种子表文件: %s</string>
     <string name="seed_table_applied_success">种子表应用成功!</string>

@@ -13,6 +13,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.*
@@ -468,7 +471,7 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
 
     SettingsSection(
       title = stringResource(Res.string.settings_language_label),
-      description = null
+      description = stringResource(Res.string.settings_language_restart_notice)
     ) {
       LanguageDropdown(currentCode = config.preferredLanguage)
     }
@@ -529,21 +532,23 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LanguageDropdown(currentCode: String) {
   var expanded by remember { mutableStateOf(false) }
   val currentLabel = AppLocale.entryFor(currentCode).nativeLabel
 
-  Box(
-    modifier = Modifier
-      .fillMaxWidth()
-      .clickable { expanded = !expanded }
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = !expanded }
   ) {
     OutlinedTextField(
       value = currentLabel,
       onValueChange = {},
       readOnly = true,
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier
+        .fillMaxWidth()
+        .menuAnchor(),
       colors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = RFColors.AccentRed,
         unfocusedBorderColor = RFColors.CardBorder,
@@ -552,14 +557,10 @@ private fun LanguageDropdown(currentCode: String) {
         cursorColor = RFColors.AccentRed
       ),
       trailingIcon = {
-        Text(
-          text = "▼",
-          color = RFColors.TextPrimary,
-          fontSize = 12.sp
-        )
+        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
       }
     )
-    DropdownMenu(
+    ExposedDropdownMenu(
       expanded = expanded,
       onDismissRequest = { expanded = false },
       modifier = Modifier.fillMaxWidth(),

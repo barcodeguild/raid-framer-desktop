@@ -48,7 +48,11 @@
     <string name="settings_your_current_character">Your Current Character</string>
     <string name="settings_character_note">Switch characters in-game to update this value automatically.</string>
     <string name="settings_enter_name_placeholder">Enter Character Name</string>
-    <string name="settings_uninstall_done_text">The Lua Addon has been safely removed from your game folder.\n\n**HOWEVER**\n\nYou should still complete the uninstallation of the main application by uninstalling "Raid Framer" via the Windows Control Panel. (that's this app) If you don't uninstall, and decide to open the app again, the Lua addon will be copied back to your game folder in the interest of the addon still functioning. (at your desire) Thanks! Exiting now!</string>
+    <string name="settings_uninstall_done_text">The Lua Addon has been safely removed from your game folder.
+
+**HOWEVER**
+
+You should still complete the uninstallation of the main application by uninstalling "Raid Framer" via the Windows Control Panel. (that's this app) If you don't uninstall, and decide to open the app again, the Lua addon will be copied back to your game folder in the interest of the addon still functioning. (at your desire) Thanks! Exiting now!</string>
     <string name="settings_mini_graph_description">Enable DPS/HEALS/CC Mini-Graph. Shows performance over time.</string>
     <string name="settings_show_heals_column">Show Heals Column</string>
     <string name="settings_show_cc_column">Show CC Column</string>
@@ -62,7 +66,9 @@
     <string name="settings_use_sadly">I'd prefer to use Sadly.io for in-game schedule data. (Coming Soon)</string>
     <string name="settings_dragon_breath_overlay">Enable dragon breath detector and counter overlay. (Note: You still have be in 100 meter range of the dragon rider to witness the breaths, this isn't magic friends!) (Coming Soon)</string>
     <string name="settings_uninstall_confirm_title">Confirm Uninstall</string>
-    <string name="settings_uninstall_confirm_text">Are you sure you want to uninstall the Lua Addon? This will remove the game integration.\n\nPlease close the game before continuing, otherwise files will be left over.</string>
+    <string name="settings_uninstall_confirm_text">Are you sure you want to uninstall the Lua Addon? This will remove the game integration.
+
+Please close the game before continuing, otherwise files will be left over.</string>
     <string name="settings_uninstall_confirm_button">Uninstall</string>
     <string name="settings_uninstall_button">Uninstall Lua Addon &amp; App</string>
     <string name="settings_player_remappings_button">Player Re-mappings, PvP Duels &amp; Filters</string>
@@ -76,6 +82,7 @@
     <string name="settings_general_overlay_title">General Overlay Settings</string>
     <string name="settings_general_overlay_description">Some friends may wish to adjust the transparency and color of their overlays.</string>
     <string name="settings_language_label">Language</string>
+    <string name="settings_language_restart_notice">Note: Restart the app for language changes to take full effect.</string>
 
     <!-- Recording Session Panel (shown when a session is active in Settings) -->
     <string name="settings_recording_session_title">Recording Session</string>
@@ -173,7 +180,7 @@
     <string name="file_selection_searching">Searching for valid combat logs.. Results will appear here..</string>
 
     <!-- Combat Overlay -->
-    <string name="combat_press_plus_to_record">Press \'+\' to start a new recording session</string>
+    <string name="combat_press_plus_to_record">Press '+' to start a new recording session</string>
     <string name="combat_column_pvp_damage">🔥 PvP Damage 🔥</string>
     <string name="combat_column_pvp_heals">💉 PvP Heals 💉</string>
     <string name="combat_column_pvp_cc">⛨ PvP CC ⛨</string>
@@ -225,7 +232,9 @@
     <!-- App / Tray Menu -->
     <string name="app_tray_title">.: Raid Framer :.</string>
     <string name="app_tray_reset_positions">Reset Window Positions</string>
-    <string name="app_replay_viewing_format">You are viewing a replay of combat data from: %1$s\n\nLive monitoring is disabled while viewing replays.</string>
+    <string name="app_replay_viewing_format">You are viewing a replay of combat data from: %1$s
+
+Live monitoring is disabled while viewing replays.</string>
     <string name="general_metric_type_cc">Crowd Control</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">Damage</string>
@@ -376,7 +385,10 @@
     <string name="settings_seed_table_import">Import</string>
     <string name="settings_seed_table_remove">Remove</string>
     <string name="settings_seed_table_date_format">%s (%dd %dh old)</string>
-    <string name="seed_table_apply_prompt">Would you like to apply the seed table from:\n%s\n\nThis will allow the app to use this seed table as a reference for player data.</string>
+    <string name="seed_table_apply_prompt">Would you like to apply the seed table from:
+%s
+
+This will allow the app to use this seed table as a reference for player data.</string>
     <string name="seed_table_apply_title">Apply Seed Table</string>
     <string name="seed_table_file_not_found">The specified seed table file was not found: %s</string>
     <string name="seed_table_applied_success">Seed table applied successfully!</string>
