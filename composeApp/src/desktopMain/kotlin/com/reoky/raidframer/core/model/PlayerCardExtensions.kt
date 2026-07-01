@@ -314,6 +314,20 @@ fun PlayerCard.hasPvPParticipation(): Boolean {
 }
 
 /**
+ * Compute a single "PvP performance score" summarizing how active a player was this session.
+ * Placeholder algorithm (per friend request):
+ *  +1 pt per 100k dmg or heals (combined)
+ *  +1 pt per 10 cc points
+ *  +1 pt per 10 charms, 10 distresses, 10 silences (stillnesses), or 10 songs (combined)
+ */
+fun PlayerCard.pvpPerformancePoints(): Int {
+  val damageAndHeals = (sessionDamageTotal + sessionHealTotal) / 100_000L
+  val ccPoints = sessionCCTotal / 10
+  val controlEffects = (sessionCharmTotal + sessionDistressTotal + sessionSilenceTotal + sessionSongsTotal) / 10
+  return (damageAndHeals + ccPoints + controlEffects).toInt()
+}
+
+/**
  * Sets the faction and faction status on a PlayerCard, updating both the card fields and the cache entity.
  * If the cache exists, it copies the new values. If not, it creates a new cache object with the faction data.
  */

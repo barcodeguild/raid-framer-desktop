@@ -12,6 +12,7 @@ import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.model.pvpPerformancePoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -178,6 +179,9 @@ object ImageExportInteractor {
     val buildCountsHaranya: Map<String, Int>,
     val buildCountsNuia: Map<String, Int>,
     val buildCountsPirate: Map<String, Int>,
+    val topPerformanceHaranya: List<PlayerCard>,
+    val topPerformanceNuia: List<PlayerCard>,
+    val topPerformancePirate: List<PlayerCard>,
     val factionSilenceData: Map<String, Float>,
     val factionCharmData: Map<String, Float>,
     val factionDistressData: Map<String, Float>,
@@ -235,6 +239,9 @@ object ImageExportInteractor {
       buildCountsHaranya  = PlayerCacheInteractor.buildCountsHaranya.value,
       buildCountsNuia     = PlayerCacheInteractor.buildCountsNuia.value,
       buildCountsPirate   = PlayerCacheInteractor.buildCountsPirate.value,
+      topPerformanceHaranya = PlayerCacheInteractor.topPerformanceHaranya.value.take(15),
+      topPerformanceNuia    = PlayerCacheInteractor.topPerformanceNuia.value.take(15),
+      topPerformancePirate  = PlayerCacheInteractor.topPerformancePirate.value.take(15),
       factionSilenceData  = PlayerCacheInteractor.factionSilenceComparisonAll.value,
       factionCharmData    = PlayerCacheInteractor.factionCharmComparisonAll.value,
       factionDistressData = PlayerCacheInteractor.factionDistressComparisonAll.value,
@@ -722,22 +729,26 @@ object ImageExportInteractor {
           val xPos = x + index * (actualSubColWidth + COLUMN_GAP)
           drawCardBackgroundTransparent(g2d, xPos, y, actualAvailW + CARD_PADDING * 2, maxBlockHeight)
           val icon = when {
-            title.contains("Haranya") || title.contains("Debuffs") -> "\uD83D\uDD25"
-            title.contains("Nuia")    || title.contains("Songs")   -> "\u2764"
-            title.contains("Pirate")  || title.contains("Buffs")   -> "\u26A1"
-            title.contains("Ode")        -> "\uD83C\uDFB5"
-            title.contains("Kills")      -> "\u2694"
-            title.contains("Dmg Taken")  -> "\uD83D\uDD25"
-            title.contains("Heals Received") -> "\uD83D\uDC89"
-            title.contains("Items")      -> "\uD83D\uDCE6"
-            title.contains("Potion")     -> "\uD83E\uDDEA"
-            title.contains("Glider")     -> "\uD83D\uDD3A"
-            title.contains("Item Skills")-> "\u2699"
-            title.contains("Builds")     -> "\u2694"
             title.contains("Spell Damage") -> "\uD83D\uDD25"
-            title == "Silences"  -> "\uD83D\uDD07"
-            title == "Charms"    -> "\uD83D\uDC96"
-            title == "Distresses" -> "\uD83D\uDE24"
+            title.contains("Ode")          -> "\uD83C\uDFB5"
+            title.contains("Kills")        -> "\u2694"
+            title.contains("Dmg Taken")    -> "\uD83D\uDD25"
+            title.contains("Heals Received") -> "\uD83D\uDC89"
+            title.contains("Items")        -> "\uD83D\uDCE6"
+            title.contains("Potion")       -> "\uD83E\uDDEA"
+            title.contains("Glider")       -> "\uD83D\uDD3A"
+            title.contains("Item Skills")  -> "\u2699"
+            title.contains("Builds")       -> "\u2694"
+            title.contains("Performance")  -> "\uD83C\uDFC6"
+            title == "Silences"            -> "\uD83D\uDD07"
+            title == "Charms"              -> "\uD83D\uDC96"
+            title == "Distresses"          -> "\uD83D\uDE24"
+            title.contains("Debuffs")      -> "\uD83D\uDD25"
+            title.contains("Songs")        -> "\u2764"
+            title.contains("Buffs")        -> "\u26A1"
+            title.contains("Haranya")      -> "\uD83D\uDD25"
+            title.contains("Nuia")         -> "\u2764"
+            title.contains("Pirate")       -> "\u26A1"
             else -> ""
           }
           val headerTitle = if (icon.isNotEmpty()) "$icon $title $icon" else title
@@ -892,6 +903,12 @@ object ImageExportInteractor {
       "Builds Haranya" to ColumnData.BuildData(data.buildCountsHaranya),
       "Builds Nuia"    to ColumnData.BuildData(data.buildCountsNuia),
       "Builds Pirate"  to ColumnData.BuildData(data.buildCountsPirate),
+    )))
+
+    tripletBlocks.add(makeTriplet(listOf(
+      "Performance Haranya" to ColumnData.CardData(data.topPerformanceHaranya, { it.pvpPerformancePoints().toString() }, HARANYA_COLOR),
+      "Performance Nuia"    to ColumnData.CardData(data.topPerformanceNuia,    { it.pvpPerformancePoints().toString() }, NUIA_COLOR),
+      "Performance Pirate"  to ColumnData.CardData(data.topPerformancePirate,  { it.pvpPerformancePoints().toString() }, PIRATE_COLOR),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(

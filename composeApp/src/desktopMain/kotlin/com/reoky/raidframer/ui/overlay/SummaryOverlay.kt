@@ -22,6 +22,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.model.pvpPerformancePoints
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.PlayerRankingRow
@@ -59,6 +60,9 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_ode_nuia
 import raid_framer_desktop.composeapp.generated.resources.summary_top_ode_pirate
 import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_item_uses
 import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_spells_damage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_performance
+import raid_framer_desktop.composeapp.generated.resources.summary_top_nuia_performance
+import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_performance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_potion_drinkers
 import raid_framer_desktop.composeapp.generated.resources.summary_top_silences
 import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
@@ -97,6 +101,10 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val topKillsNuia by PlayerCacheInteractor.topKillsNuia.collectAsState()
   val topKillsPirate by PlayerCacheInteractor.topKillsPirate.collectAsState()
 
+  val topPerformanceHaranya by PlayerCacheInteractor.topPerformanceHaranya.collectAsState()
+  val topPerformanceNuia by PlayerCacheInteractor.topPerformanceNuia.collectAsState()
+  val topPerformancePirate by PlayerCacheInteractor.topPerformancePirate.collectAsState()
+
   val topOdeHaranya by PlayerCacheInteractor.topOdeHaranya.collectAsState()
   val topOdeNuia by PlayerCacheInteractor.topOdeNuia.collectAsState()
   val topOdePirate by PlayerCacheInteractor.topOdePirate.collectAsState()
@@ -125,7 +133,8 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     "Received",
     "Items",
     "Utility",
-    "Specs"
+    "Specs",
+    "Performance"
   )
 
   val scope = rememberCoroutineScope()
@@ -251,6 +260,12 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           buildCountsHaranya = buildCountsHaranya,
           buildCountsNuia = buildCountsNuia,
           buildCountsPirate = buildCountsPirate,
+          wm = wm
+        )
+        9 -> PerformanceTab(
+          topPerformanceHaranya = topPerformanceHaranya,
+          topPerformanceNuia = topPerformanceNuia,
+          topPerformancePirate = topPerformancePirate,
           wm = wm
         )
       }
@@ -600,13 +615,19 @@ private fun StatColumn(
         modifier = Modifier.padding(end = 4.dp)
       )
       Text(
-        text = title,
+        text = title.lowercase().capitalize(),
         color = Color.White,
         textAlign = TextAlign.Center
       )
+      Text(
+        text = icon,
+        fontFamily = FontsHelper.faSolid(),
+        fontSize = 14.sp,
+        color = Color.White,
+        modifier = Modifier.padding(start = 4.dp)
+      )
     }
 
-    // Scrollable List
     LazyColumn(
       contentPadding = PaddingValues(0.dp),
       modifier = Modifier.fillMaxWidth()
@@ -702,6 +723,13 @@ private fun ItemStatColumn(
         color = Color.White,
         textAlign = TextAlign.Center
       )
+      Text(
+        text = icon,
+        fontFamily = FontsHelper.faSolid(),
+        fontSize = 14.sp,
+        color = Color.White,
+        modifier = Modifier.padding(start = 4.dp)
+      )
     }
 
     // Scrollable List of items
@@ -755,6 +783,13 @@ private fun SpellStatColumn(
         text = title,
         color = Color.White,
         textAlign = TextAlign.Center
+      )
+      Text(
+        text = icon,
+        fontFamily = FontsHelper.faSolid(),
+        fontSize = 14.sp,
+        color = Color.White,
+        modifier = Modifier.padding(start = 4.dp)
       )
     }
 
@@ -840,9 +875,16 @@ private fun BuildStatColumn(
         modifier = Modifier.padding(end = 4.dp)
       )
       Text(
-        text = title.lowercase().capitalize(),
+        text = title,
         color = Color.White,
         textAlign = TextAlign.Center
+      )
+      Text(
+        text = icon,
+        fontFamily = FontsHelper.faSolid(),
+        fontSize = 14.sp,
+        color = Color.White,
+        modifier = Modifier.padding(start = 4.dp)
       )
     }
 
@@ -860,6 +902,54 @@ private fun BuildStatColumn(
           onClick = { onClick(entry.key to entry.value) }
         )
       }
+    }
+  }
+}
+
+@Composable
+private fun PerformanceTab(
+  topPerformanceHaranya: List<PlayerCard>,
+  topPerformanceNuia: List<PlayerCard>,
+  topPerformancePirate: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(
+    modifier = Modifier.fillMaxSize()
+  ) {
+    StatColumn(
+      icon = "\uD83C\uDFC6",
+      title = stringResource(Res.string.summary_top_haranya_performance),
+      cards = topPerformanceHaranya,
+      valueExtractor = { it.pvpPerformancePoints().toString() },
+      valueColor = Color(0xFFAB47BC),
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+
+    StatColumn(
+      icon = "\uD83C\uDFC6",
+      title = stringResource(Res.string.summary_top_nuia_performance),
+      cards = topPerformanceNuia,
+      valueExtractor = { it.pvpPerformancePoints().toString() },
+      valueColor = Color(0xFFEC407A),
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+
+    StatColumn(
+      icon = "\uD83C\uDFC6",
+      title = stringResource(Res.string.summary_top_pirate_performance),
+      cards = topPerformancePirate,
+      valueExtractor = { it.pvpPerformancePoints().toString() },
+      valueColor = Color(0xFF7E57C2),
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
     }
   }
 }

@@ -221,6 +221,9 @@ Please close the game before continuing, otherwise files will be left over.</str
     <string name="summary_haranya_builds">Haranya Builds</string>
     <string name="summary_nuia_builds">Nuia Builds</string>
     <string name="summary_pirate_builds">Pirate Builds</string>
+    <string name="summary_top_haranya_performance">Top Performance Haranya</string>
+    <string name="summary_top_nuia_performance">Top Performance Nuia</string>
+    <string name="summary_top_pirate_performance">Top Performance Pirate</string>
 
     <!-- General Strings -->
     <string name="general_about">About</string>

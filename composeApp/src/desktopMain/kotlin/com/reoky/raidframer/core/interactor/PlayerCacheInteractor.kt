@@ -1141,6 +1141,34 @@ object PlayerCacheInteractor : Interactor() {
     }
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
+  // PvP performance score pumps (one per faction)
+  val topPerformanceHaranya: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cardList ->
+      cardList
+        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.HARANYA.value && it.pvpPerformancePoints() > 0 }
+        .sortedByDescending { it.pvpPerformancePoints() }
+        .take(100)
+    }
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topPerformanceNuia: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cardList ->
+      cardList
+        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.NUIA.value && it.pvpPerformancePoints() > 0 }
+        .sortedByDescending { it.pvpPerformancePoints() }
+        .take(100)
+    }
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topPerformancePirate: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cardList ->
+      cardList
+        .filter { it.isRealPlayer && it.lastKnownFaction == Faction.PIRATE.value && it.pvpPerformancePoints() > 0 }
+        .sortedByDescending { it.pvpPerformancePoints() }
+        .take(100)
+    }
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
   val buildCountsHaranya: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
     .map {
       it
