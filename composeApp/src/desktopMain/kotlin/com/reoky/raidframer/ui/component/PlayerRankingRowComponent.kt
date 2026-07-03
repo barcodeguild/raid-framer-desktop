@@ -27,7 +27,7 @@ import com.reoky.raidframer.core.model.PlayerCard
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.text.font.FontWeight
 import com.reoky.raidframer.core.config.RFConfig
-import com.reoky.raidframer.core.definitions.SkillTreeType
+import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
@@ -42,7 +42,8 @@ fun PlayerRankingRow(
   valueColor: Color,
   isRetribution: Boolean,
   flashingColor: Color,
-  onClick: () -> Unit
+  onClick: () -> Unit,
+  isOwnCharacter: Boolean = false
 ) {
   val interactionSource = remember { MutableInteractionSource() }
   val isHovered by interactionSource.collectIsHoveredAsState()
@@ -90,7 +91,7 @@ fun PlayerRankingRow(
           )
         }
       } else {
-        spec.trees.take(3).forEach { treeName ->
+        spec.trees.sortedByDisplayOrder().forEach { treeName ->
           val painter = skillTreeIconPainterFor(treeName)
           Image(
             painter = painter,
@@ -126,13 +127,27 @@ fun PlayerRankingRow(
     Spacer(modifier = Modifier.width(6.dp))
 
     // 4. Value (Totals)
-    // Fixed width ensures large numbers (e.g. 203.4k) are not cut off by the weight distribution
+    // Always render value text and a separate asterisk (or invisible placeholder of same width)
+    // to keep all rows right-aligned at the same position
     Text(
       text = valueText,
       color = valueColor,
       maxLines = 1,
       textAlign = TextAlign.End
     )
+    if (isOwnCharacter) {
+      Text(
+        text = "*",
+        color = valueColor,
+        maxLines = 1
+      )
+    } else {
+      Text(
+        text = "*",
+        color = Color.Transparent,
+        maxLines = 1
+      )
+    }
 
     // 5. Retribution Icon
     Box(

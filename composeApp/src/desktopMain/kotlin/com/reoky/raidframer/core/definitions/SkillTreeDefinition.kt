@@ -81,6 +81,35 @@ fun findSkillTreeForSpell(spell: String): SkillTreeType? {
 }
 
 /*
+ * The canonical display order for skill tree icons as of patch 10.x.
+ * Auramancy > Archery > Shadowplay > Songcraft > Spelldance > Sorcery > Gunslinger > Vitalism > Witchcraft > Malediction > Battlerage > Occultism > Swiftblade > Defense
+ */
+val SKILL_TREE_DISPLAY_ORDER = listOf(
+  SkillTreeType.AURAMANCY,
+  SkillTreeType.ARCHERY,
+  SkillTreeType.SHADOWPLAY,
+  SkillTreeType.SONGCRAFT,
+  SkillTreeType.SPELLDANCE,
+  SkillTreeType.SORCERY,
+  SkillTreeType.GUNSLINGER,
+  SkillTreeType.VITALISM,
+  SkillTreeType.WITCHCRAFT,
+  SkillTreeType.MALEDICTION,
+  SkillTreeType.BATTLERAGE,
+  SkillTreeType.OCCULTISM,
+  SkillTreeType.SWIFTBLADE,
+  SkillTreeType.DEFENSE,
+)
+
+private val SKILL_TREE_SORT_ORDER = SKILL_TREE_DISPLAY_ORDER.withIndex().associate { it.value to it.index }
+
+fun List<SkillTreeType>.sortedByDisplayOrder(): List<SkillTreeType> =
+  sortedBy { SKILL_TREE_SORT_ORDER[it] ?: Int.MAX_VALUE }
+
+fun Set<SkillTreeType>.sortedByDisplayOrder(): List<SkillTreeType> =
+  toList().sortedBy { SKILL_TREE_SORT_ORDER[it] ?: Int.MAX_VALUE }
+
+/*
  * Skill trees sorted by name alphabetically and then indexed by their id starting from 0.
  */
 enum class SkillTreeType(val tree: SkillTreeDefinition) {
