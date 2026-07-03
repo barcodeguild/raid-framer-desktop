@@ -27,7 +27,7 @@ import com.reoky.raidframer.core.model.PlayerCard
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.text.font.FontWeight
 import com.reoky.raidframer.core.config.RFConfig
-import com.reoky.raidframer.core.definitions.SkillTreeType
+import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
@@ -91,7 +91,7 @@ fun PlayerRankingRow(
           )
         }
       } else {
-        spec.trees.take(3).forEach { treeName ->
+        spec.trees.sortedByDisplayOrder().forEach { treeName ->
           val painter = skillTreeIconPainterFor(treeName)
           Image(
             painter = painter,

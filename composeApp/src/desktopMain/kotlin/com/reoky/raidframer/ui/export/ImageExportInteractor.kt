@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color as ComposeColor
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.SkillTreeType
+import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getDocumentsDirectory
@@ -615,7 +616,7 @@ object ImageExportInteractor {
     val iconY  = y + (ROW_HEIGHT - iconSize) / 2
 
     val trees: List<SkillTreeType?> = if (spec != null && spec != SpecType.UNKNOWN) {
-      spec.trees.toList().take(3)
+      spec.trees.sortedByDisplayOrder().take(3)
     } else {
       listOf(null, null, null)
     }
