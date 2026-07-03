@@ -627,12 +627,13 @@ object ImageExportInteractor {
 
     val nameStartX = iconX + 2   // small gap after icons
 
-    // value amount
+    // value amount (asterisk if own character)
+    val displayValueText = if (card.name == RFConfig.state.value.playerName) "$valueText*" else valueText
     g2d.font  = valueFont
     g2d.color = valueColor
-    val valueBounds = g2d.fontMetrics.getStringBounds(valueText, g2d)
+    val valueBounds = g2d.fontMetrics.getStringBounds(displayValueText, g2d)
     val valueX      = xOffset + width - valueBounds.width.toInt() - 8
-    g2d.drawString(valueText, valueX, y + 16)
+    g2d.drawString(displayValueText, valueX, y + 16)
 
     // player's character name
     g2d.font  = rowFont

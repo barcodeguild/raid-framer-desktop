@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
@@ -595,6 +596,7 @@ private fun StatColumn(
   modifier: Modifier = Modifier,
   onClick: (PlayerCard) -> Unit
 ) {
+  val config by RFConfig.state.collectAsState()
   Column(
     modifier = modifier
       .fillMaxHeight()
@@ -640,6 +642,7 @@ private fun StatColumn(
           valueColor = valueColor,
           isRetribution = card.isBuildingAggression,
           flashingColor = Color.Red,
+          isOwnCharacter = card.name == config.playerName,
           onClick = { onClick(card) }
         )
       }

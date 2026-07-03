@@ -42,7 +42,8 @@ fun PlayerRankingRow(
   valueColor: Color,
   isRetribution: Boolean,
   flashingColor: Color,
-  onClick: () -> Unit
+  onClick: () -> Unit,
+  isOwnCharacter: Boolean = false
 ) {
   val interactionSource = remember { MutableInteractionSource() }
   val isHovered by interactionSource.collectIsHoveredAsState()
@@ -127,8 +128,9 @@ fun PlayerRankingRow(
 
     // 4. Value (Totals)
     // Fixed width ensures large numbers (e.g. 203.4k) are not cut off by the weight distribution
+    val displayValueText = if (isOwnCharacter) "$valueText*" else valueText
     Text(
-      text = valueText,
+      text = displayValueText,
       color = valueColor,
       maxLines = 1,
       textAlign = TextAlign.End

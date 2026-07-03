@@ -278,6 +278,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                     valueColor = RFColors.dpsOrange,
                     isRetribution = card.isBuildingAggression,
                     flashingColor = flashingColorState.value,
+                    isOwnCharacter = card.name == config.playerName,
                     onClick = {
                       AppState.selectPlayer(card.name)
                       AppState.selectMetricType(GraphMetricType.DAMAGE)
@@ -311,6 +312,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                     valueColor = RFColors.healsGreen,
                     isRetribution = card.isBuildingAggression,
                     flashingColor = flashingColorState.value,
+                    isOwnCharacter = card.name == config.playerName,
                     onClick = {
                       AppState.selectPlayer(card.name)
                       AppState.selectMetricType(GraphMetricType.HEALING)
@@ -344,6 +346,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                     valueColor = RFColors.ccCyan,
                     isRetribution = card.isBuildingAggression,
                     flashingColor = flashingColorState.value,
+                    isOwnCharacter = card.name == config.playerName,
                     onClick = {
                       AppState.selectPlayer(card.name)
                       AppState.selectMetricType(GraphMetricType.CC)
