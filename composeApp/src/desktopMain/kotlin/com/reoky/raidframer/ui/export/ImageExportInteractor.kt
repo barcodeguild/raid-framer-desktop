@@ -628,13 +628,23 @@ object ImageExportInteractor {
 
     val nameStartX = iconX + 2   // small gap after icons
 
-    // value amount (asterisk if own character)
-    val displayValueText = if (card.name == RFConfig.state.value.playerName) "$valueText*" else valueText
+    // value amount (always account for trailing asterisk space)
+    val asteriskBounds = g2d.fontMetrics.getStringBounds("*", g2d)
     g2d.font  = valueFont
     g2d.color = valueColor
-    val valueBounds = g2d.fontMetrics.getStringBounds(displayValueText, g2d)
-    val valueX      = xOffset + width - valueBounds.width.toInt() - 8
-    g2d.drawString(displayValueText, valueX, y + 16)
+    val valueBounds = g2d.fontMetrics.getStringBounds(valueText, g2d)
+    val valueX      = xOffset + width - valueBounds.width.toInt() - asteriskBounds.width.toInt() - 8
+    g2d.drawString(valueText, valueX, y + 16)
+
+    // asterisk if own character (draw visible or invisible to reserve space)
+    if (card.name == RFConfig.state.value.playerName) {
+      g2d.drawString("*", valueX + valueBounds.width.toInt(), y + 16)
+    } else {
+      val prevColor = g2d.color
+      g2d.color = Color(0, true)
+      g2d.drawString("*", valueX + valueBounds.width.toInt(), y + 16)
+      g2d.color = prevColor
+    }
 
     // player's character name
     g2d.font  = rowFont

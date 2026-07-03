@@ -127,14 +127,27 @@ fun PlayerRankingRow(
     Spacer(modifier = Modifier.width(6.dp))
 
     // 4. Value (Totals)
-    // Fixed width ensures large numbers (e.g. 203.4k) are not cut off by the weight distribution
-    val displayValueText = if (isOwnCharacter) "$valueText*" else valueText
+    // Always render value text and a separate asterisk (or invisible placeholder of same width)
+    // to keep all rows right-aligned at the same position
     Text(
-      text = displayValueText,
+      text = valueText,
       color = valueColor,
       maxLines = 1,
       textAlign = TextAlign.End
     )
+    if (isOwnCharacter) {
+      Text(
+        text = "*",
+        color = valueColor,
+        maxLines = 1
+      )
+    } else {
+      Text(
+        text = "*",
+        color = Color.Transparent,
+        maxLines = 1
+      )
+    }
 
     // 5. Retribution Icon
     Box(
