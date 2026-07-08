@@ -236,6 +236,21 @@
     <string name="summary_haranya_builds">Билды Харанья</string>
     <string name="summary_nuia_builds">Билды Нуиан</string>
     <string name="summary_pirate_builds">Билды Пиратов</string>
+    <string name="summary_top_haranya_performance">Топ производительности Харанья</string>
+    <string name="summary_top_nuia_performance">Топ производительности Нуиан</string>
+    <string name="summary_top_pirate_performance">Топ производительности Пиратов</string>
+
+    <!-- Summary Tab Labels -->
+    <string name="summary_tab_debuffs">Дебаффы</string>
+    <string name="summary_tab_spells">Заклинания</string>
+    <string name="summary_tab_buffs">Баффы</string>
+    <string name="summary_tab_ode">Ода</string>
+    <string name="summary_tab_kd">К/Д</string>
+    <string name="summary_tab_received">Получено</string>
+    <string name="summary_tab_items">Предметы</string>
+    <string name="summary_tab_utility">Утилиты</string>
+    <string name="summary_tab_specs">Спеки</string>
+    <string name="summary_tab_performance">Эффективность</string>
 
     <!-- General Strings -->
     <string name="general_about">О программе</string>

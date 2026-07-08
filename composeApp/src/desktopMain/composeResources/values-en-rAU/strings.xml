@@ -237,6 +237,18 @@ Please close the game before continuing, otherwise files will be left over.</str
     <string name="summary_nuia_builds">Nuia Builds</string>
     <string name="summary_pirate_builds">Pirate Builds</string>
 
+    <!-- Summary Tab Labels -->
+    <string name="summary_tab_debuffs">Debuffs</string>
+    <string name="summary_tab_spells">Spells</string>
+    <string name="summary_tab_buffs">Buffs</string>
+    <string name="summary_tab_ode">Ode</string>
+    <string name="summary_tab_kd">K/D</string>
+    <string name="summary_tab_received">Received</string>
+    <string name="summary_tab_items">Items</string>
+    <string name="summary_tab_utility">Utility</string>
+    <string name="summary_tab_specs">Specs</string>
+    <string name="summary_tab_performance">Performance</string>
+
     <!-- General Strings -->
     <string name="general_about">About</string>
     <string name="general_cancel">Cancel</string>

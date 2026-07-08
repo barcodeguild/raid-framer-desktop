@@ -42,6 +42,16 @@ import raid_framer_desktop.composeapp.generated.resources.summary_most_item_usag
 import raid_framer_desktop.composeapp.generated.resources.summary_nuia_builds
 import raid_framer_desktop.composeapp.generated.resources.summary_pirate_builds
 import raid_framer_desktop.composeapp.generated.resources.summary_silences_by_faction
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_buffs
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_debuffs
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_items
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_kd
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_ode
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_performance
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_received
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_specs
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_spells
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_utility
 import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
 import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
@@ -126,16 +136,16 @@ fun SummaryOverlay(wm: WindowManager? = null) {
 
   var selectedTabIndex by remember { mutableStateOf(0) }
   val tabs = listOf(
-    "Debuffs",
-    "Spells",
-    "Buffs",
-    "Ode",
-    "K/D",
-    "Received",
-    "Items",
-    "Utility",
-    "Specs",
-    "Performance"
+    stringResource(Res.string.summary_tab_debuffs),
+    stringResource(Res.string.summary_tab_spells),
+    stringResource(Res.string.summary_tab_buffs),
+    stringResource(Res.string.summary_tab_ode),
+    stringResource(Res.string.summary_tab_kd),
+    stringResource(Res.string.summary_tab_received),
+    stringResource(Res.string.summary_tab_items),
+    stringResource(Res.string.summary_tab_utility),
+    stringResource(Res.string.summary_tab_specs),
+    stringResource(Res.string.summary_tab_performance)
   )
 
   val scope = rememberCoroutineScope()

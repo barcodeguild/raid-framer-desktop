@@ -236,6 +236,21 @@
     <string name="summary_haranya_builds">哈拉尼亚配装</string>
     <string name="summary_nuia_builds">努伊安配装</string>
     <string name="summary_pirate_builds">海盗配装</string>
+    <string name="summary_top_haranya_performance">哈拉尼亚输出榜</string>
+    <string name="summary_top_nuia_performance">努伊安输出榜</string>
+    <string name="summary_top_pirate_performance">海盗输出榜</string>
+
+    <!-- Summary Tab Labels -->
+    <string name="summary_tab_debuffs">减益效果</string>
+    <string name="summary_tab_spells">技能</string>
+    <string name="summary_tab_buffs">增益效果</string>
+    <string name="summary_tab_ode">赞歌</string>
+    <string name="summary_tab_kd">击杀/死亡</string>
+    <string name="summary_tab_received">承受</string>
+    <string name="summary_tab_items">物品</string>
+    <string name="summary_tab_utility">实用技能</string>
+    <string name="summary_tab_specs">天赋/职业</string>
+    <string name="summary_tab_performance">表现</string>
 
     <!-- General Strings -->
     <string name="general_about">关于</string>

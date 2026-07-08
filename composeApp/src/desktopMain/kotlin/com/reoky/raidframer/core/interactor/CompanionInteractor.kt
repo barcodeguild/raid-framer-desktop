@@ -249,8 +249,10 @@ object CompanionInteractor : Interactor() {
                     debuffId = event.buffId,
                   )
                 )
+                Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} applied debuff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target}.")
               } else {
                 PlayerCacheInteractor.postEvent(combatEvent)
+                Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} applied buff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target}.")
               }
             }
             is CombatEventPayload.BuffEndedPayload -> {

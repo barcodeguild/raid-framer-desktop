@@ -236,6 +236,21 @@ Bitte schließen Sie das Spiel, bevor Sie fortfahren, andernfalls bleiben Dateie
     <string name="summary_haranya_builds">Haranya-Builds</string>
     <string name="summary_nuia_builds">Nuia-Builds</string>
     <string name="summary_pirate_builds">Piraten-Builds</string>
+    <string name="summary_top_haranya_performance">Top-Leistung Haranya</string>
+    <string name="summary_top_nuia_performance">Top-Leistung Nuia</string>
+    <string name="summary_top_pirate_performance">Top-Leistung Piraten</string>
+
+    <!-- Summary Tab Labels -->
+    <string name="summary_tab_debuffs">Schwächungszauber</string>
+    <string name="summary_tab_spells">Zauber</string>
+    <string name="summary_tab_buffs">Stärkungszauber</string>
+    <string name="summary_tab_ode">Ode</string>
+    <string name="summary_tab_kd">K/D</string>
+    <string name="summary_tab_received">Erhalten</string>
+    <string name="summary_tab_items">Gegenstände</string>
+    <string name="summary_tab_utility">Nützliches</string>
+    <string name="summary_tab_specs">Spezialisierungen</string>
+    <string name="summary_tab_performance">Leistung</string>
 
     <!-- General Strings -->
     <string name="general_about">Über</string>

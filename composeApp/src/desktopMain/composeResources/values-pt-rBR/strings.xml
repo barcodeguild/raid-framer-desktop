@@ -236,6 +236,21 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="summary_haranya_builds">Builds Haranya</string>
     <string name="summary_nuia_builds">Builds Nuia</string>
     <string name="summary_pirate_builds">Builds Pirata</string>
+    <string name="summary_top_haranya_performance">Top Desempenho Haranya</string>
+    <string name="summary_top_nuia_performance">Top Desempenho Nuia</string>
+    <string name="summary_top_pirate_performance">Top Desempenho Pirata</string>
+
+    <!-- Summary Tab Labels -->
+    <string name="summary_tab_debuffs">Penalidades</string>
+    <string name="summary_tab_spells">Habilidades</string>
+    <string name="summary_tab_buffs">Benefícios</string>
+    <string name="summary_tab_ode">Ode</string>
+    <string name="summary_tab_kd">K/D</string>
+    <string name="summary_tab_received">Recebido</string>
+    <string name="summary_tab_items">Itens</string>
+    <string name="summary_tab_utility">Utilitários</string>
+    <string name="summary_tab_specs">Especializações</string>
+    <string name="summary_tab_performance">Desempenho</string>
 
     <!-- General Strings -->
     <string name="general_about">Sobre</string>

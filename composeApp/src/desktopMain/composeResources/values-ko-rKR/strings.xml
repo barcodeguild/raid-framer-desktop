@@ -236,6 +236,21 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="summary_haranya_builds">하라니아 빌드</string>
     <string name="summary_nuia_builds">누이안 빌드</string>
     <string name="summary_pirate_builds">해적 빌드</string>
+    <string name="summary_top_haranya_performance">하라니아 성능 순위</string>
+    <string name="summary_top_nuia_performance">누이안 성능 순위</string>
+    <string name="summary_top_pirate_performance">해적 성능 순위</string>
+
+    <!-- Summary Tab Labels -->
+    <string name="summary_tab_debuffs">디버프</string>
+    <string name="summary_tab_spells">스킬</string>
+    <string name="summary_tab_buffs">버프</string>
+    <string name="summary_tab_ode">찬가</string>
+    <string name="summary_tab_kd">K/D</string>
+    <string name="summary_tab_received">받은 피해/회복</string>
+    <string name="summary_tab_items">아이템</string>
+    <string name="summary_tab_utility">유틸리티</string>
+    <string name="summary_tab_specs">직업</string>
+    <string name="summary_tab_performance">성과</string>
 
     <!-- General Strings -->
     <string name="general_about">정보</string>
