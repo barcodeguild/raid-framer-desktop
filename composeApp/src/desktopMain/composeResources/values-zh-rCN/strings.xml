@@ -57,6 +57,21 @@
     <string name="settings_show_heals_column">显示治疗列</string>
     <string name="settings_show_cc_column">显示控场列</string>
     <string name="settings_show_damage_column">显示伤害列</string>
+    <string name="settings_combat_custom_categories_title">自定义类别</string>
+    <string name="settings_combat_custom_categories_description">选择最多三个额外的类别作为战斗覆盖层的列显示。它们将与伤害、治疗和控场一起显示。</string>
+    <string name="settings_combat_custom_category_1">自定义类别 1</string>
+    <string name="settings_combat_custom_category_2">自定义类别 2</string>
+    <string name="settings_combat_custom_category_3">自定义类别 3</string>
+    <string name="category_none">无</string>
+    <string name="category_charms">魅惑</string>
+    <string name="category_silences">沉默</string>
+    <string name="category_distresses">苦恼</string>
+    <string name="category_debuffs">减益</string>
+    <string name="category_songs">歌曲</string>
+    <string name="category_buffs">增益</string>
+    <string name="category_potions">药水</string>
+    <string name="category_gliders">滑翔翼</string>
+    <string name="category_items">物品</string>
     <string name="settings_combat_overlay_title">战斗覆盖</string>
     <string name="settings_combat_fade_controls">当光标离开覆盖层时自动淡出图标控件。</string>
     <string name="settings_split_chat">启用OSRS风格的分割聊天窗口覆盖。(即将推出)</string>
@@ -221,6 +236,21 @@
     <string name="summary_haranya_builds">哈拉尼亚配装</string>
     <string name="summary_nuia_builds">努伊安配装</string>
     <string name="summary_pirate_builds">海盗配装</string>
+    <string name="summary_top_haranya_performance">哈拉尼亚输出榜</string>
+    <string name="summary_top_nuia_performance">努伊安输出榜</string>
+    <string name="summary_top_pirate_performance">海盗输出榜</string>
+
+    <!-- Summary Tab Labels -->
+    <string name="summary_tab_debuffs">减益效果</string>
+    <string name="summary_tab_spells">技能</string>
+    <string name="summary_tab_buffs">增益效果</string>
+    <string name="summary_tab_ode">赞歌</string>
+    <string name="summary_tab_kd">击杀/死亡</string>
+    <string name="summary_tab_received">承受</string>
+    <string name="summary_tab_items">物品</string>
+    <string name="summary_tab_utility">实用技能</string>
+    <string name="summary_tab_specs">天赋/职业</string>
+    <string name="summary_tab_performance">表现</string>
 
     <!-- General Strings -->
     <string name="general_about">关于</string>

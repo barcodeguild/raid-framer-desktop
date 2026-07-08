@@ -57,6 +57,21 @@ Você ainda deve completar a desinstalação do aplicativo principal desinstalan
     <string name="settings_show_heals_column">Mostrar Coluna de Curas</string>
     <string name="settings_show_cc_column">Mostrar Coluna CC</string>
     <string name="settings_show_damage_column">Mostrar Coluna de Dano</string>
+    <string name="settings_combat_custom_categories_title">Categorias Personalizadas</string>
+    <string name="settings_combat_custom_categories_description">Escolha até três categorias adicionais para exibir como colunas no overlay de combate. Estas aparecem junto com Dano, Curas e CC.</string>
+    <string name="settings_combat_custom_category_1">Categoria Personalizada 1</string>
+    <string name="settings_combat_custom_category_2">Categoria Personalizada 2</string>
+    <string name="settings_combat_custom_category_3">Categoria Personalizada 3</string>
+    <string name="category_none">Nenhuma</string>
+    <string name="category_charms">Encantos</string>
+    <string name="category_silences">Silenciamentos</string>
+    <string name="category_distresses">Angústias</string>
+    <string name="category_debuffs">Debuffs</string>
+    <string name="category_songs">Músicas</string>
+    <string name="category_buffs">Buffs</string>
+    <string name="category_potions">Poções</string>
+    <string name="category_gliders">Planadores</string>
+    <string name="category_items">Itens</string>
     <string name="settings_combat_overlay_title">Overlay de Combate</string>
     <string name="settings_combat_fade_controls">Desvanecer controles de ícone automaticamente quando o cursor sair do overlay.</string>
     <string name="settings_split_chat">Ativar overlay de janela split-chat estilo OSRS. (Em Breve)</string>
@@ -221,6 +236,21 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="summary_haranya_builds">Builds Haranya</string>
     <string name="summary_nuia_builds">Builds Nuia</string>
     <string name="summary_pirate_builds">Builds Pirata</string>
+    <string name="summary_top_haranya_performance">Top Desempenho Haranya</string>
+    <string name="summary_top_nuia_performance">Top Desempenho Nuia</string>
+    <string name="summary_top_pirate_performance">Top Desempenho Pirata</string>
+
+    <!-- Summary Tab Labels -->
+    <string name="summary_tab_debuffs">Penalidades</string>
+    <string name="summary_tab_spells">Habilidades</string>
+    <string name="summary_tab_buffs">Benefícios</string>
+    <string name="summary_tab_ode">Ode</string>
+    <string name="summary_tab_kd">K/D</string>
+    <string name="summary_tab_received">Recebido</string>
+    <string name="summary_tab_items">Itens</string>
+    <string name="summary_tab_utility">Utilitários</string>
+    <string name="summary_tab_specs">Especializações</string>
+    <string name="summary_tab_performance">Desempenho</string>
 
     <!-- General Strings -->
     <string name="general_about">Sobre</string>

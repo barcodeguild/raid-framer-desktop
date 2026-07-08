@@ -40,6 +40,7 @@ import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableStatus
+import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.helper.UpdateHelper
@@ -581,9 +582,12 @@ private fun LanguageDropdown(currentCode: String) {
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CombatOverlaySettingsPanel() {
   val config by RFConfig.state.collectAsState()
+
+  val categoryOptions = listOf("") + CombatRankingCategory.ALL_CATEGORIES.map { it.name }
 
   SettingsSection(
     title = stringResource(Res.string.settings_combat_overlay_title),
@@ -612,6 +616,118 @@ private fun CombatOverlaySettingsPanel() {
       onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatControlsFadeEnabled = isChecked) } },
       label = stringResource(Res.string.settings_combat_fade_controls)
     )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Text(
+      text = stringResource(Res.string.settings_combat_custom_categories_title),
+      color = RFColors.AccentRed,
+      fontSize = 14.sp,
+      fontWeight = FontWeight.Bold
+    )
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+      text = stringResource(Res.string.settings_combat_custom_categories_description),
+      color = RFColors.TextPrimary,
+      fontSize = 12.sp
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+
+    CategoryDropdown(
+      label = stringResource(Res.string.settings_combat_custom_category_1),
+      selectedCategory = config.combatCustomCategory1,
+      options = categoryOptions,
+      onCategorySelected = { cat -> RFConfig.update { it.copy(combatCustomCategory1 = cat) } }
+    )
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    CategoryDropdown(
+      label = stringResource(Res.string.settings_combat_custom_category_2),
+      selectedCategory = config.combatCustomCategory2,
+      options = categoryOptions,
+      onCategorySelected = { cat -> RFConfig.update { it.copy(combatCustomCategory2 = cat) } }
+    )
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    CategoryDropdown(
+      label = stringResource(Res.string.settings_combat_custom_category_3),
+      selectedCategory = config.combatCustomCategory3,
+      options = categoryOptions,
+      onCategorySelected = { cat -> RFConfig.update { it.copy(combatCustomCategory3 = cat) } }
+    )
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryDropdown(
+  label: String,
+  selectedCategory: String,
+  options: List<String>,
+  onCategorySelected: (String) -> Unit
+) {
+  var expanded by remember { mutableStateOf(false) }
+
+  val displayLabel = if (selectedCategory.isBlank()) {
+    stringResource(Res.string.category_none)
+  } else {
+    CombatRankingCategory.fromString(selectedCategory)?.let { category ->
+      stringResource(category.displayNameRes)
+    } ?: selectedCategory
+  }
+
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = !expanded }
+  ) {
+    OutlinedTextField(
+      value = displayLabel,
+      onValueChange = {},
+      readOnly = true,
+      label = { Text(text = label, fontSize = 12.sp, color = RFColors.TextSecondary) },
+      modifier = Modifier
+        .fillMaxWidth()
+        .menuAnchor(),
+      colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = RFColors.AccentRed,
+        unfocusedBorderColor = RFColors.CardBorder,
+        focusedTextColor = RFColors.TextPrimary,
+        unfocusedTextColor = RFColors.TextPrimary,
+        cursorColor = RFColors.AccentRed,
+        focusedLabelColor = RFColors.TextSecondary,
+        unfocusedLabelColor = RFColors.TextTertiary
+      ),
+      trailingIcon = {
+        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+      }
+    )
+    ExposedDropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier.fillMaxWidth(),
+      containerColor = RFColors.CardBackground,
+      tonalElevation = 4.dp
+    ) {
+      options.forEach { option ->
+        DropdownMenuItem(
+          text = {
+            Text(
+              text = if (option.isBlank()) stringResource(Res.string.category_none)
+              else CombatRankingCategory.fromString(option)?.let { stringResource(it.displayNameRes) }
+              ?: option,
+              color = RFColors.TextPrimary
+            )
+          },
+          onClick = {
+            onCategorySelected(option)
+            expanded = false
+          },
+          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+        )
+      }
+    }
   }
 }
 

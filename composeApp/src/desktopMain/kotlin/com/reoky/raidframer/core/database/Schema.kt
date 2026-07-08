@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 23
+const val SCHEMA_VERSION = 24
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -77,6 +77,11 @@ data class ConfigEntity(
   val combatShowDamageColumn: Boolean = true,
   val combatShowHealsColumn: Boolean = true,
   val combatShowCCColumn: Boolean = true,
+
+  // Combat overlay custom category columns (up to 3)
+  val combatCustomCategory1: String = "",
+  val combatCustomCategory2: String = "",
+  val combatCustomCategory3: String = "",
 
   // Combat overlay UX
   val combatControlsFadeEnabled: Boolean = true, // fade icon controls out when cursor leaves the overlay

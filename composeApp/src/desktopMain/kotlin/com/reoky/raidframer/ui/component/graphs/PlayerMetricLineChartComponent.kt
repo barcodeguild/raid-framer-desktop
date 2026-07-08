@@ -28,7 +28,9 @@ import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_no_recent_data
@@ -89,48 +91,50 @@ fun MultiPlayerMetricLineChart(
   // Update loop
   LaunchedEffect(usedGroups, selectedMinutes, mode, forceSlidingWindow, metricType) {
     while (true) {
-      val now = System.currentTimeMillis()
-      val groupCards = usedGroups.map { spec ->
-        PlayerCacheInteractor.getGroupCards { pc -> spec.filter(pc) }
-      }
-
-      val bucketSize = 1000L // 1 second resolution
-      val windowStart = now - selectedMinutes * 60_000L
-      val nowBucketStart = (now / bucketSize) * bucketSize
-      val totalBuckets = selectedMinutes * 60
-
-      // Generate X axis timestamps (descending from now)
-      val bucketTimestamps = (totalBuckets - 1 downTo 0).map { i -> nowBucketStart - i * bucketSize }
-
-      val useSliding = forceSlidingWindow || (mode != GameMonitorInteractor.MonitorModes.REPLAY)
-
-      val computedPerGroup = groupCards.map { cards ->
-        val buckets = mutableMapOf<Long, Long>()
-        cards.forEach { card ->
-          // Select events based on metric type
-          val events: List<CombatEvent> = when (metricType) {
-            GraphMetricType.DAMAGE -> card.recentDamageEvents
-            GraphMetricType.HEALING -> card.recentHealEvents
-            GraphMetricType.CC -> card.recentDebuffAppliedEvents
-          }
-
-          events.forEach { e ->
-            if (!useSliding || e.timestamp >= windowStart) {
-              val bucketStart = (e.timestamp / bucketSize) * bucketSize
-
-              val amount = when (metricType) {
-                GraphMetricType.DAMAGE -> (e as? DamageEvent)?.damage?.toLong() ?: 0L
-                GraphMetricType.HEALING -> (e as? HealEvent)?.amount?.toLong() ?: 0L
-                GraphMetricType.CC -> 1L // Count
-              }
-
-              buckets[bucketStart] = (buckets[bucketStart] ?: 0L) + amount
-            }
-          }
+      val computedPerGroup = withContext(Dispatchers.Default) {
+        val now = System.currentTimeMillis()
+        val groupCards = usedGroups.map { spec ->
+          PlayerCacheInteractor.getGroupCards { pc -> spec.filter(pc) }
         }
 
-        // Map back to the generated timestamp list
-        bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
+        val bucketSize = 1000L // 1 second resolution
+        val windowStart = now - selectedMinutes * 60_000L
+        val nowBucketStart = (now / bucketSize) * bucketSize
+        val totalBuckets = selectedMinutes * 60
+
+        // Generate X axis timestamps (descending from now)
+        val bucketTimestamps = (totalBuckets - 1 downTo 0).map { i -> nowBucketStart - i * bucketSize }
+
+        val useSliding = forceSlidingWindow || (mode != GameMonitorInteractor.MonitorModes.REPLAY)
+
+        groupCards.map { cards ->
+          val buckets = mutableMapOf<Long, Long>()
+          cards.forEach { card ->
+            // Select events based on metric type
+            val events: List<CombatEvent> = when (metricType) {
+              GraphMetricType.DAMAGE -> card.recentDamageEvents
+              GraphMetricType.HEALING -> card.recentHealEvents
+              GraphMetricType.CC -> card.recentDebuffAppliedEvents
+            }
+
+            events.forEach { e ->
+              if (!useSliding || e.timestamp >= windowStart) {
+                val bucketStart = (e.timestamp / bucketSize) * bucketSize
+
+                val amount = when (metricType) {
+                  GraphMetricType.DAMAGE -> (e as? DamageEvent)?.damage?.toLong() ?: 0L
+                  GraphMetricType.HEALING -> (e as? HealEvent)?.amount?.toLong() ?: 0L
+                  GraphMetricType.CC -> 1L // Count
+                }
+
+                buckets[bucketStart] = (buckets[bucketStart] ?: 0L) + amount
+              }
+            }
+          }
+
+          // Map back to the generated timestamp list
+          bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
+        }
       }
 
       samplesPerGroup = computedPerGroup

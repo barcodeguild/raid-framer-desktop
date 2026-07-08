@@ -17,8 +17,38 @@ import com.reoky.raidframer.core.model.pvpPerformancePoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.arkorean_regular
 import raid_framer_desktop.composeapp.generated.resources.export_no_data
 import raid_framer_desktop.composeapp.generated.resources.export_title_battle_summary
+import raid_framer_desktop.composeapp.generated.resources.summary_haranya_builds
+import raid_framer_desktop.composeapp.generated.resources.summary_most_item_usages
+import raid_framer_desktop.composeapp.generated.resources.summary_nuia_builds
+import raid_framer_desktop.composeapp.generated.resources.summary_pirate_builds
+import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
+import raid_framer_desktop.composeapp.generated.resources.summary_top_debuffs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
+import raid_framer_desktop.composeapp.generated.resources.summary_top_distresses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_gamers
+import raid_framer_desktop.composeapp.generated.resources.summary_top_heals_received
+import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_item_uses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_performance
+import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_spells_damage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_kills_haranya
+import raid_framer_desktop.composeapp.generated.resources.summary_top_kills_nuia
+import raid_framer_desktop.composeapp.generated.resources.summary_top_kills_pirate
+import raid_framer_desktop.composeapp.generated.resources.summary_top_nuia_item_uses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_nuia_performance
+import raid_framer_desktop.composeapp.generated.resources.summary_top_nuia_spells_damage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_ode_haranya
+import raid_framer_desktop.composeapp.generated.resources.summary_top_ode_nuia
+import raid_framer_desktop.composeapp.generated.resources.summary_top_ode_pirate
+import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_item_uses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_performance
+import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_spells_damage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_potion_drinkers
+import raid_framer_desktop.composeapp.generated.resources.summary_top_silences
+import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Font
@@ -322,7 +352,7 @@ object ImageExportInteractor {
     }
   }
 
-  private fun calculateImageHeight(data: ExportData): Int {
+  private suspend fun calculateImageHeight(data: ExportData): Int {
     val columnHeights = computeColumnHeights(data)
     return columnHeights.max() + 30
   }
@@ -332,7 +362,7 @@ object ImageExportInteractor {
    * below it.  We track an equal [titleOffset] for columns 1 and 2, while column 0
    * additionally holds the pie-chart and combat blocks.
    */
-  private fun computeColumnHeights(data: ExportData): List<Int> {
+  private suspend fun computeColumnHeights(data: ExportData): List<Int> {
     val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * 2) / 3
 
     val pieChartBlock = makePieChartBlock(data, superColWidth)
@@ -372,13 +402,14 @@ object ImageExportInteractor {
       drawCardBackgroundTransparent(g2d, x, y, w, combatH)
       val subColW = w / 3
 
-      val damageTitle = if (data.allowPvE) "⚔️ PvE Damage ⚔️" else "🔥 PvP Damage 🔥"
-      val healsTitle  = if (data.allowPvE) "💉 PvE Heals 💉"  else "💉 PvP Heals 💉"
-      val ccTitle     = if (data.allowPvE) "🛡️ PvE CC 🛡️"    else "🛡️ PvP CC 🛡️"
+      val damageTitle = if (data.allowPvE) "PvE Damage" else "PvP Damage"
+      val healsTitle  = if (data.allowPvE) "PvE Heals"  else "PvP Heals"
+      val ccTitle     = if (data.allowPvE) "PvE CC"    else "PvP CC"
+      val icon = if (data.allowPvE) "⚔" else "🔥"
 
-      drawSectionHeader(g2d, damageTitle, x,               y, subColW, toAwtColor(RFColors.dpsOrange))
-      drawSectionHeader(g2d, healsTitle,  x + subColW,     y, subColW, toAwtColor(RFColors.healsGreen))
-      drawSectionHeader(g2d, ccTitle,     x + subColW * 2, y, subColW, toAwtColor(RFColors.ccCyan))
+      drawSectionHeader(g2d, damageTitle, x,               y, subColW, toAwtColor(RFColors.dpsOrange), icon)
+      drawSectionHeader(g2d, healsTitle,  x + subColW,     y, subColW, toAwtColor(RFColors.healsGreen), "💉")
+      drawSectionHeader(g2d, ccTitle,     x + subColW * 2, y, subColW, toAwtColor(RFColors.ccCyan), "🛡")
 
       var rowY = y + SECTION_HEADER_HEIGHT
       val maxRows = maxOf(data.topDamage.size, data.topHeals.size, data.topCC.size).coerceAtLeast(1)
@@ -432,7 +463,7 @@ object ImageExportInteractor {
    * The title now spans the full image width. It used to just be the top-left brick of the masonry. Overall, going for
    * a dynamic layout like masonry because each battle is going to be different have different-sized cards for each section.
    */
-  private fun drawMasonryLayout(g2d: Graphics2D, data: ExportData) {
+  private suspend fun drawMasonryLayout(g2d: Graphics2D, data: ExportData) {
     val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * 2) / 3
 
     // Full-width title card
@@ -515,13 +546,13 @@ object ImageExportInteractor {
 
     g2d.color = TEXT_PRIMARY
     g2d.font  = titleFont
-    g2d.drawString("${AppGlobals.APP_NAME} — ${data.battleSummaryTitle}", textStartX, y + 32)
+    g2d.drawString("${AppGlobals.APP_NAME} - ${data.battleSummaryTitle}", textStartX, y + 32)
 
     val durationStr = formatDuration(data.sessionDurationMs)
     g2d.font  = subtitleFont
     g2d.color = toAwtColor(RFColors.TextSecondary)
     g2d.drawString(
-      "${data.sessionTitle}  •  ${data.sessionDate}  •  ${AppGlobals.APP_VERSION}  •  $durationStr",
+      "${data.sessionTitle}  |  ${data.sessionDate}  |  ${AppGlobals.APP_VERSION}  |  $durationStr",
       textStartX, y + 56
     )
 
@@ -557,12 +588,42 @@ object ImageExportInteractor {
     g2d.drawRect(x, y, width, height)
   }
 
-  private fun drawSectionHeader(g2d: Graphics2D, title: String, x: Int, y: Int, width: Int, color: Color) {
-    g2d.font = createFont(Font.BOLD, 13f)
+  private fun drawSectionHeader(g2d: Graphics2D, title: String, x: Int, y: Int, width: Int, color: Color, icon: String = "") {
+    val textFont = createFont(Font.BOLD, 13f)
+    g2d.font = textFont
     g2d.color = color
-    val titleWidth = g2d.fontMetrics.stringWidth(title)
-    val centeredX  = x + (width - titleWidth) / 2
-    g2d.drawString(title, centeredX.coerceAtLeast(x + 4), y + 18)
+    val textWidth = g2d.fontMetrics.stringWidth(title)
+
+    var totalWidth = textWidth
+    val iconFont = createEmojiFont(Font.BOLD, 13f)
+    val iconWidth = if (icon.isNotEmpty()) {
+      g2d.font = iconFont
+      g2d.fontMetrics.stringWidth(icon)
+    } else 0
+    totalWidth += iconWidth * 2
+    if (icon.isNotEmpty()) totalWidth += g2d.fontMetrics.stringWidth("  ")
+
+    val startX = (x + (width - totalWidth) / 2).coerceAtLeast(x + 4)
+    var drawX = startX
+
+    if (icon.isNotEmpty()) {
+      g2d.font = iconFont
+      g2d.drawString(icon, drawX, y + 18)
+      drawX += g2d.fontMetrics.stringWidth(icon)
+      val spaceW = g2d.fontMetrics.stringWidth(" ")
+      drawX += spaceW
+    }
+
+    g2d.font = textFont
+    g2d.drawString(title, drawX, y + 18)
+    drawX += textWidth
+
+    if (icon.isNotEmpty()) {
+      val spaceW = g2d.fontMetrics.stringWidth(" ")
+      drawX += spaceW
+      g2d.font = iconFont
+      g2d.drawString(icon, drawX, y + 18)
+    }
   }
 
   /**
@@ -573,7 +634,7 @@ object ImageExportInteractor {
     if (maxWidth <= 0) return ""
     val fm = g2d.fontMetrics
     if (fm.stringWidth(text) <= maxWidth) return text
-    val ellipsis = "…"
+    val ellipsis = "..."
     var fitted = text
     while (fitted.isNotEmpty() && fm.stringWidth("$fitted$ellipsis") > maxWidth) {
       fitted = fitted.dropLast(1)
@@ -727,44 +788,20 @@ object ImageExportInteractor {
     }
   }
 
-  // TODO: Problems with i18n strings here..
-  private fun getAllCategoryBlocks(data: ExportData, superColWidth: Int): List<TripletBlock> {
+
+  private suspend fun getAllCategoryBlocks(data: ExportData, superColWidth: Int): List<TripletBlock> {
     val tripletBlocks  = mutableListOf<TripletBlock>()
     val subColWidth    = (superColWidth - COLUMN_GAP * 2) / 3
 
-    val makeTriplet: (List<Pair<String, ColumnData>>) -> TripletBlock = { columns ->
-      val maxBlockHeight = columns.maxOfOrNull { calculateHeight(it.second) } ?: CATEGORY_MIN_HEIGHT
+    val makeTriplet: (List<Triple<String, String, ColumnData>>) -> TripletBlock = { columns ->
+      val maxBlockHeight = columns.maxOfOrNull { calculateHeight(it.third) } ?: CATEGORY_MIN_HEIGHT
       TripletBlock("", emptyList(), maxBlockHeight) { g2d, x, y, w ->
         val actualSubColWidth = if (w < superColWidth) (w - COLUMN_GAP * 2) / 3 else subColWidth
         val actualAvailW      = actualSubColWidth - CARD_PADDING * 2
-        columns.forEachIndexed { index, (title, colData) ->
+        columns.forEachIndexed { index, (title, icon, colData) ->
           val xPos = x + index * (actualSubColWidth + COLUMN_GAP)
           drawCardBackgroundTransparent(g2d, xPos, y, actualAvailW + CARD_PADDING * 2, maxBlockHeight)
-          val icon = when {
-            title.contains("Spell Damage") -> "\uD83D\uDD25"
-            title.contains("Ode")          -> "\uD83C\uDFB5"
-            title.contains("Kills")        -> "\u2694"
-            title.contains("Dmg Taken")    -> "\uD83D\uDD25"
-            title.contains("Heals Received") -> "\uD83D\uDC89"
-            title.contains("Items")        -> "\uD83D\uDCE6"
-            title.contains("Potion")       -> "\uD83E\uDDEA"
-            title.contains("Glider")       -> "\uD83D\uDD3A"
-            title.contains("Item Skills")  -> "\u2699"
-            title.contains("Builds")       -> "\u2694"
-            title.contains("Performance")  -> "\uD83C\uDFC6"
-            title == "Silences"            -> "\uD83D\uDD07"
-            title == "Charms"              -> "\uD83D\uDC96"
-            title == "Distresses"          -> "\uD83D\uDE24"
-            title.contains("Debuffs")      -> "\uD83D\uDD25"
-            title.contains("Songs")        -> "\u2764"
-            title.contains("Buffs")        -> "\u26A1"
-            title.contains("Haranya")      -> "\uD83D\uDD25"
-            title.contains("Nuia")         -> "\u2764"
-            title.contains("Pirate")       -> "\u26A1"
-            else -> ""
-          }
-          val headerTitle = if (icon.isNotEmpty()) "$icon $title $icon" else title
-          drawSectionHeader(g2d, headerTitle, xPos + CARD_PADDING, y, actualAvailW, TEXT_PRIMARY)
+          drawSectionHeader(g2d, title, xPos + CARD_PADDING, y, actualAvailW, TEXT_PRIMARY, icon)
 
           val labelFont = createFont(Font.PLAIN, 10f)
           val valueFont = createFont(Font.BOLD,  10f)
@@ -777,10 +814,10 @@ object ImageExportInteractor {
                 g2d.color = toAwtColor(RFColors.TextSecondary)
                 g2d.drawString(data.noDataText, xPos + CARD_PADDING + 8, rowY + 14)
               } else {
-                val spellColor = when {
-                  title.contains("Haranya") -> HARANYA_COLOR
-                  title.contains("Nuia")    -> NUIA_COLOR
-                  title.contains("Pirate")  -> PIRATE_COLOR
+                val spellColor = when (index) {
+                  0 -> HARANYA_COLOR
+                  1 -> NUIA_COLOR
+                  2 -> PIRATE_COLOR
                   else -> toAwtColor(RFColors.dpsOrange)
                 }
                 for (i in 0 until minOf(d.spells.size, MAX_ROWS)) {
@@ -802,10 +839,10 @@ object ImageExportInteractor {
                 g2d.color = toAwtColor(RFColors.TextSecondary)
                 g2d.drawString(data.noDataText, xPos + CARD_PADDING + 8, rowY + 14)
               } else {
-                val itemColor = when {
-                  title.contains("Haranya") -> HARANYA_COLOR
-                  title.contains("Nuia")    -> NUIA_COLOR
-                  title.contains("Pirate")  -> PIRATE_COLOR
+                val itemColor = when (index) {
+                  0 -> HARANYA_COLOR
+                  1 -> NUIA_COLOR
+                  2 -> PIRATE_COLOR
                   else -> toAwtColor(RFColors.TextSecondary)
                 }
                 for (i in 0 until minOf(d.items.size, MAX_ROWS)) {
@@ -827,10 +864,10 @@ object ImageExportInteractor {
                 g2d.color = toAwtColor(RFColors.TextSecondary)
                 g2d.drawString(data.noDataText, xPos + CARD_PADDING + 8, rowY + 14)
               } else {
-                val buildColor = when {
-                  title.contains("Haranya") -> HARANYA_COLOR
-                  title.contains("Nuia")    -> NUIA_COLOR
-                  title.contains("Pirate")  -> PIRATE_COLOR
+                val buildColor = when (index) {
+                  0 -> HARANYA_COLOR
+                  1 -> NUIA_COLOR
+                  2 -> PIRATE_COLOR
                   else -> toAwtColor(RFColors.TextSecondary)
                 }
                 d.builds.entries.sortedByDescending { it.value }.take(MAX_ROWS).forEachIndexed { idx, (label, count) ->
@@ -871,72 +908,96 @@ object ImageExportInteractor {
     }
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Spell Damage Haranya" to ColumnData.SpellData(data.topDamageSpellsHaranya),
-      "Spell Damage Nuia"    to ColumnData.SpellData(data.topDamageSpellsNuia),
-      "Spell Damage Pirate"  to ColumnData.SpellData(data.topDamageSpellsPirate),
+      Triple(getString(Res.string.summary_top_haranya_spells_damage), "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsHaranya)),
+      Triple(getString(Res.string.summary_top_nuia_spells_damage),    "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsNuia)),
+      Triple(getString(Res.string.summary_top_pirate_spells_damage),  "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsPirate)),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Debuffs" to ColumnData.CardData(data.topDebuffs, { it.sessionDebuffTotal.toString() }, HARANYA_COLOR),
-      "Songs"   to ColumnData.CardData(data.topSongs,   { it.sessionSongsTotal.toString()  }, NUIA_COLOR),
-      "Buffs"   to ColumnData.CardData(data.topBuffs,   { it.sessionBuffTotal.toString()   }, PIRATE_COLOR),
+      Triple(getString(Res.string.summary_top_debuffs), "\uD83D\uDD25", ColumnData.CardData(data.topDebuffs, { it.sessionDebuffTotal.toString() }, HARANYA_COLOR)),
+      Triple(getString(Res.string.summary_top_songs),   "\u2764", ColumnData.CardData(data.topSongs,   { it.sessionSongsTotal.toString()  }, NUIA_COLOR)),
+      Triple(getString(Res.string.summary_top_buffs),   "\u26A1", ColumnData.CardData(data.topBuffs,   { it.sessionBuffTotal.toString()   }, PIRATE_COLOR)),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Ode Haranya" to ColumnData.CardData(data.topOdeHaranya, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen)),
-      "Ode Nuia"    to ColumnData.CardData(data.topOdeNuia,    { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen)),
-      "Ode Pirate"  to ColumnData.CardData(data.topOdePirate,  { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen)),
+      Triple(getString(Res.string.summary_top_ode_haranya), "\uD83C\uDFB5", ColumnData.CardData(data.topOdeHaranya, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
+      Triple(getString(Res.string.summary_top_ode_nuia),    "\uD83C\uDFB5", ColumnData.CardData(data.topOdeNuia,    { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
+      Triple(getString(Res.string.summary_top_ode_pirate),  "\uD83C\uDFB5", ColumnData.CardData(data.topOdePirate,  { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Kills Haranya" to ColumnData.CardData(data.topKillsHaranya, { it.sessionKillTotal.toString() }, KILLS_HARANYA_COLOR),
-      "Kills Nuia"    to ColumnData.CardData(data.topKillsNuia,    { it.sessionKillTotal.toString() }, KILLS_NUIA_COLOR),
-      "Kills Pirate"  to ColumnData.CardData(data.topKillsPirate,  { it.sessionKillTotal.toString() }, KILLS_PIRATE_COLOR),
+      Triple(getString(Res.string.summary_top_kills_haranya), "\u2694", ColumnData.CardData(data.topKillsHaranya, { it.sessionKillTotal.toString() }, KILLS_HARANYA_COLOR)),
+      Triple(getString(Res.string.summary_top_kills_nuia),    "\u2694", ColumnData.CardData(data.topKillsNuia,    { it.sessionKillTotal.toString() }, KILLS_NUIA_COLOR)),
+      Triple(getString(Res.string.summary_top_kills_pirate),  "\u2694", ColumnData.CardData(data.topKillsPirate,  { it.sessionKillTotal.toString() }, KILLS_PIRATE_COLOR)),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Dmg Taken"     to ColumnData.CardData(data.topDamageTaken,   { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation()   }, toAwtColor(RFColors.dpsOrange)),
-      "Heals Received" to ColumnData.CardData(data.topHealsReceived, { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen)),
+      Triple(getString(Res.string.summary_top_damage_taken),     "\uD83D\uDD25", ColumnData.CardData(data.topDamageTaken,   { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation()   }, toAwtColor(RFColors.dpsOrange))),
+      Triple(getString(Res.string.summary_top_heals_received), "\uD83D\uDC89", ColumnData.CardData(data.topHealsReceived, { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Items Haranya" to ColumnData.ItemData(data.topItemUsesHaranya),
-      "Items Nuia"    to ColumnData.ItemData(data.topItemUsesNuia),
-      "Items Pirate"  to ColumnData.ItemData(data.topItemUsesPirate),
+      Triple(getString(Res.string.summary_top_haranya_item_uses), "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesHaranya)),
+      Triple(getString(Res.string.summary_top_nuia_item_uses),    "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesNuia)),
+      Triple(getString(Res.string.summary_top_pirate_item_uses),  "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesPirate)),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Potion Drinkers" to ColumnData.CardData(data.topPotters,          { it.sessionPotionTotal.toString()    }, POTION_COLOR),
-      "Glider Gamers"   to ColumnData.CardData(data.topGliderGamers,     { it.sessionGliderTotal.toString()    }, GLIDER_COLOR),
-      "Item Skills"     to ColumnData.CardData(data.topItemSkillCasters, { it.sessionItemSkillTotal.toString() }, ITEM_SKILL_COLOR),
+      Triple(getString(Res.string.summary_top_potion_drinkers), "\uD83E\uDDEA", ColumnData.CardData(data.topPotters,          { it.sessionPotionTotal.toString()    }, POTION_COLOR)),
+      Triple(getString(Res.string.summary_top_glider_gamers),   "\uD83D\uDD3A", ColumnData.CardData(data.topGliderGamers,     { it.sessionGliderTotal.toString()    }, GLIDER_COLOR)),
+      Triple(getString(Res.string.summary_most_item_usages),     "\u2699", ColumnData.CardData(data.topItemSkillCasters, { it.sessionItemSkillTotal.toString() }, ITEM_SKILL_COLOR)),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Builds Haranya" to ColumnData.BuildData(data.buildCountsHaranya),
-      "Builds Nuia"    to ColumnData.BuildData(data.buildCountsNuia),
-      "Builds Pirate"  to ColumnData.BuildData(data.buildCountsPirate),
+      Triple(getString(Res.string.summary_haranya_builds), "\u2694", ColumnData.BuildData(data.buildCountsHaranya)),
+      Triple(getString(Res.string.summary_nuia_builds),    "\u2694", ColumnData.BuildData(data.buildCountsNuia)),
+      Triple(getString(Res.string.summary_pirate_builds),  "\u2694", ColumnData.BuildData(data.buildCountsPirate)),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Performance Haranya" to ColumnData.CardData(data.topPerformanceHaranya, { it.pvpPerformancePoints().toString() }, HARANYA_COLOR),
-      "Performance Nuia"    to ColumnData.CardData(data.topPerformanceNuia,    { it.pvpPerformancePoints().toString() }, NUIA_COLOR),
-      "Performance Pirate"  to ColumnData.CardData(data.topPerformancePirate,  { it.pvpPerformancePoints().toString() }, PIRATE_COLOR),
+      Triple(getString(Res.string.summary_top_haranya_performance), "\uD83C\uDFC6", ColumnData.CardData(data.topPerformanceHaranya, { it.pvpPerformancePoints().toString() }, HARANYA_COLOR)),
+      Triple(getString(Res.string.summary_top_nuia_performance),    "\uD83C\uDFC6", ColumnData.CardData(data.topPerformanceNuia,    { it.pvpPerformancePoints().toString() }, NUIA_COLOR)),
+      Triple(getString(Res.string.summary_top_pirate_performance),  "\uD83C\uDFC6", ColumnData.CardData(data.topPerformancePirate,  { it.pvpPerformancePoints().toString() }, PIRATE_COLOR)),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
-      "Silences"  to ColumnData.CardData(data.topSilences,  { it.sessionSilenceTotal.toString()  }, SILENCE_COLOR),
-      "Charms"    to ColumnData.CardData(data.topCharms,    { it.sessionCharmTotal.toString()    }, CHARM_COLOR),
-      "Distresses" to ColumnData.CardData(data.topDistresses, { it.sessionDistressTotal.toString() }, DISTRESS_COLOR),
+      Triple(getString(Res.string.summary_top_silences),  "\uD83D\uDD07", ColumnData.CardData(data.topSilences,  { it.sessionSilenceTotal.toString()  }, SILENCE_COLOR)),
+      Triple(getString(Res.string.summary_top_charms),    "\uD83D\uDC96", ColumnData.CardData(data.topCharms,    { it.sessionCharmTotal.toString()    }, CHARM_COLOR)),
+      Triple(getString(Res.string.summary_top_distresses), "\uD83D\uDE24", ColumnData.CardData(data.topDistresses, { it.sessionDistressTotal.toString() }, DISTRESS_COLOR)),
     )))
 
     return tripletBlocks
   }
 
+  private var cachedFont: Font? = null
+  private var cachedEmojiFont: Font? = null
+
   private fun createFont(style: Int, size: Float): Font {
-    return try {
-      Font("Segoe UI Emoji", style, size.toInt())
-    } catch (_: Exception) {
-      Font("Segoe UI", style, size.toInt())
+    val baseFont = cachedFont?.deriveFont(size) ?: run {
+      try {
+        val uri = Res.getUri("font/arkorean_regular.ttf")
+        if (uri != null) {
+          val font = Font.createFont(Font.TRUETYPE_FONT, URI(uri.toString()).toURL().openStream()).deriveFont(size)
+          cachedFont = font
+          return font.deriveFont(style)
+        }
+      } catch (_: Exception) { }
+      try {
+        Font("Segoe UI Emoji", style, size.toInt())
+      } catch (_: Exception) {
+        Font("Segoe UI", style, size.toInt())
+      }
+    }
+    return baseFont.deriveFont(style)
+  }
+
+  private fun createEmojiFont(style: Int, size: Float): Font {
+    return cachedEmojiFont?.deriveFont(style, size) ?: run {
+      try {
+        Font("Segoe UI Emoji", style, size.toInt())
+      } catch (_: Exception) {
+        Font("Segoe UI", style, size.toInt())
+      }
     }
   }
 }

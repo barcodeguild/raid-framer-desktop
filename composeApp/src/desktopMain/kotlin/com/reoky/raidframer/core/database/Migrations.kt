@@ -179,3 +179,12 @@ val MIGRATION_22_23 = object : Migration(22, 23) {
   }
 }
 
+// added combat custom category columns to ConfigEntity
+val MIGRATION_23_24 = object : Migration(23, 24) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN combatCustomCategory1 TEXT NOT NULL DEFAULT ''").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN combatCustomCategory2 TEXT NOT NULL DEFAULT ''").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN combatCustomCategory3 TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}
+

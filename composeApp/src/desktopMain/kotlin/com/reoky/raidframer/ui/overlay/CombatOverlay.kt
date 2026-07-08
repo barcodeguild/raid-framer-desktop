@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.StateFlow
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
@@ -32,12 +34,14 @@ import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.core.model.CombatRankingCategory
+import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import org.jetbrains.compose.resources.stringResource
 import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.ui.dialog.exitDialog
-import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_damage
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_heals
@@ -72,6 +76,48 @@ fun CombatOverlay(wm: WindowManager? = null) {
   val sortedHeals by PlayerCacheInteractor.topHeals.collectAsState()
   val sortedCC by PlayerCacheInteractor.topCC.collectAsState()
 
+  // config state for showing/hiding columns
+  val config by RFConfig.state.collectAsState()
+
+  val customCategories = remember { mutableStateListOf<Pair<CombatRankingCategory, StateFlow<List<PlayerCard>>>>() }
+  LaunchedEffect(config.combatCustomCategory1, config.combatCustomCategory2, config.combatCustomCategory3) {
+    customCategories.clear()
+    listOf(
+      config.combatCustomCategory1,
+      config.combatCustomCategory2,
+      config.combatCustomCategory3
+    ).forEach { categoryName ->
+      if (categoryName.isNotBlank()) {
+        CombatRankingCategory.fromString(categoryName)?.let { category ->
+          customCategories.add(category to PlayerCacheInteractor.getRankingFlow(category))
+        }
+      }
+    }
+  }
+
+  val customListStates = remember { mutableStateMapOf<String, LazyListState>() }
+  LaunchedEffect(config.combatCustomCategory1, config.combatCustomCategory2, config.combatCustomCategory3) {
+    val neededKeys = customCategories.map { it.first.name }.toSet()
+    val existingKeys = customListStates.keys.toSet()
+    (existingKeys - neededKeys).forEach { key -> customListStates.remove(key) }
+    (neededKeys - existingKeys).forEach { key -> customListStates[key] = LazyListState() }
+  }
+
+  var isCustomStickyMap by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
+  customCategories.forEach { (category, flow) ->
+    val listState = customListStates[category.name] ?: return@forEach
+    val categoryName = category.name
+    LaunchedEffect(categoryName) {
+      snapshotFlow { listState.isScrollInProgress to listState.firstVisibleItemIndex }
+        .collect { (isScrolling, index) ->
+          isCustomStickyMap = isCustomStickyMap + (categoryName to if (isScrolling) false else (index == 0 && listState.firstVisibleItemScrollOffset == 0))
+        }
+    }
+    LaunchedEffect(categoryName) {
+      if (isCustomStickyMap[categoryName] != false) listState.scrollToItem(0)
+    }
+  }
+
   // the animation for red flashing text
   val flashingColorState = rememberInfiniteTransition().animateColor(
     initialValue = Color.White,
@@ -86,9 +132,6 @@ fun CombatOverlay(wm: WindowManager? = null) {
   val healsListState = rememberLazyListState()
   val ccListState = rememberLazyListState()
 
-  // config state for showing/hiding columns
-  val config by RFConfig.state.collectAsState()
-
   val damageColumnText = stringResource(
     if (config.allowPVEDamage) Res.string.combat_column_pve_damage else Res.string.combat_column_pvp_damage
   )
@@ -100,7 +143,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
   )
 
   val anyColumnVisibleGlobal by remember { derivedStateOf {
-    config.combatShowDamageColumn || config.combatShowHealsColumn || config.combatShowCCColumn
+    config.combatShowDamageColumn || config.combatShowHealsColumn || config.combatShowCCColumn || customCategories.isNotEmpty()
   } }
 
   // --- Controls fade logic ---
@@ -194,6 +237,17 @@ fun CombatOverlay(wm: WindowManager? = null) {
             }
             if (config.combatShowCCColumn) {
               Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { Text(text = ccColumnText, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            }
+            customCategories.forEach { (category, _) ->
+              Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                  Text(text = category.icon, color = Color.White, fontFamily = FontsHelper.faSolid(), fontSize = 13.sp)
+                  Spacer(modifier = Modifier.width(4.dp))
+                  Text(text = stringResource(category.displayNameRes), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                  Spacer(modifier = Modifier.width(4.dp))
+                  Text(text = category.icon, color = Color.White, fontFamily = FontsHelper.faSolid(), fontSize = 13.sp)
+                }
+              }
             }
           }
 
@@ -350,6 +404,51 @@ fun CombatOverlay(wm: WindowManager? = null) {
                     onClick = {
                       AppState.selectPlayer(card.name)
                       AppState.selectMetricType(GraphMetricType.CC)
+                      wm?.openWindow(OverlayType.PLAYER_CARD)
+                    }
+                  )
+                }
+              }
+            }
+          }
+
+          customCategories.forEach { (category, flow) ->
+            val sortedList by flow.collectAsState()
+            val listState = customListStates[category.name] ?: return@forEach
+            Column(
+              modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+              horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+              LazyColumn(
+                contentPadding = PaddingValues(0.dp),
+                state = listState,
+                modifier = Modifier
+                  .padding(start = 12.dp, bottom = 6.dp)
+                  .fillMaxWidth()
+              ) {
+                itemsIndexed(sortedList, key = { _, card -> card.name }) { index, card ->
+                  PlayerRankingRow(
+                    index = index,
+                    card = card,
+                    valueText = when (category) {
+                      CombatRankingCategory.CHARMS -> card.sessionCharmTotal.toString()
+                      CombatRankingCategory.SILENCES -> card.sessionSilenceTotal.toString()
+                      CombatRankingCategory.DISTRESSES -> card.sessionDistressTotal.toString()
+                      CombatRankingCategory.DEBUFFS -> card.sessionDebuffTotal.toString()
+                      CombatRankingCategory.SONGS -> card.sessionSongsTotal.toString()
+                      CombatRankingCategory.BUFFS -> card.sessionBuffTotal.toString()
+                      CombatRankingCategory.POTIONS -> card.sessionPotionTotal.toString()
+                      CombatRankingCategory.GLIDERS -> card.sessionGliderTotal.toString()
+                      CombatRankingCategory.ITEMS -> card.sessionItemSkillTotal.toString()
+                    },
+                    valueColor = category.valueColor,
+                    isRetribution = card.isBuildingAggression,
+                    flashingColor = flashingColorState.value,
+                    isOwnCharacter = card.name == config.playerName,
+                    onClick = {
+                      AppState.selectPlayer(card.name)
                       wm?.openWindow(OverlayType.PLAYER_CARD)
                     }
                   )

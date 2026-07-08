@@ -50,6 +50,11 @@ object RFColors {
   val gliderBlue = Color(0xFF42A5F5)
   val itemSkillYellow = Color(0xFFFFCA28)
 
+  // Custom category ranking colors
+  val charmPink = Color(0xFFEC407A)
+  val silencePurple = Color(0xFFAB47BC)
+  val distressPurple = Color(0xFF7E57C2)
+
   // Gear score histogram gradient colors (low to high gear)
   val gearRed = Color(0xFFFF1744)
   val gearOrange = Color(0xFFFF9800)
