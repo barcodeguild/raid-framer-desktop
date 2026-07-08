@@ -1288,6 +1288,20 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+  fun getRankingFlow(category: CombatRankingCategory): StateFlow<List<PlayerCard>> {
+    return when (category) {
+      CombatRankingCategory.CHARMS -> topCharms
+      CombatRankingCategory.SILENCES -> topSilences
+      CombatRankingCategory.DISTRESSES -> topDistresses
+      CombatRankingCategory.DEBUFFS -> topDebuff
+      CombatRankingCategory.SONGS -> topSongs
+      CombatRankingCategory.BUFFS -> topBuffs
+      CombatRankingCategory.POTIONS -> topPotters
+      CombatRankingCategory.GLIDERS -> topGliderGamers
+      CombatRankingCategory.ITEMS -> topItemSkillCasters
+    }
+  }
+
   /* Raid Parties UI Subscriptions */
   fun getRaidById(raidId: Int): StateFlow<List<Party>> {
     return snapshotFlow { raids[raidId] ?: listOf() }
