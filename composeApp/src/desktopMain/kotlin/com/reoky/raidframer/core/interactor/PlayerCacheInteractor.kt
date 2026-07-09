@@ -501,6 +501,7 @@ object PlayerCacheInteractor : Interactor() {
         cards[event.source]?.let { card ->
           cards[event.source] = card.postDamageEvent(event)
         }
+        GraphDataInteractor.postEvent(event)
         // credit damage taken to target
         createCardIfNoneExists(cid = event.cid, playerName = event.target)
         cards[event.target]?.let { card ->
@@ -517,6 +518,7 @@ object PlayerCacheInteractor : Interactor() {
         cards[event.source]?.let { card ->
           cards[event.source] = card.postHealEvent(event)
         }
+        GraphDataInteractor.postEvent(event)
         // credit the target with received heals
         createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.target]?.let { card ->
@@ -606,6 +608,16 @@ object PlayerCacheInteractor : Interactor() {
 
         // give credit to the source
         event.source?.let { source ->
+          GraphDataInteractor.postEvent(
+            DebuffAppliedEvent(
+              cid = event.cid,
+              timestamp = event.timestamp,
+              source = event.source,
+              target = event.target,
+              debuff = event.debuff,
+              debuffId = event.debuffId
+            )
+          )
           cards[source]?.let { card ->
             cards[source] = card.postDebuffAppliedEvent(
               DebuffAppliedEvent(

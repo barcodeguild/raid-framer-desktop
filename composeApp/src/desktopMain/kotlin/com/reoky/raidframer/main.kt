@@ -19,6 +19,7 @@ import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.DeathAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
+import com.reoky.raidframer.core.interactor.GraphDataInteractor
 import com.reoky.raidframer.core.interactor.InstallationInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
@@ -98,6 +99,7 @@ fun main(args: Array<String>) {
     LoggingInteractor.initialize() // prunes old logs
     LoggingInteractor.start()
     PlayerCacheInteractor.start()
+    GraphDataInteractor.start(delay = 60000L)
     //GameMonitorInteractor.start()
     InstallationInteractor.start(delay = 3000L)
     CompanionInteractor.start(delay = 1000L)
@@ -261,6 +263,7 @@ private fun acquireSingleInstanceMutex(): Boolean {
  */
 fun quit() {
   Log.info(TAG, "Shutting down Raid Framer...")
+  GraphDataInteractor.stop()
   PlayerCacheInteractor.stop()
   GameMonitorInteractor.stop()
   DeathAccumulatorInteractor.stop()

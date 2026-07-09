@@ -16,11 +16,15 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
+import com.reoky.raidframer.core.interactor.GraphDataInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.*
+import com.reoky.raidframer.ui.LocalDragLock
 import io.github.koalaplot.core.line.AreaBaseline.ConstantLine
 import io.github.koalaplot.core.line.AreaPlot2
 import io.github.koalaplot.core.line.LinePlot2
@@ -41,6 +45,7 @@ import kotlin.math.min
 
 private data class TimeSample(val timestamp: Long, val valueSum: Long)
 private data class Peak(val index: Int, val value: Float) // used for the white line
+private data class PeakPair(val left: Peak, val right: Peak)
 
 data class GroupSpec(
   val name: String,
@@ -87,8 +92,14 @@ fun MultiPlayerMetricLineChart(
 
   var selectedMinutes by remember(initialMinutesWindow) { mutableStateOf(initialMinutesWindow) }
   var samplesPerGroup by remember { mutableStateOf<List<List<TimeSample>>>(emptyList()) }
+  var viewportOffset by remember(selectedMinutes) { mutableStateOf(Float.POSITIVE_INFINITY) }
+  val dragLock = LocalDragLock.current
 
-  // Update loop
+  // Keep a bounded amount of history so the selected window can scroll without
+  // forcing the chart to render tens of thousands of points every second.
+  val historyMinutes = max(selectedMinutes * 4, selectedMinutes + 15)
+
+  // Update loop - now uses GraphDataInteractor for historical data
   LaunchedEffect(usedGroups, selectedMinutes, mode, forceSlidingWindow, metricType) {
     while (true) {
       val computedPerGroup = withContext(Dispatchers.Default) {
@@ -97,42 +108,30 @@ fun MultiPlayerMetricLineChart(
           PlayerCacheInteractor.getGroupCards { pc -> spec.filter(pc) }
         }
 
-        val bucketSize = 1000L // 1 second resolution
-        val windowStart = now - selectedMinutes * 60_000L
-        val nowBucketStart = (now / bucketSize) * bucketSize
-        val totalBuckets = selectedMinutes * 60
+         val bucketSize = 1000L
+         val windowStart = now - historyMinutes * 60_000L
+         val nowBucketStart = (now / bucketSize) * bucketSize
+         val totalBuckets = historyMinutes * 60
 
-        // Generate X axis timestamps (descending from now)
         val bucketTimestamps = (totalBuckets - 1 downTo 0).map { i -> nowBucketStart - i * bucketSize }
 
-        val useSliding = forceSlidingWindow || (mode != GameMonitorInteractor.MonitorModes.REPLAY)
-
-        groupCards.map { cards ->
+         groupCards.map { cards ->
           val buckets = mutableMapOf<Long, Long>()
+
+          // First, pull from GraphDataInteractor for historical data
           cards.forEach { card ->
-            // Select events based on metric type
-            val events: List<CombatEvent> = when (metricType) {
-              GraphMetricType.DAMAGE -> card.recentDamageEvents
-              GraphMetricType.HEALING -> card.recentHealEvents
-              GraphMetricType.CC -> card.recentDebuffAppliedEvents
-            }
+             val graphData = GraphDataInteractor.getAggregatedData(
+               playerName = card.name,
+               metricType = metricType,
+               startTimeMs = windowStart,
+               endTimeMs = now
+             )
 
-            events.forEach { e ->
-              if (!useSliding || e.timestamp >= windowStart) {
-                val bucketStart = (e.timestamp / bucketSize) * bucketSize
-
-                val amount = when (metricType) {
-                  GraphMetricType.DAMAGE -> (e as? DamageEvent)?.damage?.toLong() ?: 0L
-                  GraphMetricType.HEALING -> (e as? HealEvent)?.amount?.toLong() ?: 0L
-                  GraphMetricType.CC -> 1L // Count
-                }
-
-                buckets[bucketStart] = (buckets[bucketStart] ?: 0L) + amount
-              }
+            graphData.forEach { (ts, value) ->
+              buckets[ts] = (buckets[ts] ?: 0L) + value
             }
           }
 
-          // Map back to the generated timestamp list
           bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
         }
       }
@@ -146,6 +145,10 @@ fun MultiPlayerMetricLineChart(
 
   Column(modifier = modifier) {
     var isHovered by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isHovered) {
+      dragLock.value = isHovered
+    }
 
     Box(
       modifier = Modifier
@@ -165,8 +168,6 @@ fun MultiPlayerMetricLineChart(
         val timestamps = remember(samplesPerGroup) { samplesPerGroup.first().map { it.timestamp } }
         val count = timestamps.size
 
-        // X axis is 0..count-1
-        val minX = 0f
         val maxX = (count - 1).toFloat().coerceAtLeast(1f)
 
         val rawSeries = remember(samplesPerGroup) {
@@ -186,14 +187,71 @@ fun MultiPlayerMetricLineChart(
           max(maxVal.toFloat(), 10f) * 1.1f
         }
 
-        XYGraph<Float, Float>(
-          xAxisModel = rememberFloatLinearAxisModel(
-            range = minX..maxX,
-            minViewExtent = maxX, // Show whole range
-            maxViewExtent = maxX,
-            minimumMajorTickSpacing = 80.dp, // Tweakable
-            minorTickCount = 0
-          ),
+        // Keep the selected duration visible while allowing the loaded history to be dragged.
+        val viewportWidth = (selectedMinutes * 60 - 1).toFloat().coerceAtLeast(1f)
+          .coerceAtMost(maxX)
+        val latestStartX = (maxX - viewportWidth).coerceAtLeast(0f)
+        val visibleStartX = remember(viewportOffset, maxX, viewportWidth) {
+          (if (viewportOffset.isFinite()) viewportOffset else latestStartX)
+            .coerceIn(0f, latestStartX)
+        }
+
+        val trendLines: List<List<DefaultPoint<Float, Float>>?> = remember(dataSeries, maxY) {
+          dataSeries.map { series: List<DefaultPoint<Float, Float>> ->
+            createTrendLine(series, maxY)
+          }
+        }
+        val visibleEndX = remember(visibleStartX, maxX, viewportWidth) {
+          (visibleStartX + viewportWidth).coerceAtMost(maxX)
+        }
+
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(maxX, viewportWidth) {
+              awaitPointerEventScope {
+                  var dragging = false
+                  var lastX = 0f
+                  var dragStartOffset = 0f
+                 while (true) {
+                   val event = awaitPointerEvent()
+                   when (event.type) {
+                     PointerEventType.Press -> {
+                        dragging = true
+                        lastX = event.changes.first().position.x
+                        dragStartOffset = visibleStartX
+                       dragLock.value = true
+                     }
+                    PointerEventType.Release -> {
+                      dragging = false
+                      dragLock.value = false
+                    }
+                    PointerEventType.Move -> {
+                      if (dragging && event.changes.any { it.pressed }) {
+                          val currentX = event.changes.first().position.x
+                          val deltaX = currentX - lastX
+                          lastX = currentX
+                         if (size.width > 0 && viewportWidth > 0f) {
+                           val pixelsPerUnit = size.width / viewportWidth
+                           dragStartOffset = (dragStartOffset - deltaX / pixelsPerUnit)
+                             .coerceIn(0f, latestStartX)
+                           viewportOffset = dragStartOffset
+                         }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+        ) {
+          XYGraph<Float, Float>(
+            xAxisModel = rememberFloatLinearAxisModel(
+              range = visibleStartX..visibleEndX,
+              minViewExtent = (visibleEndX - visibleStartX),
+              maxViewExtent = (visibleEndX - visibleStartX),
+              minimumMajorTickSpacing = 80.dp,
+              minorTickCount = 0
+            ),
           yAxisModel = rememberFloatLinearAxisModel(
             range = 0f..maxY,
             minimumMajorTickSpacing = 50.dp,
@@ -223,7 +281,7 @@ fun MultiPlayerMetricLineChart(
                 alpha = 1.0f
               ),
               // FIX: Explicitly specifying generic types to help type inference
-              areaBaseline = ConstantLine<Float, Float>(0f)
+              areaBaseline = ConstantLine(0f)
             )
             LinePlot2<Float, Float>(
               data = series,
@@ -233,63 +291,17 @@ fun MultiPlayerMetricLineChart(
                 alpha = 0.95f
               )
             )
-            findTwoHighestPeaks(series)?.let { (peak1, peak2) ->
-              val thresholdY = maxY / 3f
-
-              if (peak1.value > thresholdY && peak2.value > thresholdY) {
-                // Calculate slope
-                val slope = (peak2.value - peak1.value) / (peak2.index - peak1.index)
-
-                // Calculate angle in degrees
-                val angleRadians = kotlin.math.atan(slope)
-                val angleDegrees = kotlin.math.abs(Math.toDegrees(angleRadians.toDouble()))
-
-                // Only render if angle is less than 40 degrees
-                if (angleDegrees < 40.0) {
-                  // Extend line to graph boundaries
-                  var leftX = 0f
-                  var leftY = peak1.value - (peak1.index * slope)
-
-                  var rightX = series.lastIndex.toFloat()
-                  var rightY = peak1.value + ((series.lastIndex - peak1.index) * slope)
-
-                  // Find leftmost safe point
-                  for (i in 0 until peak1.index) {
-                    val projectedY = peak1.value - ((peak1.index - i) * slope)
-                    if (projectedY <= series[i].y) {
-                      leftX = i.toFloat()
-                      leftY = projectedY
-                      break
-                    }
-                  }
-
-                  // Find rightmost safe point
-                  for (i in series.lastIndex downTo peak2.index + 1) {
-                    val projectedY = peak2.value + ((i - peak2.index) * slope)
-                    if (projectedY <= series[i].y) {
-                      rightX = i.toFloat()
-                      rightY = projectedY
-                      break
-                    }
-                  }
-
-                  val trendLine = listOf(
-                    DefaultPoint(leftX, leftY),
-                    DefaultPoint(rightX, rightY)
-                  )
-
-                  LinePlot2<Float, Float>(
-                    data = trendLine,
-                    lineStyle = LineStyle(
-                      brush = SolidColor(Color.White),
-                      strokeWidth = 3.dp,
-                      alpha = 0.90f,
-                      pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 5f), 0f)
-                    )
-                  )
-                }
-              }
-            }
+             trendLines.getOrNull(idx)?.let { trendLine: List<DefaultPoint<Float, Float>> ->
+               LinePlot2<Float, Float>(
+                 data = trendLine,
+                 lineStyle = LineStyle(
+                   brush = SolidColor(Color.White),
+                   strokeWidth = 3.dp,
+                   alpha = 0.90f,
+                   pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 5f), 0f)
+                 )
+               )
+             }
           }
         }
 
@@ -346,38 +358,76 @@ fun MultiPlayerMetricLineChart(
   }
 }
 
-private fun findTwoHighestPeaks(series: List<DefaultPoint<Float, Float>>): Pair<Peak, Peak>? {
+}
+
+private fun findTwoHighestPeaks(series: List<DefaultPoint<Float, Float>>): PeakPair? {
   if (series.size < 3) return null
 
-  // Find local maxima (peaks)
-  val peaks = mutableListOf<Peak>()
-  for (i in 1 until series.size - 1) {
-    val prev = series[i - 1].y
-    val curr = series[i].y
-    val next = series[i + 1].y
+  val peaks = series.mapIndexedNotNull { index, point ->
+    if (index == 0 || index == series.lastIndex) return@mapIndexedNotNull null
+    val previous = series[index - 1].y
+    val next = series[index + 1].y
+    if (point.y > 0f && point.y > previous && point.y > next) {
+      Peak(index, point.y)
+    } else null
+  }
 
-    if (curr > prev && curr > next && curr > 0f) {
-      peaks.add(Peak(i, curr))
+  val first = peaks.maxByOrNull { it.value } ?: return null
+  val second = peaks
+    .asSequence()
+    .filter { kotlin.math.abs(it.index - first.index) >= 3 }
+    .maxByOrNull { it.value }
+    ?: return null
+
+  return if (first.index < second.index) {
+    PeakPair(first, second)
+  } else {
+    PeakPair(second, first)
+  }
+}
+
+private fun createTrendLine(
+  series: List<DefaultPoint<Float, Float>>,
+  maxY: Float
+): List<DefaultPoint<Float, Float>>? {
+  val peaks = findTwoHighestPeaks(series) ?: return null
+  val peak1 = peaks.left
+  val peak2 = peaks.right
+  val thresholdY = maxY / 3f
+  if (peak1.value <= thresholdY || peak2.value <= thresholdY) return null
+
+  val slope = (peak2.value - peak1.value) / (peak2.index - peak1.index)
+  val angleDegrees = kotlin.math.abs(
+    Math.toDegrees(kotlin.math.atan(slope).toDouble())
+  )
+  if (angleDegrees >= 40.0) return null
+
+  var leftX = 0f
+  var leftY = peak1.value - peak1.index * slope
+  var rightX = series.lastIndex.toFloat()
+  var rightY = peak1.value + (series.lastIndex - peak1.index) * slope
+
+  for (i in 0 until peak1.index) {
+    val projectedY = peak1.value - (peak1.index - i) * slope
+    if (projectedY <= series[i].y) {
+      leftX = i.toFloat()
+      leftY = projectedY
+      break
     }
   }
 
-  if (peaks.size < 2) return null
-
-  // Sort by value descending
-  val sortedPeaks = peaks.sortedByDescending { it.value }
-
-  // Use a smaller minimum separation (2-3 indices is enough to avoid adjacent points)
-  val minSeparation = 3
-
-  // Find the two highest peaks that are sufficiently separated
-  val peak1 = sortedPeaks[0]
-  val peak2 = sortedPeaks.drop(1).firstOrNull { kotlin.math.abs(it.index - peak1.index) >= minSeparation } ?: return null
-
-  // Return in chronological order (left to right)
-  return if (peak1.index < peak2.index) {
-    Pair(peak1, peak2)
-  } else {
-    Pair(peak2, peak1)
+  for (i in series.lastIndex downTo peak2.index + 1) {
+    val projectedY = peak2.value + (i - peak2.index) * slope
+    if (projectedY <= series[i].y) {
+      rightX = i.toFloat()
+      rightY = projectedY
+      break
+    }
   }
+
+  return listOf(
+    DefaultPoint(leftX, leftY),
+    DefaultPoint(rightX, rightY)
+  )
 }
 
