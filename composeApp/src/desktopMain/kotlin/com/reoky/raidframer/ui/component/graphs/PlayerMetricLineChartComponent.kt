@@ -20,6 +20,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.unit.dp
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.GraphDataInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
@@ -38,13 +39,11 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.graphs_no_recent_data
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
 private data class TimeSample(val timestamp: Long, val valueSum: Long)
-private data class Peak(val index: Int, val value: Float) // used for the white line
+private data class Peak(val index: Int, val value: Float)
 private data class PeakPair(val left: Peak, val right: Peak)
 
 data class GroupSpec(
@@ -71,6 +70,24 @@ private fun simpleMovingAverage(series: List<DefaultPoint<Float, Float>>, window
   }
 }
 
+private fun formatLabel(seconds: Long): String {
+  return when {
+    seconds < 0 -> ""
+    seconds == 0L -> "0"
+    seconds < 60 -> "${seconds}s"
+    seconds < 3600 -> {
+      val m = seconds / 60
+      val s = seconds % 60
+      if (s > 0) "${m}m${s}s" else "${m}m"
+    }
+    else -> {
+      val h = seconds / 3600
+      val m = (seconds % 3600) / 60
+      if (m > 0) "${h}h${m}m" else "${h}h"
+    }
+  }
+}
+
 @OptIn(ExperimentalKoalaPlotApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MultiPlayerMetricLineChart(
@@ -83,65 +100,88 @@ fun MultiPlayerMetricLineChart(
   smoothingWindow: Int = 3,
   modifier: Modifier = Modifier
 ) {
-  // clamp groups to 1..3
   val usedGroups = remember(groups) {
     groups.take(3).ifEmpty {
       listOf(GroupSpec("All", { true }, Color(0xFFEF5350)))
     }
   }
 
+  val stableGroupKey = remember(usedGroups.map { Pair(it.name, it.color) }) {
+    usedGroups.map { Pair(it.name, it.color) }
+  }
+
   var selectedMinutes by remember(initialMinutesWindow) { mutableStateOf(initialMinutesWindow) }
   var samplesPerGroup by remember { mutableStateOf<List<List<TimeSample>>>(emptyList()) }
-  var viewportOffset by remember(selectedMinutes) { mutableStateOf(Float.POSITIVE_INFINITY) }
+  var viewportOffset by remember { mutableStateOf(Float.POSITIVE_INFINITY) }
+  var isDragging by remember { mutableStateOf(false) }
   val dragLock = LocalDragLock.current
 
-  // Keep a bounded amount of history so the selected window can scroll without
-  // forcing the chart to render tens of thousands of points every second.
-  val historyMinutes = max(selectedMinutes * 4, selectedMinutes + 15)
+  val historyMinutes = max(selectedMinutes * 3, selectedMinutes + 10)
 
-  // Update loop - now uses GraphDataInteractor for historical data
-  LaunchedEffect(usedGroups, selectedMinutes, mode, forceSlidingWindow, metricType) {
+  val displayBucketSizeMs = remember(selectedMinutes) {
+    when {
+      selectedMinutes <= 1 -> 1000L
+      selectedMinutes <= 5 -> 2000L
+      selectedMinutes <= 15 -> 5000L
+      else -> 10000L
+    }
+  }
+
+  val labelIncrementSec = remember(selectedMinutes) {
+    when {
+      selectedMinutes <= 1 -> 10L
+      selectedMinutes <= 5 -> 30L
+      selectedMinutes <= 15 -> 60L
+      else -> 300L
+    }
+  }
+
+  val tickIncrementIndices = remember(labelIncrementSec, displayBucketSizeMs) {
+    max(1f, (labelIncrementSec * 1000L / displayBucketSizeMs).toFloat())
+  }
+
+  LaunchedEffect(stableGroupKey, selectedMinutes, mode, forceSlidingWindow, metricType) {
+    val bucketSize = displayBucketSizeMs
     while (true) {
-      val computedPerGroup = withContext(Dispatchers.Default) {
-        val now = System.currentTimeMillis()
-        val groupCards = usedGroups.map { spec ->
-          PlayerCacheInteractor.getGroupCards { pc -> spec.filter(pc) }
-        }
-
-         val bucketSize = 1000L
-         val windowStart = now - historyMinutes * 60_000L
-         val nowBucketStart = (now / bucketSize) * bucketSize
-         val totalBuckets = historyMinutes * 60
-
-        val bucketTimestamps = (totalBuckets - 1 downTo 0).map { i -> nowBucketStart - i * bucketSize }
-
-         groupCards.map { cards ->
-          val buckets = mutableMapOf<Long, Long>()
-
-          // First, pull from GraphDataInteractor for historical data
-          cards.forEach { card ->
-             val graphData = GraphDataInteractor.getAggregatedData(
-               playerName = card.name,
-               metricType = metricType,
-               startTimeMs = windowStart,
-               endTimeMs = now
-             )
-
-            graphData.forEach { (ts, value) ->
-              buckets[ts] = (buckets[ts] ?: 0L) + value
-            }
+      if (!isDragging) {
+        val computedPerGroup = withContext(Dispatchers.Default) {
+          val now = System.currentTimeMillis()
+          val groupCards = usedGroups.map { spec ->
+            PlayerCacheInteractor.getGroupCards { pc -> spec.filter(pc) }
           }
+          val windowStart = now - historyMinutes * 60_000L
+          val nowBucketStart = (now / bucketSize) * bucketSize
+          val totalBuckets = (historyMinutes * 60_000L) / bucketSize
+          val bucketTimestamps = (totalBuckets - 1 downTo 0).map { i -> nowBucketStart - i * bucketSize }
 
-          bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
+          groupCards.map { cards ->
+            val buckets = mutableMapOf<Long, Long>()
+            cards.forEach { card ->
+              val rawGraphData = GraphDataInteractor.getAggregatedData(
+                playerName = card.name,
+                metricType = metricType,
+                startTimeMs = windowStart,
+                endTimeMs = now
+              )
+              for ((ts, value) in rawGraphData) {
+                val aggTs = (ts / bucketSize) * bucketSize
+                buckets[aggTs] = (buckets[aggTs] ?: 0L) + value
+              }
+            }
+            bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
+          }
         }
+        samplesPerGroup = computedPerGroup
       }
-
-      samplesPerGroup = computedPerGroup
       delay(1000L)
     }
   }
 
-  val timeFmt = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
+  LaunchedEffect(selectedMinutes) {
+    viewportOffset = Float.POSITIVE_INFINITY
+  }
+
+  val sessionStart by remember { derivedStateOf { RFConfig.state.value.lastSessionStart } }
 
   Column(modifier = modifier) {
     var isHovered by remember { mutableStateOf(false) }
@@ -187,7 +227,6 @@ fun MultiPlayerMetricLineChart(
           max(maxVal.toFloat(), 10f) * 1.1f
         }
 
-        // Keep the selected duration visible while allowing the loaded history to be dragged.
         val viewportWidth = (selectedMinutes * 60 - 1).toFloat().coerceAtLeast(1f)
           .coerceAtMost(maxX)
         val latestStartX = (maxX - viewportWidth).coerceAtLeast(0f)
@@ -208,35 +247,36 @@ fun MultiPlayerMetricLineChart(
         Box(
           modifier = Modifier
             .fillMaxSize()
-            .pointerInput(maxX, viewportWidth) {
+            .pointerInput(maxX, viewportWidth, latestStartX) {
               awaitPointerEventScope {
-                  var dragging = false
-                  var lastX = 0f
-                  var dragStartOffset = 0f
-                 while (true) {
-                   val event = awaitPointerEvent()
-                   when (event.type) {
-                     PointerEventType.Press -> {
-                        dragging = true
-                        lastX = event.changes.first().position.x
-                        dragStartOffset = visibleStartX
-                       dragLock.value = true
-                     }
+                var dragging = false
+                var lastX = 0f
+                var dragStartOffset = 0f
+                while (true) {
+                  val event = awaitPointerEvent()
+                  when (event.type) {
+                    PointerEventType.Press -> {
+                      dragging = true
+                      isDragging = true
+                      lastX = event.changes.first().position.x
+                      dragStartOffset = visibleStartX
+                      dragLock.value = true
+                    }
                     PointerEventType.Release -> {
                       dragging = false
-                      dragLock.value = false
+                      isDragging = false
                     }
                     PointerEventType.Move -> {
                       if (dragging && event.changes.any { it.pressed }) {
-                          val currentX = event.changes.first().position.x
-                          val deltaX = currentX - lastX
-                          lastX = currentX
-                         if (size.width > 0 && viewportWidth > 0f) {
-                           val pixelsPerUnit = size.width / viewportWidth
-                           dragStartOffset = (dragStartOffset - deltaX / pixelsPerUnit)
-                             .coerceIn(0f, latestStartX)
-                           viewportOffset = dragStartOffset
-                         }
+                        val currentX = event.changes.first().position.x
+                        val deltaX = currentX - lastX
+                        lastX = currentX
+                        if (size.width > 0 && viewportWidth > 0f) {
+                          val pixelsPerUnit = size.width / viewportWidth
+                          dragStartOffset = (dragStartOffset - deltaX / pixelsPerUnit)
+                            .coerceIn(0f, latestStartX)
+                          viewportOffset = dragStartOffset
+                        }
                       }
                     }
                   }
@@ -249,7 +289,8 @@ fun MultiPlayerMetricLineChart(
               range = visibleStartX..visibleEndX,
               minViewExtent = (visibleEndX - visibleStartX),
               maxViewExtent = (visibleEndX - visibleStartX),
-              minimumMajorTickSpacing = 80.dp,
+              minimumMajorTickIncrement = tickIncrementIndices,
+              minimumMajorTickSpacing = 60.dp,
               minorTickCount = 0
             ),
           yAxisModel = rememberFloatLinearAxisModel(
@@ -261,10 +302,12 @@ fun MultiPlayerMetricLineChart(
           verticalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.2f),
           xAxisStyle = rememberAxisStyle(color = Color.White, tickPosition = TickPosition.Outside),
           yAxisStyle = rememberAxisStyle(color = Color.White, tickPosition = TickPosition.Outside),
-          // FIX: Explicitly mark lambdas as @Composable to resolve overload ambiguity
           xAxisLabels = @Composable { xVal ->
             val idx = xVal.toInt()
-            val label = if (idx in 0 until count) timeFmt.format(Date(timestamps[idx])) else ""
+            val label = if (idx in 0 until count) {
+              val relSecs = (timestamps[idx] - sessionStart) / 1000L
+              if (relSecs < 0) "" else formatLabel((relSecs / labelIncrementSec) * labelIncrementSec)
+            } else ""
             Text(text = label, style = typography.caption, color = Color.LightGray)
           },
           yAxisLabels = @Composable { yVal ->
@@ -280,7 +323,6 @@ fun MultiPlayerMetricLineChart(
                 brush = Brush.verticalGradient(listOf(color.copy(alpha = 0.35f), Color.Transparent)),
                 alpha = 1.0f
               ),
-              // FIX: Explicitly specifying generic types to help type inference
               areaBaseline = ConstantLine(0f)
             )
             LinePlot2<Float, Float>(
@@ -291,21 +333,20 @@ fun MultiPlayerMetricLineChart(
                 alpha = 0.95f
               )
             )
-             trendLines.getOrNull(idx)?.let { trendLine: List<DefaultPoint<Float, Float>> ->
-               LinePlot2<Float, Float>(
-                 data = trendLine,
-                 lineStyle = LineStyle(
-                   brush = SolidColor(Color.White),
-                   strokeWidth = 3.dp,
-                   alpha = 0.90f,
-                   pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 5f), 0f)
-                 )
-               )
-             }
+             trendLines.getOrNull(idx)?.let { trendLine ->
+                LinePlot2<Float, Float>(
+                  data = trendLine,
+                  lineStyle = LineStyle(
+                    brush = SolidColor(Color.White),
+                    strokeWidth = 3.dp,
+                    alpha = 0.90f,
+                    pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 5f), 0f)
+                  )
+                )
+              }
           }
         }
 
-        // Time-frame selection buttons
         val buttonsAlpha by animateFloatAsState(
           targetValue = if (isHovered) 1f else 0f,
           animationSpec = tween(durationMillis = 250)
@@ -430,4 +471,3 @@ private fun createTrendLine(
     DefaultPoint(rightX, rightY)
   )
 }
-
