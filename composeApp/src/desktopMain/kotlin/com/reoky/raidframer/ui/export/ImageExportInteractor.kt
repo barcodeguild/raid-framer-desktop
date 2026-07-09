@@ -84,9 +84,9 @@ object ImageExportInteractor {
   private const val TITLE_CARD_HEIGHT = 90
 
   private val CARD_BACKGROUND = Color(0, 0, 0)
-  private val CARD_BACKGROUND_TRANSPARENT = Color(0, 0, 0, 110)
+  private val CARD_BACKGROUND_TRANSPARENT = Color(0, 0, 0, 140)
   private val BORDER_COLOR = Color(55, 55, 70)
-  private val BORDER_COLOR_TRANSPARENT = Color(55, 55, 70, 150)
+  private val BORDER_COLOR_TRANSPARENT = Color(55, 55, 70, 160)
 
   private fun toAwtColor(composeColor: ComposeColor): Color {
     return Color(composeColor.red, composeColor.green, composeColor.blue, composeColor.alpha)
