@@ -114,6 +114,7 @@ fun MultiPlayerMetricLineChart(
   var samplesPerGroup by remember { mutableStateOf<List<List<TimeSample>>>(emptyList()) }
   var viewportOffset by remember { mutableStateOf(Float.POSITIVE_INFINITY) }
   var isDragging by remember { mutableStateOf(false) }
+  var latestStartX by remember { mutableStateOf(0f) }
   val dragLock = LocalDragLock.current
 
   val historyMinutes = max(selectedMinutes * 3, selectedMinutes + 10)
@@ -143,7 +144,8 @@ fun MultiPlayerMetricLineChart(
   LaunchedEffect(stableGroupKey, selectedMinutes, mode, forceSlidingWindow, metricType) {
     val bucketSize = displayBucketSizeMs
     while (true) {
-      if (!isDragging) {
+      val atLatest = !isDragging && (!viewportOffset.isFinite() || viewportOffset >= latestStartX - 1f)
+      if (atLatest) {
         val computedPerGroup = withContext(Dispatchers.Default) {
           val now = System.currentTimeMillis()
           val groupCards = usedGroups.map { spec ->
@@ -229,7 +231,7 @@ fun MultiPlayerMetricLineChart(
 
         val viewportWidth = (selectedMinutes * 60 - 1).toFloat().coerceAtLeast(1f)
           .coerceAtMost(maxX)
-        val latestStartX = (maxX - viewportWidth).coerceAtLeast(0f)
+        latestStartX = (maxX - viewportWidth).coerceAtLeast(0f)
         val visibleStartX = remember(viewportOffset, maxX, viewportWidth) {
           (if (viewportOffset.isFinite()) viewportOffset else latestStartX)
             .coerceIn(0f, latestStartX)
