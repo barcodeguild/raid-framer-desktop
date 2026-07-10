@@ -228,8 +228,8 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="summary_top_kills_haranya">하라니아 처치 순위</string>
     <string name="summary_top_kills_nuia">누이안 처치 순위</string>
     <string name="summary_top_kills_pirate">해적 처치 순위</string>
-    <string name="summary_top_damage_taken">🔥 받은 피해 순위 🔥</string>
-    <string name="summary_top_heals_received">💉 받은 힐 순위 💉</string>
+    <string name="summary_top_damage_taken">받은 피해 순위</string>
+    <string name="summary_top_heals_received">받은 힐 순위</string>
     <string name="summary_top_potion_drinkers">물약 도전자 순위</string>
     <string name="summary_top_glider_gamers">글라이더 도전자 순위</string>
     <string name="summary_most_item_usages">아이템 사용 순위</string>

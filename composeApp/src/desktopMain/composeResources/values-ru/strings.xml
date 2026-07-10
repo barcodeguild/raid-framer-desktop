@@ -228,8 +228,8 @@
     <string name="summary_top_kills_haranya">Топ убийств Харанья</string>
     <string name="summary_top_kills_nuia">Топ убийств Нуиан</string>
     <string name="summary_top_kills_pirate">Топ убийств Пиратов</string>
-    <string name="summary_top_damage_taken">🔥 Топ полученного урона 🔥</string>
-    <string name="summary_top_heals_received">💉 Топ полученного исцеления 💉</string>
+    <string name="summary_top_damage_taken">Топ полученного урона</string>
+    <string name="summary_top_heals_received">Топ полученного исцеления</string>
     <string name="summary_top_potion_drinkers">Топ любителей зелий</string>
     <string name="summary_top_glider_gamers">Топ планерщиков</string>
     <string name="summary_most_item_usages">Больше всего использований предметов</string>
