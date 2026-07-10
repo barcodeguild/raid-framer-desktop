@@ -2,6 +2,7 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -14,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.RFGraphColor
@@ -506,6 +509,7 @@ private fun SectionCard(
 fun RowItemWithTime(timestamp: Long, content: AnnotatedString.Builder.() -> Unit) {
   val interactionSource = remember { MutableInteractionSource() }
   val isHovered by interactionSource.collectIsHoveredAsState()
+  val fullText = remember { buildAnnotatedString { content() } }
 
   Row(
     modifier = Modifier
@@ -524,11 +528,33 @@ fun RowItemWithTime(timestamp: Long, content: AnnotatedString.Builder.() -> Unit
       modifier = Modifier.width(50.dp)
     )
     Text(
-      text = buildAnnotatedString { content() },
+      text = fullText,
       fontSize = 12.sp,
       maxLines = 1,
-      overflow = TextOverflow.Ellipsis
+      overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.weight(1f)
     )
+  }
+
+  if (isHovered) {
+    Popup(
+      alignment = Alignment.TopStart,
+      offset = androidx.compose.ui.unit.IntOffset(x = 20, y = 24)
+    ) {
+      Surface(
+        shape = RoundedCornerShape(4.dp),
+        elevation = 4.dp,
+        color = Color.Black.copy(alpha = 0.9f),
+        border = BorderStroke(1.dp, Color.Gray)
+      ) {
+        Text(
+          text = fullText,
+          color = Color.White,
+          modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+          fontSize = 11.sp
+        )
+      }
+    }
   }
 }
 
