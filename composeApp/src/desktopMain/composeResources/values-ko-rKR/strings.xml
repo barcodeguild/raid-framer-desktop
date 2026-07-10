@@ -133,6 +133,9 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="player_card_recent_items">아이템 스킬 사용</string>
     <string name="player_card_recent_buffs">버프 적용</string>
     <string name="player_card_recent_debuffs">디버프 적용</string>
+    <string name="player_card_damage_by_skill">스킬별 피해</string>
+    <string name="player_card_heals_by_skill">스킬별 치유</string>
+    <string name="player_card_cc_by_skill">스킬별 제어</string>
     <string name="player_card_session_totals">세션 총계</string>
     <string name="player_card_lifetime_totals">생애 총계</string>
 

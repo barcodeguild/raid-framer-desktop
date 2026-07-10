@@ -133,6 +133,9 @@
     <string name="player_card_recent_items">物品技能使用</string>
     <string name="player_card_recent_buffs">应用的增益</string>
     <string name="player_card_recent_debuffs">应用的减益</string>
+    <string name="player_card_damage_by_skill">技能伤害分布</string>
+    <string name="player_card_heals_by_skill">技能治疗分布</string>
+    <string name="player_card_cc_by_skill">技能控制分布</string>
     <string name="player_card_session_totals">会话总计</string>
     <string name="player_card_lifetime_totals">终身总计</string>
 

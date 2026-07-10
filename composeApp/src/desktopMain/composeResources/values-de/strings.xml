@@ -133,6 +133,9 @@ Bitte schließen Sie das Spiel, bevor Sie fortfahren, andernfalls bleiben Dateie
     <string name="player_card_recent_items">Gegenstandsfähigkeitsbenutzungen</string>
     <string name="player_card_recent_buffs">Angewendete Buffs</string>
     <string name="player_card_recent_debuffs">Angewendete Debuffs</string>
+    <string name="player_card_damage_by_skill">Schaden nach Fähigkeit</string>
+    <string name="player_card_heals_by_skill">Heilung nach Fähigkeit</string>
+    <string name="player_card_cc_by_skill">Kontrolle nach Fähigkeit</string>
     <string name="player_card_session_totals">Sitzungsgesamtwerte</string>
     <string name="player_card_lifetime_totals">Lebensgesamtwerte</string>
 

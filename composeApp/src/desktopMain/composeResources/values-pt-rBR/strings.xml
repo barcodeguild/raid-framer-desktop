@@ -133,6 +133,9 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="player_card_recent_items">Usos de Habilidade de Item</string>
     <string name="player_card_recent_buffs">Buffs Aplicados</string>
     <string name="player_card_recent_debuffs">Debuffs Aplicados</string>
+    <string name="player_card_damage_by_skill">Dano por Habilidade</string>
+    <string name="player_card_heals_by_skill">Cura por Habilidade</string>
+    <string name="player_card_cc_by_skill">CC por Habilidade</string>
     <string name="player_card_session_totals">Totais da Sessão</string>
     <string name="player_card_lifetime_totals">Totais Vitalícios</string>
 
