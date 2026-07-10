@@ -58,7 +58,11 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
     ),
     recentHealEvents = (this.recentHealEvents + event).takeLast(200),
     sessionHealTotal = this.sessionHealTotal + event.amount,
-    sessionOdeHealsTotal = if (isOde) this.sessionOdeHealsTotal + event.amount else this.sessionOdeHealsTotal
+    sessionOdeHealsTotal = if (isOde) this.sessionOdeHealsTotal + event.amount else this.sessionOdeHealsTotal,
+    sessionSpellHealMap = run {
+      val spellKey = event.spell.ifBlank { "Unknown" }
+      this.sessionSpellHealMap + (spellKey to ((this.sessionSpellHealMap[spellKey] ?: 0L) + event.amount))
+    }
   )
 }
 
@@ -208,6 +212,12 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionSilenceTotal = if (isSilence) sessionSilenceTotal + 1 else sessionSilenceTotal,
     sessionGliderTotal = if (isGlider) sessionGliderTotal + 1 else sessionGliderTotal,
     sessionCCTotal = if (isCC) this.sessionCCTotal + 1 else this.sessionCCTotal,
+    sessionSpellCCMap = if (isCC) {
+      val debuffKey = event.debuff.ifBlank { "Unknown" }
+      this.sessionSpellCCMap + (debuffKey to ((this.sessionSpellCCMap[debuffKey] ?: 0) + 1))
+    } else {
+      this.sessionSpellCCMap
+    },
     lastGliderUse = if (isGlider) event.timestamp else this.lastGliderUse, // update glider use timestamp if applicable
   )
 }

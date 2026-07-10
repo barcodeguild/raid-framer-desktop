@@ -133,6 +133,9 @@
     <string name="player_card_recent_items">Использование навыков предметов</string>
     <string name="player_card_recent_buffs">Примененные баффы</string>
     <string name="player_card_recent_debuffs">Примененные дебаффы</string>
+    <string name="player_card_damage_by_skill">Урон по навыкам</string>
+    <string name="player_card_heals_by_skill">Исцеление по навыкам</string>
+    <string name="player_card_cc_by_skill">Контроль по навыкам</string>
     <string name="player_card_session_totals">Итоги сессии</string>
     <string name="player_card_lifetime_totals">Итоги за все время</string>
 
@@ -225,8 +228,8 @@
     <string name="summary_top_kills_haranya">Топ убийств Харанья</string>
     <string name="summary_top_kills_nuia">Топ убийств Нуиан</string>
     <string name="summary_top_kills_pirate">Топ убийств Пиратов</string>
-    <string name="summary_top_damage_taken">🔥 Топ полученного урона 🔥</string>
-    <string name="summary_top_heals_received">💉 Топ полученного исцеления 💉</string>
+    <string name="summary_top_damage_taken">Топ полученного урона</string>
+    <string name="summary_top_heals_received">Топ полученного исцеления</string>
     <string name="summary_top_potion_drinkers">Топ любителей зелий</string>
     <string name="summary_top_glider_gamers">Топ планерщиков</string>
     <string name="summary_most_item_usages">Больше всего использований предметов</string>

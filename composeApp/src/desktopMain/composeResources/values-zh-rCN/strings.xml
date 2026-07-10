@@ -133,6 +133,9 @@
     <string name="player_card_recent_items">物品技能使用</string>
     <string name="player_card_recent_buffs">应用的增益</string>
     <string name="player_card_recent_debuffs">应用的减益</string>
+    <string name="player_card_damage_by_skill">技能伤害分布</string>
+    <string name="player_card_heals_by_skill">技能治疗分布</string>
+    <string name="player_card_cc_by_skill">技能控制分布</string>
     <string name="player_card_session_totals">会话总计</string>
     <string name="player_card_lifetime_totals">终身总计</string>
 
@@ -225,8 +228,8 @@
     <string name="summary_top_kills_haranya">哈拉尼亚击杀榜</string>
     <string name="summary_top_kills_nuia">努伊安击杀榜</string>
     <string name="summary_top_kills_pirate">海盗击杀榜</string>
-    <string name="summary_top_damage_taken">🔥 承受伤害榜 🔥</string>
-    <string name="summary_top_heals_received">💉 接受治疗榜 💉</string>
+    <string name="summary_top_damage_taken">承受伤害榜</string>
+    <string name="summary_top_heals_received">接受治疗榜</string>
     <string name="summary_top_potion_drinkers">药水达人榜</string>
     <string name="summary_top_glider_gamers">滑翔翼高手榜</string>
     <string name="summary_most_item_usages">物品使用榜</string>

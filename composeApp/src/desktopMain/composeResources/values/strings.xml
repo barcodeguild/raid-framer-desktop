@@ -133,6 +133,9 @@ Please close the game before continuing, otherwise files will be left over.</str
     <string name="player_card_recent_items">Item Skill Uses</string>
     <string name="player_card_recent_buffs">Buffs Applied</string>
     <string name="player_card_recent_debuffs">Debuffs Applied</string>
+    <string name="player_card_damage_by_skill">Damage by Skill</string>
+    <string name="player_card_heals_by_skill">Heals by Skill</string>
+    <string name="player_card_cc_by_skill">CC by Skill</string>
     <string name="player_card_session_totals">Session Totals</string>
     <string name="player_card_lifetime_totals">Lifetime Totals</string>
 
@@ -225,8 +228,8 @@ Please close the game before continuing, otherwise files will be left over.</str
     <string name="summary_top_kills_haranya">Top Kills Haranya</string>
     <string name="summary_top_kills_nuia">Top Kills Nuia</string>
     <string name="summary_top_kills_pirate">Top Kills Pirate</string>
-    <string name="summary_top_damage_taken">🔥 Top Damage Taken 🔥</string>
-    <string name="summary_top_heals_received">💉 Top Heals Received 💉</string>
+    <string name="summary_top_damage_taken">Top Damage Taken</string>
+    <string name="summary_top_heals_received">Top Heals Received</string>
     <string name="summary_top_potion_drinkers">Top Potion Drinkers</string>
     <string name="summary_top_glider_gamers">Top Glider Gamers</string>
     <string name="summary_most_item_usages">Most Item Usages</string>
