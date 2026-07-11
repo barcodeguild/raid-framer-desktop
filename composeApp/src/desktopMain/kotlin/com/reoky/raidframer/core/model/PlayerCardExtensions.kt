@@ -325,16 +325,18 @@ fun PlayerCard.hasPvPParticipation(): Boolean {
 
 /**
  * Compute a single "PvP performance score" summarizing how active a player was this session.
- * Placeholder algorithm (per friend request):
- *  +1 pt per 100k dmg or heals (combined)
- *  +1 pt per 10 cc points
- *  +1 pt per 10 charms, 10 distresses, 10 silences (stillnesses), or 10 songs (combined)
+ * Updated algorithm:
+ *  - Dmg/Heals: 1 point per 100k (e.g., 5.5M dmg = 55 points)
+ *  - CC: 0.1 point per CC point (e.g., 2000 CC = 200 points)
+ *  - Songs: 0.04 points per song (e.g., 2000 songs = 80 points)
+ *  - Charms: 1 point per charm (e.g., 100 charms = 100 points)
  */
 fun PlayerCard.pvpPerformancePoints(): Int {
   val damageAndHeals = (sessionDamageTotal + sessionHealTotal) / 100_000L
-  val ccPoints = sessionCCTotal / 10
-  val controlEffects = (sessionCharmTotal + sessionDistressTotal + sessionSilenceTotal + sessionSongsTotal) / 10
-  return (damageAndHeals + ccPoints + controlEffects).toInt()
+  val ccPoints = sessionCCTotal * 0.1
+  val songsPoints = sessionSongsTotal * 0.04
+  val charmsPoints = sessionCharmTotal * 1.0
+  return (damageAndHeals + ccPoints + songsPoints + charmsPoints).toInt()
 }
 
 /**
