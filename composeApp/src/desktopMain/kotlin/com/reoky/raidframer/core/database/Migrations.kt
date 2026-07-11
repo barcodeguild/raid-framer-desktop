@@ -227,3 +227,11 @@ val MIGRATION_24_25 = object : Migration(24, 25) {
   }
 }
 
+// added companionShowDebugInfo and companionShowDeathsPerMinute to ConfigEntity
+val MIGRATION_25_26 = object : Migration(25, 26) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN companionShowDebugInfo INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN companionShowDeathsPerMinute INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

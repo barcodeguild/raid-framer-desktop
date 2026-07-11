@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 25
+const val SCHEMA_VERSION = 26
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -71,8 +71,12 @@ data class ConfigEntity(
   val companionMarkSacDancers: Boolean = true,
   val companionMarkCharmedTargets: Boolean = true,
   val companionMarkSilencedTargets: Boolean = true,
-  val companionMarkDistressedTargets: Boolean = true
-  ,
+  val companionMarkDistressedTargets: Boolean = true,
+
+  // Companion debug and info display toggles 7/11/26
+  val companionShowDebugInfo: Boolean = false,
+  val companionShowDeathsPerMinute: Boolean = false,
+
   // Combat overlay column visibility toggles
   val combatShowDamageColumn: Boolean = true,
   val combatShowHealsColumn: Boolean = true,

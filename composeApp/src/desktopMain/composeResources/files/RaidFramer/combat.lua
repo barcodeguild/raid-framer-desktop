@@ -111,8 +111,15 @@ function RF.Combat.handleCombatMessage(...)
   -- if it's been a minute, reset the counter
   -- removes the need to call os.time() multiple times per event by using the ts from the previous event
   if (meta.timestamp - RF.Combat.EVENTS_PER_MINUTE_LAST_RESET) >= 60 then
-    local kbps = (RF.Combat.EVENTS_PER_MINUTE * 256) / 1024 -- assuming average event size of 256 bytes
-    RF:Log("[Performance] Combat event logging rate is about: " .. tostring(math.floor(kbps)) .. " KB/s)")
+    if RF.Config.SHOW_DEBUG_INFO then
+      local kbps = (RF.Combat.EVENTS_PER_MINUTE * 256) / 1024 -- assuming average event size of 256 bytes
+      RF:Log("[Performance] Combat event logging rate is about: " .. tostring(math.floor(kbps)) .. " KB/s)")
+    end
+
+    if RF.Config.SHOW_DEATHS_PER_MINUTE then
+      RF:Log("[Performance] Deaths per minute: " .. tostring(RF.Combat.DEATHS_PER_MINUTE))
+    end
+
     RF.Combat.EVENTS_PER_MINUTE_LAST_RESET = meta.timestamp -- move timestamp pointer to now
     RF.Combat.EVENTS_PER_MINUTE = 0 -- reset counter
     RF.Combat.DEATHS_PER_MINUTE = 0 -- reset death counter
