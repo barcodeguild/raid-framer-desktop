@@ -102,6 +102,10 @@ private enum class SortOrder(val indicator: String) {
   DESC("▼"), ASC("▲"), NONE("");
 }
 
+private val WellShape = RoundedCornerShape(8.dp)
+private val WellColor = RFColors.CardBackground.copy(alpha = 0.72f)
+private val WellBorder = RFColors.CardBorder
+
 // Selects which set of session totals the "Session" totals card should show.
 // CURRENT reads from the in-memory PlayerCard; everything else reads from
 // the player_session_totals table aggregated by the PlayerCacheInteractor.
@@ -240,8 +244,32 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             .padding(12.dp),
         )
 
-        // No longer looks good having a divider here
-        //Divider(color = RFColors.CardBorder, thickness = 1.dp)
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Divider(
+            modifier = Modifier.weight(1f),
+            color = RFColors.CardBorder,
+            thickness = 1.dp
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Box(
+            modifier = Modifier
+              .width(28.dp)
+              .height(2.dp)
+              .clip(RoundedCornerShape(1.dp))
+              .background(RFColors.AccentRed)
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Divider(
+            modifier = Modifier.weight(1f),
+            color = RFColors.CardBorder,
+            thickness = 1.dp
+          )
+        }
 
         card?.let { card ->
           Column(
@@ -256,10 +284,11 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             Row(
               modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.DarkGray.copy(alpha = 0.3f))
-                .padding(8.dp)
+                .padding(horizontal = 8.dp)
+                .clip(WellShape)
+                .background(WellColor)
+                .border(1.dp, WellBorder, WellShape)
+                .padding(12.dp)
                 .height(300.dp)
             ) {
               // Damage
@@ -321,16 +350,17 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Buffs, Items, K/D
             Row(
               modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.DarkGray.copy(alpha = 0.3f))
-                .padding(8.dp)
+                .padding(horizontal = 8.dp)
+                .clip(WellShape)
+                .background(WellColor)
+                .border(1.dp, WellBorder, WellShape)
+                .padding(12.dp)
                 .height(300.dp)
             ) {
               SortableEventListColumn(
@@ -482,12 +512,22 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             }
 
             // Player Details Section
-            PlayerDetailsSection(
-              card = card,
-              onLeadershipChange = { newLeadership ->
-                PlayerCacheInteractor.updatePlayerLeadershipFor(playerName, newLeadership)
-              }
-            )
+            Column(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .clip(WellShape)
+                .background(WellColor)
+                .border(1.dp, WellBorder, WellShape)
+                .padding(12.dp)
+            ) {
+              PlayerDetailsSection(
+                card = card,
+                onLeadershipChange = { newLeadership ->
+                  PlayerCacheInteractor.updatePlayerLeadershipFor(playerName, newLeadership)
+                }
+              )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -520,7 +560,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(modifier = Modifier.fillMaxWidth()) {
 
@@ -572,7 +612,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 }
               }
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
           }
         }
       }
@@ -591,9 +631,10 @@ private fun SectionCard(
 ) {
   Column(
     modifier = modifier
-      .padding(horizontal = 8.dp, vertical = 4.dp)
-      .clip(RoundedCornerShape(8.dp))
-      .background(Color.DarkGray.copy(alpha = 0.3f))
+      .padding(horizontal = 8.dp)
+      .clip(WellShape)
+      .background(WellColor)
+      .border(1.dp, WellBorder, WellShape)
       .padding(12.dp)
   ) {
     Row(
@@ -610,7 +651,7 @@ private fun SectionCard(
         text = title,
         color = RFColors.TextPrimary,
         fontWeight = FontWeight.Bold,
-        fontSize = 14.sp
+        fontSize = 13.sp
       )
     }
     content()
@@ -848,7 +889,10 @@ private fun SessionScopeDropdown(
       value = sessionScopeLabel(selected),
       onValueChange = {},
       readOnly = true,
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(48.dp),
+      singleLine = true,
       colors = TextFieldDefaults.textFieldColors(
         textColor = RFColors.TextPrimary,
         backgroundColor = Color(0xFF1E1E1E),
@@ -867,7 +911,7 @@ private fun SessionScopeDropdown(
       expanded = expanded,
       onDismissRequest = { expanded = false },
       modifier = Modifier
-        .fillMaxWidth()
+        .width(210.dp)
         .clip(RoundedCornerShape(8.dp))
         .background(RFColors.CardBackground)
         .border(1.dp, RFColors.CardBorder, RoundedCornerShape(8.dp))
@@ -904,25 +948,39 @@ private fun TotalsFiltersBar(
   onScopeChange: (SessionScope) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Row(
-    modifier = modifier
-      .padding(horizontal = 8.dp, vertical = 4.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.End
+  Surface(
+    modifier = modifier.padding(horizontal = 8.dp),
+    shape = WellShape,
+    color = WellColor,
+    border = BorderStroke(1.dp, WellBorder)
   ) {
-    Text(
-      text = stringResource(Res.string.player_card_totals_scope_label) + ":",
-      color = RFColors.TextSecondary,
-      fontSize = 12.sp,
-      fontWeight = FontWeight.SemiBold
-    )
-    Spacer(modifier = Modifier.width(8.dp))
-    // Constrain the dropdown so it doesn't try to span the full row.
-    SessionScopeDropdown(
-      selected = selectedScope,
-      onSelected = onScopeChange,
-      modifier = Modifier.width(220.dp)
-    )
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+      Column {
+        Text(
+          text = stringResource(Res.string.player_card_totals_scope_label),
+          color = RFColors.TextPrimary,
+          fontSize = 13.sp,
+          fontWeight = FontWeight.Bold
+        )
+        Text(
+          text = "Controls the session totals below",
+          color = RFColors.TextTertiary,
+          fontSize = 11.sp
+        )
+      }
+
+      SessionScopeDropdown(
+        selected = selectedScope,
+        onSelected = onScopeChange,
+        modifier = Modifier.width(210.dp)
+      )
+    }
   }
 }
 

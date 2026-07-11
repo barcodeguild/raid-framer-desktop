@@ -31,11 +31,6 @@ fun PlayerDetailsSection(card: PlayerCard, onLeadershipChange: (Int) -> Unit) {
   Column(
     modifier = Modifier
       .fillMaxWidth()
-      .padding(horizontal = 12.dp, vertical = 8.dp)
-      .background(
-        Color.DarkGray.copy(alpha = 0.3f),
-        shape = RoundedCornerShape(8.dp)
-      )
       .padding(12.dp)
   ) {
     Text(
