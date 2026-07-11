@@ -139,6 +139,14 @@ Bitte schließen Sie das Spiel, bevor Sie fortfahren, andernfalls bleiben Dateie
     <string name="player_card_session_totals">Sitzungsgesamtwerte</string>
     <string name="player_card_lifetime_totals">Lebensgesamtwerte</string>
 
+    <!-- Session scope dropdown -->
+    <string name="player_card_totals_scope_label">Ansicht</string>
+    <string name="player_card_session_scope_current">Aktuelle Sitzung</string>
+    <string name="player_card_session_scope_previous">Vorherige Sitzung</string>
+    <string name="player_card_session_scope_last_n">Letzte %1$d Sitzungen</string>
+    <string name="player_card_session_scope_all">Alle Sitzungen</string>
+    <string name="player_card_no_historical_data">Keine archivierten Sitzungen für diesen Spieler.</string>
+
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">Gesamtschaden</string>
     <string name="player_card_stat_healing">Gesamtheilung</string>

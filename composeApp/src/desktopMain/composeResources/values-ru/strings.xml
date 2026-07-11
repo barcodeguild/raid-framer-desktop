@@ -139,6 +139,14 @@
     <string name="player_card_session_totals">Итоги сессии</string>
     <string name="player_card_lifetime_totals">Итоги за все время</string>
 
+    <!-- Session scope dropdown -->
+    <string name="player_card_totals_scope_label">Показать</string>
+    <string name="player_card_session_scope_current">Текущая сессия</string>
+    <string name="player_card_session_scope_previous">Предыдущая сессия</string>
+    <string name="player_card_session_scope_last_n">Последние %1$d сессий</string>
+    <string name="player_card_session_scope_all">Все сессии</string>
+    <string name="player_card_no_historical_data">Для этого игрока нет архивных сессий.</string>
+
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">Общий урон</string>
     <string name="player_card_stat_healing">Общее исцеление</string>

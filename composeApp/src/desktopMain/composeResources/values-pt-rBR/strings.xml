@@ -139,6 +139,14 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="player_card_session_totals">Totais da Sessão</string>
     <string name="player_card_lifetime_totals">Totais Vitalícios</string>
 
+    <!-- Session scope dropdown -->
+    <string name="player_card_totals_scope_label">Visualizar</string>
+    <string name="player_card_session_scope_current">Sessão Atual</string>
+    <string name="player_card_session_scope_previous">Sessão Anterior</string>
+    <string name="player_card_session_scope_last_n">Últimas %1$d Sessões</string>
+    <string name="player_card_session_scope_all">Todas as Sessões</string>
+    <string name="player_card_no_historical_data">Nenhuma sessão arquivada para este jogador.</string>
+
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">Dano Total</string>
     <string name="player_card_stat_healing">Cura Total</string>

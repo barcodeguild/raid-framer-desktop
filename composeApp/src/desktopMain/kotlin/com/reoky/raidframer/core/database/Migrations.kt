@@ -188,3 +188,42 @@ val MIGRATION_23_24 = object : Migration(23, 24) {
   }
 }
 
+// added player_session_totals table to persist per-player session snapshots at the end of a recording
+// session. The PlayerCardOverlay uses these rows to render historical session totals ("Previous Session",
+// "Last N Sessions", "All Sessions"). Composite primary key (playerName, sessionStart) makes the archive
+// step idempotent if it runs twice for the same session.
+val MIGRATION_24_25 = object : Migration(24, 25) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare(
+      """
+      CREATE TABLE IF NOT EXISTS player_session_totals (
+        playerName TEXT NOT NULL,
+        sessionStart INTEGER NOT NULL,
+        sessionEnd INTEGER NOT NULL,
+        sessionType TEXT NOT NULL DEFAULT '',
+        sessionTitle TEXT NOT NULL DEFAULT '',
+        totalDamage INTEGER NOT NULL DEFAULT 0,
+        totalHealing INTEGER NOT NULL DEFAULT 0,
+        totalCC INTEGER NOT NULL DEFAULT 0,
+        totalBuffs INTEGER NOT NULL DEFAULT 0,
+        totalDebuffs INTEGER NOT NULL DEFAULT 0,
+        totalCharms INTEGER NOT NULL DEFAULT 0,
+        totalSongs INTEGER NOT NULL DEFAULT 0,
+        totalDistresses INTEGER NOT NULL DEFAULT 0,
+        totalSilences INTEGER NOT NULL DEFAULT 0,
+        totalGliderUses INTEGER NOT NULL DEFAULT 0,
+        totalItemSkills INTEGER NOT NULL DEFAULT 0,
+        totalPotions INTEGER NOT NULL DEFAULT 0,
+        totalKills INTEGER NOT NULL DEFAULT 0,
+        totalKillsKB INTEGER NOT NULL DEFAULT 0,
+        totalDeaths INTEGER NOT NULL DEFAULT 0,
+        totalDamageTaken INTEGER NOT NULL DEFAULT 0,
+        totalHealsReceived INTEGER NOT NULL DEFAULT 0,
+        totalOdeHeals INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (playerName, sessionStart)
+      )
+      """.trimIndent()
+    ).use { it.step() }
+  }
+}
+

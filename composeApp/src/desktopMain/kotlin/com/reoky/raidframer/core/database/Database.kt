@@ -61,6 +61,7 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_21_22) // 06/25/26 added seed table config fields
   .addMigrations(MIGRATION_22_23) // 06/25/26 added preferredLanguage to config eek!
   .addMigrations(MIGRATION_23_24) // 07/07/26 added combat custom category columns to config
+  .addMigrations(MIGRATION_24_25) // 07/11/26 added player_session_totals table for historical session views
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

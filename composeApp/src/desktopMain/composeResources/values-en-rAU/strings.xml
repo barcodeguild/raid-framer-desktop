@@ -139,6 +139,14 @@ Please close the game before continuing, otherwise files will be left over.</str
     <string name="player_card_session_totals">Session Totals</string>
     <string name="player_card_lifetime_totals">Lifetime Totals</string>
 
+    <!-- Session scope dropdown -->
+    <string name="player_card_totals_scope_label">View</string>
+    <string name="player_card_session_scope_current">Current Session</string>
+    <string name="player_card_session_scope_previous">Previous Session</string>
+    <string name="player_card_session_scope_last_n">Last %1$d Sessions</string>
+    <string name="player_card_session_scope_all">All Sessions</string>
+    <string name="player_card_no_historical_data">No historical sessions for this player yet.</string>
+
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">Total Damage</string>
     <string name="player_card_stat_healing">Total Healing</string>

@@ -139,6 +139,14 @@
     <string name="player_card_session_totals">会话总计</string>
     <string name="player_card_lifetime_totals">终身总计</string>
 
+    <!-- Session scope dropdown -->
+    <string name="player_card_totals_scope_label">查看</string>
+    <string name="player_card_session_scope_current">当前会话</string>
+    <string name="player_card_session_scope_previous">上一场会话</string>
+    <string name="player_card_session_scope_last_n">最近 %1$d 场会话</string>
+    <string name="player_card_session_scope_all">所有会话</string>
+    <string name="player_card_no_historical_data">该玩家暂无归档会话。</string>
+
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">总伤害</string>
     <string name="player_card_stat_healing">总治疗</string>
