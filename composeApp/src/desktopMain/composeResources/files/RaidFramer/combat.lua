@@ -115,8 +115,8 @@ function RF.Combat.handleCombatMessage(...)
       local kbps = (RF.Combat.EVENTS_PER_MINUTE * 256) / 1024 -- assuming average event size of 256 bytes
       RF:Log("[Performance] Combat event logging rate is about: " .. tostring(math.floor(kbps)) .. " KB/s)")
     end
-
-    if RF.Config.SHOW_DEATHS_PER_MINUTE then
+    
+    if RF.Config.SHOW_DEATHS_PER_MINUTE and RF.Combat.DEATHS_PER_MINUTE > 0 then
       RF:Log("[Performance] Deaths per minute: " .. tostring(RF.Combat.DEATHS_PER_MINUTE))
     end
 
