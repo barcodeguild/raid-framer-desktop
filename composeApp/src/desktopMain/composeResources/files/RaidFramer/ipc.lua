@@ -153,7 +153,9 @@ function RF.IPC.interact()
       newQueue[newTail] = RF.IPC.MESSAGE_WRITE_QUEUE[i]
     end
     -- log compaction for diagnostics (should be rare)
-    RF:Log("IPC: Compacting write queue (old head=" .. tostring(RF.IPC.MESSAGE_WRITE_QUEUE_HEAD) .. ", old tail=" .. tostring(RF.IPC.MESSAGE_WRITE_QUEUE_TAIL) .. ")")
+    if RF.Config.SHOW_DEBUG_INFO then
+      RF:Log("IPC: Compacting write queue (old head=" .. tostring(RF.IPC.MESSAGE_WRITE_QUEUE_HEAD) .. ", old tail=" .. tostring(RF.IPC.MESSAGE_WRITE_QUEUE_TAIL) .. ")")
+    end
     RF.IPC.MESSAGE_WRITE_QUEUE = newQueue
     RF.IPC.MESSAGE_WRITE_QUEUE_HEAD = 1
     RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = newTail

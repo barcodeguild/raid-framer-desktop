@@ -139,6 +139,14 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="player_card_session_totals">세션 총계</string>
     <string name="player_card_lifetime_totals">생애 총계</string>
 
+    <!-- Session scope dropdown -->
+    <string name="player_card_totals_scope_label">보기</string>
+    <string name="player_card_session_scope_current">현재 세션</string>
+    <string name="player_card_session_scope_previous">이전 세션</string>
+    <string name="player_card_session_scope_last_n">최근 %1$d개 세션</string>
+    <string name="player_card_session_scope_all">모든 세션</string>
+    <string name="player_card_no_historical_data">이 플레이어에 대해 보관된 세션이 없습니다.</string>
+
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">총 피해</string>
     <string name="player_card_stat_healing">총 힐</string>

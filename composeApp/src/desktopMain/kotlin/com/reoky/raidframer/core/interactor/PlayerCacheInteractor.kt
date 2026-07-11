@@ -10,6 +10,7 @@ import com.reoky.raidframer.core.calc.RealtimeComputer
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.database.PlayerSessionTotalsEntity
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.findSkillTreeForSpell
@@ -288,10 +289,31 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   fun startNewSession(sessionType: String, allowPvE: Boolean) {
+    // Capture snapshot synchronously so the archive step sees the in-memory session totals
+    // that exist *before* we clear `cards` below. Reading `RFConfig.state.value` is a direct
+    // StateFlow read (no suspend), and `cards.values.toList()` is a snapshot copy.
+    val previousConfig = RFConfig.state.value
+    val previousSessionStart = previousConfig.lastSessionStart
+    val snapshot = if (previousSessionStart > 0L) cards.values.toList() else emptyList()
+
     scope.launch {
+      // Archive the previous session's per-player totals first so they're persisted before
+      // the new session's totals overwrite the in-memory state. Skipped on first-ever launch
+      // (lastSessionStart == 0) and when there's nothing in the snapshot to archive.
+      if (snapshot.isNotEmpty()) {
+        archiveSessionSnapshot(
+          snapshot = snapshot,
+          sessionStart = previousSessionStart,
+          sessionType = previousConfig.lastSessionType,
+          sessionTitle = previousConfig.lastSessionTitle
+        )
+      }
+
       RFConfig.update {
         it.copy(
-          allowPVEDamage = allowPvE
+          allowPVEDamage = allowPvE,
+          lastSessionStart = System.currentTimeMillis(),
+          lastSessionType = sessionType
         )
       }
       // go big or go home: better solution that resetting, just clear on start instead
@@ -306,8 +328,147 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   fun stopSession() {
+    // Snapshot the in-memory session totals so they survive a hard close of the app later.
+    val currentConfig = RFConfig.state.value
+    val previousSessionStart = currentConfig.lastSessionStart
+    val snapshot = if (previousSessionStart > 0L) cards.values.toList() else emptyList()
+
     CombatLogInteractor.stopRecording()
+
+    if (snapshot.isNotEmpty()) {
+      archiveSessionSnapshot(
+        snapshot = snapshot,
+        sessionStart = previousSessionStart,
+        sessionType = currentConfig.lastSessionType.ifBlank { "manual_stop" },
+        sessionTitle = currentConfig.lastSessionTitle
+      )
+    }
+    // Reset start marker so a subsequent startNewSession knows there's nothing in memory to archive.
+    RFConfig.update { it.copy(lastSessionStart = 0L) }
     Log.info(TAG, "Recording session stopped")
+  }
+
+  /**
+   * Writes one [PlayerSessionTotalsEntity] per player in [snapshot], capturing every
+   * `session*` field of the in-memory [PlayerCard]. No-op when [sessionStart] is unset
+   * or when the wall clock has moved backwards. Composite primary key on the entity makes
+   * the insert idempotent (REPLACE on conflict).
+   */
+  private fun archiveSessionSnapshot(
+    snapshot: List<PlayerCard>,
+    sessionStart: Long,
+    sessionType: String,
+    sessionTitle: String
+  ) {
+    if (sessionStart <= 0L) return
+    val sessionEnd = System.currentTimeMillis()
+    if (sessionEnd <= sessionStart) return
+
+    scope.launch {
+      var written = 0
+      snapshot.forEach { card ->
+        // Only archive real players. NPC cards (e.g. raid mobs, world bosses) get
+        // auto-upgraded to real players in `interact()` and would normally have a
+        // session*, but skipping them here keeps the historical table scoped to the
+        // entities the user actually cares about and cuts the row count meaningfully.
+        if (!card.isRealPlayer) return@forEach
+        if (!hasAnySessionActivity(card)) return@forEach
+        val entity = PlayerSessionTotalsEntity(
+          playerName = card.name,
+          sessionStart = sessionStart,
+          sessionEnd = sessionEnd,
+          sessionType = sessionType,
+          sessionTitle = sessionTitle,
+          totalDamage = card.sessionDamageTotal,
+          totalHealing = card.sessionHealTotal,
+          totalCC = card.sessionCCTotal,
+          totalBuffs = card.sessionBuffTotal,
+          totalDebuffs = card.sessionDebuffTotal,
+          totalCharms = card.sessionCharmTotal,
+          totalSongs = card.sessionSongsTotal,
+          totalDistresses = card.sessionDistressTotal,
+          totalSilences = card.sessionSilenceTotal,
+          totalGliderUses = card.sessionGliderTotal,
+          totalItemSkills = card.sessionItemSkillTotal,
+          totalPotions = card.sessionPotionTotal,
+          totalKills = card.sessionKillTotal,
+          totalKillsKB = card.sessionKillTotalKB,
+          totalDeaths = card.sessionDeathTotal,
+          totalDamageTaken = card.sessionDamageTakenTotal,
+          totalHealsReceived = card.sessionHealsReceivedTotal,
+          totalOdeHeals = card.sessionOdeHealsTotal
+        )
+        RFDao.playerSessionDao.insert(entity)
+        written++
+      }
+      Log.info(TAG, "Archived session totals for $written/${snapshot.size} player(s) (session $sessionStart → $sessionEnd)")
+    }
+  }
+
+  // Skip the row entirely if a player had zero activity in the session — keeps the historical
+  // table from filling up with empty rows for every NPC that was briefly upgraded then ignored.
+  private fun hasAnySessionActivity(card: PlayerCard): Boolean {
+    return card.sessionDamageTotal != 0L ||
+        card.sessionHealTotal != 0L ||
+        card.sessionCCTotal != 0 ||
+        card.sessionBuffTotal != 0 ||
+        card.sessionDebuffTotal != 0 ||
+        card.sessionCharmTotal != 0 ||
+        card.sessionSongsTotal != 0 ||
+        card.sessionDistressTotal != 0 ||
+        card.sessionSilenceTotal != 0 ||
+        card.sessionGliderTotal != 0 ||
+        card.sessionItemSkillTotal != 0 ||
+        card.sessionPotionTotal != 0 ||
+        card.sessionKillTotal != 0 ||
+        card.sessionKillTotalKB != 0 ||
+        card.sessionDeathTotal != 0 ||
+        card.sessionDamageTakenTotal != 0 ||
+        card.sessionHealsReceivedTotal != 0 ||
+        card.sessionOdeHealsTotal != 0L
+  }
+
+  /**
+   * Fetches the [limit] most recently archived sessions for [playerName] (newest first by
+   * `sessionEnd`) and returns a single aggregated [PlayerSessionTotalsEntity] whose fields are
+   * the sum of all returned sessions. Returns null when no historical sessions exist.
+   * Pass `null` for [limit] to aggregate every archived session for the player.
+   */
+  suspend fun getHistoricalTotalsForPlayer(
+    playerName: String,
+    limit: Int? = null
+  ): PlayerSessionTotalsEntity? {
+    val sessions = if (limit != null) {
+      RFDao.playerSessionDao.getRecentSessionsForPlayer(playerName, limit)
+    } else {
+      RFDao.playerSessionDao.getSessionsForPlayer(playerName)
+    }
+    if (sessions.isEmpty()) return null
+    return PlayerSessionTotalsEntity(
+      playerName = playerName,
+      sessionStart = sessions.minOf { it.sessionStart },
+      sessionEnd = sessions.maxOf { it.sessionEnd },
+      sessionType = sessions.first().sessionType,
+      sessionTitle = "${sessions.size} sessions",
+      totalDamage = sessions.sumOf { it.totalDamage },
+      totalHealing = sessions.sumOf { it.totalHealing },
+      totalCC = sessions.sumOf { it.totalCC },
+      totalBuffs = sessions.sumOf { it.totalBuffs },
+      totalDebuffs = sessions.sumOf { it.totalDebuffs },
+      totalCharms = sessions.sumOf { it.totalCharms },
+      totalSongs = sessions.sumOf { it.totalSongs },
+      totalDistresses = sessions.sumOf { it.totalDistresses },
+      totalSilences = sessions.sumOf { it.totalSilences },
+      totalGliderUses = sessions.sumOf { it.totalGliderUses },
+      totalItemSkills = sessions.sumOf { it.totalItemSkills },
+      totalPotions = sessions.sumOf { it.totalPotions },
+      totalKills = sessions.sumOf { it.totalKills },
+      totalKillsKB = sessions.sumOf { it.totalKillsKB },
+      totalDeaths = sessions.sumOf { it.totalDeaths },
+      totalDamageTaken = sessions.sumOf { it.totalDamageTaken },
+      totalHealsReceived = sessions.sumOf { it.totalHealsReceived },
+      totalOdeHeals = sessions.sumOf { it.totalOdeHeals }
+    )
   }
 
   // filter pve damage by checking if the target is a real player

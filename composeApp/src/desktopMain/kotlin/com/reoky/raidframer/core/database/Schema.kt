@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 24
+const val SCHEMA_VERSION = 26
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -71,8 +71,12 @@ data class ConfigEntity(
   val companionMarkSacDancers: Boolean = true,
   val companionMarkCharmedTargets: Boolean = true,
   val companionMarkSilencedTargets: Boolean = true,
-  val companionMarkDistressedTargets: Boolean = true
-  ,
+  val companionMarkDistressedTargets: Boolean = true,
+
+  // Companion debug and info display toggles 7/11/26
+  val companionShowDebugInfo: Boolean = false,
+  val companionShowDeathsPerMinute: Boolean = false,
+
   // Combat overlay column visibility toggles
   val combatShowDamageColumn: Boolean = true,
   val combatShowHealsColumn: Boolean = true,
@@ -181,6 +185,44 @@ data class PlayerCacheEntity(
   val lifetimeTotalDeaths: Long = 0L,
   val lifetimeTotalDamageTaken: Long = 0L,
   val lifetimeTotalHealsReceived: Long = 0L,
+)
+
+/*
+ * Stores a per-player snapshot of session totals captured at the end of a recording session.
+ * One row is written per (playerName, sessionStart) the moment a new session begins (and when
+ * a session is stopped without a follow-up start), so the player card overlay can show historical
+ * session totals ("Previous Session", "Last 2 Sessions", "All Sessions", etc.) in addition to
+ * the in-memory current session. The composite primary key makes the archive step idempotent.
+ */
+@Entity(
+  tableName = "player_session_totals",
+  primaryKeys = ["playerName", "sessionStart"]
+)
+data class PlayerSessionTotalsEntity(
+  val playerName: String,
+  val sessionStart: Long, // UTC ms; from RFConfig.lastSessionStart when archive happens
+  val sessionEnd: Long,   // UTC ms; System.currentTimeMillis() at archive time
+  val sessionType: String = "", // e.g. "Kraken", "Halcy", "Custom", "manual_stop"
+  val sessionTitle: String = "", // session file/title at the time of archive
+
+  val totalDamage: Long = 0L,
+  val totalHealing: Long = 0L,
+  val totalCC: Int = 0,
+  val totalBuffs: Int = 0,
+  val totalDebuffs: Int = 0,
+  val totalCharms: Int = 0,
+  val totalSongs: Int = 0,
+  val totalDistresses: Int = 0,
+  val totalSilences: Int = 0,
+  val totalGliderUses: Int = 0,
+  val totalItemSkills: Int = 0,
+  val totalPotions: Int = 0,
+  val totalKills: Int = 0,
+  val totalKillsKB: Int = 0,
+  val totalDeaths: Int = 0,
+  val totalDamageTaken: Int = 0,
+  val totalHealsReceived: Int = 0,
+  val totalOdeHeals: Long = 0L
 )
 
 // global enums below for consolidation

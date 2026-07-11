@@ -4,6 +4,7 @@ package com.reoky.raidframer.ui.overlay
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -15,8 +16,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -25,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
@@ -36,11 +44,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.database.PlayerSessionTotalsEntity
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.RFGraphColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -55,6 +65,12 @@ import raid_framer_desktop.composeapp.generated.resources.graphs_trend_graph
 import raid_framer_desktop.composeapp.generated.resources.player_card_damage_by_skill
 import raid_framer_desktop.composeapp.generated.resources.player_card_heals_by_skill
 import raid_framer_desktop.composeapp.generated.resources.player_card_cc_by_skill
+import raid_framer_desktop.composeapp.generated.resources.player_card_no_historical_data
+import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_all
+import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_current
+import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_last_n
+import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_previous
+import raid_framer_desktop.composeapp.generated.resources.player_card_totals_scope_label
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_buffs
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_cc
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_charms
@@ -77,7 +93,6 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_recent_deb
 import raid_framer_desktop.composeapp.generated.resources.player_card_recent_heals
 import raid_framer_desktop.composeapp.generated.resources.player_card_recent_item_uses
 import raid_framer_desktop.composeapp.generated.resources.player_card_recent_kd_short
-import raid_framer_desktop.composeapp.generated.resources.player_card_session_totals
 import raid_framer_desktop.composeapp.generated.resources.player_card_lifetime_totals
 import raid_framer_desktop.composeapp.generated.resources.player_card_title_format
 import java.text.SimpleDateFormat
@@ -85,6 +100,84 @@ import java.util.Date
 
 private enum class SortOrder(val indicator: String) {
   DESC("▼"), ASC("▲"), NONE("");
+}
+
+private val WellShape = RoundedCornerShape(8.dp)
+private val WellColor = RFColors.CardBackground.copy(alpha = 0.72f)
+private val WellBorder = RFColors.CardBorder
+
+// Selects which set of session totals the "Session" totals card should show.
+// CURRENT reads from the in-memory PlayerCard; everything else reads from
+// the player_session_totals table aggregated by the PlayerCacheInteractor.
+// `limit` is the max number of archived sessions to aggregate (null = unbounded).
+private enum class SessionScope(
+  val isCurrent: Boolean = false,
+  val limit: Int? = null
+) {
+  CURRENT(isCurrent = true),
+  PREVIOUS(limit = 1),
+  LAST_2(limit = 2),
+  LAST_3(limit = 3),
+  LAST_5(limit = 5),
+  ALL(limit = null);
+}
+
+// View-model-agnostic shape so the totals card can render either the in-memory
+// session or an aggregated historical one without branching on the source.
+private data class SessionTotals(
+  val damage: Long,
+  val healing: Long,
+  val cc: Int,
+  val buffs: Int,
+  val debuffs: Int,
+  val charms: Int,
+  val distress: Int,
+  val silence: Int,
+  val glider: Int,
+  val items: Int,
+  val potions: Int,
+  val kills: Int,
+  val killsKB: Int,
+  val damageTaken: Int,
+  val healsReceived: Int
+) {
+  companion object {
+    fun fromPlayerCard(card: PlayerCard) = SessionTotals(
+      damage = card.sessionDamageTotal,
+      healing = card.sessionHealTotal,
+      cc = card.sessionCCTotal,
+      buffs = card.sessionBuffTotal,
+      debuffs = card.sessionDebuffTotal,
+      charms = card.sessionCharmTotal,
+      distress = card.sessionDistressTotal,
+      silence = card.sessionSilenceTotal,
+      glider = card.sessionGliderTotal,
+      items = card.sessionItemSkillTotal,
+      potions = card.sessionPotionTotal,
+      kills = card.sessionKillTotal,
+      killsKB = card.sessionKillTotalKB,
+      damageTaken = card.sessionDamageTakenTotal,
+      healsReceived = card.sessionHealsReceivedTotal
+    )
+
+    fun fromEntity(entity: PlayerSessionTotalsEntity) = SessionTotals(
+      damage = entity.totalDamage,
+      healing = entity.totalHealing,
+      cc = entity.totalCC,
+      buffs = entity.totalBuffs,
+      debuffs = entity.totalDebuffs,
+      charms = entity.totalCharms,
+      distress = entity.totalDistresses,
+      silence = entity.totalSilences,
+      glider = entity.totalGliderUses,
+      items = entity.totalItemSkills,
+      potions = entity.totalPotions,
+      kills = entity.totalKills,
+      killsKB = entity.totalKillsKB,
+      damageTaken = entity.totalDamageTaken,
+      healsReceived = entity.totalHealsReceived
+    )
+  }
 }
 
 @Preview
@@ -151,8 +244,32 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             .padding(12.dp),
         )
 
-        // No longer looks good having a divider here
-        //Divider(color = RFColors.CardBorder, thickness = 1.dp)
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Divider(
+            modifier = Modifier.weight(1f),
+            color = RFColors.CardBorder,
+            thickness = 1.dp
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Box(
+            modifier = Modifier
+              .width(28.dp)
+              .height(2.dp)
+              .clip(RoundedCornerShape(1.dp))
+              .background(RFColors.AccentRed)
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Divider(
+            modifier = Modifier.weight(1f),
+            color = RFColors.CardBorder,
+            thickness = 1.dp
+          )
+        }
 
         card?.let { card ->
           Column(
@@ -167,10 +284,11 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             Row(
               modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.DarkGray.copy(alpha = 0.3f))
-                .padding(8.dp)
+                .padding(horizontal = 8.dp)
+                .clip(WellShape)
+                .background(WellColor)
+                .border(1.dp, WellBorder, WellShape)
+                .padding(12.dp)
                 .height(300.dp)
             ) {
               // Damage
@@ -232,16 +350,17 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Buffs, Items, K/D
             Row(
               modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.DarkGray.copy(alpha = 0.3f))
-                .padding(8.dp)
+                .padding(horizontal = 8.dp)
+                .clip(WellShape)
+                .background(WellColor)
+                .border(1.dp, WellBorder, WellShape)
+                .padding(12.dp)
                 .height(300.dp)
             ) {
               SortableEventListColumn(
@@ -393,39 +512,74 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             }
 
             // Player Details Section
-            PlayerDetailsSection(
-              card = card,
-              onLeadershipChange = { newLeadership ->
-                PlayerCacheInteractor.updatePlayerLeadershipFor(playerName, newLeadership)
-              }
-            )
+            Column(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .clip(WellShape)
+                .background(WellColor)
+                .border(1.dp, WellBorder, WellShape)
+                .padding(12.dp)
+            ) {
+              PlayerDetailsSection(
+                card = card,
+                onLeadershipChange = { newLeadership ->
+                  PlayerCacheInteractor.updatePlayerLeadershipFor(playerName, newLeadership)
+                }
+              )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // Totals Row
+            var selectedScope by remember(playerName) { mutableStateOf(SessionScope.CURRENT) }
+            // Fetch historical data once and pass to the totals card so both columns can
+            // share the load (and we don't double-query on a state change).
+            val historical by produceState<PlayerSessionTotalsEntity?>(
+              initialValue = null,
+              key1 = playerName,
+              key2 = selectedScope
+            ) {
+              if (selectedScope.isCurrent) {
+                value = null
+              } else {
+                value = PlayerCacheInteractor.getHistoricalTotalsForPlayer(playerName, selectedScope.limit)
+              }
+            }
+            val sessionTotals: SessionTotals? = when {
+              selectedScope.isCurrent -> SessionTotals.fromPlayerCard(card)
+              else -> historical?.let { SessionTotals.fromEntity(it) }
+            }
+
+            // Filters bar above the totals row. Hosts the SessionScope dropdown so the two
+            // totals cards below stay visually symmetric; the dropdown's selection also
+            // drives the title of the left (manipulated) totals card.
+            TotalsFiltersBar(
+              selectedScope = selectedScope,
+              onScopeChange = { selectedScope = it },
+              modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             Row(modifier = Modifier.fillMaxWidth()) {
 
-              // Session Totals
+              // Manipulated (left) totals card. Title is dynamic so the user can tell
+              // which scope they're looking at without the dropdown being inside the card.
               SectionCard(
-                title = stringResource(Res.string.player_card_session_totals),
+                title = sessionScopeLabel(selectedScope),
                 modifier = Modifier.weight(1f),
                 accentColor = RFColors.AccentRed
               ) {
-                StatRow(stringResource(Res.string.player_card_stat_damage), card.sessionDamageTotal, RFColors.dpsOrange)
-                StatRow(stringResource(Res.string.player_card_stat_healing), card.sessionHealTotal, RFColors.healsGreen)
-                StatRow(stringResource(Res.string.player_card_stat_cc), card.sessionCCTotal.toLong(), RFColors.ccCyan)
-                StatRow(stringResource(Res.string.player_card_stat_buffs), card.sessionBuffTotal.toLong(), RFColors.itemSkillYellow)
-                StatRow(stringResource(Res.string.player_card_stat_debuffs), card.sessionDebuffTotal.toLong(), Color(0xFFAB47BC))
-                StatRow(stringResource(Res.string.player_card_stat_charms), card.sessionCharmTotal.toLong(), RFColors.charmPink)
-                StatRow(stringResource(Res.string.player_card_stat_distress), card.sessionDistressTotal.toLong(), RFColors.distressPurple)
-                StatRow(stringResource(Res.string.player_card_stat_silence), card.sessionSilenceTotal.toLong(), RFColors.silencePurple)
-                StatRow(stringResource(Res.string.player_card_stat_glider), card.sessionGliderTotal.toLong(), RFColors.gliderBlue)
-                StatRow(stringResource(Res.string.player_card_stat_items), card.sessionItemSkillTotal.toLong(), RFColors.itemSkillYellow)
-                StatRow(stringResource(Res.string.player_card_stat_potions), card.sessionPotionTotal.toLong(), RFColors.potionTeal)
-                StatRow(stringResource(Res.string.player_card_stat_kills_most_damage), card.sessionKillTotal.toLong(), RFColors.dpsOrange)
-                StatRow(stringResource(Res.string.player_card_stat_kills_killing_blow), card.sessionKillTotalKB.toLong(), RFColors.killsHaranyaGreen)
-                StatRow(stringResource(Res.string.player_card_stat_total_damage_taken), card.sessionDamageTakenTotal.toLong(), Color(0xFFEF5350))
-                StatRow(stringResource(Res.string.player_card_stat_total_heals_received), card.sessionHealsReceivedTotal.toLong(), RFColors.healsGreen)
+                if (sessionTotals == null) {
+                  Text(
+                    text = stringResource(Res.string.player_card_no_historical_data),
+                    color = RFColors.TextDisabled,
+                    fontSize = 13.sp
+                  )
+                } else {
+                  SessionStatRows(sessionTotals)
+                }
               }
 
               Spacer(modifier = Modifier.width(16.dp))
@@ -458,7 +612,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 }
               }
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
           }
         }
       }
@@ -477,9 +631,10 @@ private fun SectionCard(
 ) {
   Column(
     modifier = modifier
-      .padding(horizontal = 8.dp, vertical = 4.dp)
-      .clip(RoundedCornerShape(8.dp))
-      .background(Color.DarkGray.copy(alpha = 0.3f))
+      .padding(horizontal = 8.dp)
+      .clip(WellShape)
+      .background(WellColor)
+      .border(1.dp, WellBorder, WellShape)
       .padding(12.dp)
   ) {
     Row(
@@ -496,7 +651,7 @@ private fun SectionCard(
         text = title,
         color = RFColors.TextPrimary,
         fontWeight = FontWeight.Bold,
-        fontSize = 14.sp
+        fontSize = 13.sp
       )
     }
     content()
@@ -701,4 +856,149 @@ fun StatRow(label: String, value: Long, valueColor: Color = RFColors.TextPrimary
 private fun formatTime(ts: Long): String {
   val sdf = SimpleDateFormat("HH:mm:ss")
   return sdf.format(Date(ts))
+}
+
+// Localized label for a session scope. Used by both the dropdown's selected display and its menu rows.
+@Composable
+private fun sessionScopeLabel(scope: SessionScope): String = when (scope) {
+  SessionScope.CURRENT -> stringResource(Res.string.player_card_session_scope_current)
+  SessionScope.PREVIOUS -> stringResource(Res.string.player_card_session_scope_previous)
+  SessionScope.LAST_2 -> stringResource(Res.string.player_card_session_scope_last_n, 2)
+  SessionScope.LAST_3 -> stringResource(Res.string.player_card_session_scope_last_n, 3)
+  SessionScope.LAST_5 -> stringResource(Res.string.player_card_session_scope_last_n, 5)
+  SessionScope.ALL -> stringResource(Res.string.player_card_session_scope_all)
+}
+
+// Compact dropdown styled to match SessionTypeDropdown. Picking a new scope bubbles up via
+// onSelected; the parent decides which data source to drive the totals card with.
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun SessionScopeDropdown(
+  selected: SessionScope,
+  onSelected: (SessionScope) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  var expanded by remember { mutableStateOf(false) }
+
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = it },
+    modifier = modifier
+  ) {
+    TextField(
+      value = sessionScopeLabel(selected),
+      onValueChange = {},
+      readOnly = true,
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(48.dp),
+      singleLine = true,
+      colors = TextFieldDefaults.textFieldColors(
+        textColor = RFColors.TextPrimary,
+        backgroundColor = Color(0xFF1E1E1E),
+        focusedIndicatorColor = RFColors.AccentRed,
+        unfocusedIndicatorColor = RFColors.CardBorder,
+        cursorColor = RFColors.AccentRed
+      ),
+      trailingIcon = {
+        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+      },
+      textStyle = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold),
+      maxLines = 1
+    )
+
+    ExposedDropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier
+        .width(210.dp)
+        .clip(RoundedCornerShape(8.dp))
+        .background(RFColors.CardBackground)
+        .border(1.dp, RFColors.CardBorder, RoundedCornerShape(8.dp))
+    ) {
+      SessionScope.entries.forEach { scope ->
+        DropdownMenuItem(
+          onClick = {
+            onSelected(scope)
+            expanded = false
+          },
+          content = {
+            Text(
+              text = sessionScopeLabel(scope),
+              color = if (scope == selected) RFColors.AccentRed else RFColors.TextPrimary,
+              fontWeight = if (scope == selected) FontWeight.Bold else FontWeight.Normal,
+              fontSize = 12.sp,
+              maxLines = 1
+            )
+          }
+        )
+      }
+    }
+  }
+}
+
+// Slim bar that sits above the totals row and hosts the SessionScope dropdown.
+// Lifting the dropdown out of the totals cards keeps the two cards below
+// visually symmetric; the dropdown's selection drives the title of the left
+// (manipulated) card so the user can still tell which scope they're viewing.
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
+@Composable
+private fun TotalsFiltersBar(
+  selectedScope: SessionScope,
+  onScopeChange: (SessionScope) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Surface(
+    modifier = modifier.padding(horizontal = 8.dp),
+    shape = WellShape,
+    color = WellColor,
+    border = BorderStroke(1.dp, WellBorder)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+      Column {
+        Text(
+          text = stringResource(Res.string.player_card_totals_scope_label),
+          color = RFColors.TextPrimary,
+          fontSize = 13.sp,
+          fontWeight = FontWeight.Bold
+        )
+        Text(
+          text = "Controls the session totals below",
+          color = RFColors.TextTertiary,
+          fontSize = 11.sp
+        )
+      }
+
+      SessionScopeDropdown(
+        selected = selectedScope,
+        onSelected = onScopeChange,
+        modifier = Modifier.width(210.dp)
+      )
+    }
+  }
+}
+
+@Composable
+private fun SessionStatRows(totals: SessionTotals) {
+  StatRow(stringResource(Res.string.player_card_stat_damage), totals.damage, RFColors.dpsOrange)
+  StatRow(stringResource(Res.string.player_card_stat_healing), totals.healing, RFColors.healsGreen)
+  StatRow(stringResource(Res.string.player_card_stat_cc), totals.cc.toLong(), RFColors.ccCyan)
+  StatRow(stringResource(Res.string.player_card_stat_buffs), totals.buffs.toLong(), RFColors.itemSkillYellow)
+  StatRow(stringResource(Res.string.player_card_stat_debuffs), totals.debuffs.toLong(), Color(0xFFAB47BC))
+  StatRow(stringResource(Res.string.player_card_stat_charms), totals.charms.toLong(), RFColors.charmPink)
+  StatRow(stringResource(Res.string.player_card_stat_distress), totals.distress.toLong(), RFColors.distressPurple)
+  StatRow(stringResource(Res.string.player_card_stat_silence), totals.silence.toLong(), RFColors.silencePurple)
+  StatRow(stringResource(Res.string.player_card_stat_glider), totals.glider.toLong(), RFColors.gliderBlue)
+  StatRow(stringResource(Res.string.player_card_stat_items), totals.items.toLong(), RFColors.itemSkillYellow)
+  StatRow(stringResource(Res.string.player_card_stat_potions), totals.potions.toLong(), RFColors.potionTeal)
+  StatRow(stringResource(Res.string.player_card_stat_kills_most_damage), totals.kills.toLong(), RFColors.dpsOrange)
+  StatRow(stringResource(Res.string.player_card_stat_kills_killing_blow), totals.killsKB.toLong(), RFColors.killsHaranyaGreen)
+  StatRow(stringResource(Res.string.player_card_stat_total_damage_taken), totals.damageTaken.toLong(), Color(0xFFEF5350))
+  StatRow(stringResource(Res.string.player_card_stat_total_heals_received), totals.healsReceived.toLong(), RFColors.healsGreen)
 }

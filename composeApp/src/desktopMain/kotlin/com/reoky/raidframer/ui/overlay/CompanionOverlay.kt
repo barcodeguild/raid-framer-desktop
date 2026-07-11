@@ -141,6 +141,28 @@ fun CompanionOverlay(wm: WindowManager? = null) {
           )
         }
 
+        // debug info toggle
+        Row {
+          CheckBoxComponent(
+            label = "Show Debug Info (creates many chat messages)",
+            initialChecked = RFConfig.state.value.companionShowDebugInfo,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionShowDebugInfo = isChecked) }
+            }
+          )
+        }
+
+        // deaths per minute toggle
+        Row {
+          CheckBoxComponent(
+            label = "Show Deaths Per Minute (creates many chat messages)",
+            initialChecked = RFConfig.state.value.companionShowDeathsPerMinute,
+            onCheckedChange = { isChecked ->
+              RFConfig.update { it.copy(companionShowDeathsPerMinute = isChecked) }
+            }
+          )
+        }
+
         // mark enemy healers
 //        Row {
 //          CheckBoxComponent(

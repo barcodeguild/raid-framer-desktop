@@ -6,6 +6,9 @@ RF.Config = RF.Config or {}
 RF.Config.BASE_DIR = "../Documents/Addon/RaidFramer/"
 RF.Config.CONFIG_FILE = RF.Config.BASE_DIR .. "settings.conf"
 
+-- Note: These are loaded from settings.conf
+RF.Config.SHOW_DEBUG_INFO = false -- this was annoying people so toggle added
+RF.Config.SHOW_DEATHS_PER_MINUTE = false
 RF.Config.SHOW_RAID_STATUS = false
 RF.Config.SHOW_CHARMED_IN_CHAT = true
 RF.Config.SHOW_SILENCED_IN_CHAT = true
@@ -40,7 +43,9 @@ RF.Config.MARK_DISTRESSED_TARGETS = true
          end
 
          -- Map the config keys to the internal RF.Config keys
-         if key == "show_raid_status" then RF.Config.SHOW_RAID_STATUS = value
+         if key == "show_debug_info" then RF.Config.SHOW_DEBUG_INFO = value
+         elseif key == "show_deaths_per_minute" then RF.Config.SHOW_DEATHS_PER_MINUTE = value
+         elseif key == "show_raid_status" then RF.Config.SHOW_RAID_STATUS = value
          elseif key == "show_charmed_in_chat" then RF.Config.SHOW_CHARMED_IN_CHAT = value
          elseif key == "show_silenced_in_chat" then RF.Config.SHOW_SILENCED_IN_CHAT = value
          elseif key == "mark_hvt_healers" then RF.Config.MARK_HVT_HEALERS = value

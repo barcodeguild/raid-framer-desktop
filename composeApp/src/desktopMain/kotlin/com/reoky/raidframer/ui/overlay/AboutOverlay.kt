@@ -9,8 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -195,6 +198,28 @@ fun AboutOverlay(wm: WindowManager? = null) {
           Spacer(modifier = Modifier.height(16.dp))
           Text(
             text = stringResource(Res.string.about_dedication_text),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            fontSize = 16.sp,
+            color = Color.White
+          )
+          Spacer(modifier = Modifier.height(16.dp))
+          Text(
+            text = buildAnnotatedString {
+              append("With special thanks to ")
+              withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Spaguetti")
+              }
+              append(", ")
+              withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Xizde")
+              }
+              append(", and ")
+              withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append("Zilus")
+              }
+              append("!")
+            },
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontSize = 16.sp,

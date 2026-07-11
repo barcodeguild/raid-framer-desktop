@@ -12,13 +12,14 @@ import androidx.room.Transaction
 import kotlin.text.orEmpty
 
 @Database(
-  entities = [WindowStateEntity::class, ConfigEntity::class, PlayerCacheEntity::class],
+  entities = [WindowStateEntity::class, ConfigEntity::class, PlayerCacheEntity::class, PlayerSessionTotalsEntity::class],
   version = SCHEMA_VERSION
 )
 abstract class AppDatabase : RoomDatabase() {
   abstract fun getWindowStateDao(): WindowStateDao
   abstract fun getConfigDao(): ConfigDao
   abstract fun getPlayerCacheDao(): PlayerCacheDao
+  abstract fun getPlayerSessionDao(): PlayerSessionDao
 }
 
 @Dao
@@ -54,4 +55,24 @@ interface PlayerCacheDao {
 
   @Query("SELECT COUNT(*) FROM player_cache")
   suspend fun getPlayerCount(): Int
+}
+
+@Dao
+interface PlayerSessionDao {
+  // Newest first; used by "Previous Session" / "Last N Sessions" / "All Sessions" UIs.
+  @Query("SELECT * FROM player_session_totals WHERE playerName = :playerName ORDER BY sessionEnd DESC")
+  suspend fun getSessionsForPlayer(playerName: String): List<PlayerSessionTotalsEntity>
+
+  // Same ordering but bounded for "Last N" lookups so we never aggregate more than the user asked for.
+  @Query("SELECT * FROM player_session_totals WHERE playerName = :playerName ORDER BY sessionEnd DESC LIMIT :limit")
+  suspend fun getRecentSessionsForPlayer(playerName: String, limit: Int): List<PlayerSessionTotalsEntity>
+
+  // Distinct recent session starts for the dropdown / scope label (e.g. "5 sessions logged").
+  @Query("SELECT COUNT(*) FROM player_session_totals WHERE playerName = :playerName")
+  suspend fun getSessionCountForPlayer(playerName: String): Int
+
+  // Composite primary key (playerName, sessionStart) makes this an upsert: re-archiving a session
+  // is a no-op rather than a duplicate row. Cheaper than a defensive DELETE-then-INSERT.
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insert(session: PlayerSessionTotalsEntity)
 }

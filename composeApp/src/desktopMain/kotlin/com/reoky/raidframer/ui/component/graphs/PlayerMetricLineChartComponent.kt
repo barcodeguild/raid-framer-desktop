@@ -306,7 +306,7 @@ fun MultiPlayerMetricLineChart(
           yAxisStyle = rememberAxisStyle(color = Color.White, tickPosition = TickPosition.Outside),
           xAxisLabels = @Composable { xVal ->
             val idx = xVal.toInt()
-            val label = if (idx in 0 until count) {
+            val label = if (idx in 0 until count && sessionStart > 0L) {
               val relSecs = (timestamps[idx] - sessionStart) / 1000L
               if (relSecs < 0) "" else formatLabel((relSecs / labelIncrementSec) * labelIncrementSec)
             } else ""

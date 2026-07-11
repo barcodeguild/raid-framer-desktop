@@ -118,6 +118,8 @@ object InstallationInteractor : Interactor() {
       "show_charmed_in_chat" to config.companionShowCharmedInChat.toString(),
       "show_silenced_in_chat" to config.companionShowSilencedInChat.toString(),
       "show_distressed_in_chat" to config.companionShowDistressedInChat.toString(),
+      "show_debug_info" to config.companionShowDebugInfo.toString(),
+      "show_deaths_per_minute" to config.companionShowDeathsPerMinute.toString(),
       "play_charm_sound" to config.companionPlayCharmSound.toString(),
       "mark_hvt_healers" to config.companionMarkHVTHealers.toString(),
       "mark_hvt_dps" to config.companionMarkHVTDPS.toString(),
