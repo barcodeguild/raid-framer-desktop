@@ -359,7 +359,7 @@ fun MultiPlayerMetricLineChart(
             val idx = xVal.toInt()
             val label = if (idx in 0 until count && sessionStart > 0L) {
               val relSecs = (timestamps[idx] - sessionStart) / 1000L
-              if (relSecs < 0) "" else formatLabel((relSecs / labelIncrementSec) * labelIncrementSec)
+              if (relSecs <= 0) "" else formatLabel((relSecs / labelIncrementSec) * labelIncrementSec)
             } else ""
             Text(text = label, style = typography.caption, color = Color.LightGray)
           },
