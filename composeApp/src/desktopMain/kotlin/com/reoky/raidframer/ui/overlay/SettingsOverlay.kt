@@ -1,6 +1,8 @@
 package com.reoky.raidframer.ui.overlay
 
+import androidx.compose.animation.core.*
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import kotlin.math.sin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,6 +47,9 @@ import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.helper.UpdateHelper
 import com.reoky.raidframer.core.helper.UpdateStatus
+import com.reoky.raidframer.core.helper.UpdateDownloader
+import com.reoky.raidframer.core.helper.DownloadStatus
+import com.reoky.raidframer.core.helper.UpdateInfo
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -64,10 +69,12 @@ import kotlin.system.exitProcess
 private fun SettingsSection(
   title: String,
   description: String? = null,
+  modifier: Modifier = Modifier,
+  borderColor: Color = RFColors.CardBorder,
   content: @Composable ColumnScope.() -> Unit
 ) {
   Surface(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxWidth()
       .padding(horizontal = 12.dp, vertical = 6.dp),
     shape = RoundedCornerShape(10.dp),
@@ -76,7 +83,7 @@ private fun SettingsSection(
   ) {
     Column(
       modifier = Modifier
-        .border(1.dp, RFColors.CardBorder, RoundedCornerShape(10.dp))
+        .border(1.dp, borderColor, RoundedCornerShape(10.dp))
         .padding(16.dp)
     ) {
       Text(
@@ -139,6 +146,15 @@ fun SettingsOverlay(wm: WindowManager? = null) {
   val showUninstallConfirmDialog = remember { mutableStateOf(false) }
   val showUninstallDoneDialog = remember { mutableStateOf(false) }
 
+  // Auto-scroll to the update panel if opened from the update dialog
+  LaunchedEffect(Unit) {
+    if (UpdateHelper.shouldScrollToUpdate) {
+      UpdateHelper.shouldScrollToUpdate = false
+      kotlinx.coroutines.delay(500) // wait for full layout composition
+      scrollState.animateScrollTo(scrollState.maxValue)
+    }
+  }
+
   Box(
     modifier = Modifier
       .fillMaxSize()
@@ -173,7 +189,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
             Spacer(modifier = Modifier.width(6.dp))
             Text(
               text = config.defaultArcheRageDirectory,
-              color = Color(0xFF66BB6A),
+              color = RFColors.UpdateGreen,
               fontSize = 13.sp,
               modifier = Modifier.align(Alignment.CenterVertically)
             )
@@ -759,7 +775,7 @@ private fun ExportSettingsPanel() {
           Spacer(modifier = Modifier.width(6.dp))
           Text(
             text = exportDir ?: stringResource(Res.string.settings_export_directory_not_found),
-            color = if (exportDir != null) Color(0xFF66BB6A) else RFColors.AccentRed,
+            color = if (exportDir != null) RFColors.UpdateGreen else RFColors.AccentRed,
             fontSize = 13.sp
           )
         }
@@ -804,12 +820,68 @@ private fun ExportSettingsPanel() {
 private fun VersionPanel() {
   val currentVersion = AppGlobals.APP_VERSION
   var updateStatus by remember { mutableStateOf<UpdateStatus>(UpdateStatus.Idle) }
+  var downloadStatus by remember { mutableStateOf<DownloadStatus?>(null) }
   val scope = rememberCoroutineScope()
+  val config by RFConfig.state.collectAsState()
+  val pendingUpdate by UpdateHelper.pendingUpdate.collectAsState()
+
+  // Golden sheen animation — trigger on either manual check or startup check
+  val hasUpdate = updateStatus is UpdateStatus.Available || pendingUpdate != null
+  var showSheen by remember { mutableStateOf(hasUpdate) }
+  var sheenElapsed by remember { mutableStateOf(0f) }
+
+  LaunchedEffect(hasUpdate) {
+    if (hasUpdate) {
+      showSheen = true
+      sheenElapsed = 0f
+      val start = System.nanoTime()
+      while (showSheen) {
+        kotlinx.coroutines.delay(50)
+        sheenElapsed = (System.nanoTime() - start) / 1_000_000_000f
+        if (sheenElapsed >= 7f) {
+          showSheen = false
+          break
+        }
+      }
+    } else {
+      showSheen = false
+    }
+  }
+
+  val sectionBorderColor = if (showSheen) {
+    val cycle = (sheenElapsed % 1.5f) / 1.5f
+    val pulse = (sin(cycle * Math.PI.toFloat()) * 0.3f + 0.35f).coerceIn(0f, 1f)
+    RFColors.UpdateGold.copy(alpha = pulse)
+  } else RFColors.CardBorder
 
   SettingsSection(
     title = stringResource(Res.string.settings_about_title),
-    description = stringResource(Res.string.settings_about_github_note)
+    description = stringResource(Res.string.settings_about_github_note),
+    borderColor = sectionBorderColor
   ) {
+    // Auto-update toggle
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        text = stringResource(Res.string.settings_auto_update_toggle),
+        color = RFColors.TextSecondary,
+        fontSize = 13.sp
+      )
+      Switch(
+        checked = config.autoUpdateEnabled,
+        onCheckedChange = { RFConfig.update { it.copy(autoUpdateEnabled = it.autoUpdateEnabled.not()) } },
+        colors = SwitchDefaults.colors(
+          checkedThumbColor = Color.White,
+          checkedTrackColor = RFColors.AccentRed,
+          uncheckedThumbColor = RFColors.TextTertiary,
+          uncheckedTrackColor = RFColors.BadgeBackground
+        )
+      )
+    }
+
     Row(
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceBetween,
@@ -833,8 +905,8 @@ private fun VersionPanel() {
         Spacer(modifier = Modifier.height(4.dp))
         when (val status = updateStatus) {
           is UpdateStatus.Available -> Text(
-            text = stringResource(Res.string.settings_update_available, status.newVersion),
-            color = Color(0xFF66BB6A),
+            text = stringResource(Res.string.settings_update_available, status.updateInfo.version),
+            color = RFColors.UpdateGreen,
             fontSize = 12.sp
           )
           is UpdateStatus.Checking -> Text(
@@ -854,35 +926,130 @@ private fun VersionPanel() {
           )
           is UpdateStatus.Idle -> {}
         }
+
+        // Download progress
+        val ds = downloadStatus
+        if (ds != null) {
+          Spacer(modifier = Modifier.height(6.dp))
+          when (ds) {
+            is DownloadStatus.Progress -> {
+              LinearProgressIndicator(
+                progress = ds.percent / 100f,
+                modifier = Modifier.fillMaxWidth().height(4.dp),
+                color = RFColors.AccentRed,
+                backgroundColor = RFColors.BadgeBackground
+              )
+              Spacer(modifier = Modifier.height(2.dp))
+              val downloadedStr = formatFileSize(ds.bytesDownloaded)
+              val totalStr = if (ds.totalBytes > 0) formatFileSize(ds.totalBytes) else "?"
+              Text(
+                text = stringResource(Res.string.settings_update_downloading, ds.percent.toInt(), downloadedStr, totalStr),
+                color = RFColors.TextSecondary,
+                fontSize = 11.sp
+              )
+            }
+            is DownloadStatus.Verifying -> Text(
+              text = stringResource(Res.string.settings_update_verifying),
+              color = RFColors.TextSecondary,
+              fontSize = 11.sp
+            )
+            is DownloadStatus.Installing -> Text(
+              text = stringResource(Res.string.settings_update_installing),
+              color = RFColors.UpdateGreen,
+              fontSize = 11.sp
+            )
+            is DownloadStatus.Error -> Text(
+              text = stringResource(Res.string.settings_update_download_failed, ds.message),
+              color = RFColors.AccentRed,
+              fontSize = 11.sp
+            )
+            is DownloadStatus.Success -> Text(
+              text = stringResource(Res.string.settings_update_install_complete),
+              color = RFColors.UpdateGreen,
+              fontSize = 11.sp
+            )
+            is DownloadStatus.Cancelled -> Text(
+              text = stringResource(Res.string.settings_update_cancelled),
+              color = RFColors.TextSecondary,
+              fontSize = 11.sp
+            )
+          }
+        }
       }
       Spacer(modifier = Modifier.width(12.dp))
-      Button(
-        onClick = {
-          updateStatus = UpdateStatus.Checking
-          scope.launch(Dispatchers.IO) {
-            UpdateHelper.checkForUpdates { status ->
-              scope.launch(Dispatchers.Main) { updateStatus = status }
+
+      // Show "Download & Install" when update is available, otherwise "Check for Updates"
+      if (updateStatus is UpdateStatus.Available && downloadStatus == null) {
+        Button(
+          onClick = {
+            val info = (updateStatus as UpdateStatus.Available).updateInfo
+            downloadStatus = DownloadStatus.Progress(0f, 0L, 0L)
+            scope.launch(Dispatchers.IO) {
+              val result = UpdateDownloader.downloadAndInstall(info) { status ->
+                scope.launch(Dispatchers.Main) { downloadStatus = status }
+              }
+              scope.launch(Dispatchers.Main) {
+                downloadStatus = result
+                if (result is DownloadStatus.Success || result is DownloadStatus.Installing) {
+                  // MSI is running in its own process — exit now so the installer can replace files
+                  // The updater thread in UpdateDownloader will attempt a relaunch after install completes.
+                  kotlinx.coroutines.delay(500) // brief pause so the user sees "Installing..." status
+                  kotlin.system.exitProcess(0)
+                }
+              }
             }
-          }
-        },
-        colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
-        enabled = updateStatus is UpdateStatus.Idle || updateStatus is UpdateStatus.Error || updateStatus is UpdateStatus.UpToDate
-      ) {
-        Text(
-          text = stringResource(Res.string.settings_about_check_updates_button),
-          color = Color.White,
-          fontWeight = FontWeight.SemiBold,
-          fontSize = 13.sp
-        )
+          },
+          colors = ButtonDefaults.buttonColors(RFColors.AccentRed)
+        ) {
+          Text(
+            text = stringResource(Res.string.settings_update_download_install_button),
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 13.sp
+          )
+        }
+      } else if (downloadStatus is DownloadStatus.Progress || downloadStatus is DownloadStatus.Verifying) {
+        Button(
+          onClick = { UpdateDownloader.cancel() },
+          colors = ButtonDefaults.buttonColors(RFColors.TextTertiary)
+        ) {
+          Text(
+            text = stringResource(Res.string.general_cancel),
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 13.sp
+          )
+        }
+      } else {
+        Button(
+          onClick = {
+            updateStatus = UpdateStatus.Checking
+            downloadStatus = null
+            scope.launch(Dispatchers.IO) {
+              UpdateHelper.checkForUpdates { status ->
+                scope.launch(Dispatchers.Main) { updateStatus = status }
+              }
+            }
+          },
+          colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+          enabled = downloadStatus == null || downloadStatus is DownloadStatus.Error || downloadStatus is DownloadStatus.Success || downloadStatus is DownloadStatus.Cancelled
+        ) {
+          Text(
+            text = stringResource(Res.string.settings_about_check_updates_button),
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 13.sp
+          )
+        }
       }
     }
 
     if (updateStatus is UpdateStatus.Available) {
       Spacer(modifier = Modifier.height(8.dp))
-      val releaseUrl = (updateStatus as UpdateStatus.Available).releaseUrl
+      val releaseUrl = (updateStatus as UpdateStatus.Available).updateInfo.releaseUrl
       Text(
         text = releaseUrl,
-        color = Color(0xFF64B5F6),
+        color = RFColors.LinkBlue,
         fontSize = 12.sp,
         modifier = Modifier.clickable {
           if (Desktop.isDesktopSupported()) {
@@ -986,7 +1153,7 @@ private fun SeedTableSettingsPanel(wm: WindowManager? = null) {
         val dateStr = String.format(stringResource(Res.string.settings_seed_table_date_format), createdDate, days, hours)
         Text(
           text = String.format(stringResource(Res.string.settings_seed_table_applied), s.playerCount, dateStr),
-          color = if (s.isStale) RFColors.AccentRed else Color(0xFF66BB6A),
+          color = if (s.isStale) RFColors.AccentRed else RFColors.UpdateGreen,
           fontSize = 13.sp,
           fontWeight = FontWeight.Medium
         )

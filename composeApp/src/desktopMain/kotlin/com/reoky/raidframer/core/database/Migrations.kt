@@ -235,3 +235,10 @@ val MIGRATION_25_26 = object : Migration(25, 26) {
   }
 }
 
+// added autoUpdateEnabled to ConfigEntity
+val MIGRATION_26_27 = object : Migration(26, 27) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN autoUpdateEnabled INTEGER NOT NULL DEFAULT 1").use { it.step() }
+  }
+}
+

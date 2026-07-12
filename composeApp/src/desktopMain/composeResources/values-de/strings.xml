@@ -382,6 +382,19 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="settings_update_check_failed">Update-Prüfung fehlgeschlagen</string>
     <string name="settings_update_checking">Prüfe...</string>
     <string name="settings_about_github_note">Prüft github.com auf neue Versionen. Keine Daten werden an einen Server gesendet.</string>
+    <string name="settings_auto_update_toggle">Beim Start nach Updates suchen</string>
+    <string name="settings_update_download_install_button">Herunterladen &amp; installieren</string>
+    <string name="settings_update_downloading">Herunterladen… %1$d%%  (%2$s / %3$s)</string>
+    <string name="settings_update_verifying">Download-Integrität wird überprüft…</string>
+    <string name="settings_update_installing">Installation… Die App wird geschlossen und neu installiert. Möglicherweise müssen Sie das Spiel danach neu starten.</string>
+    <string name="settings_update_download_failed">Download fehlgeschlagen: %1$s</string>
+    <string name="settings_update_install_complete">Installation abgeschlossen! Sie können die App neu starten.</string>
+    <string name="settings_update_cancelled">Download abgebrochen.</string>
+    <string name="combat_update_tooltip">Update verfügbar: Version %1$s</string>
+    <string name="update_dialog_title">Update verfügbar</string>
+    <string name="update_dialog_message">Eine neue Version (%1$s) ist verfügbar.\nSie verwenden derzeit Version %2$s.\n\nDie App wird geschlossen, neu installiert und neu gestartet. Möglicherweise müssen Sie das Spiel danach neu starten.</string>
+    <string name="update_dialog_install">Herunterladen &amp; installieren</string>
+    <string name="update_dialog_later">Später</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Raid-Management &amp; Anwesenheit</string>

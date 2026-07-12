@@ -382,8 +382,21 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="settings_update_available">Update available: %1$s</string>
     <string name="settings_update_up_to_date">You are running the latest version</string>
     <string name="settings_update_check_failed">Failed to check for updates</string>
-    <string name="settings_update_checking">Checking...</string>
+    <string name="settings_update_checking">Checking…</string>
     <string name="settings_about_github_note">Checks github.com for new releases. No data is sent to any server.</string>
+    <string name="settings_auto_update_toggle">Check for updates on startup</string>
+    <string name="settings_update_download_install_button">Download &amp; Install</string>
+    <string name="settings_update_downloading">Downloading… %1$d%%  (%2$s / %3$s)</string>
+    <string name="settings_update_verifying">Verifying download integrity…</string>
+    <string name="settings_update_installing">Installing… the app will close and reinstall. You may need to relaunch the game afterwards.</string>
+    <string name="settings_update_download_failed">Download failed: %1$s</string>
+    <string name="settings_update_install_complete">Install complete! You can restart the app.</string>
+    <string name="settings_update_cancelled">Download cancelled.</string>
+    <string name="combat_update_tooltip">Version %1$s Update Available</string>
+    <string name="update_dialog_title">Update Available</string>
+    <string name="update_dialog_message">A new version (%1$s) is available.\nYou are currently on version %2$s.\n\nThe app will close, reinstall, and relaunch. You may need to relaunch the game afterwards.</string>
+    <string name="update_dialog_install">Download &amp; Install</string>
+    <string name="update_dialog_later">Later</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Raid Management &amp; Attendance</string>

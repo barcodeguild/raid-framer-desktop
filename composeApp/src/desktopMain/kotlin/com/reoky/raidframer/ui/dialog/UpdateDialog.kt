@@ -22,19 +22,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.helpers.RFColors
-import com.reoky.raidframer.quit
+import com.reoky.raidframer.core.helper.UpdateInfo
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.exit_dialog_title
-import raid_framer_desktop.composeapp.generated.resources.exit_dialog_message
-import raid_framer_desktop.composeapp.generated.resources.exit_dialog_dismiss
-import raid_framer_desktop.composeapp.generated.resources.general_exit
+import raid_framer_desktop.composeapp.generated.resources.update_dialog_title
+import raid_framer_desktop.composeapp.generated.resources.update_dialog_message
+import raid_framer_desktop.composeapp.generated.resources.update_dialog_install
+import raid_framer_desktop.composeapp.generated.resources.update_dialog_later
 
 @Composable
-fun exitDialog(shouldShowExitDialog: MutableState<Boolean>) {
-  if (shouldShowExitDialog.value) {
-    Dialog(onDismissRequest = { shouldShowExitDialog.value = false }) {
+fun updateDialog(
+  shouldShowUpdateDialog: MutableState<Boolean>,
+  updateInfo: UpdateInfo?,
+  onDownloadAndInstall: (UpdateInfo) -> Unit
+) {
+  if (shouldShowUpdateDialog.value && updateInfo != null) {
+    Dialog(onDismissRequest = { shouldShowUpdateDialog.value = false }) {
       Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color.Black,
@@ -42,14 +47,14 @@ fun exitDialog(shouldShowExitDialog: MutableState<Boolean>) {
       ) {
         Column(modifier = Modifier.padding(16.dp)) {
           Text(
-            stringResource(Res.string.exit_dialog_title),
+            stringResource(Res.string.update_dialog_title),
             color = Color.White,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
           )
           Spacer(modifier = Modifier.height(6.dp))
           Text(
-            stringResource(Res.string.exit_dialog_message),
+            stringResource(Res.string.update_dialog_message, updateInfo.version, AppGlobals.APP_VERSION),
             color = Color.White,
             fontSize = 12.sp,
             lineHeight = 15.sp
@@ -61,17 +66,20 @@ fun exitDialog(shouldShowExitDialog: MutableState<Boolean>) {
             verticalAlignment = Alignment.CenterVertically
           ) {
             Button(
-              onClick = { shouldShowExitDialog.value = false },
+              onClick = { shouldShowUpdateDialog.value = false },
               colors = ButtonDefaults.buttonColors(Color.White),
               modifier = Modifier.padding(end = 8.dp)
             ) {
-              Text(stringResource(Res.string.exit_dialog_dismiss), color = Color.Black, fontSize = 12.sp)
+              Text(stringResource(Res.string.update_dialog_later), color = Color.Black, fontSize = 12.sp)
             }
             Button(
-              onClick = { quit() },
-              colors = ButtonDefaults.buttonColors(Color.Red.copy(alpha = 0.75f))
+              onClick = {
+                shouldShowUpdateDialog.value = false
+                onDownloadAndInstall(updateInfo)
+              },
+              colors = ButtonDefaults.buttonColors(RFColors.UpdateGreen)
             ) {
-              Text(stringResource(Res.string.general_exit), color = Color.White, fontSize = 12.sp)
+              Text(stringResource(Res.string.update_dialog_install), color = Color.White, fontSize = 12.sp)
             }
           }
         }

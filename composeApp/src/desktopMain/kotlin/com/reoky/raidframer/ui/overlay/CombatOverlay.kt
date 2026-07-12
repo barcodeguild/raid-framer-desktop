@@ -37,11 +37,18 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helper.UpdateHelper
 import org.jetbrains.compose.resources.stringResource
 import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.ui.dialog.exitDialog
+import com.reoky.raidframer.ui.dialog.updateDialog
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Surface
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.unit.IntOffset
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_damage
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_heals
@@ -52,6 +59,7 @@ import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_cc
 import raid_framer_desktop.composeapp.generated.resources.combat_no_columns_message
 import raid_framer_desktop.composeapp.generated.resources.combat_open_settings
 import raid_framer_desktop.composeapp.generated.resources.combat_press_plus_to_record
+import raid_framer_desktop.composeapp.generated.resources.combat_update_tooltip
 
 @Preview
 @Composable
@@ -70,6 +78,23 @@ fun CombatOverlay(wm: WindowManager? = null) {
 
   val shouldShowExitDialog = remember { mutableStateOf(false) }
   exitDialog(shouldShowExitDialog)
+
+  // Update dialog — shown once on startup if an update is available
+  val shouldShowUpdateDialog = remember { mutableStateOf(false) }
+  val pendingUpdate by UpdateHelper.pendingUpdate.collectAsState()
+  LaunchedEffect(pendingUpdate) {
+    if (pendingUpdate != null && !shouldShowUpdateDialog.value) {
+      shouldShowUpdateDialog.value = true
+    }
+  }
+  updateDialog(
+    shouldShowUpdateDialog = shouldShowUpdateDialog,
+    updateInfo = pendingUpdate,
+    onDownloadAndInstall = {
+      UpdateHelper.shouldScrollToUpdate = true
+      wm?.openWindow(OverlayType.SETTINGS)
+    }
+  )
 
   // Collect the sorted lists from the PlayerCacheInteractor
   val sortedDamage by PlayerCacheInteractor.topDamage.collectAsState()
@@ -273,9 +298,37 @@ fun CombatOverlay(wm: WindowManager? = null) {
               val summaryInteractionSource = remember { MutableInteractionSource() }
               Text(text = "\uf200", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (summaryInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = summaryInteractionSource))
             }
-            IconButton(onClick = { wm?.openWindow(OverlayType.SETTINGS) }, modifier = Modifier.size(32.dp)) {
+            // Settings cog — turns yellow when an update is available, with hover tooltip
+            var showSettingsTooltip by remember { mutableStateOf(false) }
+            Box {
               val settingsInteractionSource = remember { MutableInteractionSource() }
-              Text(text = "\uf013", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (settingsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = settingsInteractionSource))
+              val isSettingsHovered by settingsInteractionSource.collectIsHoveredAsState()
+              val hasUpdate = pendingUpdate != null
+              val cogColor = when {
+                isSettingsHovered -> Color.Red
+                hasUpdate -> RFColors.UpdateGold
+                else -> Color.White
+              }
+              IconButton(onClick = { wm?.openWindow(OverlayType.SETTINGS) }, modifier = Modifier.size(32.dp)) {
+                Text(text = "\uf013", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = cogColor, modifier = Modifier.hoverable(interactionSource = settingsInteractionSource))
+              }
+              if (hasUpdate && isSettingsHovered) {
+                Popup(alignment = Alignment.TopCenter, offset = IntOffset(0, 36)) {
+                  Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    elevation = 4.dp,
+                    color = Color.Black.copy(alpha = 0.9f),
+                    border = BorderStroke(1.dp, Color.Gray)
+                  ) {
+                    Text(
+                      text = stringResource(Res.string.combat_update_tooltip, pendingUpdate!!.version),
+                      color = Color.White,
+                      modifier = Modifier.padding(6.dp),
+                      fontSize = 11.sp
+                    )
+                  }
+                }
+              }
             }
             IconButton(onClick = {
               if (CombatLogInteractor.isRecording.value) {

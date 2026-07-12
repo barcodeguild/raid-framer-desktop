@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 26
+const val SCHEMA_VERSION = 27
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -103,7 +103,10 @@ data class ConfigEntity(
   val seedTableFileName: String = "",
 
   // Language preference (empty = use system locale)
-  val preferredLanguage: String = ""
+  val preferredLanguage: String = "",
+
+  // Auto-update settings
+  val autoUpdateEnabled: Boolean = true
 )
 
 /*

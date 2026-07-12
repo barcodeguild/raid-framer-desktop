@@ -114,18 +114,23 @@ fun MultiPlayerMetricLineChart(
   var samplesPerGroup by remember { mutableStateOf<List<List<TimeSample>>>(emptyList()) }
   var viewportOffset by remember { mutableStateOf(Float.POSITIVE_INFINITY) }
   var isDragging by remember { mutableStateOf(false) }
-  var latestStartX by remember { mutableStateOf(0f) }
+  var dragSessionId by remember { mutableStateOf(0L) }
   val dragLock = LocalDragLock.current
-
-  val historyMinutes = max(selectedMinutes * 3, selectedMinutes + 10)
 
   val displayBucketSizeMs = remember(selectedMinutes) {
     when {
       selectedMinutes <= 1 -> 1000L
       selectedMinutes <= 5 -> 2000L
       selectedMinutes <= 15 -> 5000L
-      else -> 10000L
+      else -> 30000L
     }
+  }
+
+  val historyMinutes = remember(selectedMinutes, displayBucketSizeMs) {
+    val viewportDataPoints = selectedMinutes * 60L * 1000L / displayBucketSizeMs
+    val historyDataPoints = (viewportDataPoints * 1.5).toLong()
+    val minutes = (historyDataPoints * displayBucketSizeMs / 60_000.0).toInt()
+    max(minutes, selectedMinutes + 10)
   }
 
   val labelIncrementSec = remember(selectedMinutes) {
@@ -141,11 +146,32 @@ fun MultiPlayerMetricLineChart(
     max(1f, (labelIncrementSec * 1000L / displayBucketSizeMs).toFloat())
   }
 
+  val latestGraphStartX = remember(samplesPerGroup, selectedMinutes, displayBucketSizeMs) {
+    val sampleCount = samplesPerGroup.firstOrNull()?.size ?: 0
+    val maxX = (sampleCount - 1).toFloat().coerceAtLeast(1f)
+    val viewportWidth = (selectedMinutes * 60L * 1000L / displayBucketSizeMs)
+      .toFloat()
+      .coerceAtLeast(1f)
+      .coerceAtMost(maxX)
+    (maxX - viewportWidth).coerceAtLeast(0f)
+  }
+
+  // The polling coroutine must always observe the latest interaction state.
+  // Otherwise, it can apply an old live-edge fetch after dragging starts.
+  val currentIsDragging by rememberUpdatedState(isDragging)
+  val currentViewportOffset by rememberUpdatedState(viewportOffset)
+  val currentDragSessionId by rememberUpdatedState(dragSessionId)
+  val currentLatestGraphStartX by rememberUpdatedState(latestGraphStartX)
+
   LaunchedEffect(stableGroupKey, selectedMinutes, mode, forceSlidingWindow, metricType) {
     val bucketSize = displayBucketSizeMs
     while (true) {
-      val atLatest = !isDragging && (!viewportOffset.isFinite() || viewportOffset >= latestStartX - 1f)
-      if (atLatest) {
+      val fetchStartedAtLatest =
+        !currentIsDragging &&
+            (!currentViewportOffset.isFinite() ||
+                currentViewportOffset >= currentLatestGraphStartX - 1f)
+      if (fetchStartedAtLatest) {
+        val fetchDragSessionId = currentDragSessionId
         val computedPerGroup = withContext(Dispatchers.Default) {
           val now = System.currentTimeMillis()
           val groupCards = usedGroups.map { spec ->
@@ -173,7 +199,20 @@ fun MultiPlayerMetricLineChart(
             bucketTimestamps.map { m -> TimeSample(m, buckets[m] ?: 0L) }
           }
         }
-        samplesPerGroup = computedPerGroup
+        // Do not apply a fetch that started before the user began dragging.
+        // Applying it can replace the current viewport and make the graph jump.
+        if (!currentIsDragging && currentDragSessionId == fetchDragSessionId) {
+          // Only reset to the live edge if the viewport is still there when
+          // the fetch completes. A drag may have started while the fetch ran.
+          val stillAtLatest =
+            !currentViewportOffset.isFinite() ||
+                currentViewportOffset >= currentLatestGraphStartX - 1f
+
+          if (fetchStartedAtLatest && stillAtLatest) {
+            viewportOffset = Float.POSITIVE_INFINITY
+          }
+          samplesPerGroup = computedPerGroup
+        }
       }
       delay(1000L)
     }
@@ -229,13 +268,15 @@ fun MultiPlayerMetricLineChart(
           max(maxVal.toFloat(), 10f) * 1.1f
         }
 
-        val viewportWidth = (selectedMinutes * 60 - 1).toFloat().coerceAtLeast(1f)
+        val viewportWidth = (selectedMinutes * 60L * 1000L / displayBucketSizeMs).toFloat().coerceAtLeast(1f)
           .coerceAtMost(maxX)
-        latestStartX = (maxX - viewportWidth).coerceAtLeast(0f)
+        val latestStartX = (maxX - viewportWidth).coerceAtLeast(0f)
         val visibleStartX = remember(viewportOffset, maxX, viewportWidth) {
           (if (viewportOffset.isFinite()) viewportOffset else latestStartX)
             .coerceIn(0f, latestStartX)
         }
+        val currentVisibleStartX by rememberUpdatedState(visibleStartX)
+        val currentLatestStartX by rememberUpdatedState(latestStartX)
 
         val trendLines: List<List<DefaultPoint<Float, Float>>?> = remember(dataSeries, maxY) {
           dataSeries.map { series: List<DefaultPoint<Float, Float>> ->
@@ -246,10 +287,18 @@ fun MultiPlayerMetricLineChart(
           (visibleStartX + viewportWidth).coerceAtMost(maxX)
         }
 
+        val visibleDataSeries = remember(dataSeries, visibleStartX, visibleEndX) {
+          dataSeries.map { series ->
+            val startIdx = (visibleStartX.toInt() - 1).coerceAtLeast(0)
+            val endIdx = (visibleEndX.toInt() + 2).coerceAtMost(series.size)
+            series.subList(startIdx, endIdx)
+          }
+        }
+
         Box(
           modifier = Modifier
             .fillMaxSize()
-            .pointerInput(maxX, viewportWidth, latestStartX) {
+            .pointerInput(maxX, viewportWidth) {
               awaitPointerEventScope {
                 var dragging = false
                 var lastX = 0f
@@ -259,14 +308,16 @@ fun MultiPlayerMetricLineChart(
                   when (event.type) {
                     PointerEventType.Press -> {
                       dragging = true
+                      dragSessionId++
                       isDragging = true
                       lastX = event.changes.first().position.x
-                      dragStartOffset = visibleStartX
+                      dragStartOffset = currentVisibleStartX
                       dragLock.value = true
                     }
                     PointerEventType.Release -> {
                       dragging = false
                       isDragging = false
+
                     }
                     PointerEventType.Move -> {
                       if (dragging && event.changes.any { it.pressed }) {
@@ -276,7 +327,7 @@ fun MultiPlayerMetricLineChart(
                         if (size.width > 0 && viewportWidth > 0f) {
                           val pixelsPerUnit = size.width / viewportWidth
                           dragStartOffset = (dragStartOffset - deltaX / pixelsPerUnit)
-                            .coerceIn(0f, latestStartX)
+                            .coerceIn(0f, currentLatestStartX)
                           viewportOffset = dragStartOffset
                         }
                       }
@@ -308,7 +359,7 @@ fun MultiPlayerMetricLineChart(
             val idx = xVal.toInt()
             val label = if (idx in 0 until count && sessionStart > 0L) {
               val relSecs = (timestamps[idx] - sessionStart) / 1000L
-              if (relSecs < 0) "" else formatLabel((relSecs / labelIncrementSec) * labelIncrementSec)
+              if (relSecs <= 0) "" else formatLabel((relSecs / labelIncrementSec) * labelIncrementSec)
             } else ""
             Text(text = label, style = typography.caption, color = Color.LightGray)
           },
@@ -317,7 +368,7 @@ fun MultiPlayerMetricLineChart(
             Text(text = label, style = typography.caption, color = Color.LightGray)
           }
         ) {
-          dataSeries.forEachIndexed { idx, series ->
+          visibleDataSeries.forEachIndexed { idx, series ->
             val color = usedGroups.getOrNull(idx)?.color ?: Color(0xFFEF5350)
             AreaPlot2<Float, Float>(
               data = series,

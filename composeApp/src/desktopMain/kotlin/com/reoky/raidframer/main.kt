@@ -15,6 +15,7 @@ import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
+import com.reoky.raidframer.core.helper.UpdateHelper
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.DeathAccumulatorInteractor
@@ -108,6 +109,20 @@ fun main(args: Array<String>) {
     PetAccumulatorInteractor.start()
     CombatLogInteractor.start(delay = 3000L)
     SeedTableInteractor.start(delay = 2000L)
+
+    // Background update check on startup (non-blocking, silent)
+    context.launch(Dispatchers.IO) {
+      if (RFConfig.state.value.autoUpdateEnabled) {
+        Log.info(TAG, "Checking for updates on startup...")
+        UpdateHelper.checkForUpdates { status ->
+          if (status is com.reoky.raidframer.core.helper.UpdateStatus.Available) {
+            Log.info(TAG, "Update available: ${status.updateInfo.version}")
+          } else {
+            Log.info(TAG, "No update available or check failed.")
+          }
+        }
+      }
+    }
 
     // file path args processing
     val incoming = args.firstOrNull { it.endsWith(".log", ignoreCase = true) || it.endsWith(".rfst", ignoreCase = true) }
