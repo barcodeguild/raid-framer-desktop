@@ -1,7 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 val APP_NAME = "Raid Framer"
-val APP_VERSION = "2.1.5"
+val APP_VERSION = "2.1.6"
 val PACKAGE_ID = "com.reoky.raidframer"
 
 plugins {
@@ -62,12 +62,13 @@ compose.desktop {
       copyright = "© 2026 Raid Framer. All rights reserved."
       vendor = "by ~ catreo ~"
 
+
       /* MSI Package Meta */
       targetFormats(TargetFormat.Msi)
       windows {
         iconFile.set(project.file("raidframer.ico"))
         upgradeUuid = "547fdeb1-3ac5-4df9-9925-6ac9e7b18943"
-        dirChooser = true
+        dirChooser = true // whether to show the wizard ~
         msiPackageVersion = APP_VERSION
         menu = true
         shortcut = true

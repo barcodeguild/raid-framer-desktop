@@ -382,6 +382,19 @@
     <string name="settings_update_check_failed">检查更新失败</string>
     <string name="settings_update_checking">检查中...</string>
     <string name="settings_about_github_note">检查github.com获取新版本。不会向任何服务器发送数据。</string>
+    <string name="settings_auto_update_toggle">启动时检查更新</string>
+    <string name="settings_update_download_install_button">下载并安装</string>
+    <string name="settings_update_downloading">下载中… %1$d%%  (%2$s / %3$s)</string>
+    <string name="settings_update_verifying">验证下载完整性…</string>
+    <string name="settings_update_installing">安装中… 应用将关闭并重新安装。之后您可能需要重新启动游戏。</string>
+    <string name="settings_update_download_failed">下载失败: %1$s</string>
+    <string name="settings_update_install_complete">安装完成！您可以重启应用。</string>
+    <string name="settings_update_cancelled">下载已取消。</string>
+    <string name="combat_update_tooltip">版本 %1$s 可用更新</string>
+    <string name="update_dialog_title">有可用更新</string>
+    <string name="update_dialog_message">新版本 (%1$s) 已可用。\n您当前使用的版本是 %2$s。\n\n应用将关闭、重新安装并重启。之后您可能需要重新启动游戏。</string>
+    <string name="update_dialog_install">下载并安装</string>
+    <string name="update_dialog_later">稍后</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">团队管理和出勤</string>

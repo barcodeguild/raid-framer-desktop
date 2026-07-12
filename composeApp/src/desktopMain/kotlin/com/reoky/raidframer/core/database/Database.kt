@@ -63,6 +63,7 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_23_24) // 07/07/26 added combat custom category columns to config
   .addMigrations(MIGRATION_24_25) // 07/11/26 added player_session_totals table for historical session views
   .addMigrations(MIGRATION_25_26) // 07/11/26 added companionShowDebugInfo and companionShowDeathsPerMinute to config
+  .addMigrations(MIGRATION_26_27) // 07/12/26 added autoUpdateEnabled to config
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

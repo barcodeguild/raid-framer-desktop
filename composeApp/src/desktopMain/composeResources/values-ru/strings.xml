@@ -382,6 +382,19 @@
     <string name="settings_update_check_failed">Не удалось проверить обновления</string>
     <string name="settings_update_checking">Проверка...</string>
     <string name="settings_about_github_note">Проверяет github.com на наличие новых релизов. Никакие данные не отправляются ни на какой сервер.</string>
+    <string name="settings_auto_update_toggle">Проверять обновления при запуске</string>
+    <string name="settings_update_download_install_button">Скачать и установить</string>
+    <string name="settings_update_downloading">Загрузка… %1$d%%  (%2$s / %3$s)</string>
+    <string name="settings_update_verifying">Проверка целостности загрузки…</string>
+    <string name="settings_update_installing">Установка… приложение закроется и переустановится. Возможно, потребуется перезапустить игру.</string>
+    <string name="settings_update_download_failed">Ошибка загрузки: %1$s</string>
+    <string name="settings_update_install_complete">Установка завершена! Вы можете перезапустить приложение.</string>
+    <string name="settings_update_cancelled">Загрузка отменена.</string>
+    <string name="combat_update_tooltip">Доступно обновление: версия %1$s</string>
+    <string name="update_dialog_title">Доступно обновление</string>
+    <string name="update_dialog_message">Доступна новая версия (%1$s).\nВы используете версию %2$s.\n\nПриложение закроется, переустановится и перезапустится. Возможно, потребуется перезапустить игру.</string>
+    <string name="update_dialog_install">Скачать и установить</string>
+    <string name="update_dialog_later">Позже</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Управление рейдом и посещаемость</string>

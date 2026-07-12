@@ -31,6 +31,11 @@ object RFColors {
   val AccentRed = Color(0xFFDC143C)
   val AccentRedMuted = Color(0xFFD08080)
 
+  // Update / dialog colors
+  val UpdateGreen = Color(0xFF66BB6A)
+  val UpdateGold = Color(0xFFFFCA28)
+  val LinkBlue = Color(0xFF64B5F6)
+
   val dpsOrange = Color(249, 191, 59, 255)
   val healsGreen = Color(105, 235, 113, 255)
   val ccCyan = Color.Cyan

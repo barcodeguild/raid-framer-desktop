@@ -382,6 +382,19 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="settings_update_check_failed">Falha ao verificar atualizações</string>
     <string name="settings_update_checking">Verificando...</string>
     <string name="settings_about_github_note">Verifica github.com por novos lançamentos. Nenhum dado é enviado para nenhum servidor.</string>
+    <string name="settings_auto_update_toggle">Verificar atualizações ao iniciar</string>
+    <string name="settings_update_download_install_button">Baixar &amp; Instalar</string>
+    <string name="settings_update_downloading">Baixando… %1$d%%  (%2$s / %3$s)</string>
+    <string name="settings_update_verifying">Verificando integridade do download…</string>
+    <string name="settings_update_installing">Instalando… o app será fechado e reinstalado. Você pode precisar reiniciar o jogo depois.</string>
+    <string name="settings_update_download_failed">Falha no download: %1$s</string>
+    <string name="settings_update_install_complete">Instalação concluída! Você pode reiniciar o app.</string>
+    <string name="settings_update_cancelled">Download cancelado.</string>
+    <string name="combat_update_tooltip">Versão %1$s disponível</string>
+    <string name="update_dialog_title">Atualização Disponível</string>
+    <string name="update_dialog_message">Uma nova versão (%1$s) está disponível.\nVocê está usando a versão %2$s.\n\nO app será fechado, reinstalado e reiniciado. Você pode precisar reiniciar o jogo depois.</string>
+    <string name="update_dialog_install">Baixar &amp; Instalar</string>
+    <string name="update_dialog_later">Mais Tarde</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Gerenciamento de Raid &amp; Frequência</string>
