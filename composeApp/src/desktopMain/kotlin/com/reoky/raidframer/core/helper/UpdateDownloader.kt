@@ -158,12 +158,19 @@ object UpdateDownloader {
       val msiexecPath = findMsiexec()
       val msiPath = msiFile.absolutePath
 
-      // Build the msiexec command: passive mode shows progress but doesn't require clicks
+      val installLogFile = File(
+        System.getProperty("java.io.tmpdir"),
+        "RaidFramer-install-${System.currentTimeMillis()}.log"
+      )
+
+      // Build the msiexec command: passive mode shows progress but doesn't require clicks.
+      // The verbose log provides a reliable installation-completion signal.
       val command = listOf(
         msiexecPath,
         "/i", msiPath,
         "/passive",
-        "/norestart"
+        "/norestart",
+        "/l*v", installLogFile.absolutePath
       )
 
       Log.info(TAG, "Running: ${command.joinToString(" ")}")
@@ -174,7 +181,7 @@ object UpdateDownloader {
 
       // Spawn an independent watcher process that outlives the main app.
       // It finds the exe, waits for the file to stabilize, then relaunches the app.
-      spawnRelaunchWatcher()
+      spawnRelaunchWatcher(installLogFile.absolutePath)
 
       true
     } catch (e: Exception) {
@@ -188,12 +195,34 @@ object UpdateDownloader {
    * polls until the file's date modified stabilizes (>5 seconds old), then relaunches.
    * The script survives exitProcess(0) because it's a detached OS process.
    */
-  private fun spawnRelaunchWatcher() {
+  private fun spawnRelaunchWatcher(installLogPath: String) {
     try {
       val d = "$" // Kotlin raw strings still interpolate $, so build the PS vars separately
       val script = """
-        |# Wait for the installer to finish writing files
-        |Start-Sleep -Seconds 10
+        |param([string]${d}LogPath)
+        |
+        |# Wait for Windows Installer to report successful completion in its verbose log.
+        |${d}deadline = [DateTime]::Now.AddMinutes(10)
+        |${d}installComplete = ${d}false
+        |while ([DateTime]::Now -lt ${d}deadline) {
+        |  if (Test-Path -LiteralPath ${d}LogPath) {
+        |    ${d}log = Get-Content -LiteralPath ${d}LogPath -Raw -ErrorAction SilentlyContinue
+        |    if (${d}log -match "Installation completed successfully") {
+        |      ${d}installComplete = ${d}true
+        |      break
+        |    }
+        |    if (${d}log -match "Installation failed" -or ${d}log -match "Return value 3") {
+        |      Write-Host "The MSI installation failed."
+        |      exit 1
+        |    }
+        |  }
+        |  Start-Sleep -Milliseconds 500
+        |}
+        |
+        |if (-not ${d}installComplete) {
+        |  Write-Host "Timed out waiting for MSI installation to complete."
+        |  exit 1
+        |}
         |
         |${d}exePath = ${d}null
         |
@@ -232,17 +261,39 @@ object UpdateDownloader {
         |
         |Write-Host "Found exe: ${d}exePath"
         |
-        |# Wait until the file's date modified is >5 seconds old (install complete)
-        |${d}timeout = [DateTime]::Now.AddMinutes(5)
-        |while ([DateTime]::Now -lt ${d}timeout) {
-        |  ${d}lastWrite = (Get-Item ${d}exePath).LastWriteTime
-        |  ${d}age = [DateTime]::Now - ${d}lastWrite
-        |  if (${d}age.TotalSeconds -gt 5) { break }
-        |  Start-Sleep -Seconds 2
+        |# Wait until the installed executable exists and can be opened.
+        |# The MSI log is the completion signal; this check handles final file replacement
+        |# and makes sure the executable is available before relaunching.
+        |${d}fileDeadline = [DateTime]::Now.AddMinutes(2)
+        |${d}fileReady = ${d}false
+        |while ([DateTime]::Now -lt ${d}fileDeadline) {
+        |  if (Test-Path -LiteralPath ${d}exePath -PathType Leaf) {
+        |    try {
+        |      ${d}stream = [System.IO.File]::Open(
+        |        ${d}exePath,
+        |        [System.IO.FileMode]::Open,
+        |        [System.IO.FileAccess]::Read,
+        |        [System.IO.FileShare]::ReadWrite -bor [System.IO.FileShare]::Delete
+        |      )
+        |      ${d}stream.Dispose()
+        |      ${d}fileReady = ${d}true
+        |      break
+        |    } catch {
+        |      # The installer may still be replacing or releasing the executable.
+        |    }
+        |  }
+        |  Start-Sleep -Milliseconds 250
+        |}
+        |
+        |if (-not ${d}fileReady) {
+        |  Write-Host "Timed out waiting for the installed executable to become available."
+        |  exit 1
         |}
         |
         |Write-Host "Launching ${d}exePath"
         |Start-Process -FilePath ${d}exePath
+        |
+        |Remove-Item -LiteralPath ${d}LogPath -Force -ErrorAction SilentlyContinue
         |
         |# Self-delete the script
         |Remove-Item -Path ${d}PSCommandPath -Force -ErrorAction SilentlyContinue
@@ -252,7 +303,11 @@ object UpdateDownloader {
       psFile.writeText(script)
 
       ProcessBuilder(
-        "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", psFile.absolutePath
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-File", psFile.absolutePath,
+        "-LogPath", installLogPath
       ).start()
 
       Log.info(TAG, "Spawned relaunch watcher: ${psFile.absolutePath}")
