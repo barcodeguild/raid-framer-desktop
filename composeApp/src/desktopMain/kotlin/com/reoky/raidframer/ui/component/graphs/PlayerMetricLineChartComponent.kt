@@ -117,15 +117,20 @@ fun MultiPlayerMetricLineChart(
   var latestStartX by remember { mutableStateOf(0f) }
   val dragLock = LocalDragLock.current
 
-  val historyMinutes = max(selectedMinutes * 3, selectedMinutes + 10)
-
   val displayBucketSizeMs = remember(selectedMinutes) {
     when {
       selectedMinutes <= 1 -> 1000L
       selectedMinutes <= 5 -> 2000L
       selectedMinutes <= 15 -> 5000L
-      else -> 10000L
+      else -> 30000L
     }
+  }
+
+  val historyMinutes = remember(selectedMinutes, displayBucketSizeMs) {
+    val viewportDataPoints = selectedMinutes * 60L * 1000L / displayBucketSizeMs
+    val historyDataPoints = (viewportDataPoints * 1.5).toLong()
+    val minutes = (historyDataPoints * displayBucketSizeMs / 60_000.0).toInt()
+    max(minutes, selectedMinutes + 10)
   }
 
   val labelIncrementSec = remember(selectedMinutes) {
@@ -229,7 +234,7 @@ fun MultiPlayerMetricLineChart(
           max(maxVal.toFloat(), 10f) * 1.1f
         }
 
-        val viewportWidth = (selectedMinutes * 60 - 1).toFloat().coerceAtLeast(1f)
+        val viewportWidth = (selectedMinutes * 60L * 1000L / displayBucketSizeMs).toFloat().coerceAtLeast(1f)
           .coerceAtMost(maxX)
         latestStartX = (maxX - viewportWidth).coerceAtLeast(0f)
         val visibleStartX = remember(viewportOffset, maxX, viewportWidth) {
@@ -244,6 +249,14 @@ fun MultiPlayerMetricLineChart(
         }
         val visibleEndX = remember(visibleStartX, maxX, viewportWidth) {
           (visibleStartX + viewportWidth).coerceAtMost(maxX)
+        }
+
+        val visibleDataSeries = remember(dataSeries, visibleStartX, visibleEndX) {
+          dataSeries.map { series ->
+            val startIdx = (visibleStartX.toInt() - 1).coerceAtLeast(0)
+            val endIdx = (visibleEndX.toInt() + 2).coerceAtMost(series.size)
+            series.subList(startIdx, endIdx)
+          }
         }
 
         Box(
@@ -317,7 +330,7 @@ fun MultiPlayerMetricLineChart(
             Text(text = label, style = typography.caption, color = Color.LightGray)
           }
         ) {
-          dataSeries.forEachIndexed { idx, series ->
+          visibleDataSeries.forEachIndexed { idx, series ->
             val color = usedGroups.getOrNull(idx)?.color ?: Color(0xFFEF5350)
             AreaPlot2<Float, Float>(
               data = series,
