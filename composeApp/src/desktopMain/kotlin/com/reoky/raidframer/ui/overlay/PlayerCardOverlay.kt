@@ -20,6 +20,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -907,31 +908,33 @@ private fun SessionScopeDropdown(
       maxLines = 1
     )
 
-    ExposedDropdownMenu(
-      expanded = expanded,
-      onDismissRequest = { expanded = false },
-      modifier = Modifier
-        .width(210.dp)
-        .clip(RoundedCornerShape(8.dp))
-        .background(RFColors.CardBackground)
-        .border(1.dp, RFColors.CardBorder, RoundedCornerShape(8.dp))
+    MaterialTheme(
+      colors = MaterialTheme.colors.copy(surface = RFColors.CardBackground)
     ) {
-      SessionScope.entries.forEach { scope ->
-        DropdownMenuItem(
-          onClick = {
-            onSelected(scope)
-            expanded = false
-          },
-          content = {
-            Text(
-              text = sessionScopeLabel(scope),
-              color = if (scope == selected) RFColors.AccentRed else RFColors.TextPrimary,
-              fontWeight = if (scope == selected) FontWeight.Bold else FontWeight.Normal,
-              fontSize = 12.sp,
-              maxLines = 1
-            )
-          }
-        )
+      ExposedDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        modifier = Modifier
+          .width(210.dp)
+          .border(1.dp, RFColors.CardBorder, RoundedCornerShape(8.dp))
+      ) {
+        SessionScope.entries.forEach { scope ->
+          DropdownMenuItem(
+            onClick = {
+              onSelected(scope)
+              expanded = false
+            },
+            content = {
+              Text(
+                text = sessionScopeLabel(scope),
+                color = if (scope == selected) RFColors.AccentRed else RFColors.TextPrimary,
+                fontWeight = if (scope == selected) FontWeight.Bold else FontWeight.Normal,
+                fontSize = 12.sp,
+                maxLines = 1
+              )
+            }
+          )
+        }
       }
     }
   }
