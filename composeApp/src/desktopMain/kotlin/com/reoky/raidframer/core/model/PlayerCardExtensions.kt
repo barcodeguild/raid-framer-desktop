@@ -9,6 +9,7 @@ import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
 import com.reoky.raidframer.core.definitions.silencedDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithPotionDetectionMiddleWare
+import com.reoky.raidframer.core.definitions.isOdeToRecovery
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 /**
@@ -49,7 +50,8 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
-  val isOde = if (event.spell.contains("Ode to Recovery")) true else false // is this ode?
+  val isOde = isOdeToRecovery(event.spell)
+  val allowOdeAsHeal = RFConfig.state.value.allowOdeToRecoveryCountAsHeals
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
@@ -57,11 +59,15 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
       lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount
     ),
     recentHealEvents = (this.recentHealEvents + event).takeLast(200),
-    sessionHealTotal = this.sessionHealTotal + event.amount,
+    sessionHealTotal = if (isOde && !allowOdeAsHeal) this.sessionHealTotal else this.sessionHealTotal + event.amount,
     sessionOdeHealsTotal = if (isOde) this.sessionOdeHealsTotal + event.amount else this.sessionOdeHealsTotal,
     sessionSpellHealMap = run {
       val spellKey = event.spell.ifBlank { "Unknown" }
-      this.sessionSpellHealMap + (spellKey to ((this.sessionSpellHealMap[spellKey] ?: 0L) + event.amount))
+      if (isOde && !allowOdeAsHeal) {
+        this.sessionSpellHealMap
+      } else {
+        this.sessionSpellHealMap + (spellKey to ((this.sessionSpellHealMap[spellKey] ?: 0L) + event.amount))
+      }
     }
   )
 }
@@ -88,13 +94,15 @@ fun PlayerCard.postDamageTakenEvent(event: DamageEvent): PlayerCard {
  */
 fun PlayerCard.postHealsReceivedEvent(event: HealEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  val isOde = isOdeToRecovery(event.spell)
+  val allowOdeAsHeal = RFConfig.state.value.allowOdeToRecoveryCountAsHeals
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
       lifetimeTotalHealsReceived = cache.lifetimeTotalHealsReceived + event.amount
     ),
-    sessionHealsReceivedTotal = this.sessionHealsReceivedTotal + event.amount
+    sessionHealsReceivedTotal = if (isOde && !allowOdeAsHeal) this.sessionHealsReceivedTotal else this.sessionHealsReceivedTotal + event.amount
   )
 }
 

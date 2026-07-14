@@ -77,6 +77,7 @@ Você ainda deve completar a desinstalação do aplicativo principal desinstalan
     <string name="settings_split_chat">Ativar overlay de janela split-chat estilo OSRS. (Em Breve)</string>
     <string name="settings_tabbed_detection">Ocultar automaticamente overlays do jogo enquanto estiver fora do jogo em abas. Não se aplica a dicas de ferramenta (aquelas com barra de título).</string>
     <string name="settings_allow_pve_damage">Permitir que Dano PvE seja contado para DPS/Contadores de Kills. (Útil para jogadores solo que querem ver sua saída de dano contra alvos PvE)</string>
+    <string name="settings_allow_ode_to_recovery_count_as_heals">Permitir que Ode à Recuperação seja contado como cura nos rankings de cura.</string>
     <string name="settings_game_schedule_hotkey">Ativar [SEGURAR TAB] para trazer o site oficial de programação de eventos no jogo como overlay. (Em Breve)</string>
     <string name="settings_use_sadly">Prefiro usar Sadly.io para dados de programação no jogo. (Em Breve)</string>
     <string name="settings_dragon_breath_overlay">Ativar detector e contador de bafo de dragão. (Nota: Você ainda precisa estar no alcance de 100 metros do cavaleiro de dragão para testemunhar os baforos, isso não é mágica amigos!) (Em Breve)</string>

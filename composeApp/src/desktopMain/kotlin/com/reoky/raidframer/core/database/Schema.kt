@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 27
+const val SCHEMA_VERSION = 28
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -106,7 +106,10 @@ data class ConfigEntity(
   val preferredLanguage: String = "",
 
   // Auto-update settings
-  val autoUpdateEnabled: Boolean = true
+  val autoUpdateEnabled: Boolean = true,
+
+  // Ode to Recovery heal filtering
+  val allowOdeToRecoveryCountAsHeals: Boolean = false
 )
 
 /*

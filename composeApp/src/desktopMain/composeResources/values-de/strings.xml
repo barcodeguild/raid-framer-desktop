@@ -77,6 +77,7 @@ Sie sollten immer noch die Deinstallation der Hauptanwendung abschließen, indem
     <string name="settings_split_chat">OSRS-artiges Split-Chat-Fenster-Overlay aktivieren. (Demnächst)</string>
     <string name="settings_tabbed_detection">Spiel-Overlays automatisch ausblenden, während aus dem Spiel herausgetabbt. Gilt nicht für Tooltips (die mit Titelleiste).</string>
     <string name="settings_allow_pve_damage">PvE-Schaden zu DPS/Kill-Zählern zählen lassen. (Nützlich für Einzelspieler, die ihre Schadensausgabe gegen PvE-Ziele sehen möchten)</string>
+    <string name="settings_allow_ode_to_recovery_count_as_heals">Ode an die Genesung als Heilung in Heilungsranglisten zählen lassen.</string>
     <string name="settings_game_schedule_hotkey">[TAB HALTEN] aktivieren, um die offizielle In-Game-Eventplan-Website als Overlay anzuzeigen. (Demnächst)</string>
     <string name="settings_use_sadly">Ich würde lieber Sadly.io für In-Game-Eventplandaten verwenden. (Demnächst)</string>
     <string name="settings_dragon_breath_overlay">Drachenatem-Detektor und -Zähler-Overlay aktivieren. (Hinweis: Sie müssen immer noch in 100-Meter-Reichweite des Drachenreiters sein, um die Atemzüge zu sehen, das ist keine Magie Freunde!) (Demnächst)</string>

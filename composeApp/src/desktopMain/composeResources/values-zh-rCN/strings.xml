@@ -77,6 +77,7 @@
     <string name="settings_split_chat">启用OSRS风格的分割聊天窗口覆盖。(即将推出)</string>
     <string name="settings_tabbed_detection">在标签页切换出游戏时自动隐藏游戏覆盖。不适用于工具提示(那些有标题栏的)。</string>
     <string name="settings_allow_pve_damage">允许PvE伤害计入DPS/击杀计数器。(对于想要查看对PvE目标伤害输出的单人玩家很有用)</string>
+    <string name="settings_allow_ode_to_recovery_count_as_heals">允许生命乐章被计入治疗排名中的治疗量。</string>
     <string name="settings_game_schedule_hotkey">启用[按住TAB]以将官方游戏内活动时间表网站作为覆盖层显示。(即将推出)</string>
     <string name="settings_use_sadly">我更愿意使用Sadly.io获取游戏内时间表数据。(即将推出)</string>
     <string name="settings_dragon_breath_overlay">启用龙息检测器和计数器覆盖。(注意:您仍需在龙骑士100米范围内才能目睹龙息，这不是魔法朋友们!)(即将推出)</string>
