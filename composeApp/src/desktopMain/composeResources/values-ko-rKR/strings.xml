@@ -232,9 +232,9 @@
     <string name="summary_top_debuffs">디버프 순위</string>
     <string name="summary_top_songs">피리 순위</string>
     <string name="summary_top_buffs">버프 순위</string>
-    <string name="summary_top_ode_haranya">♪ 동대륙 치무 ♪</string>
-    <string name="summary_top_ode_nuia">♪ 서대륙 치무 ♪</string>
-    <string name="summary_top_ode_pirate">♪ 해적 치무 ♪</string>
+    <string name="summary_top_ode_haranya">동대륙 치무</string>
+    <string name="summary_top_ode_nuia">서대륙 치무</string>
+    <string name="summary_top_ode_pirate">해적 치무</string>
     <string name="summary_top_kills_haranya">동대륙 킬 순위</string>
     <string name="summary_top_kills_nuia">서대륙 킬 순위</string>
     <string name="summary_top_kills_pirate">해적 킬 순위</string>

@@ -232,9 +232,9 @@
     <string name="summary_top_debuffs">Топ дебаффов</string>
     <string name="summary_top_songs">Топ песен</string>
     <string name="summary_top_buffs">Топ баффов</string>
-    <string name="summary_top_ode_haranya">♪ Топ Ода Харанья ♪</string>
-    <string name="summary_top_ode_nuia">♪ Топ Ода Нуиан ♪</string>
-    <string name="summary_top_ode_pirate">♪ Топ Ода Пиратов ♪</string>
+    <string name="summary_top_ode_haranya">Топ Ода Харанья</string>
+    <string name="summary_top_ode_nuia">Топ Ода Нуиан</string>
+    <string name="summary_top_ode_pirate">Топ Ода Пиратов</string>
     <string name="summary_top_kills_haranya">Топ убийств Харанья</string>
     <string name="summary_top_kills_nuia">Топ убийств Нуиан</string>
     <string name="summary_top_kills_pirate">Топ убийств Пиратов</string>

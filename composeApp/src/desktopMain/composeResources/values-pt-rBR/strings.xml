@@ -232,9 +232,9 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="summary_top_debuffs">Top Debuffs</string>
     <string name="summary_top_songs">Top Músicas</string>
     <string name="summary_top_buffs">Top Buffs</string>
-    <string name="summary_top_ode_haranya">♪ Top Ode Haranya ♪</string>
-    <string name="summary_top_ode_nuia">♪ Top Ode Nuia ♪</string>
-    <string name="summary_top_ode_pirate">♪ Top Ode Pirata ♪</string>
+    <string name="summary_top_ode_haranya">Top Ode Haranya</string>
+    <string name="summary_top_ode_nuia">Top Ode Nuia</string>
+    <string name="summary_top_ode_pirate">Top Ode Pirata</string>
     <string name="summary_top_kills_haranya">Top Kills Haranya</string>
     <string name="summary_top_kills_nuia">Top Kills Nuia</string>
     <string name="summary_top_kills_pirate">Top Kills Pirata</string>

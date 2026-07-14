@@ -232,9 +232,9 @@
     <string name="summary_top_debuffs">减益榜</string>
     <string name="summary_top_songs">歌曲榜</string>
     <string name="summary_top_buffs">增益榜</string>
-    <string name="summary_top_ode_haranya">♪ 哈拉尼亚颂歌 ♪</string>
-    <string name="summary_top_ode_nuia">♪ 努伊安颂歌 ♪</string>
-    <string name="summary_top_ode_pirate">♪ 海盗颂歌 ♪</string>
+    <string name="summary_top_ode_haranya">哈拉尼亚颂歌</string>
+    <string name="summary_top_ode_nuia">努伊安颂歌</string>
+    <string name="summary_top_ode_pirate">海盗颂歌</string>
     <string name="summary_top_kills_haranya">哈拉尼亚击杀榜</string>
     <string name="summary_top_kills_nuia">努伊安击杀榜</string>
     <string name="summary_top_kills_pirate">海盗击杀榜</string>
