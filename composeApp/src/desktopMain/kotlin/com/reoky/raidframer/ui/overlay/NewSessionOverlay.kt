@@ -92,9 +92,9 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
     val baseName = if (selectedEventType == SESSION_TYPE_DONT_CARE) {
       "dont_care"
     } else if (isCustomEvent) {
-      customEventName.lowercase().replace(Regex("[^a-z0-9]+"), "_")
+      customEventName.lowercase().replace(Regex("[^a-z0-9]+"), "_").trim('_')
     } else {
-      selectedEventType.lowercase().replace(Regex("[^a-z0-9]+"), "_")
+      selectedEventType.lowercase().replace(Regex("[^a-z0-9]+"), "_").trim('_')
     }
     val modeSuffix = if (allowPvEDamage) "pve" else "pvp"
     val timeSuffix = SimpleDateFormat("HHmm'Z'", Locale.US).apply { timeZone = java.util.TimeZone.getTimeZone("UTC") }.format(Date())
