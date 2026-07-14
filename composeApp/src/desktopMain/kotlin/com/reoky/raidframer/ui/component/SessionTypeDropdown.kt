@@ -8,6 +8,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -18,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
@@ -115,31 +115,33 @@ fun SessionTypeDropdown(
       maxLines = 1
     )
 
-    ExposedDropdownMenu(
-      expanded = expanded,
-      onDismissRequest = { expanded = false },
-      modifier = Modifier
-        .fillMaxWidth()
-        .clip(RoundedCornerShape(8.dp))
-        .background(RFColors.CardBackground)
-        .border(1.dp, RFColors.CardBorder, RoundedCornerShape(8.dp))
+    MaterialTheme(
+      colors = MaterialTheme.colors.copy(surface = RFColors.CardBackground)
     ) {
-      SESSION_TYPES.forEach { type ->
-        DropdownMenuItem(
-          onClick = {
-            onTypeSelected(type)
-            expanded = false
-          },
-          content = {
-            Text(
-              text = type,
-              color = if (type == selectedType) RFColors.AccentRed else RFColors.TextPrimary,
-              fontWeight = if (type == selectedType) FontWeight.Bold else FontWeight.Normal,
-              fontSize = 12.sp,
-              maxLines = 1
-            )
-          }
-        )
+      ExposedDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        modifier = Modifier
+          .fillMaxWidth()
+          .border(1.dp, RFColors.CardBorder, RoundedCornerShape(8.dp))
+      ) {
+        SESSION_TYPES.forEach { type ->
+          DropdownMenuItem(
+            onClick = {
+              onTypeSelected(type)
+              expanded = false
+            },
+            content = {
+              Text(
+                text = type,
+                color = if (type == selectedType) RFColors.AccentRed else RFColors.TextPrimary,
+                fontWeight = if (type == selectedType) FontWeight.Bold else FontWeight.Normal,
+                fontSize = 12.sp,
+                maxLines = 1
+              )
+            }
+          )
+        }
       }
     }
   }

@@ -34,6 +34,7 @@ import raid_framer_desktop.composeapp.generated.resources.about_go_to_settings_b
 import raid_framer_desktop.composeapp.generated.resources.about_package_label
 import raid_framer_desktop.composeapp.generated.resources.about_read_settings_instruction
 import raid_framer_desktop.composeapp.generated.resources.about_source_label
+import raid_framer_desktop.composeapp.generated.resources.about_special_thanks
 import raid_framer_desktop.composeapp.generated.resources.about_staff_dedication
 import raid_framer_desktop.composeapp.generated.resources.about_thanks_label
 import raid_framer_desktop.composeapp.generated.resources.about_thanks_location
@@ -204,21 +205,25 @@ fun AboutOverlay(wm: WindowManager? = null) {
             color = Color.White
           )
           Spacer(modifier = Modifier.height(16.dp))
+          val thanksNames = listOf("Spaguetti", "Xizde", "매콤신우", "Zilus")
+          val thanksText = stringResource(
+            Res.string.about_special_thanks,
+            *thanksNames.toTypedArray()
+          )
           Text(
             text = buildAnnotatedString {
-              append("With special thanks to ")
-              withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                append("Spaguetti")
+              var remaining = thanksText
+              for (name in thanksNames) {
+                val idx = remaining.indexOf(name)
+                if (idx >= 0) {
+                  append(remaining.substring(0, idx))
+                  withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(name)
+                  }
+                  remaining = remaining.substring(idx + name.length)
+                }
               }
-              append(", ")
-              withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                append("Xizde")
-              }
-              append(", and ")
-              withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                append("Zilus")
-              }
-              append("!")
+              append(remaining)
             },
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,

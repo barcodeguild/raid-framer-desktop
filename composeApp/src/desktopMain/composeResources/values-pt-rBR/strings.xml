@@ -77,6 +77,7 @@ Você ainda deve completar a desinstalação do aplicativo principal desinstalan
     <string name="settings_split_chat">Ativar overlay de janela split-chat estilo OSRS. (Em Breve)</string>
     <string name="settings_tabbed_detection">Ocultar automaticamente overlays do jogo enquanto estiver fora do jogo em abas. Não se aplica a dicas de ferramenta (aquelas com barra de título).</string>
     <string name="settings_allow_pve_damage">Permitir que Dano PvE seja contado para DPS/Contadores de Kills. (Útil para jogadores solo que querem ver sua saída de dano contra alvos PvE)</string>
+    <string name="settings_allow_ode_to_recovery_count_as_heals">Permitir que Ode à Recuperação seja contado como cura nos rankings de cura.</string>
     <string name="settings_game_schedule_hotkey">Ativar [SEGURAR TAB] para trazer o site oficial de programação de eventos no jogo como overlay. (Em Breve)</string>
     <string name="settings_use_sadly">Prefiro usar Sadly.io para dados de programação no jogo. (Em Breve)</string>
     <string name="settings_dragon_breath_overlay">Ativar detector e contador de bafo de dragão. (Nota: Você ainda precisa estar no alcance de 100 metros do cavaleiro de dragão para testemunhar os baforos, isso não é mágica amigos!) (Em Breve)</string>
@@ -121,6 +122,7 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="about_community_dedication">À comunidade ArcheRage pelo apoio e feedback. ~</string>
     <string name="about_staff_dedication">À equipe ArcheRage pela dedicação e trabalho árduo. ~</string>
     <string name="about_dev_dedication">Aos desenvolvedores ArcheRage pelo apoio contínuo e atualizações. ~</string>
+    <string name="about_special_thanks">Agradecimento especial a %1$s, %2$s, %3$s e %4$s!</string>
 
     <!-- Player Card -->
     <string name="player_card_no_cached_data">Nenhum dado em cache disponível.</string>
@@ -230,9 +232,9 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="summary_top_debuffs">Top Debuffs</string>
     <string name="summary_top_songs">Top Músicas</string>
     <string name="summary_top_buffs">Top Buffs</string>
-    <string name="summary_top_ode_haranya">♪ Top Ode Haranya ♪</string>
-    <string name="summary_top_ode_nuia">♪ Top Ode Nuia ♪</string>
-    <string name="summary_top_ode_pirate">♪ Top Ode Pirata ♪</string>
+    <string name="summary_top_ode_haranya">Top Ode Haranya</string>
+    <string name="summary_top_ode_nuia">Top Ode Nuia</string>
+    <string name="summary_top_ode_pirate">Top Ode Pirata</string>
     <string name="summary_top_kills_haranya">Top Kills Haranya</string>
     <string name="summary_top_kills_nuia">Top Kills Nuia</string>
     <string name="summary_top_kills_pirate">Top Kills Pirata</string>

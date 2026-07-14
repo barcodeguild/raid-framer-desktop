@@ -462,6 +462,12 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       label = stringResource(Res.string.settings_allow_pve_damage)
     )
 
+    SettingsCheckbox(
+      checked = config.allowOdeToRecoveryCountAsHeals,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(allowOdeToRecoveryCountAsHeals = isChecked) } },
+      label = stringResource(Res.string.settings_allow_ode_to_recovery_count_as_heals)
+    )
+
 //    SettingsCheckbox(
 //      checked = config.gameScheduleHotkeyEnabled,
 //      onCheckedChange = { isChecked -> RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) } },

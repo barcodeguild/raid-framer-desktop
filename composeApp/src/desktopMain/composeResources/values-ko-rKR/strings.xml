@@ -11,14 +11,14 @@
     <string name="companion_toggle_raid_status">플레이어가 공격대에 참여하거나 떠날 때 메인/공동 공격대 인원 수를 표시합니다.</string>
     <string name="companion_toggle_display_charmed">게임 채팅 창에 '매혹' 대상 표시.</string>
     <string name="companion_toggle_display_silenced">게임 채팅 창에 '침묵' 대상 표시.</string>
-    <string name="companion_toggle_display_distressed">게임 채팅 창에 '고통' 대상 표시.</string>
+    <string name="companion_toggle_display_distressed">게임 채팅 창에 '강위축' 대상 표시.</string>
     <string name="companion_toggl_display_mark_hvt_healers">가장 가치 있는 적 힐러 위에 [하트 표시]를 표시합니다. (누적 PvP 힐량 기준 상위 3명 적 힐러.)</string>
     <string name="companion_toggle_display_mark_hvt_dps">가장 가치 있는 적 DPS 위에 [교차 검 표시]를 표시합니다. (누적 PvP 피해량 기준 상위 3명 적 DPS.)</string>
     <string name="companion_toggle_display_mark_hvt_cc">가치 있는 적 CC 마법사 위에 [방패 표시]를 표시해 멀리하세요. (누적 PvP 군중 제어 시간 기준 상위 3명 적 CC.)</string>
-    <string name="companion_toggle_display_mark_sac_dancers">희생 무용수가 시전하는 동안 신의 빛을 표시합니다. (기본 게임 효과보다 더 쉽게 찾을 수 있습니다.)</string>
+    <string name="companion_toggle_display_mark_sac_dancers">댄서가 희춤을 시전하는 동안 신의 빛을 표시합니다. (기본 게임 효과보다 더 쉽게 찾을 수 있습니다.)</string>
     <string name="companion_toggle_display_mark_charmed_targets">플레이어 머리 위에 [보라색 점]을 표시하여 매혹되었음을 나타냅니다.</string>
     <string name="companion_toggle_display_mark_silenced_targets">플레이어 머리 위에 [검은 점]을 표시하여 침묵되었음을 나타냅니다.</string>
-    <string name="companion_toggle_display_mark_distressed_targets">플레이어 머리 위에 [파란 점]을 표시하여 고통 중임을 나타냅니다.</string>
+    <string name="companion_toggle_display_mark_distressed_targets">플레이어 머리 위에 [파란 점]을 표시하여 강위축 중임을 나타냅니다.</string>
 
     <!-- New Session Overlay -->
     <string name="new_session_title">새 녹화 세션</string>
@@ -35,7 +35,7 @@
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop 설정</string>
     <string name="settings_data_sourcing_title">데이터 소스</string>
-    <string name="settings_data_sourcing_description">아래에서 올바른 ArcheRage 문서 디렉토리를 보고 있는지 확인하세요. 게임 문서 디렉토리가 자동으로 감지되었습니다. 올바른 디렉토리가 보이지 않거나 아래 텍스트가 빨간색이면 버그를 신고하세요.</string>
+    <string name="settings_data_sourcing_description">아래에 표시된 ArcheRage 문서(Documents) 디렉터리가 올바른지 확인해 주십시오. 게임의 문서 디렉터리는 자동으로 감지되었습니다. 올바른 디렉터리가 아니거나 아래 텍스트가 빨간색으로 표시된다면 버그를 신고해 주시기 바랍니다.</string>
     <string name="settings_toggle_pvp_damage">PvP 피해만 표시</string>
     <string name="settings_toggle_show_mini_graph">미니 DPS/HEALS/CC 그래프 오버레이 활성화</string>
     <string name="settings_lua_options_title">Lua 옵션</string>
@@ -50,13 +50,13 @@
     <string name="settings_enter_name_placeholder">캐릭터 이름 입력</string>
     <string name="settings_uninstall_done_text">Lua 애드온이 게임 폴더에서 안전하게 제거되었습니다.
 
-**그러나**
+        **그러나**
 
-Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 제거를 완료해야 합니다. (이 앱입니다) 제거하지 않고 앱을 다시 열면 애드온이 여전히 작동하도록 Lua 애드온이 게임 폴더에 다시 복사됩니다. (원하는 대로) 감사합니다! 지금 종료합니다!</string>
+        Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 제거를 완료해야 합니다. (이 앱입니다) 제거하지 않고 앱을 다시 열면 애드온이 여전히 작동하도록 Lua 애드온이 게임 폴더에 다시 복사됩니다. (원하는 대로) 감사합니다! 지금 종료합니다!</string>
     <string name="settings_mini_graph_description">DPS/HEALS/CC 미니 그래프 활성화. 시간에 따른 성능 표시.</string>
-    <string name="settings_show_heals_column">힐 열 표시</string>
-    <string name="settings_show_cc_column">CC 열 표시</string>
-    <string name="settings_show_damage_column">피해 열 표시</string>
+    <string name="settings_show_heals_column">치유량 표시</string>
+    <string name="settings_show_cc_column">cc횟수 표시</string>
+    <string name="settings_show_damage_column">피해량 표시</string>
     <string name="settings_combat_custom_categories_title">커스텀 카테고리</string>
     <string name="settings_combat_custom_categories_description">전투 오버레이에 열로 표시할 추가 카테고리를 최대 3개까지 선택하세요. 피해, 힐, CC와 함께 표시됩니다.</string>
     <string name="settings_combat_custom_category_1">커스텀 카테고리 1</string>
@@ -65,25 +65,26 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="category_none">없음</string>
     <string name="category_charms">매혹</string>
     <string name="category_silences">침묵</string>
-    <string name="category_distresses">고통</string>
+    <string name="category_distresses">강위축</string>
     <string name="category_debuffs">디버프</string>
     <string name="category_songs">노래</string>
     <string name="category_buffs">버프</string>
     <string name="category_potions">물약</string>
-    <string name="category_gliders">글라이더</string>
+    <string name="category_gliders">날틀</string>
     <string name="category_items">아이템</string>
     <string name="settings_combat_overlay_title">전투 오버레이</string>
     <string name="settings_combat_fade_controls">커서가 오버레이를 벗어나면 아이콘 컨트롤 자동 페이드.</string>
     <string name="settings_split_chat">OSRS 스타일 분할 채팅 창 오버레이 활성화. (곧 출시)</string>
     <string name="settings_tabbed_detection">게임에서 탭으로 나갔을 때 게임 오버레이 자동 숨기기. 툴팁(제목 표시줄 있는 것)에는 적용되지 않습니다.</string>
     <string name="settings_allow_pve_damage">PvE 피해가 DPS/킬 카운터에 포함되도록 허용. (PvE 대상에 대한 피해량을 보고 싶은 솔로 플레이어에게 유용)</string>
+    <string name="settings_allow_ode_to_recovery_count_as_heals">치유의 무곡이 치유 순위에서 치유로 계산되도록 허용.</string>
     <string name="settings_game_schedule_hotkey">[TAB 길게 누르기]로 공식 인게임 이벤트 일정 웹사이트를 오버레이로 표시. (곧 출시)</string>
     <string name="settings_use_sadly">인게임 일정 데이터에 Sadly.io 사용 선호. (곧 출시)</string>
     <string name="settings_dragon_breath_overlay">드래곤 브레스 감지기 및 카운터 오버레이 활성화. (참고: 드래곤 라이더의 100미터 범위 내에 있어야 브레스를 볼 수 있습니다, 이건 마법이 아닙니다 친구들!) (곧 출시)</string>
     <string name="settings_uninstall_confirm_title">제거 확인</string>
     <string name="settings_uninstall_confirm_text">Lua 애드온을 제거하시겠습니까? 게임 통합이 제거됩니다.
 
-계속하기 전에 게임을 종료하세요, 그렇지 않으면 파일이 남습니다.</string>
+        계속하기 전에 게임을 종료하세요, 그렇지 않으면 파일이 남습니다.</string>
     <string name="settings_uninstall_confirm_button">제거</string>
     <string name="settings_uninstall_button">Lua 애드온 및 앱 제거</string>
     <string name="settings_player_remappings_button">플레이어 재매핑, PvP 듀얼 및 필터</string>
@@ -115,27 +116,28 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="about_go_to_settings_button">설정으로 이동</string>
     <string name="about_author_label">제작자:</string>
     <string name="about_author_name">~ Reoky ~</string>
-    <string name="about_dedication_text">동쪽과 가상 세계의 모든 친구들에게 헌정합니다. 이 코드가 선한 일에 사용되기를 바랍니다.</string>
+    <string name="about_dedication_text">동대륙과 아키레이지 세계의 모든 친구들에게 헌정합니다. 이 코드가 선한 일에 사용되기를 바랍니다.</string>
     <string name="about_thanks_label">감사합니다</string>
     <string name="about_thanks_location">통합 동부</string>
     <string name="about_community_dedication">ArcheRage 커뮤니티의 지원과 피드백에 감사드립니다. ~</string>
     <string name="about_staff_dedication">ArcheRage 스태프의 헌신과 노고에 감사드립니다. ~</string>
     <string name="about_dev_dedication">ArcheRage 개발자의 지속적인 지원과 업데이트에 감사드립니다. ~</string>
+    <string name="about_special_thanks">특별히 감사드립니다 %1$s, %2$s, %3$s, %4$s!</string>
 
     <!-- Player Card -->
     <string name="player_card_no_cached_data">사용 가능한 캐시 데이터가 없습니다.</string>
     <string name="player_card_title_format">%1$s 플레이어 카드</string>
     <string name="player_card_recent_item_uses">아이템 사용</string>
     <string name="player_card_recent_kd_short">최근 K/D</string>
-    <string name="player_card_recent_damage">최근 피해</string>
-    <string name="player_card_recent_heals">최근 힐</string>
+    <string name="player_card_recent_damage">최근 피해량</string>
+    <string name="player_card_recent_heals">최근 힐량</string>
     <string name="player_card_recent_kd">최근 킬 &amp; 데스</string>
-    <string name="player_card_recent_items">아이템 스킬 사용</string>
+    <string name="player_card_recent_items">스왑 아이템 사용</string>
     <string name="player_card_recent_buffs">버프 적용</string>
     <string name="player_card_recent_debuffs">디버프 적용</string>
     <string name="player_card_damage_by_skill">스킬별 피해</string>
     <string name="player_card_heals_by_skill">스킬별 치유</string>
-    <string name="player_card_cc_by_skill">스킬별 제어</string>
+    <string name="player_card_cc_by_skill">스킬별 cc</string>
     <string name="player_card_session_totals">세션 총계</string>
     <string name="player_card_lifetime_totals">생애 총계</string>
 
@@ -148,23 +150,23 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="player_card_no_historical_data">이 플레이어에 대해 보관된 세션이 없습니다.</string>
 
     <!-- More specific stat labels used in totals -->
-    <string name="player_card_stat_damage">총 피해</string>
-    <string name="player_card_stat_healing">총 힐</string>
+    <string name="player_card_stat_damage">총 피해량</string>
+    <string name="player_card_stat_healing">총 힐량</string>
     <string name="player_card_stat_cc">CC 전달</string>
     <string name="player_card_stat_buffs">버프</string>
     <string name="player_card_stat_debuffs">디버프</string>
     <string name="player_card_stat_charms">매혹</string>
-    <string name="player_card_stat_distress">고통</string>
+    <string name="player_card_stat_distress">강위축</string>
     <string name="player_card_stat_silence">침묵</string>
     <string name="player_card_stat_glider">글라이더 사용</string>
     <string name="player_card_stat_items">아이템 사용</string>
     <string name="player_card_stat_potions">물약</string>
     <string name="player_card_stat_kills">킬</string>
     <string name="player_card_stat_deaths">데스</string>
-    <string name="player_card_stat_kills_most_damage">킬 (최대 피해)</string>
-    <string name="player_card_stat_kills_killing_blow">킬 (막타)</string>
-    <string name="player_card_stat_total_damage_taken">총 받은 피해</string>
-    <string name="player_card_stat_total_heals_received">총 받은 힐</string>
+    <string name="player_card_stat_kills_most_damage">최대 피해량</string>
+    <string name="player_card_stat_kills_killing_blow">킬수</string>
+    <string name="player_card_stat_total_damage_taken">총 받은 피해량</string>
+    <string name="player_card_stat_total_heals_received">총 받은 힐량</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">플레이어 상세</string>
@@ -176,8 +178,8 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="pet_companion_dmg_label">동반자 피해</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">드래곤 브레스, 리소, 전투 펫 및 기타 생물</string>
-    <string name="pokemon_no_companions">아직 활성화된 동반자가 감지되지 않았습니다...</string>
+    <string name="pokemon_title">드래곤 브레스, 콩벌레, 전투 펫 및 기타 소환수</string>
+    <string name="pokemon_no_companions">아직 활성화된 소환수가 감지되지 않았습니다...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">알 수 없음: %1$s</string>
@@ -213,49 +215,49 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="combat_column_pve_damage">⚔️ PvE 피해 ⚔️</string>
     <string name="combat_column_pve_heals">💉 PvE 힐 💉</string>
     <string name="combat_column_pve_cc">⛨ PvE CC ⛨</string>
-    <string name="combat_no_columns_message">형제.. 적어도 하나의 카테고리는 추가해보세요..</string>
+    <string name="combat_no_columns_message">형님들.. 적어도 하나의 카테고리는 추가해보세요..</string>
     <string name="combat_open_settings">설정 열기</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>
     <string name="summary_silences_by_faction">진영별 침묵</string>
     <string name="summary_charms_by_faction">진영별 매혹</string>
-    <string name="summary_distresses_by_faction">진영별 고통</string>
+    <string name="summary_distresses_by_faction">진영별 강위축</string>
     <string name="summary_top_silences">침묵 순위</string>
     <string name="summary_top_charms">매혹 순위</string>
-    <string name="summary_top_distresses">고통 순위</string>
-    <string name="summary_top_haranya_spells_damage">하라니아 주문 피해 순위</string>
-    <string name="summary_top_nuia_spells_damage">누이안 주문 피해 순위</string>
+    <string name="summary_top_distresses">강위축 순위</string>
+    <string name="summary_top_haranya_spells_damage">동대륙 주문 피해 순위</string>
+    <string name="summary_top_nuia_spells_damage">서대륙 주문 피해 순위</string>
     <string name="summary_top_pirate_spells_damage">해적 주문 피해 순위</string>
     <string name="summary_top_debuffs">디버프 순위</string>
-    <string name="summary_top_songs">노래 순위</string>
+    <string name="summary_top_songs">피리 순위</string>
     <string name="summary_top_buffs">버프 순위</string>
-    <string name="summary_top_ode_haranya">♪ 하라니아 송가 ♪</string>
-    <string name="summary_top_ode_nuia">♪ 누이안 송가 ♪</string>
-    <string name="summary_top_ode_pirate">♪ 해적 송가 ♪</string>
-    <string name="summary_top_kills_haranya">하라니아 처치 순위</string>
-    <string name="summary_top_kills_nuia">누이안 처치 순위</string>
-    <string name="summary_top_kills_pirate">해적 처치 순위</string>
+    <string name="summary_top_ode_haranya">동대륙 치무</string>
+    <string name="summary_top_ode_nuia">서대륙 치무</string>
+    <string name="summary_top_ode_pirate">해적 치무</string>
+    <string name="summary_top_kills_haranya">동대륙 킬 순위</string>
+    <string name="summary_top_kills_nuia">서대륙 킬 순위</string>
+    <string name="summary_top_kills_pirate">해적 킬 순위</string>
     <string name="summary_top_damage_taken">받은 피해 순위</string>
     <string name="summary_top_heals_received">받은 힐 순위</string>
-    <string name="summary_top_potion_drinkers">물약 도전자 순위</string>
-    <string name="summary_top_glider_gamers">글라이더 도전자 순위</string>
+    <string name="summary_top_potion_drinkers">물약 사용 순위</string>
+    <string name="summary_top_glider_gamers">날틀 사용 순위</string>
     <string name="summary_most_item_usages">아이템 사용 순위</string>
-    <string name="summary_top_haranya_item_uses">하라니아 아이템 사용 순위</string>
-    <string name="summary_top_nuia_item_uses">누이안 아이템 사용 순위</string>
+    <string name="summary_top_haranya_item_uses">동대륙 아이템 사용 순위</string>
+    <string name="summary_top_nuia_item_uses">서대륙 아이템 사용 순위</string>
     <string name="summary_top_pirate_item_uses">해적 아이템 사용 순위</string>
-    <string name="summary_haranya_builds">하라니아 빌드</string>
-    <string name="summary_nuia_builds">누이안 빌드</string>
-    <string name="summary_pirate_builds">해적 빌드</string>
-    <string name="summary_top_haranya_performance">하라니아 성능 순위</string>
-    <string name="summary_top_nuia_performance">누이안 성능 순위</string>
-    <string name="summary_top_pirate_performance">해적 성능 순위</string>
+    <string name="summary_haranya_builds">동대륙 직업</string>
+    <string name="summary_nuia_builds">서대륙 직업</string>
+    <string name="summary_pirate_builds">해적 직업</string>
+    <string name="summary_top_haranya_performance">동대륙 mvp 순위</string>
+    <string name="summary_top_nuia_performance">서대륙 mvp 순위</string>
+    <string name="summary_top_pirate_performance">해적 mvp 순위</string>
 
     <!-- Summary Tab Labels -->
     <string name="summary_tab_debuffs">디버프</string>
     <string name="summary_tab_spells">스킬</string>
     <string name="summary_tab_buffs">버프</string>
-    <string name="summary_tab_ode">찬가</string>
+    <string name="summary_tab_ode">치무</string>
     <string name="summary_tab_kd">K/D</string>
     <string name="summary_tab_received">받은 피해/회복</string>
     <string name="summary_tab_items">아이템</string>
@@ -275,7 +277,7 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="app_tray_reset_positions">창 위치 재설정</string>
     <string name="app_replay_viewing_format">다음 위치의 전투 데이터를 재생 중입니다: %1$s
 
-재생 중에는 실시간 모니터링이 비활성화됩니다.</string>
+        재생 중에는 실시간 모니터링이 비활성화됩니다.</string>
     <string name="general_metric_type_cc">군중 제어</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">피해</string>
@@ -296,38 +298,38 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="leadership_gm">GM</string>
 
     <!-- Game Utility Items -->
-    <string name="item_name_kraken_scepter">크라켄 지팡이</string>
-    <string name="item_name_kraken_spear">크라켄 창</string>
-    <string name="item_name_kraken_shield">크라켄 방패</string>
-    <string name="item_name_lib_shield">도서관 방패</string>
-    <string name="item_name_library_greatclub">도서관 큰 몽둥이</string>
-    <string name="item_name_honor_nodachi">명예의 광란의 장도</string>
-    <string name="item_name_jola_shield">졸라의 원한</string>
-    <string name="item_name_halcy_neck">고요의 목걸이</string>
-    <string name="item_name_soul_neck">영혼의 목걸이</string>
-    <string name="item_name_mist_nodachi">파멸의 그림자 장도</string>
-    <string name="item_name_lib_bow">도서관/불멸의 수호자의 활</string>
-    <string name="item_name_lib_dagger">도서관/불멸의 수호자의 단검</string>
-    <string name="item_name_lib_shortspear">도서관/불멸의 수호자의 단창</string>
-    <string name="item_name_lib_staff">도서관/불멸의 수호자의 지팡이</string>
-    <string name="item_name_snake_greatsword">뱀의 대검 (날)</string>
-    <string name="item_name_snake_shield">뱀의 방패 (보루)</string>
-    <string name="item_name_snake_sword">뱀의 검 (면도날)</string>
-    <string name="item_name_snake_greataxe">뱀의 도끼 (육저 목표)</string>
-    <string name="item_name_snake_scepter">뱀의 지팡이 (스넵터/리치)</string>
-    <string name="item_name_snake_gun">뱀의 총 (탄환)</string>
-    <string name="item_name_bd_shield">흑룡 방패</string>
-    <string name="item_name_bd_club">흑룡 몽둥이</string>
-    <string name="item_name_bd_bow">흑룡 활 (눈갈라버리는자)</string>
-    <string name="item_name_bd_gun">흑룡 총 (물기)</string>
-    <string name="item_name_bd_staff">흑룡 지팡이 (포효)</string>
-    <string name="item_name_bd_sword">흑룡 검 (꼬리사신)</string>
-    <string name="item_name_bd_2h_sword">흑룡 양손검 (날개사신)</string>
-    <string name="item_name_sungold_anth_set_pull">선골 앤솔로지 세트 풀</string>
-    <string name="item_name_garden_anth_set_pull">정원 앤솔로지 세트 풀</string>
-    <string name="item_name_serp_staff">타락한 지혜 (세르펜티스)</string>
-    <string name="item_name_mist_dagger">안개 노래 사악한 속삭임 단검</string>
-    <string name="item_name_mist_shield">안개 노래 은신송곳니 방패</string>
+    <string name="item_name_kraken_scepter">크지</string>
+    <string name="item_name_kraken_spear">크창</string>
+    <string name="item_name_kraken_shield">크방</string>
+    <string name="item_name_lib_shield">도방</string>
+    <string name="item_name_library_greatclub">양둔</string>
+    <string name="item_name_honor_nodachi">광폭도</string>
+    <string name="item_name_jola_shield">샤방</string>
+    <string name="item_name_halcy_neck">황평목</string>
+    <string name="item_name_soul_neck">저밤목</string>
+    <string name="item_name_mist_nodachi">향뜰양도</string>
+    <string name="item_name_lib_bow">서고 활</string>
+    <string name="item_name_lib_dagger">서고 단검</string>
+    <string name="item_name_lib_shortspear">서고 한창</string>
+    <string name="item_name_lib_staff">서고 양지</string>
+    <string name="item_name_snake_greatsword">안키쉬 양손검</string>
+    <string name="item_name_snake_shield">안키쉬 방패 </string>
+    <string name="item_name_snake_sword">안키쉬 한손검</string>
+    <string name="item_name_snake_greataxe">안키쉬 양손도끼</string>
+    <string name="item_name_snake_scepter">안키쉬 지팡이</string>
+    <string name="item_name_snake_gun">안키쉬 총</string>
+    <string name="item_name_bd_shield">용방</string>
+    <string name="item_name_bd_club">용둔</string>
+    <string name="item_name_bd_bow">용활</string>
+    <string name="item_name_bd_gun">용총</string>
+    <string name="item_name_bd_staff">용팡이</string>
+    <string name="item_name_bd_sword">용 한손도</string>
+    <string name="item_name_bd_2h_sword">용 양손도</string>
+    <string name="item_name_sungold_anth_set_pull">짭탈사령</string>
+    <string name="item_name_garden_anth_set_pull">찐탈사령</string>
+    <string name="item_name_serp_staff">나차지팡이</string>
+    <string name="item_name_mist_dagger">향뜰단검</string>
+    <string name="item_name_mist_shield">향뜰방패</string>
 
     <!-- Game Potions -->
     <string name="potion_name_minor_healing_rank_one">장막의 불꽃 (하급 치유 물약)</string>
@@ -358,7 +360,7 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="potion_name_minor_mana_titan">타이탄의 마나 물약 (하급 마나 물약)</string>
 
     <string name="potion_name_phoenix_tears_tincture">불사조 눈물 팅크</string>
-    <string name="potion_name_wild_ginseng">야생 인삼! (なんてつく友達だ!)</string>
+    <string name="potion_name_wild_ginseng">산삼</string>
 
     <!-- PNG Export -->
     <string name="export_title_battle_summary">전투 요약</string>
@@ -406,17 +408,17 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="raid_tab_nearby_gear">근처 장비</string>
     <string name="raid_no_raid_detected">공격대 관리 기능을 사용하려면 공격대에 참여하세요. Lua 애드온이 설치되어 있어야 합니다. 제목 표시줄 있는 창은 오버레이가 아니므로 게임 UI를 가리지 않도록 다른 모니터에 배치하세요.</string>
     <string name="raid_main_raid_label">메인 공격대</string>
-    <string name="raid_coraid_label">공동 공격대</string>
+    <string name="raid_coraid_label">서브 공격대</string>
     <string name="raid_include_main_raid">메인 공격대 포함</string>
-    <string name="raid_include_coraid">공동 공격대 포함</string>
+    <string name="raid_include_coraid">서브 공격대 포함</string>
     <string name="raid_include_nearby_same_faction">근처 같은 진영 플레이어 포함</string>
     <string name="raid_include_nearby_opposite_faction">근처 반대 진영 플레이어 포함</string>
     <string name="raid_require_pvp_filter">최소한의 참여 요구. (25k 피해, 25k 힐 또는 25+ CC 포인트)</string>
-    <string name="raid_include_departed">공격대를 떠난 플레이어 포함</string>
+    <string name="raid_include_departed">공격대를 탈퇴한 유저 포함</string>
     <string name="raid_copy_attendance">출석 복사</string>
-    <string name="raid_haranya_faction">하라니아 진영 (%d)</string>
-    <string name="raid_nuian_faction">누이안 진영 (%d)</string>
-    <string name="raid_pirate_faction">해적 진영 (%d)</string>
+    <string name="raid_haranya_faction">동대륙 (%d)</string>
+    <string name="raid_nuian_faction">서대륙 (%d)</string>
+    <string name="raid_pirate_faction">해적 (%d)</string>
     <string name="raid_close">닫기</string>
     <string name="raid_nearby_disclaimer">근처에서 전투 이벤트를 생성한 플레이어만 표시합니다. 은신한 플레이어는 감지하지 못합니다.</string>
     <string name="raid_nearby_require_pvp">참여 요구 (25k 피해, 25k 힐 또는 25+ CC)</string>
@@ -438,9 +440,9 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="settings_seed_table_remove">제거</string>
     <string name="settings_seed_table_date_format">%s (%dd %dh 전)</string>
     <string name="seed_table_apply_prompt">다음 위치에서 시드 테이블을 적용하시겠습니까:
-%s
+        %s
 
-이렇게 하면 앱이 이 시드 테이블을 플레이어 데이터 참조로 사용할 수 있습니다.</string>
+        이렇게 하면 앱이 이 시드 테이블을 플레이어 데이터 참조로 사용할 수 있습니다.</string>
     <string name="seed_table_apply_title">시드 테이블 적용</string>
     <string name="seed_table_file_not_found">지정된 시드 테이블 파일을 찾을 수 없습니다: %s</string>
     <string name="seed_table_applied_success">시드 테이블이 성공적으로 적용되었습니다!</string>

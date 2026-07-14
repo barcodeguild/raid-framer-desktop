@@ -242,3 +242,10 @@ val MIGRATION_26_27 = object : Migration(26, 27) {
   }
 }
 
+// added allowOdeToRecoveryCountAsHeals to ConfigEntity for filtering Ode heals in rankings
+val MIGRATION_27_28 = object : Migration(27, 28) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN allowOdeToRecoveryCountAsHeals INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

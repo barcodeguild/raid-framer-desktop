@@ -201,7 +201,7 @@ fun main(args: Array<String>) {
     }
 
     if (statesLoaded) {
-      tray = spawnSystemTray(wm)
+      tray = rememberSystemTray(wm)
       Log.info(TAG, "Opening default windows...")
       OverlayContainer(wm)
     }
@@ -225,35 +225,40 @@ fun messageBox(title: String, message: String) {
  * off the screen, so the user has a way to get them back.
  */
 @Composable
-fun spawnSystemTray(wm: WindowManager): SystemTray {
-  val tray = SystemTray.get()
-  val helpString = stringResource(Res.string.general_help_window_postions_reset)
-
-  // Updated to use the type-safe Res accessor
+fun rememberSystemTray(wm: WindowManager): SystemTray {
+  val titleStr = stringResource(Res.string.app_tray_title)
+  val settingsStr = stringResource(Res.string.general_settings)
+  val aboutStr = stringResource(Res.string.general_about)
+  val resetStr = stringResource(Res.string.app_tray_reset_positions)
+  val exitStr = stringResource(Res.string.general_exit)
+  val helpStr = stringResource(Res.string.general_help_window_postions_reset)
   val iconImage = painterResource(Res.drawable.raidframer).toAwtImage(
     density = Density(1f),
     layoutDirection = LayoutDirection.Ltr,
     size = Size(32f, 32f)
   )
 
-  val titleMenuItem = MenuItem(stringResource(Res.string.app_tray_title))
-  titleMenuItem.setImage(iconImage)
-  tray.menu.add(titleMenuItem)
-  tray.menu.add(MenuItem(stringResource(Res.string.general_settings)) {
-    wm.openWindow(OverlayType.SETTINGS)
-  })
-  tray.menu.add(MenuItem(stringResource(Res.string.general_about)) {
-    wm.openWindow(OverlayType.ABOUT)
-  })
-  tray.menu.add(MenuItem(stringResource(Res.string.app_tray_reset_positions)) {
-    wm.resetAllWindowPositions()
-    messageBox(AppGlobals.APP_NAME, helpString)
-  })
-  tray.menu.add(MenuItem(stringResource(Res.string.general_exit)) {
-    quit()
-  })
-  tray.setImage(iconImage)
-  return tray
+  return remember(wm) {
+    val tray = SystemTray.get()
+    val titleMenuItem = MenuItem(titleStr)
+    titleMenuItem.setImage(iconImage)
+    tray.menu.add(titleMenuItem)
+    tray.menu.add(MenuItem(settingsStr) {
+      wm.openWindow(OverlayType.SETTINGS)
+    })
+    tray.menu.add(MenuItem(aboutStr) {
+      wm.openWindow(OverlayType.ABOUT)
+    })
+    tray.menu.add(MenuItem(resetStr) {
+      wm.resetAllWindowPositions()
+      messageBox(AppGlobals.APP_NAME, helpStr)
+    })
+    tray.menu.add(MenuItem(exitStr) {
+      quit()
+    })
+    tray.setImage(iconImage)
+    tray
+  }
 }
 
 private fun acquireSingleInstanceMutex(): Boolean {

@@ -77,6 +77,7 @@
     <string name="settings_split_chat">启用OSRS风格的分割聊天窗口覆盖。(即将推出)</string>
     <string name="settings_tabbed_detection">在标签页切换出游戏时自动隐藏游戏覆盖。不适用于工具提示(那些有标题栏的)。</string>
     <string name="settings_allow_pve_damage">允许PvE伤害计入DPS/击杀计数器。(对于想要查看对PvE目标伤害输出的单人玩家很有用)</string>
+    <string name="settings_allow_ode_to_recovery_count_as_heals">允许生命乐章被计入治疗排名中的治疗量。</string>
     <string name="settings_game_schedule_hotkey">启用[按住TAB]以将官方游戏内活动时间表网站作为覆盖层显示。(即将推出)</string>
     <string name="settings_use_sadly">我更愿意使用Sadly.io获取游戏内时间表数据。(即将推出)</string>
     <string name="settings_dragon_breath_overlay">启用龙息检测器和计数器覆盖。(注意:您仍需在龙骑士100米范围内才能目睹龙息，这不是魔法朋友们!)(即将推出)</string>
@@ -121,6 +122,7 @@
     <string name="about_community_dedication">感谢ArcheRage社区的支持和反馈。~</string>
     <string name="about_staff_dedication">感谢ArcheRage工作人员的奉献和辛勤工作。~</string>
     <string name="about_dev_dedication">感谢ArcheRage开发者的持续支持和更新。~</string>
+    <string name="about_special_thanks">特别感谢 %1$s、%2$s、%3$s 和 %4$s！</string>
 
     <!-- Player Card -->
     <string name="player_card_no_cached_data">没有可用的缓存数据。</string>
@@ -230,9 +232,9 @@
     <string name="summary_top_debuffs">减益榜</string>
     <string name="summary_top_songs">歌曲榜</string>
     <string name="summary_top_buffs">增益榜</string>
-    <string name="summary_top_ode_haranya">♪ 哈拉尼亚颂歌 ♪</string>
-    <string name="summary_top_ode_nuia">♪ 努伊安颂歌 ♪</string>
-    <string name="summary_top_ode_pirate">♪ 海盗颂歌 ♪</string>
+    <string name="summary_top_ode_haranya">哈拉尼亚颂歌</string>
+    <string name="summary_top_ode_nuia">努伊安颂歌</string>
+    <string name="summary_top_ode_pirate">海盗颂歌</string>
     <string name="summary_top_kills_haranya">哈拉尼亚击杀榜</string>
     <string name="summary_top_kills_nuia">努伊安击杀榜</string>
     <string name="summary_top_kills_pirate">海盗击杀榜</string>
