@@ -121,6 +121,7 @@
     <string name="about_community_dedication">感谢ArcheRage社区的支持和反馈。~</string>
     <string name="about_staff_dedication">感谢ArcheRage工作人员的奉献和辛勤工作。~</string>
     <string name="about_dev_dedication">感谢ArcheRage开发者的持续支持和更新。~</string>
+    <string name="about_special_thanks">特别感谢 %1$s、%2$s、%3$s 和 %4$s！</string>
 
     <!-- Player Card -->
     <string name="player_card_no_cached_data">没有可用的缓存数据。</string>

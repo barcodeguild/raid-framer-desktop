@@ -121,6 +121,7 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="about_community_dedication">À comunidade ArcheRage pelo apoio e feedback. ~</string>
     <string name="about_staff_dedication">À equipe ArcheRage pela dedicação e trabalho árduo. ~</string>
     <string name="about_dev_dedication">Aos desenvolvedores ArcheRage pelo apoio contínuo e atualizações. ~</string>
+    <string name="about_special_thanks">Agradecimento especial a %1$s, %2$s, %3$s e %4$s!</string>
 
     <!-- Player Card -->
     <string name="player_card_no_cached_data">Nenhum dado em cache disponível.</string>

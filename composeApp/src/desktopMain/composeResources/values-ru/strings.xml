@@ -121,6 +121,7 @@
     <string name="about_community_dedication">Сообществу ArcheRage за их поддержку и обратную связь. ~</string>
     <string name="about_staff_dedication">Сотрудникам ArcheRage за их преданность и тяжелую работу. ~</string>
     <string name="about_dev_dedication">Разработчикам ArcheRage за их постоянную поддержку и обновления. ~</string>
+    <string name="about_special_thanks">Особая благодарность %1$s, %2$s, %3$s и %4$s!</string>
 
     <!-- Player Card -->
     <string name="player_card_no_cached_data">Кэшированные данные недоступны.</string>
