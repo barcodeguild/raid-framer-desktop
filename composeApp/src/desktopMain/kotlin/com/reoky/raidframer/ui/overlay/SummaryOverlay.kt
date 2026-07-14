@@ -205,7 +205,8 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           text = {
             Text(
               text = title,
-              color = if (selectedTabIndex == index) Color.White else RFColors.TextSecondary
+              color = if (selectedTabIndex == index) Color.White else RFColors.TextSecondary,
+              fontSize = 11.sp
             )
           }
         )
@@ -428,7 +429,7 @@ private fun OdeTab(
     modifier = Modifier.fillMaxSize()
   ) {
     StatColumn(
-      icon = "",
+      icon = "\uD83C\uDFB5",
       title = stringResource(Res.string.summary_top_ode_haranya),
       cards = topOdeHaranya,
       valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
@@ -440,7 +441,7 @@ private fun OdeTab(
     }
 
     StatColumn(
-      icon = "",
+      icon = "\uD83C\uDFB5",
       title = stringResource(Res.string.summary_top_ode_nuia),
       cards = topOdeNuia,
       valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
@@ -452,7 +453,7 @@ private fun OdeTab(
     }
 
     StatColumn(
-      icon = "",
+      icon = "\uD83C\uDFB5",
       title = stringResource(Res.string.summary_top_ode_pirate),
       cards = topOdePirate,
       valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
@@ -523,7 +524,7 @@ private fun DamageTakenHealsReceived(
     modifier = Modifier.fillMaxSize()
   ) {
     StatColumn(
-      icon = "",
+      icon = "\uD83D\uDD25",
       title = stringResource(Res.string.summary_top_damage_taken),
       cards = topDamageTaken,
       valueExtractor = { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation() },
@@ -535,7 +536,7 @@ private fun DamageTakenHealsReceived(
     }
 
     StatColumn(
-      icon = "",
+      icon = "\uD83D\uDC89",
       title = stringResource(Res.string.summary_top_heals_received),
       cards = topHealsReceived,
       valueExtractor = { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() },
@@ -627,7 +628,7 @@ private fun StatColumn(
         modifier = Modifier.padding(end = 4.dp)
       )
       Text(
-        text = title.lowercase().capitalize(),
+        text = title,
         color = Color.White,
         textAlign = TextAlign.Center
       )
