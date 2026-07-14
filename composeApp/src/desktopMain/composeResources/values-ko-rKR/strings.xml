@@ -11,14 +11,14 @@
     <string name="companion_toggle_raid_status">플레이어가 공격대에 참여하거나 떠날 때 메인/공동 공격대 인원 수를 표시합니다.</string>
     <string name="companion_toggle_display_charmed">게임 채팅 창에 '매혹' 대상 표시.</string>
     <string name="companion_toggle_display_silenced">게임 채팅 창에 '침묵' 대상 표시.</string>
-    <string name="companion_toggle_display_distressed">게임 채팅 창에 '고통' 대상 표시.</string>
+    <string name="companion_toggle_display_distressed">게임 채팅 창에 '강위축' 대상 표시.</string>
     <string name="companion_toggl_display_mark_hvt_healers">가장 가치 있는 적 힐러 위에 [하트 표시]를 표시합니다. (누적 PvP 힐량 기준 상위 3명 적 힐러.)</string>
     <string name="companion_toggle_display_mark_hvt_dps">가장 가치 있는 적 DPS 위에 [교차 검 표시]를 표시합니다. (누적 PvP 피해량 기준 상위 3명 적 DPS.)</string>
     <string name="companion_toggle_display_mark_hvt_cc">가치 있는 적 CC 마법사 위에 [방패 표시]를 표시해 멀리하세요. (누적 PvP 군중 제어 시간 기준 상위 3명 적 CC.)</string>
     <string name="companion_toggle_display_mark_sac_dancers">희생 무용수가 시전하는 동안 신의 빛을 표시합니다. (기본 게임 효과보다 더 쉽게 찾을 수 있습니다.)</string>
     <string name="companion_toggle_display_mark_charmed_targets">플레이어 머리 위에 [보라색 점]을 표시하여 매혹되었음을 나타냅니다.</string>
     <string name="companion_toggle_display_mark_silenced_targets">플레이어 머리 위에 [검은 점]을 표시하여 침묵되었음을 나타냅니다.</string>
-    <string name="companion_toggle_display_mark_distressed_targets">플레이어 머리 위에 [파란 점]을 표시하여 고통 중임을 나타냅니다.</string>
+    <string name="companion_toggle_display_mark_distressed_targets">플레이어 머리 위에 [파란 점]을 표시하여 강위축 중임을 나타냅니다.</string>
 
     <!-- New Session Overlay -->
     <string name="new_session_title">새 녹화 세션</string>
@@ -65,7 +65,7 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="category_none">없음</string>
     <string name="category_charms">매혹</string>
     <string name="category_silences">침묵</string>
-    <string name="category_distresses">고통</string>
+    <string name="category_distresses">강위축</string>
     <string name="category_debuffs">디버프</string>
     <string name="category_songs">노래</string>
     <string name="category_buffs">버프</string>
@@ -154,7 +154,7 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="player_card_stat_buffs">버프</string>
     <string name="player_card_stat_debuffs">디버프</string>
     <string name="player_card_stat_charms">매혹</string>
-    <string name="player_card_stat_distress">고통</string>
+    <string name="player_card_stat_distress">강위축</string>
     <string name="player_card_stat_silence">침묵</string>
     <string name="player_card_stat_glider">글라이더 사용</string>
     <string name="player_card_stat_items">아이템 사용</string>
@@ -220,10 +220,10 @@ Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>
     <string name="summary_silences_by_faction">진영별 침묵</string>
     <string name="summary_charms_by_faction">진영별 매혹</string>
-    <string name="summary_distresses_by_faction">진영별 고통</string>
+    <string name="summary_distresses_by_faction">진영별 강위축</string>
     <string name="summary_top_silences">침묵 순위</string>
     <string name="summary_top_charms">매혹 순위</string>
-    <string name="summary_top_distresses">고통 순위</string>
+    <string name="summary_top_distresses">강위축 순위</string>
     <string name="summary_top_haranya_spells_damage">하라니아 주문 피해 순위</string>
     <string name="summary_top_nuia_spells_damage">누이안 주문 피해 순위</string>
     <string name="summary_top_pirate_spells_damage">해적 주문 피해 순위</string>
