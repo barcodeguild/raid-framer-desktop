@@ -1,7 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 val APP_NAME = "Raid Framer"
-val APP_VERSION = "2.1.9"
+val APP_VERSION = "2.2.0"
 val PACKAGE_ID = "com.reoky.raidframer"
 
 plugins {
@@ -40,7 +40,8 @@ kotlin {
     desktopMain.dependencies {
       implementation(compose.desktop.currentOs)
       implementation(libs.kotlinx.coroutinesSwing)
-      implementation(libs.dorkbox.systemTray)
+      implementation(libs.jna)
+      implementation(libs.jna.platform)
       implementation(libs.koala.core)
     }
   }

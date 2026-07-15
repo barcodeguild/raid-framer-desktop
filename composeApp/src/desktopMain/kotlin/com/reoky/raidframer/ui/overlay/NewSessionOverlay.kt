@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Surface
@@ -55,6 +58,7 @@ import java.util.Locale
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.new_session_allow_pve
+import raid_framer_desktop.composeapp.generated.resources.new_session_allow_ode_to_recovery_count_as_heals
 import raid_framer_desktop.composeapp.generated.resources.new_session_cancel
 import raid_framer_desktop.composeapp.generated.resources.new_session_custom_name_placeholder
 import raid_framer_desktop.composeapp.generated.resources.new_session_damage_mode_label
@@ -73,7 +77,8 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
   var selectedEventType by remember { mutableStateOf(SESSION_TYPES.first()) }
   var isCustomEvent by remember { mutableStateOf(false) }
   var customEventName by remember { mutableStateOf("") }
-  var allowPvEDamage by remember { mutableStateOf(false) }
+  var allowPvEDamage by remember { mutableStateOf(config.allowPVEDamage) }
+  var allowOdeToRecoveryCountAsHeals by remember { mutableStateOf(false) }
   var sessionFileName by remember { mutableStateOf("") }
   var customError by remember { mutableStateOf<String?>(null) }
   var isDropdownExpanded by remember { mutableStateOf(false) }
@@ -114,17 +119,17 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
     customError = null
 
     val isDontCare = selectedEventType == SESSION_TYPE_DONT_CARE
-    val effectiveAllowPvE = if (isDontCare) (0..1).random() == 1 else allowPvEDamage
     val displayName = if (isCustomEvent) customEventName else selectedEventType
     RFConfig.update {
       it.copy(
         lastSessionTitle = sessionFileName,
         lastSessionStart = System.currentTimeMillis(),
         lastSessionType = displayName,
-        allowPVEDamage = effectiveAllowPvE
+        allowPVEDamage = allowPvEDamage,
+        allowOdeToRecoveryCountAsHeals = allowOdeToRecoveryCountAsHeals
       )
     }
-    PlayerCacheInteractor.startNewSession(displayName, effectiveAllowPvE)
+    PlayerCacheInteractor.startNewSession(displayName, allowPvEDamage)
     wm?.closeWindow(OverlayType.NEW_SESSION)
   }
 
@@ -282,6 +287,42 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
                   fontSize = 13.sp
                 )
               }
+            }
+          }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Surface(
+          modifier = Modifier.fillMaxWidth(),
+          shape = RoundedCornerShape(10.dp),
+          color = RFColors.CardBackground,
+          elevation = 2.dp
+        ) {
+          Column(
+            modifier = Modifier
+              .border(1.dp, RFColors.CardBorder, RoundedCornerShape(10.dp))
+              .padding(12.dp)
+          ) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier.fillMaxWidth()
+            ) {
+              Checkbox(
+                checked = allowOdeToRecoveryCountAsHeals,
+                onCheckedChange = { allowOdeToRecoveryCountAsHeals = it },
+                colors = CheckboxDefaults.colors(
+                  checkmarkColor = Color.White,
+                  checkedColor = RFColors.AccentRed,
+                  uncheckedColor = RFColors.TextTertiary
+                )
+              )
+              Spacer(modifier = Modifier.width(8.dp))
+              Text(
+                text = stringResource(Res.string.new_session_allow_ode_to_recovery_count_as_heals),
+                color = RFColors.TextPrimary,
+                fontSize = 13.sp
+              )
             }
           }
         }

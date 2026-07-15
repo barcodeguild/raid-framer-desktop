@@ -6,6 +6,7 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getDocumentsDirectory
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
@@ -226,6 +227,7 @@ object ImageExportInteractor {
     val buildCountsHaranya: Map<String, Int>,
     val buildCountsNuia: Map<String, Int>,
     val buildCountsPirate: Map<String, Int>,
+    val buildDisplayNames: Map<String, String>,
     val topPerformanceHaranya: List<PlayerCard>,
     val topPerformanceNuia: List<PlayerCard>,
     val topPerformancePirate: List<PlayerCard>,
@@ -295,6 +297,11 @@ object ImageExportInteractor {
       buildCountsHaranya  = PlayerCacheInteractor.buildCountsHaranya.value,
       buildCountsNuia     = PlayerCacheInteractor.buildCountsNuia.value,
       buildCountsPirate   = PlayerCacheInteractor.buildCountsPirate.value,
+      buildDisplayNames   = (PlayerCacheInteractor.buildCountsHaranya.value.keys +
+                              PlayerCacheInteractor.buildCountsNuia.value.keys +
+                              PlayerCacheInteractor.buildCountsPirate.value.keys)
+        .distinct()
+        .associateWith { name -> SpecType.fromName(name)?.let { getString(it.localizedDisplayNameRes) } ?: name },
       topPerformanceHaranya = PlayerCacheInteractor.topPerformanceHaranya.value.take(15),
       topPerformanceNuia    = PlayerCacheInteractor.topPerformanceNuia.value.take(15),
       topPerformancePirate  = PlayerCacheInteractor.topPerformancePirate.value.take(15),
@@ -903,9 +910,10 @@ object ImageExportInteractor {
                   else -> toAwtColor(RFColors.TextSecondary)
                 }
                 d.builds.entries.sortedByDescending { it.value }.take(MAX_ROWS).forEachIndexed { idx, (label, count) ->
+                  val displayLabel = data.buildDisplayNames[label] ?: label
                   g2d.font  = labelFont
                   g2d.color = TEXT_PRIMARY
-                  g2d.drawString("${idx + 1}. $label", xPos + CARD_PADDING + 8, rowY + 14)
+                  g2d.drawString("${idx + 1}. $displayLabel", xPos + CARD_PADDING + 8, rowY + 14)
                   g2d.font  = valueFont
                   g2d.color = buildColor
                   val valStr = count.toLong().humanReadableAbbreviation()
