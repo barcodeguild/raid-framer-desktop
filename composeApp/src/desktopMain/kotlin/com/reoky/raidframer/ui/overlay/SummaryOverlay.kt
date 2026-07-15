@@ -22,6 +22,8 @@ import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.pvpPerformancePoints
 import com.reoky.raidframer.ui.OverlayType
@@ -908,9 +910,12 @@ private fun BuildStatColumn(
     ) {
       val sorted = builds.entries.sortedByDescending { it.value }
       itemsIndexed(sorted, key = { _, entry -> entry.key }) { index, entry ->
+        val displayName = entry.key.let { raw ->
+          SpecType.fromName(raw)?.let { stringResource(it.localizedDisplayNameRes) } ?: raw.ifBlank { "Unknown" }
+        }
         SimpleRankingRow(
           index = index,
-          name = entry.key.ifBlank { "Unknown" },
+          name = displayName,
           valueText = entry.value.toString(),
           valueColor = valueColor,
           onClick = { onClick(entry.key to entry.value) }

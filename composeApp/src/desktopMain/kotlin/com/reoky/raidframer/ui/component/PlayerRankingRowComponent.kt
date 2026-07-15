@@ -29,9 +29,11 @@ import androidx.compose.ui.text.font.FontWeight
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
 import com.reoky.raidframer.core.model.Faction
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -167,6 +169,8 @@ fun PlayerRankingRow(
 
   // Tooltip for Spec/Class details
   if (showSpecTooltip && spec != null) {
+    val resolvedTrees = spec.trees.sortedByDisplayOrder().map { stringResource(it.localizedDisplayNameRes) }
+    val treeNames = resolvedTrees.joinToString(", ")
     Popup(
       alignment = Alignment.TopStart,
       offset = androidx.compose.ui.unit.IntOffset(x = 20, y = 20)
@@ -178,7 +182,7 @@ fun PlayerRankingRow(
         border = BorderStroke(1.dp, Color.Gray)
       ) {
         Text(
-          text = "${spec.toDisplayName()} (${spec.trees.joinToString(", ")})",
+          text = "${stringResource(spec.localizedDisplayNameRes)} ($treeNames)",
           color = Color.White,
           modifier = Modifier.padding(8.dp),
           fontSize = 12.sp

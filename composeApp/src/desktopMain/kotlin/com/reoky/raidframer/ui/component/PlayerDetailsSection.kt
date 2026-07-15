@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.database.LeadershipRole
+import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.model.PlayerCard
 import org.jetbrains.compose.resources.stringResource
@@ -48,7 +50,7 @@ fun PlayerDetailsSection(card: PlayerCard, onLeadershipChange: (Int) -> Unit) {
         DetailRow("Faction Status", card.lastKnownFactionStatus)
         DetailRow("Guild", card.lastKnownGuild.ifEmpty { "N/A" })
         DetailRow("Gear Score", if (card.lastKnownGearScore <= 0) "Please Click on Player" else card.lastKnownGearScore.toString())
-        DetailRow("Build", card.currentBuild)
+        DetailRow("Build", SpecType.fromName(card.currentBuild)?.let { stringResource(it.localizedDisplayNameRes) } ?: card.currentBuild)
         DetailRow("Current Role", stringResource(LeadershipRole.fromInt(card.leaderships).friendlyNameRes))
       }
 
