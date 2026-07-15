@@ -365,6 +365,13 @@
     <!-- PNG Export -->
     <string name="export_title_battle_summary">전투 요약</string>
     <string name="export_no_data">데이터 없음</string>
+    <string name="export_header_on"> 켜짐</string>
+    <string name="export_header_off">꺼짐</string>
+    <string name="export_header_ode_label">오데</string>
+    <string name="export_header_pve_label">PvE</string>
+    <string name="export_header_kills_label">처치</string>
+    <string name="export_header_most_damage">최대 피해</string>
+    <string name="export_header_killing_blow">결정타</string>
 
     <!-- Export Settings -->
     <string name="settings_export_title">내보내기 설정</string>

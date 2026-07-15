@@ -367,6 +367,13 @@ Live monitoring is disabled while viewing replays.</string>
     <!-- PNG Export -->
     <string name="export_title_battle_summary">Battle Summary</string>
     <string name="export_no_data">No data</string>
+    <string name="export_header_on">On</string>
+    <string name="export_header_off">Off</string>
+    <string name="export_header_ode_label">Ode</string>
+    <string name="export_header_pve_label">PvE</string>
+    <string name="export_header_kills_label">Kills</string>
+    <string name="export_header_most_damage">Most Damage</string>
+    <string name="export_header_killing_blow">Killing Blow</string>
 
     <!-- Export Settings -->
     <string name="settings_export_title">Export Settings</string>

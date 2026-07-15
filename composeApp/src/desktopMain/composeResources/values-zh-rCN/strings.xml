@@ -363,8 +363,15 @@
     <string name="potion_name_wild_ginseng">野生人参!(真是个幸运的朋友!)</string>
 
     <!-- PNG Export -->
-    <string name="export_title_battle_summary">战斗总结</string>
+    <string name="export_title_battle_summary">战斗摘要</string>
     <string name="export_no_data">无数据</string>
+    <string name="export_header_on">开</string>
+    <string name="export_header_off">关</string>
+    <string name="export_header_ode_label">挽歌</string>
+    <string name="export_header_pve_label">PvE</string>
+    <string name="export_header_kills_label">击杀</string>
+    <string name="export_header_most_damage">造成伤害最高</string>
+    <string name="export_header_killing_blow">致命一击</string>
 
     <!-- Export Settings -->
     <string name="settings_export_title">导出设置</string>

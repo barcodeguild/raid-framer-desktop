@@ -365,6 +365,13 @@
     <!-- PNG Export -->
     <string name="export_title_battle_summary">Боевая сводка</string>
     <string name="export_no_data">Нет данных</string>
+    <string name="export_header_on">Вкл</string>
+    <string name="export_header_off">Выкл</string>
+    <string name="export_header_ode_label">Ода</string>
+    <string name="export_header_pve_label">PvE</string>
+    <string name="export_header_kills_label">Убийства</string>
+    <string name="export_header_most_damage">Наибольший урон</string>
+    <string name="export_header_killing_blow">Убийственный удар</string>
 
     <!-- Export Settings -->
     <string name="settings_export_title">Настройки экспорта</string>
