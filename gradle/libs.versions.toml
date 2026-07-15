@@ -5,10 +5,10 @@ composeMultiplatform = "1.11.1" # https://github.com/JetBrains/compose-multiplat
 junit = "4.13.2"# https://search.maven.org/artifact/junit/junit
 kotlin = "2.4.0" # https://github.com/JetBrains/kotlin/releases/
 kotlinx-coroutines = "1.11.0" # https://github.com/Kotlin/kotlinx.coroutines/releases/
-dorkbox-systemTray = "4.4" # https://github.com/dorkbox/SystemTray/releases
 room = "2.8.4" # https://maven.google.com/web/index.html?q=room-gra#androidx.room:room-gradle-plugin
 sqlite = "2.6.2" # https://maven.google.com/web/index.html?q=sqlite#androidx.sqlite:sqlite
 ksp = "2.3.9" # https://github.com/google/ksp/releases
+jna = "5.19.1" # https://github.com/java-native-access/jna
 koala = "0.11.2" # https://github.com/KoalaPlot/koalaplot-core
 kotlinx-serialization = "1.11.0" # https://github.com/Kotlin/kotlinx.serialization/
 
@@ -26,7 +26,9 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 
-dorkbox-systemTray = { module = "com.dorkbox:SystemTray", version.ref = "dorkbox-systemTray" }
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+
 koala-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koala" }
 
 [plugins]

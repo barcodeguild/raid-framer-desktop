@@ -1,16 +1,11 @@
 package com.reoky.raidframer
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.toAwtImage
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
@@ -31,8 +26,7 @@ import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
-import dorkbox.systemTray.MenuItem
-import dorkbox.systemTray.SystemTray
+import com.reoky.raidframer.ui.component.SystemTrayComponent
 import com.sun.jna.platform.win32.Kernel32
 import com.sun.jna.platform.win32.WinError
 import com.sun.jna.platform.win32.WinNT.HANDLE
@@ -42,18 +36,9 @@ import javax.swing.JOptionPane
 import kotlin.system.exitProcess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.getString
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.app_replay_viewing_format
-import raid_framer_desktop.composeapp.generated.resources.app_tray_reset_positions
-import raid_framer_desktop.composeapp.generated.resources.app_tray_title
-import raid_framer_desktop.composeapp.generated.resources.general_about
-import raid_framer_desktop.composeapp.generated.resources.general_exit
-import raid_framer_desktop.composeapp.generated.resources.general_help_window_postions_reset
-import raid_framer_desktop.composeapp.generated.resources.general_settings
-import raid_framer_desktop.composeapp.generated.resources.raidframer
 import raid_framer_desktop.composeapp.generated.resources.seed_table_apply_prompt
 import raid_framer_desktop.composeapp.generated.resources.seed_table_apply_title
 import raid_framer_desktop.composeapp.generated.resources.seed_table_applied_success
@@ -63,7 +48,6 @@ const val TAG = "Main"
 private const val SINGLE_INSTANCE_MUTEX = "Local\\RaidFramerDesktopSingleInstance"
 
 private var appMutexHandle: HANDLE? = null
-private var tray: SystemTray? = null
 
 /* ~ Entry Point ~ */
 fun main(args: Array<String>) {
@@ -201,7 +185,7 @@ fun main(args: Array<String>) {
     }
 
     if (statesLoaded) {
-      tray = rememberSystemTray(wm)
+      SystemTrayComponent(wm, ::quit)
       Log.info(TAG, "Opening default windows...")
       OverlayContainer(wm)
     }
@@ -218,47 +202,6 @@ fun messageBox(title: String, message: String) {
     title,
     JOptionPane.INFORMATION_MESSAGE
   )
-}
-
-/*
- * Spawns the system tray icon and menu. I basically added this in case overlays appear behind other windows or
- * off the screen, so the user has a way to get them back.
- */
-@Composable
-fun rememberSystemTray(wm: WindowManager): SystemTray {
-  val titleStr = stringResource(Res.string.app_tray_title)
-  val settingsStr = stringResource(Res.string.general_settings)
-  val aboutStr = stringResource(Res.string.general_about)
-  val resetStr = stringResource(Res.string.app_tray_reset_positions)
-  val exitStr = stringResource(Res.string.general_exit)
-  val helpStr = stringResource(Res.string.general_help_window_postions_reset)
-  val iconImage = painterResource(Res.drawable.raidframer).toAwtImage(
-    density = Density(1f),
-    layoutDirection = LayoutDirection.Ltr,
-    size = Size(32f, 32f)
-  )
-
-  return remember(wm) {
-    val tray = SystemTray.get()
-    val titleMenuItem = MenuItem(titleStr)
-    titleMenuItem.setImage(iconImage)
-    tray.menu.add(titleMenuItem)
-    tray.menu.add(MenuItem(settingsStr) {
-      wm.openWindow(OverlayType.SETTINGS)
-    })
-    tray.menu.add(MenuItem(aboutStr) {
-      wm.openWindow(OverlayType.ABOUT)
-    })
-    tray.menu.add(MenuItem(resetStr) {
-      wm.resetAllWindowPositions()
-      messageBox(AppGlobals.APP_NAME, helpStr)
-    })
-    tray.menu.add(MenuItem(exitStr) {
-      quit()
-    })
-    tray.setImage(iconImage)
-    tray
-  }
 }
 
 private fun acquireSingleInstanceMutex(): Boolean {
@@ -290,8 +233,6 @@ fun quit() {
   CompanionInteractor.stop()
   InstallationInteractor.stop()
   CombatLogInteractor.stop()
-  tray?.shutdown()
-  tray?.remove()
   LoggingInteractor.stop() // should be last because this is the thing that logs shutdown message
   appMutexHandle?.let { Kernel32.INSTANCE.CloseHandle(it) }
   appMutexHandle = null

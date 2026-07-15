@@ -40,7 +40,8 @@ kotlin {
     desktopMain.dependencies {
       implementation(compose.desktop.currentOs)
       implementation(libs.kotlinx.coroutinesSwing)
-      implementation(libs.dorkbox.systemTray)
+      implementation(libs.jna)
+      implementation(libs.jna.platform)
       implementation(libs.koala.core)
     }
   }
