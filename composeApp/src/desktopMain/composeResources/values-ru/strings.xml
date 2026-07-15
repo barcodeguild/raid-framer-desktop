@@ -31,6 +31,7 @@
     <string name="new_session_file_name_label">Имя файла сессии</string>
     <string name="new_session_start_recording">Начать запись</string>
     <string name="new_session_cancel">Нет</string>
+    <string name="new_session_allow_ode_to_recovery_count_as_heals">Разрешить Песнь исцеления засчитываться как лечение</string>
 
     <!-- Settings Overlay -->
     <string name="settings_title">Настройки Raid Framer Desktop</string>
@@ -77,7 +78,6 @@
     <string name="settings_split_chat">Включить оверлей окна раздельного чата в стиле OSRS. (Скоро)</string>
     <string name="settings_tabbed_detection">Автоматически скрывать игровые оверлеи при переключении вкладок из игры. Не применяется к подсказкам (те, у которых есть заголовок).</string>
     <string name="settings_allow_pve_damage">Разрешить PvE урон засчитываться в счетчики DPS/убийств. (Полезно для одиночных игроков, которые хотят видеть свой урон по PvE целям)</string>
-    <string name="settings_allow_ode_to_recovery_count_as_heals">Разрешить Песнь исцеления засчитываться как лечение в рейтингах лечения.</string>
     <string name="settings_game_schedule_hotkey">Включить [УДЕРЖИВАТЬ TAB] для отображения официального веб-сайта расписания внутриигровых событий в качестве оверлея. (Скоро)</string>
     <string name="settings_use_sadly">Я предпочитаю использовать Sadly.io для данных о расписании внутриигровых событий. (Скоро)</string>
     <string name="settings_dragon_breath_overlay">Включить детектор и счетчик драконьего дыхания. (Примечание: вам все равно нужно быть в пределах 100 метров от драконьего всадника, чтобы наблюдать за дыханием, это не магия, друзья!) (Скоро)</string>
