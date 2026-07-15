@@ -20,6 +20,13 @@ import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.arkorean_regular
 import raid_framer_desktop.composeapp.generated.resources.export_no_data
 import raid_framer_desktop.composeapp.generated.resources.export_title_battle_summary
+import raid_framer_desktop.composeapp.generated.resources.export_header_on
+import raid_framer_desktop.composeapp.generated.resources.export_header_off
+import raid_framer_desktop.composeapp.generated.resources.export_header_ode_label
+import raid_framer_desktop.composeapp.generated.resources.export_header_pve_label
+import raid_framer_desktop.composeapp.generated.resources.export_header_kills_label
+import raid_framer_desktop.composeapp.generated.resources.export_header_most_damage
+import raid_framer_desktop.composeapp.generated.resources.export_header_killing_blow
 import raid_framer_desktop.composeapp.generated.resources.summary_haranya_builds
 import raid_framer_desktop.composeapp.generated.resources.summary_most_item_usages
 import raid_framer_desktop.composeapp.generated.resources.summary_nuia_builds
@@ -178,9 +185,18 @@ object ImageExportInteractor {
     val sessionDate: String,
     val sessionDurationMs: Long,
     val allowPvE: Boolean,
+    val allowOdeToRecoveryCountAsHeals: Boolean,
+    // val killCounterMode: String, // TODO: uncomment when kill counter mode selection is implemented
     // Pre-loaded localised strings
     val battleSummaryTitle: String,
     val noDataText: String,
+    val exportHeaderOn: String,
+    val exportHeaderOff: String,
+    val exportHeaderOdeLabel: String,
+    val exportHeaderPveLabel: String,
+    val exportHeaderKillsLabel: String,
+    val exportHeaderMostDamage: String,
+    val exportHeaderKillingBlow: String,
     val topDamage: List<PlayerCard>,
     val topHeals: List<PlayerCard>,
     val topCC: List<PlayerCard>,
@@ -239,8 +255,17 @@ object ImageExportInteractor {
       sessionDate         = DateFormat.getDateInstance(DateFormat.SHORT).format(Date()),
       sessionDurationMs   = durationMs,
       allowPvE            = config.allowPVEDamage,
+      allowOdeToRecoveryCountAsHeals = config.allowOdeToRecoveryCountAsHeals,
+      // killCounterMode     = config.killCounterMode, // TODO: uncomment when kill counter mode selection is implemented
       battleSummaryTitle  = getString(Res.string.export_title_battle_summary),
       noDataText          = getString(Res.string.export_no_data),
+      exportHeaderOn      = getString(Res.string.export_header_on),
+      exportHeaderOff     = getString(Res.string.export_header_off),
+      exportHeaderOdeLabel = getString(Res.string.export_header_ode_label),
+      exportHeaderPveLabel = getString(Res.string.export_header_pve_label),
+      exportHeaderKillsLabel = getString(Res.string.export_header_kills_label),
+      exportHeaderMostDamage = getString(Res.string.export_header_most_damage),
+      exportHeaderKillingBlow = getString(Res.string.export_header_killing_blow),
       topDamage           = PlayerCacheInteractor.topDamage.value.take(50),
       topHeals            = PlayerCacheInteractor.topHeals.value.take(50),
       topCC               = PlayerCacheInteractor.topCC.value.take(50),
@@ -549,10 +574,17 @@ object ImageExportInteractor {
     g2d.drawString("${AppGlobals.APP_NAME} - ${data.battleSummaryTitle}", textStartX, y + 32)
 
     val durationStr = formatDuration(data.sessionDurationMs)
+    val odeLabel = if (data.allowOdeToRecoveryCountAsHeals) data.exportHeaderOn else data.exportHeaderOff
+    val pveLabel = if (data.allowPvE) data.exportHeaderOn else data.exportHeaderOff
+    // TODO: uncomment when kill counter mode selection is implemented
+    // val killModeLabel = when (data.killCounterMode) {
+    //   "KILLING_BLOW" -> data.exportHeaderKillingBlow
+    //   else -> data.exportHeaderMostDamage
+    // }
     g2d.font  = subtitleFont
     g2d.color = toAwtColor(RFColors.TextSecondary)
     g2d.drawString(
-      "${data.sessionTitle}  |  ${data.sessionDate}  |  ${AppGlobals.APP_VERSION}  |  $durationStr",
+      "${data.sessionTitle}  |  ${data.sessionDate}  |  ${AppGlobals.APP_VERSION}  |  $durationStr  |  ${data.exportHeaderOdeLabel}: $odeLabel  |  ${data.exportHeaderPveLabel}: $pveLabel",
       textStartX, y + 56
     )
 

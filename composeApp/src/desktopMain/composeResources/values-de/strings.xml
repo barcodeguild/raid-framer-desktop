@@ -365,6 +365,13 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <!-- PNG Export -->
     <string name="export_title_battle_summary">Kampfzusammenfassung</string>
     <string name="export_no_data">Keine Daten</string>
+    <string name="export_header_on">Ein</string>
+    <string name="export_header_off">Aus</string>
+    <string name="export_header_ode_label">Ode</string>
+    <string name="export_header_pve_label">PvE</string>
+    <string name="export_header_kills_label">Kills</string>
+    <string name="export_header_most_damage">Höchster Schaden</string>
+    <string name="export_header_killing_blow">Tödlicher Schlag</string>
 
     <!-- Export Settings -->
     <string name="settings_export_title">Exporteinstellungen</string>

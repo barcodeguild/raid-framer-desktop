@@ -27,6 +27,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.StateFlow
+import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
@@ -226,12 +227,10 @@ fun CombatOverlay(wm: WindowManager? = null) {
   }
   LaunchedEffect(sortedCC) { if (isCCSticky) ccListState.scrollToItem(0) }
 
-  Column(
+  Box(
     modifier = Modifier
       .fillMaxSize()
-      .hoverable(interactionSource = overlayInteractionSource),
-    verticalArrangement = Arrangement.Top,
-    horizontalAlignment = Alignment.CenterHorizontally
+      .hoverable(interactionSource = overlayInteractionSource)
   ) {
     Column(
       modifier = Modifier
@@ -529,5 +528,15 @@ fun CombatOverlay(wm: WindowManager? = null) {
         }
       }
     }
+    // Watermark footer — faint version/ode status for screenshots
+    // Uses align(BottomEnd) inside the Box parent so it takes zero layout space.
+    val odeStatus = if (config.allowOdeToRecoveryCountAsHeals) " ode" else ""
+    Text(
+      text = "v${AppGlobals.APP_VERSION}$odeStatus",
+      modifier = Modifier.align(Alignment.BottomEnd).wrapContentSize().padding(end = 6.dp, bottom = 2.dp),
+      color = Color.White.copy(alpha = 0.18f),
+      fontSize = 8.sp,
+      fontWeight = FontWeight.Light
+    )
   }
 }

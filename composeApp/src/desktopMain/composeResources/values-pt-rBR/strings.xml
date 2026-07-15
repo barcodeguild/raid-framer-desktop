@@ -365,6 +365,13 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <!-- PNG Export -->
     <string name="export_title_battle_summary">Resumo da Batalha</string>
     <string name="export_no_data">Sem dados</string>
+    <string name="export_header_on">Ligado</string>
+    <string name="export_header_off">Desligado</string>
+    <string name="export_header_ode_label">Ode</string>
+    <string name="export_header_pve_label">PvE</string>
+    <string name="export_header_kills_label">Abates</string>
+    <string name="export_header_most_damage">Maior Dano</string>
+    <string name="export_header_killing_blow">Golpe Mortal</string>
 
     <!-- Export Settings -->
     <string name="settings_export_title">Configurações de Exportação</string>
