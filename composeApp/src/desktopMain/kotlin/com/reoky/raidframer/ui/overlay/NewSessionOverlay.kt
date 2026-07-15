@@ -78,7 +78,7 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
   var isCustomEvent by remember { mutableStateOf(false) }
   var customEventName by remember { mutableStateOf("") }
   var allowPvEDamage by remember { mutableStateOf(config.allowPVEDamage) }
-  var allowOdeToRecoveryCountAsHeals by remember { mutableStateOf(config.allowOdeToRecoveryCountAsHeals) }
+  var allowOdeToRecoveryCountAsHeals by remember { mutableStateOf(false) }
   var sessionFileName by remember { mutableStateOf("") }
   var customError by remember { mutableStateOf<String?>(null) }
   var isDropdownExpanded by remember { mutableStateOf(false) }
