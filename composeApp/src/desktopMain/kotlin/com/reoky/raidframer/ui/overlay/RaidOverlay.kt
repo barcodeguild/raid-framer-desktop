@@ -82,8 +82,12 @@ fun RaidOverlay(wm: WindowManager? = null) {
   val raidDepartures = PlayerCacheInteractor.raidDeparturesFlow.collectAsState()
   var selectedTab by remember { mutableStateOf(RaidTab.ATTENDANCE) }
   var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
+  var raidWasDetected by remember { mutableStateOf(false) }
+  if (!raidWasDetected && (mainRaid.value.isNotEmpty() || coRaid.value.isNotEmpty())) {
+    raidWasDetected = true
+  }
   Box(modifier = Modifier.fillMaxSize()) {
-    if (mainRaid.value.isEmpty() && coRaid.value.isEmpty()) {
+    if (mainRaid.value.isEmpty() && coRaid.value.isEmpty() && !raidWasDetected) {
       Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
