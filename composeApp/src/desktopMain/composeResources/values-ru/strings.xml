@@ -215,6 +215,13 @@
     <string name="combat_column_pve_damage">⚔️ PvE урон ⚔️</string>
     <string name="combat_column_pve_heals">💉 PvE исцеление 💉</string>
     <string name="combat_column_pve_cc">⛨ PvE CC ⛨</string>
+    <!-- Export combat titles (plain-text, no emojis — for PNG export rendering) -->
+    <string name="export_combat_pvp_damage">PvP урон</string>
+    <string name="export_combat_pvp_heals">PvP исцеление</string>
+    <string name="export_combat_pvp_cc">PvP CC</string>
+    <string name="export_combat_pve_damage">PvE урон</string>
+    <string name="export_combat_pve_heals">PvE исцеление</string>
+    <string name="export_combat_pve_cc">PvE CC</string>
     <string name="combat_no_columns_message">Брат.. Попробуй добавить хотя бы одну категорию..</string>
     <string name="combat_open_settings">Открыть настройки</string>
 

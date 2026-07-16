@@ -215,6 +215,13 @@ Bitte schließen Sie das Spiel, bevor Sie fortfahren, andernfalls bleiben Dateie
     <string name="combat_column_pve_damage">⚔️ PvE-Schaden ⚔️</string>
     <string name="combat_column_pve_heals">💉 PvE-Heilungen 💉</string>
     <string name="combat_column_pve_cc">⛨ PvE-CC ⛨</string>
+    <!-- Export combat titles (plain-text, no emojis — for PNG export rendering) -->
+    <string name="export_combat_pvp_damage">PvP-Schaden</string>
+    <string name="export_combat_pvp_heals">PvP-Heilungen</string>
+    <string name="export_combat_pvp_cc">PvP-CC</string>
+    <string name="export_combat_pve_damage">PvE-Schaden</string>
+    <string name="export_combat_pve_heals">PvE-Heilungen</string>
+    <string name="export_combat_pve_cc">PvE-CC</string>
     <string name="combat_no_columns_message">Bruder.. Versuch wenigstens eine Kategorie hinzuzufügen..</string>
     <string name="combat_open_settings">Einstellungen öffnen</string>
 

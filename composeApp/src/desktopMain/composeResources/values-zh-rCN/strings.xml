@@ -215,6 +215,13 @@
     <string name="combat_column_pve_damage">⚔️ PvE伤害 ⚔️</string>
     <string name="combat_column_pve_heals">💉 PvE治疗 💉</string>
     <string name="combat_column_pve_cc">⛨ PvE控场 ⛨</string>
+    <!-- Export combat titles (plain-text, no emojis — for PNG export rendering) -->
+    <string name="export_combat_pvp_damage">PvP伤害</string>
+    <string name="export_combat_pvp_heals">PvP治疗</string>
+    <string name="export_combat_pvp_cc">PvP控场</string>
+    <string name="export_combat_pve_damage">PvE伤害</string>
+    <string name="export_combat_pve_heals">PvE治疗</string>
+    <string name="export_combat_pve_cc">PvE控场</string>
     <string name="combat_no_columns_message">兄弟.. 试着至少添加一个类别..</string>
     <string name="combat_open_settings">打开设置</string>
 

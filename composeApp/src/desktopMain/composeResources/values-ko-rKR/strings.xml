@@ -215,6 +215,13 @@
     <string name="combat_column_pve_damage">⚔️ PvE 피해 ⚔️</string>
     <string name="combat_column_pve_heals">💉 PvE 힐 💉</string>
     <string name="combat_column_pve_cc">⛨ PvE CC ⛨</string>
+    <!-- Export combat titles (plain-text, no emojis — for PNG export rendering) -->
+    <string name="export_combat_pvp_damage">PvP 피해</string>
+    <string name="export_combat_pvp_heals">PvP 힐</string>
+    <string name="export_combat_pvp_cc">PvP CC</string>
+    <string name="export_combat_pve_damage">PvE 피해</string>
+    <string name="export_combat_pve_heals">PvE 힐</string>
+    <string name="export_combat_pve_cc">PvE CC</string>
     <string name="combat_no_columns_message">형님들.. 적어도 하나의 카테고리는 추가해보세요..</string>
     <string name="combat_open_settings">설정 열기</string>
 

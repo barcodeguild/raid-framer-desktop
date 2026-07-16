@@ -36,6 +36,12 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
 import raid_framer_desktop.composeapp.generated.resources.summary_top_debuffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pve_cc
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pve_damage
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pve_heals
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_cc
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_damage
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_heals
 import raid_framer_desktop.composeapp.generated.resources.summary_top_distresses
 import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_gamers
 import raid_framer_desktop.composeapp.generated.resources.summary_top_heals_received
@@ -203,6 +209,9 @@ object ImageExportInteractor {
     val exportHeaderKillsLabel: String,
     val exportHeaderMostDamage: String,
     val exportHeaderKillingBlow: String,
+    val combatDamageTitle: String,
+    val combatHealsTitle: String,
+    val combatCCTitle: String,
     val topDamage: List<PlayerCard>,
     val topHeals: List<PlayerCard>,
     val topCC: List<PlayerCard>,
@@ -273,6 +282,15 @@ object ImageExportInteractor {
       exportHeaderKillsLabel = getString(Res.string.export_header_kills_label),
       exportHeaderMostDamage = getString(Res.string.export_header_most_damage),
       exportHeaderKillingBlow = getString(Res.string.export_header_killing_blow),
+      combatDamageTitle = getString(
+        if (config.allowPVEDamage) Res.string.export_combat_pve_damage else Res.string.export_combat_pvp_damage
+      ),
+      combatHealsTitle = getString(
+        if (config.allowPVEDamage) Res.string.export_combat_pve_heals else Res.string.export_combat_pvp_heals
+      ),
+      combatCCTitle = getString(
+        if (config.allowPVEDamage) Res.string.export_combat_pve_cc else Res.string.export_combat_pvp_cc
+      ),
       topDamage           = PlayerCacheInteractor.topDamage.value.take(50),
       topHeals            = PlayerCacheInteractor.topHeals.value.take(50),
       topCC               = PlayerCacheInteractor.topCC.value.take(50),
@@ -442,14 +460,11 @@ object ImageExportInteractor {
       drawCardBackgroundTransparent(g2d, x, y, w, combatH)
       val subColW = w / 3
 
-      val damageTitle = if (data.allowPvE) "PvE Damage" else "PvP Damage"
-      val healsTitle  = if (data.allowPvE) "PvE Heals"  else "PvP Heals"
-      val ccTitle     = if (data.allowPvE) "PvE CC"    else "PvP CC"
-      val icon = if (data.allowPvE) "⚔" else "🔥"
+      val icon = if (data.allowPvE) "\u2694" else "\uD83D\uDD25"
 
-      drawSectionHeader(g2d, damageTitle, x,               y, subColW, toAwtColor(RFColors.dpsOrange), icon)
-      drawSectionHeader(g2d, healsTitle,  x + subColW,     y, subColW, toAwtColor(RFColors.healsGreen), "💉")
-      drawSectionHeader(g2d, ccTitle,     x + subColW * 2, y, subColW, toAwtColor(RFColors.ccCyan), "🛡")
+      drawSectionHeader(g2d, data.combatDamageTitle, x,               y, subColW, toAwtColor(RFColors.dpsOrange), icon)
+      drawSectionHeader(g2d, data.combatHealsTitle,  x + subColW,     y, subColW, toAwtColor(RFColors.healsGreen), "\uD83D\uDC89")
+      drawSectionHeader(g2d, data.combatCCTitle,     x + subColW * 2, y, subColW, toAwtColor(RFColors.ccCyan), "\uD83D\uDEE1")
 
       var rowY = y + SECTION_HEADER_HEIGHT
       val maxRows = maxOf(data.topDamage.size, data.topHeals.size, data.topCC.size).coerceAtLeast(1)

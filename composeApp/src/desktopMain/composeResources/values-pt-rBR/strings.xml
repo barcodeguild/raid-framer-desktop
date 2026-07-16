@@ -215,6 +215,13 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="combat_column_pve_damage">⚔️ Dano PvE ⚔️</string>
     <string name="combat_column_pve_heals">💉 Curas PvE 💉</string>
     <string name="combat_column_pve_cc">⛨ CC PvE ⛨</string>
+    <!-- Export combat titles (plain-text, no emojis — for PNG export rendering) -->
+    <string name="export_combat_pvp_damage">Dano PvP</string>
+    <string name="export_combat_pvp_heals">Cura PvP</string>
+    <string name="export_combat_pvp_cc">CC PvP</string>
+    <string name="export_combat_pve_damage">Dano PvE</string>
+    <string name="export_combat_pve_heals">Cura PvE</string>
+    <string name="export_combat_pve_cc">CC PvE</string>
     <string name="combat_no_columns_message">Cara.. Tenta Adicionar Pelo Menos Uma Categoria..</string>
     <string name="combat_open_settings">Abrir Configurações</string>
 

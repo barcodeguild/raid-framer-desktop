@@ -244,7 +244,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
       CombatOverlaySettingsPanel()
 
-      ExportSettingsPanel()
+      ExportSettingsPanel(wm)
 
       SeedTableSettingsPanel(wm)
 
@@ -743,7 +743,7 @@ private fun CategoryDropdown(
 }
 
 @Composable
-private fun ExportSettingsPanel() {
+private fun ExportSettingsPanel(wm: WindowManager?) {
   val config by RFConfig.state.collectAsState()
   val exportDir = getExportDirectory()
   val directorySize = remember(exportDir) {
@@ -786,6 +786,7 @@ private fun ExportSettingsPanel() {
         onClick = {
           if (exportDir != null) {
             Desktop.getDesktop().open(java.io.File(exportDir))
+            wm?.closeWindow(OverlayType.SETTINGS)
           }
         },
         colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
