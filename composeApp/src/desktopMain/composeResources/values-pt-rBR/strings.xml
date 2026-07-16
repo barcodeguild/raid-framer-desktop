@@ -108,6 +108,10 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="settings_recording_session_duration_format">Duração: %1$s</string>
     <string name="settings_recording_session_stop">Parar Gravação</string>
 
+    <!-- Crash Recovery Banner (shown when a stale session was cleared on launch) -->
+    <string name="settings_crash_recovery_title">Sessão Interrompida</string>
+    <string name="settings_crash_recovery_message">Uma sessão de gravação anterior foi interrompida e descartada.</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">Versão:</string>
@@ -278,6 +282,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="general_cancel">Cancelar</string>
     <string name="general_exit">Sair</string>
     <string name="general_settings">Configurações</string>
+    <string name="general_ok">OK</string>
     <string name="general_instructions_dragging_overlays">Shift + Clique para Arrastar Overlays</string>
 
     <!-- App / Tray Menu -->

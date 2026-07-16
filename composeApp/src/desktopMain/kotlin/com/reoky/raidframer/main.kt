@@ -178,6 +178,18 @@ fun main(args: Array<String>) {
           RFConfig.update { it.copy(firstLaunch = false) }
         }
         if (config.miniGraphEnabled) wm.openWindow(OverlayType.MINI)
+        if (config.lastSessionStart > 0) {
+          Log.info(TAG, "Stale session detected (lastSessionStart=${config.lastSessionStart}), clearing on launch.")
+          AppState.crashRecoverySessionTitle = config.lastSessionTitle
+          RFConfig.update {
+            it.copy(
+              lastSessionStart = 0L,
+              lastSessionTitle = "",
+              lastSessionType = "",
+              lastSessionDurationMs = 0L
+            )
+          }
+        }
       }
 
 

@@ -108,6 +108,10 @@
     <string name="settings_recording_session_duration_format">持续时间：%1$s</string>
     <string name="settings_recording_session_stop">停止录制</string>
 
+    <!-- Crash Recovery Banner (shown when a stale session was cleared on launch) -->
+    <string name="settings_crash_recovery_title">会话已中断</string>
+    <string name="settings_crash_recovery_message">上一个录制会话已被中断并丢弃。</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">版本:</string>
@@ -278,6 +282,7 @@
     <string name="general_cancel">取消</string>
     <string name="general_exit">退出</string>
     <string name="general_settings">设置</string>
+    <string name="general_ok">确定</string>
     <string name="general_instructions_dragging_overlays">Shift + 点击拖动覆盖层</string>
 
     <!-- App / Tray Menu -->

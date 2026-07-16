@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.sin
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.DragInteraction
@@ -46,6 +47,7 @@ import com.reoky.raidframer.core.seedtable.SeedTableStatus
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.AppGlobals
+import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helper.UpdateHelper
 import com.reoky.raidframer.core.helper.UpdateStatus
 import com.reoky.raidframer.core.helper.UpdateDownloader
@@ -241,6 +243,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
       if (config.lastSessionStart > 0) {
         RecordingSessionPanel(config)
+      } else {
+        CrashRecoveryBanner()
       }
 
       OverlayFeaturesPanel(wm)
@@ -1085,6 +1089,51 @@ private fun VersionPanel() {
 
       val releaseNotes = (updateStatus as UpdateStatus.Available).updateInfo.releaseNotes
       PatchNotesComponent(releaseNotes)
+    }
+  }
+}
+
+@Composable
+private fun CrashRecoveryBanner() {
+  val sessionTitle = AppState.crashRecoverySessionTitle
+  if (sessionTitle == null) return
+
+  var dismissed by remember { mutableStateOf(false) }
+  if (dismissed) return
+
+  Surface(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 12.dp, vertical = 6.dp),
+    shape = RoundedCornerShape(10.dp),
+    color = RFColors.AccentRed.copy(alpha = 0.12f),
+    border = BorderStroke(1.dp, RFColors.AccentRed.copy(alpha = 0.4f))
+  ) {
+    Row(
+      modifier = Modifier.padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = stringResource(Res.string.settings_crash_recovery_title),
+          color = RFColors.AccentRed,
+          fontSize = 14.sp,
+          fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = stringResource(Res.string.settings_crash_recovery_message),
+          color = RFColors.TextSecondary,
+          fontSize = 12.sp
+        )
+      }
+      TextButton(onClick = { dismissed = true }) {
+        Text(
+          text = stringResource(Res.string.general_ok),
+          color = RFColors.AccentRed,
+          fontWeight = FontWeight.SemiBold
+        )
+      }
     }
   }
 }

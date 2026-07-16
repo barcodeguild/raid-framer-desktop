@@ -37,4 +37,7 @@ object AppState {
     _isEverythingVisible.value = visible
   }
 
+  // set on launch if a stale session was cleared (crash recovery)
+  var crashRecoverySessionTitle: String? = null
+
 }

@@ -108,6 +108,10 @@
     <string name="settings_recording_session_duration_format">지속 시간: %1$s</string>
     <string name="settings_recording_session_stop">녹화 중지</string>
 
+    <!-- Crash Recovery Banner (shown when a stale session was cleared on launch) -->
+    <string name="settings_crash_recovery_title">세션 중단됨</string>
+    <string name="settings_crash_recovery_message">이전 녹화 세션이 중단되어 삭제되었습니다.</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">버전:</string>
@@ -278,6 +282,7 @@
     <string name="general_cancel">취소</string>
     <string name="general_exit">종료</string>
     <string name="general_settings">설정</string>
+    <string name="general_ok">확인</string>
     <string name="general_instructions_dragging_overlays">Shift + 클릭으로 오버레이 드래그</string>
 
     <!-- App / Tray Menu -->
