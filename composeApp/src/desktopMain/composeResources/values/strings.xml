@@ -84,8 +84,9 @@ You should still complete the uninstallation of the main application by uninstal
     <string name="settings_uninstall_confirm_title">Confirm Uninstall</string>
     <string name="settings_uninstall_confirm_text">Are you sure you want to uninstall the Lua Addon? This will remove the game integration.
 
-Please close the game before continuing, otherwise files will be left over.</string>
+The app will notify the in-game addon to shut down before removing files.</string>
     <string name="settings_uninstall_confirm_button">Uninstall</string>
+    <string name="settings_uninstall_shutting_down">Shutting down Lua addon and releasing file locks...</string>
     <string name="settings_uninstall_button">Uninstall Lua Addon &amp; App</string>
     <string name="settings_player_remappings_button">Player Re-mappings, PvP Duels &amp; Filters</string>
     <string name="settings_uninstall_done_title">Uninstall Complete</string>

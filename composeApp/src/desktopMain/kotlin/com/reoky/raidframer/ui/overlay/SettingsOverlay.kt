@@ -146,7 +146,9 @@ fun SettingsOverlay(wm: WindowManager? = null) {
   val config by RFConfig.state.collectAsState()
   val scrollState = rememberScrollState()
   val showUninstallConfirmDialog = remember { mutableStateOf(false) }
+  val showUninstallingDialog = remember { mutableStateOf(false) }
   val showUninstallDoneDialog = remember { mutableStateOf(false) }
+  val uninstallScope = rememberCoroutineScope()
 
   // Auto-scroll to the update panel if opened from the update dialog
   LaunchedEffect(Unit) {
@@ -294,8 +296,12 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         Button(
           onClick = {
             showUninstallConfirmDialog.value = false
-            CompanionInteractor.uninstall()
-            showUninstallDoneDialog.value = true
+            showUninstallingDialog.value = true
+            uninstallScope.launch {
+              CompanionInteractor.uninstall()
+              showUninstallingDialog.value = false
+              showUninstallDoneDialog.value = true
+            }
           },
           colors = ButtonDefaults.buttonColors(Color(0xFFB71C1C))
         ) {
@@ -310,6 +316,28 @@ fun SettingsOverlay(wm: WindowManager? = null) {
           Text(stringResource(Res.string.general_cancel), color = RFColors.TextPrimary)
         }
       }
+    )
+  }
+
+  if (showUninstallingDialog.value) {
+    AlertDialog(
+      onDismissRequest = {},
+      title = { Text(stringResource(Res.string.settings_uninstall_confirm_title), color = RFColors.TextPrimary) },
+      text = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(20.dp),
+            color = RFColors.AccentRed,
+            strokeWidth = 2.dp
+          )
+          Spacer(modifier = Modifier.width(12.dp))
+          Text(stringResource(Res.string.settings_uninstall_shutting_down), color = RFColors.TextSecondary)
+        }
+      },
+      backgroundColor = RFColors.CardBackground,
+      shape = RoundedCornerShape(10.dp),
+      confirmButton = {},
+      dismissButton = {}
     )
   }
 

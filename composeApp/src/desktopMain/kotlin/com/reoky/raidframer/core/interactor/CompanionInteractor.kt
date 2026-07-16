@@ -15,6 +15,7 @@ import com.reoky.raidframer.core.serialization.CombatEventPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.PlayerInfoPayload
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -390,25 +391,77 @@ object CompanionInteractor : Interactor() {
 
 
   /**
-   * Stops the interact loop and cleanly removes the Lua addon and folder.
+   * Sends a shutdown command to the Lua addon, waits for it to release file locks,
+   * then cleanly removes the addon folder.
    */
-  fun uninstall() {
-    stop()
-    InstallationInteractor.stop()
-
+  suspend fun uninstall() {
     val gameDirectory = RFConfig.state.value.defaultArcheRageDirectory
     if (gameDirectory.isBlank()) {
       Log.error(TAG, "Cannot uninstall Lua addon: Game directory not set.")
       return
     }
 
+    // Tell the Lua addon to shut down and release its file handles
+    try {
+      sendMessage(IPCMessagePayload.Shutdown())
+      Log.info(TAG, "Sent SHUTDOWN message to Lua addon. Waiting for file locks to release...")
+    } catch (e: Exception) {
+      Log.error(TAG, "Failed to send SHUTDOWN message: ${e.message}")
+    }
+
+    // Give the Lua addon time to process the SHUTDOWN message and close file handles
+    delay(2000L)
+
+    stop()
+    InstallationInteractor.stop()
+
     val addonDirectory = Paths.get(gameDirectory, ADDON_RELATIVE_PATH)
     if (addonDirectory.exists()) {
+      // Try recursive delete first (works if all handles are released)
       try {
         addonDirectory.toFile().deleteRecursively()
         Log.info(TAG, "Successfully uninstalled Lua addon and removed folder.")
+        return
       } catch (e: Exception) {
-        Log.error(TAG, "Failed to uninstall Lua addon: ${e.message}")
+        Log.info(TAG, "Recursive delete had locked files, will retry with individual file removal.")
+      }
+
+      // Fallback: delete individual files with retries for locked ones
+      val maxRetries = 5
+      for (attempt in 1..maxRetries) {
+        val remainingFiles = addonDirectory.toFile().walkBottomUp().toList()
+        if (remainingFiles.isEmpty()) break
+
+        var allDeleted = true
+        for (file in remainingFiles) {
+          if (file.exists()) {
+            val deleted = file.delete()
+            if (!deleted) {
+              allDeleted = false
+              Log.debug(TAG, "Could not delete ${file.name} on attempt $attempt (may be locked)")
+            }
+          }
+        }
+
+        if (allDeleted) {
+          Log.info(TAG, "Successfully uninstalled Lua addon and removed folder.")
+          return
+        }
+
+        if (attempt < maxRetries) {
+          delay(1000L) // wait before retrying
+        }
+      }
+
+      // Final check
+      if (addonDirectory.exists()) {
+        val leftoverFiles = addonDirectory.toFile().walkTopDown().filter { it.isFile }.map { it.name }.toList()
+        if (leftoverFiles.isNotEmpty()) {
+          Log.warn(TAG, "Some files could not be removed (may still be locked by game): ${leftoverFiles.joinToString()}")
+        } else {
+          addonDirectory.toFile().delete()
+          Log.info(TAG, "Successfully uninstalled Lua addon and removed folder.")
+        }
       }
     }
   }

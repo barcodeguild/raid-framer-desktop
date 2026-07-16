@@ -75,7 +75,7 @@ end
 function RF:Shutdown()
   if not self.initialized then return end
   self.initialized = false
-  self:Log("Shutdown")
+  self:Log("Hehe bye!")
   deregisterForEvents()
 end
 

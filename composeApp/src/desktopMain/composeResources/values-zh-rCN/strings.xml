@@ -84,8 +84,9 @@
     <string name="settings_uninstall_confirm_title">确认卸载</string>
     <string name="settings_uninstall_confirm_text">您确定要卸载Lua插件吗?这将移除游戏集成。
 
-请在继续之前关闭游戏，否则文件将会残留。</string>
+应用将通知游戏内插件在移除文件前关闭。</string>
     <string name="settings_uninstall_confirm_button">卸载</string>
+    <string name="settings_uninstall_shutting_down">正在关闭Lua插件并释放文件锁...</string>
     <string name="settings_uninstall_button">卸载Lua插件和应用</string>
     <string name="settings_player_remappings_button">玩家重映射、PvP决斗和过滤器</string>
     <string name="settings_uninstall_done_title">卸载完成</string>

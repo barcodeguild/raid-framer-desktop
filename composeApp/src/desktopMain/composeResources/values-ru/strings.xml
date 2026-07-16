@@ -84,8 +84,9 @@
     <string name="settings_uninstall_confirm_title">Подтвердить удаление</string>
     <string name="settings_uninstall_confirm_text">Вы уверены, что хотите удалить Lua-аддон? Это удалит интеграцию с игрой.
 
-Пожалуйста, закройте игру перед продолжением, иначе файлы останутся.</string>
+Приложение уведомит внутриигровой аддон о закрытии перед удалением файлов.</string>
     <string name="settings_uninstall_confirm_button">Удалить</string>
+    <string name="settings_uninstall_shutting_down">Выключение Lua-аддона и освобождение блокировок файлов...</string>
     <string name="settings_uninstall_button">Удалить Lua-аддон и приложение</string>
     <string name="settings_player_remappings_button">Переназначение игроков, PvP дуэли и фильтры</string>
     <string name="settings_uninstall_done_title">Удаление завершено</string>

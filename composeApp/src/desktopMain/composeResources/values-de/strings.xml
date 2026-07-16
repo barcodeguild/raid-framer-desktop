@@ -84,8 +84,9 @@ Sie sollten immer noch die Deinstallation der Hauptanwendung abschließen, indem
     <string name="settings_uninstall_confirm_title">Deinstallation bestätigen</string>
     <string name="settings_uninstall_confirm_text">Sind Sie sicher, dass Sie das Lua-Addon deinstallieren möchten? Dies entfernt die Spielintegration.
 
-Bitte schließen Sie das Spiel, bevor Sie fortfahren, andernfalls bleiben Dateien übrig.</string>
+Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Dateien herunterzufahren.</string>
     <string name="settings_uninstall_confirm_button">Deinstallieren</string>
+    <string name="settings_uninstall_shutting_down">Lua-Addon wird heruntergefahren und Dateisperren werden freigegeben...</string>
     <string name="settings_uninstall_button">Lua-Addon &amp; App deinstallieren</string>
     <string name="settings_player_remappings_button">Spieler-Neuzuordnungen, PvP-Duelle &amp; Filter</string>
     <string name="settings_uninstall_done_title">Deinstallation abgeschlossen</string>

@@ -84,8 +84,9 @@ Você ainda deve completar a desinstalação do aplicativo principal desinstalan
     <string name="settings_uninstall_confirm_title">Confirmar Desinstalação</string>
     <string name="settings_uninstall_confirm_text">Tem certeza de que deseja desinstalar o Addon Lua? Isso removerá a integração com o jogo.
 
-Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deixados para trás.</string>
+O aplicativo notificará o addon in-game para encerrar antes de remover os arquivos.</string>
     <string name="settings_uninstall_confirm_button">Desinstalar</string>
+    <string name="settings_uninstall_shutting_down">Desligando o addon Lua e liberando bloqueios de arquivos...</string>
     <string name="settings_uninstall_button">Desinstalar Addon Lua &amp; App</string>
     <string name="settings_player_remappings_button">Re-mapeamentos de Jogador, Duelos PvP &amp; Filtros</string>
     <string name="settings_uninstall_done_title">Desinstalação Concluída</string>
