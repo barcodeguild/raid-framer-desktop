@@ -411,6 +411,7 @@
     <string name="update_dialog_message">新版本 (%1$s) 已可用。\n您当前使用的版本是 %2$s。\n\n应用将关闭、重新安装并重启。之后您可能需要重新启动游戏。</string>
     <string name="update_dialog_install">下载并安装</string>
     <string name="update_dialog_later">稍后</string>
+    <string name="settings_update_whats_new">更新内容</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">团队管理和出勤</string>

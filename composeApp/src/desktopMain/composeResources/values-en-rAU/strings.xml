@@ -409,6 +409,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="update_dialog_message">A new version (%1$s) is available.\nYou are currently on version %2$s.\n\nThe app will close, reinstall, and relaunch. You may need to relaunch the game afterwards.</string>
     <string name="update_dialog_install">Download &amp; Install</string>
     <string name="update_dialog_later">Later</string>
+    <string name="settings_update_whats_new">What\'s New</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Raid Management &amp; Attendance</string>

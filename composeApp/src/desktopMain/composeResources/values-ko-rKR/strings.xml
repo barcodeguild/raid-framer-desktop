@@ -411,6 +411,7 @@
     <string name="update_dialog_message">새 버전(%1$s)이 available합니다.\n현재 버전은 %2$s입니다.\n\n앱이 종료되고 다시 설치 및 재시작됩니다. 이후 게임을 다시 시작해야 할 수 있습니다.</string>
     <string name="update_dialog_install">다운로드 및 설치</string>
     <string name="update_dialog_later">나중에</string>
+    <string name="settings_update_whats_new">새로운 기능</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">공격대 관리 및 출석</string>

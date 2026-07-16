@@ -411,6 +411,7 @@
     <string name="update_dialog_message">Доступна новая версия (%1$s).\nВы используете версию %2$s.\n\nПриложение закроется, переустановится и перезапустится. Возможно, потребуется перезапустить игру.</string>
     <string name="update_dialog_install">Скачать и установить</string>
     <string name="update_dialog_later">Позже</string>
+    <string name="settings_update_whats_new">Что нового</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Управление рейдом и посещаемость</string>

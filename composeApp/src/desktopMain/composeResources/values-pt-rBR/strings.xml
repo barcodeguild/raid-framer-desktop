@@ -411,6 +411,7 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="update_dialog_message">Uma nova versão (%1$s) está disponível.\nVocê está usando a versão %2$s.\n\nO app será fechado, reinstalado e reiniciado. Você pode precisar reiniciar o jogo depois.</string>
     <string name="update_dialog_install">Baixar &amp; Instalar</string>
     <string name="update_dialog_later">Mais Tarde</string>
+    <string name="settings_update_whats_new">Novidades</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Gerenciamento de Raid &amp; Frequência</string>

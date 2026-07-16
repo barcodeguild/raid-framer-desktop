@@ -55,6 +55,7 @@ import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.component.PatchNotesComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -1053,6 +1054,9 @@ private fun VersionPanel() {
           }
         }
       )
+
+      val releaseNotes = (updateStatus as UpdateStatus.Available).updateInfo.releaseNotes
+      PatchNotesComponent(releaseNotes)
     }
   }
 }

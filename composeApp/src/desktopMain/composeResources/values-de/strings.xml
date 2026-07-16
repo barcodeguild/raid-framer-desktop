@@ -411,6 +411,7 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="update_dialog_message">Eine neue Version (%1$s) ist verfügbar.\nSie verwenden derzeit Version %2$s.\n\nDie App wird geschlossen, neu installiert und neu gestartet. Möglicherweise müssen Sie das Spiel danach neu starten.</string>
     <string name="update_dialog_install">Herunterladen &amp; installieren</string>
     <string name="update_dialog_later">Später</string>
+    <string name="settings_update_whats_new">Neuigkeiten</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Raid-Management &amp; Anwesenheit</string>
