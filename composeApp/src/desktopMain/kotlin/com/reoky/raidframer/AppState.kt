@@ -39,5 +39,10 @@ object AppState {
 
   // set on launch if a stale session was cleared (crash recovery)
   var crashRecoverySessionTitle: String? = null
+  private val _crashRecoveryDismissed = MutableStateFlow(false)
+  val crashRecoveryDismissed = _crashRecoveryDismissed.asStateFlow()
+  fun dismissCrashRecovery() {
+    _crashRecoveryDismissed.value = true
+  }
 
 }

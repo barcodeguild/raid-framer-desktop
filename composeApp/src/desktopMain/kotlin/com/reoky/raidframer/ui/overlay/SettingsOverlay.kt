@@ -1096,10 +1096,8 @@ private fun VersionPanel() {
 @Composable
 private fun CrashRecoveryBanner() {
   val sessionTitle = AppState.crashRecoverySessionTitle
-  if (sessionTitle == null) return
-
-  var dismissed by remember { mutableStateOf(false) }
-  if (dismissed) return
+  val dismissed by AppState.crashRecoveryDismissed.collectAsState()
+  if (sessionTitle == null || dismissed) return
 
   Surface(
     modifier = Modifier
@@ -1127,7 +1125,7 @@ private fun CrashRecoveryBanner() {
           fontSize = 12.sp
         )
       }
-      TextButton(onClick = { dismissed = true }) {
+      TextButton(onClick = { AppState.dismissCrashRecovery() }) {
         Text(
           text = stringResource(Res.string.general_ok),
           color = RFColors.AccentRed,
