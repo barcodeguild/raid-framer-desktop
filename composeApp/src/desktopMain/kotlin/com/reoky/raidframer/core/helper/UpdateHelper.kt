@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
 
 data class UpdateInfo(
@@ -12,7 +13,8 @@ data class UpdateInfo(
   val msiUrl: String,
   val msiSha256: String,
   val releaseUrl: String,
-  val tagName: String
+  val tagName: String,
+  val releaseNotes: String
 )
 
 sealed class UpdateStatus {
@@ -36,7 +38,7 @@ object UpdateHelper {
 
   fun checkForUpdates(onResult: (UpdateStatus) -> Unit) {
     try {
-      val connection = URL(GITHUB_API_URL).openConnection() as HttpURLConnection
+      val connection = URI(GITHUB_API_URL).toURL().openConnection() as HttpURLConnection
       connection.requestMethod = "GET"
       connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
       connection.setRequestProperty("User-Agent", "RaidFramer-Desktop")
@@ -47,6 +49,7 @@ object UpdateHelper {
         val htmlUrl = extractHtmlUrl(response)
         val newVersion = parseVersionFromTag(tagName)
         val msiAsset = extractMsiAsset(response)
+        val releaseNotes = extractReleaseBody(response)?.let { filterChangelog(stripImages(it)) } ?: ""
 
         if (newVersion != null && (AppGlobals.DEBUG_UPDATE_SAME_VERSION || isVersionGreater(newVersion, AppGlobals.APP_VERSION))) {
           if (msiAsset != null) {
@@ -55,7 +58,8 @@ object UpdateHelper {
               msiUrl = msiAsset.first,
               msiSha256 = msiAsset.second,
               releaseUrl = htmlUrl ?: GITHUB_RELEASES_URL,
-              tagName = tagName ?: ""
+              tagName = tagName ?: "",
+              releaseNotes = releaseNotes
             )
             _pendingUpdate.value = updateInfo
             onResult(UpdateStatus.Available(updateInfo))
@@ -103,6 +107,44 @@ object UpdateHelper {
   private fun extractHtmlUrl(json: String): String? {
     val regex = "\"html_url\"\\s*:\\s*\"([^\"]+)\"".toRegex()
     return regex.find(json)?.groupValues?.get(1)
+  }
+
+  /**
+   * Extracts the release body (patch notes) from the GitHub release JSON.
+   * The body is a JSON-escaped string — unescapes \\r\\n, \\n, \\\" etc.
+   */
+  private fun extractReleaseBody(json: String): String? {
+    val regex = "\"body\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"".toRegex()
+    val match = regex.find(json) ?: return null
+    return match.groupValues[1]
+      .replace("\\r\\n", "\n")
+      .replace("\\n", "\n")
+      .replace("\\\"", "\"")
+      .replace("\\\\", "\\")
+      .trim()
+  }
+
+  /**
+   * Strips Markdown image patterns ![alt](url) from text.
+   */
+  private fun stripImages(body: String): String {
+    return body.replace(Regex("!\\[[^]]*]\\([^)]*\\)"), "").trim()
+  }
+
+  /**
+   * Filters release notes to only include content between separator lines
+   * (5+ consecutive dashes, asterisks, or underscores).
+   * If fewer than 2 separators are found, returns the full body.
+   */
+  private fun filterChangelog(body: String): String {
+    val separatorRegex = Regex("^-{5,}$|^\\*{5,}$|^_{5,}$", RegexOption.MULTILINE)
+    val separators = separatorRegex.findAll(body).toList()
+    if (separators.size >= 2) {
+      val start = separators.first().range.last + 1
+      val end = separators.last().range.first
+      return body.substring(start, end).trim()
+    }
+    return body.trim()
   }
 
   /**

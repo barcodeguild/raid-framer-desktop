@@ -84,8 +84,9 @@
     <string name="settings_uninstall_confirm_title">确认卸载</string>
     <string name="settings_uninstall_confirm_text">您确定要卸载Lua插件吗?这将移除游戏集成。
 
-请在继续之前关闭游戏，否则文件将会残留。</string>
+应用将通知游戏内插件在移除文件前关闭。</string>
     <string name="settings_uninstall_confirm_button">卸载</string>
+    <string name="settings_uninstall_shutting_down">正在关闭Lua插件并释放文件锁...</string>
     <string name="settings_uninstall_button">卸载Lua插件和应用</string>
     <string name="settings_player_remappings_button">玩家重映射、PvP决斗和过滤器</string>
     <string name="settings_uninstall_done_title">卸载完成</string>
@@ -106,6 +107,10 @@
     <string name="settings_recording_session_type_format">类型：%1$s (%2$s)</string>
     <string name="settings_recording_session_duration_format">持续时间：%1$s</string>
     <string name="settings_recording_session_stop">停止录制</string>
+
+    <!-- Crash Recovery Banner (shown when a stale session was cleared on launch) -->
+    <string name="settings_crash_recovery_title">会话已中断</string>
+    <string name="settings_crash_recovery_message">上一个录制会话已被中断并丢弃。</string>
 
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
@@ -215,6 +220,13 @@
     <string name="combat_column_pve_damage">⚔️ PvE伤害 ⚔️</string>
     <string name="combat_column_pve_heals">💉 PvE治疗 💉</string>
     <string name="combat_column_pve_cc">⛨ PvE控场 ⛨</string>
+    <!-- Export combat titles (plain-text, no emojis — for PNG export rendering) -->
+    <string name="export_combat_pvp_damage">PvP伤害</string>
+    <string name="export_combat_pvp_heals">PvP治疗</string>
+    <string name="export_combat_pvp_cc">PvP控场</string>
+    <string name="export_combat_pve_damage">PvE伤害</string>
+    <string name="export_combat_pve_heals">PvE治疗</string>
+    <string name="export_combat_pve_cc">PvE控场</string>
     <string name="combat_no_columns_message">兄弟.. 试着至少添加一个类别..</string>
     <string name="combat_open_settings">打开设置</string>
 
@@ -270,6 +282,7 @@
     <string name="general_cancel">取消</string>
     <string name="general_exit">退出</string>
     <string name="general_settings">设置</string>
+    <string name="general_ok">确定</string>
     <string name="general_instructions_dragging_overlays">Shift + 点击拖动覆盖层</string>
 
     <!-- App / Tray Menu -->
@@ -404,6 +417,7 @@
     <string name="update_dialog_message">新版本 (%1$s) 已可用。\n您当前使用的版本是 %2$s。\n\n应用将关闭、重新安装并重启。之后您可能需要重新启动游戏。</string>
     <string name="update_dialog_install">下载并安装</string>
     <string name="update_dialog_later">稍后</string>
+    <string name="settings_update_whats_new">更新内容</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">团队管理和出勤</string>

@@ -84,8 +84,9 @@
     <string name="settings_uninstall_confirm_title">Подтвердить удаление</string>
     <string name="settings_uninstall_confirm_text">Вы уверены, что хотите удалить Lua-аддон? Это удалит интеграцию с игрой.
 
-Пожалуйста, закройте игру перед продолжением, иначе файлы останутся.</string>
+Приложение уведомит внутриигровой аддон о закрытии перед удалением файлов.</string>
     <string name="settings_uninstall_confirm_button">Удалить</string>
+    <string name="settings_uninstall_shutting_down">Выключение Lua-аддона и освобождение блокировок файлов...</string>
     <string name="settings_uninstall_button">Удалить Lua-аддон и приложение</string>
     <string name="settings_player_remappings_button">Переназначение игроков, PvP дуэли и фильтры</string>
     <string name="settings_uninstall_done_title">Удаление завершено</string>
@@ -106,6 +107,10 @@
     <string name="settings_recording_session_type_format">Тип: %1$s (%2$s)</string>
     <string name="settings_recording_session_duration_format">Длительность: %1$s</string>
     <string name="settings_recording_session_stop">Остановить запись</string>
+
+    <!-- Crash Recovery Banner (shown when a stale session was cleared on launch) -->
+    <string name="settings_crash_recovery_title">Сессия прервана</string>
+    <string name="settings_crash_recovery_message">Предыдущая сессия записи была прервана и отброшена.</string>
 
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
@@ -215,6 +220,13 @@
     <string name="combat_column_pve_damage">⚔️ PvE урон ⚔️</string>
     <string name="combat_column_pve_heals">💉 PvE исцеление 💉</string>
     <string name="combat_column_pve_cc">⛨ PvE CC ⛨</string>
+    <!-- Export combat titles (plain-text, no emojis — for PNG export rendering) -->
+    <string name="export_combat_pvp_damage">PvP урон</string>
+    <string name="export_combat_pvp_heals">PvP исцеление</string>
+    <string name="export_combat_pvp_cc">PvP CC</string>
+    <string name="export_combat_pve_damage">PvE урон</string>
+    <string name="export_combat_pve_heals">PvE исцеление</string>
+    <string name="export_combat_pve_cc">PvE CC</string>
     <string name="combat_no_columns_message">Брат.. Попробуй добавить хотя бы одну категорию..</string>
     <string name="combat_open_settings">Открыть настройки</string>
 
@@ -270,6 +282,7 @@
     <string name="general_cancel">Отмена</string>
     <string name="general_exit">Выход</string>
     <string name="general_settings">Настройки</string>
+    <string name="general_ok">OK</string>
     <string name="general_instructions_dragging_overlays">Shift + клик для перетаскивания оверлеев</string>
 
     <!-- App / Tray Menu -->
@@ -404,6 +417,7 @@
     <string name="update_dialog_message">Доступна новая версия (%1$s).\nВы используете версию %2$s.\n\nПриложение закроется, переустановится и перезапустится. Возможно, потребуется перезапустить игру.</string>
     <string name="update_dialog_install">Скачать и установить</string>
     <string name="update_dialog_later">Позже</string>
+    <string name="settings_update_whats_new">Что нового</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Управление рейдом и посещаемость</string>

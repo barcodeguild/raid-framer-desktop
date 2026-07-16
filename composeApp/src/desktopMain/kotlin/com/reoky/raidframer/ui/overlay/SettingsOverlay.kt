@@ -1,9 +1,10 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.animation.core.*
-import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.sin
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.DragInteraction
@@ -16,6 +17,7 @@ import androidx.compose.material.*
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -45,6 +47,7 @@ import com.reoky.raidframer.core.seedtable.SeedTableStatus
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.AppGlobals
+import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helper.UpdateHelper
 import com.reoky.raidframer.core.helper.UpdateStatus
 import com.reoky.raidframer.core.helper.UpdateDownloader
@@ -54,6 +57,7 @@ import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.component.PatchNotesComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -144,7 +148,9 @@ fun SettingsOverlay(wm: WindowManager? = null) {
   val config by RFConfig.state.collectAsState()
   val scrollState = rememberScrollState()
   val showUninstallConfirmDialog = remember { mutableStateOf(false) }
+  val showUninstallingDialog = remember { mutableStateOf(false) }
   val showUninstallDoneDialog = remember { mutableStateOf(false) }
+  val uninstallScope = rememberCoroutineScope()
 
   // Auto-scroll to the update panel if opened from the update dialog
   LaunchedEffect(Unit) {
@@ -237,13 +243,15 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
       if (config.lastSessionStart > 0) {
         RecordingSessionPanel(config)
+      } else {
+        CrashRecoveryBanner()
       }
 
       OverlayFeaturesPanel(wm)
 
       CombatOverlaySettingsPanel()
 
-      ExportSettingsPanel()
+      ExportSettingsPanel(wm)
 
       SeedTableSettingsPanel(wm)
 
@@ -292,8 +300,12 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         Button(
           onClick = {
             showUninstallConfirmDialog.value = false
-            CompanionInteractor.uninstall()
-            showUninstallDoneDialog.value = true
+            showUninstallingDialog.value = true
+            uninstallScope.launch {
+              CompanionInteractor.uninstall()
+              showUninstallingDialog.value = false
+              showUninstallDoneDialog.value = true
+            }
           },
           colors = ButtonDefaults.buttonColors(Color(0xFFB71C1C))
         ) {
@@ -311,10 +323,32 @@ fun SettingsOverlay(wm: WindowManager? = null) {
     )
   }
 
+  if (showUninstallingDialog.value) {
+    AlertDialog(
+      onDismissRequest = {},
+      title = { Text(stringResource(Res.string.settings_uninstall_confirm_title), color = RFColors.TextPrimary) },
+      text = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(20.dp),
+            color = RFColors.AccentRed,
+            strokeWidth = 2.dp
+          )
+          Spacer(modifier = Modifier.width(12.dp))
+          Text(stringResource(Res.string.settings_uninstall_shutting_down), color = RFColors.TextSecondary)
+        }
+      },
+      backgroundColor = RFColors.CardBackground,
+      shape = RoundedCornerShape(10.dp),
+      confirmButton = {},
+      dismissButton = {}
+    )
+  }
+
   if (showUninstallDoneDialog.value) {
     AlertDialog(
       onDismissRequest = {
-        Runtime.getRuntime().exec("control appwiz.cpl")
+        ProcessBuilder("control", "appwiz.cpl").start()
         exitProcess(0)
       },
       title = { Text(stringResource(Res.string.settings_uninstall_done_title), color = RFColors.TextPrimary) },
@@ -323,7 +357,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       shape = RoundedCornerShape(10.dp),
       confirmButton = {
         Button(onClick = {
-          Runtime.getRuntime().exec("control appwiz.cpl")
+          ProcessBuilder("control", "appwiz.cpl").start()
           exitProcess(0)
         }, colors = ButtonDefaults.buttonColors(RFColors.AccentRed)) {
           Text(stringResource(Res.string.general_exit), color = Color.White)
@@ -559,7 +593,7 @@ private fun LanguageDropdown(currentCode: String) {
       readOnly = true,
       modifier = Modifier
         .fillMaxWidth()
-        .menuAnchor(),
+        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
       colors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = RFColors.AccentRed,
         unfocusedBorderColor = RFColors.CardBorder,
@@ -699,7 +733,7 @@ private fun CategoryDropdown(
       label = { Text(text = label, fontSize = 12.sp, color = RFColors.TextSecondary) },
       modifier = Modifier
         .fillMaxWidth()
-        .menuAnchor(),
+        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
       colors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = RFColors.AccentRed,
         unfocusedBorderColor = RFColors.CardBorder,
@@ -742,7 +776,7 @@ private fun CategoryDropdown(
 }
 
 @Composable
-private fun ExportSettingsPanel() {
+private fun ExportSettingsPanel(wm: WindowManager?) {
   val config by RFConfig.state.collectAsState()
   val exportDir = getExportDirectory()
   val directorySize = remember(exportDir) {
@@ -785,6 +819,7 @@ private fun ExportSettingsPanel() {
         onClick = {
           if (exportDir != null) {
             Desktop.getDesktop().open(java.io.File(exportDir))
+            wm?.closeWindow(OverlayType.SETTINGS)
           }
         },
         colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
@@ -1051,6 +1086,54 @@ private fun VersionPanel() {
           }
         }
       )
+
+      val releaseNotes = (updateStatus as UpdateStatus.Available).updateInfo.releaseNotes
+      PatchNotesComponent(releaseNotes)
+    }
+  }
+}
+
+@Composable
+private fun CrashRecoveryBanner() {
+  val sessionTitle = AppState.crashRecoverySessionTitle
+  if (sessionTitle == null) return
+
+  var dismissed by remember { mutableStateOf(false) }
+  if (dismissed) return
+
+  Surface(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 12.dp, vertical = 6.dp),
+    shape = RoundedCornerShape(10.dp),
+    color = RFColors.AccentRed.copy(alpha = 0.12f),
+    border = BorderStroke(1.dp, RFColors.AccentRed.copy(alpha = 0.4f))
+  ) {
+    Row(
+      modifier = Modifier.padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = stringResource(Res.string.settings_crash_recovery_title),
+          color = RFColors.AccentRed,
+          fontSize = 14.sp,
+          fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = stringResource(Res.string.settings_crash_recovery_message),
+          color = RFColors.TextSecondary,
+          fontSize = 12.sp
+        )
+      }
+      TextButton(onClick = { dismissed = true }) {
+        Text(
+          text = stringResource(Res.string.general_ok),
+          color = RFColors.AccentRed,
+          fontWeight = FontWeight.SemiBold
+        )
+      }
     }
   }
 }

@@ -131,6 +131,14 @@ sealed class IPCMessagePayload {
     override val timestamp: Long = System.currentTimeMillis()
   ) : IPCMessagePayload()
 
+  @Serializable
+  @SerialName("SHUTDOWN")
+  data class Shutdown(
+    override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
+    override val timestamp: Long = System.currentTimeMillis()
+  ) : IPCMessagePayload()
+
 }
 
 /**

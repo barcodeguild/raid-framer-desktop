@@ -3,7 +3,7 @@
 -- https://github.com/barcodeguild/raid-framer-desktop
 -- Author: Reoky
 RF = RF or {}
-RF.TAG = "Raid Framer 2.2.0"
+RF.TAG = "Raid Framer 2.2.1"
 
 RF.PLAYER_NAME = ""
 RF.FACTION = ""
@@ -75,7 +75,7 @@ end
 function RF:Shutdown()
   if not self.initialized then return end
   self.initialized = false
-  self:Log("Shutdown")
+  self:Log("Hehe bye!")
   deregisterForEvents()
 end
 

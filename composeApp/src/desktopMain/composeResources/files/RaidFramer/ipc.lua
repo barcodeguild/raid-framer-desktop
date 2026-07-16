@@ -20,6 +20,7 @@ RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = 0
 
 -- Persistent output file handle to avoid repeated open/close
 RF.IPC.OUT_FH = nil
+RF.IPC.SHUTDOWN_REQUESTED = false
 
 RF.IPC.MESSAGE_TYPES = {
   COMBAT_EVENT = "COMBAT_EVENT", -- see game monitor branch (not used yet)
@@ -35,7 +36,8 @@ RF.IPC.MESSAGE_TYPES = {
   SOUND_ALERT = "SOUND_ALERT", -- play a sound alert on the companion (not used yet, but I want to get the unreal tournament sounds for this LOL)
   AOE_SPLAT = "AOE_SPLAT", -- hoping maybe Queen Sparkles will open the animation api someday (not used yet but I want to draw sick animations on the ground for charms and stuff!)
   TEST_PING = "TEST_PING", -- companion replies with a "pong" payload (used for the lua companion indicator LED)
-  CONFIG_UPDATE = "CONFIG_UPDATE" -- app notifies addon that config has changed, prompts a reload from disk
+  CONFIG_UPDATE = "CONFIG_UPDATE", -- app notifies addon that config has changed, prompts a reload from disk
+  SHUTDOWN = "SHUTDOWN" -- app requests addon to shut down and release file locks for clean uninstall
 }
 
 -- Helper: open persistent output file handle (append mode). Returns file handle or nil.
@@ -62,6 +64,9 @@ end
 -- poke does some work and then returns; this is called periodically by the main addon loop
 -- and it's meant to smooth out writes over time instead of spamming writes in the combat event handler
 function RF.IPC.interact()
+
+  -- GUARD: Don't process if shutdown has been requested
+  if RF.IPC.SHUTDOWN_REQUESTED then return end
 
   -- GUARD: Should we write right now? (rate limit)
   local now = os.time()
@@ -180,6 +185,7 @@ end
 
 -- Queues a message to be sent later; returns nothing (avoid heavy work on hot path)
 function RF.IPC.EnqueueWriteMessage(msgType, payload)
+  if RF.IPC.SHUTDOWN_REQUESTED then return end
   -- Build message table but do NOT stringify here to keep hot path cheap
   local message = RF.IPC.BuildIPCMessage(msgType, payload)
 
@@ -202,6 +208,7 @@ end
 -- would constantly open and close the file, which is inefficient.
 -- but this is how we used to do combat event writes before batching was implemented
 function RF.IPC.WriteMessage(msgType, payload)
+  if RF.IPC.SHUTDOWN_REQUESTED then return end
   local message = RF.IPC.BuildIPCMessage(msgType, payload)
   local json = RF.JSON.json_encode(message)
   local f = RF.IPC.OpenOutFile()
@@ -286,6 +293,11 @@ function RF.IPC.HandleRawMessage(rawMessage)
   elseif message.type == RF.IPC.MESSAGE_TYPES.CONFIG_UPDATE then
     RF:Log("Addon configuration updated via the desktop app.")
     RF.Config.LoadConfig()
+  elseif message.type == RF.IPC.MESSAGE_TYPES.SHUTDOWN then
+    RF.IPC.SHUTDOWN_REQUESTED = true
+    RF:Log("Shutdown requested by desktop app. Releasing file locks...")
+    RF.IPC.ResetOutputFile()
+    RF:Shutdown()
   else
     RF:Log("IPC: Received unknown message type: " .. tostring(message.type))
   end

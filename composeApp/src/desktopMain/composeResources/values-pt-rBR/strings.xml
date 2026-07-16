@@ -84,8 +84,9 @@ Você ainda deve completar a desinstalação do aplicativo principal desinstalan
     <string name="settings_uninstall_confirm_title">Confirmar Desinstalação</string>
     <string name="settings_uninstall_confirm_text">Tem certeza de que deseja desinstalar o Addon Lua? Isso removerá a integração com o jogo.
 
-Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deixados para trás.</string>
+O aplicativo notificará o addon in-game para encerrar antes de remover os arquivos.</string>
     <string name="settings_uninstall_confirm_button">Desinstalar</string>
+    <string name="settings_uninstall_shutting_down">Desligando o addon Lua e liberando bloqueios de arquivos...</string>
     <string name="settings_uninstall_button">Desinstalar Addon Lua &amp; App</string>
     <string name="settings_player_remappings_button">Re-mapeamentos de Jogador, Duelos PvP &amp; Filtros</string>
     <string name="settings_uninstall_done_title">Desinstalação Concluída</string>
@@ -106,6 +107,10 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="settings_recording_session_type_format">Tipo: %1$s (%2$s)</string>
     <string name="settings_recording_session_duration_format">Duração: %1$s</string>
     <string name="settings_recording_session_stop">Parar Gravação</string>
+
+    <!-- Crash Recovery Banner (shown when a stale session was cleared on launch) -->
+    <string name="settings_crash_recovery_title">Sessão Interrompida</string>
+    <string name="settings_crash_recovery_message">Uma sessão de gravação anterior foi interrompida e descartada.</string>
 
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
@@ -215,6 +220,13 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="combat_column_pve_damage">⚔️ Dano PvE ⚔️</string>
     <string name="combat_column_pve_heals">💉 Curas PvE 💉</string>
     <string name="combat_column_pve_cc">⛨ CC PvE ⛨</string>
+    <!-- Export combat titles (plain-text, no emojis — for PNG export rendering) -->
+    <string name="export_combat_pvp_damage">Dano PvP</string>
+    <string name="export_combat_pvp_heals">Cura PvP</string>
+    <string name="export_combat_pvp_cc">CC PvP</string>
+    <string name="export_combat_pve_damage">Dano PvE</string>
+    <string name="export_combat_pve_heals">Cura PvE</string>
+    <string name="export_combat_pve_cc">CC PvE</string>
     <string name="combat_no_columns_message">Cara.. Tenta Adicionar Pelo Menos Uma Categoria..</string>
     <string name="combat_open_settings">Abrir Configurações</string>
 
@@ -270,6 +282,7 @@ Por favor, feche o jogo antes de continuar, caso contrário arquivos serão deix
     <string name="general_cancel">Cancelar</string>
     <string name="general_exit">Sair</string>
     <string name="general_settings">Configurações</string>
+    <string name="general_ok">OK</string>
     <string name="general_instructions_dragging_overlays">Shift + Clique para Arrastar Overlays</string>
 
     <!-- App / Tray Menu -->
@@ -404,6 +417,7 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="update_dialog_message">Uma nova versão (%1$s) está disponível.\nVocê está usando a versão %2$s.\n\nO app será fechado, reinstalado e reiniciado. Você pode precisar reiniciar o jogo depois.</string>
     <string name="update_dialog_install">Baixar &amp; Instalar</string>
     <string name="update_dialog_later">Mais Tarde</string>
+    <string name="settings_update_whats_new">Novidades</string>
 
     <!-- Raid / Attendance Overlay -->
     <string name="raid_attendance_title">Gerenciamento de Raid &amp; Frequência</string>

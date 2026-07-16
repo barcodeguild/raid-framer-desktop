@@ -36,6 +36,12 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
 import raid_framer_desktop.composeapp.generated.resources.summary_top_debuffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pve_cc
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pve_damage
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pve_heals
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_cc
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_damage
+import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_heals
 import raid_framer_desktop.composeapp.generated.resources.summary_top_distresses
 import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_gamers
 import raid_framer_desktop.composeapp.generated.resources.summary_top_heals_received
@@ -72,6 +78,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.skia.Bitmap
+import org.jetbrains.skia.Codec
+import org.jetbrains.skia.Data
+import org.jetbrains.skia.ImageInfo
+import org.jetbrains.skia.svg.SVGDOM
 import javax.imageio.ImageIO
 
 object ImageExportInteractor {
@@ -137,8 +148,8 @@ object ImageExportInteractor {
    */
   private fun renderSvgToAwtImage(svgBytes: ByteArray, targetSize: Int): BufferedImage? {
     return try {
-      val data   = org.jetbrains.skia.Data.makeFromBytes(svgBytes)
-      val svgDom = org.jetbrains.skia.svg.SVGDOM(data)
+      val data   = Data.makeFromBytes(svgBytes)
+      val svgDom = SVGDOM(data)
 
       val nativeSize = 64   // matches every skill-tree SVG's viewBox width/height
       val surface    = org.jetbrains.skia.Surface.makeRasterN32Premul(nativeSize, nativeSize)
@@ -148,8 +159,8 @@ object ImageExportInteractor {
 
       // skia is the ui framework compose (at least on Windows desktops but not Android nor iOS) uses for rendering the ui
       // to place SVGs inside this bitmap programmatically we are calling skia's own drawing functions.
-      val bitmap = org.jetbrains.skia.Bitmap()
-      bitmap.allocPixels(org.jetbrains.skia.ImageInfo.makeN32Premul(nativeSize, nativeSize))
+      val bitmap = Bitmap()
+      bitmap.allocPixels(ImageInfo.makeN32Premul(nativeSize, nativeSize))
       if (!surface.readPixels(bitmap, 0, 0)) return null
 
       val native = BufferedImage(nativeSize, nativeSize, BufferedImage.TYPE_INT_ARGB)
@@ -174,8 +185,8 @@ object ImageExportInteractor {
     return skillTreeImageCache.getOrPut(tree to size) {
       try {
         val name = tree?.name?.lowercase() ?: "unknown"
-        val uri  = Res.getUri("drawable/$name.svg") ?: return@getOrPut null
-        val bytes = URI(uri.toString()).toURL().openStream().use { it.readBytes() }
+        val uri  = Res.getUri("drawable/$name.svg")
+        val bytes = URI(uri).toURL().openStream().use { it.readBytes() }
         renderSvgToAwtImage(bytes, size)
       } catch (_: Exception) { null }
     }
@@ -198,6 +209,9 @@ object ImageExportInteractor {
     val exportHeaderKillsLabel: String,
     val exportHeaderMostDamage: String,
     val exportHeaderKillingBlow: String,
+    val combatDamageTitle: String,
+    val combatHealsTitle: String,
+    val combatCCTitle: String,
     val topDamage: List<PlayerCard>,
     val topHeals: List<PlayerCard>,
     val topCC: List<PlayerCard>,
@@ -268,6 +282,15 @@ object ImageExportInteractor {
       exportHeaderKillsLabel = getString(Res.string.export_header_kills_label),
       exportHeaderMostDamage = getString(Res.string.export_header_most_damage),
       exportHeaderKillingBlow = getString(Res.string.export_header_killing_blow),
+      combatDamageTitle = getString(
+        if (config.allowPVEDamage) Res.string.export_combat_pve_damage else Res.string.export_combat_pvp_damage
+      ),
+      combatHealsTitle = getString(
+        if (config.allowPVEDamage) Res.string.export_combat_pve_heals else Res.string.export_combat_pvp_heals
+      ),
+      combatCCTitle = getString(
+        if (config.allowPVEDamage) Res.string.export_combat_pve_cc else Res.string.export_combat_pvp_cc
+      ),
       topDamage           = PlayerCacheInteractor.topDamage.value.take(50),
       topHeals            = PlayerCacheInteractor.topHeals.value.take(50),
       topCC               = PlayerCacheInteractor.topCC.value.take(50),
@@ -352,6 +375,11 @@ object ImageExportInteractor {
     }
   }
 
+  /*
+   * So the reason we downsample the image from a higher resolution is because of the icons and fonts being pixelated
+   * if we render at the target resolution. The first iteration of the PNG export was very pixelated and this ended-up
+   * being the solution.
+   */
   private fun downsampleImage(source: BufferedImage, width: Int, height: Int): BufferedImage {
     val scaled = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
     val sg = scaled.createGraphics()
@@ -372,13 +400,11 @@ object ImageExportInteractor {
 
     try {
       val resUri = Res.getUri("drawable/reoky_wallpaper.png")
-      if (resUri != null) {
-        val wallpaper = ImageIO.read(URI(resUri.toString()).toURL())
-        if (wallpaper != null) {
-          g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
-          g2d.drawImage(wallpaper, 0, 0, width, height, null)
-          g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)
-        }
+      val wallpaper = ImageIO.read(URI(resUri).toURL())
+      if (wallpaper != null) {
+        g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
+        g2d.drawImage(wallpaper, 0, 0, width, height, null)
+        g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)
       }
     } catch (_: Exception) {
     }
@@ -434,14 +460,11 @@ object ImageExportInteractor {
       drawCardBackgroundTransparent(g2d, x, y, w, combatH)
       val subColW = w / 3
 
-      val damageTitle = if (data.allowPvE) "PvE Damage" else "PvP Damage"
-      val healsTitle  = if (data.allowPvE) "PvE Heals"  else "PvP Heals"
-      val ccTitle     = if (data.allowPvE) "PvE CC"    else "PvP CC"
-      val icon = if (data.allowPvE) "⚔" else "🔥"
+      val icon = if (data.allowPvE) "\u2694" else "\uD83D\uDD25"
 
-      drawSectionHeader(g2d, damageTitle, x,               y, subColW, toAwtColor(RFColors.dpsOrange), icon)
-      drawSectionHeader(g2d, healsTitle,  x + subColW,     y, subColW, toAwtColor(RFColors.healsGreen), "💉")
-      drawSectionHeader(g2d, ccTitle,     x + subColW * 2, y, subColW, toAwtColor(RFColors.ccCyan), "🛡")
+      drawSectionHeader(g2d, data.combatDamageTitle, x,               y, subColW, toAwtColor(RFColors.dpsOrange), icon)
+      drawSectionHeader(g2d, data.combatHealsTitle,  x + subColW,     y, subColW, toAwtColor(RFColors.healsGreen), "\uD83D\uDC89")
+      drawSectionHeader(g2d, data.combatCCTitle,     x + subColW * 2, y, subColW, toAwtColor(RFColors.ccCyan), "\uD83D\uDEE1")
 
       var rowY = y + SECTION_HEADER_HEIGHT
       val maxRows = maxOf(data.topDamage.size, data.topHeals.size, data.topCC.size).coerceAtLeast(1)
@@ -483,9 +506,9 @@ object ImageExportInteractor {
       val chartRadius  = 45
       val chartY       = y + CARD_PADDING + 62
 
-      drawPieChart(g2d, "Silences",   data.factionSilenceData,  (chartSpacing / 2).toInt(), chartY, chartRadius, 0)
-      drawPieChart(g2d, "Charms",     data.factionCharmData,    (chartSpacing / 2).toInt(), chartY, chartRadius, chartSpacing.toInt())
-      drawPieChart(g2d, "Distresses", data.factionDistressData, (chartSpacing / 2).toInt(), chartY, chartRadius, (chartSpacing * 2).toInt())
+      drawPieChart(g2d, "Silences",   data.factionSilenceData,  chartSpacing / 2, chartY, chartRadius, 0)
+      drawPieChart(g2d, "Charms",     data.factionCharmData,    chartSpacing / 2, chartY, chartRadius, chartSpacing)
+      drawPieChart(g2d, "Distresses", data.factionDistressData, chartSpacing / 2, chartY, chartRadius, chartSpacing * 2)
     }
   }
 
@@ -536,23 +559,21 @@ object ImageExportInteractor {
     return logoCache ?: run {
       try {
         val uri = Res.getUri("drawable/raidframer.ico")
-        if (uri != null) {
-          val bytes = URI(uri.toString()).toURL().openStream().use { it.readBytes() }
-          val data = org.jetbrains.skia.Data.makeFromBytes(bytes)
-          val codec = org.jetbrains.skia.Codec.makeFromData(data)
-          val imageInfo = org.jetbrains.skia.ImageInfo.makeN32Premul(codec.width, codec.height)
-          val bitmap = org.jetbrains.skia.Bitmap()
-          bitmap.allocPixels(imageInfo)
-          codec.readPixels(bitmap, 0, 0)
+        val bytes = URI(uri).toURL().openStream().use { it.readBytes() }
+        val data = Data.makeFromBytes(bytes)
+        val codec = Codec.makeFromData(data)
+        val imageInfo = ImageInfo.makeN32Premul(codec.width, codec.height)
+        val bitmap = Bitmap()
+        bitmap.allocPixels(imageInfo)
+        codec.readPixels(bitmap, 0, 0)
 
-          val awtImage = BufferedImage(codec.width, codec.height, BufferedImage.TYPE_INT_ARGB)
-          for (py in 0 until codec.height) {
-            for (px in 0 until codec.width) {
-              awtImage.setRGB(px, py, bitmap.getColor(px, py))
-            }
+        val awtImage = BufferedImage(codec.width, codec.height, BufferedImage.TYPE_INT_ARGB)
+        for (py in 0 until codec.height) {
+          for (px in 0 until codec.width) {
+            awtImage.setRGB(px, py, bitmap.getColor(px, py))
           }
-          logoCache = awtImage
         }
+        logoCache = awtImage
       } catch (_: Exception) { }
       logoCache
     }
@@ -1016,11 +1037,9 @@ object ImageExportInteractor {
     val baseFont = cachedFont?.deriveFont(size) ?: run {
       try {
         val uri = Res.getUri("font/arkorean_regular.ttf")
-        if (uri != null) {
-          val font = Font.createFont(Font.TRUETYPE_FONT, URI(uri.toString()).toURL().openStream()).deriveFont(size)
-          cachedFont = font
-          return font.deriveFont(style)
-        }
+        val font = Font.createFont(Font.TRUETYPE_FONT, URI(uri).toURL().openStream()).deriveFont(size)
+        cachedFont = font
+        return font.deriveFont(style)
       } catch (_: Exception) { }
       try {
         Font("Segoe UI Emoji", style, size.toInt())
