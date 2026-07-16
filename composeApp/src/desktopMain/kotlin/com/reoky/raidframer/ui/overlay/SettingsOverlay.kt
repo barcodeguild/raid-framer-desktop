@@ -1,7 +1,7 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.animation.core.*
-import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.sin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +16,7 @@ import androidx.compose.material.*
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -314,7 +315,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
   if (showUninstallDoneDialog.value) {
     AlertDialog(
       onDismissRequest = {
-        Runtime.getRuntime().exec("control appwiz.cpl")
+        ProcessBuilder("control", "appwiz.cpl").start()
         exitProcess(0)
       },
       title = { Text(stringResource(Res.string.settings_uninstall_done_title), color = RFColors.TextPrimary) },
@@ -323,7 +324,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       shape = RoundedCornerShape(10.dp),
       confirmButton = {
         Button(onClick = {
-          Runtime.getRuntime().exec("control appwiz.cpl")
+          ProcessBuilder("control", "appwiz.cpl").start()
           exitProcess(0)
         }, colors = ButtonDefaults.buttonColors(RFColors.AccentRed)) {
           Text(stringResource(Res.string.general_exit), color = Color.White)
@@ -559,7 +560,7 @@ private fun LanguageDropdown(currentCode: String) {
       readOnly = true,
       modifier = Modifier
         .fillMaxWidth()
-        .menuAnchor(),
+        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
       colors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = RFColors.AccentRed,
         unfocusedBorderColor = RFColors.CardBorder,
@@ -699,7 +700,7 @@ private fun CategoryDropdown(
       label = { Text(text = label, fontSize = 12.sp, color = RFColors.TextSecondary) },
       modifier = Modifier
         .fillMaxWidth()
-        .menuAnchor(),
+        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
       colors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = RFColors.AccentRed,
         unfocusedBorderColor = RFColors.CardBorder,

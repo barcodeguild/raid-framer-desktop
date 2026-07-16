@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
 
 data class UpdateInfo(
@@ -36,7 +37,7 @@ object UpdateHelper {
 
   fun checkForUpdates(onResult: (UpdateStatus) -> Unit) {
     try {
-      val connection = URL(GITHUB_API_URL).openConnection() as HttpURLConnection
+      val connection = URI(GITHUB_API_URL).toURL().openConnection() as HttpURLConnection
       connection.requestMethod = "GET"
       connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
       connection.setRequestProperty("User-Agent", "RaidFramer-Desktop")
