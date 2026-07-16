@@ -454,25 +454,24 @@
     <string name="seed_table_file_not_found">지정된 시드 테이블 파일을 찾을 수 없습니다: %s</string>
     <string name="seed_table_applied_success">시드 테이블이 성공적으로 적용되었습니다!</string>
 
-
     <!-- Skill Trees (alphabetical) -->
-    <string name="skill_tree_archery">Archery</string>
-    <string name="skill_tree_auramancy">Auramancy</string>
-    <string name="skill_tree_battlerage">Battlerage</string>
-    <string name="skill_tree_defense">Defense</string>
-    <string name="skill_tree_gunslinger">Gunslinger</string>
-    <string name="skill_tree_malediction">Malediction</string>
-    <string name="skill_tree_occultism">Occultism</string>
-    <string name="skill_tree_shadowplay">Shadowplay</string>
-    <string name="skill_tree_songcraft">Songcraft</string>
-    <string name="skill_tree_sorcery">Sorcery</string>
-    <string name="skill_tree_spelldance">Spelldance</string>
-    <string name="skill_tree_swiftblade">Swiftblade</string>
-    <string name="skill_tree_vitalism">Vitalism</string>
-    <string name="skill_tree_witchcraft">Witchcraft</string>
+    <string name="skill_tree_archery">야성</string>
+    <string name="skill_tree_auramancy">의지</string>
+    <string name="skill_tree_battlerage">격투</string>
+    <string name="skill_tree_defense">철벽</string>
+    <string name="skill_tree_gunslinger">광기</string>
+    <string name="skill_tree_malediction">증오</string>
+    <string name="skill_tree_occultism">죽음</string>
+    <string name="skill_tree_shadowplay">사명</string>
+    <string name="skill_tree_songcraft">낭만</string>
+    <string name="skill_tree_sorcery">마법</string>
+    <string name="skill_tree_spelldance">환락</string>
+    <string name="skill_tree_swiftblade">암투</string>
+    <string name="skill_tree_vitalism">사랑</string>
+    <string name="skill_tree_witchcraft">환술</string>
 
     <!-- Spec Types (alphabetical) -->
-    <string name="spec_type_abolisher">Abolisher</string>
+    <string name="spec_type_abolisher">Abolisher 전사</string>
     <string name="spec_type_absolver">Absolver</string>
     <string name="spec_type_activist">Activist</string>
     <string name="spec_type_adept">Adept</string>
@@ -484,12 +483,12 @@
     <string name="spec_type_apostate">Apostate</string>
     <string name="spec_type_arachnomancer">Arachnomancer</string>
     <string name="spec_type_arcane_hunter">Arcane Hunter</string>
-    <string name="spec_type_arcanist">Arcanist</string>
+    <string name="spec_type_arcanist">Arcanist 마법사</string>
     <string name="spec_type_archon">Archon</string>
     <string name="spec_type_argent">Argent</string>
-    <string name="spec_type_assassin">Assassin</string>
+    <string name="spec_type_assassin">Assassin 보호자</string>
     <string name="spec_type_astral_ranger">Astral Ranger</string>
-    <string name="spec_type_athame">Athame</string>
+    <string name="spec_type_athame">Athame 조율사</string>
     <string name="spec_type_augmentor">Augmentor</string>
     <string name="spec_type_augurer">Augurer</string>
     <string name="spec_type_avatar">Avatar</string>
@@ -498,13 +497,13 @@
     <string name="spec_type_banshee">Banshee</string>
     <string name="spec_type_barrelace">Barrelace</string>
     <string name="spec_type_barricade">Barricade</string>
-    <string name="spec_type_bastion">Bastion</string>
+    <string name="spec_type_bastion">Bastion 감시원</string>
     <string name="spec_type_battlemage">Battlemage</string>
     <string name="spec_type_battlepriest">Battlepriest</string>
     <string name="spec_type_beguiler">Beguiler</string>
     <string name="spec_type_beguiling_dancer">Beguiling Dancer</string>
     <string name="spec_type_blackguard">Blackguard</string>
-    <string name="spec_type_blade_dancer">Blade Dancer</string>
+    <string name="spec_type_blade_dancer">Blade Dancer 검의 춤꾼</string>
     <string name="spec_type_bladechanter">Bladechanter</string>
     <string name="spec_type_blademage">Blademage</string>
     <string name="spec_type_bladespell">Bladespell</string>
@@ -515,7 +514,7 @@
     <string name="spec_type_blinkshot">Blinkshot</string>
     <string name="spec_type_blood_arrow">Blood Arrow</string>
     <string name="spec_type_bloodmage">Bloodmage</string>
-    <string name="spec_type_bloodreaver">Bloodreaver</string>
+    <string name="spec_type_bloodreaver">Bloodreaver 비격</string>
     <string name="spec_type_bloodskald">Bloodskald</string>
     <string name="spec_type_bloodthrall">Bloodthrall</string>
     <string name="spec_type_bloody_dancer">Bloody Dancer</string>
@@ -525,15 +524,15 @@
     <string name="spec_type_bounty_hunter">Bounty Hunter</string>
     <string name="spec_type_breathstealer">Breathstealer</string>
     <string name="spec_type_buccaneer">Buccaneer</string>
-    <string name="spec_type_bulwark">Bulwark</string>
+    <string name="spec_type_bulwark">광철의</string>
     <string name="spec_type_cabalist">Cabalist</string>
     <string name="spec_type_cannoneer">Cannoneer</string>
     <string name="spec_type_caretaker">Caretaker</string>
     <string name="spec_type_charmer">Charmer</string>
     <string name="spec_type_clairvoyer">Clairvoyer</string>
     <string name="spec_type_cleric">Cleric</string>
-    <string name="spec_type_comedian">Comedian</string>
-    <string name="spec_type_confessor">Confessor</string>
+    <string name="spec_type_comedian">Comedian 환사철</string>
+    <string name="spec_type_confessor">Confessor 악사</string>
     <string name="spec_type_confutator">Confutator</string>
     <string name="spec_type_conjuror">Conjuror</string>
     <string name="spec_type_corruptor">Corruptor</string>
@@ -554,17 +553,17 @@
     <string name="spec_type_darkness_resolver">Darkness Resolver</string>
     <string name="spec_type_darkness_revolutionist">Darkness Revolutionist</string>
     <string name="spec_type_darkness_savior">Darkness Savior</string>
-    <string name="spec_type_darkrunner">Darkrunner</string>
+    <string name="spec_type_darkrunner">Darkrunner 첩자</string>
     <string name="spec_type_darkseer">Darkseer</string>
     <string name="spec_type_dawncaller">Dawncaller</string>
     <string name="spec_type_death_prophet">Death Prophet</string>
     <string name="spec_type_death_warden">Death Warden</string>
     <string name="spec_type_deathchord">Deathchord</string>
-    <string name="spec_type_deathtrigger">Deathtrigger</string>
+    <string name="spec_type_deathtrigger">Deathtrigger 피의 사냥꾼</string>
     <string name="spec_type_deathvicar">Deathvicar</string>
     <string name="spec_type_deathwish">Deathwish</string>
     <string name="spec_type_deceiver">Deceiver</string>
-    <string name="spec_type_defiant">Defiant</string>
+    <string name="spec_type_defiant">광야철</string>
     <string name="spec_type_defiler">Defiler</string>
     <string name="spec_type_demolisher">Demolisher</string>
     <string name="spec_type_demonologist">Demonologist</string>
@@ -574,7 +573,7 @@
     <string name="spec_type_dirgeweaver">Dirgeweaver</string>
     <string name="spec_type_disciple">Disciple</string>
     <string name="spec_type_diviner">Diviner</string>
-    <string name="spec_type_doombringer">Doombringer</string>
+    <string name="spec_type_doombringer">Doombringer 작가</string>
     <string name="spec_type_doomcaller">Doomcaller</string>
     <string name="spec_type_doomlord">Doomlord</string>
     <string name="spec_type_doomshot">Doomshot</string>
@@ -587,7 +586,7 @@
     <string name="spec_type_dreadnaught">Dreadnaught</string>
     <string name="spec_type_dreadrunner">Dreadrunner</string>
     <string name="spec_type_dreadstone">Dreadstone</string>
-    <string name="spec_type_dreambreaker">Dreambreaker</string>
+    <string name="spec_type_dreambreaker">Dreambreaker 교란꾼</string>
     <string name="spec_type_dreamspinner">Dreamspinner</string>
     <string name="spec_type_druid">Druid</string>
     <string name="spec_type_dusk_dancer">Dusk Dancer</string>
@@ -595,21 +594,21 @@
     <string name="spec_type_duskraider">Duskraider</string>
     <string name="spec_type_earthsinger">Earthsinger</string>
     <string name="spec_type_ebonshield">Ebonshield</string>
-    <string name="spec_type_ebonsong">Ebonsong</string>
+    <string name="spec_type_ebonsong">Ebonsong 그림자춤꾼</string>
     <string name="spec_type_edgeripper">Edgeripper</string>
     <string name="spec_type_edgewalker">Edgewalker</string>
     <string name="spec_type_eidolon">Eidolon</string>
     <string name="spec_type_emissary">Emissary</string>
     <string name="spec_type_enchantrix">Enchantrix</string>
     <string name="spec_type_enforcer">Enforcer</string>
-    <string name="spec_type_enigmatist">Enigmatist</string>
+    <string name="spec_type_enigmatist">Enigmatist 유령용사</string>
     <string name="spec_type_equalizer">Equalizer</string>
     <string name="spec_type_evangelist">Evangelist</string>
     <string name="spec_type_eviscerator">Eviscerator</string>
     <string name="spec_type_evoker">Evoker</string>
     <string name="spec_type_executioner">Executioner</string>
     <string name="spec_type_exorcist">Exorcist</string>
-    <string name="spec_type_fanatic">Fanatic</string>
+    <string name="spec_type_fanatic">Fanatic 증마사</string>
     <string name="spec_type_fangborn">Fangborn</string>
     <string name="spec_type_farslayer">Farslayer</string>
     <string name="spec_type_fatemark">Fatemark</string>
@@ -632,7 +631,7 @@
     <string name="spec_type_ghostblade">Ghostblade</string>
     <string name="spec_type_glamorous_avenger">Glamorous Avenger</string>
     <string name="spec_type_glamorous_revolutionist">Glamorous Revolutionist</string>
-    <string name="spec_type_glamorous_savior">Glamorous Savior</string>
+    <string name="spec_type_glamorous_savior">Glamorous Savior 환사낭</string>
     <string name="spec_type_gloomknight">Gloomknight</string>
     <string name="spec_type_gloomspell">Gloomspell</string>
     <string name="spec_type_gloomstalker">Gloomstalker</string>
@@ -647,7 +646,7 @@
     <string name="spec_type_heartsbane">Heartsbane</string>
     <string name="spec_type_hellshield">Hellshield</string>
     <string name="spec_type_hellweaver">Hellweaver</string>
-    <string name="spec_type_herald">Herald</string>
+    <string name="spec_type_herald">Herald 수호자</string>
     <string name="spec_type_hereafter_artist">Hereafter Artist</string>
     <string name="spec_type_hereafter_avenger">Hereafter Avenger</string>
     <string name="spec_type_hereafter_controller">Hereafter Controller</string>
@@ -656,15 +655,15 @@
     <string name="spec_type_hereafter_revolutionist">Hereafter Revolutionist</string>
     <string name="spec_type_hereafter_savior">Hereafter Savior</string>
     <string name="spec_type_hex_ranger">Hex Ranger</string>
-    <string name="spec_type_hex_warden">Hex Warden</string>
-    <string name="spec_type_hexblade">Hexblade</string>
+    <string name="spec_type_hex_warden">hex warden 선인</string>
+    <string name="spec_type_hexblade">Hexblade 정파자</string>
     <string name="spec_type_hexbolt">Hexbolt</string>
     <string name="spec_type_hexdancer">Hexdancer</string>
-    <string name="spec_type_hexsniper">Hexsniper</string>
+    <string name="spec_type_hexsniper">Hexsniper 광환의</string>
     <string name="spec_type_hierophant">Hierophant</string>
     <string name="spec_type_honorguard">Honorguard</string>
     <string name="spec_type_hordebreaker">Hordebreaker</string>
-    <string name="spec_type_howler">Howler</string>
+    <string name="spec_type_howler">Howler </string>
     <string name="spec_type_illusion_apostle">Illusion Apostle</string>
     <string name="spec_type_illusion_argent">Illusion Argent</string>
     <string name="spec_type_illusion_blade">Illusion Blade</string>
@@ -691,7 +690,7 @@
     <string name="spec_type_incantator">Incantator</string>
     <string name="spec_type_infiltrator">Infiltrator</string>
     <string name="spec_type_inquisitor">Inquisitor</string>
-    <string name="spec_type_instigator">Instigator</string>
+    <string name="spec_type_instigator">Instigator 증낭의</string>
     <string name="spec_type_invader">Invader</string>
     <string name="spec_type_invoker">Invoker</string>
     <string name="spec_type_ironsoul">Ironsoul</string>
@@ -741,8 +740,8 @@
     <string name="spec_type_planeshifter">Planeshifter</string>
     <string name="spec_type_pontifex">Pontifex</string>
     <string name="spec_type_poxbane">Poxbane</string>
-    <string name="spec_type_primeval">Primeval</string>
-    <string name="spec_type_privateer">Privateer</string>
+    <string name="spec_type_primeval">Primeval 야사의</string>
+    <string name="spec_type_privateer">Privateer 광낭사</string>
     <string name="spec_type_purgator">Purgator</string>
     <string name="spec_type_purifier">Purifier</string>
     <string name="spec_type_quickdraw">Quickdraw</string>
@@ -755,7 +754,7 @@
     <string name="spec_type_reincarnator">Reincarnator</string>
     <string name="spec_type_requiem">Requiem</string>
     <string name="spec_type_revelator">Revelator</string>
-    <string name="spec_type_revenant">Revenant</string>
+    <string name="spec_type_revenant">Revenant 죽마의</string>
     <string name="spec_type_revolutionist">Revolutionist</string>
     <string name="spec_type_runebreaker">Runebreaker</string>
     <string name="spec_type_saboteur">Saboteur</string>
@@ -763,7 +762,7 @@
     <string name="spec_type_seal_artist">Seal Artist</string>
     <string name="spec_type_seal_controller">Seal Controller</string>
     <string name="spec_type_seal_fanatic">Seal Fanatic</string>
-    <string name="spec_type_seal_resolver">Seal Resolver</string>
+    <string name="spec_type_seal_resolver">Seal Resolver 격환철</string>
     <string name="spec_type_seal_revolutionist">Seal Revolutionist</string>
     <string name="spec_type_secret_choreographer">Secret Choreographer</string>
     <string name="spec_type_shadehunter">Shadehunter</string>
@@ -775,7 +774,7 @@
     <string name="spec_type_shadowdancer">Shadowdancer</string>
     <string name="spec_type_shadowguard">Shadowguard</string>
     <string name="spec_type_shadowknight">Shadowknight</string>
-    <string name="spec_type_shadowsong">Shadowsong</string>
+    <string name="spec_type_shadowsong">Shadowsong 증낭사</string>
     <string name="spec_type_shaman">Shaman</string>
     <string name="spec_type_shroudmaster">Shroudmaster</string>
     <string name="spec_type_shroudsong">Shroudsong</string>
@@ -793,12 +792,12 @@
     <string name="spec_type_spectre">Spectre</string>
     <string name="spec_type_spellbinder">Spellbinder</string>
     <string name="spec_type_spellbow">Spellbow</string>
-    <string name="spec_type_spellsinger">Spellsinger</string>
+    <string name="spec_type_spellsinger">Spellsinger 마낭사</string>
     <string name="spec_type_spellsong">Spellsong</string>
     <string name="spec_type_spellsword">Spellsword</string>
     <string name="spec_type_spellweaver">Spellweaver</string>
     <string name="spec_type_spiritualist">Spiritualist</string>
-    <string name="spec_type_stone_arrow">Stone Arrow</string>
+    <string name="spec_type_stone_arrow">Stone Arrow 야철사</string>
     <string name="spec_type_stormcaster">Stormcaster</string>
     <string name="spec_type_stormchaser">Stormchaser</string>
     <string name="spec_type_striking_dancer">Striking Dancer</string>
@@ -806,9 +805,9 @@
     <string name="spec_type_swiftshot">Swiftshot</string>
     <string name="spec_type_swiftstone">Swiftstone</string>
     <string name="spec_type_synergist">Synergist</string>
-    <string name="spec_type_tempest">Tempest</string>
+    <string name="spec_type_tempest">Tempest 광야낭</string>
     <string name="spec_type_templar">Templar</string>
-    <string name="spec_type_thaumaturge">Thaumaturge</string>
+    <string name="spec_type_thaumaturge">Thaumaturge 마철의</string>
     <string name="spec_type_tomb_warden">Tomb Warden</string>
     <string name="spec_type_tombcaller">Tombcaller</string>
     <string name="spec_type_tombsong">Tombsong</string>
@@ -837,6 +836,5 @@
     <string name="spec_type_wrathslayer">Wrathslayer</string>
     <string name="spec_type_zealot">Zealot</string>
     <string name="spec_type_zephyr">Zephyr</string>
-
 
 </resources>
