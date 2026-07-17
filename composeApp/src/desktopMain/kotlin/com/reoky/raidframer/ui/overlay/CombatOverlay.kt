@@ -168,6 +168,8 @@ fun CombatOverlay(wm: WindowManager? = null) {
 
   // Stop/abort popup state
   var showStopPopup by remember { mutableStateOf(false) }
+  val stopPopupInteractionSource = remember { MutableInteractionSource() }
+  val isStopPopupHovered by stopPopupInteractionSource.collectIsHoveredAsState()
 
   val damageColumnText = stringResource(
     if (config.allowPVEDamage) Res.string.combat_column_pve_damage else Res.string.combat_column_pvp_damage
@@ -187,6 +189,14 @@ fun CombatOverlay(wm: WindowManager? = null) {
   // Use hoverable + collectIsHoveredAsState so no experimental API is needed
   val overlayInteractionSource = remember { MutableInteractionSource() }
   val isOverlayHovered by overlayInteractionSource.collectIsHoveredAsState()
+
+  // Dismiss stop popup when cursor leaves both the overlay and the popup
+  LaunchedEffect(isOverlayHovered, isStopPopupHovered) {
+    if (!isOverlayHovered && !isStopPopupHovered && showStopPopup) {
+      showStopPopup = false
+    }
+  }
+
   val controlsAlpha by animateFloatAsState(
     targetValue = if (!config.combatControlsFadeEnabled || isOverlayHovered) 1f else 0f,
     animationSpec = tween(durationMillis = 500)
@@ -377,14 +387,14 @@ fun CombatOverlay(wm: WindowManager? = null) {
             if (showStopPopup) {
               Popup(
                 alignment = Alignment.TopEnd,
-                offset = IntOffset(0, 36),
-                onDismissRequest = { showStopPopup = false }
+                offset = IntOffset(0, 36)
               ) {
                 Surface(
                   shape = RoundedCornerShape(4.dp),
                   elevation = 4.dp,
                   color = Color.Black.copy(alpha = 0.92f),
-                  border = BorderStroke(1.dp, Color.Gray)
+                  border = BorderStroke(1.dp, Color.Gray),
+                  modifier = Modifier.hoverable(interactionSource = stopPopupInteractionSource)
                 ) {
                   Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
                     TextButton(
