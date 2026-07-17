@@ -145,6 +145,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="player_card_cc_by_skill">CC by Skill</string>
     <string name="player_card_session_totals">Session Totals</string>
     <string name="player_card_lifetime_totals">Lifetime Totals</string>
+    <string name="player_card_lifetime_totals_sessions">Lifetime Totals (%1$d Sessions)</string>
 
     <!-- Session scope dropdown -->
     <string name="player_card_totals_scope_label">View</string>

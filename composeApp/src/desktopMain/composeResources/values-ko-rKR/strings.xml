@@ -145,6 +145,7 @@
     <string name="player_card_cc_by_skill">스킬별 cc</string>
     <string name="player_card_session_totals">세션 총계</string>
     <string name="player_card_lifetime_totals">생애 총계</string>
+    <string name="player_card_lifetime_totals_sessions">생애 총계 (%1$d세션)</string>
 
     <!-- Session scope dropdown -->
     <string name="player_card_totals_scope_label">보기</string>

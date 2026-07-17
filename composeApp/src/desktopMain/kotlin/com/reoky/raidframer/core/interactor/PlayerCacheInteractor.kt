@@ -64,6 +64,7 @@ object PlayerCacheInteractor : Interactor() {
 
   init {
     scope.launch {
+      refreshOwnSessionCount()
       while (true) {
         realtimeComputer.push(MetricRawSample(System.currentTimeMillis(), 5000.0))
         delay(1000)
@@ -402,6 +403,7 @@ object PlayerCacheInteractor : Interactor() {
         written++
       }
       Log.info(TAG, "Archived session totals for $written/${snapshot.size} player(s) (session $sessionStart → $sessionEnd)")
+      refreshOwnSessionCount()
     }
   }
 
@@ -1450,6 +1452,33 @@ object PlayerCacheInteractor : Interactor() {
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.WhileSubscribed(20000), emptyMap())
+
+  // Lifetime session count for the current player (archived sessions + 1 if a session is active)
+  private val _ownSessionCount = MutableStateFlow(0)
+  val ownSessionCount: StateFlow<Int> = _ownSessionCount.asStateFlow()
+
+  /**
+   * Queries the archived session count for the current player and adds 1 if there is
+   * an active recording session. Called on startup and after every archive step.
+   */
+  suspend fun refreshOwnSessionCount() {
+    val playerName = RFConfig.state.value.playerName
+    if (playerName.isBlank()) {
+      _ownSessionCount.value = 0
+      return
+    }
+    _ownSessionCount.value = getSessionCountForPlayer(playerName)
+  }
+
+  /**
+   * Returns the total number of sessions for [playerName] (archived rows in
+   * player_session_totals plus one if there is an active recording session for that player).
+   */
+  suspend fun getSessionCountForPlayer(playerName: String): Int {
+    val archivedCount = RFDao.playerSessionDao.getSessionCountForPlayer(playerName)
+    val hasActiveSession = RFConfig.state.value.lastSessionStart > 0L && RFConfig.state.value.playerName == playerName
+    return archivedCount + if (hasActiveSession) 1 else 0
+  }
 
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .sample(250L)

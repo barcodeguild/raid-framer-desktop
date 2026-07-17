@@ -95,6 +95,7 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_recent_hea
 import raid_framer_desktop.composeapp.generated.resources.player_card_recent_item_uses
 import raid_framer_desktop.composeapp.generated.resources.player_card_recent_kd_short
 import raid_framer_desktop.composeapp.generated.resources.player_card_lifetime_totals
+import raid_framer_desktop.composeapp.generated.resources.player_card_lifetime_totals_sessions
 import raid_framer_desktop.composeapp.generated.resources.player_card_title_format
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -199,6 +200,14 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
   val currentPlayer by AppState.selectedPlayer.collectAsState()
   val metricType by AppState.selectedMetricType.collectAsState()
+
+  var playerSessionCount by remember { mutableStateOf(0) }
+  LaunchedEffect(currentPlayer) {
+    val name = currentPlayer
+    if (!name.isNullOrBlank()) {
+      playerSessionCount = PlayerCacheInteractor.getSessionCountForPlayer(name)
+    }
+  }
 
   val currentDateString = java.time.LocalDate.now().let {
     "${it.monthValue}/${it.dayOfMonth}"
@@ -587,7 +596,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
               // Lifetime Totals
               SectionCard(
-                title = stringResource(Res.string.player_card_lifetime_totals),
+                title = stringResource(Res.string.player_card_lifetime_totals_sessions, playerSessionCount),
                 modifier = Modifier.weight(1f),
                 accentColor = RFColors.AccentRed
               ) {

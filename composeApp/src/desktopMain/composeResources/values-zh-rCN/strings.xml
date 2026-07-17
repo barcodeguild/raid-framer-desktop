@@ -145,6 +145,7 @@
     <string name="player_card_cc_by_skill">技能控制分布</string>
     <string name="player_card_session_totals">会话总计</string>
     <string name="player_card_lifetime_totals">终身总计</string>
+    <string name="player_card_lifetime_totals_sessions">终身总计（%1$d 场会话）</string>
 
     <!-- Session scope dropdown -->
     <string name="player_card_totals_scope_label">查看</string>

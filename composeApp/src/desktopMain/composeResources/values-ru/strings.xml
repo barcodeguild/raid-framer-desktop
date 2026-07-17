@@ -145,6 +145,7 @@
     <string name="player_card_cc_by_skill">Контроль по навыкам</string>
     <string name="player_card_session_totals">Итоги сессии</string>
     <string name="player_card_lifetime_totals">Итоги за все время</string>
+    <string name="player_card_lifetime_totals_sessions">Итоги за все время (%1$d сессий)</string>
 
     <!-- Session scope dropdown -->
     <string name="player_card_totals_scope_label">Показать</string>

@@ -145,6 +145,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="player_card_cc_by_skill">Kontrolle nach Fähigkeit</string>
     <string name="player_card_session_totals">Sitzungsgesamtwerte</string>
     <string name="player_card_lifetime_totals">Lebensgesamtwerte</string>
+    <string name="player_card_lifetime_totals_sessions">Lebensgesamtwerte (%1$d Sitzungen)</string>
 
     <!-- Session scope dropdown -->
     <string name="player_card_totals_scope_label">Ansicht</string>

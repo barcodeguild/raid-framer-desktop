@@ -145,6 +145,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="player_card_cc_by_skill">CC por Habilidade</string>
     <string name="player_card_session_totals">Totais da Sessão</string>
     <string name="player_card_lifetime_totals">Totais Vitalícios</string>
+    <string name="player_card_lifetime_totals_sessions">Totais Vitalícios (%1$d Sessões)</string>
 
     <!-- Session scope dropdown -->
     <string name="player_card_totals_scope_label">Visualizar</string>

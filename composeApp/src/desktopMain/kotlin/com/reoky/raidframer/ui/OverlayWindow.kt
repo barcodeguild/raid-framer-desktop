@@ -368,7 +368,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionXDp = 900f,
       lastPositionYDp = 300f,
       lastWidthDp = 500f,
-      lastHeightDp = 720f,
+      lastHeightDp = 740f,
       isVisible = false
     )
 
