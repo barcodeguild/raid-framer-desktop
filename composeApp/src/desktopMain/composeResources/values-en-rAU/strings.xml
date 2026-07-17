@@ -203,12 +203,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="filters_original_placeholder">Original</string>
     <string name="filters_replacement_placeholder">Replacement</string>
     <string name="filters_add_button">Add to Filters</string>
-
-    <!-- Exit Dialog -->
-    <string name="exit_dialog_title">Are you sure?</string>
-    <string name="exit_dialog_message">This will exit and close any open overlay windows. You can launch .:Raid Framer:. again from the Windows Start Menu.</string>
-    <string name="exit_dialog_dismiss">Nah</string>
-
+    
     <!-- File Selection Dialog -->
     <string name="file_selection_title">Select Combat Logfile</string>
     <string name="file_selection_searching">Searching for valid combat logs.. Results will appear here..</string>

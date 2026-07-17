@@ -27,6 +27,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.FontsHelper
@@ -43,7 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 import com.reoky.raidframer.core.config.RFConfig
-import com.reoky.raidframer.ui.dialog.exitDialog
+import com.reoky.raidframer.quitAfterSessionStop
 import com.reoky.raidframer.ui.dialog.updateDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -77,8 +78,7 @@ fun PreviewCombatOverlay() {
 @Composable
 fun CombatOverlay(wm: WindowManager? = null) {
 
-  val shouldShowExitDialog = remember { mutableStateOf(false) }
-  exitDialog(shouldShowExitDialog)
+  val scope = rememberCoroutineScope()
 
   // Update dialog — shown once on startup if an update is available
   val shouldShowUpdateDialog = remember { mutableStateOf(false) }
@@ -277,7 +277,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
 
           // left icons — overlaid at start edge, never affects title layout
           Row(modifier = Modifier.align(Alignment.CenterStart).alpha(controlsAlpha), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { shouldShowExitDialog.value = true }, modifier = Modifier.size(32.dp)) {
+            IconButton(onClick = { scope.launch { quitAfterSessionStop() } }, modifier = Modifier.size(32.dp)) {
               val closeInteractionSource = remember { MutableInteractionSource() }
               Text(text = "\uf00d", fontFamily = FontsHelper.faSolid(), fontSize = 16.sp, color = if (closeInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = closeInteractionSource))
             }

@@ -13,6 +13,7 @@ import com.reoky.raidframer.core.serialization.AppJson
 import com.reoky.raidframer.core.serialization.CombatEventPayload
 import com.reoky.raidframer.ui.export.ImageExportInteractor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -60,6 +61,7 @@ object CombatLogInteractor : Interactor() {
 
   private var writer: BufferedWriter? = null
   private var currentOutputFile: java.nio.file.Path? = null
+  private var exportJob: Job? = null
 
   override suspend fun interact() {
     if (!_isRecording.value) return
@@ -79,7 +81,7 @@ object CombatLogInteractor : Interactor() {
     if (!_isRecording.value) return
     _isRecording.value = false
     val sessionStart = RFConfig.state.value.lastSessionStart
-    scope.launch {
+    exportJob = scope.launch {
       flushBuffer()
       closeWriter()
       val config = RFConfig.state.value
@@ -98,6 +100,10 @@ object CombatLogInteractor : Interactor() {
       exportSummaryImage(durationMs)
       Log.info(TAG, "Combat log recording stopped")
     }
+  }
+
+  suspend fun awaitExport() {
+    exportJob?.join()
   }
 
   fun recordEvent(event: CombatEvent) {

@@ -204,11 +204,6 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="filters_replacement_placeholder">Ersetzung</string>
     <string name="filters_add_button">Zu Filtern hinzufügen</string>
 
-    <!-- Exit Dialog -->
-    <string name="exit_dialog_title">Sind Sie sicher?</string>
-    <string name="exit_dialog_message">Dies wird beendet und alle offenen Overlay-Fenster schließen. Sie können .:Raid Framer:. erneut über das Windows-Startmenü starten.</string>
-    <string name="exit_dialog_dismiss">Nein</string>
-
     <!-- File Selection Dialog -->
     <string name="file_selection_title">Kampflogdatei auswählen</string>
     <string name="file_selection_searching">Suche nach gültigen Kampflogs.. Ergebnisse erscheinen hier..</string>

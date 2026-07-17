@@ -204,11 +204,6 @@
     <string name="filters_replacement_placeholder">替换</string>
     <string name="filters_add_button">添加到过滤器</string>
 
-    <!-- Exit Dialog -->
-    <string name="exit_dialog_title">您确定吗？</string>
-    <string name="exit_dialog_message">这将退出并关闭任何打开的覆盖窗口。您可以从Windows开始菜单再次启动.:Raid Framer:.。</string>
-    <string name="exit_dialog_dismiss">不了</string>
-
     <!-- File Selection Dialog -->
     <string name="file_selection_title">选择战斗日志文件</string>
     <string name="file_selection_searching">正在搜索有效的战斗日志.. 结果将显示在这里..</string>

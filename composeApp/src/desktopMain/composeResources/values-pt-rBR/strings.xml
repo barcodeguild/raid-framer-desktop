@@ -204,11 +204,6 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="filters_replacement_placeholder">Substituição</string>
     <string name="filters_add_button">Adicionar aos Filtros</string>
 
-    <!-- Exit Dialog -->
-    <string name="exit_dialog_title">Tem certeza?</string>
-    <string name="exit_dialog_message">Isso sairá e fechará quaisquer janelas de overlay abertas. Você pode iniciar .:Raid Framer:. novamente pelo Menu Iniciar do Windows.</string>
-    <string name="exit_dialog_dismiss">Não</string>
-
     <!-- File Selection Dialog -->
     <string name="file_selection_title">Selecionar Arquivo de Log de Combate</string>
     <string name="file_selection_searching">Procurando logs de combate válidos.. Os resultados aparecerão aqui..</string>

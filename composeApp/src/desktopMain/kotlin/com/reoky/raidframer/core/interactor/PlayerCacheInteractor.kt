@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -61,6 +62,7 @@ object PlayerCacheInteractor : Interactor() {
   private val cards = mutableStateMapOf<String, PlayerCard>()
   private val petCards = mutableStateMapOf<String, PetCard>()
   private val mutex = Mutex() // to protect critical sections during player card updates from other threads
+  private var archiveJob: Job? = null
 
   init {
     scope.launch {
@@ -337,7 +339,7 @@ object PlayerCacheInteractor : Interactor() {
     CombatLogInteractor.stopRecording()
 
     if (snapshot.isNotEmpty()) {
-      archiveSessionSnapshot(
+      archiveJob = archiveSessionSnapshot(
         snapshot = snapshot,
         sessionStart = previousSessionStart,
         sessionType = currentConfig.lastSessionType.ifBlank { "manual_stop" },
@@ -347,6 +349,10 @@ object PlayerCacheInteractor : Interactor() {
     // Reset start marker so a subsequent startNewSession knows there's nothing in memory to archive.
     RFConfig.update { it.copy(lastSessionStart = 0L) }
     Log.info(TAG, "Recording session stopped")
+  }
+
+  suspend fun awaitArchive() {
+    archiveJob?.join()
   }
 
   /**
@@ -360,12 +366,12 @@ object PlayerCacheInteractor : Interactor() {
     sessionStart: Long,
     sessionType: String,
     sessionTitle: String
-  ) {
-    if (sessionStart <= 0L) return
+  ): Job? {
+    if (sessionStart <= 0L) return null
     val sessionEnd = System.currentTimeMillis()
-    if (sessionEnd <= sessionStart) return
+    if (sessionEnd <= sessionStart) return null
 
-    scope.launch {
+    return scope.launch {
       var written = 0
       snapshot.forEach { card ->
         // Only archive real players. NPC cards (e.g. raid mobs, world bosses) get

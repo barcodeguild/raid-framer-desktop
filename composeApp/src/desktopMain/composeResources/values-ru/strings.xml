@@ -204,11 +204,6 @@
     <string name="filters_replacement_placeholder">Замена</string>
     <string name="filters_add_button">Добавить в фильтры</string>
 
-    <!-- Exit Dialog -->
-    <string name="exit_dialog_title">Вы уверены?</string>
-    <string name="exit_dialog_message">Это выйдет и закроет все открытые окна оверлеев. Вы можете снова запустить .:Raid Framer:. из меню Пуск Windows.</string>
-    <string name="exit_dialog_dismiss">Нет</string>
-
     <!-- File Selection Dialog -->
     <string name="file_selection_title">Выберите файл боевого лога</string>
     <string name="file_selection_searching">Поиск допустимых боевых логов.. Результаты появятся здесь..</string>
