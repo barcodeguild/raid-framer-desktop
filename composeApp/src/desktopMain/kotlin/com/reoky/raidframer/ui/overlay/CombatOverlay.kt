@@ -16,6 +16,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +63,13 @@ import raid_framer_desktop.composeapp.generated.resources.combat_no_columns_mess
 import raid_framer_desktop.composeapp.generated.resources.combat_open_settings
 import raid_framer_desktop.composeapp.generated.resources.combat_press_plus_to_record
 import raid_framer_desktop.composeapp.generated.resources.combat_update_tooltip
+import raid_framer_desktop.composeapp.generated.resources.session_abort_confirm_title
+import raid_framer_desktop.composeapp.generated.resources.session_abort_confirm_text
+import raid_framer_desktop.composeapp.generated.resources.session_abort_confirm_button
+import raid_framer_desktop.composeapp.generated.resources.combat_stop_and_save
+import raid_framer_desktop.composeapp.generated.resources.combat_abort_and_discard
+import raid_framer_desktop.composeapp.generated.resources.combat_save_and_exit_tooltip
+import raid_framer_desktop.composeapp.generated.resources.general_cancel
 
 @Preview
 @Composable
@@ -157,6 +165,9 @@ fun CombatOverlay(wm: WindowManager? = null) {
   val damageListState = rememberLazyListState()
   val healsListState = rememberLazyListState()
   val ccListState = rememberLazyListState()
+
+  // Stop/abort popup state
+  var showStopPopup by remember { mutableStateOf(false) }
 
   val damageColumnText = stringResource(
     if (config.allowPVEDamage) Res.string.combat_column_pve_damage else Res.string.combat_column_pvp_damage
@@ -277,9 +288,29 @@ fun CombatOverlay(wm: WindowManager? = null) {
 
           // left icons — overlaid at start edge, never affects title layout
           Row(modifier = Modifier.align(Alignment.CenterStart).alpha(controlsAlpha), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { scope.launch { quitAfterSessionStop() } }, modifier = Modifier.size(32.dp)) {
+            Box {
               val closeInteractionSource = remember { MutableInteractionSource() }
-              Text(text = "\uf00d", fontFamily = FontsHelper.faSolid(), fontSize = 16.sp, color = if (closeInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = closeInteractionSource))
+              val isCloseHovered by closeInteractionSource.collectIsHoveredAsState()
+              IconButton(onClick = { scope.launch { quitAfterSessionStop() } }, modifier = Modifier.size(32.dp)) {
+                Text(text = "\uf00d", fontFamily = FontsHelper.faSolid(), fontSize = 16.sp, color = if (isCloseHovered) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = closeInteractionSource))
+              }
+              if (isCloseHovered) {
+                Popup(alignment = Alignment.TopCenter, offset = IntOffset(0, 36)) {
+                  Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    elevation = 4.dp,
+                    color = Color.Black.copy(alpha = 0.9f),
+                    border = BorderStroke(1.dp, Color.Gray)
+                  ) {
+                    Text(
+                      text = stringResource(Res.string.combat_save_and_exit_tooltip),
+                      color = Color.White,
+                      modifier = Modifier.padding(4.dp),
+                      fontSize = 10.sp
+                    )
+                  }
+                }
+              }
             }
             IconButton(onClick = { wm?.openWindow(OverlayType.POKEMON) }, modifier = Modifier.size(32.dp)) {
               val petsInteractionSource = remember { MutableInteractionSource() }
@@ -331,8 +362,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
             }
             IconButton(onClick = {
               if (CombatLogInteractor.isRecording.value) {
-                PlayerCacheInteractor.stopSession()
-                RFConfig.update { it.copy(lastSessionStart = 0L) }
+                showStopPopup = !showStopPopup
               } else {
                 wm?.openWindow(OverlayType.NEW_SESSION)
               }
@@ -342,6 +372,43 @@ fun CombatOverlay(wm: WindowManager? = null) {
               val icon = if (isRecording.value) "\uf04d" else "\u002b"
               val color = if (plusInteractionSource.collectIsHoveredAsState().value) RFColors.AccentRed else if (isRecording.value) RFColors.AccentRed else Color.White
               Text(text = icon, fontFamily = FontsHelper.faSolid(), fontSize = 15.sp, color = color, modifier = Modifier.hoverable(interactionSource = plusInteractionSource))
+            }
+            // Stop session popup — offers "Save & Stop" and "Abort & Discard" options
+            if (showStopPopup) {
+              Popup(
+                alignment = Alignment.TopEnd,
+                offset = IntOffset(0, 36),
+                onDismissRequest = { showStopPopup = false }
+              ) {
+                Surface(
+                  shape = RoundedCornerShape(4.dp),
+                  elevation = 4.dp,
+                  color = Color.Black.copy(alpha = 0.92f),
+                  border = BorderStroke(1.dp, Color.Gray)
+                ) {
+                  Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                    TextButton(
+                      onClick = {
+                        showStopPopup = false
+                        PlayerCacheInteractor.stopSession()
+                        RFConfig.update { it.copy(lastSessionStart = 0L) }
+                      },
+                      contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                    ) {
+                      Text(text = stringResource(Res.string.combat_stop_and_save), color = Color.White, fontSize = 11.sp)
+                    }
+                    TextButton(
+                      onClick = {
+                        showStopPopup = false
+                        PlayerCacheInteractor.abortSession()
+                      },
+                      contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                    ) {
+                      Text(text = stringResource(Res.string.combat_abort_and_discard), color = RFColors.AccentRed, fontSize = 11.sp)
+                    }
+                  }
+                }
+              }
             }
           }
         }

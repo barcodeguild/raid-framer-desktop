@@ -112,6 +112,15 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="settings_crash_recovery_title">Sessão Interrompida</string>
     <string name="settings_crash_recovery_message">Uma sessão de gravação anterior foi interrompida e descartada.</string>
 
+    <!-- Abort Session -->
+    <string name="combat_stop_and_save">Salvar &amp; Parar</string>
+    <string name="combat_abort_and_discard">Cancelar &amp; Descartar</string>
+    <string name="combat_save_and_exit_tooltip">Salvar &amp; Sair</string>
+    <string name="settings_recording_session_abort">Cancelar Sessão</string>
+    <string name="session_abort_confirm_title">Cancelar Sessão?</string>
+    <string name="session_abort_confirm_text">Isso descartará todos os dados gravados desta sessão sem salvar. Os totais acumulados serão revertidos para os valores anteriores à sessão.</string>
+    <string name="session_abort_confirm_button">Cancelar</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">Versão:</string>

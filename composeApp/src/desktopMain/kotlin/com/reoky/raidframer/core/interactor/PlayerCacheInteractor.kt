@@ -63,6 +63,7 @@ object PlayerCacheInteractor : Interactor() {
   private val petCards = mutableStateMapOf<String, PetCard>()
   private val mutex = Mutex() // to protect critical sections during player card updates from other threads
   private var archiveJob: Job? = null
+  private var preSessionCacheSnapshot: MutableMap<String, PlayerCacheEntity?> = mutableMapOf()
 
   init {
     scope.launch {
@@ -226,6 +227,10 @@ object PlayerCacheInteractor : Interactor() {
         currentRole = SpecType.fromName(previousSpec)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value
       )
       cards[playerName] = card
+      // Snapshot the cache at load time for abort support — captures the DB value before any session increments
+      if (CombatLogInteractor.isRecording.value) {
+        preSessionCacheSnapshot[playerName] = card.cache
+      }
     }
   }
 
@@ -312,6 +317,12 @@ object PlayerCacheInteractor : Interactor() {
         )
       }
 
+      // Snapshot all existing card caches before clearing, so abort can revert lifetime totals
+      preSessionCacheSnapshot = cards.values
+        .filter { it.cache != null }
+        .associate { it.name to it.cache!! }
+        .toMutableMap()
+
       RFConfig.update {
         it.copy(
           allowPVEDamage = allowPvE,
@@ -349,6 +360,44 @@ object PlayerCacheInteractor : Interactor() {
     // Reset start marker so a subsequent startNewSession knows there's nothing in memory to archive.
     RFConfig.update { it.copy(lastSessionStart = 0L) }
     Log.info(TAG, "Recording session stopped")
+  }
+
+  /**
+   * Aborts the current recording session without archiving any data.
+   * Restores pre-session lifetime totals from the cache snapshot and reverts the database
+   * for any card whose cache may have been persisted mid-session (auto-upgrade, spec determination, etc).
+   * Cards created during the session (not in the snapshot) are simply discarded.
+   */
+  fun abortSession() {
+    val currentConfig = RFConfig.state.value
+    if (currentConfig.lastSessionStart <= 0L) return
+
+    CombatLogInteractor.stopRecording()
+
+    scope.launch {
+      mutex.withLock {
+        cards.forEach { (name, card) ->
+          preSessionCacheSnapshot[name]?.let { preSessionCache ->
+            cards[name] = card.copy(cache = preSessionCache)
+            RFDao.playerCacheDao.insert(preSessionCache)
+          }
+        }
+        cards.clear()
+        petCards.clear()
+        raids.clear()
+      }
+      preSessionCacheSnapshot = mutableMapOf()
+    }
+
+    RFConfig.update {
+      it.copy(
+        lastSessionStart = 0L,
+        lastSessionTitle = "",
+        lastSessionType = "",
+        lastSessionDurationMs = 0L
+      )
+    }
+    Log.info(TAG, "Recording session aborted — no data archived, lifetime totals reverted")
   }
 
   suspend fun awaitArchive() {

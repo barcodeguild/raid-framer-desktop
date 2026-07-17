@@ -112,6 +112,15 @@
     <string name="settings_crash_recovery_title">会话已中断</string>
     <string name="settings_crash_recovery_message">上一个录制会话已被中断并丢弃。</string>
 
+    <!-- Abort Session -->
+    <string name="combat_stop_and_save">保存并停止</string>
+    <string name="combat_abort_and_discard">中止并丢弃</string>
+    <string name="combat_save_and_exit_tooltip">保存并退出</string>
+    <string name="settings_recording_session_abort">中止会话</string>
+    <string name="session_abort_confirm_title">中止会话？</string>
+    <string name="session_abort_confirm_text">这将丢弃本次会话的所有录制数据，且不会保存。终身总计将恢复到会话前的值。</string>
+    <string name="session_abort_confirm_button">中止</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">版本:</string>

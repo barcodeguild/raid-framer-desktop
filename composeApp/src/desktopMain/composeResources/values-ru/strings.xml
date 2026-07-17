@@ -112,6 +112,15 @@
     <string name="settings_crash_recovery_title">Сессия прервана</string>
     <string name="settings_crash_recovery_message">Предыдущая сессия записи была прервана и отброшена.</string>
 
+    <!-- Abort Session -->
+    <string name="combat_stop_and_save">Сохранить и остановить</string>
+    <string name="combat_abort_and_discard">Отменить и удалить</string>
+    <string name="combat_save_and_exit_tooltip">Сохранить и выйти</string>
+    <string name="settings_recording_session_abort">Отменить сессию</string>
+    <string name="session_abort_confirm_title">Отменить сессию?</string>
+    <string name="session_abort_confirm_text">Все записанные данные этой сессии будут удалены без сохранения. Совокупные итоги будут возвращены к значениям до начала сессии.</string>
+    <string name="session_abort_confirm_button">Отменить</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">Версия:</string>

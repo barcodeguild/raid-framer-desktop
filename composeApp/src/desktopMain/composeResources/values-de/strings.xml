@@ -112,6 +112,15 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="settings_crash_recovery_title">Sitzung unterbrochen</string>
     <string name="settings_crash_recovery_message">Eine vorherige Aufnahmesitzung wurde unterbrochen und verworfen.</string>
 
+    <!-- Abort Session -->
+    <string name="combat_stop_and_save">Speichern &amp; Stoppen</string>
+    <string name="combat_abort_and_discard">Abbrechen &amp; Verwerfen</string>
+    <string name="combat_save_and_exit_tooltip">Speichern &amp; Beenden</string>
+    <string name="settings_recording_session_abort">Sitzung abbrechen</string>
+    <string name="session_abort_confirm_title">Sitzung abbrechen?</string>
+    <string name="session_abort_confirm_text">Alle aufgezeichneten Daten dieser Sitzung werden verworfen, ohne gespeichert zu werden. Lebensgesamtwerte werden auf die Werte vor der Sitzung zurückgesetzt.</string>
+    <string name="session_abort_confirm_button">Abbrechen</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">Version:</string>

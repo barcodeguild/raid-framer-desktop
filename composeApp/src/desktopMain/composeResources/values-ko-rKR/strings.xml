@@ -112,6 +112,15 @@
     <string name="settings_crash_recovery_title">세션 중단됨</string>
     <string name="settings_crash_recovery_message">이전 녹화 세션이 중단되어 삭제되었습니다.</string>
 
+    <!-- Abort Session -->
+    <string name="combat_stop_and_save">저장 후 중지</string>
+    <string name="combat_abort_and_discard">중 취소 및 삭제</string>
+    <string name="combat_save_and_exit_tooltip">저장 후 종료</string>
+    <string name="settings_recording_session_abort">세션 중 취소</string>
+    <string name="session_abort_confirm_title">세션을 중 취소하시겠습니까?</string>
+    <string name="session_abort_confirm_text">이 세션의 모든 녹화 데이터가 저장 없이 삭제됩니다. 누적 총합이 세션 시작 전 값으로 복원됩니다.</string>
+    <string name="session_abort_confirm_button">중 취소</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">버전:</string>

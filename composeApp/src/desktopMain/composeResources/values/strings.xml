@@ -112,6 +112,15 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="settings_crash_recovery_title">Session Interrupted</string>
     <string name="settings_crash_recovery_message">A previous recording session was interrupted and has been discarded.</string>
 
+    <!-- Abort Session -->
+    <string name="combat_stop_and_save">Save &amp; Stop</string>
+    <string name="combat_abort_and_discard">Abort &amp; Discard</string>
+    <string name="combat_save_and_exit_tooltip">Save &amp; Exit</string>
+    <string name="settings_recording_session_abort">Abort Session</string>
+    <string name="session_abort_confirm_title">Abort Session?</string>
+    <string name="session_abort_confirm_text">This will discard all recorded data from this session without saving. Lifetime totals will be reverted to their pre-session values.</string>
+    <string name="session_abort_confirm_button">Abort</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">Version:</string>
