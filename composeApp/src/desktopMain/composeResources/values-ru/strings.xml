@@ -112,6 +112,15 @@
     <string name="settings_crash_recovery_title">Сессия прервана</string>
     <string name="settings_crash_recovery_message">Предыдущая сессия записи была прервана и отброшена.</string>
 
+    <!-- Abort Session -->
+    <string name="combat_stop_and_save">Сохранить и остановить</string>
+    <string name="combat_abort_and_discard">Отменить и удалить</string>
+    <string name="combat_save_and_exit_tooltip">Сохранить и выйти</string>
+    <string name="settings_recording_session_abort">Отменить сессию</string>
+    <string name="session_abort_confirm_title">Отменить сессию?</string>
+    <string name="session_abort_confirm_text">Все записанные данные этой сессии будут удалены без сохранения. Совокупные итоги будут возвращены к значениям до начала сессии.</string>
+    <string name="session_abort_confirm_button">Отменить</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">Версия:</string>
@@ -145,6 +154,7 @@
     <string name="player_card_cc_by_skill">Контроль по навыкам</string>
     <string name="player_card_session_totals">Итоги сессии</string>
     <string name="player_card_lifetime_totals">Итоги за все время</string>
+    <string name="player_card_lifetime_totals_sessions">Итоги за все время (%1$d сессий)</string>
 
     <!-- Session scope dropdown -->
     <string name="player_card_totals_scope_label">Показать</string>
@@ -202,11 +212,6 @@
     <string name="filters_original_placeholder">Оригинал</string>
     <string name="filters_replacement_placeholder">Замена</string>
     <string name="filters_add_button">Добавить в фильтры</string>
-
-    <!-- Exit Dialog -->
-    <string name="exit_dialog_title">Вы уверены?</string>
-    <string name="exit_dialog_message">Это выйдет и закроет все открытые окна оверлеев. Вы можете снова запустить .:Raid Framer:. из меню Пуск Windows.</string>
-    <string name="exit_dialog_dismiss">Нет</string>
 
     <!-- File Selection Dialog -->
     <string name="file_selection_title">Выберите файл боевого лога</string>

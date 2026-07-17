@@ -250,3 +250,17 @@ fun quit() {
   appMutexHandle = null
   exitProcess(0)
 }
+
+/*
+ * Stops the recording session, waits for the PNG export and session archive to complete,
+ * then quits the application. Falls through to quit() immediately if not recording.
+ */
+suspend fun quitAfterSessionStop() {
+  if (CombatLogInteractor.isRecording.value) {
+    Log.info(TAG, "Session active — stopping recording and awaiting export before quit...")
+    PlayerCacheInteractor.stopSession()
+    CombatLogInteractor.awaitExport()
+    PlayerCacheInteractor.awaitArchive()
+  }
+  quit()
+}

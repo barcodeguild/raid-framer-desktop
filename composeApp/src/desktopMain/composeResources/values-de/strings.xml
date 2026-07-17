@@ -112,6 +112,15 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="settings_crash_recovery_title">Sitzung unterbrochen</string>
     <string name="settings_crash_recovery_message">Eine vorherige Aufnahmesitzung wurde unterbrochen und verworfen.</string>
 
+    <!-- Abort Session -->
+    <string name="combat_stop_and_save">Speichern &amp; Stoppen</string>
+    <string name="combat_abort_and_discard">Abbrechen &amp; Verwerfen</string>
+    <string name="combat_save_and_exit_tooltip">Speichern &amp; Beenden</string>
+    <string name="settings_recording_session_abort">Sitzung abbrechen</string>
+    <string name="session_abort_confirm_title">Sitzung abbrechen?</string>
+    <string name="session_abort_confirm_text">Alle aufgezeichneten Daten dieser Sitzung werden verworfen, ohne gespeichert zu werden. Lebensgesamtwerte werden auf die Werte vor der Sitzung zurückgesetzt.</string>
+    <string name="session_abort_confirm_button">Abbrechen</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">Version:</string>
@@ -145,6 +154,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="player_card_cc_by_skill">Kontrolle nach Fähigkeit</string>
     <string name="player_card_session_totals">Sitzungsgesamtwerte</string>
     <string name="player_card_lifetime_totals">Lebensgesamtwerte</string>
+    <string name="player_card_lifetime_totals_sessions">Lebensgesamtwerte (%1$d Sitzungen)</string>
 
     <!-- Session scope dropdown -->
     <string name="player_card_totals_scope_label">Ansicht</string>
@@ -202,11 +212,6 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="filters_original_placeholder">Original</string>
     <string name="filters_replacement_placeholder">Ersetzung</string>
     <string name="filters_add_button">Zu Filtern hinzufügen</string>
-
-    <!-- Exit Dialog -->
-    <string name="exit_dialog_title">Sind Sie sicher?</string>
-    <string name="exit_dialog_message">Dies wird beendet und alle offenen Overlay-Fenster schließen. Sie können .:Raid Framer:. erneut über das Windows-Startmenü starten.</string>
-    <string name="exit_dialog_dismiss">Nein</string>
 
     <!-- File Selection Dialog -->
     <string name="file_selection_title">Kampflogdatei auswählen</string>

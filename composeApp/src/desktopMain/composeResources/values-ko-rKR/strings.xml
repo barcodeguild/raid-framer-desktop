@@ -112,6 +112,15 @@
     <string name="settings_crash_recovery_title">세션 중단됨</string>
     <string name="settings_crash_recovery_message">이전 녹화 세션이 중단되어 삭제되었습니다.</string>
 
+    <!-- Abort Session -->
+    <string name="combat_stop_and_save">저장 후 중지</string>
+    <string name="combat_abort_and_discard">중 취소 및 삭제</string>
+    <string name="combat_save_and_exit_tooltip">저장 후 종료</string>
+    <string name="settings_recording_session_abort">세션 중 취소</string>
+    <string name="session_abort_confirm_title">세션을 중 취소하시겠습니까?</string>
+    <string name="session_abort_confirm_text">이 세션의 모든 녹화 데이터가 저장 없이 삭제됩니다. 누적 총합이 세션 시작 전 값으로 복원됩니다.</string>
+    <string name="session_abort_confirm_button">중 취소</string>
+
     <!-- About Overlay Strings -->
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">버전:</string>
@@ -145,6 +154,7 @@
     <string name="player_card_cc_by_skill">스킬별 cc</string>
     <string name="player_card_session_totals">세션 총계</string>
     <string name="player_card_lifetime_totals">생애 총계</string>
+    <string name="player_card_lifetime_totals_sessions">생애 총계 (%1$d세션)</string>
 
     <!-- Session scope dropdown -->
     <string name="player_card_totals_scope_label">보기</string>
@@ -202,12 +212,7 @@
     <string name="filters_original_placeholder">원본</string>
     <string name="filters_replacement_placeholder">대체</string>
     <string name="filters_add_button">필터에 추가</string>
-
-    <!-- Exit Dialog -->
-    <string name="exit_dialog_title">확실합니까?</string>
-    <string name="exit_dialog_message">종료하고 열려 있는 오버레이 창을 모두 닫습니다. Windows 시작 메뉴에서 .:Raid Framer:.를 다시 실행할 수 있습니다.</string>
-    <string name="exit_dialog_dismiss">싫어요</string>
-
+    
     <!-- File Selection Dialog -->
     <string name="file_selection_title">전투 로그 파일 선택</string>
     <string name="file_selection_searching">유효한 전투 로그 검색 중.. 결과가 여기에 표시됩니다..</string>

@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.ConfigEntity
 import com.reoky.raidframer.core.locale.AppLocale
@@ -1140,6 +1141,7 @@ private fun CrashRecoveryBanner() {
 private fun RecordingSessionPanel(config: ConfigEntity) {
   val mode = if (config.allowPVEDamage) "PvE" else "PvP"
   var elapsedSeconds by remember { mutableStateOf(0L) }
+  var showAbortConfirmDialog by remember { mutableStateOf(false) }
 
   LaunchedEffect(config.lastSessionStart) {
     while (config.lastSessionStart > 0) {
@@ -1160,7 +1162,7 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-      Column {
+      Column(modifier = Modifier.weight(1f)) {
         Text(
           text = stringResource(Res.string.settings_recording_session_type_format, config.lastSessionType, mode),
           color = RFColors.TextPrimary,
@@ -1174,7 +1176,16 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
           fontWeight = FontWeight.Medium
         )
       }
-      Spacer(modifier = Modifier.weight(1f))
+      TextButton(
+        onClick = { showAbortConfirmDialog = true }
+      ) {
+        Text(
+          text = stringResource(Res.string.settings_recording_session_abort),
+          color = RFColors.AccentRed,
+          fontWeight = FontWeight.SemiBold,
+          fontSize = 13.sp
+        )
+      }
       Button(
         onClick = {
           PlayerCacheInteractor.stopSession()
@@ -1188,6 +1199,55 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
           fontWeight = FontWeight.SemiBold,
           fontSize = 13.sp
         )
+      }
+    }
+  }
+
+  if (showAbortConfirmDialog) {
+    Dialog(onDismissRequest = { showAbortConfirmDialog = false }) {
+      Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = Color.Black,
+        border = BorderStroke(1.dp, RFColors.CardBorder)
+      ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+          Text(
+            stringResource(Res.string.session_abort_confirm_title),
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+          )
+          Spacer(modifier = Modifier.height(6.dp))
+          Text(
+            stringResource(Res.string.session_abort_confirm_text),
+            color = Color.White,
+            fontSize = 14.sp,
+            lineHeight = 15.sp
+          )
+          Spacer(modifier = Modifier.height(12.dp))
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Button(
+              onClick = { showAbortConfirmDialog = false },
+              colors = ButtonDefaults.buttonColors(Color.White),
+              modifier = Modifier.padding(end = 8.dp)
+            ) {
+              Text(stringResource(Res.string.general_cancel), color = Color.Black, fontSize = 12.sp)
+            }
+            Button(
+              onClick = {
+                showAbortConfirmDialog = false
+                PlayerCacheInteractor.abortSession()
+              },
+              colors = ButtonDefaults.buttonColors(Color.Red.copy(alpha = 0.75f))
+            ) {
+              Text(stringResource(Res.string.session_abort_confirm_button), color = Color.White, fontSize = 12.sp)
+            }
+          }
+        }
       }
     }
   }
