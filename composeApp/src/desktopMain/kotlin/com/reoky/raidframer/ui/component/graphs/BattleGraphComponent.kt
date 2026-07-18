@@ -43,11 +43,13 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.getGraphNodeColor
 import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
 import com.reoky.raidframer.core.interactor.BattleGraphData
 import com.reoky.raidframer.core.interactor.BattleGraphMode
@@ -546,12 +548,8 @@ private fun NodeComponent(
   isSelected: Boolean = false,
   modifier: Modifier = Modifier
 ) {
-  val factionColor = when (node.faction) {
-    Faction.HARANYA -> RFColors.factionHaranya
-    Faction.NUIA -> RFColors.factionNuia
-    Faction.PIRATE -> RFColors.factionPirate
-    else -> RFColors.TextSecondary
-  }
+  val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
+  val factionColor = playerFaction.getGraphNodeColor(node.faction)
 
   val spec = node.spec
   val trees: List<SkillTreeType> = spec?.trees?.sortedByDisplayOrder()?.take(3) ?: emptyList()

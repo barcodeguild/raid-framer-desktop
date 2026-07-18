@@ -45,6 +45,12 @@ object RFColors {
   val factionNuia = Color(0xFFEC407A)
   val factionPirate = Color(0xFF7E57C2)
 
+  // Graph node faction colors (perspective-based)
+  val graphNodeAllied = Color(0xFF36F1CC)
+  val graphNodeEnemy = Color.Red.copy(alpha = 0.75f)
+  val graphNodePirate = Color(0xFFE56CAB)
+  val graphNodeNeutral = Color(0xFF808080)
+
   // Per-faction kill ranking colors
   val killsHaranyaGreen = Color(0xFF66BB6A)
   val killsNuiaOrange = Color(0xFFFFA726)
@@ -119,6 +125,34 @@ fun Faction.getFactionHighlightColor(faction: Faction): Color {
       Faction.UNKNOWN -> Color.Transparent
     }
     Faction.UNKNOWN -> Color.Transparent
+  }
+}
+
+/*
+ * Get the graph node color for a target faction from the viewer's faction perspective.
+ * Uses RFColors constants for consistency across the battle graph.
+ */
+fun Faction.getGraphNodeColor(targetFaction: Faction): Color {
+  return when (this) {
+    Faction.HARANYA -> when (targetFaction) {
+      Faction.HARANYA -> RFColors.graphNodeAllied
+      Faction.NUIA -> RFColors.graphNodeEnemy
+      Faction.PIRATE -> RFColors.graphNodePirate
+      Faction.UNKNOWN -> RFColors.graphNodeNeutral
+    }
+    Faction.NUIA -> when (targetFaction) {
+      Faction.HARANYA -> RFColors.graphNodeEnemy
+      Faction.NUIA -> RFColors.graphNodeAllied
+      Faction.PIRATE -> RFColors.graphNodePirate
+      Faction.UNKNOWN -> RFColors.graphNodeNeutral
+    }
+    Faction.PIRATE -> when (targetFaction) {
+      Faction.HARANYA -> RFColors.graphNodePirate
+      Faction.NUIA -> RFColors.graphNodeEnemy
+      Faction.PIRATE -> Color.Yellow.copy(alpha = 0.75f)
+      Faction.UNKNOWN -> RFColors.graphNodeNeutral
+    }
+    Faction.UNKNOWN -> RFColors.graphNodeNeutral
   }
 }
 
