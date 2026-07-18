@@ -29,6 +29,7 @@ import com.reoky.raidframer.core.interactor.BattleGraphMode
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.CompactSessionTotals
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.BattleGraphComponent
 import org.jetbrains.compose.resources.stringResource
@@ -49,6 +50,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   var ccThreshold by remember { mutableStateOf(0f) }
   var searchQuery by remember { mutableStateOf("") }
   var maxNodes by remember { mutableStateOf(25f) }
+  var selectedPlayerName by remember { mutableStateOf<String?>(null) }
 
   val sliderInteractionSource = remember { MutableInteractionSource() }
   LaunchedEffect(sliderInteractionSource) {
@@ -93,6 +95,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             searchQuery = specName
             BattleGraphInteractor.setSearchQuery(specName)
           },
+          onNodeSelected = { name -> selectedPlayerName = name },
           modifier = Modifier.fillMaxSize()
         )
       } else {
@@ -258,6 +261,17 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           color = RFColors.TextPrimary,
           interactionSource = sliderInteractionSource,
           modifier = Modifier.width(320.dp)
+        )
+      }
+
+      // Session totals widget in bottom-left when a node is selected
+      selectedPlayerName?.let { playerName ->
+        CompactSessionTotals(
+          playerName = playerName,
+          modifier = Modifier
+            .align(Alignment.BottomStart)
+            .padding(8.dp)
+            .widthIn(max = 200.dp)
         )
       }
     }

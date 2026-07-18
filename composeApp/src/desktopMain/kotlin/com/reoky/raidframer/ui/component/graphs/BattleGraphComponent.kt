@@ -66,6 +66,7 @@ fun BattleGraphComponent(
   onOpenPlayerCard: (String) -> Unit,
   onFilterByName: (String) -> Unit,
   onFilterBySpec: (String) -> Unit,
+  onNodeSelected: (String?) -> Unit,
   modifier: Modifier = Modifier
 ) {
   var scale by remember { mutableFloatStateOf(1f) }
@@ -215,6 +216,11 @@ fun BattleGraphComponent(
               continue
             }
             when (event.type) {
+              PointerEventType.Press -> {
+                // Deselect node when clicking on empty canvas space
+                selectedNode = null
+                onNodeSelected(null)
+              }
               PointerEventType.Scroll -> {
                 val scrollDelta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
                 if (scrollDelta != 0f) {
@@ -496,6 +502,8 @@ fun BattleGraphComponent(
                         contextMenuPosition = Offset(nodeCx, nodeCy)
                       }
                       selectedNode = node
+                      onNodeSelected(node.name)
+                      change.consume()
                     }
                   }
                 }
