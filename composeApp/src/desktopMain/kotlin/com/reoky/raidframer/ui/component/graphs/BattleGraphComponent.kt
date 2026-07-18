@@ -325,21 +325,22 @@ fun BattleGraphComponent(
           val alpha = 0.3f + edge.normalizedWeight * 0.5f
           val color = edgeColor.copy(alpha = alpha)
 
-          // Curve only reciprocal relationships so one-way edges remain direct.
-          // Separate controls near each node make the two directions diverge
-          // immediately instead of sharing a single midpoint control point.
+          // Use one quadratic-style control point for reciprocal edges. The
+          // equivalent cubic controls preserve a single smooth arc and avoid
+          // the visible kink caused by independently offsetting both handles.
           val curvature = if (isBidirectional) {
-            (safeDist * 0.17f).coerceIn(16f * scale, 64f * scale)
+            (safeDist * 0.08f).coerceIn(6f * scale, 36f * scale)
           } else {
             0f
           }
-          // Keep the control points farther along the tangents to produce a
-          // smoother, more arc-like curve instead of a squared-off bend.
-          val controlDistance = (safeDist * 0.36f).coerceIn(24f * scale, 100f * scale)
-          val startCtrlX = startX + nx * controlDistance + perpX * curvature
-          val startCtrlY = startY + ny * controlDistance + perpY * curvature
-          val endCtrlX = endX - nx * controlDistance + perpX * curvature
-          val endCtrlY = endY - ny * controlDistance + perpY * curvature
+          val midpointX = (startX + endX) / 2f
+          val midpointY = (startY + endY) / 2f
+          val quadraticCtrlX = midpointX + perpX * curvature
+          val quadraticCtrlY = midpointY + perpY * curvature
+          val startCtrlX = startX + (quadraticCtrlX - startX) * (2f / 3f)
+          val startCtrlY = startY + (quadraticCtrlY - startY) * (2f / 3f)
+          val endCtrlX = endX + (quadraticCtrlX - endX) * (2f / 3f)
+          val endCtrlY = endY + (quadraticCtrlY - endY) * (2f / 3f)
 
           // Compute arrow geometry first to know where line should stop.
           val tangentDx = endX - endCtrlX
