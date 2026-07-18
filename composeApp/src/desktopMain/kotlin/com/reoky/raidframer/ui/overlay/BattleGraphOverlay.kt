@@ -1,22 +1,26 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.interactor.BattleGraphInteractor
 import com.reoky.raidframer.core.interactor.BattleGraphMode
+import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -33,157 +37,166 @@ import raid_framer_desktop.composeapp.generated.resources.battle_graph_no_data
 fun BattleGraphOverlay(wm: WindowManager?) {
   val graphData by BattleGraphInteractor.graphData.collectAsState()
   val selectedMode by BattleGraphInteractor.selectedMode.collectAsState()
+  val dragLock = LocalDragLock.current
 
-  var damageThresholdMin by remember { mutableStateOf(1000f) }
-  var damageThresholdMax by remember { mutableStateOf(10_000_000f) }
-  var healThresholdMin by remember { mutableStateOf(1000f) }
-  var healThresholdMax by remember { mutableStateOf(10_000_000f) }
-  var ccThresholdMin by remember { mutableStateOf(0f) }
-  var ccThresholdMax by remember { mutableStateOf(5000f) }
+  var damageThreshold by remember { mutableStateOf(1000f) }
+  var healThreshold by remember { mutableStateOf(1000f) }
+  var ccThreshold by remember { mutableStateOf(0f) }
+
+  val sliderInteractionSource = remember { MutableInteractionSource() }
+  LaunchedEffect(sliderInteractionSource) {
+    sliderInteractionSource.interactions.collect { interaction ->
+      when (interaction) {
+        is DragInteraction.Start -> { dragLock.value = true }
+        is DragInteraction.Stop,
+        is DragInteraction.Cancel -> { dragLock.value = false }
+      }
+    }
+  }
 
   Column(
-    modifier = Modifier
-      .fillMaxSize()
-      .background(RFColors.CardBackground)
+    modifier = Modifier.fillMaxSize()
   ) {
     TitleBarComponent(
       title = stringResource(Res.string.battle_graph_title),
       onClose = { wm?.closeWindow(OverlayType.BATTLE_GRAPH) }
     )
 
-    // Mode toggles
-    Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 8.dp, vertical = 4.dp),
-      horizontalArrangement = Arrangement.Center,
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      val modes = listOf(
-        BattleGraphMode.DAMAGE to stringResource(Res.string.battle_graph_focused_damage),
-        BattleGraphMode.HEALS to stringResource(Res.string.battle_graph_heal_prop),
-        BattleGraphMode.CC to stringResource(Res.string.battle_graph_crowd_control_distribution)
-      )
-      modes.forEach { (mode, label) ->
-        val isSelected = mode == selectedMode
-        val highlightColor = when (mode) {
-          BattleGraphMode.DAMAGE -> RFColors.dpsOrange
-          BattleGraphMode.HEALS -> RFColors.healsGreen
-          BattleGraphMode.CC -> RFColors.ccCyan
-        }
-        TextButton(
-          onClick = { BattleGraphInteractor.setMode(mode) },
-          modifier = Modifier
-            .padding(horizontal = 4.dp)
-            .alpha(if (isSelected) 1f else 0.5f)
-        ) {
-          Text(
-            text = label,
-            color = if (isSelected) highlightColor else RFColors.TextSecondary,
-            fontSize = 11.sp
-          )
-        }
-      }
-    }
-
-    // Threshold filters row
-    Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 12.dp, vertical = 4.dp),
-      horizontalArrangement = Arrangement.SpaceEvenly,
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      when (selectedMode) {
-        BattleGraphMode.DAMAGE -> {
-          ThresholdFilter(
-            label = "DMG",
-            minValue = damageThresholdMin,
-            maxValue = damageThresholdMax,
-            rangeMin = 0f,
-            rangeMax = 10_000_000f,
-            onMinChange = { damageThresholdMin = it; BattleGraphInteractor.setDamageThreshold(it.toLong(), damageThresholdMax.toLong()) },
-            onMaxChange = { damageThresholdMax = it; BattleGraphInteractor.setDamageThreshold(damageThresholdMin.toLong(), it.toLong()) },
-            color = RFColors.dpsOrange
-          )
-        }
-        BattleGraphMode.HEALS -> {
-          ThresholdFilter(
-            label = "Heal",
-            minValue = healThresholdMin,
-            maxValue = healThresholdMax,
-            rangeMin = 0f,
-            rangeMax = 10_000_000f,
-            onMinChange = { healThresholdMin = it; BattleGraphInteractor.setHealThreshold(it.toLong(), healThresholdMax.toLong()) },
-            onMaxChange = { healThresholdMax = it; BattleGraphInteractor.setHealThreshold(healThresholdMin.toLong(), it.toLong()) },
-            color = RFColors.healsGreen
-          )
-        }
-        BattleGraphMode.CC -> {
-          ThresholdFilter(
-            label = "CC",
-            minValue = ccThresholdMin,
-            maxValue = ccThresholdMax,
-            rangeMin = 0f,
-            rangeMax = 5000f,
-            onMinChange = { ccThresholdMin = it; BattleGraphInteractor.setCCThreshold(it.toInt(), ccThresholdMax.toInt()) },
-            onMaxChange = { ccThresholdMax = it; BattleGraphInteractor.setCCThreshold(ccThresholdMin.toInt(), it.toInt()) },
-            color = RFColors.ccCyan
-          )
-        }
-      }
-    }
-
-    // Graph area
-    if (graphData.nodes.isNotEmpty()) {
-      Box(modifier = Modifier.fillMaxSize()) {
+    // Graph area with controls overlaid in upper-right
+    Box(modifier = Modifier.fillMaxSize()) {
+      if (graphData.nodes.isNotEmpty()) {
         BattleGraphComponent(
           graphData = graphData,
           mode = selectedMode,
           modifier = Modifier.fillMaxSize()
         )
+      } else {
+        Box(
+          modifier = Modifier.fillMaxSize(),
+          contentAlignment = Alignment.Center
+        ) {
+          Text(
+            text = stringResource(Res.string.battle_graph_no_data),
+            color = RFColors.TextTertiary,
+            fontSize = 14.sp
+          )
+        }
       }
-    } else {
-      Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+
+      // Compact controls overlay in upper-right
+      Column(
+        modifier = Modifier
+          .align(Alignment.TopEnd)
+          .padding(8.dp)
+          .clip(RoundedCornerShape(8.dp))
+          .background(RFColors.CardBackground.copy(alpha = 0.85f))
+          .padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalAlignment = Alignment.End
       ) {
-        Text(
-          text = stringResource(Res.string.battle_graph_no_data),
-          color = RFColors.TextTertiary,
-          fontSize = 14.sp
-        )
+        // Mode toggles - compact row
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(2.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          val modes = listOf(
+            BattleGraphMode.DAMAGE to "DMG",
+            BattleGraphMode.HEALS to "Heal",
+            BattleGraphMode.CC to "CC"
+          )
+          modes.forEach { (mode, label) ->
+            val isSelected = mode == selectedMode
+            val highlightColor = when (mode) {
+              BattleGraphMode.DAMAGE -> RFColors.dpsOrange
+              BattleGraphMode.HEALS -> RFColors.healsGreen
+              BattleGraphMode.CC -> RFColors.ccCyan
+            }
+            TextButton(
+              onClick = { BattleGraphInteractor.setMode(mode) },
+              modifier = Modifier.alpha(if (isSelected) 1f else 0.5f).height(24.dp),
+              contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
+            ) {
+              Text(
+                text = label,
+                color = if (isSelected) highlightColor else RFColors.TextSecondary,
+                fontSize = 10.sp
+              )
+            }
+          }
+        }
+
+        // Threshold slider - compact
+        when (selectedMode) {
+          BattleGraphMode.DAMAGE -> {
+            CompactThresholdSlider(
+              label = "Min DMG",
+              value = damageThreshold,
+              rangeMax = 10_000_000f,
+              onValueChange = { damageThreshold = it },
+              onValueChangeFinished = { BattleGraphInteractor.setDamageThreshold(damageThreshold.toLong()) },
+              color = RFColors.dpsOrange,
+              interactionSource = sliderInteractionSource
+            )
+          }
+          BattleGraphMode.HEALS -> {
+            CompactThresholdSlider(
+              label = "Min Heal",
+              value = healThreshold,
+              rangeMax = 10_000_000f,
+              onValueChange = { healThreshold = it },
+              onValueChangeFinished = { BattleGraphInteractor.setHealThreshold(healThreshold.toLong()) },
+              color = RFColors.healsGreen,
+              interactionSource = sliderInteractionSource
+            )
+          }
+          BattleGraphMode.CC -> {
+            CompactThresholdSlider(
+              label = "Min CC",
+              value = ccThreshold,
+              rangeMax = 5000f,
+              onValueChange = { ccThreshold = it },
+              onValueChangeFinished = { BattleGraphInteractor.setCCThreshold(ccThreshold.toInt()) },
+              color = RFColors.ccCyan,
+              interactionSource = sliderInteractionSource
+            )
+          }
+        }
       }
     }
   }
 }
 
 @Composable
-private fun ThresholdFilter(
+private fun CompactThresholdSlider(
   label: String,
-  minValue: Float,
-  maxValue: Float,
-  rangeMin: Float,
+  value: Float,
   rangeMax: Float,
-  onMinChange: (Float) -> Unit,
-  onMaxChange: (Float) -> Unit,
-  color: Color
+  onValueChange: (Float) -> Unit,
+  onValueChangeFinished: () -> Unit,
+  color: Color,
+  interactionSource: MutableInteractionSource
 ) {
   Row(
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp)
+    horizontalArrangement = Arrangement.spacedBy(4.dp)
   ) {
-    Text(text = "$label:", color = RFColors.TextSecondary, fontSize = 10.sp)
-    Text(
-      text = formatThresholdValue(minValue),
-      color = color,
-      fontSize = 10.sp
+    Text(text = "$label:", color = RFColors.TextSecondary, fontSize = 9.sp)
+    Slider(
+      value = value,
+      onValueChange = onValueChange,
+      onValueChangeFinished = onValueChangeFinished,
+      valueRange = 0f..rangeMax,
+      modifier = Modifier.width(120.dp),
+      colors = SliderDefaults.colors(
+        thumbColor = color,
+        activeTrackColor = color,
+        inactiveTrackColor = RFColors.TextTertiary
+      ),
+      interactionSource = interactionSource
     )
-    Text(text = "-", color = RFColors.TextTertiary, fontSize = 10.sp)
     Text(
-      text = formatThresholdValue(maxValue),
+      text = formatThresholdValue(value),
       color = color,
-      fontSize = 10.sp
+      fontSize = 9.sp
     )
   }
 }

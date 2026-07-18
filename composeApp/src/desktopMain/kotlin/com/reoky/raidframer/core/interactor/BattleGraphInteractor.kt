@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
+import kotlin.random.Random
 
 enum class BattleGraphMode { DAMAGE, HEALS, CC }
 
@@ -48,11 +49,8 @@ object BattleGraphInteractor : Interactor() {
   val selectedMode: StateFlow<BattleGraphMode> = _selectedMode.asStateFlow()
 
   private var damageThresholdMin = 1000L
-  private var damageThresholdMax = 10_000_000L
   private var healThresholdMin = 1000L
-  private var healThresholdMax = 10_000_000L
   private var ccThresholdMin = 0
-  private var ccThresholdMax = 5000
 
   override suspend fun interact() {
     combine(
@@ -69,21 +67,18 @@ object BattleGraphInteractor : Interactor() {
     _selectedMode.value = mode
   }
 
-  fun setDamageThreshold(min: Long, max: Long) {
+  fun setDamageThreshold(min: Long) {
     damageThresholdMin = min
-    damageThresholdMax = max
     rebuildGraphFromCurrentState()
   }
 
-  fun setHealThreshold(min: Long, max: Long) {
+  fun setHealThreshold(min: Long) {
     healThresholdMin = min
-    healThresholdMax = max
     rebuildGraphFromCurrentState()
   }
 
-  fun setCCThreshold(min: Int, max: Int) {
+  fun setCCThreshold(min: Int) {
     ccThresholdMin = min
-    ccThresholdMax = max
     rebuildGraphFromCurrentState()
   }
 
@@ -121,7 +116,7 @@ object BattleGraphInteractor : Interactor() {
       BattleGraphMode.DAMAGE -> {
         filteredCards.forEach { sourceCard ->
           sourceCard.sessionDamageToPlayer.forEach { (targetName, damage) ->
-            if (damage >= damageThresholdMin && damage <= damageThresholdMax) {
+            if (damage >= damageThresholdMin) {
               val incoming = nodeMap[targetName]?.let {
                 filteredCards.find { it.name == targetName }?.sessionDamageFromPlayer?.get(sourceCard.name) ?: 0L
               } ?: 0L
@@ -138,7 +133,7 @@ object BattleGraphInteractor : Interactor() {
       BattleGraphMode.HEALS -> {
         filteredCards.forEach { sourceCard ->
           sourceCard.sessionHealToPlayer.forEach { (targetName, heals) ->
-            if (heals >= healThresholdMin && heals <= healThresholdMax) {
+            if (heals >= healThresholdMin) {
               edges.add(GraphEdge(
                 source = sourceCard.name,
                 target = targetName,
@@ -152,7 +147,7 @@ object BattleGraphInteractor : Interactor() {
       BattleGraphMode.CC -> {
         filteredCards.forEach { sourceCard ->
           sourceCard.sessionCCToPlayer.forEach { (targetName, cc) ->
-            if (cc >= ccThresholdMin && cc <= ccThresholdMax) {
+            if (cc >= ccThresholdMin) {
               edges.add(GraphEdge(
                 source = sourceCard.name,
                 target = targetName,
@@ -188,9 +183,10 @@ object BattleGraphInteractor : Interactor() {
     if (count == 0) return
     val radius = 150f * sqrt(count.toFloat())
     nodes.forEachIndexed { index, node ->
-      val angle = 2.0 * Math.PI * index / count
-      node.x = (radius * kotlin.math.cos(angle)).toFloat()
-      node.y = (radius * kotlin.math.sin(angle)).toFloat()
+      val angle = 2.0 * Math.PI * index / count + Random.nextFloat() * 0.5f
+      val jitter = 0.7f + Random.nextFloat() * 0.6f
+      node.x = (radius * jitter * kotlin.math.cos(angle)).toFloat()
+      node.y = (radius * jitter * kotlin.math.sin(angle)).toFloat()
       node.vx = 0f
       node.vy = 0f
     }
