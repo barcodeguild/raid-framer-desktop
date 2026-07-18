@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -53,6 +54,7 @@ import com.reoky.raidframer.core.interactor.BattleGraphMode
 import com.reoky.raidframer.core.interactor.GraphNode
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.LocalDragLock
+import kotlin.math.atan2
 import kotlin.math.sqrt
 
 @Composable
@@ -115,10 +117,11 @@ fun BattleGraphComponent(
     }
 
     val iterations = 200
-    val repulsionForce = 20000f
-    val attractionForce = 0.005f
+    // Keep nodes farther apart so edge strokes and labels have room to breathe.
+    val repulsionForce = 55000f
+    val attractionForce = 0.0025f
     val damping = 0.85f
-    val centerGravity = 0.002f
+    val centerGravity = 0.0015f
     val lerpFactor = 0.15f
     val iterationsPerFrame = 4
 
@@ -141,6 +144,8 @@ fun BattleGraphComponent(
       }
 
       edges.forEach { edge ->
+        if (edge.source == edge.target) return@forEach
+
         val srcIdx = nodes.indexOfFirst { it.name == edge.source }
         val tgtIdx = nodes.indexOfFirst { it.name == edge.target }
         if (srcIdx >= 0 && tgtIdx >= 0) {
@@ -260,9 +265,14 @@ fun BattleGraphComponent(
       val arrowWidth = 5f * scale
 
       edges.forEach { edge ->
+        if (edge.source == edge.target) return@forEach
+
         val srcIdx = nodes.indexOfFirst { it.name == edge.source }
         val tgtIdx = nodes.indexOfFirst { it.name == edge.target }
         if (srcIdx >= 0 && tgtIdx >= 0 && srcIdx < animatedX.size && tgtIdx < animatedX.size) {
+          val isBidirectional = edge.source != edge.target && edges.any {
+            it.source == edge.target && it.target == edge.source
+          }
           val srcCx = animatedX[srcIdx] * scale + panOffset.x + centerX
           val srcCy = animatedY[srcIdx] * scale + panOffset.y + centerY
           val tgtCx = animatedX[tgtIdx] * scale + panOffset.x + centerX
@@ -271,35 +281,69 @@ fun BattleGraphComponent(
           val dx = tgtCx - srcCx
           val dy = tgtCy - srcCy
           val dist = sqrt(dx * dx + dy * dy)
+          val safeDist = dist.coerceAtLeast(1f)
 
-          if (dist <= scaledRadius * 2f) return@forEach
-
-          val nx = dx / dist
-          val ny = dy / dist
-
-          // Start/end from circle perimeters with small gap
-          val edgeMargin = 6f * scale
-          val startX = srcCx + nx * (scaledRadius + edgeMargin)
-          val startY = srcCy + ny * (scaledRadius + edgeMargin)
-          val endX = tgtCx - nx * (scaledRadius + edgeMargin)
-          val endY = tgtCy - ny * (scaledRadius + edgeMargin)
+          // Keep valid relationships visible even when the force layout places
+          // nodes inside each other's radius or directly on top of each other.
+          // The fallback direction prevents division by zero for coincident nodes.
+          val nx = if (dist > 0.1f) dx / safeDist else 1f
+          val ny = if (dist > 0.1f) dy / safeDist else 0f
+          val perpX = -ny
+          val perpY = nx
 
           val strokeWidth = (1f + edge.normalizedWeight * 7f) * scale
+
+          // Give heavier edges additional clearance, but keep the endpoints
+          // between the node perimeters when the nodes are very close.
+          val availableGap = (safeDist - scaledRadius * 2f).coerceAtLeast(0f)
+          val requestedMargin = (6f + edge.normalizedWeight * 8f) * scale
+          val edgeMargin = requestedMargin.coerceAtMost(availableGap * 0.45f)
+
+          // Reciprocal edges use separate tangential entry/exit points on the
+          // node circles. This prevents their endpoints from overlapping while
+          // keeping one-way relationships straight.
+          val endpointSeparation = if (isBidirectional) {
+            (4f + strokeWidth * 0.75f).coerceAtMost(scaledRadius * 0.35f)
+          } else {
+            0f
+          }
+          val startRadialX = nx + perpX * endpointSeparation / scaledRadius
+          val startRadialY = ny + perpY * endpointSeparation / scaledRadius
+          val startRadialLength = sqrt(
+            startRadialX * startRadialX + startRadialY * startRadialY
+          )
+          val endRadialX = -nx + perpX * endpointSeparation / scaledRadius
+          val endRadialY = -ny + perpY * endpointSeparation / scaledRadius
+          val endRadialLength = sqrt(
+            endRadialX * endRadialX + endRadialY * endRadialY
+          )
+
+          val startX = srcCx + startRadialX / startRadialLength * (scaledRadius + edgeMargin)
+          val startY = srcCy + startRadialY / startRadialLength * (scaledRadius + edgeMargin)
+          val endX = tgtCx + endRadialX / endRadialLength * (scaledRadius + edgeMargin)
+          val endY = tgtCy + endRadialY / endRadialLength * (scaledRadius + edgeMargin)
           val alpha = 0.3f + edge.normalizedWeight * 0.5f
           val color = edgeColor.copy(alpha = alpha)
 
-          // Bezier curve: control point offset perpendicular to midpoint
-          val midX = (startX + endX) / 2f
-          val midY = (startY + endY) / 2f
-          val perpX = -ny
-          val perpY = nx
-          val curvature = (dist * 0.12f).coerceIn(8f, 60f) * scale
-          val ctrlX = midX + perpX * curvature
-          val ctrlY = midY + perpY * curvature
+          // Curve only reciprocal relationships so one-way edges remain direct.
+          // Separate controls near each node make the two directions diverge
+          // immediately instead of sharing a single midpoint control point.
+          val curvature = if (isBidirectional) {
+            (safeDist * 0.17f).coerceIn(16f * scale, 64f * scale)
+          } else {
+            0f
+          }
+          // Keep the control points farther along the tangents to produce a
+          // smoother, more arc-like curve instead of a squared-off bend.
+          val controlDistance = (safeDist * 0.36f).coerceIn(24f * scale, 100f * scale)
+          val startCtrlX = startX + nx * controlDistance + perpX * curvature
+          val startCtrlY = startY + ny * controlDistance + perpY * curvature
+          val endCtrlX = endX - nx * controlDistance + perpX * curvature
+          val endCtrlY = endY - ny * controlDistance + perpY * curvature
 
-          // Compute arrow geometry first to know where line should stop
-          val tangentDx = endX - ctrlX
-          val tangentDy = endY - ctrlY
+          // Compute arrow geometry first to know where line should stop.
+          val tangentDx = endX - endCtrlX
+          val tangentDy = endY - endCtrlY
           val tangentLen = sqrt(tangentDx * tangentDx + tangentDy * tangentDy)
           val arrowBaseX: Float
           val arrowBaseY: Float
@@ -314,10 +358,17 @@ fun BattleGraphComponent(
             arrowBaseY = endY
           }
 
-          // Draw curved edge as a smooth Path using cubicTo
+          // Draw the edge with independent controls at both node ends.
           val edgePath = androidx.compose.ui.graphics.Path().apply {
             moveTo(startX, startY)
-            cubicTo(startX, startY, ctrlX, ctrlY, arrowBaseX, arrowBaseY)
+            cubicTo(
+              startCtrlX,
+              startCtrlY,
+              endCtrlX,
+              endCtrlY,
+              arrowBaseX,
+              arrowBaseY
+            )
           }
           drawPath(edgePath, color, style = androidx.compose.ui.graphics.drawscope.Stroke(
             width = strokeWidth,
@@ -342,18 +393,67 @@ fun BattleGraphComponent(
             drawPath(path, color)
           }
 
-          // Edge label at curve midpoint (t=0.5 on bezier)
-          val labelX = 0.25f * startX + 0.5f * ctrlX + 0.25f * arrowBaseX
-          val labelY = 0.25f * startY + 0.5f * ctrlY + 0.25f * arrowBaseY
-          drawText(
-            textMeasurer = textMeasurer,
-            text = edge.displayValue,
-            topLeft = Offset(labelX - 20f * scale, labelY - 14f * scale),
-            style = TextStyle(
+          // Place the label on the curve's midpoint and rotate it to follow
+          // the local edge direction. Offset it from the stroke so the text
+          // remains readable instead of being drawn directly over the edge.
+          val curveT = 0.5f
+          val inverseT = 1f - curveT
+          val labelX = inverseT * inverseT * inverseT * startX +
+            3f * inverseT * inverseT * curveT * startCtrlX +
+            3f * inverseT * curveT * curveT * endCtrlX +
+            curveT * curveT * curveT * arrowBaseX
+          val labelY = inverseT * inverseT * inverseT * startY +
+            3f * inverseT * inverseT * curveT * startCtrlY +
+            3f * inverseT * curveT * curveT * endCtrlY +
+            curveT * curveT * curveT * arrowBaseY
+
+          val tangentX = 3f * inverseT * inverseT * (startCtrlX - startX) +
+            6f * inverseT * curveT * (endCtrlX - startCtrlX) +
+            3f * curveT * curveT * (arrowBaseX - endCtrlX)
+          val tangentY = 3f * inverseT * inverseT * (startCtrlY - startY) +
+            6f * inverseT * curveT * (endCtrlY - startCtrlY) +
+            3f * curveT * curveT * (arrowBaseY - endCtrlY)
+          val tangentLength = sqrt(tangentX * tangentX + tangentY * tangentY)
+
+          if (tangentLength > 0.1f) {
+            var labelAngle = Math.toDegrees(
+              atan2(tangentY.toDouble(), tangentX.toDouble())
+            ).toFloat()
+
+            // Keep labels upright when an edge travels from right to left.
+            if (labelAngle > 90f || labelAngle < -90f) {
+              labelAngle += 180f
+            }
+
+            val unitTangentX = tangentX / tangentLength
+            val unitTangentY = tangentY / tangentLength
+            val labelNormalX = -unitTangentY
+            val labelNormalY = unitTangentX
+            val labelStyle = TextStyle(
               fontSize = (10f * scale).sp,
               color = color
             )
-          )
+            val labelLayout = textMeasurer.measure(
+              text = edge.displayValue,
+              style = labelStyle
+            )
+            val labelGap = 5f * scale + labelLayout.size.height / 2f
+            val labelCenterX = labelX + labelNormalX * labelGap
+            val labelCenterY = labelY + labelNormalY * labelGap
+
+            rotate(
+              degrees = labelAngle,
+              pivot = Offset(labelCenterX, labelCenterY)
+            ) {
+              drawText(
+                textLayoutResult = labelLayout,
+                topLeft = Offset(
+                  labelCenterX - labelLayout.size.width / 2f,
+                  labelCenterY - labelLayout.size.height / 2f
+                )
+              )
+            }
+          }
         }
       }
     }
@@ -371,8 +471,11 @@ fun BattleGraphComponent(
           isSelected = selectedNode?.name == node.name,
           modifier = Modifier
             .graphicsLayer {
-              translationX = nodeCx - 50.dp.toPx() * scale
-              translationY = nodeCy - 50.dp.toPx() * scale
+              // graphicsLayer scales around the node's center by default. Keep the
+              // translation based on the unscaled layout size so the visual center
+              // remains aligned with the edge coordinates at every zoom level.
+              translationX = nodeCx - 50.dp.toPx()
+              translationY = nodeCy - 50.dp.toPx()
               scaleX = scale
               scaleY = scale
             }
