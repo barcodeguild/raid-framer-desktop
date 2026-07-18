@@ -49,7 +49,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   var healThreshold by remember { mutableStateOf(1000f) }
   var ccThreshold by remember { mutableStateOf(0f) }
   var searchQuery by remember { mutableStateOf("") }
-  var maxNodes by remember { mutableStateOf(25f) }
+  var maxEdges by remember { mutableStateOf(25f) }
   var selectedPlayerName by remember { mutableStateOf<String?>(null) }
 
   val sliderInteractionSource = remember { MutableInteractionSource() }
@@ -251,13 +251,13 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           }
         }
 
-        // Max objects slider - below threshold
+        // Max edges slider - below threshold
         CompactThresholdSlider(
-          label = "Max Nodes",
-          value = maxNodes,
+          label = "Max Edges",
+          value = maxEdges,
           rangeMax = 250f,
-          onValueChange = { maxNodes = it },
-          onValueChangeFinished = { BattleGraphInteractor.setMaxNodes(maxNodes.toInt()) },
+          onValueChange = { maxEdges = it },
+          onValueChangeFinished = { BattleGraphInteractor.setMaxEdges(maxEdges.toInt()) },
           color = RFColors.TextPrimary,
           interactionSource = sliderInteractionSource,
           modifier = Modifier.width(320.dp)

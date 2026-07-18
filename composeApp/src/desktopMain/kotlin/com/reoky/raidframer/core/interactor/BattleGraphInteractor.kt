@@ -53,7 +53,7 @@ object BattleGraphInteractor : Interactor() {
   private var healThresholdMin = 1000L
   private var ccThresholdMin = 0
   private var searchQuery = ""
-  private var maxNodes = 25
+  private var maxEdges = 25
 
   private var lastRebuildTime = 0L
   private val rebuildThrottleMs = 3_000L
@@ -61,9 +61,12 @@ object BattleGraphInteractor : Interactor() {
   override suspend fun interact() {
     combine(
       PlayerCacheInteractor.topDamage,
+      PlayerCacheInteractor.topHeals,
+      PlayerCacheInteractor.topCC,
       _selectedMode
-    ) { cards, mode ->
-      cards to mode
+    ) { damages, heals, cc, mode ->
+      val merged = (damages + heals + cc).distinctBy { it.name }
+      merged to mode
     }.collect { (cards, mode) ->
       val now = System.currentTimeMillis()
       if (now - lastRebuildTime >= rebuildThrottleMs) {
@@ -98,14 +101,17 @@ object BattleGraphInteractor : Interactor() {
     rebuildGraphFromCurrentState()
   }
 
-  fun setMaxNodes(max: Int) {
-    maxNodes = max
+  fun setMaxEdges(max: Int) {
+    maxEdges = max
     rebuildGraphFromCurrentState()
   }
 
   private fun rebuildGraphFromCurrentState() {
     scope.launch {
-      val cards = PlayerCacheInteractor.topDamage.value
+      val damages = PlayerCacheInteractor.topDamage.value
+      val heals = PlayerCacheInteractor.topHeals.value
+      val cc = PlayerCacheInteractor.topCC.value
+      val cards = (damages + heals + cc).distinctBy { it.name }
       val mode = _selectedMode.value
       rebuildGraph(cards, mode)
     }
@@ -188,7 +194,7 @@ object BattleGraphInteractor : Interactor() {
     }
 
     val maxValue = edges.maxOfOrNull { it.weight } ?: 1L
-    val normalizedEdges = edges.sortedByDescending { it.weight }.take(maxNodes.coerceAtLeast(1)).map { edge ->
+    val normalizedEdges = edges.sortedByDescending { it.weight }.take(maxEdges.coerceAtLeast(1)).map { edge ->
       val normalized = (edge.weight.toFloat() / maxValue).coerceIn(0.1f, 1f)
       edge.copy(normalizedWeight = normalized)
     }
