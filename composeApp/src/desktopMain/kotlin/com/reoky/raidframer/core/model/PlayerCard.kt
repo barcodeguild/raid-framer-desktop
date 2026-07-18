@@ -55,6 +55,14 @@ data class PlayerCard (
   val recentBuffAppliedEvents: List<BuffAppliedEvent> = listOf(),
   val recentDebuffAppliedEvents: List<DebuffAppliedEvent> = listOf(),
 
+  // session edge weights for battle graph: per-player adjacency lists (graph-database style)
+  val sessionDamageToPlayer: Map<String, Long> = mapOf(),   // target name -> damage dealt to them
+  val sessionDamageFromPlayer: Map<String, Long> = mapOf(), // source name -> damage received from them
+  val sessionHealToPlayer: Map<String, Long> = mapOf(),     // target name -> heals done to them
+  val sessionHealFromPlayer: Map<String, Long> = mapOf(),   // source name -> heals received from them
+  val sessionCCToPlayer: Map<String, Int> = mapOf(),        // target name -> CC applied to them
+  val sessionCCFromPlayer: Map<String, Int> = mapOf(),      // source name -> CC received from them
+
   // session counter totals : when a new session starts, these reset to 0 and the totals are written to the database cache
   val sessionSpellDamageMap: Map<String, Long> = mapOf(), // spell name -> total damage dealt this session (never capped, used for accurate spell breakdown)
   val sessionSpellHealMap: Map<String, Long> = mapOf(), // spell name -> total healing done this session

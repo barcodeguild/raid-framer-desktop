@@ -235,6 +235,20 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="combat_no_columns_message">Bro.. Try Adding at Least One Category..</string>
     <string name="combat_open_settings">Open Settings</string>
 
+    <!-- Battle Graph Overlay -->
+    <string name="battle_graph_title">Battle Graph</string>
+    <string name="battle_graph_focused_damage">Focused Damage</string>
+    <string name="battle_graph_heal_prop">Heal Prop</string>
+    <string name="battle_graph_crowd_control_distribution">Crowd-Control Distribution</string>
+    <string name="battle_graph_summary">Summary</string>
+    <string name="battle_graph_view_options">View Options</string>
+    <string name="battle_graph_no_data">No data available for current filters</string>
+    <string name="battle_graph_outgoing_format">Outgoing: %1$s</string>
+    <string name="battle_graph_incoming_format">Incoming: %1$s</string>
+    <string name="battle_graph_edge_dmg_format">%1$s dmg</string>
+    <string name="battle_graph_edge_heal_format">%1$s heal</string>
+    <string name="battle_graph_edge_cc_format">%1$s CC</string>
+
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Battle Summary (%1$s)</string>
     <string name="summary_silences_by_faction">Silences by Faction</string>

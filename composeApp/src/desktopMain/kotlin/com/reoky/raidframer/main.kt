@@ -11,6 +11,7 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
 import com.reoky.raidframer.core.helper.UpdateHelper
+import com.reoky.raidframer.core.interactor.BattleGraphInteractor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.DeathAccumulatorInteractor
@@ -93,6 +94,7 @@ fun main(args: Array<String>) {
     PetAccumulatorInteractor.start()
     CombatLogInteractor.start(delay = 3000L)
     SeedTableInteractor.start(delay = 2000L)
+    BattleGraphInteractor.start()
 
     // Background update check on startup (non-blocking, silent)
     context.launch(Dispatchers.IO) {
@@ -238,6 +240,7 @@ private fun acquireSingleInstanceMutex(): Boolean {
  */
 fun quit() {
   Log.info(TAG, "Shutting down Raid Framer...")
+  BattleGraphInteractor.stop()
   GraphDataInteractor.stop()
   PlayerCacheInteractor.stop()
   GameMonitorInteractor.stop()

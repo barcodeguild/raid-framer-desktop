@@ -26,6 +26,7 @@ import com.reoky.raidframer.ui.overlay.RaidOverlay
 import com.reoky.raidframer.ui.overlay.SettingsOverlay
 import com.reoky.raidframer.ui.overlay.PlayerCardOverlay
 import com.reoky.raidframer.ui.overlay.TrackerOverlay
+import com.reoky.raidframer.ui.overlay.BattleGraphOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.awt.event.ComponentAdapter
@@ -72,6 +73,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.NEW_SESSION -> NewSessionOverlay(wm)
           OverlayType.RAID -> RaidOverlay(wm)
           OverlayType.PLAYER_CARD -> PlayerCardOverlay(wm)
+          OverlayType.BATTLE_GRAPH -> BattleGraphOverlay(wm)
           else -> {}
         }
 

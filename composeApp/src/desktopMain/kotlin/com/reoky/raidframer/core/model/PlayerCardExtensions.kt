@@ -41,7 +41,8 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
       val spellKey = event.spell.ifBlank { "Unknown" }
       this.sessionSpellDamageMap + (spellKey to ((this.sessionSpellDamageMap[spellKey] ?: 0L) + event.damage))
     },
-    sessionDamageTotal = this.sessionDamageTotal + event.damage
+    sessionDamageTotal = this.sessionDamageTotal + event.damage,
+    sessionDamageToPlayer = this.sessionDamageToPlayer + (event.target to ((this.sessionDamageToPlayer[event.target] ?: 0L) + event.damage))
   )
 }
 
@@ -68,6 +69,11 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
       } else {
         this.sessionSpellHealMap + (spellKey to ((this.sessionSpellHealMap[spellKey] ?: 0L) + event.amount))
       }
+    },
+    sessionHealToPlayer = if (isOde && !allowOdeAsHeal) {
+      this.sessionHealToPlayer
+    } else {
+      this.sessionHealToPlayer + (event.target to ((this.sessionHealToPlayer[event.target] ?: 0L) + event.amount))
     }
   )
 }
@@ -84,7 +90,8 @@ fun PlayerCard.postDamageTakenEvent(event: DamageEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalDamageTaken = cache.lifetimeTotalDamageTaken + event.damage
     ),
-    sessionDamageTakenTotal = this.sessionDamageTakenTotal + event.damage
+    sessionDamageTakenTotal = this.sessionDamageTakenTotal + event.damage,
+    sessionDamageFromPlayer = this.sessionDamageFromPlayer + (event.source to ((this.sessionDamageFromPlayer[event.source] ?: 0L) + event.damage))
   )
 }
 
@@ -102,7 +109,12 @@ fun PlayerCard.postHealsReceivedEvent(event: HealEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalHealsReceived = cache.lifetimeTotalHealsReceived + event.amount
     ),
-    sessionHealsReceivedTotal = if (isOde && !allowOdeAsHeal) this.sessionHealsReceivedTotal else this.sessionHealsReceivedTotal + event.amount
+    sessionHealsReceivedTotal = if (isOde && !allowOdeAsHeal) this.sessionHealsReceivedTotal else this.sessionHealsReceivedTotal + event.amount,
+    sessionHealFromPlayer = if (isOde && !allowOdeAsHeal) {
+      this.sessionHealFromPlayer
+    } else {
+      this.sessionHealFromPlayer + (event.source to ((this.sessionHealFromPlayer[event.source] ?: 0L) + event.amount))
+    }
   )
 }
 
@@ -168,10 +180,16 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
  * Add a debuff gained event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
+  val isCC = findDebuffByName(event.debuff)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
     recentDebuffGainedEvents = (this.recentDebuffGainedEvents + event).takeLast(200), // optional to takeLast(n)
+    sessionCCFromPlayer = if (isCC) {
+      this.sessionCCFromPlayer + (event.source to ((this.sessionCCFromPlayer[event.source] ?: 0) + 1))
+    } else {
+      this.sessionCCFromPlayer
+    }
   )
 }
 
@@ -225,6 +243,11 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       this.sessionSpellCCMap + (debuffKey to ((this.sessionSpellCCMap[debuffKey] ?: 0) + 1))
     } else {
       this.sessionSpellCCMap
+    },
+    sessionCCToPlayer = if (isCC) {
+      this.sessionCCToPlayer + (event.target to ((this.sessionCCToPlayer[event.target] ?: 0) + 1))
+    } else {
+      this.sessionCCToPlayer
     },
     lastGliderUse = if (isGlider) event.timestamp else this.lastGliderUse, // update glider use timestamp if applicable
   )
