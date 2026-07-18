@@ -33,7 +33,6 @@ import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.BattleGraphComponent
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.battle_graph_title
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_damage
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_heal_prop
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_crowd_control_distribution
@@ -65,8 +64,14 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   Column(
     modifier = Modifier.fillMaxSize()
   ) {
+    val titleText = when (selectedMode) {
+      BattleGraphMode.DAMAGE -> stringResource(Res.string.battle_graph_focused_damage)
+      BattleGraphMode.HEALS -> stringResource(Res.string.battle_graph_heal_prop)
+      BattleGraphMode.CC -> stringResource(Res.string.battle_graph_crowd_control_distribution)
+    }
+
     TitleBarComponent(
-      title = stringResource(Res.string.battle_graph_title),
+      title = titleText,
       onClose = { wm?.closeWindow(OverlayType.BATTLE_GRAPH) }
     )
 
@@ -172,19 +177,6 @@ fun BattleGraphOverlay(wm: WindowManager?) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Max objects slider
-        CompactThresholdSlider(
-          label = "Max Nodes",
-          value = maxNodes,
-          rangeMax = 250f,
-          onValueChange = { maxNodes = it },
-          onValueChangeFinished = { BattleGraphInteractor.setMaxNodes(maxNodes.toInt()) },
-          color = RFColors.TextPrimary,
-          interactionSource = sliderInteractionSource
-        )
-
-        Spacer(modifier = Modifier.height(2.dp))
-
         // Mode toggles - compact row
         Row(
           horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -226,7 +218,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               onValueChange = { damageThreshold = it },
               onValueChangeFinished = { BattleGraphInteractor.setDamageThreshold(damageThreshold.toLong()) },
               color = RFColors.dpsOrange,
-              interactionSource = sliderInteractionSource
+              interactionSource = sliderInteractionSource,
+              modifier = Modifier.width(320.dp)
             )
           }
           BattleGraphMode.HEALS -> {
@@ -237,7 +230,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               onValueChange = { healThreshold = it },
               onValueChangeFinished = { BattleGraphInteractor.setHealThreshold(healThreshold.toLong()) },
               color = RFColors.healsGreen,
-              interactionSource = sliderInteractionSource
+              interactionSource = sliderInteractionSource,
+              modifier = Modifier.width(320.dp)
             )
           }
           BattleGraphMode.CC -> {
@@ -248,10 +242,23 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               onValueChange = { ccThreshold = it },
               onValueChangeFinished = { BattleGraphInteractor.setCCThreshold(ccThreshold.toInt()) },
               color = RFColors.ccCyan,
-              interactionSource = sliderInteractionSource
+              interactionSource = sliderInteractionSource,
+              modifier = Modifier.width(320.dp)
             )
           }
         }
+
+        // Max objects slider - below threshold
+        CompactThresholdSlider(
+          label = "Max Nodes",
+          value = maxNodes,
+          rangeMax = 250f,
+          onValueChange = { maxNodes = it },
+          onValueChangeFinished = { BattleGraphInteractor.setMaxNodes(maxNodes.toInt()) },
+          color = RFColors.TextPrimary,
+          interactionSource = sliderInteractionSource,
+          modifier = Modifier.width(320.dp)
+        )
       }
     }
   }
@@ -265,11 +272,13 @@ private fun CompactThresholdSlider(
   onValueChange: (Float) -> Unit,
   onValueChangeFinished: () -> Unit,
   color: Color,
-  interactionSource: MutableInteractionSource
+  interactionSource: MutableInteractionSource,
+  modifier: Modifier = Modifier
 ) {
   Row(
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(4.dp)
+    horizontalArrangement = Arrangement.spacedBy(4.dp),
+    modifier = modifier
   ) {
     Text(text = "$label:", color = RFColors.TextSecondary, fontSize = 9.sp)
     Slider(
@@ -277,7 +286,7 @@ private fun CompactThresholdSlider(
       onValueChange = onValueChange,
       onValueChangeFinished = onValueChangeFinished,
       valueRange = 0f..rangeMax,
-      modifier = Modifier.width(120.dp),
+      modifier = Modifier.weight(1f),
       colors = SliderDefaults.colors(
         thumbColor = color,
         activeTrackColor = color,
