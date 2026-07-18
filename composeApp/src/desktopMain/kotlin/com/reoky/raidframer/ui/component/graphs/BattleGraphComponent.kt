@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,11 +32,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.definitions.SkillTreeType
@@ -52,6 +56,9 @@ import kotlin.math.sqrt
 fun BattleGraphComponent(
   graphData: BattleGraphData,
   mode: BattleGraphMode,
+  onOpenPlayerCard: (String) -> Unit,
+  onFilterByName: (String) -> Unit,
+  onFilterBySpec: (String) -> Unit,
   modifier: Modifier = Modifier
 ) {
   var scale by remember { mutableFloatStateOf(1f) }
@@ -62,6 +69,14 @@ fun BattleGraphComponent(
 
   val textMeasurer = rememberTextMeasurer()
   val dragLock = LocalDragLock.current
+  val density = LocalDensity.current.density
+
+  // Right-click context menu state
+  var contextMenuNode by remember { mutableStateOf<GraphNode?>(null) }
+  var contextMenuPosition by remember { mutableStateOf(Offset.Zero) }
+
+  // Left-click selection state
+  var selectedNode by remember { mutableStateOf<GraphNode?>(null) }
 
   // Animated node positions - initialized once, preserved across updates
   var initialized by remember { mutableStateOf(false) }
@@ -97,12 +112,12 @@ fun BattleGraphComponent(
     }
 
     val iterations = 200
-    val repulsionForce = 5000f
-    val attractionForce = 0.01f
-    val damping = 0.9f
-    val centerGravity = 0.005f
-    val lerpFactor = 0.35f
-    val iterationsPerFrame = 8
+    val repulsionForce = 20000f
+    val attractionForce = 0.005f
+    val damping = 0.85f
+    val centerGravity = 0.002f
+    val lerpFactor = 0.15f
+    val iterationsPerFrame = 4
 
     repeat(iterations) { iter ->
       simNodes.forEach { it.vx = 0f; it.vy = 0f }
@@ -181,16 +196,24 @@ fun BattleGraphComponent(
           var isPanning = false
           while (true) {
             val event = awaitPointerEvent()
+            // Skip events already consumed by child composables (e.g. TextField, Slider)
+            if (event.changes.any { it.isConsumed }) {
+              if (isPanning) {
+                isPanning = false
+                dragLock.value = false
+              }
+              continue
+            }
             when (event.type) {
               PointerEventType.Scroll -> {
                 val scrollDelta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
-                if (scrollDelta != 0f && event.changes.all { !it.isConsumed }) {
+                if (scrollDelta != 0f) {
                   scale = (scale * (1f - scrollDelta * 0.1f)).coerceIn(0.25f, 4f)
                   event.changes.forEach { it.consume() }
                 }
               }
               PointerEventType.Move -> {
-                val pressedChange = event.changes.firstOrNull { it.pressed && !it.isConsumed }
+                val pressedChange = event.changes.firstOrNull { it.pressed }
                 if (pressedChange != null && event.changes.size == 1) {
                   if (!isPanning) {
                     lastPanX = pressedChange.position.x
@@ -230,7 +253,6 @@ fun BattleGraphComponent(
     ) {
       val nodeRadiusPx = 50.dp.toPx()
       val scaledRadius = nodeRadiusPx * scale
-      val edgePadding = 4f * scale
       val arrowLen = 10f * scale
       val arrowWidth = 5f * scale
 
@@ -247,16 +269,17 @@ fun BattleGraphComponent(
           val dy = tgtCy - srcCy
           val dist = sqrt(dx * dx + dy * dy)
 
-          if (dist <= scaledRadius * 2f + edgePadding * 2f) return@forEach
+          if (dist <= scaledRadius * 2f) return@forEach
 
           val nx = dx / dist
           val ny = dy / dist
 
           // Start/end from circle perimeters with small gap
-          val startX = srcCx + nx * (scaledRadius + edgePadding)
-          val startY = srcCy + ny * (scaledRadius + edgePadding)
-          val endX = tgtCx - nx * (scaledRadius + edgePadding)
-          val endY = tgtCy - ny * (scaledRadius + edgePadding)
+          val edgeMargin = 6f * scale
+          val startX = srcCx + nx * (scaledRadius + edgeMargin)
+          val startY = srcCy + ny * (scaledRadius + edgeMargin)
+          val endX = tgtCx - nx * (scaledRadius + edgeMargin)
+          val endY = tgtCy - ny * (scaledRadius + edgeMargin)
 
           val strokeWidth = (1f + edge.normalizedWeight * 7f) * scale
           val alpha = 0.3f + edge.normalizedWeight * 0.5f
@@ -271,30 +294,41 @@ fun BattleGraphComponent(
           val ctrlX = midX + perpX * curvature
           val ctrlY = midY + perpY * curvature
 
-          // Draw curved edge using line segments
+          // Compute arrow geometry first to know where line should stop
+          val tangentDx = endX - ctrlX
+          val tangentDy = endY - ctrlY
+          val tangentLen = sqrt(tangentDx * tangentDx + tangentDy * tangentDy)
+          val arrowBaseX: Float
+          val arrowBaseY: Float
+          if (tangentLen > 0.1f) {
+            val tnx = tangentDx / tangentLen
+            val tny = tangentDy / tangentLen
+            // Arrow tip at perimeter, base pulled back by arrowLen
+            arrowBaseX = endX - tnx * arrowLen
+            arrowBaseY = endY - tny * arrowLen
+          } else {
+            arrowBaseX = endX
+            arrowBaseY = endY
+          }
+
+          // Draw curved edge to arrow BASE (not tip) so line doesn't overlap arrow
           val steps = 20
           var prevX = startX
           var prevY = startY
           for (s in 1..steps) {
             val t = s.toFloat() / steps
             val invT = 1f - t
-            val px = invT * invT * startX + 2f * invT * t * ctrlX + t * t * endX
-            val py = invT * invT * startY + 2f * invT * t * ctrlY + t * t * endY
+            val px = invT * invT * startX + 2f * invT * t * ctrlX + t * t * arrowBaseX
+            val py = invT * invT * startY + 2f * invT * t * ctrlY + t * t * arrowBaseY
             drawLine(color, Offset(prevX, prevY), Offset(px, py), strokeWidth)
             prevX = px
             prevY = py
           }
 
-          // Arrowhead at the end of the curve
-          // Tangent at t=1 for quadratic bezier: 2*(P2 - P1) where P1=ctrl, P2=end
-          val tangentDx = endX - ctrlX
-          val tangentDy = endY - ctrlY
-          val tangentLen = sqrt(tangentDx * tangentDx + tangentDy * tangentDy)
+          // Arrowhead at the end (tip at perimeter, base at arrowBase)
           if (tangentLen > 0.1f) {
             val tnx = tangentDx / tangentLen
             val tny = tangentDy / tangentLen
-            val arrowBaseX = endX - tnx * arrowLen
-            val arrowBaseY = endY - tny * arrowLen
             val arrowLeftX = arrowBaseX + tny * arrowWidth
             val arrowLeftY = arrowBaseY - tnx * arrowWidth
             val arrowRightX = arrowBaseX - tny * arrowWidth
@@ -310,8 +344,8 @@ fun BattleGraphComponent(
           }
 
           // Edge label at curve midpoint (t=0.5 on bezier)
-          val labelX = 0.25f * startX + 0.5f * ctrlX + 0.25f * endX
-          val labelY = 0.25f * startY + 0.5f * ctrlY + 0.25f * endY
+          val labelX = 0.25f * startX + 0.5f * ctrlX + 0.25f * arrowBaseX
+          val labelY = 0.25f * startY + 0.5f * ctrlY + 0.25f * arrowBaseY
           drawText(
             textMeasurer = textMeasurer,
             text = edge.displayValue,
@@ -325,6 +359,8 @@ fun BattleGraphComponent(
       }
     }
     } // key
+
+    // Nodes overlay with right-click support
     nodes.forEachIndexed { idx, node ->
       if (idx < animatedX.size) {
         val nodeCx = animatedX[idx] * scale + panOffset.x + centerX
@@ -333,6 +369,7 @@ fun BattleGraphComponent(
         NodeComponent(
           node = node,
           mode = mode,
+          isSelected = selectedNode?.name == node.name,
           modifier = Modifier
             .graphicsLayer {
               translationX = nodeCx - 50.dp.toPx() * scale
@@ -340,7 +377,51 @@ fun BattleGraphComponent(
               scaleX = scale
               scaleY = scale
             }
+            .pointerInput(node) {
+              awaitPointerEventScope {
+                while (true) {
+                  val event = awaitPointerEvent()
+                  if (event.type == PointerEventType.Press) {
+                    val change = event.changes.firstOrNull()
+                    if (change != null) {
+                      // Left-click: open context menu
+                      contextMenuNode = node
+                      contextMenuPosition = Offset(nodeCx, nodeCy)
+                      selectedNode = node
+                    }
+                  }
+                }
+              }
+            }
         )
+      }
+    }
+
+    // Context menu
+    contextMenuNode?.let { node ->
+      DropdownMenu(
+        expanded = true,
+        onDismissRequest = { contextMenuNode = null },
+        offset = DpOffset((contextMenuPosition.x / density).dp, (contextMenuPosition.y / density).dp)
+      ) {
+        DropdownMenuItem(onClick = {
+          onOpenPlayerCard(node.name)
+          contextMenuNode = null
+        }) {
+          Text("Open Player Card", fontSize = 12.sp)
+        }
+        DropdownMenuItem(onClick = {
+          onFilterByName(node.name)
+          contextMenuNode = null
+        }) {
+          Text("Filter by Name", fontSize = 12.sp)
+        }
+        DropdownMenuItem(onClick = {
+          node.spec?.let { spec -> onFilterBySpec(spec.name) }
+          contextMenuNode = null
+        }) {
+          Text("Filter by Spec", fontSize = 12.sp)
+        }
       }
     }
   }
@@ -350,6 +431,7 @@ fun BattleGraphComponent(
 private fun NodeComponent(
   node: GraphNode,
   mode: BattleGraphMode,
+  isSelected: Boolean = false,
   modifier: Modifier = Modifier
 ) {
   val factionColor = when (node.faction) {
@@ -371,6 +453,14 @@ private fun NodeComponent(
           color = factionColor.copy(alpha = 0.3f),
           radius = size.minDimension / 2f
         )
+        // Highlight border for selected node
+        if (isSelected) {
+          drawCircle(
+            color = RFColors.TextPrimary.copy(alpha = 0.8f),
+            radius = size.minDimension / 2f,
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f)
+          )
+        }
         drawCircle(
           color = factionColor.copy(alpha = 0.6f),
           radius = size.minDimension / 2f,

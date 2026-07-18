@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 import kotlin.random.Random
@@ -51,6 +52,11 @@ object BattleGraphInteractor : Interactor() {
   private var damageThresholdMin = 1000L
   private var healThresholdMin = 1000L
   private var ccThresholdMin = 0
+  private var searchQuery = ""
+  private var maxNodes = 25
+
+  private var lastRebuildTime = 0L
+  private val rebuildThrottleMs = 3_000L
 
   override suspend fun interact() {
     combine(
@@ -59,7 +65,11 @@ object BattleGraphInteractor : Interactor() {
     ) { cards, mode ->
       cards to mode
     }.collect { (cards, mode) ->
-      rebuildGraph(cards, mode)
+      val now = System.currentTimeMillis()
+      if (now - lastRebuildTime >= rebuildThrottleMs) {
+        lastRebuildTime = now
+        rebuildGraph(cards, mode)
+      }
     }
   }
 
@@ -82,6 +92,16 @@ object BattleGraphInteractor : Interactor() {
     rebuildGraphFromCurrentState()
   }
 
+  fun setSearchQuery(query: String) {
+    searchQuery = query
+    rebuildGraphFromCurrentState()
+  }
+
+  fun setMaxNodes(max: Int) {
+    maxNodes = max
+    rebuildGraphFromCurrentState()
+  }
+
   private fun rebuildGraphFromCurrentState() {
     scope.launch {
       val cards = PlayerCacheInteractor.topDamage.value
@@ -92,7 +112,16 @@ object BattleGraphInteractor : Interactor() {
 
   private fun rebuildGraph(cards: List<PlayerCard>, mode: BattleGraphMode) {
     val allowPvE = RFConfig.state.value.allowPVEDamage
-    val filteredCards = cards.filter { it.isRealPlayer || allowPvE }
+    val queryLower = searchQuery.trim().lowercase()
+    val filteredCards = cards.filter { card ->
+      (card.isRealPlayer || allowPvE) && (queryLower.isEmpty() ||
+        card.name.lowercase().contains(queryLower) ||
+        card.currentBuild.lowercase().contains(queryLower) ||
+        SpecType.fromName(card.currentBuild)?.let { spec ->
+          spec.name.replace("_", " ").lowercase().contains(queryLower) ||
+          spec.trees.any { tree -> tree.name.replace("_", " ").lowercase().contains(queryLower) }
+        } == true)
+    }
     if (filteredCards.isEmpty()) {
       _graphData.value = BattleGraphData()
       return
@@ -161,7 +190,7 @@ object BattleGraphInteractor : Interactor() {
     }
 
     val maxValue = edges.maxOfOrNull { it.weight } ?: 1L
-    val normalizedEdges = edges.map { edge ->
+    val normalizedEdges = edges.sortedByDescending { it.weight }.take(maxNodes.coerceAtLeast(1)).map { edge ->
       val normalized = (edge.weight.toFloat() / maxValue).coerceIn(0.1f, 1f)
       edge.copy(normalizedWeight = normalized)
     }
@@ -181,7 +210,7 @@ object BattleGraphInteractor : Interactor() {
   private fun initializePositions(nodes: List<GraphNode>) {
     val count = nodes.size
     if (count == 0) return
-    val radius = 150f * sqrt(count.toFloat())
+    val radius = 200f * sqrt(count.toFloat())
     nodes.forEachIndexed { index, node ->
       val angle = 2.0 * Math.PI * index / count + Random.nextFloat() * 0.5f
       val jitter = 0.7f + Random.nextFloat() * 0.6f

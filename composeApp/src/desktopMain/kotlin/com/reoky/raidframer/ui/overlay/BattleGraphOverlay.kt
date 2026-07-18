@@ -9,14 +9,20 @@ import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.interactor.BattleGraphInteractor
 import com.reoky.raidframer.core.interactor.BattleGraphMode
@@ -42,6 +48,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   var damageThreshold by remember { mutableStateOf(1000f) }
   var healThreshold by remember { mutableStateOf(1000f) }
   var ccThreshold by remember { mutableStateOf(0f) }
+  var searchQuery by remember { mutableStateOf("") }
+  var maxNodes by remember { mutableStateOf(25f) }
 
   val sliderInteractionSource = remember { MutableInteractionSource() }
   LaunchedEffect(sliderInteractionSource) {
@@ -68,6 +76,18 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         BattleGraphComponent(
           graphData = graphData,
           mode = selectedMode,
+          onOpenPlayerCard = { playerName ->
+            AppState.selectPlayer(playerName)
+            wm?.openWindow(OverlayType.PLAYER_CARD)
+          },
+          onFilterByName = { name ->
+            searchQuery = name
+            BattleGraphInteractor.setSearchQuery(name)
+          },
+          onFilterBySpec = { specName ->
+            searchQuery = specName
+            BattleGraphInteractor.setSearchQuery(specName)
+          },
           modifier = Modifier.fillMaxSize()
         )
       } else {
@@ -93,6 +113,78 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.End
       ) {
+        // Search box
+        TextField(
+          value = searchQuery,
+          onValueChange = { query ->
+            searchQuery = query
+            BattleGraphInteractor.setSearchQuery(query)
+          },
+          placeholder = { Text("Search Characters & Classes", fontSize = 11.sp, color = RFColors.TextTertiary) },
+          trailingIcon = {
+            if (searchQuery.isNotEmpty()) {
+              TextButton(
+                onClick = {
+                  searchQuery = ""
+                  BattleGraphInteractor.setSearchQuery("")
+                },
+                modifier = Modifier.size(32.dp),
+                contentPadding = PaddingValues(0.dp)
+              ) {
+                Text(
+                  text = "×",
+                  color = RFColors.TextSecondary,
+                  fontSize = 18.sp
+                )
+              }
+            }
+          },
+          modifier = Modifier
+            .width(320.dp)
+            .height(56.dp)
+            .pointerInput(Unit) {
+              awaitPointerEventScope {
+                while (true) {
+                  val event = awaitPointerEvent()
+                  when (event.type) {
+                    PointerEventType.Enter -> dragLock.value = true
+                    PointerEventType.Exit -> dragLock.value = false
+                  }
+                }
+              }
+            }
+            .onFocusChanged { focusState ->
+              dragLock.value = focusState.isFocused
+            },
+          textStyle = androidx.compose.ui.text.TextStyle(
+            fontSize = 11.sp,
+            color = RFColors.TextPrimary
+          ),
+          singleLine = true,
+          maxLines = 1,
+          colors = TextFieldDefaults.textFieldColors(
+            backgroundColor = RFColors.CardBackground,
+            cursorColor = RFColors.TextPrimary,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+          )
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Max objects slider
+        CompactThresholdSlider(
+          label = "Max Nodes",
+          value = maxNodes,
+          rangeMax = 250f,
+          onValueChange = { maxNodes = it },
+          onValueChangeFinished = { BattleGraphInteractor.setMaxNodes(maxNodes.toInt()) },
+          color = RFColors.TextPrimary,
+          interactionSource = sliderInteractionSource
+        )
+
+        Spacer(modifier = Modifier.height(2.dp))
+
         // Mode toggles - compact row
         Row(
           horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -130,7 +222,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             CompactThresholdSlider(
               label = "Min DMG",
               value = damageThreshold,
-              rangeMax = 10_000_000f,
+              rangeMax = 250_000f,
               onValueChange = { damageThreshold = it },
               onValueChangeFinished = { BattleGraphInteractor.setDamageThreshold(damageThreshold.toLong()) },
               color = RFColors.dpsOrange,
@@ -141,7 +233,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             CompactThresholdSlider(
               label = "Min Heal",
               value = healThreshold,
-              rangeMax = 10_000_000f,
+              rangeMax = 250_000f,
               onValueChange = { healThreshold = it },
               onValueChangeFinished = { BattleGraphInteractor.setHealThreshold(healThreshold.toLong()) },
               color = RFColors.healsGreen,
@@ -152,7 +244,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             CompactThresholdSlider(
               label = "Min CC",
               value = ccThreshold,
-              rangeMax = 5000f,
+              rangeMax = 250f,
               onValueChange = { ccThreshold = it },
               onValueChangeFinished = { BattleGraphInteractor.setCCThreshold(ccThreshold.toInt()) },
               color = RFColors.ccCyan,
