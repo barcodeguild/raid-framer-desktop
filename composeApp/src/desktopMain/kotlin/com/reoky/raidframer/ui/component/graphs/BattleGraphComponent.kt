@@ -314,19 +314,15 @@ fun BattleGraphComponent(
             arrowBaseY = endY
           }
 
-          // Draw curved edge to arrow BASE (not tip) so line doesn't overlap arrow
-          val steps = 20
-          var prevX = startX
-          var prevY = startY
-          for (s in 1..steps) {
-            val t = s.toFloat() / steps
-            val invT = 1f - t
-            val px = invT * invT * startX + 2f * invT * t * ctrlX + t * t * arrowBaseX
-            val py = invT * invT * startY + 2f * invT * t * ctrlY + t * t * arrowBaseY
-            drawLine(color, Offset(prevX, prevY), Offset(px, py), strokeWidth)
-            prevX = px
-            prevY = py
+          // Draw curved edge as a smooth Path using cubicTo
+          val edgePath = androidx.compose.ui.graphics.Path().apply {
+            moveTo(startX, startY)
+            cubicTo(startX, startY, ctrlX, ctrlY, arrowBaseX, arrowBaseY)
           }
+          drawPath(edgePath, color, style = androidx.compose.ui.graphics.drawscope.Stroke(
+            width = strokeWidth,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round
+          ))
 
           // Arrowhead at the end (tip at perimeter, base at arrowBase)
           if (tangentLen > 0.1f) {

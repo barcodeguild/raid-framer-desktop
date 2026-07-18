@@ -147,9 +147,6 @@ object BattleGraphInteractor : Interactor() {
         filteredCards.forEach { sourceCard ->
           sourceCard.sessionDamageToPlayer.forEach { (targetName, damage) ->
             if (damage >= damageThresholdMin) {
-              val incoming = nodeMap[targetName]?.let {
-                filteredCards.find { it.name == targetName }?.sessionDamageFromPlayer?.get(sourceCard.name) ?: 0L
-              } ?: 0L
               edges.add(GraphEdge(
                 source = sourceCard.name,
                 target = targetName,
@@ -197,6 +194,23 @@ object BattleGraphInteractor : Interactor() {
     }
 
     val activeNodeNames = normalizedEdges.flatMap { listOf(it.source, it.target) }.toSet()
+
+    // Add one-hop neighbors that aren't in the filtered set
+    val allCardsByName = cards.associateBy { it.name }
+    activeNodeNames.forEach { name ->
+      if (name !in nodeMap) {
+        val card = allCardsByName[name] ?: return@forEach
+        val spec = SpecType.fromName(card.currentBuild)
+        val faction = Faction.fromString(card.lastKnownFaction)
+        nodeMap[name] = GraphNode(
+          name = name,
+          spec = spec,
+          gearScore = card.lastKnownGearScore,
+          faction = faction
+        )
+      }
+    }
+
     val activeNodes = nodeMap.values.filter { it.name in activeNodeNames }
 
     initializePositions(activeNodes)
