@@ -75,6 +75,7 @@ object BattleGraphInteractor : Interactor() {
 
   fun setMode(mode: BattleGraphMode) {
     _selectedMode.value = mode
+    rebuildGraphFromCurrentState()
   }
 
   fun setDamageThreshold(min: Long) {

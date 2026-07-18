@@ -41,7 +41,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
 import com.reoky.raidframer.core.definitions.SkillTreeType
+import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
@@ -384,9 +387,12 @@ fun BattleGraphComponent(
                   if (event.type == PointerEventType.Press) {
                     val change = event.changes.firstOrNull()
                     if (change != null) {
-                      // Left-click: open context menu
-                      contextMenuNode = node
-                      contextMenuPosition = Offset(nodeCx, nodeCy)
+                      val isRightClick = (event.nativeEvent as? java.awt.event.MouseEvent)?.button ==
+                        java.awt.event.MouseEvent.BUTTON3
+                      if (isRightClick) {
+                        contextMenuNode = node
+                        contextMenuPosition = Offset(nodeCx, nodeCy)
+                      }
                       selectedNode = node
                     }
                   }
@@ -399,6 +405,12 @@ fun BattleGraphComponent(
 
     // Context menu
     contextMenuNode?.let { node ->
+      val specDisplayName = node.spec?.let { spec ->
+        stringResource(spec.localizedDisplayNameRes)
+          .lowercase()
+          .replace("_", "")
+      }
+
       DropdownMenu(
         expanded = true,
         onDismissRequest = { contextMenuNode = null },
@@ -417,7 +429,7 @@ fun BattleGraphComponent(
           Text("Filter by Name", fontSize = 12.sp)
         }
         DropdownMenuItem(onClick = {
-          node.spec?.let { spec -> onFilterBySpec(spec.name) }
+          specDisplayName?.let { onFilterBySpec(it) }
           contextMenuNode = null
         }) {
           Text("Filter by Spec", fontSize = 12.sp)
@@ -493,7 +505,7 @@ private fun NodeComponent(
     }
 
     val specDisplayName = spec?.let {
-      it.name.replace("_", " ").lowercase().replaceFirstChar { c -> c.uppercase() }
+      stringResource(it.localizedDisplayNameRes)
     } ?: "Unknown"
     Text(
       text = specDisplayName,
