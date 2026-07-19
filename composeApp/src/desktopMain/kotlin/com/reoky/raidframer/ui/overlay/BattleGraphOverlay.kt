@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
@@ -162,7 +163,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             }
           },
           modifier = Modifier
-            .width(320.dp)
+            .width(340.dp)
             .height(56.dp),
           textStyle = androidx.compose.ui.text.TextStyle(
             fontSize = 11.sp,
@@ -183,7 +184,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
 
         // Mode toggles
         Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          modifier = Modifier.width(340.dp),
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
           val modes = listOf(
@@ -200,8 +202,11 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             }
             TextButton(
               onClick = { BattleGraphInteractor.setMode(mode) },
-              modifier = Modifier.alpha(if (isSelected) 1f else 0.5f).height(32.dp),
-              contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+              modifier = Modifier
+                .weight(1f)
+                .alpha(if (isSelected) 1f else 0.5f)
+                .height(36.dp),
+              contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
             ) {
               Text(
                 text = label,
@@ -221,7 +226,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               multiplier = 250_000f,
               onValueChangeFinished = { v -> damageSlider = v },
               color = RFColors.dpsOrange,
-              modifier = Modifier.width(320.dp)
+              modifier = Modifier.width(340.dp)
             )
           }
           BattleGraphMode.HEALS -> {
@@ -231,7 +236,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               multiplier = 250_000f,
               onValueChangeFinished = { v -> healSlider = v },
               color = RFColors.healsGreen,
-              modifier = Modifier.width(320.dp)
+              modifier = Modifier.width(340.dp)
             )
           }
           BattleGraphMode.CC -> {
@@ -241,7 +246,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               multiplier = 250f,
               onValueChangeFinished = { v -> ccSlider = v },
               color = RFColors.ccCyan,
-              modifier = Modifier.width(320.dp)
+              modifier = Modifier.width(340.dp)
             )
           }
         }
@@ -254,7 +259,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           multiplier = 250f,
           onValueChangeFinished = { v -> maxEdgesSlider = v },
           color = RFColors.TextPrimary,
-          modifier = Modifier.width(320.dp)
+          modifier = Modifier.width(340.dp)
         )
       }
 
@@ -285,16 +290,23 @@ private fun CompactThresholdSlider(
 
   Row(
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
     modifier = modifier
   ) {
-    Text(text = "$label:", color = RFColors.TextSecondary, fontSize = 9.sp)
+    Text(
+      text = "$label:",
+      color = RFColors.TextSecondary,
+      fontSize = 10.sp,
+      modifier = Modifier.width(64.dp)
+    )
     Slider(
       value = sliderValue,
       onValueChange = { sliderValue = it },
       onValueChangeFinished = { onValueChangeFinished(sliderValue) },
       valueRange = 0f..1f,
-      modifier = Modifier.weight(1f).height(16.dp),
+      modifier = Modifier
+        .weight(1f)
+        .height(24.dp),
       colors = SliderDefaults.colors(
         thumbColor = color,
         activeTrackColor = color,
@@ -304,7 +316,9 @@ private fun CompactThresholdSlider(
     Text(
       text = formatThresholdValue(sliderValue * multiplier),
       color = color,
-      fontSize = 9.sp
+      fontSize = 10.sp,
+      textAlign = TextAlign.End,
+      modifier = Modifier.width(42.dp)
     )
   }
 }
