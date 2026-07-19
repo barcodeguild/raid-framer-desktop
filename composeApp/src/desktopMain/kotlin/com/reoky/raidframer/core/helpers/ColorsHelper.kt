@@ -12,6 +12,7 @@ import com.reoky.raidframer.core.model.PlayerRole
 object RFColors {
   // Dark theme palette
   val CardBackground = Color(0xFF1A1A1A)
+  val PopupBackground = Color(0xFF1A1A2E) // Slightly blue-tinted for popup surfaces
   val CardBorder = Color(0xFF2A2A2A) // Subtle lighter border
   val CardBorderAccent = Color(0xFF4A1A1A) // Very subtle red tint for hover/focus
 

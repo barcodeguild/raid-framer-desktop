@@ -42,6 +42,14 @@ import raid_framer_desktop.composeapp.generated.resources.battle_graph_no_data
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_resume
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_pause
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_paused
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_search_placeholder
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_damage
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_heals
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_cc
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_dmg
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_heal
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_cc
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_max_edges
 
 @Composable
 fun BattleGraphOverlay(wm: WindowManager?) {
@@ -148,7 +156,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             searchQuery = query
             BattleGraphInteractor.setSearchQuery(query)
           },
-          placeholder = { Text("Search Characters & Classes", fontSize = 11.sp, color = RFColors.TextTertiary) },
+          placeholder = { Text(stringResource(Res.string.battle_graph_search_placeholder), fontSize = 11.sp, color = RFColors.TextTertiary) },
           trailingIcon = {
             if (searchQuery.isNotEmpty()) {
               TextButton(
@@ -194,9 +202,9 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           verticalAlignment = Alignment.CenterVertically
         ) {
           val modes = listOf(
-            BattleGraphMode.DAMAGE to "Damage",
-            BattleGraphMode.HEALS to "Heals",
-            BattleGraphMode.CC to "CC"
+            BattleGraphMode.DAMAGE to stringResource(Res.string.battle_graph_mode_damage),
+            BattleGraphMode.HEALS to stringResource(Res.string.battle_graph_mode_heals),
+            BattleGraphMode.CC to stringResource(Res.string.battle_graph_mode_cc)
           )
           modes.forEach { (mode, label) ->
             val isSelected = mode == selectedMode
@@ -226,7 +234,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         when (selectedMode) {
           BattleGraphMode.DAMAGE -> {
             CompactThresholdSlider(
-              label = "Min DMG",
+              label = stringResource(Res.string.battle_graph_min_dmg),
               initialValue = 0.1f,  // 25000 / 250_000
               multiplier = 250_000f,
               onValueChangeFinished = { v -> damageSlider = v },
@@ -236,7 +244,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           }
           BattleGraphMode.HEALS -> {
             CompactThresholdSlider(
-              label = "Min Heal",
+              label = stringResource(Res.string.battle_graph_min_heal),
               initialValue = 0.1f,  // 25000 / 250_000
               multiplier = 250_000f,
               onValueChangeFinished = { v -> healSlider = v },
@@ -246,7 +254,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           }
           BattleGraphMode.CC -> {
             CompactThresholdSlider(
-              label = "Min CC",
+              label = stringResource(Res.string.battle_graph_min_cc),
               initialValue = 0.02f,  // 5 / 250
               multiplier = 250f,
               onValueChangeFinished = { v -> ccSlider = v },
@@ -259,7 +267,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         // Max edges slider - below threshold
         Spacer(modifier = Modifier.height(8.dp))
         CompactThresholdSlider(
-          label = "Max Edges",
+          label = stringResource(Res.string.battle_graph_max_edges),
           initialValue = 0.08f,  // 20 / 250
           multiplier = 250f,
           onValueChangeFinished = { v -> maxEdgesSlider = v },

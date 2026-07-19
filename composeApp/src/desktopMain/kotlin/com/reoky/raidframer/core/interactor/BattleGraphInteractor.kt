@@ -141,7 +141,10 @@ object BattleGraphInteractor : Interactor() {
         SpecType.fromName(card.currentBuild)?.let { spec ->
           spec.name.replace("_", " ").lowercase().contains(queryLower) ||
           spec.trees.any { tree -> tree.name.replace("_", " ").lowercase().contains(queryLower) }
-        } == true)
+        } == true ||
+        card.sessionSpellDamageMap.keys.any { it.lowercase().contains(queryLower) } ||
+        card.sessionSpellHealMap.keys.any { it.lowercase().contains(queryLower) } ||
+        card.sessionSpellCCMap.keys.any { it.lowercase().contains(queryLower) })
     }
     if (filteredCards.isEmpty()) {
       _graphData.value = BattleGraphData()

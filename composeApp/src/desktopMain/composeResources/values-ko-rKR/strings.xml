@@ -241,6 +241,17 @@
     <string name="battle_graph_resume">▶  재개</string>
     <string name="battle_graph_pause">⏸  일시정지</string>
     <string name="battle_graph_paused">일시정지됨</string>
+    <string name="battle_graph_search_placeholder">캐릭터, 직업 및 스킬 검색</string>
+    <string name="battle_graph_mode_damage">피해</string>
+    <string name="battle_graph_mode_heals">치유</string>
+    <string name="battle_graph_mode_cc">CC</string>
+    <string name="battle_graph_min_dmg">최소 피해</string>
+    <string name="battle_graph_min_heal">최소 치유</string>
+    <string name="battle_graph_min_cc">최소 CC</string>
+    <string name="battle_graph_max_edges">최대 간선</string>
+    <string name="battle_graph_open_player_card">플레이어 카드 열기</string>
+    <string name="battle_graph_filter_by_name">이름으로 필터</string>
+    <string name="battle_graph_filter_by_spec">전직으로 필터</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>

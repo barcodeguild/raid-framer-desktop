@@ -241,6 +241,17 @@
     <string name="battle_graph_resume">▶  继续</string>
     <string name="battle_graph_pause">⏸  暂停</string>
     <string name="battle_graph_paused">已暂停</string>
+    <string name="battle_graph_search_placeholder">搜索角色、职业和技能</string>
+    <string name="battle_graph_mode_damage">伤害</string>
+    <string name="battle_graph_mode_heals">治疗</string>
+    <string name="battle_graph_mode_cc">控制</string>
+    <string name="battle_graph_min_dmg">最小伤害</string>
+    <string name="battle_graph_min_heal">最小治疗</string>
+    <string name="battle_graph_min_cc">最小控制</string>
+    <string name="battle_graph_max_edges">最大连线</string>
+    <string name="battle_graph_open_player_card">打开角色卡片</string>
+    <string name="battle_graph_filter_by_name">按名称筛选</string>
+    <string name="battle_graph_filter_by_spec">按职业筛选</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">战斗总结 (%1$s)</string>

@@ -241,6 +241,17 @@
     <string name="battle_graph_resume">▶  Продолжить</string>
     <string name="battle_graph_pause">⏸  Пауза</string>
     <string name="battle_graph_paused">ПАУЗА</string>
+    <string name="battle_graph_search_placeholder">Поиск персонажей, классов и заклинаний</string>
+    <string name="battle_graph_mode_damage">Урон</string>
+    <string name="battle_graph_mode_heals">Исцеление</string>
+    <string name="battle_graph_mode_cc">КК</string>
+    <string name="battle_graph_min_dmg">Мин. урон</string>
+    <string name="battle_graph_min_heal">Мин. исцеление</string>
+    <string name="battle_graph_min_cc">Мин. КК</string>
+    <string name="battle_graph_max_edges">Макс. рёбер</string>
+    <string name="battle_graph_open_player_card">Открыть карточку игрока</string>
+    <string name="battle_graph_filter_by_name">Фильтр по имени</string>
+    <string name="battle_graph_filter_by_spec">Фильтр по спеке</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Боевая сводка (%1$s)</string>

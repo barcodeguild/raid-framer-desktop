@@ -77,6 +77,10 @@ import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_edge_source_target_format
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_edge_and_n_more
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_open_player_card
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_filter_by_name
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_filter_by_spec
+import raid_framer_desktop.composeapp.generated.resources.spec_type_unknown
 import com.reoky.raidframer.core.interactor.BattleGraphData
 import com.reoky.raidframer.core.interactor.BattleGraphMode
 import com.reoky.raidframer.core.interactor.GraphEdge
@@ -667,19 +671,19 @@ fun BattleGraphComponent(
           onOpenPlayerCard(node.name)
           contextMenuNode = null
         }) {
-          Text("Open Player Card", fontSize = 12.sp)
+          Text(stringResource(Res.string.battle_graph_open_player_card), fontSize = 12.sp)
         }
         DropdownMenuItem(onClick = {
           onFilterByName(node.name)
           contextMenuNode = null
         }) {
-          Text("Filter by Name", fontSize = 12.sp)
+          Text(stringResource(Res.string.battle_graph_filter_by_name), fontSize = 12.sp)
         }
         DropdownMenuItem(onClick = {
           specDisplayName?.let { onFilterBySpec(it) }
           contextMenuNode = null
         }) {
-          Text("Filter by Spec", fontSize = 12.sp)
+          Text(stringResource(Res.string.battle_graph_filter_by_spec), fontSize = 12.sp)
         }
       }
     }
@@ -710,7 +714,7 @@ fun BattleGraphComponent(
           Surface(
             shape = RoundedCornerShape(6.dp),
             elevation = 6.dp,
-            color = Color(0xFF1A1A2E).copy(alpha = 0.95f),
+            color = RFColors.PopupBackground.copy(alpha = 0.95f),
             border = BorderStroke(1.dp, edgeColor.copy(alpha = 0.5f)),
             modifier = Modifier.hoverable(interactionSource = popupInteractionSource)
           ) {
@@ -854,7 +858,7 @@ private fun NodeComponent(
 
     val specDisplayName = spec?.let {
       stringResource(it.localizedDisplayNameRes)
-    } ?: "Unknown"
+    } ?: stringResource(Res.string.spec_type_unknown)
     Text(
       text = specDisplayName,
       color = RFColors.TextSecondary,
