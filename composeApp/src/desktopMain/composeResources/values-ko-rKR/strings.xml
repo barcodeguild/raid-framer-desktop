@@ -238,6 +238,9 @@
     <!-- Battle Graph Edge Tooltip -->
     <string name="battle_graph_edge_source_target_format">%1$s → %2$s</string>
     <string name="battle_graph_edge_and_n_more">+%1$d개 더</string>
+    <string name="battle_graph_resume">▶  재개</string>
+    <string name="battle_graph_pause">⏸  일시정지</string>
+    <string name="battle_graph_paused">일시정지됨</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>

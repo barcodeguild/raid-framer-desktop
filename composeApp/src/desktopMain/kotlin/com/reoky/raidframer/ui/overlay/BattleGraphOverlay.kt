@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,11 +39,15 @@ import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_d
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_heal_prop
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_crowd_control_distribution
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_no_data
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_resume
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_pause
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_paused
 
 @Composable
 fun BattleGraphOverlay(wm: WindowManager?) {
   val graphData by BattleGraphInteractor.graphData.collectAsState()
   val selectedMode by BattleGraphInteractor.selectedMode.collectAsState()
+  val isPaused by BattleGraphInteractor.isPaused.collectAsState()
   val dragLock = LocalDragLock.current
 
   // Slider positions 0..1 (mapped to actual values via multiplier)
@@ -261,6 +266,22 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           color = RFColors.TextPrimary,
           modifier = Modifier.width(340.dp)
         )
+
+        // Play / Pause toggle
+        Spacer(modifier = Modifier.height(8.dp))
+        TextButton(
+          onClick = { BattleGraphInteractor.togglePause() },
+          modifier = Modifier
+            .width(340.dp)
+            .height(32.dp),
+          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
+        ) {
+          Text(
+            text = if (isPaused) stringResource(Res.string.battle_graph_resume) else stringResource(Res.string.battle_graph_pause),
+            color = if (isPaused) RFColors.AccentRed else RFColors.TextPrimary,
+            fontSize = 12.sp
+          )
+        }
       }
 
       // Session totals widget in bottom-left when a node is selected
@@ -271,6 +292,22 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             .align(Alignment.BottomStart)
             .padding(8.dp)
             .widthIn(max = 200.dp)
+        )
+      }
+
+      // PAUSED indicator in top-left corner
+      if (isPaused) {
+        Text(
+          text = stringResource(Res.string.battle_graph_paused),
+          color = RFColors.AccentRed,
+          fontSize = 14.sp,
+          fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+          modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(12.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(RFColors.CardBackground.copy(alpha = 0.85f))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
         )
       }
     }

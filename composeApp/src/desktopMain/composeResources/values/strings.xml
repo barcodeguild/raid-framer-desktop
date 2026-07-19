@@ -250,6 +250,9 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="battle_graph_edge_cc_format">%1$s CC</string>
     <string name="battle_graph_edge_source_target_format">%1$s → %2$s</string>
     <string name="battle_graph_edge_and_n_more">+%1$d more</string>
+    <string name="battle_graph_resume">▶  Resume</string>
+    <string name="battle_graph_pause">⏸  Pause</string>
+    <string name="battle_graph_paused">PAUSED</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Battle Summary (%1$s)</string>

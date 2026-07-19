@@ -238,6 +238,9 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <!-- Battle Graph Edge Tooltip -->
     <string name="battle_graph_edge_source_target_format">%1$s → %2$s</string>
     <string name="battle_graph_edge_and_n_more">+%1$d mais</string>
+    <string name="battle_graph_resume">▶  Retomar</string>
+    <string name="battle_graph_pause">⏸  Pausar</string>
+    <string name="battle_graph_paused">PAUSADO</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Resumo da Batalha (%1$s)</string>

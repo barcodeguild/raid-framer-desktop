@@ -3,6 +3,7 @@ package com.reoky.raidframer.core.interactor
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
+import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerCard
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +51,9 @@ object BattleGraphInteractor : Interactor() {
   private val _selectedMode = MutableStateFlow(BattleGraphMode.DAMAGE)
   val selectedMode: StateFlow<BattleGraphMode> = _selectedMode.asStateFlow()
 
+  private val _isPaused = MutableStateFlow(false)
+  val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
+
   private var damageThresholdMin = 1000L
   private var healThresholdMin = 1000L
   private var ccThresholdMin = 0
@@ -69,6 +73,7 @@ object BattleGraphInteractor : Interactor() {
       val merged = (damages + heals + cc).distinctBy { it.name }
       merged to mode
     }.collect { (cards, mode) ->
+      if (_isPaused.value) return@collect
       val now = System.currentTimeMillis()
       if (now - lastRebuildTime >= rebuildThrottleMs) {
         lastRebuildTime = now
@@ -105,6 +110,14 @@ object BattleGraphInteractor : Interactor() {
   fun setMaxEdges(max: Int) {
     maxEdges = max
     rebuildGraphFromCurrentState()
+  }
+
+  fun togglePause() {
+    _isPaused.value = !_isPaused.value
+    if (!_isPaused.value) {
+      // On resume, rebuild immediately with current data
+      rebuildGraphFromCurrentState()
+    }
   }
 
   private fun rebuildGraphFromCurrentState() {
@@ -159,7 +172,7 @@ object BattleGraphInteractor : Interactor() {
                 source = sourceCard.name,
                 target = targetName,
                 weight = damage,
-                displayValue = "${humanReadableShort(damage)} dmg",
+                displayValue = "${damage.humanReadableAbbreviation()} dmg",
                 spellBreakdown = breakdown
               ))
             }
@@ -175,7 +188,7 @@ object BattleGraphInteractor : Interactor() {
                 source = sourceCard.name,
                 target = targetName,
                 weight = heals,
-                displayValue = "${humanReadableShort(heals)} heal",
+                displayValue = "${heals.humanReadableAbbreviation()} heal",
                 spellBreakdown = breakdown
               ))
             }
@@ -246,14 +259,6 @@ object BattleGraphInteractor : Interactor() {
       node.y = (radius * jitter * kotlin.math.sin(angle)).toFloat()
       node.vx = 0f
       node.vy = 0f
-    }
-  }
-
-  private fun humanReadableShort(value: Long): String {
-    return when {
-      value >= 1_000_000 -> String.format("%.1fM", value / 1_000_000.0)
-      value >= 1_000 -> String.format("%.1fk", value / 1_000.0)
-      else -> value.toString()
     }
   }
 }
