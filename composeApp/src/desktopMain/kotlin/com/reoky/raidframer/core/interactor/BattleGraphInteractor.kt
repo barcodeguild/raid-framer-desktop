@@ -217,7 +217,24 @@ object BattleGraphInteractor : Interactor() {
     }
 
     val maxValue = edges.maxOfOrNull { it.weight } ?: 1L
-    val normalizedEdges = edges.sortedByDescending { it.weight }.take(maxEdges.coerceAtLeast(1)).map { edge ->
+
+    // Select the strongest edges first, but keep the reverse edge whenever it
+    // exists. Otherwise, maxEdges can select only one direction of a pair and
+    // make an otherwise bidirectional relationship appear one-way.
+    val edgesByDirection = edges.associateBy { it.source to it.target }
+    val selectedEdges = edges
+      .sortedByDescending { it.weight }
+      .take(maxEdges.coerceAtLeast(1))
+      .toMutableList()
+
+    selectedEdges.toList().forEach { edge ->
+      val reverseEdge = edgesByDirection[edge.target to edge.source]
+      if (reverseEdge != null && reverseEdge !in selectedEdges) {
+        selectedEdges.add(reverseEdge)
+      }
+    }
+
+    val normalizedEdges = selectedEdges.map { edge ->
       val normalized = (edge.weight.toFloat() / maxValue).coerceIn(0.1f, 1f)
       edge.copy(normalizedWeight = normalized)
     }
