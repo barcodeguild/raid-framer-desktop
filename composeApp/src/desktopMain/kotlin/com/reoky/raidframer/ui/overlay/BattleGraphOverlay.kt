@@ -58,25 +58,25 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   val dragLock = LocalDragLock.current
 
   // Slider positions 0..1 (mapped to actual values via multiplier)
-  var damageSlider by remember { mutableFloatStateOf(0.1f) }      // 25000 / 250_000
-  var healSlider by remember { mutableFloatStateOf(0.1f) }       // 25000 / 250_000
-  var ccSlider by remember { mutableFloatStateOf(0.02f) }        // 5 / 250
+  var damageSlider by remember { mutableFloatStateOf(0.125f) }     // 25000 / 200_000
+  var healSlider by remember { mutableFloatStateOf(0.125f) }      // 25000 / 200_000
+  var ccSlider by remember { mutableFloatStateOf(0.1f) }          // 5 / 50
   var searchQuery by remember { mutableStateOf("") }
-  var maxEdgesSlider by remember { mutableFloatStateOf(0.08f) }   // 20 / 250
+  var maxEdgesSlider by remember { mutableFloatStateOf(0.4f) }    // 20 / 50
   var selectedPlayerName by remember { mutableStateOf<String?>(null) }
 
   // Debounced push to interactor — avoids recomposition during drag
   LaunchedEffect(Unit) {
-    snapshotFlow { damageSlider }.debounce(300).collect { v -> BattleGraphInteractor.setDamageThreshold((v * 250_000f).toLong()) }
+    snapshotFlow { damageSlider }.debounce(300).collect { v -> BattleGraphInteractor.setDamageThreshold((v * 200_000f).toLong()) }
   }
   LaunchedEffect(Unit) {
-    snapshotFlow { healSlider }.debounce(300).collect { v -> BattleGraphInteractor.setHealThreshold((v * 250_000f).toLong()) }
+    snapshotFlow { healSlider }.debounce(300).collect { v -> BattleGraphInteractor.setHealThreshold((v * 200_000f).toLong()) }
   }
   LaunchedEffect(Unit) {
-    snapshotFlow { ccSlider }.debounce(300).collect { v -> BattleGraphInteractor.setCCThreshold((v * 250f).toInt()) }
+    snapshotFlow { ccSlider }.debounce(300).collect { v -> BattleGraphInteractor.setCCThreshold((v * 50f).toInt()) }
   }
   LaunchedEffect(Unit) {
-    snapshotFlow { maxEdgesSlider }.debounce(300).collect { v -> BattleGraphInteractor.setMaxEdges((v * 250f).toInt()) }
+    snapshotFlow { maxEdgesSlider }.debounce(300).collect { v -> BattleGraphInteractor.setMaxEdges((v * 50f).toInt()) }
   }
 
   Column(
@@ -234,8 +234,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           BattleGraphMode.DAMAGE -> {
             CompactThresholdSlider(
               label = stringResource(Res.string.battle_graph_min_dmg),
-              initialValue = 0.1f,  // 25000 / 250_000
-              multiplier = 250_000f,
+              initialValue = 0.125f,  // 25000 / 200_000
+              multiplier = 200_000f,
               onValueChangeFinished = { v -> damageSlider = v },
               color = RFColors.dpsOrange,
               modifier = Modifier.width(340.dp)
@@ -244,8 +244,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           BattleGraphMode.HEALS -> {
             CompactThresholdSlider(
               label = stringResource(Res.string.battle_graph_min_heal),
-              initialValue = 0.1f,  // 25000 / 250_000
-              multiplier = 250_000f,
+              initialValue = 0.125f,  // 25000 / 200_000
+              multiplier = 200_000f,
               onValueChangeFinished = { v -> healSlider = v },
               color = RFColors.healsGreen,
               modifier = Modifier.width(340.dp)
@@ -254,8 +254,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           BattleGraphMode.CC -> {
             CompactThresholdSlider(
               label = stringResource(Res.string.battle_graph_min_cc),
-              initialValue = 0.02f,  // 5 / 250
-              multiplier = 250f,
+              initialValue = 0.1f,  // 5 / 50
+              multiplier = 50f,
               onValueChangeFinished = { v -> ccSlider = v },
               color = RFColors.ccCyan,
               modifier = Modifier.width(340.dp)
@@ -267,8 +267,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         Spacer(modifier = Modifier.height(8.dp))
         CompactThresholdSlider(
           label = stringResource(Res.string.battle_graph_max_edges),
-          initialValue = 0.08f,  // 20 / 250
-          multiplier = 250f,
+          initialValue = 0.4f,  // 20 / 50
+          multiplier = 50f,
           onValueChangeFinished = { v -> maxEdgesSlider = v },
           color = RFColors.TextPrimary,
           modifier = Modifier.width(340.dp)

@@ -58,7 +58,7 @@ object BattleGraphInteractor : Interactor() {
   private var healThresholdMin = 1000L
   private var ccThresholdMin = 0
   private var searchQuery = ""
-  private var maxEdges = 25
+  private var maxEdges = 50
 
   private var lastRebuildTime = 0L
   private val rebuildThrottleMs = 3_000L
