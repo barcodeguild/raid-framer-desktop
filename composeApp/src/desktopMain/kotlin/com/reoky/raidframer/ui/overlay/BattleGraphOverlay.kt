@@ -3,13 +3,14 @@ package com.reoky.raidframer.ui.overlay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -29,6 +30,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CompactSessionTotals
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.BattleGraphComponent
+import kotlinx.coroutines.flow.debounce
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_damage
@@ -42,12 +44,27 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   val selectedMode by BattleGraphInteractor.selectedMode.collectAsState()
   val dragLock = LocalDragLock.current
 
-  var damageThreshold by remember { mutableStateOf(1000f) }
-  var healThreshold by remember { mutableStateOf(1000f) }
-  var ccThreshold by remember { mutableStateOf(0f) }
+  // Slider positions 0..1 (mapped to actual values via multiplier)
+  var damageSlider by remember { mutableFloatStateOf(0.1f) }      // 25000 / 250_000
+  var healSlider by remember { mutableFloatStateOf(0.1f) }       // 25000 / 250_000
+  var ccSlider by remember { mutableFloatStateOf(0.02f) }        // 5 / 250
   var searchQuery by remember { mutableStateOf("") }
-  var maxEdges by remember { mutableStateOf(25f) }
+  var maxEdgesSlider by remember { mutableFloatStateOf(0.08f) }   // 20 / 250
   var selectedPlayerName by remember { mutableStateOf<String?>(null) }
+
+  // Debounced push to interactor — avoids recomposition during drag
+  LaunchedEffect(Unit) {
+    snapshotFlow { damageSlider }.debounce(300).collect { v -> BattleGraphInteractor.setDamageThreshold((v * 250_000f).toLong()) }
+  }
+  LaunchedEffect(Unit) {
+    snapshotFlow { healSlider }.debounce(300).collect { v -> BattleGraphInteractor.setHealThreshold((v * 250_000f).toLong()) }
+  }
+  LaunchedEffect(Unit) {
+    snapshotFlow { ccSlider }.debounce(300).collect { v -> BattleGraphInteractor.setCCThreshold((v * 250f).toInt()) }
+  }
+  LaunchedEffect(Unit) {
+    snapshotFlow { maxEdgesSlider }.debounce(300).collect { v -> BattleGraphInteractor.setMaxEdges((v * 250f).toInt()) }
+  }
 
   Column(
     modifier = Modifier.fillMaxSize()
@@ -104,7 +121,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           .padding(8.dp)
           .clip(RoundedCornerShape(8.dp))
           .background(RFColors.CardBackground.copy(alpha = 0.85f))
-          .padding(horizontal = 8.dp, vertical = 6.dp)
+          .padding(horizontal = 12.dp, vertical = 10.dp)
           .pointerInput(Unit) {
             awaitPointerEventScope {
               while (true) {
@@ -153,8 +170,9 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           ),
           singleLine = true,
           maxLines = 1,
-          colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = RFColors.CardBackground,
+          colors = TextFieldDefaults.colors(
+            focusedContainerColor = RFColors.CardBackground,
+            unfocusedContainerColor = RFColors.CardBackground,
             cursorColor = RFColors.TextPrimary,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -163,13 +181,13 @@ fun BattleGraphOverlay(wm: WindowManager?) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Mode toggles - compact row
+        // Mode toggles
         Row(
-          horizontalArrangement = Arrangement.spacedBy(2.dp),
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
           val modes = listOf(
-            BattleGraphMode.DAMAGE to "DMG",
+            BattleGraphMode.DAMAGE to "Damage",
             BattleGraphMode.HEALS to "Heal",
             BattleGraphMode.CC to "CC"
           )
@@ -182,13 +200,13 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             }
             TextButton(
               onClick = { BattleGraphInteractor.setMode(mode) },
-              modifier = Modifier.alpha(if (isSelected) 1f else 0.5f).height(24.dp),
-              contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)
+              modifier = Modifier.alpha(if (isSelected) 1f else 0.5f).height(32.dp),
+              contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
             ) {
               Text(
                 text = label,
                 color = if (isSelected) highlightColor else RFColors.TextSecondary,
-                fontSize = 10.sp
+                fontSize = 12.sp
               )
             }
           }
@@ -199,10 +217,9 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           BattleGraphMode.DAMAGE -> {
             CompactThresholdSlider(
               label = "Min DMG",
-              value = damageThreshold,
-              rangeMax = 250_000f,
-              onValueChange = { damageThreshold = it },
-              onValueChangeFinished = { BattleGraphInteractor.setDamageThreshold(damageThreshold.toLong()) },
+              initialValue = 0.1f,  // 25000 / 250_000
+              multiplier = 250_000f,
+              onValueChangeFinished = { v -> damageSlider = v },
               color = RFColors.dpsOrange,
               modifier = Modifier.width(320.dp)
             )
@@ -210,10 +227,9 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           BattleGraphMode.HEALS -> {
             CompactThresholdSlider(
               label = "Min Heal",
-              value = healThreshold,
-              rangeMax = 250_000f,
-              onValueChange = { healThreshold = it },
-              onValueChangeFinished = { BattleGraphInteractor.setHealThreshold(healThreshold.toLong()) },
+              initialValue = 0.1f,  // 25000 / 250_000
+              multiplier = 250_000f,
+              onValueChangeFinished = { v -> healSlider = v },
               color = RFColors.healsGreen,
               modifier = Modifier.width(320.dp)
             )
@@ -221,10 +237,9 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           BattleGraphMode.CC -> {
             CompactThresholdSlider(
               label = "Min CC",
-              value = ccThreshold,
-              rangeMax = 250f,
-              onValueChange = { ccThreshold = it },
-              onValueChangeFinished = { BattleGraphInteractor.setCCThreshold(ccThreshold.toInt()) },
+              initialValue = 0.02f,  // 5 / 250
+              multiplier = 250f,
+              onValueChangeFinished = { v -> ccSlider = v },
               color = RFColors.ccCyan,
               modifier = Modifier.width(320.dp)
             )
@@ -232,12 +247,12 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         }
 
         // Max edges slider - below threshold
+        Spacer(modifier = Modifier.height(8.dp))
         CompactThresholdSlider(
           label = "Max Edges",
-          value = maxEdges,
-          rangeMax = 250f,
-          onValueChange = { maxEdges = it },
-          onValueChangeFinished = { BattleGraphInteractor.setMaxEdges(maxEdges.toInt()) },
+          initialValue = 0.08f,  // 20 / 250
+          multiplier = 250f,
+          onValueChangeFinished = { v -> maxEdgesSlider = v },
           color = RFColors.TextPrimary,
           modifier = Modifier.width(320.dp)
         )
@@ -260,13 +275,14 @@ fun BattleGraphOverlay(wm: WindowManager?) {
 @Composable
 private fun CompactThresholdSlider(
   label: String,
-  value: Float,
-  rangeMax: Float,
-  onValueChange: (Float) -> Unit,
-  onValueChangeFinished: () -> Unit,
+  initialValue: Float,
+  multiplier: Float,
+  onValueChangeFinished: (Float) -> Unit,
   color: Color,
   modifier: Modifier = Modifier
 ) {
+  var sliderValue by remember { mutableFloatStateOf(initialValue) }
+
   Row(
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -274,11 +290,11 @@ private fun CompactThresholdSlider(
   ) {
     Text(text = "$label:", color = RFColors.TextSecondary, fontSize = 9.sp)
     Slider(
-      value = value,
-      onValueChange = onValueChange,
-      onValueChangeFinished = onValueChangeFinished,
-      valueRange = 0f..rangeMax,
-      modifier = Modifier.weight(1f),
+      value = sliderValue,
+      onValueChange = { sliderValue = it },
+      onValueChangeFinished = { onValueChangeFinished(sliderValue) },
+      valueRange = 0f..1f,
+      modifier = Modifier.weight(1f).height(16.dp),
       colors = SliderDefaults.colors(
         thumbColor = color,
         activeTrackColor = color,
@@ -286,7 +302,7 @@ private fun CompactThresholdSlider(
       )
     )
     Text(
-      text = formatThresholdValue(value),
+      text = formatThresholdValue(sliderValue * multiplier),
       color = color,
       fontSize = 9.sp
     )
