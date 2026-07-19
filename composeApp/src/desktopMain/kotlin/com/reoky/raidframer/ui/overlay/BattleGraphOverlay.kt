@@ -1,8 +1,6 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.DragInteraction
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Slider
@@ -16,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -51,17 +48,6 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   var searchQuery by remember { mutableStateOf("") }
   var maxEdges by remember { mutableStateOf(25f) }
   var selectedPlayerName by remember { mutableStateOf<String?>(null) }
-
-  val sliderInteractionSource = remember { MutableInteractionSource() }
-  LaunchedEffect(sliderInteractionSource) {
-    sliderInteractionSource.interactions.collect { interaction ->
-      when (interaction) {
-        is DragInteraction.Start -> { dragLock.value = true }
-        is DragInteraction.Stop,
-        is DragInteraction.Cancel -> { dragLock.value = false }
-      }
-    }
-  }
 
   Column(
     modifier = Modifier.fillMaxSize()
@@ -118,7 +104,18 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           .padding(8.dp)
           .clip(RoundedCornerShape(8.dp))
           .background(RFColors.CardBackground.copy(alpha = 0.85f))
-          .padding(horizontal = 8.dp, vertical = 6.dp),
+          .padding(horizontal = 8.dp, vertical = 6.dp)
+          .pointerInput(Unit) {
+            awaitPointerEventScope {
+              while (true) {
+                val event = awaitPointerEvent()
+                when (event.type) {
+                  PointerEventType.Enter -> dragLock.value = true
+                  PointerEventType.Exit -> dragLock.value = false
+                }
+              }
+            }
+          },
         horizontalAlignment = Alignment.End
       ) {
         // Search box
@@ -149,21 +146,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           },
           modifier = Modifier
             .width(320.dp)
-            .height(56.dp)
-            .pointerInput(Unit) {
-              awaitPointerEventScope {
-                while (true) {
-                  val event = awaitPointerEvent()
-                  when (event.type) {
-                    PointerEventType.Enter -> dragLock.value = true
-                    PointerEventType.Exit -> dragLock.value = false
-                  }
-                }
-              }
-            }
-            .onFocusChanged { focusState ->
-              dragLock.value = focusState.isFocused
-            },
+            .height(56.dp),
           textStyle = androidx.compose.ui.text.TextStyle(
             fontSize = 11.sp,
             color = RFColors.TextPrimary
@@ -221,7 +204,6 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               onValueChange = { damageThreshold = it },
               onValueChangeFinished = { BattleGraphInteractor.setDamageThreshold(damageThreshold.toLong()) },
               color = RFColors.dpsOrange,
-              interactionSource = sliderInteractionSource,
               modifier = Modifier.width(320.dp)
             )
           }
@@ -233,7 +215,6 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               onValueChange = { healThreshold = it },
               onValueChangeFinished = { BattleGraphInteractor.setHealThreshold(healThreshold.toLong()) },
               color = RFColors.healsGreen,
-              interactionSource = sliderInteractionSource,
               modifier = Modifier.width(320.dp)
             )
           }
@@ -245,7 +226,6 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               onValueChange = { ccThreshold = it },
               onValueChangeFinished = { BattleGraphInteractor.setCCThreshold(ccThreshold.toInt()) },
               color = RFColors.ccCyan,
-              interactionSource = sliderInteractionSource,
               modifier = Modifier.width(320.dp)
             )
           }
@@ -259,7 +239,6 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           onValueChange = { maxEdges = it },
           onValueChangeFinished = { BattleGraphInteractor.setMaxEdges(maxEdges.toInt()) },
           color = RFColors.TextPrimary,
-          interactionSource = sliderInteractionSource,
           modifier = Modifier.width(320.dp)
         )
       }
@@ -286,7 +265,6 @@ private fun CompactThresholdSlider(
   onValueChange: (Float) -> Unit,
   onValueChangeFinished: () -> Unit,
   color: Color,
-  interactionSource: MutableInteractionSource,
   modifier: Modifier = Modifier
 ) {
   Row(
@@ -305,8 +283,7 @@ private fun CompactThresholdSlider(
         thumbColor = color,
         activeTrackColor = color,
         inactiveTrackColor = RFColors.TextTertiary
-      ),
-      interactionSource = interactionSource
+      )
     )
     Text(
       text = formatThresholdValue(value),
