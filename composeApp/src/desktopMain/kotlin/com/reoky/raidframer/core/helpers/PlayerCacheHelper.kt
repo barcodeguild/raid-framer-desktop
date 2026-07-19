@@ -117,7 +117,15 @@ fun PlayerCard.resetSession(): PlayerCard {
     sessionSongsTotal = 0,
     sessionDamageTakenTotal = 0,
     sessionHealsReceivedTotal = 0,
-    sessionOdeHealsTotal = 0
+    sessionOdeHealsTotal = 0,
+
+    // Session edge weights for battle graph
+    sessionDamageToPlayer = mapOf(),
+    sessionDamageFromPlayer = mapOf(),
+    sessionHealToPlayer = mapOf(),
+    sessionHealFromPlayer = mapOf(),
+    sessionCCToPlayer = mapOf(),
+    sessionCCFromPlayer = mapOf()
   )
 }
 

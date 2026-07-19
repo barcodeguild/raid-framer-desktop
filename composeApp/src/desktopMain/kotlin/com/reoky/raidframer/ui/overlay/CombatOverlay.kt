@@ -70,6 +70,8 @@ import raid_framer_desktop.composeapp.generated.resources.combat_stop_and_save
 import raid_framer_desktop.composeapp.generated.resources.combat_abort_and_discard
 import raid_framer_desktop.composeapp.generated.resources.combat_save_and_exit_tooltip
 import raid_framer_desktop.composeapp.generated.resources.general_cancel
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_summary
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_title
 
 @Preview
 @Composable
@@ -171,6 +173,11 @@ fun CombatOverlay(wm: WindowManager? = null) {
   val stopPopupInteractionSource = remember { MutableInteractionSource() }
   val isStopPopupHovered by stopPopupInteractionSource.collectIsHoveredAsState()
 
+  // View options popup state (Summary / Battle Graph)
+  var showViewPopup by remember { mutableStateOf(false) }
+  val viewPopupInteractionSource = remember { MutableInteractionSource() }
+  val isViewPopupHovered by viewPopupInteractionSource.collectIsHoveredAsState()
+
   val damageColumnText = stringResource(
     if (config.allowPVEDamage) Res.string.combat_column_pve_damage else Res.string.combat_column_pvp_damage
   )
@@ -194,6 +201,13 @@ fun CombatOverlay(wm: WindowManager? = null) {
   LaunchedEffect(isOverlayHovered, isStopPopupHovered) {
     if (!isOverlayHovered && !isStopPopupHovered && showStopPopup) {
       showStopPopup = false
+    }
+  }
+
+  // Dismiss view popup when cursor leaves both the overlay and the popup
+  LaunchedEffect(isOverlayHovered, isViewPopupHovered) {
+    if (!isOverlayHovered && !isViewPopupHovered && showViewPopup) {
+      showViewPopup = false
     }
   }
 
@@ -334,9 +348,48 @@ fun CombatOverlay(wm: WindowManager? = null) {
 
           // right icons — overlaid at end edge, never affects title layout
           Row(modifier = Modifier.align(Alignment.CenterEnd).alpha(controlsAlpha), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { wm?.openWindow(OverlayType.SUMMARY) }, modifier = Modifier.size(32.dp)) {
+            // View options dropdown (Summary / Battle Graph)
+            Box {
               val summaryInteractionSource = remember { MutableInteractionSource() }
-              Text(text = "\uf200", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (summaryInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = summaryInteractionSource))
+              val isSummaryHovered by summaryInteractionSource.collectIsHoveredAsState()
+              IconButton(onClick = { showViewPopup = !showViewPopup }, modifier = Modifier.size(32.dp)) {
+                Text(text = "\uf200", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (isSummaryHovered || showViewPopup) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = summaryInteractionSource))
+              }
+              if (showViewPopup) {
+                Popup(
+                  alignment = Alignment.TopEnd,
+                  offset = IntOffset(0, 36)
+                ) {
+                  Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    elevation = 4.dp,
+                    color = Color.Black.copy(alpha = 0.92f),
+                    border = BorderStroke(1.dp, Color.Gray),
+                    modifier = Modifier.hoverable(interactionSource = viewPopupInteractionSource)
+                  ) {
+                    Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                      TextButton(
+                        onClick = {
+                          showViewPopup = false
+                          wm?.openWindow(OverlayType.SUMMARY)
+                        },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                      ) {
+                        Text(text = stringResource(Res.string.battle_graph_summary), color = Color.White, fontSize = 11.sp)
+                      }
+                      TextButton(
+                        onClick = {
+                          showViewPopup = false
+                          wm?.openWindow(OverlayType.BATTLE_GRAPH)
+                        },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                      ) {
+                        Text(text = stringResource(Res.string.battle_graph_title), color = Color.White, fontSize = 11.sp)
+                      }
+                    }
+                  }
+                }
+              }
             }
             // Settings cog — turns yellow when an update is available, with hover tooltip
             var showSettingsTooltip by remember { mutableStateOf(false) }
@@ -438,149 +491,151 @@ fun CombatOverlay(wm: WindowManager? = null) {
         }
 
         // Body columns row below header ~ columns fill full width and extend to edges
-        Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-          if (config.combatShowDamageColumn) {
-            Column(
-              modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-              horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-              LazyColumn(
-                contentPadding = PaddingValues(0.dp),
-                state = damageListState,
+        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+          Row(modifier = Modifier.fillMaxSize()) {
+            if (config.combatShowDamageColumn) {
+              Column(
                 modifier = Modifier
-                  .padding(start = 12.dp, bottom = 6.dp)
-                  .fillMaxWidth()
+                  .weight(1f)
+                  .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally
               ) {
-                itemsIndexed(sortedDamage, key = { _, card -> card.name }) { index, card ->
-                  PlayerRankingRow(
-                    index = index,
-                    card = card,
-                    valueText = card.sessionDamageTotal.humanReadableAbbreviation(),
-                    valueColor = RFColors.dpsOrange,
-                    isRetribution = card.isBuildingAggression,
-                    flashingColor = flashingColorState.value,
-                    isOwnCharacter = card.name == config.playerName,
-                    onClick = {
-                      AppState.selectPlayer(card.name)
-                      AppState.selectMetricType(GraphMetricType.DAMAGE)
-                      wm?.openWindow(OverlayType.PLAYER_CARD)
-                    }
-                  )
+                LazyColumn(
+                  contentPadding = PaddingValues(0.dp),
+                  state = damageListState,
+                  modifier = Modifier
+                    .padding(start = 12.dp, bottom = 6.dp)
+                    .fillMaxWidth()
+                ) {
+                  itemsIndexed(sortedDamage, key = { _, card -> card.name }) { index, card ->
+                    PlayerRankingRow(
+                      index = index,
+                      card = card,
+                      valueText = card.sessionDamageTotal.humanReadableAbbreviation(),
+                      valueColor = RFColors.dpsOrange,
+                      isRetribution = card.isBuildingAggression,
+                      flashingColor = flashingColorState.value,
+                      isOwnCharacter = card.name == config.playerName,
+                      onClick = {
+                        AppState.selectPlayer(card.name)
+                        AppState.selectMetricType(GraphMetricType.DAMAGE)
+                        wm?.openWindow(OverlayType.PLAYER_CARD)
+                      }
+                    )
+                  }
                 }
               }
             }
-          }
 
-          if (config.combatShowHealsColumn) {
-            Column(
-              modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-              horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-              LazyColumn(
-                contentPadding = PaddingValues(0.dp),
-                state = healsListState,
+            if (config.combatShowHealsColumn) {
+              Column(
                 modifier = Modifier
-                  .padding(start = 12.dp, bottom = 6.dp)
-                  .fillMaxWidth()
+                  .weight(1f)
+                  .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally
               ) {
-                itemsIndexed(sortedHeals, key = { _, card -> card.name }) { index, card ->
-                  PlayerRankingRow(
-                    index = index,
-                    card = card,
-                    valueText = card.sessionHealTotal.humanReadableAbbreviation(),
-                    valueColor = RFColors.healsGreen,
-                    isRetribution = card.isBuildingAggression,
-                    flashingColor = flashingColorState.value,
-                    isOwnCharacter = card.name == config.playerName,
-                    onClick = {
-                      AppState.selectPlayer(card.name)
-                      AppState.selectMetricType(GraphMetricType.HEALING)
-                      wm?.openWindow(OverlayType.PLAYER_CARD)
-                    }
-                  )
+                LazyColumn(
+                  contentPadding = PaddingValues(0.dp),
+                  state = healsListState,
+                  modifier = Modifier
+                    .padding(start = 12.dp, bottom = 6.dp)
+                    .fillMaxWidth()
+                ) {
+                  itemsIndexed(sortedHeals, key = { _, card -> card.name }) { index, card ->
+                    PlayerRankingRow(
+                      index = index,
+                      card = card,
+                      valueText = card.sessionHealTotal.humanReadableAbbreviation(),
+                      valueColor = RFColors.healsGreen,
+                      isRetribution = card.isBuildingAggression,
+                      flashingColor = flashingColorState.value,
+                      isOwnCharacter = card.name == config.playerName,
+                      onClick = {
+                        AppState.selectPlayer(card.name)
+                        AppState.selectMetricType(GraphMetricType.HEALING)
+                        wm?.openWindow(OverlayType.PLAYER_CARD)
+                      }
+                    )
+                  }
                 }
               }
             }
-          }
 
-          if (config.combatShowCCColumn) {
-            Column(
-              modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-              horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-              LazyColumn(
-                contentPadding = PaddingValues(0.dp),
-                state = ccListState,
+            if (config.combatShowCCColumn) {
+              Column(
                 modifier = Modifier
-                  .padding(start = 12.dp, bottom = 6.dp)
-                  .fillMaxWidth()
+                  .weight(1f)
+                  .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally
               ) {
-                itemsIndexed(sortedCC, key = { _, card -> card.name }) { index, card ->
-                  PlayerRankingRow(
-                    index = index,
-                    card = card,
-                    valueText = card.sessionCCTotal.toString(),
-                    valueColor = RFColors.ccCyan,
-                    isRetribution = card.isBuildingAggression,
-                    flashingColor = flashingColorState.value,
-                    isOwnCharacter = card.name == config.playerName,
-                    onClick = {
-                      AppState.selectPlayer(card.name)
-                      AppState.selectMetricType(GraphMetricType.CC)
-                      wm?.openWindow(OverlayType.PLAYER_CARD)
-                    }
-                  )
+                LazyColumn(
+                  contentPadding = PaddingValues(0.dp),
+                  state = ccListState,
+                  modifier = Modifier
+                    .padding(start = 12.dp, bottom = 6.dp)
+                    .fillMaxWidth()
+                ) {
+                  itemsIndexed(sortedCC, key = { _, card -> card.name }) { index, card ->
+                    PlayerRankingRow(
+                      index = index,
+                      card = card,
+                      valueText = card.sessionCCTotal.toString(),
+                      valueColor = RFColors.ccCyan,
+                      isRetribution = card.isBuildingAggression,
+                      flashingColor = flashingColorState.value,
+                      isOwnCharacter = card.name == config.playerName,
+                      onClick = {
+                        AppState.selectPlayer(card.name)
+                        AppState.selectMetricType(GraphMetricType.CC)
+                        wm?.openWindow(OverlayType.PLAYER_CARD)
+                      }
+                    )
+                  }
                 }
               }
             }
-          }
 
-          customCategories.forEach { (category, flow) ->
-            val sortedList by flow.collectAsState()
-            val listState = customListStates[category.name] ?: return@forEach
-            Column(
-              modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-              horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-              LazyColumn(
-                contentPadding = PaddingValues(0.dp),
-                state = listState,
+            customCategories.forEach { (category, flow) ->
+              val sortedList by flow.collectAsState()
+              val listState = customListStates[category.name] ?: return@forEach
+              Column(
                 modifier = Modifier
-                  .padding(start = 12.dp, bottom = 6.dp)
-                  .fillMaxWidth()
+                  .weight(1f)
+                  .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally
               ) {
-                itemsIndexed(sortedList, key = { _, card -> card.name }) { index, card ->
-                  PlayerRankingRow(
-                    index = index,
-                    card = card,
-                    valueText = when (category) {
-                      CombatRankingCategory.CHARMS -> card.sessionCharmTotal.toString()
-                      CombatRankingCategory.SILENCES -> card.sessionSilenceTotal.toString()
-                      CombatRankingCategory.DISTRESSES -> card.sessionDistressTotal.toString()
-                      CombatRankingCategory.DEBUFFS -> card.sessionDebuffTotal.toString()
-                      CombatRankingCategory.SONGS -> card.sessionSongsTotal.toString()
-                      CombatRankingCategory.BUFFS -> card.sessionBuffTotal.toString()
-                      CombatRankingCategory.POTIONS -> card.sessionPotionTotal.toString()
-                      CombatRankingCategory.GLIDERS -> card.sessionGliderTotal.toString()
-                      CombatRankingCategory.ITEMS -> card.sessionItemSkillTotal.toString()
-                    },
-                    valueColor = category.valueColor,
-                    isRetribution = card.isBuildingAggression,
-                    flashingColor = flashingColorState.value,
-                    isOwnCharacter = card.name == config.playerName,
-                    onClick = {
-                      AppState.selectPlayer(card.name)
-                      wm?.openWindow(OverlayType.PLAYER_CARD)
-                    }
-                  )
+                LazyColumn(
+                  contentPadding = PaddingValues(0.dp),
+                  state = listState,
+                  modifier = Modifier
+                    .padding(start = 12.dp, bottom = 6.dp)
+                    .fillMaxWidth()
+                ) {
+                  itemsIndexed(sortedList, key = { _, card -> card.name }) { index, card ->
+                    PlayerRankingRow(
+                      index = index,
+                      card = card,
+                      valueText = when (category) {
+                        CombatRankingCategory.CHARMS -> card.sessionCharmTotal.toString()
+                        CombatRankingCategory.SILENCES -> card.sessionSilenceTotal.toString()
+                        CombatRankingCategory.DISTRESSES -> card.sessionDistressTotal.toString()
+                        CombatRankingCategory.DEBUFFS -> card.sessionDebuffTotal.toString()
+                        CombatRankingCategory.SONGS -> card.sessionSongsTotal.toString()
+                        CombatRankingCategory.BUFFS -> card.sessionBuffTotal.toString()
+                        CombatRankingCategory.POTIONS -> card.sessionPotionTotal.toString()
+                        CombatRankingCategory.GLIDERS -> card.sessionGliderTotal.toString()
+                        CombatRankingCategory.ITEMS -> card.sessionItemSkillTotal.toString()
+                      },
+                      valueColor = category.valueColor,
+                      isRetribution = card.isBuildingAggression,
+                      flashingColor = flashingColorState.value,
+                      isOwnCharacter = card.name == config.playerName,
+                      onClick = {
+                        AppState.selectPlayer(card.name)
+                        wm?.openWindow(OverlayType.PLAYER_CARD)
+                      }
+                    )
+                  }
                 }
               }
             }

@@ -54,6 +54,9 @@ import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.SessionStatRows
+import com.reoky.raidframer.ui.component.SessionTotals
+import com.reoky.raidframer.ui.component.StatRow
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 import com.reoky.raidframer.ui.component.graphs.GroupSpec
@@ -126,61 +129,7 @@ private enum class SessionScope(
 
 // View-model-agnostic shape so the totals card can render either the in-memory
 // session or an aggregated historical one without branching on the source.
-private data class SessionTotals(
-  val damage: Long,
-  val healing: Long,
-  val cc: Int,
-  val buffs: Int,
-  val debuffs: Int,
-  val charms: Int,
-  val distress: Int,
-  val silence: Int,
-  val glider: Int,
-  val items: Int,
-  val potions: Int,
-  val kills: Int,
-  val killsKB: Int,
-  val damageTaken: Int,
-  val healsReceived: Int
-) {
-  companion object {
-    fun fromPlayerCard(card: PlayerCard) = SessionTotals(
-      damage = card.sessionDamageTotal,
-      healing = card.sessionHealTotal,
-      cc = card.sessionCCTotal,
-      buffs = card.sessionBuffTotal,
-      debuffs = card.sessionDebuffTotal,
-      charms = card.sessionCharmTotal,
-      distress = card.sessionDistressTotal,
-      silence = card.sessionSilenceTotal,
-      glider = card.sessionGliderTotal,
-      items = card.sessionItemSkillTotal,
-      potions = card.sessionPotionTotal,
-      kills = card.sessionKillTotal,
-      killsKB = card.sessionKillTotalKB,
-      damageTaken = card.sessionDamageTakenTotal,
-      healsReceived = card.sessionHealsReceivedTotal
-    )
-
-    fun fromEntity(entity: PlayerSessionTotalsEntity) = SessionTotals(
-      damage = entity.totalDamage,
-      healing = entity.totalHealing,
-      cc = entity.totalCC,
-      buffs = entity.totalBuffs,
-      debuffs = entity.totalDebuffs,
-      charms = entity.totalCharms,
-      distress = entity.totalDistresses,
-      silence = entity.totalSilences,
-      glider = entity.totalGliderUses,
-      items = entity.totalItemSkills,
-      potions = entity.totalPotions,
-      kills = entity.totalKills,
-      killsKB = entity.totalKillsKB,
-      damageTaken = entity.totalDamageTaken,
-      healsReceived = entity.totalHealsReceived
-    )
-  }
-}
+// Moved to SessionTotalsComponent.kt as shared SessionTotals.
 
 @Preview
 @Composable
@@ -852,16 +801,7 @@ private fun SkillBarRow(rank: Int, skillName: String, value: Long, maxValue: Lon
   }
 }
 
-@Composable
-fun StatRow(label: String, value: Long, valueColor: Color = RFColors.TextPrimary) {
-  Row(
-    modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-    horizontalArrangement = Arrangement.SpaceBetween
-  ) {
-    Text(text = label, color = RFColors.TextSecondary, fontSize = 13.sp)
-    Text(text = value.humanReadableAbbreviation(), color = valueColor, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-  }
-}
+// StatRow moved to SessionTotalsComponent.kt as shared composable.
 
 private fun formatTime(ts: Long): String {
   val sdf = SimpleDateFormat("HH:mm:ss")
@@ -996,21 +936,4 @@ private fun TotalsFiltersBar(
   }
 }
 
-@Composable
-private fun SessionStatRows(totals: SessionTotals) {
-  StatRow(stringResource(Res.string.player_card_stat_damage), totals.damage, RFColors.dpsOrange)
-  StatRow(stringResource(Res.string.player_card_stat_healing), totals.healing, RFColors.healsGreen)
-  StatRow(stringResource(Res.string.player_card_stat_cc), totals.cc.toLong(), RFColors.ccCyan)
-  StatRow(stringResource(Res.string.player_card_stat_buffs), totals.buffs.toLong(), RFColors.itemSkillYellow)
-  StatRow(stringResource(Res.string.player_card_stat_debuffs), totals.debuffs.toLong(), Color(0xFFAB47BC))
-  StatRow(stringResource(Res.string.player_card_stat_charms), totals.charms.toLong(), RFColors.charmPink)
-  StatRow(stringResource(Res.string.player_card_stat_distress), totals.distress.toLong(), RFColors.distressPurple)
-  StatRow(stringResource(Res.string.player_card_stat_silence), totals.silence.toLong(), RFColors.silencePurple)
-  StatRow(stringResource(Res.string.player_card_stat_glider), totals.glider.toLong(), RFColors.gliderBlue)
-  StatRow(stringResource(Res.string.player_card_stat_items), totals.items.toLong(), RFColors.itemSkillYellow)
-  StatRow(stringResource(Res.string.player_card_stat_potions), totals.potions.toLong(), RFColors.potionTeal)
-  StatRow(stringResource(Res.string.player_card_stat_kills_most_damage), totals.kills.toLong(), RFColors.dpsOrange)
-  StatRow(stringResource(Res.string.player_card_stat_kills_killing_blow), totals.killsKB.toLong(), RFColors.killsHaranyaGreen)
-  StatRow(stringResource(Res.string.player_card_stat_total_damage_taken), totals.damageTaken.toLong(), Color(0xFFEF5350))
-  StatRow(stringResource(Res.string.player_card_stat_total_heals_received), totals.healsReceived.toLong(), RFColors.healsGreen)
-}
+// SessionStatRows moved to SessionTotalsComponent.kt as shared composable.

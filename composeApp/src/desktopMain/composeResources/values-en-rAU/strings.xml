@@ -235,6 +235,24 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="combat_no_columns_message">Bro.. Try Adding at Least One Category..</string>
     <string name="combat_open_settings">Open Settings</string>
 
+    <!-- Battle Graph Edge Tooltip -->
+    <string name="battle_graph_edge_source_target_format">%1$s → %2$s</string>
+    <string name="battle_graph_edge_and_n_more">+%1$d more</string>
+    <string name="battle_graph_resume">▶  Resume</string>
+    <string name="battle_graph_pause">⏸  Pause</string>
+    <string name="battle_graph_paused">PAUSED</string>
+    <string name="battle_graph_search_placeholder">Search Characters, Classes &amp; Spells</string>
+    <string name="battle_graph_mode_damage">Damage</string>
+    <string name="battle_graph_mode_heals">Heals</string>
+    <string name="battle_graph_mode_cc">CC</string>
+    <string name="battle_graph_min_dmg">Min DMG</string>
+    <string name="battle_graph_min_heal">Min Heal</string>
+    <string name="battle_graph_min_cc">Min CC</string>
+    <string name="battle_graph_max_edges">Max Edges</string>
+    <string name="battle_graph_open_player_card">Open Player Card</string>
+    <string name="battle_graph_filter_by_name">Filter by Name</string>
+    <string name="battle_graph_filter_by_spec">Filter by Spec</string>
+
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Battle Summary (%1$s)</string>
     <string name="summary_silences_by_faction">Silences by Faction</string>
