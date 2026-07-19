@@ -235,6 +235,10 @@
     <string name="combat_no_columns_message">형님들.. 적어도 하나의 카테고리는 추가해보세요..</string>
     <string name="combat_open_settings">설정 열기</string>
 
+    <!-- Battle Graph Edge Tooltip -->
+    <string name="battle_graph_edge_source_target_format">%1$s → %2$s</string>
+    <string name="battle_graph_edge_and_n_more">+%1$d개 더</string>
+
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>
     <string name="summary_silences_by_faction">진영별 침묵</string>

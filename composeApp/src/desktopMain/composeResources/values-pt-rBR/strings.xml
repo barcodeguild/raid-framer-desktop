@@ -235,6 +235,10 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="combat_no_columns_message">Cara.. Tenta Adicionar Pelo Menos Uma Categoria..</string>
     <string name="combat_open_settings">Abrir Configurações</string>
 
+    <!-- Battle Graph Edge Tooltip -->
+    <string name="battle_graph_edge_source_target_format">%1$s → %2$s</string>
+    <string name="battle_graph_edge_and_n_more">+%1$d mais</string>
+
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Resumo da Batalha (%1$s)</string>
     <string name="summary_silences_by_faction">Silenciamentos por Facção</string>

@@ -235,6 +235,10 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="combat_no_columns_message">Bro.. Try Adding at Least One Category..</string>
     <string name="combat_open_settings">Open Settings</string>
 
+    <!-- Battle Graph Edge Tooltip -->
+    <string name="battle_graph_edge_source_target_format">%1$s → %2$s</string>
+    <string name="battle_graph_edge_and_n_more">+%1$d more</string>
+
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Battle Summary (%1$s)</string>
     <string name="summary_silences_by_faction">Silences by Faction</string>

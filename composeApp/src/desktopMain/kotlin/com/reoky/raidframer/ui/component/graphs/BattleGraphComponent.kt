@@ -1,18 +1,32 @@
 package com.reoky.raidframer.ui.component.graphs
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +36,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -29,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -42,6 +58,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import org.jetbrains.compose.resources.stringResource
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.SkillTreeType
@@ -50,14 +72,21 @@ import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getGraphNodeColor
+import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_edge_source_target_format
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_edge_and_n_more
 import com.reoky.raidframer.core.interactor.BattleGraphData
 import com.reoky.raidframer.core.interactor.BattleGraphMode
+import com.reoky.raidframer.core.interactor.GraphEdge
 import com.reoky.raidframer.core.interactor.GraphNode
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.LocalDragLock
 import kotlin.math.atan2
 import kotlin.math.sqrt
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun BattleGraphComponent(
@@ -85,6 +114,28 @@ fun BattleGraphComponent(
 
   // Left-click selection state
   var selectedNode by remember { mutableStateOf<GraphNode?>(null) }
+
+  // Edge hover state for spell breakdown tooltip
+  var hoveredEdge by remember { mutableStateOf<GraphEdge?>(null) }
+  var hoveredEdgePosition by remember { mutableStateOf(Offset.Zero) }
+  val popupInteractionSource = remember { MutableInteractionSource() }
+  val isPopupHovered by popupInteractionSource.collectIsHoveredAsState()
+  var dismissJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+  val coroutineScope = rememberCoroutineScope()
+
+  // Dismiss popup when cursor leaves both the edge and the popup, with a short delay
+  // to prevent flicker when the cursor briefly leaves the edge hit zone.
+  LaunchedEffect(hoveredEdge, isPopupHovered) {
+    dismissJob?.cancel()
+    if (hoveredEdge == null && !isPopupHovered) {
+      dismissJob = coroutineScope.launch {
+        delay(120)
+        if (hoveredEdge == null && !isPopupHovered) {
+          hoveredEdge = null
+        }
+      }
+    }
+  }
 
   // Animated node positions - initialized once, preserved across updates
   var initialized by remember { mutableStateOf(false) }
@@ -468,6 +519,92 @@ fun BattleGraphComponent(
     }
     } // key
 
+    // Edge hover detection overlay — transparent hit area covering all edges
+    Canvas(
+      modifier = Modifier
+        .fillMaxSize()
+        .pointerInput(edges, scale, panOffset) {
+          awaitPointerEventScope {
+            while (true) {
+              val event = awaitPointerEvent()
+              when (event.type) {
+                PointerEventType.Move -> {
+                  val mouse = event.changes.firstOrNull()?.position ?: continue
+                  var closestEdge: GraphEdge? = null
+                  var closestDist = Float.MAX_VALUE
+                  val hitRadius = 16f * density
+
+                  edges.forEach { edge ->
+                    if (edge.source == edge.target) return@forEach
+                    val srcIdx = nodes.indexOfFirst { it.name == edge.source }
+                    val tgtIdx = nodes.indexOfFirst { it.name == edge.target }
+                    if (srcIdx < 0 || tgtIdx < 0 || srcIdx >= animatedX.size || tgtIdx >= animatedX.size) return@forEach
+
+                    val srcCx = animatedX[srcIdx] * scale + panOffset.x + centerX
+                    val srcCy = animatedY[srcIdx] * scale + panOffset.y + centerY
+                    val tgtCx = animatedX[tgtIdx] * scale + panOffset.x + centerX
+                    val tgtCy = animatedY[tgtIdx] * scale + panOffset.y + centerY
+
+                    val dx = tgtCx - srcCx
+                    val dy = tgtCy - srcCy
+                    val dist = sqrt(dx * dx + dy * dy).coerceAtLeast(1f)
+                    val nx = dx / dist
+                    val ny = dy / dist
+                    val perpX = -ny
+                    val perpY = nx
+                    val safeDist = dist.coerceAtLeast(1f)
+                    val scaledRadiusPx = 50.dp.toPx() * scale
+                    val availableGap = (safeDist - scaledRadiusPx * 2f).coerceAtLeast(0f)
+                    val edgeMargin = ((6f + edge.normalizedWeight * 8f) * scale).coerceAtMost(availableGap * 0.45f)
+                    val isBidirectional = edges.any { it.source == edge.target && it.target == edge.source }
+                    val endpointSep = if (isBidirectional) (4f + (1f + edge.normalizedWeight * 7f) * scale * 0.75f).coerceAtMost(scaledRadiusPx * 0.35f) else 0f
+                    val startRadialX = nx + perpX * endpointSep / scaledRadiusPx
+                    val startRadialY = ny + perpY * endpointSep / scaledRadiusPx
+                    val startLen = sqrt(startRadialX * startRadialX + startRadialY * startRadialY).coerceAtLeast(0.01f)
+                    val endRadialX = -nx + perpX * endpointSep / scaledRadiusPx
+                    val endRadialY = -ny + perpY * endpointSep / scaledRadiusPx
+                    val endLen = sqrt(endRadialX * endRadialX + endRadialY * endRadialY).coerceAtLeast(0.01f)
+                    val startX = srcCx + startRadialX / startLen * (scaledRadiusPx + edgeMargin)
+                    val startY = srcCy + startRadialY / startLen * (scaledRadiusPx + edgeMargin)
+                    val endX = tgtCx + endRadialX / endLen * (scaledRadiusPx + edgeMargin)
+                    val endY = tgtCy + endRadialY / endLen * (scaledRadiusPx + edgeMargin)
+
+                    val curvature = if (isBidirectional) (safeDist * 0.08f).coerceIn(6f * scale, 36f * scale) else 0f
+                    val midX = (startX + endX) / 2f
+                    val midY = (startY + endY) / 2f
+                    val ctrlX = midX + perpX * curvature
+                    val ctrlY = midY + perpY * curvature
+
+                    // Sample cubic bezier at multiple t values and check proximity
+                    for (tFrac in listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)) {
+                      val t = tFrac
+                      val u = 1f - t
+                      val bx = u*u*u*startX + 3f*u*u*t*ctrlX + 3f*u*t*t*ctrlX + t*t*t*endX
+                      val by = u*u*u*startY + 3f*u*u*t*ctrlY + 3f*u*t*t*ctrlY + t*t*t*endY
+                      val d = sqrt((mouse.x - bx)*(mouse.x - bx) + (mouse.y - by)*(mouse.y - by))
+                      if (d < closestDist) {
+                        closestDist = d
+                        closestEdge = edge
+                      }
+                    }
+                  }
+
+                  if (closestDist < hitRadius && closestEdge != null) {
+                    hoveredEdge = closestEdge
+                    hoveredEdgePosition = mouse
+                  } else {
+                    hoveredEdge = null
+                  }
+                }
+                PointerEventType.Exit -> {
+                  hoveredEdge = null
+                }
+              }
+            }
+          }
+        }
+    ) { /* no drawing — this is a transparent hit-test layer */ }
+
     // Nodes overlay with right-click support
     nodes.forEachIndexed { idx, node ->
       if (idx < animatedX.size) {
@@ -543,6 +680,111 @@ fun BattleGraphComponent(
           contextMenuNode = null
         }) {
           Text("Filter by Spec", fontSize = 12.sp)
+        }
+      }
+    }
+
+    // Edge hover tooltip — spell breakdown popup following cursor
+    hoveredEdge?.let { edge ->
+      val breakdown = edge.spellBreakdown
+      if (breakdown.isNotEmpty()) {
+        val sortedBreakdown = breakdown.entries.sortedByDescending { it.value }
+        val maxValue = sortedBreakdown.first().value
+        Popup(
+          popupPositionProvider = object : PopupPositionProvider {
+            override fun calculatePosition(
+              anchorBounds: IntRect,
+              windowSize: IntSize,
+              layoutDirection: LayoutDirection,
+              popupContentSize: IntSize
+            ): IntOffset {
+              val px = hoveredEdgePosition.x.toInt() + 40
+              val py = hoveredEdgePosition.y.toInt() + 40
+              // Keep popup within window bounds
+              val clampedX = px.coerceIn(0, (windowSize.width - popupContentSize.width).coerceAtLeast(0))
+              val clampedY = py.coerceIn(0, (windowSize.height - popupContentSize.height).coerceAtLeast(0))
+              return IntOffset(clampedX, clampedY)
+            }
+          }
+        ) {
+          Surface(
+            shape = RoundedCornerShape(6.dp),
+            elevation = 6.dp,
+            color = Color(0xFF1A1A2E).copy(alpha = 0.95f),
+            border = BorderStroke(1.dp, edgeColor.copy(alpha = 0.5f)),
+            modifier = Modifier.hoverable(interactionSource = popupInteractionSource)
+          ) {
+            Column(
+              modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp).widthIn(max = 240.dp)
+            ) {
+              // Header: source -> target
+              Text(
+                text = stringResource(Res.string.battle_graph_edge_source_target_format, edge.source, edge.target),
+                color = RFColors.TextPrimary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+              )
+              Text(
+                text = edge.displayValue,
+                color = edgeColor,
+                fontSize = 9.sp,
+                maxLines = 1,
+                modifier = Modifier.padding(bottom = 4.dp)
+              )
+              Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+              Spacer(modifier = Modifier.height(3.dp))
+
+              // Spell breakdown rows
+              sortedBreakdown.take(12).forEach { (spell, value) ->
+                val pct = if (maxValue > 0) value.toFloat() / maxValue else 0f
+                Row(
+                  modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
+                  horizontalArrangement = Arrangement.SpaceBetween,
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Text(
+                    text = spell,
+                    color = RFColors.TextSecondary,
+                    fontSize = 9.sp,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                  )
+                  // Mini bar
+                  Box(
+                    modifier = Modifier
+                      .width(40.dp)
+                      .height(4.dp)
+                      .clip(RoundedCornerShape(2.dp))
+                      .background(Color.White.copy(alpha = 0.1f))
+                  ) {
+                    Box(
+                      modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(fraction = pct)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(edgeColor.copy(alpha = 0.7f))
+                    )
+                  }
+                  Spacer(modifier = Modifier.width(6.dp))
+                  Text(
+                    text = value.humanReadableAbbreviation(),
+                    color = edgeColor,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.SemiBold
+                  )
+                }
+              }
+              if (sortedBreakdown.size > 12) {
+                Text(
+                  text = stringResource(Res.string.battle_graph_edge_and_n_more, sortedBreakdown.size - 12),
+                  color = RFColors.TextTertiary,
+                  fontSize = 8.sp,
+                  modifier = Modifier.padding(top = 2.dp)
+                )
+              }
+            }
+          }
         }
       }
     }

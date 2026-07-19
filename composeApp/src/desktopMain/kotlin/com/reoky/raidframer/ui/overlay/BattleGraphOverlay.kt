@@ -190,7 +190,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         ) {
           val modes = listOf(
             BattleGraphMode.DAMAGE to "Damage",
-            BattleGraphMode.HEALS to "Heal",
+            BattleGraphMode.HEALS to "Heals",
             BattleGraphMode.CC to "CC"
           )
           modes.forEach { (mode, label) ->

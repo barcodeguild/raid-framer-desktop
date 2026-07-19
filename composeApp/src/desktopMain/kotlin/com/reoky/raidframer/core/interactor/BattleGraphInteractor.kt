@@ -32,7 +32,8 @@ data class GraphEdge(
   val target: String,
   val weight: Long,
   val normalizedWeight: Float = 0f,
-  val displayValue: String = ""
+  val displayValue: String = "",
+  val spellBreakdown: Map<String, Long> = emptyMap()  // spell/debuff name -> value for hover tooltip
 )
 
 data class BattleGraphData(
@@ -153,11 +154,13 @@ object BattleGraphInteractor : Interactor() {
         filteredCards.forEach { sourceCard ->
           sourceCard.sessionDamageToPlayer.forEach { (targetName, damage) ->
             if (damage >= damageThresholdMin) {
+              val breakdown = sourceCard.sessionDamageToPlayerBySpell[targetName] ?: emptyMap()
               edges.add(GraphEdge(
                 source = sourceCard.name,
                 target = targetName,
                 weight = damage,
-                displayValue = "${humanReadableShort(damage)} dmg"
+                displayValue = "${humanReadableShort(damage)} dmg",
+                spellBreakdown = breakdown
               ))
             }
           }
@@ -167,11 +170,13 @@ object BattleGraphInteractor : Interactor() {
         filteredCards.forEach { sourceCard ->
           sourceCard.sessionHealToPlayer.forEach { (targetName, heals) ->
             if (heals >= healThresholdMin) {
+              val breakdown = sourceCard.sessionHealToPlayerBySpell[targetName] ?: emptyMap()
               edges.add(GraphEdge(
                 source = sourceCard.name,
                 target = targetName,
                 weight = heals,
-                displayValue = "${humanReadableShort(heals)} heal"
+                displayValue = "${humanReadableShort(heals)} heal",
+                spellBreakdown = breakdown
               ))
             }
           }
@@ -181,11 +186,13 @@ object BattleGraphInteractor : Interactor() {
         filteredCards.forEach { sourceCard ->
           sourceCard.sessionCCToPlayer.forEach { (targetName, cc) ->
             if (cc >= ccThresholdMin) {
+              val breakdown = sourceCard.sessionCCToPlayerBySpell[targetName] ?: emptyMap()
               edges.add(GraphEdge(
                 source = sourceCard.name,
                 target = targetName,
                 weight = cc.toLong(),
-                displayValue = "$cc CC"
+                displayValue = "$cc CC",
+                spellBreakdown = breakdown.mapValues { it.value.toLong() }
               ))
             }
           }
