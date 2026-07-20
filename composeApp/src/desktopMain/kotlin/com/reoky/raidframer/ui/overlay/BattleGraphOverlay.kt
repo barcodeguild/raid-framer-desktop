@@ -62,7 +62,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   var healSlider by remember { mutableFloatStateOf(0.125f) }      // 25000 / 200_000
   var ccSlider by remember { mutableFloatStateOf(0.1f) }          // 5 / 50
   var searchQuery by remember { mutableStateOf("") }
-  var maxEdgesSlider by remember { mutableFloatStateOf(0.4f) }    // 20 / 50
+  var maxEdgesSlider by remember { mutableFloatStateOf(0.267f) }   // 20 / 75
   var selectedPlayerName by remember { mutableStateOf<String?>(null) }
 
   // Debounced push to interactor — avoids recomposition during drag
@@ -76,11 +76,11 @@ fun BattleGraphOverlay(wm: WindowManager?) {
     snapshotFlow { ccSlider }.debounce(300).collect { v -> BattleGraphInteractor.setCCThreshold((v * 50f).toInt()) }
   }
   LaunchedEffect(Unit) {
-    snapshotFlow { maxEdgesSlider }.debounce(300).collect { v -> BattleGraphInteractor.setMaxEdges((v * 50f).toInt()) }
+    snapshotFlow { maxEdgesSlider }.debounce(300).collect { v -> BattleGraphInteractor.setMaxEdges((v * 75f).toInt()) }
   }
 
   Column(
-    modifier = Modifier.fillMaxSize()
+    modifier = Modifier.fillMaxSize().background(Color(0xFF121212))
   ) {
     val titleText = when (selectedMode) {
       BattleGraphMode.DAMAGE -> stringResource(Res.string.battle_graph_focused_damage)
@@ -267,8 +267,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         Spacer(modifier = Modifier.height(8.dp))
         CompactThresholdSlider(
           label = stringResource(Res.string.battle_graph_max_edges),
-          initialValue = 0.4f,  // 20 / 50
-          multiplier = 50f,
+          initialValue = 0.267f,  // 20 / 75
+          multiplier = 75f,
           onValueChangeFinished = { v -> maxEdgesSlider = v },
           color = RFColors.TextPrimary,
           modifier = Modifier.width(340.dp)

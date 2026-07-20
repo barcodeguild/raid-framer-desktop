@@ -107,6 +107,16 @@ fun BattleGraphComponent(
 
   val nodes = graphData.nodes
   val edges = graphData.edges
+  val nodeIndexByName = remember(nodes) {
+    nodes.mapIndexed { index, node -> node.name to index }.toMap()
+  }
+  val reciprocalEdgePairs = remember(edges) {
+    edges
+      .asSequence()
+      .filter { it.source != it.target }
+      .map { it.source to it.target }
+      .toSet()
+  }
 
   val textMeasurer = rememberTextMeasurer()
   val dragLock = LocalDragLock.current
@@ -204,8 +214,8 @@ fun BattleGraphComponent(
       edges.forEach { edge ->
         if (edge.source == edge.target) return@forEach
 
-        val srcIdx = nodes.indexOfFirst { it.name == edge.source }
-        val tgtIdx = nodes.indexOfFirst { it.name == edge.target }
+        val srcIdx = nodeIndexByName[edge.source] ?: return@forEach
+        val tgtIdx = nodeIndexByName[edge.target] ?: return@forEach
         if (srcIdx >= 0 && tgtIdx >= 0) {
           val src = simNodes[srcIdx]
           val tgt = simNodes[tgtIdx]
@@ -251,6 +261,18 @@ fun BattleGraphComponent(
     BattleGraphMode.DAMAGE -> RFColors.dpsOrange
     BattleGraphMode.HEALS -> RFColors.healsGreen
     BattleGraphMode.CC -> RFColors.ccCyan
+  }
+
+  val edgeLabelLayouts = remember(edges, scale, edgeColor, textMeasurer) {
+    edges.map { edge ->
+      textMeasurer.measure(
+        text = edge.displayValue,
+        style = TextStyle(
+          fontSize = (10f * scale).sp,
+          color = edgeColor.copy(alpha = 0.3f + edge.normalizedWeight * 0.5f)
+        )
+      )
+    }
   }
 
   BoxWithConstraints(
@@ -330,12 +352,10 @@ fun BattleGraphComponent(
       edges.forEach { edge ->
         if (edge.source == edge.target) return@forEach
 
-        val srcIdx = nodes.indexOfFirst { it.name == edge.source }
-        val tgtIdx = nodes.indexOfFirst { it.name == edge.target }
-        if (srcIdx >= 0 && tgtIdx >= 0 && srcIdx < animatedX.size && tgtIdx < animatedX.size) {
-          val isBidirectional = edge.source != edge.target && edges.any {
-            it.source == edge.target && it.target == edge.source
-          }
+        val srcIdx = nodeIndexByName[edge.source] ?: return@forEach
+        val tgtIdx = nodeIndexByName[edge.target] ?: return@forEach
+        if (srcIdx < animatedX.size && tgtIdx < animatedX.size) {
+          val isBidirectional = (edge.target to edge.source) in reciprocalEdgePairs
           val srcCx = animatedX[srcIdx] * scale + panOffset.x + centerX
           val srcCy = animatedY[srcIdx] * scale + panOffset.y + centerY
           val tgtCx = animatedX[tgtIdx] * scale + panOffset.x + centerX
@@ -493,14 +513,9 @@ fun BattleGraphComponent(
             val unitTangentY = tangentY / tangentLength
             val labelNormalX = -unitTangentY
             val labelNormalY = unitTangentX
-            val labelStyle = TextStyle(
-              fontSize = (10f * scale).sp,
-              color = color
-            )
-            val labelLayout = textMeasurer.measure(
-              text = edge.displayValue,
-              style = labelStyle
-            )
+            val labelLayout = edgeLabelLayouts[
+              edges.indexOf(edge)
+            ]
             val labelGap = 5f * scale + labelLayout.size.height / 2f
             val labelCenterX = labelX + labelNormalX * labelGap
             val labelCenterY = labelY + labelNormalY * labelGap
@@ -540,9 +555,9 @@ fun BattleGraphComponent(
 
                   edges.forEach { edge ->
                     if (edge.source == edge.target) return@forEach
-                    val srcIdx = nodes.indexOfFirst { it.name == edge.source }
-                    val tgtIdx = nodes.indexOfFirst { it.name == edge.target }
-                    if (srcIdx < 0 || tgtIdx < 0 || srcIdx >= animatedX.size || tgtIdx >= animatedX.size) return@forEach
+                    val srcIdx = nodeIndexByName[edge.source] ?: return@forEach
+                    val tgtIdx = nodeIndexByName[edge.target] ?: return@forEach
+                    if (srcIdx >= animatedX.size || tgtIdx >= animatedX.size) return@forEach
 
                     val srcCx = animatedX[srcIdx] * scale + panOffset.x + centerX
                     val srcCy = animatedY[srcIdx] * scale + panOffset.y + centerY
@@ -560,7 +575,7 @@ fun BattleGraphComponent(
                     val scaledRadiusPx = 50.dp.toPx() * scale
                     val availableGap = (safeDist - scaledRadiusPx * 2f).coerceAtLeast(0f)
                     val edgeMargin = ((6f + edge.normalizedWeight * 8f) * scale).coerceAtMost(availableGap * 0.45f)
-                    val isBidirectional = edges.any { it.source == edge.target && it.target == edge.source }
+                    val isBidirectional = (edge.target to edge.source) in reciprocalEdgePairs
                     val endpointSep = if (isBidirectional) (4f + (1f + edge.normalizedWeight * 7f) * scale * 0.75f).coerceAtMost(scaledRadiusPx * 0.35f) else 0f
                     val startRadialX = nx + perpX * endpointSep / scaledRadiusPx
                     val startRadialY = ny + perpY * endpointSep / scaledRadiusPx
@@ -580,8 +595,7 @@ fun BattleGraphComponent(
                     val ctrlY = midY + perpY * curvature
 
                     // Sample cubic bezier at multiple t values and check proximity
-                    for (tFrac in listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)) {
-                      val t = tFrac
+                    for (t in EDGE_HIT_SAMPLE_POINTS) {
                       val u = 1f - t
                       val bx = u*u*u*startX + 3f*u*u*t*ctrlX + 3f*u*t*t*ctrlX + t*t*t*endX
                       val by = u*u*u*startY + 3f*u*u*t*ctrlY + 3f*u*t*t*ctrlY + t*t*t*endY
@@ -890,6 +904,8 @@ private fun SkillTreeIcon(tree: SkillTreeType) {
       .padding(horizontal = 1.dp)
   )
 }
+
+private val EDGE_HIT_SAMPLE_POINTS = floatArrayOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)
 
 private data class SimNode(
   var x: Float,
