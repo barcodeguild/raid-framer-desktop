@@ -41,6 +41,11 @@ object RFColors {
   val healsGreen = Color(105, 235, 113, 255)
   val ccCyan = Color.Cyan
 
+  // Battle graph mode colors
+  val killsRed = Color(0xFFDC143C)       // Crimson — kills graph mode
+  val buffsBlue = Color(0xFFFFCA28)      // Gold — buffs graph mode (same as itemSkillYellow)
+  val debuffsPurple = Color(0xFFAB47BC)  // Purple — debuffs graph mode (same as silencePurple)
+
   // Faction colors
   val factionHaranya = Color(0xFFAB47BC)
   val factionNuia = Color(0xFFEC407A)

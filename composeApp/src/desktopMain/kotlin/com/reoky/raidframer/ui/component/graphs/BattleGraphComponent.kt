@@ -261,6 +261,12 @@ fun BattleGraphComponent(
     BattleGraphMode.DAMAGE -> RFColors.dpsOrange
     BattleGraphMode.HEALS -> RFColors.healsGreen
     BattleGraphMode.CC -> RFColors.ccCyan
+    BattleGraphMode.KILLS -> RFColors.killsRed
+    BattleGraphMode.BUFFS -> RFColors.buffsBlue
+    BattleGraphMode.DEBUFFS -> RFColors.debuffsPurple
+    BattleGraphMode.CHARMS -> RFColors.charmPink
+    BattleGraphMode.DISTRESS -> RFColors.distressPurple
+    BattleGraphMode.SILENCE -> RFColors.silencePurple
   }
 
   val edgeLabelLayouts = remember(edges, scale, edgeColor, textMeasurer) {

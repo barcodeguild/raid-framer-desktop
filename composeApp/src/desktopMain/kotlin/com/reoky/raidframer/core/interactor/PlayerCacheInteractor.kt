@@ -1004,7 +1004,8 @@ object PlayerCacheInteractor : Interactor() {
             cards[killerName]?.let { killer ->
               cards[killerName] = killer.postKillEvent(
                 timestamp = attribution.timestamp,
-                victimName = attribution.victimName
+                victimName = attribution.victimName,
+                preDeathSpells = attribution.killerMostDamageSpells
               )
             }
           }

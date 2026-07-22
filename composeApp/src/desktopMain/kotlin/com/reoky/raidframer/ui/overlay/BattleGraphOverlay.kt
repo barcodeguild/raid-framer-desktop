@@ -3,6 +3,13 @@ package com.reoky.raidframer.ui.overlay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -18,11 +25,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.definitions.blacklistedDebuffNames
+import com.reoky.raidframer.core.definitions.blacklistedBuffNames
 import com.reoky.raidframer.core.interactor.BattleGraphInteractor
 import com.reoky.raidframer.core.interactor.BattleGraphMode
 import com.reoky.raidframer.ui.LocalDragLock
@@ -35,6 +45,12 @@ import kotlinx.coroutines.flow.debounce
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_damage
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_kills
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_buffs
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_debuffs
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_charms
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_distress
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_focused_silence
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_heal_prop
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_crowd_control_distribution
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_no_data
@@ -45,10 +61,23 @@ import raid_framer_desktop.composeapp.generated.resources.battle_graph_search_pl
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_damage
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_heals
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_cc
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_kills
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_buffs
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_debuffs
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_charms
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_distress
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_mode_silence
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_dmg
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_heal
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_cc
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_kills
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_buffs
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_debuffs
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_charms
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_distress
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_silence
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_max_edges
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_all_spells
 
 @Composable
 fun BattleGraphOverlay(wm: WindowManager?) {
@@ -86,6 +115,12 @@ fun BattleGraphOverlay(wm: WindowManager?) {
       BattleGraphMode.DAMAGE -> stringResource(Res.string.battle_graph_focused_damage)
       BattleGraphMode.HEALS -> stringResource(Res.string.battle_graph_heal_prop)
       BattleGraphMode.CC -> stringResource(Res.string.battle_graph_crowd_control_distribution)
+      BattleGraphMode.KILLS -> stringResource(Res.string.battle_graph_focused_kills)
+      BattleGraphMode.BUFFS -> stringResource(Res.string.battle_graph_focused_buffs)
+      BattleGraphMode.DEBUFFS -> stringResource(Res.string.battle_graph_focused_debuffs)
+      BattleGraphMode.CHARMS -> stringResource(Res.string.battle_graph_focused_charms)
+      BattleGraphMode.DISTRESS -> stringResource(Res.string.battle_graph_focused_distress)
+      BattleGraphMode.SILENCE -> stringResource(Res.string.battle_graph_focused_silence)
     }
 
     TitleBarComponent(
@@ -177,7 +212,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           modifier = Modifier
             .width(340.dp)
             .height(56.dp),
-          textStyle = androidx.compose.ui.text.TextStyle(
+          textStyle = TextStyle(
             fontSize = 11.sp,
             color = RFColors.TextPrimary
           ),
@@ -194,42 +229,46 @@ fun BattleGraphOverlay(wm: WindowManager?) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Mode toggles
-        Row(
-          modifier = Modifier.width(340.dp),
-          horizontalArrangement = Arrangement.spacedBy(10.dp),
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          val modes = listOf(
+        // Row 1: DAMAGE, HEALS, CC
+        ModeToggleRow(
+          modes = listOf(
             BattleGraphMode.DAMAGE to stringResource(Res.string.battle_graph_mode_damage),
             BattleGraphMode.HEALS to stringResource(Res.string.battle_graph_mode_heals),
             BattleGraphMode.CC to stringResource(Res.string.battle_graph_mode_cc)
-          )
-          modes.forEach { (mode, label) ->
-            val isSelected = mode == selectedMode
-            val highlightColor = when (mode) {
-              BattleGraphMode.DAMAGE -> RFColors.dpsOrange
-              BattleGraphMode.HEALS -> RFColors.healsGreen
-              BattleGraphMode.CC -> RFColors.ccCyan
-            }
-            TextButton(
-              onClick = { BattleGraphInteractor.setMode(mode) },
-              modifier = Modifier
-                .weight(1f)
-                .alpha(if (isSelected) 1f else 0.5f)
-                .height(36.dp),
-              contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
-            ) {
-              Text(
-                text = label,
-                color = if (isSelected) highlightColor else RFColors.TextSecondary,
-                fontSize = 12.sp
-              )
-            }
-          }
-        }
+          ),
+          selectedMode = selectedMode,
+          onModeSelected = { BattleGraphInteractor.setMode(it) }
+        )
 
-        // Threshold slider - compact
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Row 2: KILLS, BUFFS, DEBUFFS
+        ModeToggleRow(
+          modes = listOf(
+            BattleGraphMode.KILLS to stringResource(Res.string.battle_graph_mode_kills),
+            BattleGraphMode.BUFFS to stringResource(Res.string.battle_graph_mode_buffs),
+            BattleGraphMode.DEBUFFS to stringResource(Res.string.battle_graph_mode_debuffs)
+          ),
+          selectedMode = selectedMode,
+          onModeSelected = { BattleGraphInteractor.setMode(it) }
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Row 3: CHARMS, DISTRESS, SILENCE
+        ModeToggleRow(
+          modes = listOf(
+            BattleGraphMode.CHARMS to stringResource(Res.string.battle_graph_mode_charms),
+            BattleGraphMode.DISTRESS to stringResource(Res.string.battle_graph_mode_distress),
+            BattleGraphMode.SILENCE to stringResource(Res.string.battle_graph_mode_silence)
+          ),
+          selectedMode = selectedMode,
+          onModeSelected = { BattleGraphInteractor.setMode(it) }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Threshold slider for current mode
         when (selectedMode) {
           BattleGraphMode.DAMAGE -> {
             CompactThresholdSlider(
@@ -261,6 +300,96 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               modifier = Modifier.width(340.dp)
             )
           }
+          BattleGraphMode.KILLS -> {
+            CompactThresholdSlider(
+              label = stringResource(Res.string.battle_graph_min_kills),
+              initialValue = 0.02f,  // 1 / 50
+              multiplier = 50f,
+              onValueChangeFinished = { v -> BattleGraphInteractor.setKillThreshold((v * 50f).toInt()) },
+              color = RFColors.killsRed,
+              modifier = Modifier.width(340.dp)
+            )
+          }
+          BattleGraphMode.BUFFS -> {
+            CompactThresholdSlider(
+              label = stringResource(Res.string.battle_graph_min_buffs),
+              initialValue = 0.02f,  // 1 / 50
+              multiplier = 50f,
+              onValueChangeFinished = { v -> BattleGraphInteractor.setBuffThreshold((v * 50f).toInt()) },
+              color = RFColors.buffsBlue,
+              modifier = Modifier.width(340.dp)
+            )
+          }
+          BattleGraphMode.DEBUFFS -> {
+            CompactThresholdSlider(
+              label = stringResource(Res.string.battle_graph_min_debuffs),
+              initialValue = 0.02f,  // 1 / 50
+              multiplier = 50f,
+              onValueChangeFinished = { v -> BattleGraphInteractor.setDebuffThreshold((v * 50f).toInt()) },
+              color = RFColors.debuffsPurple,
+              modifier = Modifier.width(340.dp)
+            )
+          }
+          BattleGraphMode.CHARMS -> {
+            CompactThresholdSlider(
+              label = stringResource(Res.string.battle_graph_min_charms),
+              initialValue = 0.02f,  // 1 / 50
+              multiplier = 50f,
+              onValueChangeFinished = { v -> BattleGraphInteractor.setCharmThreshold((v * 50f).toInt()) },
+              color = RFColors.charmPink,
+              modifier = Modifier.width(340.dp)
+            )
+          }
+          BattleGraphMode.DISTRESS -> {
+            CompactThresholdSlider(
+              label = stringResource(Res.string.battle_graph_min_distress),
+              initialValue = 0.02f,  // 1 / 50
+              multiplier = 50f,
+              onValueChangeFinished = { v -> BattleGraphInteractor.setDistressThreshold((v * 50f).toInt()) },
+              color = RFColors.distressPurple,
+              modifier = Modifier.width(340.dp)
+            )
+          }
+          BattleGraphMode.SILENCE -> {
+            CompactThresholdSlider(
+              label = stringResource(Res.string.battle_graph_min_silence),
+              initialValue = 0.02f,  // 1 / 50
+              multiplier = 50f,
+              onValueChangeFinished = { v -> BattleGraphInteractor.setSilenceThreshold((v * 50f).toInt()) },
+              color = RFColors.silencePurple,
+              modifier = Modifier.width(340.dp)
+            )
+          }
+        }
+
+        // Spell filter dropdown for BUFFS/DEBUFFS
+        if (selectedMode == BattleGraphMode.BUFFS || selectedMode == BattleGraphMode.DEBUFFS) {
+          Spacer(modifier = Modifier.height(8.dp))
+          val isDebuffMode = selectedMode == BattleGraphMode.DEBUFFS
+          val blacklistedNames = if (isDebuffMode) blacklistedDebuffNames else blacklistedBuffNames
+          val spellMap = remember(graphData.edges, selectedMode) {
+            graphData.edges.flatMap { it.spellBreakdown.entries }
+              .groupBy { it.key }
+              .mapValues { it.value.sumOf { entry -> entry.value }.toInt() }
+              .filterKeys { it !in blacklistedNames }
+          }
+          val sortedSpells = remember(spellMap) {
+            spellMap.entries.sortedByDescending { it.value }.take(100)
+          }
+          val allLabel = stringResource(Res.string.battle_graph_all_spells)
+          val options = remember(sortedSpells, allLabel) {
+            listOf(null to allLabel) + sortedSpells.map { it.key to "${it.key} (${it.value})" }
+          }
+          SpellFilterDropdown(
+            label = if (selectedMode == BattleGraphMode.BUFFS) "Buff" else "Debuff",
+            options = options,
+            color = if (selectedMode == BattleGraphMode.BUFFS) RFColors.buffsBlue else RFColors.debuffsPurple,
+            onSpellSelected = { spell ->
+              if (selectedMode == BattleGraphMode.BUFFS) BattleGraphInteractor.setSelectedBuffSpell(spell)
+              else BattleGraphInteractor.setSelectedDebuffSpell(spell)
+            },
+            modifier = Modifier.width(340.dp)
+          )
         }
 
         // Max edges slider - below threshold
@@ -364,6 +493,119 @@ private fun CompactThresholdSlider(
       textAlign = TextAlign.End,
       modifier = Modifier.width(42.dp)
     )
+  }
+}
+
+@Composable
+private fun ModeToggleRow(
+  modes: List<Pair<BattleGraphMode, String>>,
+  selectedMode: BattleGraphMode,
+  onModeSelected: (BattleGraphMode) -> Unit
+) {
+  Row(
+    modifier = Modifier.width(340.dp),
+    horizontalArrangement = Arrangement.spacedBy(6.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    modes.forEach { (mode, label) ->
+      val isSelected = mode == selectedMode
+      val highlightColor = when (mode) {
+        BattleGraphMode.DAMAGE -> RFColors.dpsOrange
+        BattleGraphMode.HEALS -> RFColors.healsGreen
+        BattleGraphMode.CC -> RFColors.ccCyan
+        BattleGraphMode.KILLS -> RFColors.killsRed
+        BattleGraphMode.BUFFS -> RFColors.buffsBlue
+        BattleGraphMode.DEBUFFS -> RFColors.debuffsPurple
+        BattleGraphMode.CHARMS -> RFColors.charmPink
+        BattleGraphMode.DISTRESS -> RFColors.distressPurple
+        BattleGraphMode.SILENCE -> RFColors.silencePurple
+      }
+      TextButton(
+        onClick = { onModeSelected(mode) },
+        modifier = Modifier
+          .weight(1f)
+          .alpha(if (isSelected) 1f else 0.5f)
+          .height(32.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+      ) {
+        Text(
+          text = label,
+          color = if (isSelected) highlightColor else RFColors.TextSecondary,
+          fontSize = 10.sp
+        )
+      }
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SpellFilterDropdown(
+  label: String,
+  options: List<Pair<String?, String>>,
+  color: Color,
+  onSpellSelected: (String?) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  var expanded by remember { mutableStateOf(false) }
+  var selectedOption by remember { mutableStateOf(options.firstOrNull()) }
+
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = !expanded },
+    modifier = modifier
+  ) {
+    OutlinedTextField(
+      value = selectedOption?.second ?: "",
+      onValueChange = {},
+      readOnly = true,
+      label = { Text(text = label, fontSize = 10.sp, color = RFColors.TextSecondary) },
+      modifier = Modifier
+        .width(340.dp)
+        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+      colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = color,
+        unfocusedBorderColor = RFColors.CardBorder,
+        focusedTextColor = RFColors.TextPrimary,
+        unfocusedTextColor = RFColors.TextPrimary,
+        cursorColor = color,
+        focusedLabelColor = RFColors.TextSecondary,
+        unfocusedLabelColor = RFColors.TextTertiary
+      ),
+      trailingIcon = {
+        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+      },
+      textStyle = TextStyle(fontSize = 11.sp),
+      singleLine = true,
+      maxLines = 1
+    )
+    ExposedDropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier.width(340.dp),
+      containerColor = RFColors.CardBackground,
+      tonalElevation = 4.dp
+    ) {
+      options.forEach { (spell, display) ->
+        DropdownMenuItem(
+          text = {
+            Text(
+              text = display,
+              color = if (spell == null) RFColors.TextTertiary else RFColors.TextPrimary,
+              fontSize = 11.sp,
+              maxLines = 2,
+              overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
+          },
+          onClick = {
+            selectedOption = Pair(spell, display)
+            onSpellSelected(spell)
+            expanded = false
+          },
+          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        )
+      }
+    }
   }
 }
 

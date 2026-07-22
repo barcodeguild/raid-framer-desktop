@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 import kotlin.random.Random
 
-enum class BattleGraphMode { DAMAGE, HEALS, CC }
+enum class BattleGraphMode { DAMAGE, HEALS, CC, KILLS, BUFFS, DEBUFFS, CHARMS, DISTRESS, SILENCE }
 
 data class GraphNode(
   val name: String,
@@ -57,8 +57,16 @@ object BattleGraphInteractor : Interactor() {
   private var damageThresholdMin = 1000L
   private var healThresholdMin = 1000L
   private var ccThresholdMin = 0
+  private var killThresholdMin = 1
+  private var buffThresholdMin = 1
+  private var debuffThresholdMin = 1
+  private var charmThresholdMin = 1
+  private var distressThresholdMin = 1
+  private var silenceThresholdMin = 1
   private var searchQuery = ""
   private var maxEdges = 50
+  private var selectedBuffSpell: String? = null
+  private var selectedDebuffSpell: String? = null
 
   private var lastRebuildTime = 0L
   private val rebuildThrottleMs = 3_000L
@@ -70,7 +78,11 @@ object BattleGraphInteractor : Interactor() {
       PlayerCacheInteractor.topCC,
       _selectedMode
     ) { damages, heals, cc, mode ->
-      val merged = (damages + heals + cc).distinctBy { it.name }
+      // Merge in kills, buffs, debuffs from their current values
+      val kills = PlayerCacheInteractor.topKills.value
+      val buffs = PlayerCacheInteractor.topBuffs.value
+      val debuffs = PlayerCacheInteractor.topDebuff.value
+      val merged = (damages + heals + cc + kills + buffs + debuffs).distinctBy { it.name }
       merged to mode
     }.collect { (cards, mode) ->
       if (_isPaused.value) return@collect
@@ -102,6 +114,46 @@ object BattleGraphInteractor : Interactor() {
     rebuildGraphFromCurrentState()
   }
 
+  fun setKillThreshold(min: Int) {
+    killThresholdMin = min
+    rebuildGraphFromCurrentState()
+  }
+
+  fun setBuffThreshold(min: Int) {
+    buffThresholdMin = min
+    rebuildGraphFromCurrentState()
+  }
+
+  fun setDebuffThreshold(min: Int) {
+    debuffThresholdMin = min
+    rebuildGraphFromCurrentState()
+  }
+
+  fun setCharmThreshold(min: Int) {
+    charmThresholdMin = min
+    rebuildGraphFromCurrentState()
+  }
+
+  fun setDistressThreshold(min: Int) {
+    distressThresholdMin = min
+    rebuildGraphFromCurrentState()
+  }
+
+  fun setSilenceThreshold(min: Int) {
+    silenceThresholdMin = min
+    rebuildGraphFromCurrentState()
+  }
+
+  fun setSelectedBuffSpell(spell: String?) {
+    selectedBuffSpell = spell
+    rebuildGraphFromCurrentState()
+  }
+
+  fun setSelectedDebuffSpell(spell: String?) {
+    selectedDebuffSpell = spell
+    rebuildGraphFromCurrentState()
+  }
+
   fun setSearchQuery(query: String) {
     searchQuery = query
     rebuildGraphFromCurrentState()
@@ -125,7 +177,10 @@ object BattleGraphInteractor : Interactor() {
       val damages = PlayerCacheInteractor.topDamage.value
       val heals = PlayerCacheInteractor.topHeals.value
       val cc = PlayerCacheInteractor.topCC.value
-      val cards = (damages + heals + cc).distinctBy { it.name }
+      val kills = PlayerCacheInteractor.topKills.value
+      val buffs = PlayerCacheInteractor.topBuffs.value
+      val debuffs = PlayerCacheInteractor.topDebuff.value
+      val cards = (damages + heals + cc + kills + buffs + debuffs).distinctBy { it.name }
       val mode = _selectedMode.value
       rebuildGraph(cards, mode)
     }
@@ -166,55 +221,165 @@ object BattleGraphInteractor : Interactor() {
     }
 
     when (mode) {
-      BattleGraphMode.DAMAGE -> {
-        filteredCards.forEach { sourceCard ->
-          sourceCard.sessionDamageToPlayer.forEach { (targetName, damage) ->
-            if (damage >= damageThresholdMin) {
-              val breakdown = sourceCard.sessionDamageToPlayerBySpell[targetName] ?: emptyMap()
-              edges.add(GraphEdge(
-                source = sourceCard.name,
-                target = targetName,
-                weight = damage,
-                displayValue = "${damage.humanReadableAbbreviation()} dmg",
-                spellBreakdown = breakdown
-              ))
+    BattleGraphMode.DAMAGE -> {
+      filteredCards.forEach { sourceCard ->
+        sourceCard.sessionDamageToPlayer.forEach { (targetName, damage) ->
+          if (damage >= damageThresholdMin) {
+            val breakdown = sourceCard.sessionDamageToPlayerBySpell[targetName] ?: emptyMap()
+            val killCount = sourceCard.sessionKillsToPlayer[targetName] ?: 0
+            val displayValue = if (killCount > 0) {
+              "${damage.humanReadableAbbreviation()} dmg ($killCount kills)"
+            } else {
+              "${damage.humanReadableAbbreviation()} dmg"
             }
+            edges.add(GraphEdge(
+              source = sourceCard.name,
+              target = targetName,
+              weight = damage,
+              displayValue = displayValue,
+              spellBreakdown = breakdown
+            ))
           }
         }
       }
-      BattleGraphMode.HEALS -> {
-        filteredCards.forEach { sourceCard ->
-          sourceCard.sessionHealToPlayer.forEach { (targetName, heals) ->
-            if (heals >= healThresholdMin) {
-              val breakdown = sourceCard.sessionHealToPlayerBySpell[targetName] ?: emptyMap()
-              edges.add(GraphEdge(
-                source = sourceCard.name,
-                target = targetName,
-                weight = heals,
-                displayValue = "${heals.humanReadableAbbreviation()} heal",
-                spellBreakdown = breakdown
-              ))
-            }
+    }
+    BattleGraphMode.HEALS -> {
+      filteredCards.forEach { sourceCard ->
+        sourceCard.sessionHealToPlayer.forEach { (targetName, heals) ->
+          if (heals >= healThresholdMin) {
+            val breakdown = sourceCard.sessionHealToPlayerBySpell[targetName] ?: emptyMap()
+            edges.add(GraphEdge(
+              source = sourceCard.name,
+              target = targetName,
+              weight = heals,
+              displayValue = "${heals.humanReadableAbbreviation()} heal",
+              spellBreakdown = breakdown
+            ))
           }
         }
       }
-      BattleGraphMode.CC -> {
-        filteredCards.forEach { sourceCard ->
-          sourceCard.sessionCCToPlayer.forEach { (targetName, cc) ->
-            if (cc >= ccThresholdMin) {
-              val breakdown = sourceCard.sessionCCToPlayerBySpell[targetName] ?: emptyMap()
+    }
+    BattleGraphMode.CC -> {
+      filteredCards.forEach { sourceCard ->
+        sourceCard.sessionCCToPlayer.forEach { (targetName, cc) ->
+          if (cc >= ccThresholdMin) {
+            val breakdown = sourceCard.sessionCCToPlayerBySpell[targetName] ?: emptyMap()
+            edges.add(GraphEdge(
+              source = sourceCard.name,
+              target = targetName,
+              weight = cc.toLong(),
+              displayValue = "$cc CC",
+              spellBreakdown = breakdown.mapValues { it.value.toLong() }
+            ))
+          }
+        }
+      }
+    }
+    BattleGraphMode.KILLS -> {
+      filteredCards.forEach { sourceCard ->
+        sourceCard.sessionKillsToPlayer.forEach { (targetName, kills) ->
+          if (kills >= killThresholdMin) {
+            val breakdown = sourceCard.sessionKillsToPlayerBySpell[targetName] ?: emptyMap()
+            edges.add(GraphEdge(
+              source = sourceCard.name,
+              target = targetName,
+              weight = kills.toLong(),
+              displayValue = "$kills kill${if (kills != 1) "s" else ""}",
+              spellBreakdown = breakdown
+            ))
+          }
+        }
+      }
+    }
+    BattleGraphMode.BUFFS -> {
+      filteredCards.forEach { sourceCard ->
+        sourceCard.sessionBuffToPlayer.forEach { (targetName, buffs) ->
+          if (buffs >= buffThresholdMin) {
+            val breakdown = sourceCard.sessionBuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
+            val filtered = selectedBuffSpell?.let { spell -> breakdown.filterKeys { it == spell } } ?: breakdown
+            if (filtered.isNotEmpty()) {
+              val weight = if (selectedBuffSpell != null) filtered.values.sum() else buffs.toLong()
               edges.add(GraphEdge(
                 source = sourceCard.name,
                 target = targetName,
-                weight = cc.toLong(),
-                displayValue = "$cc CC",
-                spellBreakdown = breakdown.mapValues { it.value.toLong() }
+                weight = weight,
+                displayValue = "$buffs buff${if (buffs != 1) "s" else ""}",
+                spellBreakdown = filtered
               ))
             }
           }
         }
       }
     }
+    BattleGraphMode.DEBUFFS -> {
+      filteredCards.forEach { sourceCard ->
+        sourceCard.sessionDebuffToPlayer.forEach { (targetName, debuffs) ->
+          if (debuffs >= debuffThresholdMin) {
+            val breakdown = sourceCard.sessionDebuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
+            val filtered = selectedDebuffSpell?.let { spell -> breakdown.filterKeys { it == spell } } ?: breakdown
+            if (filtered.isNotEmpty()) {
+              val weight = if (selectedDebuffSpell != null) filtered.values.sum() else debuffs.toLong()
+              edges.add(GraphEdge(
+                source = sourceCard.name,
+                target = targetName,
+                weight = weight,
+                displayValue = "$debuffs debuff${if (debuffs != 1) "s" else ""}",
+                spellBreakdown = filtered
+              ))
+            }
+          }
+        }
+      }
+    }
+    BattleGraphMode.CHARMS -> {
+      filteredCards.forEach { sourceCard ->
+        sourceCard.sessionCharmToPlayer.forEach { (targetName, charms) ->
+          if (charms >= charmThresholdMin) {
+            val breakdown = sourceCard.sessionCharmToPlayerBySpell[targetName] ?: emptyMap()
+            edges.add(GraphEdge(
+              source = sourceCard.name,
+              target = targetName,
+              weight = charms.toLong(),
+              displayValue = "$charms charm${if (charms != 1) "s" else ""}",
+              spellBreakdown = breakdown.mapValues { it.value.toLong() }
+            ))
+          }
+        }
+      }
+    }
+    BattleGraphMode.DISTRESS -> {
+      filteredCards.forEach { sourceCard ->
+        sourceCard.sessionDistressToPlayer.forEach { (targetName, distress) ->
+          if (distress >= distressThresholdMin) {
+            val breakdown = sourceCard.sessionDistressToPlayerBySpell[targetName] ?: emptyMap()
+            edges.add(GraphEdge(
+              source = sourceCard.name,
+              target = targetName,
+              weight = distress.toLong(),
+              displayValue = "$distress distress${if (distress != 1) "es" else ""}",
+              spellBreakdown = breakdown.mapValues { it.value.toLong() }
+            ))
+          }
+        }
+      }
+    }
+    BattleGraphMode.SILENCE -> {
+      filteredCards.forEach { sourceCard ->
+        sourceCard.sessionSilenceToPlayer.forEach { (targetName, silence) ->
+          if (silence >= silenceThresholdMin) {
+            val breakdown = sourceCard.sessionSilenceToPlayerBySpell[targetName] ?: emptyMap()
+            edges.add(GraphEdge(
+              source = sourceCard.name,
+              target = targetName,
+              weight = silence.toLong(),
+              displayValue = "$silence silence${if (silence != 1) "s" else ""}",
+              spellBreakdown = breakdown.mapValues { it.value.toLong() }
+            ))
+          }
+        }
+      }
+    }
+  }
 
     val maxValue = edges.maxOfOrNull { it.weight } ?: 1L
 

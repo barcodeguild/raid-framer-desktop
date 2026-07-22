@@ -264,6 +264,32 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="battle_graph_open_player_card">Open Player Card</string>
     <string name="battle_graph_filter_by_name">Filter by Name</string>
     <string name="battle_graph_filter_by_spec">Filter by Spec</string>
+    <string name="battle_graph_mode_kills">Kills</string>
+    <string name="battle_graph_mode_buffs">Buffs</string>
+    <string name="battle_graph_mode_debuffs">Debuffs</string>
+    <string name="battle_graph_mode_charms">Charms</string>
+    <string name="battle_graph_mode_distress">Distress</string>
+    <string name="battle_graph_mode_silence">Silence</string>
+    <string name="battle_graph_min_kills">Min Kills</string>
+    <string name="battle_graph_min_buffs">Min Buffs</string>
+    <string name="battle_graph_min_debuffs">Min Debuffs</string>
+    <string name="battle_graph_min_charms">Min Charms</string>
+    <string name="battle_graph_min_distress">Min Distress</string>
+    <string name="battle_graph_min_silence">Min Silence</string>
+    <string name="battle_graph_focused_kills">Kill Attribution</string>
+    <string name="battle_graph_focused_buffs">Buff Distribution</string>
+    <string name="battle_graph_focused_debuffs">Debuff Distribution</string>
+    <string name="battle_graph_focused_charms">Charm Distribution</string>
+    <string name="battle_graph_focused_distress">Distress Distribution</string>
+    <string name="battle_graph_focused_silence">Silence Distribution</string>
+    <string name="battle_graph_edge_kill_format">%1$s kill</string>
+    <string name="battle_graph_edge_buff_format">%1$s buff</string>
+    <string name="battle_graph_edge_debuff_format">%1$s debuff</string>
+    <string name="battle_graph_edge_charm_format">%1$s charm</string>
+    <string name="battle_graph_edge_distress_format">%1$s distress</string>
+    <string name="battle_graph_edge_silence_format">%1$s silence</string>
+    <string name="battle_graph_kill_count_format">%1$s (%2$d kills)</string>
+    <string name="battle_graph_all_spells">All</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Battle Summary (%1$s)</string>
