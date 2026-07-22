@@ -1,5 +1,8 @@
 package com.reoky.raidframer.ui.overlay
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -93,6 +96,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   var searchQuery by remember { mutableStateOf("") }
   var maxEdgesSlider by remember { mutableFloatStateOf(0.267f) }   // 20 / 75
   var selectedPlayerName by remember { mutableStateOf<String?>(null) }
+  var isControlsExpanded by remember { mutableStateOf(true) }
 
   // Debounced push to interactor — avoids recomposition during drag
   LaunchedEffect(Unit) {
@@ -183,7 +187,22 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           },
         horizontalAlignment = Alignment.End
       ) {
-        // Search box
+        // Toggle button for collapsing/expanding controls
+        TextButton(
+          onClick = { isControlsExpanded = !isControlsExpanded },
+          modifier = Modifier
+            .width(340.dp)
+            .height(28.dp),
+          contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+        ) {
+          Text(
+            text = if (isControlsExpanded) "▲ Filters" else "▼ Filters",
+            color = RFColors.TextTertiary,
+            fontSize = 10.sp
+          )
+        }
+
+        // Search box (always visible)
         TextField(
           value = searchQuery,
           onValueChange = { query ->
@@ -227,207 +246,202 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           )
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // Row 1: DAMAGE, HEALS, CC
-        ModeToggleRow(
-          modes = listOf(
-            BattleGraphMode.DAMAGE to stringResource(Res.string.battle_graph_mode_damage),
-            BattleGraphMode.HEALS to stringResource(Res.string.battle_graph_mode_heals),
-            BattleGraphMode.CC to stringResource(Res.string.battle_graph_mode_cc)
-          ),
-          selectedMode = selectedMode,
-          onModeSelected = { BattleGraphInteractor.setMode(it) }
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // Row 2: KILLS, BUFFS, DEBUFFS
-        ModeToggleRow(
-          modes = listOf(
-            BattleGraphMode.KILLS to stringResource(Res.string.battle_graph_mode_kills),
-            BattleGraphMode.BUFFS to stringResource(Res.string.battle_graph_mode_buffs),
-            BattleGraphMode.DEBUFFS to stringResource(Res.string.battle_graph_mode_debuffs)
-          ),
-          selectedMode = selectedMode,
-          onModeSelected = { BattleGraphInteractor.setMode(it) }
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // Row 3: CHARMS, DISTRESS, SILENCE
-        ModeToggleRow(
-          modes = listOf(
-            BattleGraphMode.CHARMS to stringResource(Res.string.battle_graph_mode_charms),
-            BattleGraphMode.DISTRESS to stringResource(Res.string.battle_graph_mode_distress),
-            BattleGraphMode.SILENCE to stringResource(Res.string.battle_graph_mode_silence)
-          ),
-          selectedMode = selectedMode,
-          onModeSelected = { BattleGraphInteractor.setMode(it) }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Threshold slider for current mode
-        when (selectedMode) {
-          BattleGraphMode.DAMAGE -> {
-            CompactThresholdSlider(
-              label = stringResource(Res.string.battle_graph_min_dmg),
-              initialValue = 0.125f,  // 25000 / 200_000
-              multiplier = 200_000f,
-              minValue = 0.005f,  // minimum 1000 dmg
-              onValueChangeFinished = { v -> damageSlider = v },
-              color = RFColors.dpsOrange,
-              modifier = Modifier.width(340.dp)
-            )
-          }
-          BattleGraphMode.HEALS -> {
-            CompactThresholdSlider(
-              label = stringResource(Res.string.battle_graph_min_heal),
-              initialValue = 0.125f,  // 25000 / 200_000
-              multiplier = 200_000f,
-              minValue = 0.005f,  // minimum 1000 heals
-              onValueChangeFinished = { v -> healSlider = v },
-              color = RFColors.healsGreen,
-              modifier = Modifier.width(340.dp)
-            )
-          }
-          BattleGraphMode.CC -> {
-            CompactThresholdSlider(
-              label = stringResource(Res.string.battle_graph_min_cc),
-              initialValue = 0.1f,  // 5 / 50
-              multiplier = 50f,
-              minValue = 0.1f,  // minimum 5 CC
-              onValueChangeFinished = { v -> ccSlider = v },
-              color = RFColors.ccCyan,
-              modifier = Modifier.width(340.dp)
-            )
-          }
-          BattleGraphMode.KILLS -> {
-            CompactThresholdSlider(
-              label = stringResource(Res.string.battle_graph_min_kills),
-              initialValue = 0.02f,  // 1 / 50
-              multiplier = 50f,
-              minValue = 0.02f,  // minimum 1 kill
-              onValueChangeFinished = { v -> BattleGraphInteractor.setKillThreshold((v * 50f).toInt()) },
-              color = RFColors.killsRed,
-              modifier = Modifier.width(340.dp)
-            )
-          }
-          BattleGraphMode.BUFFS -> {
-            CompactThresholdSlider(
-              label = stringResource(Res.string.battle_graph_min_buffs),
-              initialValue = 0.02f,  // 1 / 50
-              multiplier = 50f,
-              minValue = 0.02f,  // minimum 1 buff
-              onValueChangeFinished = { v -> BattleGraphInteractor.setBuffThreshold((v * 50f).toInt()) },
-              color = RFColors.buffsBlue,
-              modifier = Modifier.width(340.dp)
-            )
-          }
-          BattleGraphMode.DEBUFFS -> {
-            CompactThresholdSlider(
-              label = stringResource(Res.string.battle_graph_min_debuffs),
-              initialValue = 0.02f,  // 1 / 50
-              multiplier = 50f,
-              minValue = 0.02f,  // minimum 1 debuff
-              onValueChangeFinished = { v -> BattleGraphInteractor.setDebuffThreshold((v * 50f).toInt()) },
-              color = RFColors.debuffsPurple,
-              modifier = Modifier.width(340.dp)
-            )
-          }
-          BattleGraphMode.CHARMS -> {
-            CompactThresholdSlider(
-              label = stringResource(Res.string.battle_graph_min_charms),
-              initialValue = 0.02f,  // 1 / 50
-              multiplier = 50f,
-              minValue = 0.02f,  // minimum 1 charm
-              onValueChangeFinished = { v -> BattleGraphInteractor.setCharmThreshold((v * 50f).toInt()) },
-              color = RFColors.charmPink,
-              modifier = Modifier.width(340.dp)
-            )
-          }
-          BattleGraphMode.DISTRESS -> {
-            CompactThresholdSlider(
-              label = stringResource(Res.string.battle_graph_min_distress),
-              initialValue = 0.02f,  // 1 / 50
-              multiplier = 50f,
-              minValue = 0.02f,  // minimum 1 distress
-              onValueChangeFinished = { v -> BattleGraphInteractor.setDistressThreshold((v * 50f).toInt()) },
-              color = RFColors.distressPurple,
-              modifier = Modifier.width(340.dp)
-            )
-          }
-          BattleGraphMode.SILENCE -> {
-            CompactThresholdSlider(
-              label = stringResource(Res.string.battle_graph_min_silence),
-              initialValue = 0.02f,  // 1 / 50
-              multiplier = 50f,
-              minValue = 0.02f,  // minimum 1 silence
-              onValueChangeFinished = { v -> BattleGraphInteractor.setSilenceThreshold((v * 50f).toInt()) },
-              color = RFColors.silencePurple,
-              modifier = Modifier.width(340.dp)
-            )
-          }
-        }
-
-        // Spell filter dropdown for BUFFS/DEBUFFS
-        if (selectedMode == BattleGraphMode.BUFFS || selectedMode == BattleGraphMode.DEBUFFS) {
-          Spacer(modifier = Modifier.height(8.dp))
-          val isDebuffMode = selectedMode == BattleGraphMode.DEBUFFS
-          val blacklistedNames = if (isDebuffMode) blacklistedDebuffNames else blacklistedBuffNames
-          val spellMap = remember(graphData.edges, selectedMode) {
-            graphData.edges.flatMap { it.spellBreakdown.entries }
-              .groupBy { it.key }
-              .mapValues { it.value.sumOf { entry -> entry.value }.toInt() }
-              .filterKeys { it !in blacklistedNames }
-          }
-          val sortedSpells = remember(spellMap) {
-            spellMap.entries.sortedByDescending { it.value }.take(100)
-          }
-          val allLabel = stringResource(Res.string.battle_graph_all_spells)
-          val options = remember(sortedSpells, allLabel) {
-            listOf(null to allLabel) + sortedSpells.map { it.key to "${it.key} (${it.value})" }
-          }
-          SpellFilterDropdown(
-            label = if (selectedMode == BattleGraphMode.BUFFS) "Buff" else "Debuff",
-            options = options,
-            color = if (selectedMode == BattleGraphMode.BUFFS) RFColors.buffsBlue else RFColors.debuffsPurple,
-            onSpellSelected = { spell ->
-              if (selectedMode == BattleGraphMode.BUFFS) BattleGraphInteractor.setSelectedBuffSpell(spell)
-              else BattleGraphInteractor.setSelectedDebuffSpell(spell)
-            },
-            modifier = Modifier.width(340.dp)
-          )
-        }
-
-        // Max edges slider - below threshold
-        Spacer(modifier = Modifier.height(8.dp))
-        CompactThresholdSlider(
-          label = stringResource(Res.string.battle_graph_max_edges),
-          initialValue = 0.267f,  // 20 / 75
-          multiplier = 75f,
-          minValue = 1f / 75f,  // minimum 1 edge
-          onValueChangeFinished = { v -> maxEdgesSlider = v },
-          color = RFColors.TextPrimary,
-          modifier = Modifier.width(340.dp)
-        )
-
-        // Play / Pause toggle
-        Spacer(modifier = Modifier.height(8.dp))
-        TextButton(
-          onClick = { BattleGraphInteractor.togglePause() },
-          modifier = Modifier
-            .width(340.dp)
-            .height(32.dp),
-          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
+        // Collapsible filter controls
+        AnimatedVisibility(
+          visible = isControlsExpanded,
+          enter = expandVertically(),
+          exit = shrinkVertically()
         ) {
-          Text(
-            text = if (isPaused) stringResource(Res.string.battle_graph_resume) else stringResource(Res.string.battle_graph_pause),
-            color = if (isPaused) RFColors.AccentRed else RFColors.TextPrimary,
-            fontSize = 12.sp
-          )
+          Column(horizontalAlignment = Alignment.End) {
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Row 1: DAMAGE, HEALS, CC
+            ModeToggleRow(
+              modes = listOf(
+                BattleGraphMode.DAMAGE to stringResource(Res.string.battle_graph_mode_damage),
+                BattleGraphMode.HEALS to stringResource(Res.string.battle_graph_mode_heals),
+                BattleGraphMode.CC to stringResource(Res.string.battle_graph_mode_cc)
+              ),
+              selectedMode = selectedMode,
+              onModeSelected = { BattleGraphInteractor.setMode(it) }
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Row 2: KILLS, BUFFS, DEBUFFS
+            ModeToggleRow(
+              modes = listOf(
+                BattleGraphMode.KILLS to stringResource(Res.string.battle_graph_mode_kills),
+                BattleGraphMode.BUFFS to stringResource(Res.string.battle_graph_mode_buffs),
+                BattleGraphMode.DEBUFFS to stringResource(Res.string.battle_graph_mode_debuffs)
+              ),
+              selectedMode = selectedMode,
+              onModeSelected = { BattleGraphInteractor.setMode(it) }
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Row 3: CHARMS, DISTRESS, SILENCE
+            ModeToggleRow(
+              modes = listOf(
+                BattleGraphMode.CHARMS to stringResource(Res.string.battle_graph_mode_charms),
+                BattleGraphMode.DISTRESS to stringResource(Res.string.battle_graph_mode_distress),
+                BattleGraphMode.SILENCE to stringResource(Res.string.battle_graph_mode_silence)
+              ),
+              selectedMode = selectedMode,
+              onModeSelected = { BattleGraphInteractor.setMode(it) }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Threshold slider for current mode
+            when (selectedMode) {
+              BattleGraphMode.DAMAGE -> {
+                CompactThresholdSlider(
+                  label = stringResource(Res.string.battle_graph_min_dmg),
+                  initialValue = 0.125f,  // 25000 / 200_000
+                  multiplier = 200_000f,
+                  minValue = 0.005f,  // minimum 1000 dmg
+                  onValueChangeFinished = { v -> damageSlider = v },
+                  color = RFColors.dpsOrange,
+                  modifier = Modifier.width(340.dp)
+                )
+              }
+              BattleGraphMode.HEALS -> {
+                CompactThresholdSlider(
+                  label = stringResource(Res.string.battle_graph_min_heal),
+                  initialValue = 0.125f,  // 25000 / 200_000
+                  multiplier = 200_000f,
+                  minValue = 0.005f,  // minimum 1000 heals
+                  onValueChangeFinished = { v -> healSlider = v },
+                  color = RFColors.healsGreen,
+                  modifier = Modifier.width(340.dp)
+                )
+              }
+              BattleGraphMode.CC -> {
+                CompactThresholdSlider(
+                  label = stringResource(Res.string.battle_graph_min_cc),
+                  initialValue = 0.1f,  // 5 / 50
+                  multiplier = 50f,
+                  minValue = 0.1f,  // minimum 5 CC
+                  onValueChangeFinished = { v -> ccSlider = v },
+                  color = RFColors.ccCyan,
+                  modifier = Modifier.width(340.dp)
+                )
+              }
+              BattleGraphMode.KILLS -> {
+                CompactThresholdSlider(
+                  label = stringResource(Res.string.battle_graph_min_kills),
+                  initialValue = 0.02f,  // 1 / 50
+                  multiplier = 50f,
+                  minValue = 0.02f,  // minimum 1 kill
+                  onValueChangeFinished = { v -> BattleGraphInteractor.setKillThreshold((v * 50f).toInt()) },
+                  color = RFColors.killsRed,
+                  modifier = Modifier.width(340.dp)
+                )
+              }
+              BattleGraphMode.BUFFS -> {
+                CompactThresholdSlider(
+                  label = stringResource(Res.string.battle_graph_min_buffs),
+                  initialValue = 0.02f,  // 1 / 50
+                  multiplier = 50f,
+                  minValue = 0.02f,  // minimum 1 buff
+                  onValueChangeFinished = { v -> BattleGraphInteractor.setBuffThreshold((v * 50f).toInt()) },
+                  color = RFColors.buffsBlue,
+                  modifier = Modifier.width(340.dp)
+                )
+              }
+              BattleGraphMode.DEBUFFS -> {
+                CompactThresholdSlider(
+                  label = stringResource(Res.string.battle_graph_min_debuffs),
+                  initialValue = 0.02f,  // 1 / 50
+                  multiplier = 50f,
+                  minValue = 0.02f,  // minimum 1 debuff
+                  onValueChangeFinished = { v -> BattleGraphInteractor.setDebuffThreshold((v * 50f).toInt()) },
+                  color = RFColors.debuffsPurple,
+                  modifier = Modifier.width(340.dp)
+                )
+              }
+              BattleGraphMode.CHARMS -> {
+                CompactThresholdSlider(
+                  label = stringResource(Res.string.battle_graph_min_charms),
+                  initialValue = 0.02f,  // 1 / 50
+                  multiplier = 50f,
+                  minValue = 0.02f,  // minimum 1 charm
+                  onValueChangeFinished = { v -> BattleGraphInteractor.setCharmThreshold((v * 50f).toInt()) },
+                  color = RFColors.charmPink,
+                  modifier = Modifier.width(340.dp)
+                )
+              }
+              BattleGraphMode.DISTRESS -> {
+                CompactThresholdSlider(
+                  label = stringResource(Res.string.battle_graph_min_distress),
+                  initialValue = 0.02f,  // 1 / 50
+                  multiplier = 50f,
+                  minValue = 0.02f,  // minimum 1 distress
+                  onValueChangeFinished = { v -> BattleGraphInteractor.setDistressThreshold((v * 50f).toInt()) },
+                  color = RFColors.distressPurple,
+                  modifier = Modifier.width(340.dp)
+                )
+              }
+              BattleGraphMode.SILENCE -> {
+                CompactThresholdSlider(
+                  label = stringResource(Res.string.battle_graph_min_silence),
+                  initialValue = 0.02f,  // 1 / 50
+                  multiplier = 50f,
+                  minValue = 0.02f,  // minimum 1 silence
+                  onValueChangeFinished = { v -> BattleGraphInteractor.setSilenceThreshold((v * 50f).toInt()) },
+                  color = RFColors.silencePurple,
+                  modifier = Modifier.width(340.dp)
+                )
+              }
+            }
+
+            // Spell filter dropdown for BUFFS/DEBUFFS
+            if (selectedMode == BattleGraphMode.BUFFS || selectedMode == BattleGraphMode.DEBUFFS) {
+              Spacer(modifier = Modifier.height(8.dp))
+              val isDebuffMode = selectedMode == BattleGraphMode.DEBUFFS
+              val blacklistedNames = if (isDebuffMode) blacklistedDebuffNames else blacklistedBuffNames
+              val spellMap = remember(graphData.edges, selectedMode) {
+                graphData.edges.flatMap { it.spellBreakdown.entries }
+                  .groupBy { it.key }
+                  .mapValues { it.value.sumOf { entry -> entry.value }.toInt() }
+                  .filterKeys { it !in blacklistedNames }
+              }
+              val sortedSpells = remember(spellMap) {
+                spellMap.entries.sortedByDescending { it.value }.take(100)
+              }
+              val allLabel = stringResource(Res.string.battle_graph_all_spells)
+              val options = remember(sortedSpells, allLabel) {
+                listOf(null to allLabel) + sortedSpells.map { it.key to "${it.key} (${it.value})" }
+              }
+              SpellFilterDropdown(
+                label = if (selectedMode == BattleGraphMode.BUFFS) "Buff" else "Debuff",
+                options = options,
+                color = if (selectedMode == BattleGraphMode.BUFFS) RFColors.buffsBlue else RFColors.debuffsPurple,
+                onSpellSelected = { spell ->
+                  if (selectedMode == BattleGraphMode.BUFFS) BattleGraphInteractor.setSelectedBuffSpell(spell)
+                  else BattleGraphInteractor.setSelectedDebuffSpell(spell)
+                },
+                modifier = Modifier.width(340.dp)
+              )
+            }
+
+            // Max edges slider - below threshold
+            Spacer(modifier = Modifier.height(8.dp))
+            CompactThresholdSlider(
+              label = stringResource(Res.string.battle_graph_max_edges),
+              initialValue = 0.267f,  // 20 / 75
+              multiplier = 75f,
+              minValue = 1f / 75f,  // minimum 1 edge
+              onValueChangeFinished = { v -> maxEdgesSlider = v },
+              color = RFColors.TextPrimary,
+              modifier = Modifier.width(340.dp)
+            )
+          }
         }
+
+        // (Pause button moved to top-left corner)
       }
 
       // Session totals widget in bottom-left when a node is selected
@@ -441,19 +455,22 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         )
       }
 
-      // PAUSED indicator in top-left corner
-      if (isPaused) {
+      // Play / Pause button in top-left corner
+      TextButton(
+        onClick = { BattleGraphInteractor.togglePause() },
+        modifier = Modifier
+          .align(Alignment.TopStart)
+          .padding(12.dp)
+          .clip(RoundedCornerShape(4.dp))
+          .background(RFColors.CardBackground.copy(alpha = 0.85f))
+          .padding(horizontal = 10.dp, vertical = 4.dp),
+        contentPadding = PaddingValues(0.dp)
+      ) {
         Text(
-          text = stringResource(Res.string.battle_graph_paused),
-          color = RFColors.AccentRed,
-          fontSize = 14.sp,
-          fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-          modifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(12.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .background(RFColors.CardBackground.copy(alpha = 0.85f))
-            .padding(horizontal = 10.dp, vertical = 4.dp)
+          text = if (isPaused) stringResource(Res.string.battle_graph_resume) else stringResource(Res.string.battle_graph_pause),
+          color = if (isPaused) RFColors.AccentRed else RFColors.TextPrimary,
+          fontSize = 12.sp,
+          fontWeight = if (isPaused) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
         )
       }
     }
