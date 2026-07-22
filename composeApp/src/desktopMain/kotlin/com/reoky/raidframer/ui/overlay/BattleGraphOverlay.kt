@@ -275,6 +275,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               label = stringResource(Res.string.battle_graph_min_dmg),
               initialValue = 0.125f,  // 25000 / 200_000
               multiplier = 200_000f,
+              minValue = 0.005f,  // minimum 1000 dmg
               onValueChangeFinished = { v -> damageSlider = v },
               color = RFColors.dpsOrange,
               modifier = Modifier.width(340.dp)
@@ -285,6 +286,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               label = stringResource(Res.string.battle_graph_min_heal),
               initialValue = 0.125f,  // 25000 / 200_000
               multiplier = 200_000f,
+              minValue = 0.005f,  // minimum 1000 heals
               onValueChangeFinished = { v -> healSlider = v },
               color = RFColors.healsGreen,
               modifier = Modifier.width(340.dp)
@@ -295,6 +297,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               label = stringResource(Res.string.battle_graph_min_cc),
               initialValue = 0.1f,  // 5 / 50
               multiplier = 50f,
+              minValue = 0.1f,  // minimum 5 CC
               onValueChangeFinished = { v -> ccSlider = v },
               color = RFColors.ccCyan,
               modifier = Modifier.width(340.dp)
@@ -305,6 +308,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               label = stringResource(Res.string.battle_graph_min_kills),
               initialValue = 0.02f,  // 1 / 50
               multiplier = 50f,
+              minValue = 0.02f,  // minimum 1 kill
               onValueChangeFinished = { v -> BattleGraphInteractor.setKillThreshold((v * 50f).toInt()) },
               color = RFColors.killsRed,
               modifier = Modifier.width(340.dp)
@@ -315,6 +319,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               label = stringResource(Res.string.battle_graph_min_buffs),
               initialValue = 0.02f,  // 1 / 50
               multiplier = 50f,
+              minValue = 0.02f,  // minimum 1 buff
               onValueChangeFinished = { v -> BattleGraphInteractor.setBuffThreshold((v * 50f).toInt()) },
               color = RFColors.buffsBlue,
               modifier = Modifier.width(340.dp)
@@ -325,6 +330,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               label = stringResource(Res.string.battle_graph_min_debuffs),
               initialValue = 0.02f,  // 1 / 50
               multiplier = 50f,
+              minValue = 0.02f,  // minimum 1 debuff
               onValueChangeFinished = { v -> BattleGraphInteractor.setDebuffThreshold((v * 50f).toInt()) },
               color = RFColors.debuffsPurple,
               modifier = Modifier.width(340.dp)
@@ -335,6 +341,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               label = stringResource(Res.string.battle_graph_min_charms),
               initialValue = 0.02f,  // 1 / 50
               multiplier = 50f,
+              minValue = 0.02f,  // minimum 1 charm
               onValueChangeFinished = { v -> BattleGraphInteractor.setCharmThreshold((v * 50f).toInt()) },
               color = RFColors.charmPink,
               modifier = Modifier.width(340.dp)
@@ -345,6 +352,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               label = stringResource(Res.string.battle_graph_min_distress),
               initialValue = 0.02f,  // 1 / 50
               multiplier = 50f,
+              minValue = 0.02f,  // minimum 1 distress
               onValueChangeFinished = { v -> BattleGraphInteractor.setDistressThreshold((v * 50f).toInt()) },
               color = RFColors.distressPurple,
               modifier = Modifier.width(340.dp)
@@ -355,6 +363,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               label = stringResource(Res.string.battle_graph_min_silence),
               initialValue = 0.02f,  // 1 / 50
               multiplier = 50f,
+              minValue = 0.02f,  // minimum 1 silence
               onValueChangeFinished = { v -> BattleGraphInteractor.setSilenceThreshold((v * 50f).toInt()) },
               color = RFColors.silencePurple,
               modifier = Modifier.width(340.dp)
@@ -398,6 +407,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           label = stringResource(Res.string.battle_graph_max_edges),
           initialValue = 0.267f,  // 20 / 75
           multiplier = 75f,
+          minValue = 1f / 75f,  // minimum 1 edge
           onValueChangeFinished = { v -> maxEdgesSlider = v },
           color = RFColors.TextPrimary,
           modifier = Modifier.width(340.dp)
@@ -457,6 +467,7 @@ private fun CompactThresholdSlider(
   multiplier: Float,
   onValueChangeFinished: (Float) -> Unit,
   color: Color,
+  minValue: Float = 0f,
   modifier: Modifier = Modifier
 ) {
   var sliderValue by remember { mutableFloatStateOf(initialValue) }
@@ -476,7 +487,7 @@ private fun CompactThresholdSlider(
       value = sliderValue,
       onValueChange = { sliderValue = it },
       onValueChangeFinished = { onValueChangeFinished(sliderValue) },
-      valueRange = 0f..1f,
+      valueRange = minValue..1f,
       modifier = Modifier
         .weight(1f)
         .height(24.dp),

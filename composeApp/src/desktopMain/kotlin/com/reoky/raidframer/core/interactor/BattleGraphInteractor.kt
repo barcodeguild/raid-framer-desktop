@@ -294,16 +294,16 @@ object BattleGraphInteractor : Interactor() {
     BattleGraphMode.BUFFS -> {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionBuffToPlayer.forEach { (targetName, buffs) ->
-          if (buffs >= buffThresholdMin) {
-            val breakdown = sourceCard.sessionBuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
-            val filtered = selectedBuffSpell?.let { spell -> breakdown.filterKeys { it == spell } } ?: breakdown
-            if (filtered.isNotEmpty()) {
-              val weight = if (selectedBuffSpell != null) filtered.values.sum() else buffs.toLong()
+          val breakdown = sourceCard.sessionBuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
+          val filtered = selectedBuffSpell?.let { spell -> breakdown.filterKeys { it == spell } } ?: breakdown
+          if (filtered.isNotEmpty()) {
+            val filteredCount = filtered.values.sum()
+            if (filteredCount >= buffThresholdMin) {
               edges.add(GraphEdge(
                 source = sourceCard.name,
                 target = targetName,
-                weight = weight,
-                displayValue = "$buffs buff${if (buffs != 1) "s" else ""}",
+                weight = filteredCount,
+                displayValue = if (selectedBuffSpell != null) "$filteredCount buff${if (filteredCount != 1L) "s" else ""}" else "$buffs buff${if (buffs != 1) "s" else ""}",
                 spellBreakdown = filtered
               ))
             }
@@ -314,16 +314,16 @@ object BattleGraphInteractor : Interactor() {
     BattleGraphMode.DEBUFFS -> {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionDebuffToPlayer.forEach { (targetName, debuffs) ->
-          if (debuffs >= debuffThresholdMin) {
-            val breakdown = sourceCard.sessionDebuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
-            val filtered = selectedDebuffSpell?.let { spell -> breakdown.filterKeys { it == spell } } ?: breakdown
-            if (filtered.isNotEmpty()) {
-              val weight = if (selectedDebuffSpell != null) filtered.values.sum() else debuffs.toLong()
+          val breakdown = sourceCard.sessionDebuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
+          val filtered = selectedDebuffSpell?.let { spell -> breakdown.filterKeys { it == spell } } ?: breakdown
+          if (filtered.isNotEmpty()) {
+            val filteredCount = filtered.values.sum()
+            if (filteredCount >= debuffThresholdMin) {
               edges.add(GraphEdge(
                 source = sourceCard.name,
                 target = targetName,
-                weight = weight,
-                displayValue = "$debuffs debuff${if (debuffs != 1) "s" else ""}",
+                weight = filteredCount,
+                displayValue = if (selectedDebuffSpell != null) "$filteredCount debuff${if (filteredCount != 1L) "s" else ""}" else "$debuffs debuff${if (debuffs != 1) "s" else ""}",
                 spellBreakdown = filtered
               ))
             }

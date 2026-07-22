@@ -32,6 +32,7 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
  */
 fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  if (event.source == event.target) return this // skip self-damage
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
@@ -59,6 +60,7 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  if (event.source == event.target) return this // skip self-heals
   val isOde = isOdeToRecovery(event.spell)
   val allowOdeAsHeal = RFConfig.state.value.allowOdeToRecoveryCountAsHeals
   return this.copy(
@@ -197,6 +199,7 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
  * Add a debuff gained event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
+  if (event.source == event.target) return this // skip self-applied debuffs
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
