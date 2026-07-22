@@ -206,6 +206,14 @@ object BattleGraphInteractor : Interactor() {
       return
     }
 
+    // Determine if the query matches any spell (not just player name/class)
+    // If so, we can filter edges by spell breakdown. If not, show all edges for matched cards.
+    val queryMatchesSpell = queryLower.isNotEmpty() && filteredCards.any { card ->
+      card.sessionSpellDamageMap.keys.any { it.lowercase().contains(queryLower) } ||
+      card.sessionSpellHealMap.keys.any { it.lowercase().contains(queryLower) } ||
+      card.sessionSpellCCMap.keys.any { it.lowercase().contains(queryLower) }
+    }
+
     val nodeMap = mutableMapOf<String, GraphNode>()
     val edges = mutableListOf<GraphEdge>()
 
@@ -226,6 +234,11 @@ object BattleGraphInteractor : Interactor() {
         sourceCard.sessionDamageToPlayer.forEach { (targetName, damage) ->
           if (damage >= damageThresholdMin) {
             val breakdown = sourceCard.sessionDamageToPlayerBySpell[targetName] ?: emptyMap()
+            // Only filter breakdown by search if query matches a spell name
+            val filteredBreakdown = if (queryMatchesSpell) {
+              breakdown.filterKeys { it.lowercase().contains(queryLower) }
+            } else breakdown
+            if (filteredBreakdown.isEmpty() && queryMatchesSpell) return@forEach
             val killCount = sourceCard.sessionKillsToPlayer[targetName] ?: 0
             val displayValue = if (killCount > 0) {
               "${damage.humanReadableAbbreviation()} dmg ($killCount kills)"
@@ -237,7 +250,7 @@ object BattleGraphInteractor : Interactor() {
               target = targetName,
               weight = damage,
               displayValue = displayValue,
-              spellBreakdown = breakdown
+              spellBreakdown = filteredBreakdown
             ))
           }
         }
@@ -248,12 +261,16 @@ object BattleGraphInteractor : Interactor() {
         sourceCard.sessionHealToPlayer.forEach { (targetName, heals) ->
           if (heals >= healThresholdMin) {
             val breakdown = sourceCard.sessionHealToPlayerBySpell[targetName] ?: emptyMap()
+            val filteredBreakdown = if (queryMatchesSpell) {
+              breakdown.filterKeys { it.lowercase().contains(queryLower) }
+            } else breakdown
+            if (filteredBreakdown.isEmpty() && queryMatchesSpell) return@forEach
             edges.add(GraphEdge(
               source = sourceCard.name,
               target = targetName,
               weight = heals,
               displayValue = "${heals.humanReadableAbbreviation()} heal",
-              spellBreakdown = breakdown
+              spellBreakdown = filteredBreakdown
             ))
           }
         }
@@ -263,13 +280,17 @@ object BattleGraphInteractor : Interactor() {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionCCToPlayer.forEach { (targetName, cc) ->
           if (cc >= ccThresholdMin) {
-            val breakdown = sourceCard.sessionCCToPlayerBySpell[targetName] ?: emptyMap()
+            val breakdown = sourceCard.sessionCCToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
+            val filteredBreakdown = if (queryMatchesSpell) {
+              breakdown.filterKeys { it.lowercase().contains(queryLower) }
+            } else breakdown
+            if (filteredBreakdown.isEmpty() && queryMatchesSpell) return@forEach
             edges.add(GraphEdge(
               source = sourceCard.name,
               target = targetName,
               weight = cc.toLong(),
               displayValue = "$cc CC",
-              spellBreakdown = breakdown.mapValues { it.value.toLong() }
+              spellBreakdown = filteredBreakdown
             ))
           }
         }
@@ -280,12 +301,16 @@ object BattleGraphInteractor : Interactor() {
         sourceCard.sessionKillsToPlayer.forEach { (targetName, kills) ->
           if (kills >= killThresholdMin) {
             val breakdown = sourceCard.sessionKillsToPlayerBySpell[targetName] ?: emptyMap()
+            val filteredBreakdown = if (queryMatchesSpell) {
+              breakdown.filterKeys { it.lowercase().contains(queryLower) }
+            } else breakdown
+            if (filteredBreakdown.isEmpty() && queryMatchesSpell) return@forEach
             edges.add(GraphEdge(
               source = sourceCard.name,
               target = targetName,
               weight = kills.toLong(),
               displayValue = "$kills kill${if (kills != 1) "s" else ""}",
-              spellBreakdown = breakdown
+              spellBreakdown = filteredBreakdown
             ))
           }
         }
@@ -295,7 +320,11 @@ object BattleGraphInteractor : Interactor() {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionBuffToPlayer.forEach { (targetName, buffs) ->
           val breakdown = sourceCard.sessionBuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
-          val filtered = selectedBuffSpell?.let { spell -> breakdown.filterKeys { it == spell } } ?: breakdown
+          // Apply both search query (only if it matches a spell) and spell dropdown filter
+          val searchFiltered = if (queryMatchesSpell) {
+            breakdown.filterKeys { it.lowercase().contains(queryLower) }
+          } else breakdown
+          val filtered = selectedBuffSpell?.let { spell -> searchFiltered.filterKeys { it == spell } } ?: searchFiltered
           if (filtered.isNotEmpty()) {
             val filteredCount = filtered.values.sum()
             if (filteredCount >= buffThresholdMin) {
@@ -303,7 +332,7 @@ object BattleGraphInteractor : Interactor() {
                 source = sourceCard.name,
                 target = targetName,
                 weight = filteredCount,
-                displayValue = if (selectedBuffSpell != null) "$filteredCount buff${if (filteredCount != 1L) "s" else ""}" else "$buffs buff${if (buffs != 1) "s" else ""}",
+                displayValue = if (selectedBuffSpell != null || queryMatchesSpell) "$filteredCount buff${if (filteredCount != 1L) "s" else ""}" else "$buffs buff${if (buffs != 1) "s" else ""}",
                 spellBreakdown = filtered
               ))
             }
@@ -315,7 +344,11 @@ object BattleGraphInteractor : Interactor() {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionDebuffToPlayer.forEach { (targetName, debuffs) ->
           val breakdown = sourceCard.sessionDebuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
-          val filtered = selectedDebuffSpell?.let { spell -> breakdown.filterKeys { it == spell } } ?: breakdown
+          // Apply both search query (only if it matches a spell) and spell dropdown filter
+          val searchFiltered = if (queryMatchesSpell) {
+            breakdown.filterKeys { it.lowercase().contains(queryLower) }
+          } else breakdown
+          val filtered = selectedDebuffSpell?.let { spell -> searchFiltered.filterKeys { it == spell } } ?: searchFiltered
           if (filtered.isNotEmpty()) {
             val filteredCount = filtered.values.sum()
             if (filteredCount >= debuffThresholdMin) {
@@ -323,7 +356,7 @@ object BattleGraphInteractor : Interactor() {
                 source = sourceCard.name,
                 target = targetName,
                 weight = filteredCount,
-                displayValue = if (selectedDebuffSpell != null) "$filteredCount debuff${if (filteredCount != 1L) "s" else ""}" else "$debuffs debuff${if (debuffs != 1) "s" else ""}",
+                displayValue = if (selectedDebuffSpell != null || queryMatchesSpell) "$filteredCount debuff${if (filteredCount != 1L) "s" else ""}" else "$debuffs debuff${if (debuffs != 1) "s" else ""}",
                 spellBreakdown = filtered
               ))
             }
@@ -335,13 +368,17 @@ object BattleGraphInteractor : Interactor() {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionCharmToPlayer.forEach { (targetName, charms) ->
           if (charms >= charmThresholdMin) {
-            val breakdown = sourceCard.sessionCharmToPlayerBySpell[targetName] ?: emptyMap()
+            val breakdown = sourceCard.sessionCharmToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
+            val filteredBreakdown = if (queryMatchesSpell) {
+              breakdown.filterKeys { it.lowercase().contains(queryLower) }
+            } else breakdown
+            if (filteredBreakdown.isEmpty() && queryMatchesSpell) return@forEach
             edges.add(GraphEdge(
               source = sourceCard.name,
               target = targetName,
               weight = charms.toLong(),
               displayValue = "$charms charm${if (charms != 1) "s" else ""}",
-              spellBreakdown = breakdown.mapValues { it.value.toLong() }
+              spellBreakdown = filteredBreakdown
             ))
           }
         }
@@ -351,13 +388,17 @@ object BattleGraphInteractor : Interactor() {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionDistressToPlayer.forEach { (targetName, distress) ->
           if (distress >= distressThresholdMin) {
-            val breakdown = sourceCard.sessionDistressToPlayerBySpell[targetName] ?: emptyMap()
+            val breakdown = sourceCard.sessionDistressToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
+            val filteredBreakdown = if (queryMatchesSpell) {
+              breakdown.filterKeys { it.lowercase().contains(queryLower) }
+            } else breakdown
+            if (filteredBreakdown.isEmpty() && queryMatchesSpell) return@forEach
             edges.add(GraphEdge(
               source = sourceCard.name,
               target = targetName,
               weight = distress.toLong(),
               displayValue = "$distress distress${if (distress != 1) "es" else ""}",
-              spellBreakdown = breakdown.mapValues { it.value.toLong() }
+              spellBreakdown = filteredBreakdown
             ))
           }
         }
@@ -367,13 +408,17 @@ object BattleGraphInteractor : Interactor() {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionSilenceToPlayer.forEach { (targetName, silence) ->
           if (silence >= silenceThresholdMin) {
-            val breakdown = sourceCard.sessionSilenceToPlayerBySpell[targetName] ?: emptyMap()
+            val breakdown = sourceCard.sessionSilenceToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
+            val filteredBreakdown = if (queryMatchesSpell) {
+              breakdown.filterKeys { it.lowercase().contains(queryLower) }
+            } else breakdown
+            if (filteredBreakdown.isEmpty() && queryMatchesSpell) return@forEach
             edges.add(GraphEdge(
               source = sourceCard.name,
               target = targetName,
               weight = silence.toLong(),
               displayValue = "$silence silence${if (silence != 1) "s" else ""}",
-              spellBreakdown = breakdown.mapValues { it.value.toLong() }
+              spellBreakdown = filteredBreakdown
             ))
           }
         }

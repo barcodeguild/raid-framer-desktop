@@ -42,6 +42,13 @@ val blacklistedDebuffIds: Set<Int> = setOf(
   847, 2176, 219, 15040,  // Lethargy
   836, 2174, 2193, 15039, 31367, // Weakened Energy
   772, 2169, 2188, 6849, 15051, 16341, 21994 // Unpleasant Sensation
+
+  // Some other stuff I found
+  18373, 23079, 23080, // Gleeful Destruction maledictions
+  22022, // Lucius: Gods and Heroes (Lunastone debuff stacks)
+  4844, // Dominator's Curse
+  13789, 14620, // Abyssal Burdon, Abyssal Whisper
+  9001158, // PvP is undesirable
 )
 
 // Buffs that are not useful for the battle graph dropdown
