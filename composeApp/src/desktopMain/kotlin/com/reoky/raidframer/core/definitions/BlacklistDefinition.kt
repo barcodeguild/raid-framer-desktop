@@ -38,10 +38,10 @@ val blacklistedDebuffIds: Set<Int> = setOf(
   4622, 20121, 8000279,
 
   // Songs debuffs (tracked separately in sessionSongsTotal)
-  853,   // Unguarded
-  847,   // Lethargy
-  31367, // Weakened Energy
-  772    // Unpleasant Sensation
+  853,2177, 2200, 21995, // Unguarded
+  847, 2176, 219, 15040,  // Lethargy
+  836, 2174, 2193, 15039, 31367, // Weakened Energy
+  772, 2169, 2188, 6849, 15051, 16341, 21994 // Unpleasant Sensation
 )
 
 // Buffs that are not useful for the battle graph dropdown
