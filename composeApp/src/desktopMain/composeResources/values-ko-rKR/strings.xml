@@ -66,7 +66,7 @@
     <string name="category_none">없음</string>
     <string name="category_charms">매혹</string>
     <string name="category_silences">침묵</string>
-    <string name="category_distresses">강위축</string>
+    <string name="category_distresses">강력한 위축</string></string>
     <string name="category_debuffs">디버프</string>
     <string name="category_songs">노래</string>
     <string name="category_buffs">버프</string>
@@ -171,7 +171,7 @@
     <string name="player_card_stat_buffs">버프</string>
     <string name="player_card_stat_debuffs">디버프</string>
     <string name="player_card_stat_charms">매혹</string>
-    <string name="player_card_stat_distress">강위축</string>
+    <string name="player_card_stat_distress">강력한 위축</string>
     <string name="player_card_stat_silence">침묵</string>
     <string name="player_card_stat_glider">글라이더 사용</string>
     <string name="player_card_stat_items">아이템 사용</string>
@@ -268,13 +268,13 @@
     <string name="tech_mvp_heals_format">MVP 치유 %1$d</string>
     <string name="tech_focused_target">집중 대상</string>
     <string name="tech_high_dmg_no_kills">높은 피해, 처치 없음</string>
-    <string name="tech_didnt_charm">매혹 안 함?</string>
+    <string name="tech_didnt_charm">매혹 없음?</string>
     <string name="tech_spell_dominance">자유 시전</string>
     <string name="tech_mvp_dps_format">MVP 딜 %1$d</string>
     <string name="tech_mvp_cc_format">MVP CC %1$d</string>
-    <string name="tech_distress_combo">고통 콤보?</string>
+    <string name="tech_distress_combo">강력한 위축 없음?</string>
     <string name="tech_cc_rival">CC 라이벌?</string>
-    <string name="tech_no_silences">침묵 콤보?</string>
+    <string name="tech_no_silences">침묵 없음?</string>
     <string name="tech_no_tiger_strikes">폭풍 가르기 없음?</string>
 
     <!-- Battle Summary Overlay -->

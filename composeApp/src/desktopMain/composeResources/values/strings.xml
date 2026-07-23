@@ -65,8 +65,8 @@ You should still complete the uninstallation of the main application by uninstal
     <string name="settings_combat_custom_category_3">Custom Category 3</string>
     <string name="category_none">None</string>
     <string name="category_charms">Charms</string>
-    <string name="category_silences">Silences</string>
-    <string name="category_distresses">Distresses</string>
+    <string name="category_silences">Silence</string>
+    <string name="category_distresses">Distressed</string>
     <string name="category_debuffs">Debuffs</string>
     <string name="category_songs">Songs</string>
     <string name="category_buffs">Buffs</string>
@@ -171,8 +171,8 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="player_card_stat_buffs">Buffs</string>
     <string name="player_card_stat_debuffs">Debuffs</string>
     <string name="player_card_stat_charms">Charms</string>
-    <string name="player_card_stat_distress">Distresses</string>
-    <string name="player_card_stat_silence">Silences</string>
+    <string name="player_card_stat_distress">Distressed</string>
+    <string name="player_card_stat_silence">Silence</string>
     <string name="player_card_stat_glider">Glider Uses</string>
     <string name="player_card_stat_items">Item Uses</string>
     <string name="player_card_stat_potions">Potions</string>
@@ -305,11 +305,11 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="tech_mvp_heals_format">MVP Heals %1$d</string>
     <string name="tech_focused_target">Focused Target</string>
     <string name="tech_high_dmg_no_kills">High Dmg No Kills</string>
-    <string name="tech_didnt_charm">Didn't Charm?</string>
+    <string name="tech_didnt_charm">No Charm?</string>
     <string name="tech_spell_dominance">Free Casting</string>
     <string name="tech_mvp_dps_format">MVP DPS %1$d</string>
     <string name="tech_mvp_cc_format">MVP CC %1$d</string>
-    <string name="tech_distress_combo">Distress Combo?</string>
+    <string name="tech_distress_combo">No Distress?</string>
     <string name="tech_cc_rival">CC Rival?</string>
     <string name="tech_no_silences">No Silence?</string>
     <string name="tech_no_tiger_strikes">No Tiger Strikes?</string>

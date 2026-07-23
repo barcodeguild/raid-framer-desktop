@@ -268,13 +268,13 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="tech_mvp_heals_format">MVP Cura %1$d</string>
     <string name="tech_focused_target">Alvo Focado</string>
     <string name="tech_high_dmg_no_kills">Alto Dano, Sem Abates</string>
-    <string name="tech_didnt_charm">Não Encantou?</string>
+    <string name="tech_didnt_charm">Sem Charme?</string>
     <string name="tech_spell_dominance">Lançamento Livre</string>
     <string name="tech_mvp_dps_format">MVP DPS %1$d</string>
     <string name="tech_mvp_cc_format">MVP CC %1$d</string>
-    <string name="tech_distress_combo">Combo de Dor?</string>
+    <string name="tech_distress_combo">Sem Angústia?</string>
     <string name="tech_cc_rival">Rival de CC?</string>
-    <string name="tech_no_silences">Combo de Silêncio?</string>
+    <string name="tech_no_silences">Sem Silêncio?</string>
     <string name="tech_no_tiger_strikes">No Tiger Strikes?</string>
 
     <!-- Battle Summary Overlay -->

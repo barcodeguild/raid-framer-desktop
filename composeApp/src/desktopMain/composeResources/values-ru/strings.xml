@@ -65,8 +65,8 @@
     <string name="settings_combat_custom_category_3">Пользовательская категория 3</string>
     <string name="category_none">Нет</string>
     <string name="category_charms">Очарования</string>
-    <string name="category_silences">Блокировки</string>
-    <string name="category_distresses">Расстройства</string>
+    <string name="category_silences">Немота</string>
+    <string name="category_distresses">Бессилие</string>
     <string name="category_debuffs">Дебаффы</string>
     <string name="category_songs">Песни</string>
     <string name="category_buffs">Баффы</string>
@@ -171,8 +171,8 @@
     <string name="player_card_stat_buffs">Баффы</string>
     <string name="player_card_stat_debuffs">Дебаффы</string>
     <string name="player_card_stat_charms">Очарования</string>
-    <string name="player_card_stat_distress">Расстройства</string>
-    <string name="player_card_stat_silence">Блокировки</string>
+    <string name="player_card_stat_distress">Бессилие</string>
+    <string name="player_card_stat_silence">Немота</string>
     <string name="player_card_stat_glider">Использования планера</string>
     <string name="player_card_stat_items">Использования предметов</string>
     <string name="player_card_stat_potions">Зелья</string>
@@ -268,13 +268,13 @@
     <string name="tech_mvp_heals_format">MVP лечение %1$d</string>
     <string name="tech_focused_target">Основная цель</string>
     <string name="tech_high_dmg_no_kills">Много урона, 0 убийств</string>
-    <string name="tech_didnt_charm">Не очаровал?</string>
+    <string name="tech_didnt_charm">Нет очарования?</string>
     <string name="tech_spell_dominance">Свободное заклинание</string>
     <string name="tech_mvp_dps_format">MVP урон %1$d</string>
     <string name="tech_mvp_cc_format">MVP КК %1$d</string>
-    <string name="tech_distress_combo">Комбо с болью?</string>
+    <string name="tech_distress_combo">Нет бессилия?</string>
     <string name="tech_cc_rival">КК соперник?</string>
-    <string name="tech_no_silences">Комбо с тишиной?</string>
+    <string name="tech_no_silences">Нет немоты?</string>
     <string name="tech_no_tiger_strikes">Вихрь смерти?</string>
 
     <!-- Battle Summary Overlay -->

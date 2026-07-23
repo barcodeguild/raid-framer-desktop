@@ -268,13 +268,13 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="tech_mvp_heals_format">MVP Heilung %1$d</string>
     <string name="tech_focused_target">Fokussiertes Ziel</string>
     <string name="tech_high_dmg_no_kills">Hoher Schaden, keine Kills</string>
-    <string name="tech_didnt_charm">Nicht verzaubert?</string>
+    <string name="tech_didnt_charm">Kein Charme?</string>
     <string name="tech_spell_dominance">Freies Zaubern</string>
     <string name="tech_mvp_dps_format">MVP DPS %1$d</string>
     <string name="tech_mvp_cc_format">MVP CC %1$d</string>
-    <string name="tech_distress_combo">Schmerz-Kombo?</string>
+    <string name="tech_distress_combo">Keine Bedrängnis?</string>
     <string name="tech_cc_rival">CC-Rivale?</string>
-    <string name="tech_no_silences">Stille?</string>
+    <string name="tech_no_silences">Keine Stille?</string>
     <string name="tech_no_tiger_strikes">No Tiger Strikes?</string>
 
     <!-- Battle Summary Overlay -->

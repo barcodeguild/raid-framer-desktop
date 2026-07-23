@@ -66,7 +66,7 @@
     <string name="category_none">无</string>
     <string name="category_charms">魅惑</string>
     <string name="category_silences">沉默</string>
-    <string name="category_distresses">苦恼</string>
+    <string name="category_distresses">深度破胆</string>
     <string name="category_debuffs">减益</string>
     <string name="category_songs">歌曲</string>
     <string name="category_buffs">增益</string>
@@ -171,7 +171,7 @@
     <string name="player_card_stat_buffs">增益</string>
     <string name="player_card_stat_debuffs">减益</string>
     <string name="player_card_stat_charms">魅惑</string>
-    <string name="player_card_stat_distress">苦恼</string>
+    <string name="player_card_stat_distress">深度破胆</string>
     <string name="player_card_stat_silence">沉默</string>
     <string name="player_card_stat_glider">滑翔翼使用</string>
     <string name="player_card_stat_items">物品使用</string>
@@ -268,13 +268,13 @@
     <string name="tech_mvp_heals_format">MVP治疗 %1$d</string>
     <string name="tech_focused_target">集中目标</string>
     <string name="tech_high_dmg_no_kills">高伤害无击杀</string>
-    <string name="tech_didnt_charm">没有魅惑？</string>
+    <string name="tech_didnt_charm">无魅惑？</string>
     <string name="tech_spell_dominance">自由施法</string>
     <string name="tech_mvp_dps_format">MVP输出 %1$d</string>
     <string name="tech_mvp_cc_format">MVP控制 %1$d</string>
-    <string name="tech_distress_combo">苦痛连招？</string>
+    <string name="tech_distress_combo">无深度破胆？</string>
     <string name="tech_cc_rival">控制对手？</string>
-    <string name="tech_no_silences">沉默连招？</string>
+    <string name="tech_no_silences">无沉默？</string>
     <string name="tech_no_tiger_strikes">杀戮风暴无？</string>
 
     <!-- Battle Summary Overlay -->
