@@ -45,7 +45,7 @@ val blacklistedDebuffIds: Set<Int> = setOf(
 
   // Some other stuff I found
   18373, 23079, 23080, // Gleeful Destruction maledictions
-  22022, // Lucius: Gods and Heroes (Lunastone debuff stacks)
+  22022, 8000576, // Lucius: Gods and Heroes (Lunastone debuff stacks)
   4844, // Dominator's Curse
   13789, 14620, // Abyssal Burdon, Abyssal Whisper
   9001158, // PvP is undesirable
@@ -57,6 +57,10 @@ val blacklistedDebuffIds: Set<Int> = setOf(
 val blacklistedBuffIds: Set<Int> = setOf(
   // Add buff IDs here as they are discovered
   // Format: id  // buff name
+  39214, // high-speed glide
+  7105, // Bracing blast immunity
+  20929, // Arc lightning immunity
+  794, 795, 796, 7655, // Increase health lift buffs
 )
 
 // Names of debuffs to blacklist (fallback for when IDs aren't available)
