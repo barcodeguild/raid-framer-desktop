@@ -538,12 +538,12 @@ object BattleGraphInteractor : Interactor() {
       val result = TechnicalAnalysisHelper.analyze(graphCards)
       _techAnalysisResult.value = result.copy(
         edgeHeuristics = result.edgeHeuristics.filter {
-          it.category == mode.name && (
+          (it.category == mode.name || it.category == "ALL") && (
             (_showTechAnalysis.value && !it.isMvp) || (_showMvpOnly.value && it.isMvp)
           )
         },
         nodeHeuristics = result.nodeHeuristics.filter {
-          it.category == mode.name && (
+          (it.category == mode.name || it.category == "ALL") && (
             (_showTechAnalysis.value && !it.isMvp) || (_showMvpOnly.value && it.isMvp)
           )
         }

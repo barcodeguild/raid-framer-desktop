@@ -45,6 +45,7 @@ object TechnicalAnalysisHelper {
   private const val CAT_HEALS = "HEALS"
   private const val CAT_DAMAGE = "DAMAGE"
   private const val CAT_CC = "CC"
+  private const val CAT_ALL = "ALL"
 
   // I might want to move these into a spell definition and internationalize them but this requires launching the game
   // in Korean again which I really don't want to do right now
@@ -62,6 +63,31 @@ object TechnicalAnalysisHelper {
     analyzeHealing(cards, cardsByName, edgeHeuristics, nodeHeuristics)
     analyzeDPS(cards, cardsByName, edgeHeuristics, nodeHeuristics)
     analyzeCC(cards, cardsByName, edgeHeuristics, nodeHeuristics)
+
+    // Skill-tree heuristics: show on ALL graph modes for any real player
+    cards.filter { it.isRealPlayer }.forEach { card ->
+      val spec = SpecType.fromName(card.currentBuild) ?: return@forEach
+
+      // Didn't Charm? - has Songcraft but 0 charms
+      if (SkillTreeType.SONGCRAFT in spec.trees && card.sessionCharmTotal == 0) {
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_didnt_charm, color = RFColors.techDidntCharm, category = CAT_ALL))
+      }
+
+      // No Tiger Strikes? - has Battlerage but 0 tiger strikes
+      if (SkillTreeType.BATTLERAGE in spec.trees && card.sessionTigerStrikeTotal == 0) {
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_no_tiger_strikes, color = RFColors.techNoTigerStrikes, category = CAT_ALL))
+      }
+
+      // No Silence? - has Witchcraft but 0 silences
+      if (SkillTreeType.WITCHCRAFT in spec.trees && card.sessionSilenceTotal == 0) {
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_no_silences, color = RFColors.techDistressCombo, category = CAT_ALL))
+      }
+
+      // Distress Combo? - has Defense but 0 distress
+      if (SkillTreeType.DEFENSE in spec.trees && card.sessionDistressTotal == 0) {
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_distress_combo, color = RFColors.techDistressCombo, category = CAT_ALL))
+      }
+    }
 
     return TechAnalysisResult(
       edgeHeuristics = edgeHeuristics,
@@ -185,18 +211,8 @@ object TechnicalAnalysisHelper {
         )
       }
 
-      // Heuristic - Didn't Charm? - has Songcraft but 0 charms
-      val spec = SpecType.fromName(card.currentBuild)
-      if (spec != null && SkillTreeType.SONGCRAFT in spec.trees && card.sessionCharmTotal == 0) {
-        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_didnt_charm, color = RFColors.techDidntCharm, category = CAT_DAMAGE))
-      }
-
-      // Heuristic - No Tiger Strikes? - has Battlerage but 0 tiger strikes
-      if (spec != null && SkillTreeType.BATTLERAGE in spec.trees && card.sessionTigerStrikeTotal == 0) {
-        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_no_tiger_strikes, color = RFColors.techNoTigerStrikes, category = CAT_DAMAGE))
-      }
-
       // Heuristic - Spell Dominance - mage/ranged whose damage comes primarily from key spells
+      val spec = SpecType.fromName(card.currentBuild)
       if (spec != null && (spec in META_MAGE_SPECS || spec in META_RANGED_SPEC)) {
         val totalDmg = card.sessionDamageTotal
         if (totalDmg > 0) {
@@ -270,18 +286,6 @@ object TechnicalAnalysisHelper {
       }
     }
 
-    // Heuristic - Distress Combos? - CC tank with defense+witchcraft but 0 distress
-    cards.filter { card ->
-      card.isRealPlayer && run {
-        val spec = SpecType.fromName(card.currentBuild) ?: return@run false
-        spec in META_CC_SPECS && SkillTreeType.DEFENSE in spec.trees && SkillTreeType.WITCHCRAFT in spec.trees
-      }
-    }.forEach { card ->
-      if (card.sessionDistressTotal == 0) {
-        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_distress_combo, color = RFColors.techDistressCombo, category = CAT_CC))
-      }
-    }
-
     // Heuristic - CC Rival? - someone applying 30+ CC stacks to a CC tank (IE they are fighting back against cc with cc)
     val ccTanks = cards.filter { card ->
       card.isRealPlayer && SpecType.fromName(card.currentBuild) in META_CC_SPECS
@@ -301,25 +305,6 @@ object TechnicalAnalysisHelper {
             )
           )
         }
-      }
-    }
-
-    // Heuristic 14: Stillness? - CC tank with witchcraft but 0 silences
-    cards.filter { card ->
-      card.isRealPlayer && run {
-        val spec = SpecType.fromName(card.currentBuild) ?: return@run false
-        spec in META_CC_SPECS && SkillTreeType.WITCHCRAFT in spec.trees
-      }
-    }.forEach { card ->
-      if (card.sessionSilenceTotal == 0) {
-        nodeHeuristics.add(
-          NodeHeuristic(
-            card.name,
-            Res.string.tech_no_silences,
-            color = RFColors.techDistressCombo,
-            category = CAT_CC
-          )
-        )
       }
     }
   }
