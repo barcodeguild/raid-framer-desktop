@@ -159,7 +159,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         BattleGraphComponent(
           graphData = graphData,
           mode = selectedMode,
-          techAnalysis = if (showTechAnalysis) techAnalysis else null,
+          techAnalysis = if (showTechAnalysis || showMvpOnly) techAnalysis else null,
           onOpenPlayerCard = { playerName ->
             AppState.selectPlayer(playerName)
             wm?.openWindow(OverlayType.PLAYER_CARD)
