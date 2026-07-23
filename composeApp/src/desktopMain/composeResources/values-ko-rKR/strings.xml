@@ -268,7 +268,7 @@
     <string name="tech_focused_target">집중 대상</string>
     <string name="tech_high_dmg_no_kills">높은 피해, 처치 없음</string>
     <string name="tech_didnt_charm">매혹 안 함?</string>
-    <string name="tech_spell_dominance">주문 지배</string>
+    <string name="tech_spell_dominance">자유 시전</string>
     <string name="tech_mvp_dps_format">MVP 딜 %1$d</string>
     <string name="tech_mvp_cc_format">MVP CC %1$d</string>
     <string name="tech_distress_combo">고통 콤보?</string>

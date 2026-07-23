@@ -32,11 +32,12 @@ object TechnicalAnalysisHelper {
 
   private const val HEAL_CIRCULAR_THRESHOLD = 50_000L
   private const val HEAL_FOCUS_THRESHOLD = 50_000L
-  private const val HEAL_FOCUS_RATIO = 0.20f
-  private const val DAMAGE_FOCUSED_THRESHOLD = 100_000L
+  private const val HEAL_FOCUS_RATIO = 0.10f
+  private const val DAMAGE_FOCUSED_THRESHOLD = 150_000L
   private const val HIGH_DAMAGE_THRESHOLD = 500_000L
+  private const val SPELL_DOMINANCE_DAMAGE_THRESHOLD = 300_000L
+  private const val NEEDS_HEALS_THRESHOLD = 0.5f // ony 50% of received damage healed
   private const val CC_RIVAL_THRESHOLD = 20
-  private const val NEEDS_HEALS_THRESHOLD = 25_000
 
   // for our nation's cats of course ~
   // I mean category ~
@@ -46,9 +47,9 @@ object TechnicalAnalysisHelper {
 
   // I might want to move these into a spell definition and internationalize them but this requires launching the game
   // in Korean again which I really don't want to do right now
-  private val CRASHING_WAVE_SPELLS = setOf("Crashing Wave", "Serpent's Glare")
-  private val ARC_LIGHTNING_SPELLS = setOf("Arc Lightning")
-  private val METEOR_STRIKE_SPELLS = setOf("Meteor Strike")
+  private val CRASHING_WAVE_SPELLS = setOf("Crashing Wave", "심연의 파동", "深渊波动", "Сгустки гнева")
+  private val ARC_LIGHTNING_SPELLS = setOf("Arc Lightning", "분노의 벼락", "闪电术", "Молния гнева")
+  private val METEOR_STRIKE_SPELLS = setOf("Meteor Strike", "별똥별: 파도", "裂空星陨", "Метеор")
 
   private val SPELL_DOMINANCE_SPELLS = CRASHING_WAVE_SPELLS + ARC_LIGHTNING_SPELLS + METEOR_STRIKE_SPELLS
 
@@ -116,7 +117,7 @@ object TechnicalAnalysisHelper {
     cards.filter { card ->
       card.isRealPlayer && SpecType.fromName(card.currentBuild) in (META_CC_SPECS + META_DANCER_SPECS)
     }.forEach { card ->
-      if (card.sessionHealsReceivedTotal < NEEDS_HEALS_THRESHOLD && card.sessionDamageTakenTotal > 50_000) {
+      if (card.sessionHealsReceivedTotal < card.sessionDamageTakenTotal * NEEDS_HEALS_THRESHOLD) {
         nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_needs_heals, RFColors.techNeedsHeals, category = CAT_HEALS))
       }
     }
@@ -155,7 +156,8 @@ object TechnicalAnalysisHelper {
     cards.filter { card ->
       card.isRealPlayer && SpecType.fromName(card.currentBuild) in dpsSpecs
     }.forEach { card ->
-      // Heuristic - Focused Target - 200k+ damage to a single target
+
+      // Heuristic - Focused Target - 150k+ damage to a single target
       card.sessionDamageToPlayer.forEach { (targetName, damage) ->
         if (damage >= DAMAGE_FOCUSED_THRESHOLD) {
           edgeHeuristics.add(
@@ -170,7 +172,7 @@ object TechnicalAnalysisHelper {
         }
       }
 
-      // Heuristic -  High Damage No Kills - 1M+ damage but 0 kills
+      // Heuristic -  High Damage No Kills - 500k+ damage but 0 kills
       if (card.sessionDamageTotal >= HIGH_DAMAGE_THRESHOLD && card.sessionKillTotal == 0) {
         nodeHeuristics.add(
           NodeHeuristic(
@@ -195,7 +197,10 @@ object TechnicalAnalysisHelper {
           val spellDmg = card.sessionSpellDamageMap.entries
             .filter { (spell, _) -> spell in SPELL_DOMINANCE_SPELLS }
             .sumOf { it.value }
-          if (spellDmg.toFloat() / totalDmg > 0.5f && spellDmg >= HIGH_DAMAGE_THRESHOLD) {
+
+          // significant damage with high-damage channeled spells like wave meteor, arc, etc
+          // we put a Spell Dominance badge on the player
+          if (spellDmg >= SPELL_DOMINANCE_DAMAGE_THRESHOLD) {
             nodeHeuristics.add(
               NodeHeuristic(
                 card.name,

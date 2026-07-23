@@ -268,7 +268,7 @@
     <string name="tech_focused_target">Основная цель</string>
     <string name="tech_high_dmg_no_kills">Много урона, 0 убийств</string>
     <string name="tech_didnt_charm">Не очаровал?</string>
-    <string name="tech_spell_dominance">Доминирование заклинаний</string>
+    <string name="tech_spell_dominance">Свободное заклинание</string>
     <string name="tech_mvp_dps_format">MVP урон %1$d</string>
     <string name="tech_mvp_cc_format">MVP КК %1$d</string>
     <string name="tech_distress_combo">Комбо с болью?</string>

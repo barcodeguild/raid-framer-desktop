@@ -268,7 +268,7 @@
     <string name="tech_focused_target">集中目标</string>
     <string name="tech_high_dmg_no_kills">高伤害无击杀</string>
     <string name="tech_didnt_charm">没有魅惑？</string>
-    <string name="tech_spell_dominance">法术主导</string>
+    <string name="tech_spell_dominance">自由施法</string>
     <string name="tech_mvp_dps_format">MVP输出 %1$d</string>
     <string name="tech_mvp_cc_format">MVP控制 %1$d</string>
     <string name="tech_distress_combo">苦痛连招？</string>
