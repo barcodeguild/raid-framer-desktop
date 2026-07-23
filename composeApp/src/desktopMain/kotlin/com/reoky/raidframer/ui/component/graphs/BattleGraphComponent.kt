@@ -288,17 +288,34 @@ fun BattleGraphComponent(
     stringResource(heuristic.labelRes, *heuristic.labelArgs.toTypedArray())
   }
 
-  // Tech analysis edge label layouts — fixed screen-size, don't scale with zoom
-  val techEdgeLabelLayouts = remember(techAnalysis, textMeasurer, resolvedTechLabels) {
+  // Tech analysis edge label layouts — scale with zoom, use graph category color
+  val techEdgeLabelLayouts = remember(techAnalysis, textMeasurer, resolvedTechLabels, scale, edgeColor) {
     techAnalysis?.edgeHeuristics?.mapIndexed { idx, heuristic ->
       textMeasurer.measure(
         text = resolvedTechLabels?.getOrNull(idx) ?: "",
         style = TextStyle(
-          fontSize = 11.sp,
-          color = heuristic.color,
+          fontSize = (11f * scale).sp,
+          color = edgeColor,
           fontWeight = FontWeight.Bold
         )
       )
+    } ?: emptyList()
+  }
+
+  // Precompute the gap from curve midpoint to tech label center for each heuristic,
+  // so it stacks directly above the amount label with uniform spacing.
+  val techLabelGapsFromMid = remember(edges, techAnalysis, textMeasurer, scale, edgeColor, techEdgeLabelLayouts) {
+    techAnalysis?.edgeHeuristics?.mapIndexed { idx, heuristic ->
+      val matchingEdgeIdx = edges.indexOfFirst {
+        it.source == heuristic.source && it.target == heuristic.target
+      }
+      val amountHeight = if (matchingEdgeIdx >= 0) {
+        edgeLabelLayouts.getOrNull(matchingEdgeIdx)?.size?.height?.toFloat() ?: 0f
+      } else 0f
+      val techHeight = techEdgeLabelLayouts.getOrNull(idx)?.size?.height?.toFloat() ?: 0f
+      // Amount label center is at: 5*scale + amountHeight/2
+      // Tech label center should be at: amount center + amountHeight/2 + spacing + techHeight/2
+      5f * scale + amountHeight + 4f * scale + techHeight / 2f
     } ?: emptyList()
   }
 
@@ -660,8 +677,8 @@ fun BattleGraphComponent(
             val labelNormalX = -unitTangentY
             val labelNormalY = unitTangentX
             val labelLayout = techEdgeLabelLayouts[idx]
-            // Fixed screen-size offset for tech labels
-            val labelGap = 6f + labelLayout.size.height / 2f
+            // Gap from curve midpoint — stacks directly above the amount label
+            val labelGap = techLabelGapsFromMid[idx]
             val labelCenterX = labelX + labelNormalX * labelGap
             val labelCenterY = labelY + labelNormalY * labelGap
 

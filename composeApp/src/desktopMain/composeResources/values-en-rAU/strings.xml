@@ -267,13 +267,13 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="tech_mvp_heals_format">MVP Heals %1$d</string>
     <string name="tech_focused_target">Focused Target</string>
     <string name="tech_high_dmg_no_kills">High Dmg No Kills</string>
-    <string name="tech_didnt_charm">Didn\'t Charm?</string>
+    <string name="tech_didnt_charm">Didn't Charm?</string>
     <string name="tech_spell_dominance">Spell Dominance</string>
     <string name="tech_mvp_dps_format">MVP DPS %1$d</string>
     <string name="tech_mvp_cc_format">MVP CC %1$d</string>
     <string name="tech_distress_combo">Distress Combos?</string>
     <string name="tech_cc_rival">CC Rival?</string>
-    <string name="tech_stillness_combo">Stillness Combos?</string>
+    <string name="tech_no_silences">Stillness Combos?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Battle Summary (%1$s)</string>

@@ -14,7 +14,8 @@ data class EdgeHeuristic(
   val labelRes: StringResource,
   val color: Color,
   val labelArgs: List<Any> = emptyList(),
-  val isMvp: Boolean = false
+  val isMvp: Boolean = false,
+  val category: String = ""
 )
 
 data class NodeHeuristic(
@@ -22,5 +23,6 @@ data class NodeHeuristic(
   val labelRes: StringResource,
   val color: Color,
   val labelArgs: List<Any> = emptyList(),
-  val isMvp: Boolean = false
+  val isMvp: Boolean = false,
+  val category: String = ""
 )

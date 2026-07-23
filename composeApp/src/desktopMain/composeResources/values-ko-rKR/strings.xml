@@ -273,7 +273,7 @@
     <string name="tech_mvp_cc_format">MVP CC %1$d</string>
     <string name="tech_distress_combo">고통 콤보?</string>
     <string name="tech_cc_rival">CC 라이벌?</string>
-    <string name="tech_stillness_combo">침묵 콤보?</string>
+    <string name="tech_no_silences">침묵 콤보?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>

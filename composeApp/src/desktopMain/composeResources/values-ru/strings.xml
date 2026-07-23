@@ -273,7 +273,7 @@
     <string name="tech_mvp_cc_format">MVP КК %1$d</string>
     <string name="tech_distress_combo">Комбо с болью?</string>
     <string name="tech_cc_rival">КК соперник?</string>
-    <string name="tech_stillness_combo">Комбо с тишиной?</string>
+    <string name="tech_no_silences">Комбо с тишиной?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Боевая сводка (%1$s)</string>

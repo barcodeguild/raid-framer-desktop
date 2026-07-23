@@ -273,7 +273,7 @@
     <string name="tech_mvp_cc_format">MVP控制 %1$d</string>
     <string name="tech_distress_combo">苦痛连招？</string>
     <string name="tech_cc_rival">控制对手？</string>
-    <string name="tech_stillness_combo">沉默连招？</string>
+    <string name="tech_no_silences">沉默连招？</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">战斗总结 (%1$s)</string>

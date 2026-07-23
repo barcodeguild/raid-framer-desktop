@@ -26,21 +26,30 @@ import raid_framer_desktop.composeapp.generated.resources.tech_mvp_dps_format
 import raid_framer_desktop.composeapp.generated.resources.tech_mvp_heals_format
 import raid_framer_desktop.composeapp.generated.resources.tech_needs_heals
 import raid_framer_desktop.composeapp.generated.resources.tech_spell_dominance
-import raid_framer_desktop.composeapp.generated.resources.tech_stillness_combo
+import raid_framer_desktop.composeapp.generated.resources.tech_no_silences
 
 object TechnicalAnalysisHelper {
 
   private const val HEAL_CIRCULAR_THRESHOLD = 50_000L
   private const val HEAL_FOCUS_THRESHOLD = 50_000L
-  private const val HEAL_FOCUS_RATIO = 0.3f
+  private const val HEAL_FOCUS_RATIO = 0.20f
   private const val DAMAGE_FOCUSED_THRESHOLD = 100_000L
   private const val HIGH_DAMAGE_THRESHOLD = 500_000L
   private const val CC_RIVAL_THRESHOLD = 20
   private const val NEEDS_HEALS_THRESHOLD = 25_000
 
+  // for our nation's cats of course ~
+  // I mean category ~
+  private const val CAT_HEALS = "HEALS"
+  private const val CAT_DAMAGE = "DAMAGE"
+  private const val CAT_CC = "CC"
+
+  // I might want to move these into a spell definition and internationalize them but this requires launching the game
+  // in Korean again which I really don't want to do right now
   private val CRASHING_WAVE_SPELLS = setOf("Crashing Wave", "Serpent's Glare")
   private val ARC_LIGHTNING_SPELLS = setOf("Arc Lightning")
   private val METEOR_STRIKE_SPELLS = setOf("Meteor Strike")
+
   private val SPELL_DOMINANCE_SPELLS = CRASHING_WAVE_SPELLS + ARC_LIGHTNING_SPELLS + METEOR_STRIKE_SPELLS
 
   fun analyze(cards: List<PlayerCard>): TechAnalysisResult {
@@ -69,7 +78,7 @@ object TechnicalAnalysisHelper {
       card.isRealPlayer && SpecType.fromName(card.currentBuild) in META_HEALER_SPECS
     }
 
-    // Heuristic - Circular healing loop
+    // Heuristic - Circular healing loop (two friends healing each others)
     for (i in healers.indices) {
       for (j in i + 1 until healers.size) {
         val a = healers[i]
@@ -77,8 +86,8 @@ object TechnicalAnalysisHelper {
         val aHealsB = a.sessionHealToPlayer[b.name] ?: 0L
         val bHealsA = b.sessionHealToPlayer[a.name] ?: 0L
         if (aHealsB >= HEAL_CIRCULAR_THRESHOLD && bHealsA >= HEAL_CIRCULAR_THRESHOLD) {
-          edgeHeuristics.add(EdgeHeuristic(a.name, b.name, Res.string.tech_heal_loop, RFColors.techHealLoop))
-          edgeHeuristics.add(EdgeHeuristic(b.name, a.name, Res.string.tech_heal_loop, RFColors.techHealLoop))
+          edgeHeuristics.add(EdgeHeuristic(a.name, b.name, Res.string.tech_heal_loop, RFColors.techHealLoop, category = CAT_HEALS))
+          edgeHeuristics.add(EdgeHeuristic(b.name, a.name, Res.string.tech_heal_loop, RFColors.techHealLoop, category = CAT_HEALS))
         }
       }
     }
@@ -96,9 +105,9 @@ object TechnicalAnalysisHelper {
         val targetCard = cardsByName[targetName] ?: return@forEach
         val targetSpec = SpecType.fromName(targetCard.currentBuild)
         if (targetSpec in META_CC_SPECS) {
-          edgeHeuristics.add(EdgeHeuristic(healer.name, targetName, Res.string.tech_heal_focus, RFColors.techHealFocus))
+          edgeHeuristics.add(EdgeHeuristic(healer.name, targetName, Res.string.tech_heal_focus, RFColors.techHealFocus, category = CAT_HEALS))
         } else if (targetSpec in META_DANCER_SPECS) {
-          edgeHeuristics.add(EdgeHeuristic(healer.name, targetName, Res.string.tech_heal_focus, RFColors.techHealFocus))
+          edgeHeuristics.add(EdgeHeuristic(healer.name, targetName, Res.string.tech_heal_focus, RFColors.techHealFocus, category = CAT_HEALS))
         }
       }
     }
@@ -108,7 +117,7 @@ object TechnicalAnalysisHelper {
       card.isRealPlayer && SpecType.fromName(card.currentBuild) in (META_CC_SPECS + META_DANCER_SPECS)
     }.forEach { card ->
       if (card.sessionHealsReceivedTotal < NEEDS_HEALS_THRESHOLD && card.sessionDamageTakenTotal > 50_000) {
-        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_needs_heals, RFColors.techNeedsHeals))
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_needs_heals, RFColors.techNeedsHeals, category = CAT_HEALS))
       }
     }
 
@@ -126,7 +135,8 @@ object TechnicalAnalysisHelper {
             Res.string.tech_mvp_heals_format,
             RFColors.techMvpHeals,
             listOf(index + 1),
-            isMvp = true
+            isMvp = true,
+            category = CAT_HEALS
           )
         )
       }
@@ -153,7 +163,8 @@ object TechnicalAnalysisHelper {
               card.name,
               targetName,
               Res.string.tech_focused_target,
-              color = RFColors.techFocusedTarget
+              color = RFColors.techFocusedTarget,
+              category = CAT_DAMAGE
             )
           )
         }
@@ -165,7 +176,8 @@ object TechnicalAnalysisHelper {
           NodeHeuristic(
             card.name,
             Res.string.tech_high_dmg_no_kills,
-            color = RFColors.techHighDmgNoKills
+            color = RFColors.techHighDmgNoKills,
+            category = CAT_DAMAGE
           )
         )
       }
@@ -173,7 +185,7 @@ object TechnicalAnalysisHelper {
       // Heuristic - Didn't Charm? - has Songcraft but 0 charms
       val spec = SpecType.fromName(card.currentBuild)
       if (spec != null && SkillTreeType.SONGCRAFT in spec.trees && card.sessionCharmTotal == 0) {
-        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_didnt_charm, color = RFColors.techDidntCharm))
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_didnt_charm, color = RFColors.techDidntCharm, category = CAT_DAMAGE))
       }
 
       // Heuristic - Spell Dominance - mage/ranged whose damage comes primarily from key spells
@@ -188,7 +200,8 @@ object TechnicalAnalysisHelper {
               NodeHeuristic(
                 card.name,
                 Res.string.tech_spell_dominance,
-                color = RFColors.techSpellDominance
+                color = RFColors.techSpellDominance,
+                category = CAT_DAMAGE
               )
             )
           }
@@ -210,7 +223,8 @@ object TechnicalAnalysisHelper {
             Res.string.tech_mvp_dps_format,
             RFColors.techMvpDps,
             listOf(index + 1),
-            isMvp = true
+            isMvp = true,
+            category = CAT_DAMAGE
           )
         )
       }
@@ -238,7 +252,8 @@ object TechnicalAnalysisHelper {
             Res.string.tech_mvp_cc_format,
             RFColors.techMvpCc,
             listOf(index + 1),
-            isMvp = true
+            isMvp = true,
+            category = CAT_CC
           )
         )
       }
@@ -252,7 +267,7 @@ object TechnicalAnalysisHelper {
       }
     }.forEach { card ->
       if (card.sessionDistressTotal == 0) {
-        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_distress_combo, color = RFColors.techDistressCombo))
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_distress_combo, color = RFColors.techDistressCombo, category = CAT_CC))
       }
     }
 
@@ -270,26 +285,28 @@ object TechnicalAnalysisHelper {
               source.name,
               tank.name,
               Res.string.tech_cc_rival,
-              color = RFColors.techNeedsHeals
+              color = RFColors.techNeedsHeals,
+              category = CAT_CC
             )
           )
         }
       }
     }
 
-    // Heuristic 14: Stillness Combos? - CC tank with witchcraft+occultism but 0 silences
+    // Heuristic 14: Stillness? - CC tank with witchcraft but 0 silences
     cards.filter { card ->
       card.isRealPlayer && run {
         val spec = SpecType.fromName(card.currentBuild) ?: return@run false
-        spec in META_CC_SPECS && SkillTreeType.WITCHCRAFT in spec.trees && SkillTreeType.OCCULTISM in spec.trees
+        spec in META_CC_SPECS && SkillTreeType.WITCHCRAFT in spec.trees
       }
     }.forEach { card ->
       if (card.sessionSilenceTotal == 0) {
         nodeHeuristics.add(
           NodeHeuristic(
             card.name,
-            Res.string.tech_stillness_combo,
-            color = RFColors.techDistressCombo
+            Res.string.tech_no_silences,
+            color = RFColors.techDistressCombo,
+            category = CAT_CC
           )
         )
       }
