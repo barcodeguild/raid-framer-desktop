@@ -10,7 +10,8 @@ import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
-import com.reoky.raidframer.core.helper.UpdateHelper
+import com.reoky.raidframer.core.helpers.UpdateHelper
+import com.reoky.raidframer.core.helpers.UpdateStatus
 import com.reoky.raidframer.core.interactor.BattleGraphInteractor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
@@ -101,7 +102,7 @@ fun main(args: Array<String>) {
       if (RFConfig.state.value.autoUpdateEnabled) {
         Log.info(TAG, "Checking for updates on startup...")
         UpdateHelper.checkForUpdates { status ->
-          if (status is com.reoky.raidframer.core.helper.UpdateStatus.Available) {
+          if (status is UpdateStatus.Available) {
             Log.info(TAG, "Update available: ${status.updateInfo.version}")
           } else {
             Log.info(TAG, "No update available or check failed.")

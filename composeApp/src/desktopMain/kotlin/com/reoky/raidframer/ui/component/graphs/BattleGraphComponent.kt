@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -67,7 +68,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import org.jetbrains.compose.resources.stringResource
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.SkillTreeType
-import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.helpers.RFColors
@@ -85,6 +85,7 @@ import com.reoky.raidframer.core.interactor.BattleGraphData
 import com.reoky.raidframer.core.interactor.BattleGraphMode
 import com.reoky.raidframer.core.interactor.GraphEdge
 import com.reoky.raidframer.core.interactor.GraphNode
+import com.reoky.raidframer.core.model.TechAnalysisResult
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.LocalDragLock
 import kotlin.math.atan2
@@ -96,6 +97,7 @@ import kotlinx.coroutines.launch
 fun BattleGraphComponent(
   graphData: BattleGraphData,
   mode: BattleGraphMode,
+  techAnalysis: TechAnalysisResult? = null,
   onOpenPlayerCard: (String) -> Unit,
   onFilterByName: (String) -> Unit,
   onFilterBySpec: (String) -> Unit,
@@ -279,6 +281,25 @@ fun BattleGraphComponent(
         )
       )
     }
+  }
+
+  // Resolve heuristic labels outside remember (stringResource is @Composable)
+  val resolvedTechLabels = techAnalysis?.edgeHeuristics?.map { heuristic ->
+    stringResource(heuristic.labelRes, *heuristic.labelArgs.toTypedArray())
+  }
+
+  // Tech analysis edge label layouts — fixed screen-size, don't scale with zoom
+  val techEdgeLabelLayouts = remember(techAnalysis, textMeasurer, resolvedTechLabels) {
+    techAnalysis?.edgeHeuristics?.mapIndexed { idx, heuristic ->
+      textMeasurer.measure(
+        text = resolvedTechLabels?.getOrNull(idx) ?: "",
+        style = TextStyle(
+          fontSize = 11.sp,
+          color = heuristic.color,
+          fontWeight = FontWeight.Bold
+        )
+      )
+    } ?: emptyList()
   }
 
   BoxWithConstraints(
@@ -544,6 +565,123 @@ fun BattleGraphComponent(
     }
     } // key
 
+    // Tech analysis edge label overlay
+    if (techAnalysis != null && techAnalysis.edgeHeuristics.isNotEmpty()) {
+      Canvas(modifier = Modifier.fillMaxSize()) {
+        val nodeRadiusPx = 50.dp.toPx()
+        val scaledRadius = nodeRadiusPx * scale
+
+        techAnalysis.edgeHeuristics.forEachIndexed { idx, heuristic ->
+          if (heuristic.source == heuristic.target) return@forEachIndexed
+          val srcIdx = nodeIndexByName[heuristic.source] ?: return@forEachIndexed
+          val tgtIdx = nodeIndexByName[heuristic.target] ?: return@forEachIndexed
+          if (srcIdx >= animatedX.size || tgtIdx >= animatedX.size) return@forEachIndexed
+
+          val isBidirectional = (heuristic.target to heuristic.source) in reciprocalEdgePairs
+          val srcCx = animatedX[srcIdx] * scale + panOffset.x + centerX
+          val srcCy = animatedY[srcIdx] * scale + panOffset.y + centerY
+          val tgtCx = animatedX[tgtIdx] * scale + panOffset.x + centerX
+          val tgtCy = animatedY[tgtIdx] * scale + panOffset.y + centerY
+
+          val dx = tgtCx - srcCx
+          val dy = tgtCy - srcCy
+          val dist = sqrt(dx * dx + dy * dy)
+          val safeDist = dist.coerceAtLeast(1f)
+          val nx = if (dist > 0.1f) dx / safeDist else 1f
+          val ny = if (dist > 0.1f) dy / safeDist else 0f
+          val perpX = -ny
+          val perpY = nx
+
+          val availableGap = (safeDist - scaledRadius * 2f).coerceAtLeast(0f)
+          val requestedMargin = (6f + 8f) * scale
+          val edgeMargin = requestedMargin.coerceAtMost(availableGap * 0.45f)
+
+          val endpointSeparation = if (isBidirectional) {
+            (4f + 8f * scale * 0.75f).coerceAtMost(scaledRadius * 0.35f)
+          } else {
+            0f
+          }
+          val startRadialX = nx + perpX * endpointSeparation / scaledRadius
+          val startRadialY = ny + perpY * endpointSeparation / scaledRadius
+          val startRadialLength = sqrt(startRadialX * startRadialX + startRadialY * startRadialY)
+          val endRadialX = -nx + perpX * endpointSeparation / scaledRadius
+          val endRadialY = -ny + perpY * endpointSeparation / scaledRadius
+          val endRadialLength = sqrt(endRadialX * endRadialX + endRadialY * endRadialY)
+
+          val startX = srcCx + startRadialX / startRadialLength * (scaledRadius + edgeMargin)
+          val startY = srcCy + startRadialY / startRadialLength * (scaledRadius + edgeMargin)
+          val endX = tgtCx + endRadialX / endRadialLength * (scaledRadius + edgeMargin)
+          val endY = tgtCy + endRadialY / endRadialLength * (scaledRadius + edgeMargin)
+
+          val curvature = if (isBidirectional) {
+            (safeDist * 0.08f).coerceIn(6f * scale, 36f * scale)
+          } else {
+            0f
+          }
+          val midpointX = (startX + endX) / 2f
+          val midpointY = (startY + endY) / 2f
+          val quadraticCtrlX = midpointX + perpX * curvature
+          val quadraticCtrlY = midpointY + perpY * curvature
+          val startCtrlX = startX + (quadraticCtrlX - startX) * (2f / 3f)
+          val startCtrlY = startY + (quadraticCtrlY - startY) * (2f / 3f)
+          val endCtrlX = endX + (quadraticCtrlX - endX) * (2f / 3f)
+          val endCtrlY = endY + (quadraticCtrlY - endY) * (2f / 3f)
+
+          // Compute label position at curve midpoint
+          val curveT = 0.5f
+          val inverseT = 1f - curveT
+          val labelX = inverseT * inverseT * inverseT * startX +
+            3f * inverseT * inverseT * curveT * startCtrlX +
+            3f * inverseT * curveT * curveT * endCtrlX +
+            curveT * curveT * curveT * endX
+          val labelY = inverseT * inverseT * inverseT * startY +
+            3f * inverseT * inverseT * curveT * startCtrlY +
+            3f * inverseT * curveT * curveT * endCtrlY +
+            curveT * curveT * curveT * endY
+
+          val tangentX = 3f * inverseT * inverseT * (startCtrlX - startX) +
+            6f * inverseT * curveT * (endCtrlX - startCtrlX) +
+            3f * curveT * curveT * (endX - endCtrlX)
+          val tangentY = 3f * inverseT * inverseT * (startCtrlY - startY) +
+            6f * inverseT * curveT * (endCtrlY - startCtrlY) +
+            3f * curveT * curveT * (endY - endCtrlY)
+          val tangentLength = sqrt(tangentX * tangentX + tangentY * tangentY)
+
+          if (tangentLength > 0.1f && idx < techEdgeLabelLayouts.size) {
+            var labelAngle = Math.toDegrees(
+              atan2(tangentY.toDouble(), tangentX.toDouble())
+            ).toFloat()
+            if (labelAngle > 90f || labelAngle < -90f) {
+              labelAngle += 180f
+            }
+
+            val unitTangentX = tangentX / tangentLength
+            val unitTangentY = tangentY / tangentLength
+            val labelNormalX = -unitTangentY
+            val labelNormalY = unitTangentX
+            val labelLayout = techEdgeLabelLayouts[idx]
+            // Fixed screen-size offset for tech labels
+            val labelGap = 6f + labelLayout.size.height / 2f
+            val labelCenterX = labelX + labelNormalX * labelGap
+            val labelCenterY = labelY + labelNormalY * labelGap
+
+            rotate(
+              degrees = labelAngle,
+              pivot = Offset(labelCenterX, labelCenterY)
+            ) {
+              drawText(
+                textLayoutResult = labelLayout,
+                topLeft = Offset(
+                  labelCenterX - labelLayout.size.width / 2f,
+                  labelCenterY - labelLayout.size.height / 2f
+                )
+              )
+            }
+          }
+        }
+      }
+    }
+
     // Edge hover detection overlay — transparent hit area covering all edges
     Canvas(
       modifier = Modifier
@@ -641,9 +779,6 @@ fun BattleGraphComponent(
           isSelected = selectedNode?.name == node.name,
           modifier = Modifier
             .graphicsLayer {
-              // graphicsLayer scales around the node's center by default. Keep the
-              // translation based on the unscaled layout size so the visual center
-              // remains aligned with the edge coordinates at every zoom level.
               translationX = nodeCx - 50.dp.toPx()
               translationY = nodeCy - 50.dp.toPx()
               scaleX = scale
@@ -671,6 +806,33 @@ fun BattleGraphComponent(
               }
             }
         )
+
+        // Node heuristic labels
+        if (techAnalysis != null) {
+          val nodeHeuristics = techAnalysis.nodeHeuristics.filter { it.nodeName == node.name }
+          val scaledNodeRadius = 50f * density * scale
+          val resolvedNodeLabels = nodeHeuristics.map { h ->
+            stringResource(h.labelRes, *h.labelArgs.toTypedArray())
+          }
+          nodeHeuristics.forEachIndexed { hIdx, heuristic ->
+            val offsetY = scaledNodeRadius + 4f * density * scale + hIdx * 18f * density * scale
+            var labelWidthPx by remember { mutableFloatStateOf(0f) }
+            NodeHeuristicLabel(
+              label = resolvedNodeLabels[hIdx],
+              color = heuristic.color,
+              modifier = Modifier
+                .onPlaced { coordinates ->
+                  labelWidthPx = coordinates.size.width.toFloat()
+                }
+                .graphicsLayer {
+                  translationX = nodeCx - labelWidthPx / 2f
+                  translationY = nodeCy + offsetY
+                  scaleX = scale
+                  scaleY = scale
+                }
+            )
+          }
+        }
       }
     }
 
@@ -909,6 +1071,32 @@ private fun SkillTreeIcon(tree: SkillTreeType) {
       .size(14.dp)
       .padding(horizontal = 1.dp)
   )
+}
+
+@Composable
+private fun NodeHeuristicLabel(
+  label: String,
+  color: Color,
+  modifier: Modifier = Modifier
+) {
+  Box(
+    modifier = modifier,
+    contentAlignment = Alignment.Center
+  ) {
+    Box(
+      modifier = Modifier
+        .background(color.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
+        .padding(horizontal = 6.dp, vertical = 2.dp)
+    ) {
+      Text(
+        text = label,
+        color = Color.Black,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        maxLines = 1
+      )
+    }
+  }
 }
 
 private val EDGE_HIT_SAMPLE_POINTS = floatArrayOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)

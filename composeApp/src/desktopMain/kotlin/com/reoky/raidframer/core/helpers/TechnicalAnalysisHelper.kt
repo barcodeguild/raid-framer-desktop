@@ -1,0 +1,298 @@
+package com.reoky.raidframer.core.helpers
+
+import com.reoky.raidframer.core.definitions.META_CC_SPECS
+import com.reoky.raidframer.core.definitions.META_DANCER_SPECS
+import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
+import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
+import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
+import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
+import com.reoky.raidframer.core.definitions.SkillTreeType
+import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.model.EdgeHeuristic
+import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.NodeHeuristic
+import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.model.TechAnalysisResult
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.tech_cc_rival
+import raid_framer_desktop.composeapp.generated.resources.tech_didnt_charm
+import raid_framer_desktop.composeapp.generated.resources.tech_distress_combo
+import raid_framer_desktop.composeapp.generated.resources.tech_focused_target
+import raid_framer_desktop.composeapp.generated.resources.tech_heal_focus
+import raid_framer_desktop.composeapp.generated.resources.tech_heal_loop
+import raid_framer_desktop.composeapp.generated.resources.tech_high_dmg_no_kills
+import raid_framer_desktop.composeapp.generated.resources.tech_mvp_cc_format
+import raid_framer_desktop.composeapp.generated.resources.tech_mvp_dps_format
+import raid_framer_desktop.composeapp.generated.resources.tech_mvp_heals_format
+import raid_framer_desktop.composeapp.generated.resources.tech_needs_heals
+import raid_framer_desktop.composeapp.generated.resources.tech_spell_dominance
+import raid_framer_desktop.composeapp.generated.resources.tech_stillness_combo
+
+object TechnicalAnalysisHelper {
+
+  private const val HEAL_CIRCULAR_THRESHOLD = 50_000L
+  private const val HEAL_FOCUS_THRESHOLD = 50_000L
+  private const val HEAL_FOCUS_RATIO = 0.3f
+  private const val DAMAGE_FOCUSED_THRESHOLD = 100_000L
+  private const val HIGH_DAMAGE_THRESHOLD = 500_000L
+  private const val CC_RIVAL_THRESHOLD = 20
+  private const val NEEDS_HEALS_THRESHOLD = 25_000
+
+  private val CRASHING_WAVE_SPELLS = setOf("Crashing Wave", "Serpent's Glare")
+  private val ARC_LIGHTNING_SPELLS = setOf("Arc Lightning")
+  private val METEOR_STRIKE_SPELLS = setOf("Meteor Strike")
+  private val SPELL_DOMINANCE_SPELLS = CRASHING_WAVE_SPELLS + ARC_LIGHTNING_SPELLS + METEOR_STRIKE_SPELLS
+
+  fun analyze(cards: List<PlayerCard>): TechAnalysisResult {
+    val cardsByName = cards.associateBy { it.name }
+    val edgeHeuristics = mutableListOf<EdgeHeuristic>()
+    val nodeHeuristics = mutableListOf<NodeHeuristic>()
+
+    analyzeHealing(cards, cardsByName, edgeHeuristics, nodeHeuristics)
+    analyzeDPS(cards, cardsByName, edgeHeuristics, nodeHeuristics)
+    analyzeCC(cards, cardsByName, edgeHeuristics, nodeHeuristics)
+
+    return TechAnalysisResult(
+      edgeHeuristics = edgeHeuristics,
+      nodeHeuristics = nodeHeuristics
+    )
+  }
+
+  // TA for Heals Graphs
+  private fun analyzeHealing(
+    cards: List<PlayerCard>,
+    cardsByName: Map<String, PlayerCard>,
+    edgeHeuristics: MutableList<EdgeHeuristic>,
+    nodeHeuristics: MutableList<NodeHeuristic>
+  ) {
+    val healers = cards.filter { card ->
+      card.isRealPlayer && SpecType.fromName(card.currentBuild) in META_HEALER_SPECS
+    }
+
+    // Heuristic - Circular healing loop
+    for (i in healers.indices) {
+      for (j in i + 1 until healers.size) {
+        val a = healers[i]
+        val b = healers[j]
+        val aHealsB = a.sessionHealToPlayer[b.name] ?: 0L
+        val bHealsA = b.sessionHealToPlayer[a.name] ?: 0L
+        if (aHealsB >= HEAL_CIRCULAR_THRESHOLD && bHealsA >= HEAL_CIRCULAR_THRESHOLD) {
+          edgeHeuristics.add(EdgeHeuristic(a.name, b.name, Res.string.tech_heal_loop, RFColors.techHealLoop))
+          edgeHeuristics.add(EdgeHeuristic(b.name, a.name, Res.string.tech_heal_loop, RFColors.techHealLoop))
+        }
+      }
+    }
+
+    // Heuristic - Healer focused on tank/dancer
+    healers.forEach { healer ->
+      val totalHeals = healer.sessionHealTotal
+      if (totalHeals <= 0) return@forEach
+
+      healer.sessionHealToPlayer.forEach { (targetName, healAmount) ->
+        if (healAmount < HEAL_FOCUS_THRESHOLD) return@forEach
+        val ratio = healAmount.toFloat() / totalHeals
+        if (ratio < HEAL_FOCUS_RATIO) return@forEach
+
+        val targetCard = cardsByName[targetName] ?: return@forEach
+        val targetSpec = SpecType.fromName(targetCard.currentBuild)
+        if (targetSpec in META_CC_SPECS) {
+          edgeHeuristics.add(EdgeHeuristic(healer.name, targetName, Res.string.tech_heal_focus, RFColors.techHealFocus))
+        } else if (targetSpec in META_DANCER_SPECS) {
+          edgeHeuristics.add(EdgeHeuristic(healer.name, targetName, Res.string.tech_heal_focus, RFColors.techHealFocus))
+        }
+      }
+    }
+
+    // Heuristic - tanks/dancers not receiving enough heals
+    cards.filter { card ->
+      card.isRealPlayer && SpecType.fromName(card.currentBuild) in (META_CC_SPECS + META_DANCER_SPECS)
+    }.forEach { card ->
+      if (card.sessionHealsReceivedTotal < NEEDS_HEALS_THRESHOLD && card.sessionDamageTakenTotal > 50_000) {
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_needs_heals, RFColors.techNeedsHeals))
+      }
+    }
+
+    // Heuristic - MVP Heals Top 3 per faction
+    val realCards = cards.filter { it.isRealPlayer }
+    listOf(Faction.HARANYA, Faction.NUIA, Faction.PIRATE).forEach { faction ->
+      val top3 = realCards
+        .filter { Faction.fromString(it.lastKnownFaction) == faction && it.sessionHealTotal > 0 }
+        .sortedByDescending { it.sessionHealTotal }
+        .take(3)
+      top3.forEachIndexed { index, card ->
+        nodeHeuristics.add(
+          NodeHeuristic(
+            card.name,
+            Res.string.tech_mvp_heals_format,
+            RFColors.techMvpHeals,
+            listOf(index + 1),
+            isMvp = true
+          )
+        )
+      }
+    }
+  }
+
+  // TA for DPS Graphs
+  private fun analyzeDPS(
+    cards: List<PlayerCard>,
+    cardsByName: Map<String, PlayerCard>,
+    edgeHeuristics: MutableList<EdgeHeuristic>,
+    nodeHeuristics: MutableList<NodeHeuristic>
+  ) {
+    val dpsSpecs = META_MAGE_SPECS + META_MELEE_SPECS + META_RANGED_SPEC
+
+    cards.filter { card ->
+      card.isRealPlayer && SpecType.fromName(card.currentBuild) in dpsSpecs
+    }.forEach { card ->
+      // Heuristic - Focused Target - 200k+ damage to a single target
+      card.sessionDamageToPlayer.forEach { (targetName, damage) ->
+        if (damage >= DAMAGE_FOCUSED_THRESHOLD) {
+          edgeHeuristics.add(
+            EdgeHeuristic(
+              card.name,
+              targetName,
+              Res.string.tech_focused_target,
+              color = RFColors.techFocusedTarget
+            )
+          )
+        }
+      }
+
+      // Heuristic -  High Damage No Kills - 1M+ damage but 0 kills
+      if (card.sessionDamageTotal >= HIGH_DAMAGE_THRESHOLD && card.sessionKillTotal == 0) {
+        nodeHeuristics.add(
+          NodeHeuristic(
+            card.name,
+            Res.string.tech_high_dmg_no_kills,
+            color = RFColors.techHighDmgNoKills
+          )
+        )
+      }
+
+      // Heuristic - Didn't Charm? - has Songcraft but 0 charms
+      val spec = SpecType.fromName(card.currentBuild)
+      if (spec != null && SkillTreeType.SONGCRAFT in spec.trees && card.sessionCharmTotal == 0) {
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_didnt_charm, color = RFColors.techDidntCharm))
+      }
+
+      // Heuristic - Spell Dominance - mage/ranged whose damage comes primarily from key spells
+      if (spec != null && (spec in META_MAGE_SPECS || spec in META_RANGED_SPEC)) {
+        val totalDmg = card.sessionDamageTotal
+        if (totalDmg > 0) {
+          val spellDmg = card.sessionSpellDamageMap.entries
+            .filter { (spell, _) -> spell in SPELL_DOMINANCE_SPELLS }
+            .sumOf { it.value }
+          if (spellDmg.toFloat() / totalDmg > 0.5f && spellDmg >= HIGH_DAMAGE_THRESHOLD) {
+            nodeHeuristics.add(
+              NodeHeuristic(
+                card.name,
+                Res.string.tech_spell_dominance,
+                color = RFColors.techSpellDominance
+              )
+            )
+          }
+        }
+      }
+    }
+
+    // Heuristic - MVP DPS Top 3 per faction
+    val realCards = cards.filter { it.isRealPlayer }
+    listOf(Faction.HARANYA, Faction.NUIA, Faction.PIRATE).forEach { faction ->
+      val top3 = realCards
+        .filter { Faction.fromString(it.lastKnownFaction) == faction && it.sessionDamageTotal > 0 }
+        .sortedByDescending { it.sessionDamageTotal }
+        .take(3)
+      top3.forEachIndexed { index, card ->
+        nodeHeuristics.add(
+          NodeHeuristic(
+            card.name,
+            Res.string.tech_mvp_dps_format,
+            RFColors.techMvpDps,
+            listOf(index + 1),
+            isMvp = true
+          )
+        )
+      }
+    }
+  }
+
+  // TA for CC Graph
+  private fun analyzeCC(
+    cards: List<PlayerCard>,
+    cardsByName: Map<String, PlayerCard>,
+    edgeHeuristics: MutableList<EdgeHeuristic>,
+    nodeHeuristics: MutableList<NodeHeuristic>
+  ) {
+    // Heuristic  MVP CC Top 3 per faction
+    val realCards = cards.filter { it.isRealPlayer }
+    listOf(Faction.HARANYA, Faction.NUIA, Faction.PIRATE).forEach { faction ->
+      val top3 = realCards
+        .filter { Faction.fromString(it.lastKnownFaction) == faction && it.sessionCCTotal > 0 }
+        .sortedByDescending { it.sessionCCTotal }
+        .take(3)
+      top3.forEachIndexed { index, card ->
+        nodeHeuristics.add(
+          NodeHeuristic(
+            card.name,
+            Res.string.tech_mvp_cc_format,
+            RFColors.techMvpCc,
+            listOf(index + 1),
+            isMvp = true
+          )
+        )
+      }
+    }
+
+    // Heuristic - Distress Combos? - CC tank with defense+witchcraft but 0 distress
+    cards.filter { card ->
+      card.isRealPlayer && run {
+        val spec = SpecType.fromName(card.currentBuild) ?: return@run false
+        spec in META_CC_SPECS && SkillTreeType.DEFENSE in spec.trees && SkillTreeType.WITCHCRAFT in spec.trees
+      }
+    }.forEach { card ->
+      if (card.sessionDistressTotal == 0) {
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_distress_combo, color = RFColors.techDistressCombo))
+      }
+    }
+
+    // Heuristic - CC Rival? - someone applying 30+ CC stacks to a CC tank (IE they are fighting back against cc with cc)
+    val ccTanks = cards.filter { card ->
+      card.isRealPlayer && SpecType.fromName(card.currentBuild) in META_CC_SPECS
+    }
+    cards.filter { it.isRealPlayer }.forEach { source ->
+      ccTanks.forEach { tank ->
+        if (source.name == tank.name) return@forEach
+        val ccApplied = source.sessionCCToPlayer[tank.name] ?: 0
+        if (ccApplied >= CC_RIVAL_THRESHOLD) {
+          edgeHeuristics.add(
+            EdgeHeuristic(
+              source.name,
+              tank.name,
+              Res.string.tech_cc_rival,
+              color = RFColors.techNeedsHeals
+            )
+          )
+        }
+      }
+    }
+
+    // Heuristic 14: Stillness Combos? - CC tank with witchcraft+occultism but 0 silences
+    cards.filter { card ->
+      card.isRealPlayer && run {
+        val spec = SpecType.fromName(card.currentBuild) ?: return@run false
+        spec in META_CC_SPECS && SkillTreeType.WITCHCRAFT in spec.trees && SkillTreeType.OCCULTISM in spec.trees
+      }
+    }.forEach { card ->
+      if (card.sessionSilenceTotal == 0) {
+        nodeHeuristics.add(
+          NodeHeuristic(
+            card.name,
+            Res.string.tech_stillness_combo,
+            color = RFColors.techDistressCombo
+          )
+        )
+      }
+    }
+  }
+}

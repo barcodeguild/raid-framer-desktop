@@ -6,6 +6,8 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -34,8 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.blacklistedDebuffNames
 import com.reoky.raidframer.core.definitions.blacklistedBuffNames
+import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.interactor.BattleGraphInteractor
 import com.reoky.raidframer.core.interactor.BattleGraphMode
 import com.reoky.raidframer.ui.LocalDragLock
@@ -81,12 +85,19 @@ import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_distr
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_min_silence
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_max_edges
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_all_spells
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_show_technical_analysis
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_show_mvp_labels
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_filters_collapsed
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_filters_expanded
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_spell_filter_buff
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_spell_filter_debuff
 
 @Composable
 fun BattleGraphOverlay(wm: WindowManager?) {
   val graphData by BattleGraphInteractor.graphData.collectAsState()
   val selectedMode by BattleGraphInteractor.selectedMode.collectAsState()
   val isPaused by BattleGraphInteractor.isPaused.collectAsState()
+  val techAnalysis by BattleGraphInteractor.techAnalysisResult.collectAsState()
   val dragLock = LocalDragLock.current
 
   // Slider positions 0..1 (mapped to actual values via multiplier)
@@ -97,6 +108,16 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   var maxEdgesSlider by remember { mutableFloatStateOf(0.267f) }   // 20 / 75
   var selectedPlayerName by remember { mutableStateOf<String?>(null) }
   var isControlsExpanded by remember { mutableStateOf(true) }
+  var showTechAnalysis by remember { mutableStateOf(false) }
+  var showMvpOnly by remember { mutableStateOf(false) }
+
+  // Resolve localized skill tree names in composable context and push to interactor
+  val localizedSkillTreeNames = SkillTreeType.entries.associateWith { tree ->
+    stringResource(tree.localizedDisplayNameRes)
+  }
+  LaunchedEffect(localizedSkillTreeNames) {
+    BattleGraphInteractor.setLocalizedSkillTreeNames(localizedSkillTreeNames)
+  }
 
   // Debounced push to interactor — avoids recomposition during drag
   LaunchedEffect(Unit) {
@@ -113,7 +134,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
   }
 
   Column(
-    modifier = Modifier.fillMaxSize().background(Color(0xFF121212))
+    modifier = Modifier.fillMaxSize().background(RFColors.OverlayBackground)
   ) {
     val titleText = when (selectedMode) {
       BattleGraphMode.DAMAGE -> stringResource(Res.string.battle_graph_focused_damage)
@@ -138,6 +159,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         BattleGraphComponent(
           graphData = graphData,
           mode = selectedMode,
+          techAnalysis = if (showTechAnalysis) techAnalysis else null,
           onOpenPlayerCard = { playerName ->
             AppState.selectPlayer(playerName)
             wm?.openWindow(OverlayType.PLAYER_CARD)
@@ -196,7 +218,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
         ) {
           Text(
-            text = if (isControlsExpanded) "▲ Filters" else "▼ Filters",
+            text = if (isControlsExpanded) stringResource(Res.string.battle_graph_filters_expanded) else stringResource(Res.string.battle_graph_filters_collapsed),
             color = RFColors.TextTertiary,
             fontSize = 10.sp
           )
@@ -291,6 +313,71 @@ fun BattleGraphOverlay(wm: WindowManager?) {
               selectedMode = selectedMode,
               onModeSelected = { BattleGraphInteractor.setMode(it) }
             )
+
+            // Technical Analysis toggle
+            val techCheckboxColor = when (selectedMode) {
+              BattleGraphMode.DAMAGE -> RFColors.dpsOrange
+              BattleGraphMode.HEALS -> RFColors.healsGreen
+              BattleGraphMode.CC -> RFColors.ccCyan
+              BattleGraphMode.KILLS -> RFColors.killsRed
+              BattleGraphMode.BUFFS -> RFColors.buffsBlue
+              BattleGraphMode.DEBUFFS -> RFColors.debuffsPurple
+              BattleGraphMode.CHARMS -> RFColors.charmPink
+              BattleGraphMode.DISTRESS -> RFColors.distressPurple
+              BattleGraphMode.SILENCE -> RFColors.silencePurple
+            }
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier
+                .width(340.dp)
+                .padding(vertical = 2.dp)
+            ) {
+              Checkbox(
+                checked = showTechAnalysis,
+                onCheckedChange = { new ->
+                  showTechAnalysis = new
+                  BattleGraphInteractor.setTechAnalysis(new)
+                },
+                colors = CheckboxDefaults.colors(
+                  checkmarkColor = Color.White,
+                  checkedColor = techCheckboxColor,
+                  uncheckedColor = RFColors.TextSecondary
+                )
+              )
+              Spacer(modifier = Modifier.width(4.dp))
+              Text(
+                text = stringResource(Res.string.battle_graph_show_technical_analysis),
+                color = RFColors.TextSecondary,
+                fontSize = 10.sp
+              )
+            }
+
+            // MVP Labels Only toggle
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier
+                .width(340.dp)
+                .padding(vertical = 2.dp)
+            ) {
+              Checkbox(
+                checked = showMvpOnly,
+                onCheckedChange = { new ->
+                  showMvpOnly = new
+                  BattleGraphInteractor.setMvpOnly(new)
+                },
+                colors = CheckboxDefaults.colors(
+                  checkmarkColor = Color.White,
+                  checkedColor = techCheckboxColor,
+                  uncheckedColor = RFColors.TextSecondary
+                )
+              )
+              Spacer(modifier = Modifier.width(4.dp))
+              Text(
+                text = stringResource(Res.string.battle_graph_show_mvp_labels),
+                color = RFColors.TextSecondary,
+                fontSize = 10.sp
+              )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -416,7 +503,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
                 listOf(null to allLabel) + sortedSpells.map { it.key to "${it.key} (${it.value})" }
               }
               SpellFilterDropdown(
-                label = if (selectedMode == BattleGraphMode.BUFFS) "Buff" else "Debuff",
+                label = if (selectedMode == BattleGraphMode.BUFFS) stringResource(Res.string.battle_graph_spell_filter_buff) else stringResource(Res.string.battle_graph_spell_filter_debuff),
                 options = options,
                 color = if (selectedMode == BattleGraphMode.BUFFS) RFColors.buffsBlue else RFColors.debuffsPurple,
                 onSpellSelected = { spell ->

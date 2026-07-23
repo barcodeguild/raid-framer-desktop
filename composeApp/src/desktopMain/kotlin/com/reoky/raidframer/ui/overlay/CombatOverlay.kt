@@ -40,7 +40,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
-import com.reoky.raidframer.core.helper.UpdateHelper
+import com.reoky.raidframer.core.helpers.UpdateHelper
 import org.jetbrains.compose.resources.stringResource
 import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
@@ -63,13 +63,9 @@ import raid_framer_desktop.composeapp.generated.resources.combat_no_columns_mess
 import raid_framer_desktop.composeapp.generated.resources.combat_open_settings
 import raid_framer_desktop.composeapp.generated.resources.combat_press_plus_to_record
 import raid_framer_desktop.composeapp.generated.resources.combat_update_tooltip
-import raid_framer_desktop.composeapp.generated.resources.session_abort_confirm_title
-import raid_framer_desktop.composeapp.generated.resources.session_abort_confirm_text
-import raid_framer_desktop.composeapp.generated.resources.session_abort_confirm_button
 import raid_framer_desktop.composeapp.generated.resources.combat_stop_and_save
 import raid_framer_desktop.composeapp.generated.resources.combat_abort_and_discard
 import raid_framer_desktop.composeapp.generated.resources.combat_save_and_exit_tooltip
-import raid_framer_desktop.composeapp.generated.resources.general_cancel
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_summary
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_title
 

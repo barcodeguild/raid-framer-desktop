@@ -716,12 +716,11 @@ object PlayerCacheInteractor : Interactor() {
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, playerName = event.source)
+        createCardIfNoneExists(cid = event.cid, playerName = event.target)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postDamageEvent(event)
         }
         GraphDataInteractor.postEvent(event)
-        // credit damage taken to target
-        createCardIfNoneExists(cid = event.cid, playerName = event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postDamageTakenEvent(event)
         }
@@ -733,12 +732,11 @@ object PlayerCacheInteractor : Interactor() {
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, event.source)
+        createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postHealEvent(event)
         }
         GraphDataInteractor.postEvent(event)
-        // credit the target with received heals
-        createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postHealsReceivedEvent(event)
         }

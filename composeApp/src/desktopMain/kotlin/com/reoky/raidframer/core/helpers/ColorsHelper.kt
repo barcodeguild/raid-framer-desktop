@@ -72,6 +72,22 @@ object RFColors {
   val silencePurple = Color(0xFFAB47BC)
   val distressPurple = Color(0xFF7E57C2)
 
+  // Overlay background
+  val OverlayBackground = Color(0xFF121212)
+
+  // Tech analysis colors
+  val techHealLoop = Color(0xFF00E676)
+  val techHealFocus = Color(0xFF69F0AE)
+  val techNeedsHeals = Color(0xFFFF5252)
+  val techMvpHeals = Color(0xFF00BCD4)
+  val techFocusedTarget = Color(0xFFFF6D00)
+  val techHighDmgNoKills = Color(0xFFFF1744)
+  val techDidntCharm = Color(0xFFE040FB)
+  val techSpellDominance = Color(0xFFFF9100)
+  val techMvpDps = Color(0xFFFFD740)
+  val techMvpCc = Color(0xFF40C4FF)
+  val techDistressCombo = Color(0xFFB388FF)
+
   // Gear score histogram gradient colors (low to high gear)
   val gearRed = Color(0xFFFF1744)
   val gearOrange = Color(0xFFFF9800)

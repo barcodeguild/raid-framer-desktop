@@ -23,6 +23,8 @@ object SeedTableInteractor : Interactor() {
   private val _status = MutableStateFlow<SeedTableStatus>(SeedTableStatus.None)
   val status: StateFlow<SeedTableStatus> = _status.asStateFlow()
 
+  private var loaded = false
+
   private fun getAppDirectory(): String {
     return "${System.getProperty("user.home")}/.RaidFramer"
   }
@@ -32,7 +34,11 @@ object SeedTableInteractor : Interactor() {
   }
 
   override suspend fun interact() {
-    loadSeedTable()
+    // Seed table only needs to be loaded once at startup
+    if (!loaded) {
+      loadSeedTable()
+      loaded = true
+    }
   }
 
   fun loadSeedTable() {

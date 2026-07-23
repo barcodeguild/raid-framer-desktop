@@ -241,7 +241,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="battle_graph_resume">▶  Fortsetzen</string>
     <string name="battle_graph_pause">⏸  Pause</string>
     <string name="battle_graph_paused">PAUSIERT</string>
-    <string name="battle_graph_search_placeholder">Charaktere, Klassen &amp; Zauber suchen</string>
+    <string name="battle_graph_search_placeholder">Charaktere, Klassen, Fertigkeitsbäume &amp; Zauber suchen</string>
     <string name="battle_graph_mode_damage">Schaden</string>
     <string name="battle_graph_mode_heals">Heilung</string>
     <string name="battle_graph_mode_cc">CC</string>
@@ -252,6 +252,28 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="battle_graph_open_player_card">Spielerkarte öffnen</string>
     <string name="battle_graph_filter_by_name">Nach Name filtern</string>
     <string name="battle_graph_filter_by_spec">Nach Spezialisierung filtern</string>
+    <string name="battle_graph_all_spells">Alle</string>
+    <string name="battle_graph_show_technical_analysis">Technische Analyse anzeigen</string>
+    <string name="battle_graph_show_mvp_labels">MVP-Beschriftungen anzeigen</string>
+    <string name="battle_graph_filters_collapsed">▼ Filter</string>
+    <string name="battle_graph_filters_expanded">▲ Filter</string>
+    <string name="battle_graph_spell_filter_buff">Buff</string>
+    <string name="battle_graph_spell_filter_debuff">Debuff</string>
+
+    <!-- Technische Analyse Heuristik-Beschriftungen -->
+    <string name="tech_heal_loop">Heilungs-Schleife</string>
+    <string name="tech_heal_focus">Heilungs-Fokus</string>
+    <string name="tech_needs_heals">Braucht Heilung</string>
+    <string name="tech_mvp_heals_format">MVP Heilung %1$d</string>
+    <string name="tech_focused_target">Fokussiertes Ziel</string>
+    <string name="tech_high_dmg_no_kills">Hoher Schaden, keine Kills</string>
+    <string name="tech_didnt_charm">Nicht verzaubert?</string>
+    <string name="tech_spell_dominance">Zauber-Dominanz</string>
+    <string name="tech_mvp_dps_format">MVP DPS %1$d</string>
+    <string name="tech_mvp_cc_format">MVP CC %1$d</string>
+    <string name="tech_distress_combo">Schmerz-Kombo?</string>
+    <string name="tech_cc_rival">CC-Rivale?</string>
+    <string name="tech_stillness_combo">Stille-Kombo?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Kampfzusammenfassung (%1$s)</string>

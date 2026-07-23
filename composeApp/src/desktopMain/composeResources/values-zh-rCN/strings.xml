@@ -241,7 +241,7 @@
     <string name="battle_graph_resume">▶  继续</string>
     <string name="battle_graph_pause">⏸  暂停</string>
     <string name="battle_graph_paused">已暂停</string>
-    <string name="battle_graph_search_placeholder">搜索角色、职业和技能</string>
+    <string name="battle_graph_search_placeholder">搜索角色、职业、技能树和法术</string>
     <string name="battle_graph_mode_damage">伤害</string>
     <string name="battle_graph_mode_heals">治疗</string>
     <string name="battle_graph_mode_cc">控制</string>
@@ -252,6 +252,28 @@
     <string name="battle_graph_open_player_card">打开角色卡片</string>
     <string name="battle_graph_filter_by_name">按名称筛选</string>
     <string name="battle_graph_filter_by_spec">按职业筛选</string>
+    <string name="battle_graph_all_spells">全部</string>
+    <string name="battle_graph_show_technical_analysis">显示技术分析</string>
+    <string name="battle_graph_show_mvp_labels">显示MVP标签</string>
+    <string name="battle_graph_filters_collapsed">▼ 筛选器</string>
+    <string name="battle_graph_filters_expanded">▲ 筛选器</string>
+    <string name="battle_graph_spell_filter_buff">增益</string>
+    <string name="battle_graph_spell_filter_debuff">减益</string>
+
+    <!-- 技术分析启发式标签 -->
+    <string name="tech_heal_loop">治疗循环</string>
+    <string name="tech_heal_focus">治疗集中</string>
+    <string name="tech_needs_heals">需要治疗</string>
+    <string name="tech_mvp_heals_format">MVP治疗 %1$d</string>
+    <string name="tech_focused_target">集中目标</string>
+    <string name="tech_high_dmg_no_kills">高伤害无击杀</string>
+    <string name="tech_didnt_charm">没有魅惑？</string>
+    <string name="tech_spell_dominance">法术主导</string>
+    <string name="tech_mvp_dps_format">MVP输出 %1$d</string>
+    <string name="tech_mvp_cc_format">MVP控制 %1$d</string>
+    <string name="tech_distress_combo">苦痛连招？</string>
+    <string name="tech_cc_rival">控制对手？</string>
+    <string name="tech_stillness_combo">沉默连招？</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">战斗总结 (%1$s)</string>

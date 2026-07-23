@@ -1,4 +1,4 @@
-package com.reoky.raidframer.core.helper
+package com.reoky.raidframer.core.helpers
 
 import com.reoky.raidframer.AppGlobals
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.net.HttpURLConnection
 import java.net.URI
-import java.net.URL
+import java.util.regex.Pattern
 
 data class UpdateInfo(
   val version: String,
@@ -114,21 +114,25 @@ object UpdateHelper {
    * The body is a JSON-escaped string — unescapes \\r\\n, \\n, \\\" etc.
    */
   private fun extractReleaseBody(json: String): String? {
-    val regex = "\"body\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"".toRegex()
-    val match = regex.find(json) ?: return null
-    return match.groupValues[1]
-      .replace("\\r\\n", "\n")
-      .replace("\\n", "\n")
-      .replace("\\\"", "\"")
-      .replace("\\\\", "\\")
-      .trim()
+    // Use possessive quantifiers (*+) to prevent catastrophic backtracking
+    val pattern = Pattern.compile("\"body\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*+)\"")
+    val matcher = pattern.matcher(json)
+    if (!matcher.find()) return null
+    return matcher.group(1)
+      ?.replace("\\r\\n", "\n")
+      ?.replace("\\n", "\n")
+      ?.replace("\\\"", "\"")
+      ?.replace("\\\\", "\\")
+      ?.trim()
   }
 
   /**
    * Strips Markdown image patterns ![alt](url) from text.
    */
   private fun stripImages(body: String): String {
-    return body.replace(Regex("!\\[[^]]*]\\([^)]*\\)"), "").trim()
+    // Use possessive quantifiers to prevent backtracking
+    val pattern = Pattern.compile("!\\[[^]]*]\\([^)]*+\\)")
+    return pattern.matcher(body).replaceAll("").trim()
   }
 
   /**
@@ -152,24 +156,33 @@ object UpdateHelper {
    * Returns Pair<downloadUrl, sha256Digest> or null if no MSI asset found.
    */
   private fun extractMsiAsset(json: String): Pair<String, String>? {
-    val assetsBlockRegex = "\"assets\"\\s*:\\s*\\[".toRegex()
-    val assetsStart = assetsBlockRegex.find(json)?.range?.last ?: return null
+    val assetsBlockRegex = Pattern.compile("\"assets\"\\s*:\\s*\\[")
+    val assetsMatcher = assetsBlockRegex.matcher(json)
+    if (!assetsMatcher.find()) return null
+    val assetsStart = assetsMatcher.end()
 
     var searchFrom = assetsStart
     while (searchFrom < json.length) {
-      val nameMatch = Regex("\"name\"\\s*:\\s*\"([^\"]+\\.msi)\"").find(json, searchFrom) ?: break
-      val msiName = nameMatch.groupValues[1]
-      val downloadUrl = Regex("\"browser_download_url\"\\s*:\\s*\"([^\"]+)\"").find(json, nameMatch.range.first)?.groupValues?.get(1) ?: break
+      val namePattern = Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+\\.msi)\"")
+      val nameMatcher = namePattern.matcher(json)
+      if (!nameMatcher.find(searchFrom)) break
+      val msiName = nameMatcher.group(1) ?: break
+
+      val urlPattern = Pattern.compile("\"browser_download_url\"\\s*:\\s*\"([^\"]+)\"")
+      val urlMatcher = urlPattern.matcher(json)
+      if (!urlMatcher.find(nameMatcher.start())) break
+      val downloadUrl = urlMatcher.group(1) ?: break
 
       // Look for the digest in the same asset block (within ~2000 chars after name)
-      val digestRegion = json.substring(nameMatch.range.first, minOf(nameMatch.range.last + 2000, json.length))
-      val digestMatch = Regex("\"digest\"\\s*:\\s*\"sha256:([a-f0-9]+)\"").find(digestRegion)
-      val sha256 = digestMatch?.groupValues?.get(1) ?: ""
+      val digestRegion = json.substring(nameMatcher.start(), minOf(nameMatcher.end() + 2000, json.length))
+      val digestPattern = Pattern.compile("\"digest\"\\s*:\\s*\"sha256:([a-f0-9]+)\"")
+      val digestMatcher = digestPattern.matcher(digestRegion)
+      val sha256 = if (digestMatcher.find()) digestMatcher.group(1) ?: "" else ""
 
       if (msiName.endsWith(".msi", ignoreCase = true)) {
         return Pair(downloadUrl, sha256)
       }
-      searchFrom = nameMatch.range.last + 1
+      searchFrom = nameMatcher.end() + 1
     }
     return null
   }

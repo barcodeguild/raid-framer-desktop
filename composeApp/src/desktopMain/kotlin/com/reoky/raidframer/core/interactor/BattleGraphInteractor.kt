@@ -1,16 +1,17 @@
 package com.reoky.raidframer.core.interactor
 
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
-import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
+import com.reoky.raidframer.core.helpers.TechnicalAnalysisHelper
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.model.TechAnalysisResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 import kotlin.random.Random
@@ -54,6 +55,15 @@ object BattleGraphInteractor : Interactor() {
   private val _isPaused = MutableStateFlow(false)
   val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
 
+  private val _showTechAnalysis = MutableStateFlow(false)
+  val showTechAnalysis: StateFlow<Boolean> = _showTechAnalysis.asStateFlow()
+
+  private val _showMvpOnly = MutableStateFlow(false)
+  val showMvpOnly: StateFlow<Boolean> = _showMvpOnly.asStateFlow()
+
+  private val _techAnalysisResult = MutableStateFlow(TechAnalysisResult())
+  val techAnalysisResult: StateFlow<TechAnalysisResult> = _techAnalysisResult.asStateFlow()
+
   private var damageThresholdMin = 1000L
   private var healThresholdMin = 1000L
   private var ccThresholdMin = 0
@@ -67,6 +77,7 @@ object BattleGraphInteractor : Interactor() {
   private var maxEdges = 50
   private var selectedBuffSpell: String? = null
   private var selectedDebuffSpell: String? = null
+  private var localizedSkillTreeNames: Map<SkillTreeType, String> = emptyMap()
 
   private var lastRebuildTime = 0L
   private val rebuildThrottleMs = 3_000L
@@ -159,6 +170,10 @@ object BattleGraphInteractor : Interactor() {
     rebuildGraphFromCurrentState()
   }
 
+  fun setLocalizedSkillTreeNames(names: Map<SkillTreeType, String>) {
+    localizedSkillTreeNames = names
+  }
+
   fun setMaxEdges(max: Int) {
     maxEdges = max
     rebuildGraphFromCurrentState()
@@ -170,6 +185,16 @@ object BattleGraphInteractor : Interactor() {
       // On resume, rebuild immediately with current data
       rebuildGraphFromCurrentState()
     }
+  }
+
+  fun setTechAnalysis(show: Boolean) {
+    _showTechAnalysis.value = show
+    rebuildGraphFromCurrentState()
+  }
+
+  fun setMvpOnly(show: Boolean) {
+    _showMvpOnly.value = show
+    rebuildGraphFromCurrentState()
   }
 
   private fun rebuildGraphFromCurrentState() {
@@ -195,7 +220,10 @@ object BattleGraphInteractor : Interactor() {
         card.currentBuild.lowercase().contains(queryLower) ||
         SpecType.fromName(card.currentBuild)?.let { spec ->
           spec.name.replace("_", " ").lowercase().contains(queryLower) ||
-          spec.trees.any { tree -> tree.name.replace("_", " ").lowercase().contains(queryLower) }
+          spec.trees.any { tree ->
+            tree.name.replace("_", " ").lowercase().contains(queryLower) ||
+            localizedSkillTreeNames[tree]?.lowercase()?.contains(queryLower) == true
+          }
         } == true ||
         card.sessionSpellDamageMap.keys.any { it.lowercase().contains(queryLower) } ||
         card.sessionSpellHealMap.keys.any { it.lowercase().contains(queryLower) } ||
@@ -476,6 +504,23 @@ object BattleGraphInteractor : Interactor() {
       edges = normalizedEdges,
       maxValue = maxValue
     )
+
+    // Run tech analysis on all real cards in the graph
+    if (_showTechAnalysis.value || _showMvpOnly.value) {
+      val allCardsByName = cards.associateBy { it.name }
+      val graphCards = activeNodeNames.mapNotNull { allCardsByName[it] }
+      val result = TechnicalAnalysisHelper.analyze(graphCards)
+      _techAnalysisResult.value = result.copy(
+        edgeHeuristics = result.edgeHeuristics.filter {
+          (_showTechAnalysis.value && !it.isMvp) || (_showMvpOnly.value && it.isMvp)
+        },
+        nodeHeuristics = result.nodeHeuristics.filter {
+          (_showTechAnalysis.value && !it.isMvp) || (_showMvpOnly.value && it.isMvp)
+        }
+      )
+    } else {
+      _techAnalysisResult.value = TechAnalysisResult()
+    }
   }
 
   private fun initializePositions(nodes: List<GraphNode>) {

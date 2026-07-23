@@ -49,6 +49,7 @@ val blacklistedDebuffIds: Set<Int> = setOf(
   4844, // Dominator's Curse
   13789, 14620, // Abyssal Burdon, Abyssal Whisper
   9001158, // PvP is undesirable
+  31318, // Hide and Seek debuff
 )
 
 // Buffs that are not useful for the battle graph dropdown
