@@ -234,6 +234,38 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  /**
+   * Load a player from the local database if they exist there but aren't yet
+   * in the in-memory cache. This is used by the battle graph to populate
+   * faction / gear-score / spec info for edge targets that haven't produced
+   * any tracked event themselves.
+   *
+   * @return true if a card was loaded from the database, false if the player
+   *         was already cached or has no database row.
+   */
+  suspend fun loadPlayerFromDbIfExists(playerName: String): Boolean {
+    if (cards.containsKey(playerName)) return false
+    val cached = RFDao.playerCacheDao.getPlayerCacheFor(playerName) ?: return false
+    val previousSpec = cached.lastKnownSpec.ifBlank { SpecType.UNKNOWN.name }
+    val card = PlayerCard(
+      name = playerName,
+      recentCids = listOf(),
+      lastEvent = System.currentTimeMillis(),
+      lastKnownFaction = Faction.fromString(cached.lastKnownFaction).value,
+      lastKnownFactionStatus = FactionStatus.fromString(cached.lastKnownFactionStatus).value,
+      lastKnownGuild = cached.lastKnownGuild,
+      lastKnownGearScore = cached.lastKnownGearScore,
+      leaderships = cached.leaderships,
+      isLoaded = true,
+      isRealPlayer = true,
+      cache = cached,
+      currentBuild = previousSpec,
+      currentRole = SpecType.fromName(previousSpec)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value
+    )
+    cards[playerName] = card
+    return true
+  }
+
   private fun mergeFromSeedTable(cache: PlayerCacheEntity, seed: SeedTableEntry): PlayerCacheEntity {
     return cache.copy(
       lastSeen = seed.lastSeen,

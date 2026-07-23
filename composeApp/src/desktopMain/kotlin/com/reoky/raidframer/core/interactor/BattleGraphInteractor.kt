@@ -211,7 +211,7 @@ object BattleGraphInteractor : Interactor() {
     }
   }
 
-  private fun rebuildGraph(cards: List<PlayerCard>, mode: BattleGraphMode) {
+  private suspend fun rebuildGraph(cards: List<PlayerCard>, mode: BattleGraphMode) {
     val allowPvE = RFConfig.state.value.allowPVEDamage
     val queryLower = searchQuery.trim().lowercase()
     val filteredCards = cards.filter { card ->
@@ -479,11 +479,25 @@ object BattleGraphInteractor : Interactor() {
 
     val activeNodeNames = normalizedEdges.flatMap { listOf(it.source, it.target) }.toSet()
 
+    // Load edge targets from the local database when they aren't already in the
+    // in-memory card cache.  This gives us faction / gear-score / spec data for
+    // players who haven't produced any tracked event themselves.
+    val knownNames = cards.associateBy { it.name }
+    activeNodeNames.filter { it !in knownNames }.forEach { name ->
+      PlayerCacheInteractor.loadPlayerFromDbIfExists(name)
+    }
+
     // Add one-hop neighbors that aren't in the filtered set.
     // A target may not have a PlayerCard yet if it has not produced any
     // tracked event, but it must still have a node so the relationship edge
     // can be rendered immediately.
-    val allCardsByName = cards.associateBy { it.name }
+    val allCardsByName = cards.associateBy { it.name }.toMutableMap()
+    // Merge in any cards we just loaded from the database
+    activeNodeNames.forEach { name ->
+      if (name !in allCardsByName) {
+        PlayerCacheInteractor.observeCard(name).value?.let { allCardsByName[name] = it }
+      }
+    }
     activeNodeNames.forEach { name ->
       if (name !in nodeMap) {
         val card = allCardsByName[name]
