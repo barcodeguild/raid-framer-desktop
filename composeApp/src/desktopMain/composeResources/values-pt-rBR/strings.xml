@@ -246,6 +246,12 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="battle_graph_mode_damage">Dano</string>
     <string name="battle_graph_mode_heals">Cura</string>
     <string name="battle_graph_mode_cc">CC</string>
+    <string name="battle_graph_mode_kills">Abates</string>
+    <string name="battle_graph_mode_buffs">Buffs</string>
+    <string name="battle_graph_mode_debuffs">Debuffs</string>
+    <string name="battle_graph_mode_charms">Encantos</string>
+    <string name="battle_graph_mode_distress">Angústia</string>
+    <string name="battle_graph_mode_silence">Silêncio</string>
     <string name="battle_graph_min_dmg">Mín. Dano</string>
     <string name="battle_graph_min_heal">Mín. Cura</string>
     <string name="battle_graph_min_cc">Mín. CC</string>

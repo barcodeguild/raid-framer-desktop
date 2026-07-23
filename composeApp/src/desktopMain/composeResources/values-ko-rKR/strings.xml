@@ -246,6 +246,12 @@
     <string name="battle_graph_mode_damage">피해</string>
     <string name="battle_graph_mode_heals">치유</string>
     <string name="battle_graph_mode_cc">CC</string>
+    <string name="battle_graph_mode_kills">킬</string>
+    <string name="battle_graph_mode_buffs">버프</string>
+    <string name="battle_graph_mode_debuffs">디버프</string>
+    <string name="battle_graph_mode_charms">매혹</string>
+    <string name="battle_graph_mode_distress">강력한 위축</string>
+    <string name="battle_graph_mode_silence">침묵</string>
     <string name="battle_graph_min_dmg">최소 피해</string>
     <string name="battle_graph_min_heal">최소 치유</string>
     <string name="battle_graph_min_cc">최소 CC</string>

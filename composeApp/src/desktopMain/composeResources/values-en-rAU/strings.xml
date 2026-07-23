@@ -246,6 +246,12 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="battle_graph_mode_damage">Damage</string>
     <string name="battle_graph_mode_heals">Heals</string>
     <string name="battle_graph_mode_cc">CC</string>
+    <string name="battle_graph_mode_kills">Kills</string>
+    <string name="battle_graph_mode_buffs">Buffs</string>
+    <string name="battle_graph_mode_debuffs">Debuffs</string>
+    <string name="battle_graph_mode_charms">Charms</string>
+    <string name="battle_graph_mode_distress">Distress</string>
+    <string name="battle_graph_mode_silence">Silence</string>
     <string name="battle_graph_min_dmg">Min DMG</string>
     <string name="battle_graph_min_heal">Min Heal</string>
     <string name="battle_graph_min_cc">Min CC</string>

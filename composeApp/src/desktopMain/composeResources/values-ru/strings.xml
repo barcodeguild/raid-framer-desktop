@@ -246,6 +246,12 @@
     <string name="battle_graph_mode_damage">Урон</string>
     <string name="battle_graph_mode_heals">Исцеление</string>
     <string name="battle_graph_mode_cc">КК</string>
+    <string name="battle_graph_mode_kills">Убийства</string>
+    <string name="battle_graph_mode_buffs">Баффы</string>
+    <string name="battle_graph_mode_debuffs">Дебаффы</string>
+    <string name="battle_graph_mode_charms">Очарование</string>
+    <string name="battle_graph_mode_distress">Бессилие</string>
+    <string name="battle_graph_mode_silence">Немота</string>
     <string name="battle_graph_min_dmg">Мин. урон</string>
     <string name="battle_graph_min_heal">Мин. исцеление</string>
     <string name="battle_graph_min_cc">Мин. КК</string>

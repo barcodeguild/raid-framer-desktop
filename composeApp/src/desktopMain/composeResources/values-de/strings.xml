@@ -246,6 +246,12 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="battle_graph_mode_damage">Schaden</string>
     <string name="battle_graph_mode_heals">Heilung</string>
     <string name="battle_graph_mode_cc">CC</string>
+    <string name="battle_graph_mode_kills">Kills</string>
+    <string name="battle_graph_mode_buffs">Buffs</string>
+    <string name="battle_graph_mode_debuffs">Debuffs</string>
+    <string name="battle_graph_mode_charms">Verzauberungen</string>
+    <string name="battle_graph_mode_distress">Bedrängnis</string>
+    <string name="battle_graph_mode_silence">Stille</string>
     <string name="battle_graph_min_dmg">Min. Schaden</string>
     <string name="battle_graph_min_heal">Min. Heilung</string>
     <string name="battle_graph_min_cc">Min. CC</string>
