@@ -484,7 +484,8 @@ object PlayerCacheInteractor : Interactor() {
           totalDeaths = card.sessionDeathTotal,
           totalDamageTaken = card.sessionDamageTakenTotal,
           totalHealsReceived = card.sessionHealsReceivedTotal,
-          totalOdeHeals = card.sessionOdeHealsTotal
+          totalOdeHeals = card.sessionOdeHealsTotal,
+          totalTigerStrikes = card.sessionTigerStrikeTotal
         )
         RFDao.playerSessionDao.insert(entity)
         written++
@@ -514,7 +515,8 @@ object PlayerCacheInteractor : Interactor() {
         card.sessionDeathTotal != 0 ||
         card.sessionDamageTakenTotal != 0 ||
         card.sessionHealsReceivedTotal != 0 ||
-        card.sessionOdeHealsTotal != 0L
+        card.sessionOdeHealsTotal != 0L ||
+        card.sessionTigerStrikeTotal != 0
   }
 
   /**
@@ -556,7 +558,8 @@ object PlayerCacheInteractor : Interactor() {
       totalDeaths = sessions.sumOf { it.totalDeaths },
       totalDamageTaken = sessions.sumOf { it.totalDamageTaken },
       totalHealsReceived = sessions.sumOf { it.totalHealsReceived },
-      totalOdeHeals = sessions.sumOf { it.totalOdeHeals }
+      totalOdeHeals = sessions.sumOf { it.totalOdeHeals },
+      totalTigerStrikes = sessions.sumOf { it.totalTigerStrikes }
     )
   }
 

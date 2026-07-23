@@ -8,6 +8,7 @@ import com.reoky.raidframer.core.definitions.distressedDebuffIds
 import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
 import com.reoky.raidframer.core.definitions.silencedDebuffIds
+import com.reoky.raidframer.core.definitions.tigerStrikeDebuffIds
 import com.reoky.raidframer.core.definitions.blacklistedDebuffIds
 import com.reoky.raidframer.core.definitions.blacklistedDebuffNames
 import com.reoky.raidframer.core.definitions.blacklistedBuffNames
@@ -36,9 +37,9 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(
+    cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalDamage = cache.lifetimeTotalDamage + event.damage
+      lifetimeTotalDamage = (card.cache?.lifetimeTotalDamage ?: 0L) + event.damage
     ),
     recentDamageEvents = (this.recentDamageEvents + event).takeLast(200),
     sessionSpellDamageMap = run {
@@ -238,18 +239,20 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isSilence = event.debuffId in silencedDebuffIds
   val isGlider = event.debuffId in gliderUsageDebuffIds && System.currentTimeMillis() - this.lastGliderUse > 5000L // glider debuff applied, but only count if more than 5 second since last use to avoid double-counting from game bug
   val isSongs = event.debuffId == 853 || event.debuffId == 847 || event.debuffId == 31367 || event.debuffId == 772 // Unguarded, Lethargy, Weakened Energy, Unpleasant Sensation
+  val isTigerStrike = event.debuffId in tigerStrikeDebuffIds
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(
+    cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalDebuffsApplied = cache.lifetimeTotalDebuffsApplied + 1,
-      lifetimeTotalCCDelivered = if (isCC) cache.lifetimeTotalCCDelivered + 1 else cache.lifetimeTotalCCDelivered,
-      lifetimeTotalCharms = if (isCharm) cache.lifetimeTotalCharms + 1 else cache.lifetimeTotalCharms,
-      lifetimeTotalSongs = if (isSongs) cache.lifetimeTotalSongs + 1 else cache.lifetimeTotalSongs,
-      lifetimeTotalGliderUses = if (isGlider) cache.lifetimeTotalGliderUses + 1 else cache.lifetimeTotalGliderUses,
-      lifetimeTotalDistresses = if (isDistress) cache.lifetimeTotalDistresses + 1 else cache.lifetimeTotalDistresses,
-      lifetimeTotalSilences = if (isSilence) cache.lifetimeTotalSilences + 1 else cache.lifetimeTotalSilences
+      lifetimeTotalDebuffsApplied = (card.cache?.lifetimeTotalDebuffsApplied ?: 0L) + 1,
+      lifetimeTotalCCDelivered = if (isCC) (card.cache?.lifetimeTotalCCDelivered ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
+      lifetimeTotalCharms = if (isCharm) (card.cache?.lifetimeTotalCharms ?: 0L) + 1 else (card.cache?.lifetimeTotalCharms ?: 0L),
+      lifetimeTotalSongs = if (isSongs) (card.cache?.lifetimeTotalSongs ?: 0L) + 1 else (card.cache?.lifetimeTotalSongs ?: 0L),
+      lifetimeTotalGliderUses = if (isGlider) (card.cache?.lifetimeTotalGliderUses ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderUses ?: 0L),
+      lifetimeTotalDistresses = if (isDistress) (card.cache?.lifetimeTotalDistresses ?: 0L) + 1 else (card.cache?.lifetimeTotalDistresses ?: 0L),
+      lifetimeTotalSilences = if (isSilence) (card.cache?.lifetimeTotalSilences ?: 0L) + 1 else (card.cache?.lifetimeTotalSilences ?: 0L),
+      lifetimeTotalTigerStrikes = if (isTigerStrike) (card.cache?.lifetimeTotalTigerStrikes ?: 0L) + 1 else (card.cache?.lifetimeTotalTigerStrikes ?: 0L)
     ),
     recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
@@ -258,7 +261,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionDistressTotal = if (isDistress) sessionDistressTotal + 1 else sessionDistressTotal,
     sessionSilenceTotal = if (isSilence) sessionSilenceTotal + 1 else sessionSilenceTotal,
     sessionGliderTotal = if (isGlider) sessionGliderTotal + 1 else sessionGliderTotal,
-    sessionCCTotal = if (isCC) this.sessionCCTotal + 1 else this.sessionCCTotal,
+    sessionTigerStrikeTotal = if (isTigerStrike) sessionTigerStrikeTotal + 1 else sessionTigerStrikeTotal,
+    sessionCCTotal = if (isCC) card.sessionCCTotal + 1 else card.sessionCCTotal,
     sessionSpellCCMap = if (isCC) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       this.sessionSpellCCMap + (debuffKey to ((this.sessionSpellCCMap[debuffKey] ?: 0) + 1))
@@ -350,9 +354,9 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(
+    cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalBuffsApplied = cache.lifetimeTotalBuffsApplied + 1
+      lifetimeTotalBuffsApplied = (card.cache?.lifetimeTotalBuffsApplied ?: 0L) + 1
     ),
     recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
     sessionBuffTotal = this.sessionBuffTotal + 1,

@@ -87,6 +87,7 @@ object RFColors {
   val techMvpDps = Color(0xFFFFD740)
   val techMvpCc = Color(0xFF40C4FF)
   val techDistressCombo = Color(0xFFB388FF)
+  val techNoTigerStrikes = Color(0xFFFF6E40)
 
   // Gear score histogram gradient colors (low to high gear)
   val gearRed = Color(0xFFFF1744)

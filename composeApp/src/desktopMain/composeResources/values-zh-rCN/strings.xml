@@ -182,6 +182,7 @@
     <string name="player_card_stat_kills_killing_blow">击杀(最后一击)</string>
     <string name="player_card_stat_total_damage_taken">承受总伤害</string>
     <string name="player_card_stat_total_heals_received">接受总治疗</string>
+    <string name="player_card_stat_tiger_strikes">杀戮风暴</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">玩家详情</string>
@@ -274,6 +275,7 @@
     <string name="tech_distress_combo">苦痛连招？</string>
     <string name="tech_cc_rival">控制对手？</string>
     <string name="tech_no_silences">沉默连招？</string>
+    <string name="tech_no_tiger_strikes">杀戮风暴无？</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">战斗总结 (%1$s)</string>

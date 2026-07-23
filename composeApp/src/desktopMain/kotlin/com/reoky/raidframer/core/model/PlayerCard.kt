@@ -118,5 +118,6 @@ data class PlayerCard (
   val sessionDamageTakenTotal: Int = 0,
   val sessionHealsReceivedTotal: Int = 0,
   val sessionOdeHealsTotal: Long = 0,
+  val sessionTigerStrikeTotal: Int = 0,
 )
 

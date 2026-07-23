@@ -182,6 +182,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="player_card_stat_kills_killing_blow">Kills (Golpe Final)</string>
     <string name="player_card_stat_total_damage_taken">Dano Total Recebido</string>
     <string name="player_card_stat_total_heals_received">Curas Totais Recebidas</string>
+    <string name="player_card_stat_tiger_strikes">Tiger Strikes</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">Detalhes do Jogador</string>
@@ -274,6 +275,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="tech_distress_combo">Combo de Dor?</string>
     <string name="tech_cc_rival">Rival de CC?</string>
     <string name="tech_no_silences">Combo de Silêncio?</string>
+    <string name="tech_no_tiger_strikes">No Tiger Strikes?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Resumo da Batalha (%1$s)</string>

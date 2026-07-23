@@ -249,3 +249,11 @@ val MIGRATION_27_28 = object : Migration(27, 28) {
   }
 }
 
+// added lifetimeTotalTigerStrikes to player_cache and totalTigerStrikes to player_session_totals for Battlerage tiger strike heuristic
+val MIGRATION_28_29 = object : Migration(28, 29) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalTigerStrikes INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalTigerStrikes INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

@@ -182,6 +182,7 @@
     <string name="player_card_stat_kills_killing_blow">Убийства (последний удар)</string>
     <string name="player_card_stat_total_damage_taken">Всего получено урона</string>
     <string name="player_card_stat_total_heals_received">Всего получено исцеления</string>
+    <string name="player_card_stat_tiger_strikes">Вихрь смерти</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">Детали игрока</string>
@@ -274,6 +275,7 @@
     <string name="tech_distress_combo">Комбо с болью?</string>
     <string name="tech_cc_rival">КК соперник?</string>
     <string name="tech_no_silences">Комбо с тишиной?</string>
+    <string name="tech_no_tiger_strikes">Вихрь смерти?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Боевая сводка (%1$s)</string>

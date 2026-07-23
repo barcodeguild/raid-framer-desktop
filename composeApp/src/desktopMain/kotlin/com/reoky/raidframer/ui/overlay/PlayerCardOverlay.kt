@@ -90,6 +90,7 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_potio
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_silence
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_damage_taken
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_heals_received
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_tiger_strikes
 import raid_framer_desktop.composeapp.generated.resources.player_card_no_cached_data
 import raid_framer_desktop.composeapp.generated.resources.player_card_recent_buffs
 import raid_framer_desktop.composeapp.generated.resources.player_card_recent_damage
@@ -559,6 +560,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_charms), cache.lifetimeTotalCharms, RFColors.charmPink)
                   StatRow(stringResource(Res.string.player_card_stat_distress), cache.lifetimeTotalDistresses, RFColors.distressPurple)
                   StatRow(stringResource(Res.string.player_card_stat_silence), cache.lifetimeTotalSilences, RFColors.silencePurple)
+                  StatRow(stringResource(Res.string.player_card_stat_tiger_strikes), cache.lifetimeTotalTigerStrikes, RFColors.techNoTigerStrikes)
                   StatRow(stringResource(Res.string.player_card_stat_glider), cache.lifetimeTotalGliderUses, RFColors.gliderBlue)
                   StatRow(stringResource(Res.string.player_card_stat_items), cache.lifetimeTotalItemSkillsUsed, RFColors.itemSkillYellow)
                   StatRow(stringResource(Res.string.player_card_stat_potions), cache.lifetimeTotalPotionUsages, RFColors.potionTeal)

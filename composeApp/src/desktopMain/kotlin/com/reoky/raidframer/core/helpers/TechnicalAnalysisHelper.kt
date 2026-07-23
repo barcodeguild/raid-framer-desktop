@@ -27,6 +27,7 @@ import raid_framer_desktop.composeapp.generated.resources.tech_mvp_heals_format
 import raid_framer_desktop.composeapp.generated.resources.tech_needs_heals
 import raid_framer_desktop.composeapp.generated.resources.tech_spell_dominance
 import raid_framer_desktop.composeapp.generated.resources.tech_no_silences
+import raid_framer_desktop.composeapp.generated.resources.tech_no_tiger_strikes
 
 object TechnicalAnalysisHelper {
 
@@ -188,6 +189,11 @@ object TechnicalAnalysisHelper {
       val spec = SpecType.fromName(card.currentBuild)
       if (spec != null && SkillTreeType.SONGCRAFT in spec.trees && card.sessionCharmTotal == 0) {
         nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_didnt_charm, color = RFColors.techDidntCharm, category = CAT_DAMAGE))
+      }
+
+      // Heuristic - No Tiger Strikes? - has Battlerage but 0 tiger strikes
+      if (spec != null && SkillTreeType.BATTLERAGE in spec.trees && card.sessionTigerStrikeTotal == 0) {
+        nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_no_tiger_strikes, color = RFColors.techNoTigerStrikes, category = CAT_DAMAGE))
       }
 
       // Heuristic - Spell Dominance - mage/ranged whose damage comes primarily from key spells

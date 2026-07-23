@@ -182,6 +182,7 @@
     <string name="player_card_stat_kills_killing_blow">킬수</string>
     <string name="player_card_stat_total_damage_taken">총 받은 피해량</string>
     <string name="player_card_stat_total_heals_received">총 받은 힐량</string>
+    <string name="player_card_stat_tiger_strikes">폭풍 가르기</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">플레이어 상세</string>
@@ -274,6 +275,7 @@
     <string name="tech_distress_combo">고통 콤보?</string>
     <string name="tech_cc_rival">CC 라이벌?</string>
     <string name="tech_no_silences">침묵 콤보?</string>
+    <string name="tech_no_tiger_strikes">폭풍 가르기 없음?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>

@@ -40,6 +40,7 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_potio
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_silence
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_damage_taken
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_heals_received
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_tiger_strikes
 
 // View-model-agnostic shape so the totals card can render either the in-memory
 // session or an aggregated historical one without branching on the source.
@@ -58,7 +59,8 @@ data class SessionTotals(
   val kills: Int,
   val killsKB: Int,
   val damageTaken: Int,
-  val healsReceived: Int
+  val healsReceived: Int,
+  val tigerStrikes: Int
 ) {
   companion object {
     fun fromPlayerCard(card: PlayerCard) = SessionTotals(
@@ -76,7 +78,8 @@ data class SessionTotals(
       kills = card.sessionKillTotal,
       killsKB = card.sessionKillTotalKB,
       damageTaken = card.sessionDamageTakenTotal,
-      healsReceived = card.sessionHealsReceivedTotal
+      healsReceived = card.sessionHealsReceivedTotal,
+      tigerStrikes = card.sessionTigerStrikeTotal
     )
 
     fun fromEntity(entity: PlayerSessionTotalsEntity) = SessionTotals(
@@ -94,7 +97,8 @@ data class SessionTotals(
       kills = entity.totalKills,
       killsKB = entity.totalKillsKB,
       damageTaken = entity.totalDamageTaken,
-      healsReceived = entity.totalHealsReceived
+      healsReceived = entity.totalHealsReceived,
+      tigerStrikes = entity.totalTigerStrikes
     )
   }
 }
@@ -109,6 +113,7 @@ fun SessionStatRows(totals: SessionTotals) {
   StatRow(stringResource(Res.string.player_card_stat_charms), totals.charms.toLong(), RFColors.charmPink)
   StatRow(stringResource(Res.string.player_card_stat_distress), totals.distress.toLong(), RFColors.distressPurple)
   StatRow(stringResource(Res.string.player_card_stat_silence), totals.silence.toLong(), RFColors.silencePurple)
+  StatRow(stringResource(Res.string.player_card_stat_tiger_strikes), totals.tigerStrikes.toLong(), RFColors.techNoTigerStrikes)
   StatRow(stringResource(Res.string.player_card_stat_glider), totals.glider.toLong(), RFColors.gliderBlue)
   StatRow(stringResource(Res.string.player_card_stat_items), totals.items.toLong(), RFColors.itemSkillYellow)
   StatRow(stringResource(Res.string.player_card_stat_potions), totals.potions.toLong(), RFColors.potionTeal)
@@ -166,6 +171,7 @@ fun CompactSessionTotals(
     CompactStatRow(stringResource(Res.string.player_card_stat_charms), sessionTotals.charms.toLong(), RFColors.charmPink)
     CompactStatRow(stringResource(Res.string.player_card_stat_distress), sessionTotals.distress.toLong(), RFColors.distressPurple)
     CompactStatRow(stringResource(Res.string.player_card_stat_silence), sessionTotals.silence.toLong(), RFColors.silencePurple)
+    CompactStatRow(stringResource(Res.string.player_card_stat_tiger_strikes), sessionTotals.tigerStrikes.toLong(), RFColors.techNoTigerStrikes)
     CompactStatRow(stringResource(Res.string.player_card_stat_glider), sessionTotals.glider.toLong(), RFColors.gliderBlue)
     CompactStatRow(stringResource(Res.string.player_card_stat_items), sessionTotals.items.toLong(), RFColors.itemSkillYellow)
     CompactStatRow(stringResource(Res.string.player_card_stat_potions), sessionTotals.potions.toLong(), RFColors.potionTeal)
