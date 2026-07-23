@@ -479,19 +479,31 @@ object BattleGraphInteractor : Interactor() {
 
     val activeNodeNames = normalizedEdges.flatMap { listOf(it.source, it.target) }.toSet()
 
-    // Add one-hop neighbors that aren't in the filtered set
+    // Add one-hop neighbors that aren't in the filtered set.
+    // A target may not have a PlayerCard yet if it has not produced any
+    // tracked event, but it must still have a node so the relationship edge
+    // can be rendered immediately.
     val allCardsByName = cards.associateBy { it.name }
     activeNodeNames.forEach { name ->
       if (name !in nodeMap) {
-        val card = allCardsByName[name] ?: return@forEach
-        val spec = SpecType.fromName(card.currentBuild)
-        val faction = Faction.fromString(card.lastKnownFaction)
-        nodeMap[name] = GraphNode(
-          name = name,
-          spec = spec,
-          gearScore = card.lastKnownGearScore,
-          faction = faction
-        )
+        val card = allCardsByName[name]
+        if (card != null) {
+          val spec = SpecType.fromName(card.currentBuild)
+          val faction = Faction.fromString(card.lastKnownFaction)
+          nodeMap[name] = GraphNode(
+            name = name,
+            spec = spec,
+            gearScore = card.lastKnownGearScore,
+            faction = faction
+          )
+        } else {
+          nodeMap[name] = GraphNode(
+            name = name,
+            spec = null,
+            gearScore = 0,
+            faction = Faction.UNKNOWN
+          )
+        }
       }
     }
 
