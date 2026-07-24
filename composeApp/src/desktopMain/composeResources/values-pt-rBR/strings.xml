@@ -182,6 +182,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="player_card_stat_kills_killing_blow">Kills (Golpe Final)</string>
     <string name="player_card_stat_total_damage_taken">Dano Total Recebido</string>
     <string name="player_card_stat_total_heals_received">Curas Totais Recebidas</string>
+    <string name="player_card_stat_tiger_strikes">Tiger Strikes</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">Detalhes do Jogador</string>
@@ -241,10 +242,16 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="battle_graph_resume">▶  Retomar</string>
     <string name="battle_graph_pause">⏸  Pausar</string>
     <string name="battle_graph_paused">PAUSADO</string>
-    <string name="battle_graph_search_placeholder">Buscar Personagens, Classes &amp; Magias</string>
+    <string name="battle_graph_search_placeholder">Buscar Personagens, Classes, Árvores de Habilidades &amp; Magias</string>
     <string name="battle_graph_mode_damage">Dano</string>
     <string name="battle_graph_mode_heals">Cura</string>
     <string name="battle_graph_mode_cc">CC</string>
+    <string name="battle_graph_mode_kills">Abates</string>
+    <string name="battle_graph_mode_buffs">Buffs</string>
+    <string name="battle_graph_mode_debuffs">Debuffs</string>
+    <string name="battle_graph_mode_charms">Encantos</string>
+    <string name="battle_graph_mode_distress">Angústia</string>
+    <string name="battle_graph_mode_silence">Silêncio</string>
     <string name="battle_graph_min_dmg">Mín. Dano</string>
     <string name="battle_graph_min_heal">Mín. Cura</string>
     <string name="battle_graph_min_cc">Mín. CC</string>
@@ -252,6 +259,29 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="battle_graph_open_player_card">Abrir Carta do Jogador</string>
     <string name="battle_graph_filter_by_name">Filtrar por Nome</string>
     <string name="battle_graph_filter_by_spec">Filtrar por Especialização</string>
+    <string name="battle_graph_all_spells">Todos</string>
+    <string name="battle_graph_show_technical_analysis">Mostrar Análise Técnica</string>
+    <string name="battle_graph_show_mvp_labels">Mostrar Etiquetas MVP</string>
+    <string name="battle_graph_filters_collapsed">▼ Filtros</string>
+    <string name="battle_graph_filters_expanded">▲ Filtros</string>
+    <string name="battle_graph_spell_filter_buff">Buff</string>
+    <string name="battle_graph_spell_filter_debuff">Debuff</string>
+
+    <!-- Etiquetas de Heurística da Análise Técnica -->
+    <string name="tech_heal_loop">Ciclo de Cura</string>
+    <string name="tech_heal_focus">Foco de Cura</string>
+    <string name="tech_needs_heals">Precisa de Cura</string>
+    <string name="tech_mvp_heals_format">MVP Cura %1$d</string>
+    <string name="tech_focused_target">Alvo Focado</string>
+    <string name="tech_high_dmg_no_kills">Alto Dano, Sem Abates</string>
+    <string name="tech_didnt_charm">Sem Charme?</string>
+    <string name="tech_spell_dominance">Lançamento Livre</string>
+    <string name="tech_mvp_dps_format">MVP DPS %1$d</string>
+    <string name="tech_mvp_cc_format">MVP CC %1$d</string>
+    <string name="tech_distress_combo">Sem Angústia?</string>
+    <string name="tech_cc_rival">Rival de CC?</string>
+    <string name="tech_no_silences">Sem Silêncio?</string>
+    <string name="tech_no_tiger_strikes">No Tiger Strikes?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Resumo da Batalha (%1$s)</string>

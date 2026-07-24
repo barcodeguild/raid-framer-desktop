@@ -66,7 +66,7 @@
     <string name="category_none">없음</string>
     <string name="category_charms">매혹</string>
     <string name="category_silences">침묵</string>
-    <string name="category_distresses">강위축</string>
+    <string name="category_distresses">강력한 위축</string>
     <string name="category_debuffs">디버프</string>
     <string name="category_songs">노래</string>
     <string name="category_buffs">버프</string>
@@ -171,7 +171,7 @@
     <string name="player_card_stat_buffs">버프</string>
     <string name="player_card_stat_debuffs">디버프</string>
     <string name="player_card_stat_charms">매혹</string>
-    <string name="player_card_stat_distress">강위축</string>
+    <string name="player_card_stat_distress">강력한 위축</string>
     <string name="player_card_stat_silence">침묵</string>
     <string name="player_card_stat_glider">글라이더 사용</string>
     <string name="player_card_stat_items">아이템 사용</string>
@@ -182,6 +182,7 @@
     <string name="player_card_stat_kills_killing_blow">킬수</string>
     <string name="player_card_stat_total_damage_taken">총 받은 피해량</string>
     <string name="player_card_stat_total_heals_received">총 받은 힐량</string>
+    <string name="player_card_stat_tiger_strikes">폭풍 가르기</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">플레이어 상세</string>
@@ -241,10 +242,16 @@
     <string name="battle_graph_resume">▶  재개</string>
     <string name="battle_graph_pause">⏸  일시정지</string>
     <string name="battle_graph_paused">일시정지됨</string>
-    <string name="battle_graph_search_placeholder">캐릭터, 직업 및 스킬 검색</string>
+    <string name="battle_graph_search_placeholder">캐릭터, 직업, 기술트리 및 스킬 검색</string>
     <string name="battle_graph_mode_damage">피해</string>
     <string name="battle_graph_mode_heals">치유</string>
     <string name="battle_graph_mode_cc">CC</string>
+    <string name="battle_graph_mode_kills">킬</string>
+    <string name="battle_graph_mode_buffs">버프</string>
+    <string name="battle_graph_mode_debuffs">디버프</string>
+    <string name="battle_graph_mode_charms">매혹</string>
+    <string name="battle_graph_mode_distress">강력한 위축</string>
+    <string name="battle_graph_mode_silence">침묵</string>
     <string name="battle_graph_min_dmg">최소 피해</string>
     <string name="battle_graph_min_heal">최소 치유</string>
     <string name="battle_graph_min_cc">최소 CC</string>
@@ -252,6 +259,29 @@
     <string name="battle_graph_open_player_card">플레이어 카드 열기</string>
     <string name="battle_graph_filter_by_name">이름으로 필터</string>
     <string name="battle_graph_filter_by_spec">전직으로 필터</string>
+    <string name="battle_graph_all_spells">전체</string>
+    <string name="battle_graph_show_technical_analysis">기술 분석 표시</string>
+    <string name="battle_graph_show_mvp_labels">MVP 라벨 표시</string>
+    <string name="battle_graph_filters_collapsed">▼ 필터</string>
+    <string name="battle_graph_filters_expanded">▲ 필터</string>
+    <string name="battle_graph_spell_filter_buff">버프</string>
+    <string name="battle_graph_spell_filter_debuff">디버프</string>
+
+    <!-- 기술 분석 휴리스틱 라벨 -->
+    <string name="tech_heal_loop">치유 순환</string>
+    <string name="tech_heal_focus">치유 집중</string>
+    <string name="tech_needs_heals">치유 필요</string>
+    <string name="tech_mvp_heals_format">MVP 치유 %1$d</string>
+    <string name="tech_focused_target">집중 대상</string>
+    <string name="tech_high_dmg_no_kills">높은 피해, 처치 없음</string>
+    <string name="tech_didnt_charm">매혹 없음?</string>
+    <string name="tech_spell_dominance">자유 시전</string>
+    <string name="tech_mvp_dps_format">MVP 딜 %1$d</string>
+    <string name="tech_mvp_cc_format">MVP CC %1$d</string>
+    <string name="tech_distress_combo">강력한 위축 없음?</string>
+    <string name="tech_cc_rival">CC 라이벌?</string>
+    <string name="tech_no_silences">침묵 없음?</string>
+    <string name="tech_no_tiger_strikes">폭풍 가르기 없음?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>

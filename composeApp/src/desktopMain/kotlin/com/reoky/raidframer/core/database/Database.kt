@@ -65,6 +65,7 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_25_26) // 07/11/26 added companionShowDebugInfo and companionShowDeathsPerMinute to config
   .addMigrations(MIGRATION_26_27) // 07/12/26 added autoUpdateEnabled to config
   .addMigrations(MIGRATION_27_28) // 07/14/26 added allowOdeToRecoveryCountAsHeals to config for filtering Ode heals in rankings
+  .addMigrations(MIGRATION_28_29) // 07/23/26 added lifetimeTotalTigerStrikes to cache and totalTigerStrikes to session totals for Battlerage heuristic
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

@@ -234,6 +234,38 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  /**
+   * Load a player from the local database if they exist there but aren't yet
+   * in the in-memory cache. This is used by the battle graph to populate
+   * faction / gear-score / spec info for edge targets that haven't produced
+   * any tracked event themselves.
+   *
+   * @return true if a card was loaded from the database, false if the player
+   *         was already cached or has no database row.
+   */
+  suspend fun loadPlayerFromDbIfExists(playerName: String): Boolean {
+    if (cards.containsKey(playerName)) return false
+    val cached = RFDao.playerCacheDao.getPlayerCacheFor(playerName) ?: return false
+    val previousSpec = cached.lastKnownSpec.ifBlank { SpecType.UNKNOWN.name }
+    val card = PlayerCard(
+      name = playerName,
+      recentCids = listOf(),
+      lastEvent = System.currentTimeMillis(),
+      lastKnownFaction = Faction.fromString(cached.lastKnownFaction).value,
+      lastKnownFactionStatus = FactionStatus.fromString(cached.lastKnownFactionStatus).value,
+      lastKnownGuild = cached.lastKnownGuild,
+      lastKnownGearScore = cached.lastKnownGearScore,
+      leaderships = cached.leaderships,
+      isLoaded = true,
+      isRealPlayer = true,
+      cache = cached,
+      currentBuild = previousSpec,
+      currentRole = SpecType.fromName(previousSpec)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value
+    )
+    cards[playerName] = card
+    return true
+  }
+
   private fun mergeFromSeedTable(cache: PlayerCacheEntity, seed: SeedTableEntry): PlayerCacheEntity {
     return cache.copy(
       lastSeen = seed.lastSeen,
@@ -452,7 +484,8 @@ object PlayerCacheInteractor : Interactor() {
           totalDeaths = card.sessionDeathTotal,
           totalDamageTaken = card.sessionDamageTakenTotal,
           totalHealsReceived = card.sessionHealsReceivedTotal,
-          totalOdeHeals = card.sessionOdeHealsTotal
+          totalOdeHeals = card.sessionOdeHealsTotal,
+          totalTigerStrikes = card.sessionTigerStrikeTotal
         )
         RFDao.playerSessionDao.insert(entity)
         written++
@@ -482,7 +515,8 @@ object PlayerCacheInteractor : Interactor() {
         card.sessionDeathTotal != 0 ||
         card.sessionDamageTakenTotal != 0 ||
         card.sessionHealsReceivedTotal != 0 ||
-        card.sessionOdeHealsTotal != 0L
+        card.sessionOdeHealsTotal != 0L ||
+        card.sessionTigerStrikeTotal != 0
   }
 
   /**
@@ -524,7 +558,8 @@ object PlayerCacheInteractor : Interactor() {
       totalDeaths = sessions.sumOf { it.totalDeaths },
       totalDamageTaken = sessions.sumOf { it.totalDamageTaken },
       totalHealsReceived = sessions.sumOf { it.totalHealsReceived },
-      totalOdeHeals = sessions.sumOf { it.totalOdeHeals }
+      totalOdeHeals = sessions.sumOf { it.totalOdeHeals },
+      totalTigerStrikes = sessions.sumOf { it.totalTigerStrikes }
     )
   }
 
@@ -716,12 +751,11 @@ object PlayerCacheInteractor : Interactor() {
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, playerName = event.source)
+        createCardIfNoneExists(cid = event.cid, playerName = event.target)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postDamageEvent(event)
         }
         GraphDataInteractor.postEvent(event)
-        // credit damage taken to target
-        createCardIfNoneExists(cid = event.cid, playerName = event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postDamageTakenEvent(event)
         }
@@ -733,12 +767,11 @@ object PlayerCacheInteractor : Interactor() {
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, event.source)
+        createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postHealEvent(event)
         }
         GraphDataInteractor.postEvent(event)
-        // credit the target with received heals
-        createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postHealsReceivedEvent(event)
         }
@@ -1004,7 +1037,8 @@ object PlayerCacheInteractor : Interactor() {
             cards[killerName]?.let { killer ->
               cards[killerName] = killer.postKillEvent(
                 timestamp = attribution.timestamp,
-                victimName = attribution.victimName
+                victimName = attribution.victimName,
+                preDeathSpells = attribution.killerMostDamageSpells
               )
             }
           }

@@ -74,7 +74,8 @@ fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntit
     lifetimeTotalKillsKB = c?.lifetimeTotalKillsKB ?: 0L,
     lifetimeTotalDeaths = c?.lifetimeTotalDeaths ?: 0L,
     lifetimeTotalDamageTaken = c?.lifetimeTotalDamageTaken ?: 0L,
-    lifetimeTotalHealsReceived = c?.lifetimeTotalHealsReceived ?: 0L
+    lifetimeTotalHealsReceived = c?.lifetimeTotalHealsReceived ?: 0L,
+    lifetimeTotalTigerStrikes = c?.lifetimeTotalTigerStrikes ?: 0L
   )
 }
 
@@ -118,6 +119,7 @@ fun PlayerCard.resetSession(): PlayerCard {
     sessionDamageTakenTotal = 0,
     sessionHealsReceivedTotal = 0,
     sessionOdeHealsTotal = 0,
+    sessionTigerStrikeTotal = 0,
 
     // Session edge weights for battle graph
     sessionDamageToPlayer = mapOf(),

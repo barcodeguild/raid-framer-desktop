@@ -65,8 +65,8 @@ You should still complete the uninstallation of the main application by uninstal
     <string name="settings_combat_custom_category_3">Custom Category 3</string>
     <string name="category_none">None</string>
     <string name="category_charms">Charms</string>
-    <string name="category_silences">Silences</string>
-    <string name="category_distresses">Distresses</string>
+    <string name="category_silences">Silence</string>
+    <string name="category_distresses">Distressed</string>
     <string name="category_debuffs">Debuffs</string>
     <string name="category_songs">Songs</string>
     <string name="category_buffs">Buffs</string>
@@ -171,8 +171,8 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="player_card_stat_buffs">Buffs</string>
     <string name="player_card_stat_debuffs">Debuffs</string>
     <string name="player_card_stat_charms">Charms</string>
-    <string name="player_card_stat_distress">Distresses</string>
-    <string name="player_card_stat_silence">Silences</string>
+    <string name="player_card_stat_distress">Distressed</string>
+    <string name="player_card_stat_silence">Silence</string>
     <string name="player_card_stat_glider">Glider Uses</string>
     <string name="player_card_stat_items">Item Uses</string>
     <string name="player_card_stat_potions">Potions</string>
@@ -182,6 +182,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="player_card_stat_kills_killing_blow">Kills (Killing Blow)</string>
     <string name="player_card_stat_total_damage_taken">Total Damage Taken</string>
     <string name="player_card_stat_total_heals_received">Total Heals Received</string>
+    <string name="player_card_stat_tiger_strikes">Tiger Strikes</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">Player Details</string>
@@ -241,10 +242,16 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="battle_graph_resume">▶  Resume</string>
     <string name="battle_graph_pause">⏸  Pause</string>
     <string name="battle_graph_paused">PAUSED</string>
-    <string name="battle_graph_search_placeholder">Search Characters, Classes &amp; Spells</string>
+    <string name="battle_graph_search_placeholder">Search Characters, Classes, Skill-Trees &amp; Spells</string>
     <string name="battle_graph_mode_damage">Damage</string>
     <string name="battle_graph_mode_heals">Heals</string>
     <string name="battle_graph_mode_cc">CC</string>
+    <string name="battle_graph_mode_kills">Kills</string>
+    <string name="battle_graph_mode_buffs">Buffs</string>
+    <string name="battle_graph_mode_debuffs">Debuffs</string>
+    <string name="battle_graph_mode_charms">Charms</string>
+    <string name="battle_graph_mode_distress">Distress</string>
+    <string name="battle_graph_mode_silence">Silence</string>
     <string name="battle_graph_min_dmg">Min DMG</string>
     <string name="battle_graph_min_heal">Min Heal</string>
     <string name="battle_graph_min_cc">Min CC</string>
@@ -252,6 +259,29 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="battle_graph_open_player_card">Open Player Card</string>
     <string name="battle_graph_filter_by_name">Filter by Name</string>
     <string name="battle_graph_filter_by_spec">Filter by Spec</string>
+    <string name="battle_graph_all_spells">All</string>
+    <string name="battle_graph_show_technical_analysis">Show Technical Analysis</string>
+    <string name="battle_graph_show_mvp_labels">Show MVP Labels</string>
+    <string name="battle_graph_filters_collapsed">▼ Filters</string>
+    <string name="battle_graph_filters_expanded">▲ Filters</string>
+    <string name="battle_graph_spell_filter_buff">Buff</string>
+    <string name="battle_graph_spell_filter_debuff">Debuff</string>
+
+    <!-- Technical Analysis Heuristic Labels -->
+    <string name="tech_heal_loop">Heal Loop</string>
+    <string name="tech_heal_focus">Heal Focus</string>
+    <string name="tech_needs_heals">Needs Heals</string>
+    <string name="tech_mvp_heals_format">MVP Heals %1$d</string>
+    <string name="tech_focused_target">Focused Target</string>
+    <string name="tech_high_dmg_no_kills">High Dmg No Kills</string>
+    <string name="tech_didnt_charm">No Charm?</string>
+    <string name="tech_spell_dominance">Free Casting</string>
+    <string name="tech_mvp_dps_format">MVP DPS %1$d</string>
+    <string name="tech_mvp_cc_format">MVP CC %1$d</string>
+    <string name="tech_distress_combo">No Distress?</string>
+    <string name="tech_cc_rival">CC Rival?</string>
+    <string name="tech_no_silences">No Silence?</string>
+    <string name="tech_no_tiger_strikes">No Tiger Strikes?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Battle Summary (%1$s)</string>

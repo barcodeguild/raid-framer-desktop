@@ -386,7 +386,7 @@ import raid_framer_desktop.composeapp.generated.resources.spec_type_zephyr
  * Whitelist of preferred builds. This is mostly just opinionated. I'm going to put a badge next to players who are playing PvP specs.
  */
 val META_CC_SPECS = setOf<SpecType>(
-  SpecType.DREAMBREAKER, SpecType.DEFILER, SpecType.REVENANT, SpecType.NIGHTCLOAK, SpecType.REVENANT
+  SpecType.DREAMBREAKER, SpecType.DEFILER, SpecType.REVENANT, SpecType.NIGHTCLOAK, SpecType.SKULLKNIGHT
 )
 val META_MELEE_SPECS = setOf<SpecType>(
   SpecType.ABOLISHER, SpecType.DARKRUNNER, SpecType.DUSKDIRGE, SpecType.EXECUTIONER, SpecType.DEATHWISH, SpecType.PHANTOM,

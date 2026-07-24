@@ -68,6 +68,34 @@ data class PlayerCard (
   val sessionHealToPlayerBySpell: Map<String, Map<String, Long>> = mapOf(),    // target -> spell -> heal
   val sessionCCToPlayerBySpell: Map<String, Map<String, Int>> = mapOf(),       // target -> debuff -> count
 
+  // Kill adjacency for battle graph
+  val sessionKillsToPlayer: Map<String, Int> = mapOf(),                         // victim -> kill count (most-damage method)
+  val sessionKillsToPlayerBySpell: Map<String, Map<String, Long>> = mapOf(),    // victim -> spell -> cumulative damage in pre-death windows
+
+  // Debuff adjacency for battle graph (ALL debuffs)
+  val sessionDebuffToPlayer: Map<String, Int> = mapOf(),                         // target -> debuff count
+  val sessionDebuffToPlayerBySpell: Map<String, Map<String, Int>> = mapOf(),    // target -> debuff name -> count
+
+  // Buff adjacency for battle graph
+  val sessionBuffToPlayer: Map<String, Int> = mapOf(),                           // target -> buff count
+  val sessionBuffToPlayerBySpell: Map<String, Map<String, Int>> = mapOf(),      // target -> buff name -> count
+
+  // Charm adjacency for battle graph
+  val sessionCharmToPlayer: Map<String, Int> = mapOf(),                          // target -> charm count
+  val sessionCharmToPlayerBySpell: Map<String, Map<String, Int>> = mapOf(),     // target -> debuff name -> count
+
+  // Distress adjacency for battle graph
+  val sessionDistressToPlayer: Map<String, Int> = mapOf(),                       // target -> distress count
+  val sessionDistressToPlayerBySpell: Map<String, Map<String, Int>> = mapOf(),  // target -> debuff name -> count
+
+  // Silence adjacency for battle graph
+  val sessionSilenceToPlayer: Map<String, Int> = mapOf(),                        // target -> silence count
+  val sessionSilenceToPlayerBySpell: Map<String, Map<String, Int>> = mapOf(),   // target -> debuff name -> count
+
+  // Per-spell aggregate maps for dropdown filtering
+  val sessionSpellBuffMap: Map<String, Int> = mapOf(),     // buff name -> total count across all targets
+  val sessionSpellDebuffMap: Map<String, Int> = mapOf(),   // debuff name -> total count across all targets
+
   // session counter totals : when a new session starts, these reset to 0 and the totals are written to the database cache
   val sessionSpellDamageMap: Map<String, Long> = mapOf(), // spell name -> total damage dealt this session (never capped, used for accurate spell breakdown)
   val sessionSpellHealMap: Map<String, Long> = mapOf(), // spell name -> total healing done this session
@@ -90,5 +118,6 @@ data class PlayerCard (
   val sessionDamageTakenTotal: Int = 0,
   val sessionHealsReceivedTotal: Int = 0,
   val sessionOdeHealsTotal: Long = 0,
+  val sessionTigerStrikeTotal: Int = 0,
 )
 

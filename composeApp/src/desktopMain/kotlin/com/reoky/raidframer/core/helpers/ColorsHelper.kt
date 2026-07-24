@@ -41,6 +41,11 @@ object RFColors {
   val healsGreen = Color(105, 235, 113, 255)
   val ccCyan = Color.Cyan
 
+  // Battle graph mode colors
+  val killsRed = Color(0xFFDC143C)       // Crimson — kills graph mode
+  val buffsBlue = Color(0xFFFFCA28)      // Gold — buffs graph mode (same as itemSkillYellow)
+  val debuffsPurple = Color(0xFFAB47BC)  // Purple — debuffs graph mode (same as silencePurple)
+
   // Faction colors
   val factionHaranya = Color(0xFFAB47BC)
   val factionNuia = Color(0xFFEC407A)
@@ -66,6 +71,23 @@ object RFColors {
   val charmPink = Color(0xFFEC407A)
   val silencePurple = Color(0xFFAB47BC)
   val distressPurple = Color(0xFF7E57C2)
+
+  // Overlay background
+  val OverlayBackground = Color(0xFF121212)
+
+  // Tech analysis colors
+  val techHealLoop = Color(0xFF00E676)
+  val techHealFocus = Color(0xFF69F0AE)
+  val techNeedsHeals = Color(0xFFFF5252)
+  val techMvpHeals = Color(0xFF00BCD4)
+  val techFocusedTarget = Color(0xFFFF6D00)
+  val techHighDmgNoKills = Color(0xFFFF1744)
+  val techDidntCharm = Color(0xFFE040FB)
+  val techSpellDominance = Color(0xFFFF9100)
+  val techMvpDps = Color(0xFFFFD740)
+  val techMvpCc = Color(0xFF40C4FF)
+  val techDistressCombo = Color(0xFFB388FF)
+  val techNoTigerStrikes = Color(0xFFFF6E40)
 
   // Gear score histogram gradient colors (low to high gear)
   val gearRed = Color(0xFFFF1744)

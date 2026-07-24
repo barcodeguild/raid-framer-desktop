@@ -1,6 +1,5 @@
 package com.reoky.raidframer.ui.overlay
 
-import androidx.compose.animation.core.*
 import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.sin
 import androidx.compose.foundation.background
@@ -14,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -49,11 +47,10 @@ import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.AppState
-import com.reoky.raidframer.core.helper.UpdateHelper
-import com.reoky.raidframer.core.helper.UpdateStatus
-import com.reoky.raidframer.core.helper.UpdateDownloader
-import com.reoky.raidframer.core.helper.DownloadStatus
-import com.reoky.raidframer.core.helper.UpdateInfo
+import com.reoky.raidframer.core.helpers.UpdateHelper
+import com.reoky.raidframer.core.helpers.UpdateStatus
+import com.reoky.raidframer.core.helpers.UpdateDownloaderHelper
+import com.reoky.raidframer.core.helpers.DownloadStatus
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -1015,7 +1012,7 @@ private fun VersionPanel() {
             val info = (updateStatus as UpdateStatus.Available).updateInfo
             downloadStatus = DownloadStatus.Progress(0f, 0L, 0L)
             scope.launch(Dispatchers.IO) {
-              val result = UpdateDownloader.downloadAndInstall(info) { status ->
+              val result = UpdateDownloaderHelper.downloadAndInstall(info) { status ->
                 scope.launch(Dispatchers.Main) { downloadStatus = status }
               }
               scope.launch(Dispatchers.Main) {
@@ -1040,7 +1037,7 @@ private fun VersionPanel() {
         }
       } else if (downloadStatus is DownloadStatus.Progress || downloadStatus is DownloadStatus.Verifying) {
         Button(
-          onClick = { UpdateDownloader.cancel() },
+          onClick = { UpdateDownloaderHelper.cancel() },
           colors = ButtonDefaults.buttonColors(RFColors.TextTertiary)
         ) {
           Text(

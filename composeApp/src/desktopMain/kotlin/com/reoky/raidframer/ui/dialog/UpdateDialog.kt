@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.helpers.RFColors
-import com.reoky.raidframer.core.helper.UpdateInfo
+import com.reoky.raidframer.core.helpers.UpdateInfo
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.update_dialog_title

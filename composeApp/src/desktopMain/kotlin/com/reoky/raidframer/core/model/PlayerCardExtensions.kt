@@ -8,6 +8,10 @@ import com.reoky.raidframer.core.definitions.distressedDebuffIds
 import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
 import com.reoky.raidframer.core.definitions.silencedDebuffIds
+import com.reoky.raidframer.core.definitions.tigerStrikeDebuffIds
+import com.reoky.raidframer.core.definitions.blacklistedDebuffIds
+import com.reoky.raidframer.core.definitions.blacklistedDebuffNames
+import com.reoky.raidframer.core.definitions.blacklistedBuffNames
 import com.reoky.raidframer.core.definitions.copiedWithPotionDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.isOdeToRecovery
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
@@ -29,12 +33,13 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
  */
 fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  if (event.source == event.target) return this // skip self-damage
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(
+    cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalDamage = cache.lifetimeTotalDamage + event.damage
+      lifetimeTotalDamage = (card.cache?.lifetimeTotalDamage ?: 0L) + event.damage
     ),
     recentDamageEvents = (this.recentDamageEvents + event).takeLast(200),
     sessionSpellDamageMap = run {
@@ -56,6 +61,7 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  if (event.source == event.target) return this // skip self-heals
   val isOde = isOdeToRecovery(event.spell)
   val allowOdeAsHeal = RFConfig.state.value.allowOdeToRecoveryCountAsHeals
   return this.copy(
@@ -194,6 +200,7 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
  * Add a debuff gained event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
+  if (event.source == event.target) return this // skip self-applied debuffs
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
@@ -225,24 +232,27 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
  */
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  if (event.source == event.target) return this // skip self-casts (e.g. self-inflicted debuffs)
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
   val isCharm = event.debuffId in charmedDebuffIds
   val isDistress = event.debuffId in distressedDebuffIds
   val isSilence = event.debuffId in silencedDebuffIds
   val isGlider = event.debuffId in gliderUsageDebuffIds && System.currentTimeMillis() - this.lastGliderUse > 5000L // glider debuff applied, but only count if more than 5 second since last use to avoid double-counting from game bug
   val isSongs = event.debuffId == 853 || event.debuffId == 847 || event.debuffId == 31367 || event.debuffId == 772 // Unguarded, Lethargy, Weakened Energy, Unpleasant Sensation
+  val isTigerStrike = event.debuffId in tigerStrikeDebuffIds
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(
+    cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalDebuffsApplied = cache.lifetimeTotalDebuffsApplied + 1,
-      lifetimeTotalCCDelivered = if (isCC) cache.lifetimeTotalCCDelivered + 1 else cache.lifetimeTotalCCDelivered,
-      lifetimeTotalCharms = if (isCharm) cache.lifetimeTotalCharms + 1 else cache.lifetimeTotalCharms,
-      lifetimeTotalSongs = if (isSongs) cache.lifetimeTotalSongs + 1 else cache.lifetimeTotalSongs,
-      lifetimeTotalGliderUses = if (isGlider) cache.lifetimeTotalGliderUses + 1 else cache.lifetimeTotalGliderUses,
-      lifetimeTotalDistresses = if (isDistress) cache.lifetimeTotalDistresses + 1 else cache.lifetimeTotalDistresses,
-      lifetimeTotalSilences = if (isSilence) cache.lifetimeTotalSilences + 1 else cache.lifetimeTotalSilences
+      lifetimeTotalDebuffsApplied = (card.cache?.lifetimeTotalDebuffsApplied ?: 0L) + 1,
+      lifetimeTotalCCDelivered = if (isCC) (card.cache?.lifetimeTotalCCDelivered ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
+      lifetimeTotalCharms = if (isCharm) (card.cache?.lifetimeTotalCharms ?: 0L) + 1 else (card.cache?.lifetimeTotalCharms ?: 0L),
+      lifetimeTotalSongs = if (isSongs) (card.cache?.lifetimeTotalSongs ?: 0L) + 1 else (card.cache?.lifetimeTotalSongs ?: 0L),
+      lifetimeTotalGliderUses = if (isGlider) (card.cache?.lifetimeTotalGliderUses ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderUses ?: 0L),
+      lifetimeTotalDistresses = if (isDistress) (card.cache?.lifetimeTotalDistresses ?: 0L) + 1 else (card.cache?.lifetimeTotalDistresses ?: 0L),
+      lifetimeTotalSilences = if (isSilence) (card.cache?.lifetimeTotalSilences ?: 0L) + 1 else (card.cache?.lifetimeTotalSilences ?: 0L),
+      lifetimeTotalTigerStrikes = if (isTigerStrike) (card.cache?.lifetimeTotalTigerStrikes ?: 0L) + 1 else (card.cache?.lifetimeTotalTigerStrikes ?: 0L)
     ),
     recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
@@ -251,7 +261,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionDistressTotal = if (isDistress) sessionDistressTotal + 1 else sessionDistressTotal,
     sessionSilenceTotal = if (isSilence) sessionSilenceTotal + 1 else sessionSilenceTotal,
     sessionGliderTotal = if (isGlider) sessionGliderTotal + 1 else sessionGliderTotal,
-    sessionCCTotal = if (isCC) this.sessionCCTotal + 1 else this.sessionCCTotal,
+    sessionTigerStrikeTotal = if (isTigerStrike) sessionTigerStrikeTotal + 1 else sessionTigerStrikeTotal,
+    sessionCCTotal = if (isCC) card.sessionCCTotal + 1 else card.sessionCCTotal,
     sessionSpellCCMap = if (isCC) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       this.sessionSpellCCMap + (debuffKey to ((this.sessionSpellCCMap[debuffKey] ?: 0) + 1))
@@ -270,6 +281,66 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     } else {
       this.sessionCCToPlayerBySpell
     },
+
+    // --- ALL debuffs adjacency (not just CC) ---
+    sessionDebuffToPlayer = this.sessionDebuffToPlayer + (event.target to ((this.sessionDebuffToPlayer[event.target] ?: 0) + 1)),
+    sessionDebuffToPlayerBySpell = run {
+      val debuffKey = event.debuff.ifBlank { "Unknown" }
+      val targetMap = this.sessionDebuffToPlayerBySpell[event.target] ?: emptyMap()
+      this.sessionDebuffToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+    },
+    sessionSpellDebuffMap = run {
+      val debuffKey = event.debuff.ifBlank { "Unknown" }
+      // Filter out blacklisted debuffs from the dropdown map
+      if (event.debuffId in blacklistedDebuffIds || debuffKey in blacklistedDebuffNames) {
+        this.sessionSpellDebuffMap
+      } else {
+        this.sessionSpellDebuffMap + (debuffKey to ((this.sessionSpellDebuffMap[debuffKey] ?: 0) + 1))
+      }
+    },
+
+    // --- Charm adjacency ---
+    sessionCharmToPlayer = if (isCharm) {
+      this.sessionCharmToPlayer + (event.target to ((this.sessionCharmToPlayer[event.target] ?: 0) + 1))
+    } else {
+      this.sessionCharmToPlayer
+    },
+    sessionCharmToPlayerBySpell = if (isCharm) {
+      val debuffKey = event.debuff.ifBlank { "Unknown" }
+      val targetMap = this.sessionCharmToPlayerBySpell[event.target] ?: emptyMap()
+      this.sessionCharmToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+    } else {
+      this.sessionCharmToPlayerBySpell
+    },
+
+    // --- Distress adjacency ---
+    sessionDistressToPlayer = if (isDistress) {
+      this.sessionDistressToPlayer + (event.target to ((this.sessionDistressToPlayer[event.target] ?: 0) + 1))
+    } else {
+      this.sessionDistressToPlayer
+    },
+    sessionDistressToPlayerBySpell = if (isDistress) {
+      val debuffKey = event.debuff.ifBlank { "Unknown" }
+      val targetMap = this.sessionDistressToPlayerBySpell[event.target] ?: emptyMap()
+      this.sessionDistressToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+    } else {
+      this.sessionDistressToPlayerBySpell
+    },
+
+    // --- Silence adjacency ---
+    sessionSilenceToPlayer = if (isSilence) {
+      this.sessionSilenceToPlayer + (event.target to ((this.sessionSilenceToPlayer[event.target] ?: 0) + 1))
+    } else {
+      this.sessionSilenceToPlayer
+    },
+    sessionSilenceToPlayerBySpell = if (isSilence) {
+      val debuffKey = event.debuff.ifBlank { "Unknown" }
+      val targetMap = this.sessionSilenceToPlayerBySpell[event.target] ?: emptyMap()
+      this.sessionSilenceToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+    } else {
+      this.sessionSilenceToPlayerBySpell
+    },
+
     lastGliderUse = if (isGlider) event.timestamp else this.lastGliderUse, // update glider use timestamp if applicable
   )
 }
@@ -279,22 +350,43 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
  */
 fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  if (event.source == event.target) return this // skip self-casts (e.g. resurgence on yourself)
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(
+    cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalBuffsApplied = cache.lifetimeTotalBuffsApplied + 1
+      lifetimeTotalBuffsApplied = (card.cache?.lifetimeTotalBuffsApplied ?: 0L) + 1
     ),
     recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
-    sessionBuffTotal = this.sessionBuffTotal + 1
+    sessionBuffTotal = this.sessionBuffTotal + 1,
+    // --- Buff adjacency ---
+    sessionBuffToPlayer = this.sessionBuffToPlayer + (event.target to ((this.sessionBuffToPlayer[event.target] ?: 0) + 1)),
+    sessionBuffToPlayerBySpell = run {
+      val buffKey = event.buff.ifBlank { "Unknown" }
+      val targetMap = this.sessionBuffToPlayerBySpell[event.target] ?: emptyMap()
+      this.sessionBuffToPlayerBySpell + (event.target to (targetMap + (buffKey to ((targetMap[buffKey] ?: 0) + 1))))
+    },
+    sessionSpellBuffMap = run {
+      val buffKey = event.buff.ifBlank { "Unknown" }
+      // Filter out blacklisted buffs from the dropdown map
+      if (buffKey in blacklistedBuffNames) {
+        this.sessionSpellBuffMap
+      } else {
+        this.sessionSpellBuffMap + (buffKey to ((this.sessionSpellBuffMap[buffKey] ?: 0) + 1))
+      }
+    }
   )
 }
 
 /**
  * Record that this player killed someone.
  */
-fun PlayerCard.postKillEvent(timestamp: Long, victimName: String): PlayerCard {
+fun PlayerCard.postKillEvent(
+  timestamp: Long,
+  victimName: String,
+  preDeathSpells: Map<String, Long> = emptyMap()
+): PlayerCard {
   return this.copy(
     lastEvent = timestamp,
     cache = cache?.copy(
@@ -304,7 +396,17 @@ fun PlayerCard.postKillEvent(timestamp: Long, victimName: String): PlayerCard {
     // Add to recent kills map
     recentKills = this.recentKills + (timestamp to victimName),
     // Increment kill score
-    sessionKillTotal = this.sessionKillTotal + 1
+    sessionKillTotal = this.sessionKillTotal + 1,
+    // --- Kill adjacency ---
+    sessionKillsToPlayer = this.sessionKillsToPlayer + (victimName to ((this.sessionKillsToPlayer[victimName] ?: 0) + 1)),
+    sessionKillsToPlayerBySpell = run {
+      val targetMap = this.sessionKillsToPlayerBySpell[victimName] ?: emptyMap()
+      val merged = targetMap.toMutableMap()
+      preDeathSpells.forEach { (spell, damage) ->
+        merged[spell] = (merged[spell] ?: 0L) + damage
+      }
+      this.sessionKillsToPlayerBySpell + (victimName to merged)
+    }
   )
 }
 

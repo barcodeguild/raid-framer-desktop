@@ -1,6 +1,5 @@
-package com.reoky.raidframer.core.helper
+package com.reoky.raidframer.core.helpers
 
-import com.reoky.raidframer.core.helpers.sha256
 import com.reoky.raidframer.core.interactor.Log
 import java.io.File
 import java.io.FileOutputStream
@@ -18,7 +17,7 @@ sealed class DownloadStatus {
   object Cancelled : DownloadStatus()
 }
 
-object UpdateDownloader {
+object UpdateDownloaderHelper {
 
   @Volatile
   private var cancelled = false

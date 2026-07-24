@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 28
+const val SCHEMA_VERSION = 29
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -191,6 +191,7 @@ data class PlayerCacheEntity(
   val lifetimeTotalDeaths: Long = 0L,
   val lifetimeTotalDamageTaken: Long = 0L,
   val lifetimeTotalHealsReceived: Long = 0L,
+  val lifetimeTotalTigerStrikes: Long = 0L,
 )
 
 /*
@@ -228,7 +229,8 @@ data class PlayerSessionTotalsEntity(
   val totalDeaths: Int = 0,
   val totalDamageTaken: Int = 0,
   val totalHealsReceived: Int = 0,
-  val totalOdeHeals: Long = 0L
+  val totalOdeHeals: Long = 0L,
+  val totalTigerStrikes: Int = 0,
 )
 
 // global enums below for consolidation

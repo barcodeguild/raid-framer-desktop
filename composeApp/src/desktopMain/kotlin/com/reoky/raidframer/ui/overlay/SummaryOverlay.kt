@@ -302,7 +302,7 @@ private fun KeyDebuffsTab(
       title = stringResource(Res.string.summary_top_silences),
       cards = topSilences,
       valueExtractor = { it.sessionSilenceTotal.toString() },
-      valueColor = Color(0xFFAB47BC),
+      valueColor = RFColors.factionHaranya,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -313,7 +313,7 @@ private fun KeyDebuffsTab(
       title = stringResource(Res.string.summary_top_charms),
       cards = topCharms,
       valueExtractor = { it.sessionCharmTotal.toString() },
-      valueColor = Color(0xFFEC407A),
+      valueColor = RFColors.factionNuia,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -324,7 +324,7 @@ private fun KeyDebuffsTab(
       title = stringResource(Res.string.summary_top_distresses),
       cards = topDistresses,
       valueExtractor = { it.sessionDistressTotal.toString() },
-      valueColor = Color(0xFF7E57C2),
+      valueColor = RFColors.factionPirate,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -348,7 +348,7 @@ private fun SpellDamageByFaction(
       title = stringResource(Res.string.summary_top_haranya_spells_damage),
       spells = topDamageSpellsHaranya,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
-      valueColor = Color(0xFFAB47BC),
+      valueColor = RFColors.factionHaranya,
       modifier = Modifier.weight(1f)
     ) {}
 
@@ -357,7 +357,7 @@ private fun SpellDamageByFaction(
       title = stringResource(Res.string.summary_top_nuia_spells_damage),
       spells = topDamageSpellsNuia,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
-      valueColor = Color(0xFFEC407A),
+      valueColor = RFColors.factionNuia,
       modifier = Modifier.weight(1f)
     ) {}
 
@@ -366,7 +366,7 @@ private fun SpellDamageByFaction(
       title = stringResource(Res.string.summary_top_pirate_spells_damage),
       spells = topDamageSpellsPirate,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
-      valueColor = Color(0xFF7E57C2),
+      valueColor = RFColors.factionPirate,
       modifier = Modifier.weight(1f)
     ) {}
   }
@@ -387,7 +387,7 @@ private fun BuffsDebuffsTab(
       title = stringResource(Res.string.summary_top_debuffs),
       cards = topDebuffs,
       valueExtractor = { it.sessionDebuffTotal.toString() },
-      valueColor = Color(0xFFAB47BC),
+      valueColor = RFColors.factionHaranya,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -399,7 +399,7 @@ private fun BuffsDebuffsTab(
       title = stringResource(Res.string.summary_top_songs),
       cards = topSongs,
       valueExtractor = { it.sessionSongsTotal.toString() },
-      valueColor = Color(0xFFEC407A),
+      valueColor = RFColors.factionNuia,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -411,7 +411,7 @@ private fun BuffsDebuffsTab(
       title = stringResource(Res.string.summary_top_buffs),
       cards = topBuffers,
       valueExtractor = { it.sessionBuffTotal.toString() },
-      valueColor = Color(0xFF7E57C2),
+      valueColor = RFColors.factionPirate,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -483,7 +483,7 @@ private fun KillsDeathsTab(
       title = stringResource(Res.string.summary_top_kills_haranya),
       cards = topKillsHaranya,
       valueExtractor = { it.sessionKillTotal.toString() },
-      valueColor = Color(0xFF66BB6A),
+      valueColor = RFColors.killsHaranyaGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -495,7 +495,7 @@ private fun KillsDeathsTab(
       title = stringResource(Res.string.summary_top_kills_nuia),
       cards = topKillsNuia,
       valueExtractor = { it.sessionKillTotal.toString() },
-      valueColor = Color(0xFFFFA726),
+      valueColor = RFColors.killsNuiaOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -507,7 +507,7 @@ private fun KillsDeathsTab(
       title = stringResource(Res.string.summary_top_kills_pirate),
       cards = topKillsPirate,
       valueExtractor = { it.sessionKillTotal.toString() },
-      valueColor = Color(0xFFEF5350),
+      valueColor = RFColors.killsPirateRed,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -566,7 +566,7 @@ private fun UtilityItemsTab(
       title = stringResource(Res.string.summary_top_potion_drinkers),
       cards = topPotters,
       valueExtractor = { it.sessionPotionTotal.toString() },
-      valueColor = Color(0xFF26A69A),
+      valueColor = RFColors.potionTeal,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -578,7 +578,7 @@ private fun UtilityItemsTab(
       title = stringResource(Res.string.summary_top_glider_gamers),
       cards = topGliderGamers,
       valueExtractor = { it.sessionGliderTotal.toString() },
-      valueColor = Color(0xFF42A5F5),
+      valueColor = RFColors.gliderBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -590,7 +590,7 @@ private fun UtilityItemsTab(
       title = stringResource(Res.string.summary_most_item_usages),
       cards = topItemSkillCasters,
       valueExtractor = { it.sessionItemSkillTotal.toString() },
-      valueColor = Color(0xFFFFCA28),
+      valueColor = RFColors.itemSkillYellow,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -679,7 +679,7 @@ private fun UtilityItemsByFaction(
       title = stringResource(Res.string.summary_top_haranya_item_uses),
       items = topItemUsesHaranya,
       valueExtractor = { it.count.toString() },
-      valueColor = Color(0xFFAB47BC),
+      valueColor = RFColors.factionHaranya,
       modifier = Modifier.weight(1f)
     ) { item ->
       // optional click: select or open player/item details if desired
@@ -690,7 +690,7 @@ private fun UtilityItemsByFaction(
       title = stringResource(Res.string.summary_top_nuia_item_uses),
       items = topItemUsesNuia,
       valueExtractor = { it.count.toString() },
-      valueColor = Color(0xFFEC407A),
+      valueColor = RFColors.factionNuia,
       modifier = Modifier.weight(1f)
     ) { item -> }
 
@@ -699,7 +699,7 @@ private fun UtilityItemsByFaction(
       title = stringResource(Res.string.summary_top_pirate_item_uses),
       items = topItemUsesPirate,
       valueExtractor = { it.count.toString() },
-      valueColor = Color(0xFF7E57C2),
+      valueColor = RFColors.factionPirate,
       modifier = Modifier.weight(1f)
     ) { item -> }
   }
@@ -840,7 +840,7 @@ private fun PlayerBuildsTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_haranya_builds),
       builds = buildCountsHaranya,
-      valueColor = Color(0xFFAB47BC),
+      valueColor = RFColors.factionHaranya,
       modifier = Modifier.weight(1f)
     ) { /* optional click */ }
 
@@ -848,7 +848,7 @@ private fun PlayerBuildsTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_nuia_builds),
       builds = buildCountsNuia,
-      valueColor = Color(0xFFEC407A),
+      valueColor = RFColors.factionNuia,
       modifier = Modifier.weight(1f)
     ) { }
 
@@ -856,7 +856,7 @@ private fun PlayerBuildsTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_pirate_builds),
       builds = buildCountsPirate,
-      valueColor = Color(0xFF7E57C2),
+      valueColor = RFColors.factionPirate,
       modifier = Modifier.weight(1f)
     ) { }
   }
@@ -940,7 +940,7 @@ private fun PerformanceTab(
       title = stringResource(Res.string.summary_top_haranya_performance),
       cards = topPerformanceHaranya,
       valueExtractor = { it.pvpPerformancePoints().toString() },
-      valueColor = Color(0xFFAB47BC),
+      valueColor = RFColors.factionHaranya,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -952,7 +952,7 @@ private fun PerformanceTab(
       title = stringResource(Res.string.summary_top_nuia_performance),
       cards = topPerformanceNuia,
       valueExtractor = { it.pvpPerformancePoints().toString() },
-      valueColor = Color(0xFFEC407A),
+      valueColor = RFColors.factionNuia,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -964,7 +964,7 @@ private fun PerformanceTab(
       title = stringResource(Res.string.summary_top_pirate_performance),
       cards = topPerformancePirate,
       valueExtractor = { it.pvpPerformancePoints().toString() },
-      valueColor = Color(0xFF7E57C2),
+      valueColor = RFColors.factionPirate,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
