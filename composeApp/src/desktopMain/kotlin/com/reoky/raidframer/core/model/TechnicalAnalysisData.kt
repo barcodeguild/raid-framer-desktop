@@ -24,5 +24,6 @@ data class NodeHeuristic(
   val color: Color,
   val labelArgs: List<Any> = emptyList(),
   val isMvp: Boolean = false,
-  val category: String = ""
+  val category: String = "",
+  val playerFaction: Faction? = null
 )

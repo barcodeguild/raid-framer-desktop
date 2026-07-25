@@ -124,6 +124,9 @@ fun BattleGraphComponent(
       .map { it.source to it.target }
       .toSet()
   }
+  val visibleEdgePairs = remember(edges) {
+    edges.map { it.source to it.target }.toSet()
+  }
 
   val textMeasurer = rememberTextMeasurer()
   val dragLock = LocalDragLock.current
@@ -596,6 +599,7 @@ fun BattleGraphComponent(
 
         techAnalysis.edgeHeuristics.forEachIndexed { idx, heuristic ->
           if (heuristic.source == heuristic.target) return@forEachIndexed
+          if ((heuristic.source to heuristic.target) !in visibleEdgePairs) return@forEachIndexed
           val srcIdx = nodeIndexByName[heuristic.source] ?: return@forEachIndexed
           val tgtIdx = nodeIndexByName[heuristic.target] ?: return@forEachIndexed
           if (srcIdx >= animatedX.size || tgtIdx >= animatedX.size) return@forEachIndexed
@@ -837,12 +841,19 @@ fun BattleGraphComponent(
           val resolvedNodeLabels = nodeHeuristics.map { h ->
             stringResource(h.labelRes, *h.labelArgs.toTypedArray())
           }
+          val viewerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
           nodeHeuristics.forEachIndexed { hIdx, heuristic ->
             val offsetY = scaledNodeRadius + 4f * density * scale + hIdx * 18f * density * scale
             var labelWidthPx by remember { mutableFloatStateOf(0f) }
+            val factionBgColor = if (heuristic.isMvp) {
+              viewerFaction.getGraphNodeColor(node.faction)
+            } else {
+              null
+            }
             NodeHeuristicLabel(
               label = resolvedNodeLabels[hIdx],
               color = heuristic.color,
+              factionColor = factionBgColor,
               modifier = Modifier
                 .onPlaced { coordinates ->
                   labelWidthPx = coordinates.size.width.toFloat()
@@ -1146,15 +1157,17 @@ private fun SkillTreeIcon(tree: SkillTreeType) {
 private fun NodeHeuristicLabel(
   label: String,
   color: Color,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  factionColor: Color? = null
 ) {
+  val bgColor = factionColor ?: color
   Box(
     modifier = modifier,
     contentAlignment = Alignment.Center
   ) {
     Box(
       modifier = Modifier
-        .background(color.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
+        .background(bgColor.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
         .padding(horizontal = 6.dp, vertical = 2.dp)
     ) {
       Text(
