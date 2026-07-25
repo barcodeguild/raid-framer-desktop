@@ -56,6 +56,7 @@ object RFColors {
   val graphNodeEnemy = Color.Red.copy(alpha = 0.75f)
   val graphNodePirate = Color(0xFFE56CAB)
   val graphNodeNeutral = Color(0xFF808080)
+  val graphNodeMob = Color(0xFFD4AF37) // solid gold-yellow for mobs (game uses #9b9555)
 
   // Per-faction kill ranking colors
   val killsHaranyaGreen = Color(0xFF66BB6A)

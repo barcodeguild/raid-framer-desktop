@@ -179,7 +179,10 @@ fun BattleGraphOverlay(wm: WindowManager?) {
             BattleGraphInteractor.setSearchQuery(specName)
           },
           onAssignFaction = { playerName, faction ->
-            PlayerCacheInteractor.updatePlayerFactionFor(playerName, faction)
+            val card = PlayerCacheInteractor.observeCard(playerName).value
+            if (card?.isRealPlayer == true) {
+              PlayerCacheInteractor.updatePlayerFactionFor(playerName, faction)
+            }
           },
           onNodeSelected = { name -> selectedPlayerName = name },
           modifier = Modifier.fillMaxSize()

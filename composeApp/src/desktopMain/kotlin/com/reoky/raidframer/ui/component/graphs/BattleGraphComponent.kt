@@ -820,7 +820,7 @@ fun BattleGraphComponent(
                     if (change != null) {
                       val isRightClick = (event.nativeEvent as? java.awt.event.MouseEvent)?.button ==
                         java.awt.event.MouseEvent.BUTTON3
-                      if (isRightClick) {
+                      if (isRightClick && node.isRealPlayer) {
                         contextMenuNode = node
                         contextMenuPosition = Offset(nodeCx, nodeCy)
                       }
@@ -902,48 +902,53 @@ fun BattleGraphComponent(
           Text(stringResource(Res.string.battle_graph_filter_by_spec), fontSize = 12.sp)
         }
 
-        // Assign to Faction submenu
-        Box {
-          val factionInteractionSource = remember { MutableInteractionSource() }
-          val isFactionHovered by factionInteractionSource.collectIsHoveredAsState()
+        // Assign to Faction submenu (only for real players, with 1s delay)
+        if (node.isRealPlayer) {
+          Box {
+            val factionInteractionSource = remember { MutableInteractionSource() }
+            val isFactionHovered by factionInteractionSource.collectIsHoveredAsState()
 
-          LaunchedEffect(isFactionHovered) {
-            if (isFactionHovered) showFactionSubmenu = true
-          }
-
-          DropdownMenuItem(
-            onClick = { },
-            interactionSource = factionInteractionSource,
-            modifier = Modifier.hoverable(factionInteractionSource)
-          ) {
-            Text(stringResource(Res.string.battle_graph_assign_to_faction), fontSize = 12.sp)
-          }
-
-          DropdownMenu(
-            expanded = showFactionSubmenu,
-            onDismissRequest = { showFactionSubmenu = false },
-            modifier = Modifier.hoverable(factionInteractionSource)
-          ) {
-            DropdownMenuItem(onClick = {
-              onAssignFaction(node.name, Faction.HARANYA)
-              contextMenuNode = null
-              showFactionSubmenu = false
-            }) {
-              Text(stringResource(Res.string.battle_graph_faction_haranya), fontSize = 12.sp)
+            LaunchedEffect(isFactionHovered) {
+              if (isFactionHovered && !showFactionSubmenu) {
+                delay(1000)
+                if (isFactionHovered) showFactionSubmenu = true
+              }
             }
-            DropdownMenuItem(onClick = {
-              onAssignFaction(node.name, Faction.NUIA)
-              contextMenuNode = null
-              showFactionSubmenu = false
-            }) {
-              Text(stringResource(Res.string.battle_graph_faction_nuia), fontSize = 12.sp)
+
+            DropdownMenuItem(
+              onClick = { },
+              interactionSource = factionInteractionSource,
+              modifier = Modifier.hoverable(factionInteractionSource)
+            ) {
+              Text(stringResource(Res.string.battle_graph_assign_to_faction), fontSize = 12.sp)
             }
-            DropdownMenuItem(onClick = {
-              onAssignFaction(node.name, Faction.PIRATE)
-              contextMenuNode = null
-              showFactionSubmenu = false
-            }) {
-              Text(stringResource(Res.string.battle_graph_faction_pirate), fontSize = 12.sp)
+
+            DropdownMenu(
+              expanded = showFactionSubmenu,
+              onDismissRequest = { showFactionSubmenu = false },
+              modifier = Modifier.hoverable(factionInteractionSource)
+            ) {
+              DropdownMenuItem(onClick = {
+                onAssignFaction(node.name, Faction.HARANYA)
+                contextMenuNode = null
+                showFactionSubmenu = false
+              }) {
+                Text(stringResource(Res.string.battle_graph_faction_haranya), fontSize = 12.sp)
+              }
+              DropdownMenuItem(onClick = {
+                onAssignFaction(node.name, Faction.NUIA)
+                contextMenuNode = null
+                showFactionSubmenu = false
+              }) {
+                Text(stringResource(Res.string.battle_graph_faction_nuia), fontSize = 12.sp)
+              }
+              DropdownMenuItem(onClick = {
+                onAssignFaction(node.name, Faction.PIRATE)
+                contextMenuNode = null
+                showFactionSubmenu = false
+              }) {
+                Text(stringResource(Res.string.battle_graph_faction_pirate), fontSize = 12.sp)
+              }
             }
           }
         }
@@ -1064,8 +1069,13 @@ private fun NodeComponent(
   isSelected: Boolean = false,
   modifier: Modifier = Modifier
 ) {
-  val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
-  val factionColor = playerFaction.getGraphNodeColor(node.faction)
+  val isMob = !node.isRealPlayer
+  val factionColor = if (isMob) {
+    RFColors.graphNodeMob
+  } else {
+    val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
+    playerFaction.getGraphNodeColor(node.faction)
+  }
 
   val spec = node.spec
   val trees: List<SkillTreeType> = spec?.trees?.sortedByDisplayOrder()?.take(3) ?: emptyList()
@@ -1076,7 +1086,7 @@ private fun NodeComponent(
       .clip(CircleShape)
       .drawBehind {
         drawCircle(
-          color = factionColor.copy(alpha = 0.3f),
+          color = factionColor.copy(alpha = if (isMob) 0.5f else 0.3f),
           radius = size.minDimension / 2f
         )
         // Highlight border for selected node
@@ -1088,7 +1098,7 @@ private fun NodeComponent(
           )
         }
         drawCircle(
-          color = factionColor.copy(alpha = 0.6f),
+          color = factionColor.copy(alpha = if (isMob) 0.85f else 0.6f),
           radius = size.minDimension / 2f,
           style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
         )
