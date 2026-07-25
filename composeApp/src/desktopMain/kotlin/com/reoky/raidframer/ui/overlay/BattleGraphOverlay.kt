@@ -272,8 +272,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           singleLine = true,
           maxLines = 1,
           colors = TextFieldDefaults.colors(
-            focusedContainerColor = RFColors.CardBackground,
-            unfocusedContainerColor = RFColors.CardBackground,
+            focusedContainerColor = RFColors.CardBackground.copy(alpha = 0.85f),
+            unfocusedContainerColor = RFColors.CardBackground.copy(alpha = 0.85f),
             cursorColor = RFColors.TextPrimary,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
