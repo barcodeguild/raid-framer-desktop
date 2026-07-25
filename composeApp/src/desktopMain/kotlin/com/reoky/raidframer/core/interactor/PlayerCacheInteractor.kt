@@ -658,6 +658,26 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  /**
+   * Manually assigns a player to a faction and persists the change.
+   */
+  fun updatePlayerFactionFor(playerName: String, faction: Faction) {
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(playerName = playerName)
+        cards[playerName]?.let { card ->
+          val updatedCard = card.setFaction(faction, FactionStatus.FRIENDLY)
+          cards[playerName] = updatedCard
+
+          // Persist to DB
+          updatedCard.cache?.let {
+            RFDao.playerCacheDao.insert(it)
+          }
+        }
+      }
+    }
+  }
+
     /**
    * Helps upgrade an NPC card to a real player card immediately based on metadata from the game proving it's a player.
    * Also persists the updated cache to the database right away. (which we didn't use to do and records got lost eek!)

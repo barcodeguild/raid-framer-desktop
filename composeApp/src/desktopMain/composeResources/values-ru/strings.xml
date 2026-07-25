@@ -259,6 +259,10 @@
     <string name="battle_graph_open_player_card">Открыть карточку игрока</string>
     <string name="battle_graph_filter_by_name">Фильтр по имени</string>
     <string name="battle_graph_filter_by_spec">Фильтр по спеке</string>
+    <string name="battle_graph_assign_to_faction">Назначить фракцию</string>
+    <string name="battle_graph_faction_haranya">Харания</string>
+    <string name="battle_graph_faction_nuia">Нуиа</string>
+    <string name="battle_graph_faction_pirate">Пираты</string>
     <string name="battle_graph_all_spells">Все</string>
     <string name="battle_graph_show_technical_analysis">Показать тех. анализ</string>
     <string name="battle_graph_show_mvp_labels">Показать MVP метки</string>

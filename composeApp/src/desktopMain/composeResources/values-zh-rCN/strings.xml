@@ -259,6 +259,10 @@
     <string name="battle_graph_open_player_card">打开角色卡片</string>
     <string name="battle_graph_filter_by_name">按名称筛选</string>
     <string name="battle_graph_filter_by_spec">按职业筛选</string>
+    <string name="battle_graph_assign_to_faction">分配到阵营</string>
+    <string name="battle_graph_faction_haranya">哈拉尼亚</string>
+    <string name="battle_graph_faction_nuia">努伊安</string>
+    <string name="battle_graph_faction_pirate">海盗</string>
     <string name="battle_graph_all_spells">全部</string>
     <string name="battle_graph_show_technical_analysis">显示技术分析</string>
     <string name="battle_graph_show_mvp_labels">显示MVP标签</string>

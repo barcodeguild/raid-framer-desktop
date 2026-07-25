@@ -259,6 +259,10 @@
     <string name="battle_graph_open_player_card">플레이어 카드 열기</string>
     <string name="battle_graph_filter_by_name">이름으로 필터</string>
     <string name="battle_graph_filter_by_spec">전직으로 필터</string>
+    <string name="battle_graph_assign_to_faction">진영 할당</string>
+    <string name="battle_graph_faction_haranya">동대륙</string>
+    <string name="battle_graph_faction_nuia">서대륙</string>
+    <string name="battle_graph_faction_pirate">해적</string>
     <string name="battle_graph_all_spells">전체</string>
     <string name="battle_graph_show_technical_analysis">기술 분석 표시</string>
     <string name="battle_graph_show_mvp_labels">MVP 라벨 표시</string>

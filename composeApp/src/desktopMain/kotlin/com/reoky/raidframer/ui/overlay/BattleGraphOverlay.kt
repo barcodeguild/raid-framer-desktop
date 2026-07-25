@@ -42,10 +42,13 @@ import com.reoky.raidframer.core.definitions.blacklistedBuffNames
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.interactor.BattleGraphInteractor
 import com.reoky.raidframer.core.interactor.BattleGraphMode
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CompactSessionTotals
+import com.reoky.raidframer.ui.component.CloseButton
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.BattleGraphComponent
 import kotlinx.coroutines.flow.debounce
@@ -133,10 +136,13 @@ fun BattleGraphOverlay(wm: WindowManager?) {
     snapshotFlow { maxEdgesSlider }.debounce(300).collect { v -> BattleGraphInteractor.setMaxEdges((v * 75f).toInt()) }
   }
 
-  Column(
+  Box(
     modifier = Modifier.fillMaxSize().background(RFColors.OverlayBackground)
   ) {
-    val titleText = when (selectedMode) {
+    Column(
+      modifier = Modifier.fillMaxSize()
+    ) {
+      val titleText = when (selectedMode) {
       BattleGraphMode.DAMAGE -> stringResource(Res.string.battle_graph_focused_damage)
       BattleGraphMode.HEALS -> stringResource(Res.string.battle_graph_heal_prop)
       BattleGraphMode.CC -> stringResource(Res.string.battle_graph_crowd_control_distribution)
@@ -148,13 +154,13 @@ fun BattleGraphOverlay(wm: WindowManager?) {
       BattleGraphMode.SILENCE -> stringResource(Res.string.battle_graph_focused_silence)
     }
 
-    TitleBarComponent(
-      title = titleText,
-      onClose = { wm?.closeWindow(OverlayType.BATTLE_GRAPH) }
-    )
+      TitleBarComponent(
+        title = titleText,
+        onClose = { wm?.closeWindow(OverlayType.BATTLE_GRAPH) }
+      )
 
-    // Graph area with controls overlaid in upper-right
-    Box(modifier = Modifier.fillMaxSize()) {
+      // Graph area with controls overlaid in upper-right
+      Box(modifier = Modifier.fillMaxSize()) {
       if (graphData.nodes.isNotEmpty()) {
         BattleGraphComponent(
           graphData = graphData,
@@ -171,6 +177,9 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           onFilterBySpec = { specName ->
             searchQuery = specName
             BattleGraphInteractor.setSearchQuery(specName)
+          },
+          onAssignFaction = { playerName, faction ->
+            PlayerCacheInteractor.updatePlayerFactionFor(playerName, faction)
           },
           onNodeSelected = { name -> selectedPlayerName = name },
           modifier = Modifier.fillMaxSize()
@@ -561,6 +570,15 @@ fun BattleGraphOverlay(wm: WindowManager?) {
         )
       }
     }
+  }
+
+    // Close button overlay so it's always above graph nodes
+    CloseButton(
+      onClose = { wm?.closeWindow(OverlayType.BATTLE_GRAPH) },
+      modifier = Modifier
+        .align(Alignment.TopEnd)
+        .padding(top = 6.dp, end = 6.dp)
+    )
   }
 }
 

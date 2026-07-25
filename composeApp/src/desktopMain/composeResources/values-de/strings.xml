@@ -259,6 +259,10 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="battle_graph_open_player_card">Spielerkarte öffnen</string>
     <string name="battle_graph_filter_by_name">Nach Name filtern</string>
     <string name="battle_graph_filter_by_spec">Nach Spezialisierung filtern</string>
+    <string name="battle_graph_assign_to_faction">Der Fraktion zuweisen</string>
+    <string name="battle_graph_faction_haranya">Haranya</string>
+    <string name="battle_graph_faction_nuia">Nuia</string>
+    <string name="battle_graph_faction_pirate">Piraten</string>
     <string name="battle_graph_all_spells">Alle</string>
     <string name="battle_graph_show_technical_analysis">Technische Analyse anzeigen</string>
     <string name="battle_graph_show_mvp_labels">MVP-Beschriftungen anzeigen</string>

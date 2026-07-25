@@ -265,6 +265,10 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="battle_graph_open_player_card">Open Player Card</string>
     <string name="battle_graph_filter_by_name">Filter by Name</string>
     <string name="battle_graph_filter_by_spec">Filter by Spec</string>
+    <string name="battle_graph_assign_to_faction">Assign to Faction</string>
+    <string name="battle_graph_faction_haranya">Haranya</string>
+    <string name="battle_graph_faction_nuia">Nuia</string>
+    <string name="battle_graph_faction_pirate">Pirate</string>
     <string name="battle_graph_mode_kills">Kills</string>
     <string name="battle_graph_mode_buffs">Buffs</string>
     <string name="battle_graph_mode_debuffs">Debuffs</string>

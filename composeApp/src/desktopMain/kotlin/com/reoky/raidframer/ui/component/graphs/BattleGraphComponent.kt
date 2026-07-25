@@ -80,6 +80,10 @@ import raid_framer_desktop.composeapp.generated.resources.battle_graph_edge_and_
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_open_player_card
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_filter_by_name
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_filter_by_spec
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_assign_to_faction
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_faction_haranya
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_faction_nuia
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_faction_pirate
 import raid_framer_desktop.composeapp.generated.resources.spec_type_unknown
 import com.reoky.raidframer.core.interactor.BattleGraphData
 import com.reoky.raidframer.core.interactor.BattleGraphMode
@@ -101,6 +105,7 @@ fun BattleGraphComponent(
   onOpenPlayerCard: (String) -> Unit,
   onFilterByName: (String) -> Unit,
   onFilterBySpec: (String) -> Unit,
+  onAssignFaction: (String, Faction) -> Unit,
   onNodeSelected: (String?) -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -127,6 +132,7 @@ fun BattleGraphComponent(
   // Right-click context menu state
   var contextMenuNode by remember { mutableStateOf<GraphNode?>(null) }
   var contextMenuPosition by remember { mutableStateOf(Offset.Zero) }
+  var showFactionSubmenu by remember { mutableStateOf(false) }
 
   // Left-click selection state
   var selectedNode by remember { mutableStateOf<GraphNode?>(null) }
@@ -863,7 +869,7 @@ fun BattleGraphComponent(
 
       DropdownMenu(
         expanded = true,
-        onDismissRequest = { contextMenuNode = null },
+        onDismissRequest = { contextMenuNode = null; showFactionSubmenu = false },
         offset = DpOffset((contextMenuPosition.x / density).dp, (contextMenuPosition.y / density).dp)
       ) {
         DropdownMenuItem(onClick = {
@@ -883,6 +889,52 @@ fun BattleGraphComponent(
           contextMenuNode = null
         }) {
           Text(stringResource(Res.string.battle_graph_filter_by_spec), fontSize = 12.sp)
+        }
+
+        // Assign to Faction submenu
+        Box {
+          val factionInteractionSource = remember { MutableInteractionSource() }
+          val isFactionHovered by factionInteractionSource.collectIsHoveredAsState()
+
+          LaunchedEffect(isFactionHovered) {
+            if (isFactionHovered) showFactionSubmenu = true
+          }
+
+          DropdownMenuItem(
+            onClick = { },
+            interactionSource = factionInteractionSource,
+            modifier = Modifier.hoverable(factionInteractionSource)
+          ) {
+            Text(stringResource(Res.string.battle_graph_assign_to_faction), fontSize = 12.sp)
+          }
+
+          DropdownMenu(
+            expanded = showFactionSubmenu,
+            onDismissRequest = { showFactionSubmenu = false },
+            modifier = Modifier.hoverable(factionInteractionSource)
+          ) {
+            DropdownMenuItem(onClick = {
+              onAssignFaction(node.name, Faction.HARANYA)
+              contextMenuNode = null
+              showFactionSubmenu = false
+            }) {
+              Text(stringResource(Res.string.battle_graph_faction_haranya), fontSize = 12.sp)
+            }
+            DropdownMenuItem(onClick = {
+              onAssignFaction(node.name, Faction.NUIA)
+              contextMenuNode = null
+              showFactionSubmenu = false
+            }) {
+              Text(stringResource(Res.string.battle_graph_faction_nuia), fontSize = 12.sp)
+            }
+            DropdownMenuItem(onClick = {
+              onAssignFaction(node.name, Faction.PIRATE)
+              contextMenuNode = null
+              showFactionSubmenu = false
+            }) {
+              Text(stringResource(Res.string.battle_graph_faction_pirate), fontSize = 12.sp)
+            }
+          }
         }
       }
     }
