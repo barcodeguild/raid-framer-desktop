@@ -25,14 +25,16 @@ fun RaidComparisonPieChart(
   title: String,
   icon: String,
   dataFlow: StateFlow<Map<String, Float>>,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  factionColors: Map<String, Color> = emptyMap()
 ) {
   val data by dataFlow.collectAsState()
 
   val pieData = data.map { (raidName, value) ->
     PieChartSlice(
       label = raidName,
-      value = value
+      value = value,
+      color = factionColors[raidName]
     )
   }
 

@@ -73,6 +73,19 @@
     <string name="category_potions">물약</string>
     <string name="category_gliders">날틀</string>
     <string name="category_items">아이템</string>
+    <string name="category_tiger_strikes">호랑이 타격</string>
+    <string name="category_freezes">동결</string>
+    <string name="category_kills">킬</string>
+    <string name="category_tripped">넘어짐</string>
+    <string name="category_bubble_trap">버블 트랩</string>
+    <string name="category_bracing_blast">브레이싱 블래스트</string>
+    <string name="category_shield_strip">방패 박탈</string>
+    <string name="category_weapon_disables">무기 무력화</string>
+    <string name="category_potion_disables">물약 무력화</string>
+    <string name="category_bd_glider">BD 날틀</string>
+    <string name="category_crystal_wings">크리스탈 윙스</string>
+    <string name="category_glider_disables">날틀 무력화</string>
+    <string name="category_provoked">도발</string>
     <string name="settings_combat_overlay_title">전투 오버레이</string>
     <string name="settings_combat_fade_controls">커서가 오버레이를 벗어나면 아이콘 컨트롤 자동 페이드.</string>
     <string name="settings_split_chat">OSRS 스타일 분할 채팅 창 오버레이 활성화. (곧 출시)</string>
@@ -183,6 +196,17 @@
     <string name="player_card_stat_total_damage_taken">총 받은 피해량</string>
     <string name="player_card_stat_total_heals_received">총 받은 힐량</string>
     <string name="player_card_stat_tiger_strikes">폭풍 가르기</string>
+    <string name="player_card_stat_freezes">동결</string>
+    <string name="player_card_stat_trips">넘어짐</string>
+    <string name="player_card_stat_bubbles">버블 트랩</string>
+    <string name="player_card_stat_bracings">브레이싱 블래스트</string>
+    <string name="player_card_stat_shield_strip">방패 박탈</string>
+    <string name="player_card_stat_weapon_disables">무기 무력화</string>
+    <string name="player_card_stat_potion_disables">물약 무력화</string>
+    <string name="player_card_stat_bd_glider">BD 날틀</string>
+    <string name="player_card_stat_crystal_wings">크리스탈 윙스</string>
+    <string name="player_card_stat_glider_disables">날틀 무력화</string>
+    <string name="player_card_stat_provoked">도발</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">플레이어 상세</string>
@@ -292,9 +316,33 @@
     <string name="summary_silences_by_faction">진영별 침묵</string>
     <string name="summary_charms_by_faction">진영별 매혹</string>
     <string name="summary_distresses_by_faction">진영별 강위축</string>
+    <string name="summary_trips_by_faction">진영별 넘어짐</string>
+    <string name="summary_bubbles_by_faction">진영별 버블 트랩</string>
+    <string name="summary_bracings_by_faction">진영별 브레이싱 블래스트</string>
+    <string name="summary_shield_strip_by_faction">진영별 방패 박탈</string>
+    <string name="summary_weapon_disables_by_faction">진영별 무기 무력화</string>
+    <string name="summary_potion_disables_by_faction">진영별 물약 무력화</string>
+    <string name="summary_bd_glider_by_faction">진영별 BD 날틀</string>
+    <string name="summary_crystal_wings_by_faction">진영별 크리스탈 윙스</string>
+    <string name="summary_glider_disables_by_faction">진영별 날틀 무력화</string>
+    <string name="summary_provokes_by_faction">진영별 도발</string>
+    <string name="summary_tiger_strikes_by_faction">진영별 호랑이 타격</string>
+    <string name="summary_freezes_by_faction">진영별 동결</string>
     <string name="summary_top_silences">침묵 순위</string>
     <string name="summary_top_charms">매혹 순위</string>
     <string name="summary_top_distresses">강위축 순위</string>
+    <string name="summary_top_trips">넘어짐 순위</string>
+    <string name="summary_top_bubbles">버블 트랩 순위</string>
+    <string name="summary_top_bracings">브레이싱 블래스트 순위</string>
+    <string name="summary_top_shield_strip">방패 박탈 순위</string>
+    <string name="summary_top_weapon_disables">무기 무력화 순위</string>
+    <string name="summary_top_potion_disables">물약 무력화 순위</string>
+    <string name="summary_top_bd_glider">BD 날틀 순위</string>
+    <string name="summary_top_crystal_wings">크리스탈 윙스 순위</string>
+    <string name="summary_top_glider_disables">날틀 무력화 순위</string>
+    <string name="summary_top_provokes">도발 순위</string>
+    <string name="summary_top_tiger_strikes">호랑이 타격 순위</string>
+    <string name="summary_top_freezes">동결 순위</string>
     <string name="summary_top_haranya_spells_damage">동대륙 주문 피해 순위</string>
     <string name="summary_top_nuia_spells_damage">서대륙 주문 피해 순위</string>
     <string name="summary_top_pirate_spells_damage">해적 주문 피해 순위</string>
@@ -324,6 +372,11 @@
 
     <!-- Summary Tab Labels -->
     <string name="summary_tab_debuffs">디버프</string>
+    <string name="summary_tab_faction_charts">진영 차트</string>
+    <string name="summary_tab_cc_debuffs">CC 디버프</string>
+    <string name="summary_tab_utility_debuffs">유틸리티 디버프</string>
+    <string name="summary_tab_glider_debuffs">날틀 디버프</string>
+    <string name="summary_tab_special_debuffs">특수 디버프</string>
     <string name="summary_tab_spells">스킬</string>
     <string name="summary_tab_buffs">버프</string>
     <string name="summary_tab_ode">치무</string>

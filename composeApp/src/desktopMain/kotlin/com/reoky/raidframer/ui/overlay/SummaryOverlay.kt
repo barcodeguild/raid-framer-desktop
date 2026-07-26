@@ -399,6 +399,13 @@ private fun FactionChartsTab(
   factionTigerStrikeData: Map<String, Float>,
   factionFreezeData: Map<String, Float>
 ) {
+  // Standardized faction colors for pie charts (from game's perspective system)
+  val factionColors = mapOf(
+    "Haranya" to Color(0xFF36F1CC),  // Allied/teal color
+    "Nuia" to Color.Red.copy(alpha = 0.75f),  // Enemy/red color
+    "Pirate" to Color(0xFFE56CAB)  // Pirate pink color
+  )
+
   LazyColumn(
     modifier = Modifier.fillMaxSize(),
     contentPadding = PaddingValues(vertical = 8.dp),
@@ -414,19 +421,22 @@ private fun FactionChartsTab(
           title = stringResource(Res.string.summary_silences_by_faction),
           icon = "\uf57f",
           dataFlow = PlayerCacheInteractor.factionSilenceComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_charms_by_faction),
           icon = "\uf004",
           dataFlow = PlayerCacheInteractor.factionCharmComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_distresses_by_faction),
           icon = "\uf567",
           dataFlow = PlayerCacheInteractor.factionDistressComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
       }
     }
@@ -438,21 +448,24 @@ private fun FactionChartsTab(
       ) {
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_trips_by_faction),
-          icon = "\uf071",
+          icon = "\u2193",
           dataFlow = PlayerCacheInteractor.factionTripsComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_bubbles_by_faction),
-          icon = "\uf0eb",
+          icon = "\u25CF",
           dataFlow = PlayerCacheInteractor.factionBubblesComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_bracings_by_faction),
-          icon = "\uf132",
+          icon = "\u27A1",
           dataFlow = PlayerCacheInteractor.factionBracingsComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
       }
     }
@@ -464,21 +477,24 @@ private fun FactionChartsTab(
       ) {
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_shield_strip_by_faction),
-          icon = "\uf3ed",
+          icon = "\u2694",
           dataFlow = PlayerCacheInteractor.factionShieldStripComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_weapon_disables_by_faction),
-          icon = "\uf6e2",
+          icon = "\u2620",
           dataFlow = PlayerCacheInteractor.factionWeaponDisablesComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_potion_disables_by_faction),
-          icon = "\uf484",
+          icon = "\u2697",
           dataFlow = PlayerCacheInteractor.factionPotionDisablesComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
       }
     }
@@ -490,21 +506,24 @@ private fun FactionChartsTab(
       ) {
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_bd_glider_by_faction),
-          icon = "\uf072",
+          icon = "\u2708",
           dataFlow = PlayerCacheInteractor.factionBdGliderComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_crystal_wings_by_faction),
-          icon = "\uf06e",
+          icon = "\u2708",
           dataFlow = PlayerCacheInteractor.factionCrystalWingsComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_glider_disables_by_faction),
-          icon = "\uf147",
+          icon = "\u2708",
           dataFlow = PlayerCacheInteractor.factionGliderDisablesComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
       }
     }
@@ -516,21 +535,24 @@ private fun FactionChartsTab(
       ) {
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_provokes_by_faction),
-          icon = "\uf559",
+          icon = "\u2757",
           dataFlow = PlayerCacheInteractor.factionProvokedComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_tiger_strikes_by_faction),
-          icon = "\uf21b",
+          icon = "\u26A1",
           dataFlow = PlayerCacheInteractor.factionTigerStrikeComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_freezes_by_faction),
-          icon = "\uf2dc",
+          icon = "\u2744",
           dataFlow = PlayerCacheInteractor.factionFreezeComparisonAll,
-          modifier = Modifier.weight(1f)
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
         )
       }
     }
@@ -548,7 +570,7 @@ private fun CCDebuffsTab(
     modifier = Modifier.fillMaxSize()
   ) {
     StatColumn(
-      icon = "\uf071",
+      icon = "\u2193",
       title = stringResource(Res.string.summary_top_trips),
       cards = topTrips,
       valueExtractor = { it.sessionTripsTotal.toString() },
@@ -559,7 +581,7 @@ private fun CCDebuffsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\uf0eb",
+      icon = "\u25CF",
       title = stringResource(Res.string.summary_top_bubbles),
       cards = topBubbles,
       valueExtractor = { it.sessionBubblesTotal.toString() },
@@ -570,7 +592,7 @@ private fun CCDebuffsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\uf132",
+      icon = "\u27A1",
       title = stringResource(Res.string.summary_top_bracings),
       cards = topBracings,
       valueExtractor = { it.sessionBracingsTotal.toString() },
@@ -594,7 +616,7 @@ private fun UtilityDebuffsTab(
     modifier = Modifier.fillMaxSize()
   ) {
     StatColumn(
-      icon = "\uf3ed",
+      icon = "\u2694",
       title = stringResource(Res.string.summary_top_shield_strip),
       cards = topShieldStrip,
       valueExtractor = { it.sessionShieldStripTotal.toString() },
@@ -605,7 +627,7 @@ private fun UtilityDebuffsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\uf6e2",
+      icon = "\u2620",
       title = stringResource(Res.string.summary_top_weapon_disables),
       cards = topWeaponDisables,
       valueExtractor = { it.sessionWeaponDisablesTotal.toString() },
@@ -616,7 +638,7 @@ private fun UtilityDebuffsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\uf484",
+      icon = "\u2697",
       title = stringResource(Res.string.summary_top_potion_disables),
       cards = topPotionDisables,
       valueExtractor = { it.sessionPotionDisablesTotal.toString() },
@@ -640,7 +662,7 @@ private fun GliderDebuffsTab(
     modifier = Modifier.fillMaxSize()
   ) {
     StatColumn(
-      icon = "\uf072",
+      icon = "\u2708",
       title = stringResource(Res.string.summary_top_bd_glider),
       cards = topBdGlider,
       valueExtractor = { it.sessionBdGliderTotal.toString() },
@@ -651,7 +673,7 @@ private fun GliderDebuffsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\uf06e",
+      icon = "\u2708",
       title = stringResource(Res.string.summary_top_crystal_wings),
       cards = topCrystalWings,
       valueExtractor = { it.sessionCrystalWingsTotal.toString() },
@@ -662,7 +684,7 @@ private fun GliderDebuffsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\uf147",
+      icon = "\u2708",
       title = stringResource(Res.string.summary_top_glider_disables),
       cards = topGliderDisables,
       valueExtractor = { it.sessionGliderDisablesTotal.toString() },
@@ -686,7 +708,7 @@ private fun SpecialDebuffsTab(
     modifier = Modifier.fillMaxSize()
   ) {
     StatColumn(
-      icon = "\uf559",
+      icon = "\u2757",
       title = stringResource(Res.string.summary_top_provokes),
       cards = topProvoked,
       valueExtractor = { it.sessionProvokedTotal.toString() },
@@ -697,7 +719,7 @@ private fun SpecialDebuffsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\uf21b",
+      icon = "\u26A1",
       title = stringResource(Res.string.summary_top_tiger_strikes),
       cards = topTigerStrikes,
       valueExtractor = { it.sessionTigerStrikeTotal.toString() },
@@ -708,7 +730,7 @@ private fun SpecialDebuffsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\uf2dc",
+      icon = "\u2744",
       title = stringResource(Res.string.summary_top_freezes),
       cards = topFreezes,
       valueExtractor = { it.sessionFreezeTotal.toString() },
@@ -1008,7 +1030,7 @@ private fun UtilityItemsTab(
     }
 
     StatColumn(
-      icon = "\uf5b0",
+      icon = "\u2708",
       title = stringResource(Res.string.summary_top_glider_gamers),
       cards = topGliderGamers,
       valueExtractor = { it.sessionGliderTotal.toString() },
