@@ -5,11 +5,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -218,7 +220,7 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   Column(
     modifier = Modifier.fillMaxSize()
   ) {
-    // Title bar with dropdown selector overlaid to the left of the close button
+    // Title bar with pagination arrows and dropdown selector
     Box(modifier = Modifier.fillMaxWidth()) {
       TitleBarComponent(
         title = stringResource(Res.string.summary_battle_summary_title_format, humanReadableDateString),
@@ -226,15 +228,34 @@ fun SummaryOverlay(wm: WindowManager? = null) {
         modifier = Modifier.fillMaxWidth()
       )
       
-      // Dropdown overlay - centered vertically, positioned to the left of the close button
+      // Navigation controls - centered vertically, positioned to the left of the close button
       var dropdownExpanded by remember { mutableStateOf(false) }
 
-      Box(
+      Row(
         modifier = Modifier
           .align(Alignment.CenterEnd)
-          .offset(y = (-2).dp)
-          .padding(end = 43.dp)
+          .offset(y = (-1).dp)
+          .padding(end = 43.dp),
+        verticalAlignment = Alignment.CenterVertically
       ) {
+        // Back arrow
+        TextButton(
+          onClick = {
+            selectedTabIndex = if (selectedTabIndex > 0) selectedTabIndex - 1 else tabs.size - 1
+          },
+          colors = ButtonDefaults.textButtonColors(
+            contentColor = RFColors.TextSecondary
+          ),
+          contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+        ) {
+          Text(
+            text = "\u25C0",
+            fontSize = 10.sp,
+            color = RFColors.TextSecondary
+          )
+        }
+
+        // Dropdown button
         TextButton(
           onClick = { dropdownExpanded = true },
           colors = ButtonDefaults.textButtonColors(
@@ -252,10 +273,29 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           )
         }
 
+        // Forward arrow
+        TextButton(
+          onClick = {
+            selectedTabIndex = if (selectedTabIndex < tabs.size - 1) selectedTabIndex + 1 else 0
+          },
+          colors = ButtonDefaults.textButtonColors(
+            contentColor = RFColors.TextSecondary
+          ),
+          contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+        ) {
+          Text(
+            text = "\u25B6",
+            fontSize = 10.sp,
+            color = RFColors.TextSecondary
+          )
+        }
+
         DropdownMenu(
           expanded = dropdownExpanded,
           onDismissRequest = { dropdownExpanded = false },
-          modifier = Modifier.background(RFColors.CardBackground)
+          modifier = Modifier
+            .background(RFColors.CardBackground, RoundedCornerShape(0.dp)),
+          shape = RoundedCornerShape(0.dp)
         ) {
           tabs.forEachIndexed { index, title ->
             DropdownMenuItem(
