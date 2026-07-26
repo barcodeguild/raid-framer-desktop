@@ -5,8 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
@@ -32,8 +33,6 @@ import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.SimpleRankingRow
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.RaidComparisonPieChart
-import com.reoky.raidframer.ui.export.ImageExportInteractor
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.summary_battle_summary_title_format
@@ -218,40 +217,55 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   Column(
     modifier = Modifier.fillMaxSize()
   ) {
-    Box(
-      modifier = Modifier.fillMaxWidth()
-    ) {
+    // Title bar with dropdown selector overlaid to the left of the close button
+    Box(modifier = Modifier.fillMaxWidth()) {
       TitleBarComponent(
         title = stringResource(Res.string.summary_battle_summary_title_format, humanReadableDateString),
         onClose = { wm?.closeWindow(OverlayType.SUMMARY) },
         modifier = Modifier.fillMaxWidth()
       )
-    }
+      
+      // Dropdown overlay - centered vertically, positioned to the left of the close button
+      var dropdownExpanded by remember { mutableStateOf(false) }
 
-    // Tab Row (stacked in 3 rows of 5 for readability)
-    Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .background(RFColors.CardBackground)
-    ) {
-      for (rowIndex in 0..2) {
-        val startIndex = rowIndex * 5
-        val endIndex = minOf(startIndex + 5, tabs.size)
-        if (startIndex >= tabs.size) break
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceEvenly
+      Box(
+        modifier = Modifier
+          .align(Alignment.CenterEnd)
+          .padding(end = 36.dp)
+      ) {
+        TextButton(
+          onClick = { dropdownExpanded = true },
+          colors = ButtonDefaults.textButtonColors(
+            contentColor = RFColors.TextPrimary
+          )
         ) {
-          for (i in startIndex until endIndex) {
-            Tab(
-              selected = selectedTabIndex == i,
-              onClick = { selectedTabIndex = i },
-              modifier = Modifier.weight(1f),
-              text = {
+          Text(
+            text = tabs[selectedTabIndex],
+            fontSize = 11.sp
+          )
+          Text(
+            text = " \u25BC",
+            fontSize = 9.sp,
+            color = RFColors.TextSecondary
+          )
+        }
+
+        DropdownMenu(
+          expanded = dropdownExpanded,
+          onDismissRequest = { dropdownExpanded = false },
+          modifier = Modifier.background(RFColors.CardBackground)
+        ) {
+          tabs.forEachIndexed { index, title ->
+            DropdownMenuItem(
+              onClick = {
+                selectedTabIndex = index
+                dropdownExpanded = false
+              },
+              content = {
                 Text(
-                  text = tabs[i],
-                  color = if (selectedTabIndex == i) Color.White else RFColors.TextSecondary,
-                  fontSize = 10.sp
+                  text = title,
+                  color = if (selectedTabIndex == index) RFColors.AccentRed else RFColors.TextPrimary,
+                  fontSize = 12.sp
                 )
               }
             )
