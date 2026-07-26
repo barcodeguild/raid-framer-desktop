@@ -257,3 +257,31 @@ val MIGRATION_28_29 = object : Migration(28, 29) {
   }
 }
 
+// added lifetime freeze/trip/bubble/bracing/shieldstrip/weapondisable/potiondisable/bdglider/crystalwings/gliderdisable/provoke totals to player_cache and session totals
+val MIGRATION_29_30 = object : Migration(29, 30) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalFreezes INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalTrips INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBubbles INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBracings INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalShieldStrip INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalWeaponDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPotionDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBdGlider INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCrystalWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalGliderDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalProvoked INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalFreezes INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalTrips INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBubbles INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBracings INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalShieldStrip INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalWeaponDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPotionDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBdGlider INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCrystalWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalGliderDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalProvoked INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

@@ -75,7 +75,18 @@ fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntit
     lifetimeTotalDeaths = c?.lifetimeTotalDeaths ?: 0L,
     lifetimeTotalDamageTaken = c?.lifetimeTotalDamageTaken ?: 0L,
     lifetimeTotalHealsReceived = c?.lifetimeTotalHealsReceived ?: 0L,
-    lifetimeTotalTigerStrikes = c?.lifetimeTotalTigerStrikes ?: 0L
+    lifetimeTotalTigerStrikes = c?.lifetimeTotalTigerStrikes ?: 0L,
+    lifetimeTotalFreezes = c?.lifetimeTotalFreezes ?: 0L,
+    lifetimeTotalTrips = c?.lifetimeTotalTrips ?: 0L,
+    lifetimeTotalBubbles = c?.lifetimeTotalBubbles ?: 0L,
+    lifetimeTotalBracings = c?.lifetimeTotalBracings ?: 0L,
+    lifetimeTotalShieldStrip = c?.lifetimeTotalShieldStrip ?: 0L,
+    lifetimeTotalWeaponDisables = c?.lifetimeTotalWeaponDisables ?: 0L,
+    lifetimeTotalPotionDisables = c?.lifetimeTotalPotionDisables ?: 0L,
+    lifetimeTotalBdGlider = c?.lifetimeTotalBdGlider ?: 0L,
+    lifetimeTotalCrystalWings = c?.lifetimeTotalCrystalWings ?: 0L,
+    lifetimeTotalGliderDisables = c?.lifetimeTotalGliderDisables ?: 0L,
+    lifetimeTotalProvoked = c?.lifetimeTotalProvoked ?: 0L
   )
 }
 
@@ -120,6 +131,17 @@ fun PlayerCard.resetSession(): PlayerCard {
     sessionHealsReceivedTotal = 0,
     sessionOdeHealsTotal = 0,
     sessionTigerStrikeTotal = 0,
+    sessionFreezeTotal = 0,
+    sessionTripsTotal = 0,
+    sessionBubblesTotal = 0,
+    sessionBracingsTotal = 0,
+    sessionShieldStripTotal = 0,
+    sessionWeaponDisablesTotal = 0,
+    sessionPotionDisablesTotal = 0,
+    sessionBdGliderTotal = 0,
+    sessionCrystalWingsTotal = 0,
+    sessionGliderDisablesTotal = 0,
+    sessionProvokedTotal = 0,
 
     // Session edge weights for battle graph
     sessionDamageToPlayer = mapOf(),

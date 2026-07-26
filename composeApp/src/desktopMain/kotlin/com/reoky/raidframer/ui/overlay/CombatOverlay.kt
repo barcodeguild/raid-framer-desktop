@@ -621,6 +621,19 @@ fun CombatOverlay(wm: WindowManager? = null) {
                         CombatRankingCategory.POTIONS -> card.sessionPotionTotal.toString()
                         CombatRankingCategory.GLIDERS -> card.sessionGliderTotal.toString()
                         CombatRankingCategory.ITEMS -> card.sessionItemSkillTotal.toString()
+                        CombatRankingCategory.TIGER_STRIKES -> card.sessionTigerStrikeTotal.toString()
+                        CombatRankingCategory.FREEZES -> card.sessionFreezeTotal.toString()
+                        CombatRankingCategory.KILLS -> card.sessionKillTotal.toString()
+                        CombatRankingCategory.TRIPS -> card.sessionTripsTotal.toString()
+                        CombatRankingCategory.BUBBLES -> card.sessionBubblesTotal.toString()
+                        CombatRankingCategory.BRACINGS -> card.sessionBracingsTotal.toString()
+                        CombatRankingCategory.SHIELD_STRIP -> card.sessionShieldStripTotal.toString()
+                        CombatRankingCategory.WEAPON_DISABLES -> card.sessionWeaponDisablesTotal.toString()
+                        CombatRankingCategory.POTION_DISABLES -> card.sessionPotionDisablesTotal.toString()
+                        CombatRankingCategory.BD_GLIDER -> card.sessionBdGliderTotal.toString()
+                        CombatRankingCategory.CRYSTAL_WINGS -> card.sessionCrystalWingsTotal.toString()
+                        CombatRankingCategory.GLIDER_DISABLES -> card.sessionGliderDisablesTotal.toString()
+                        CombatRankingCategory.PROVOKED -> card.sessionProvokedTotal.toString()
                       },
                       valueColor = category.valueColor,
                       isRetribution = card.isBuildingAggression,

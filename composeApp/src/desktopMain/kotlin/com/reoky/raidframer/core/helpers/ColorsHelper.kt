@@ -72,6 +72,17 @@ object RFColors {
   val charmPink = Color(0xFFEC407A)
   val silencePurple = Color(0xFFAB47BC)
   val distressPurple = Color(0xFF7E57C2)
+  val freezeIceBlue = Color(0xFF4FC3F7)
+  val tripsAmber = Color(0xFFFFB300)
+  val bubblesCyan = Color(0xFF00BCD4)
+  val bracingsGreen = Color(0xFF66BB6A)
+  val shieldStripOrange = Color(0xFFE64A19)
+  val weaponDisablesRed = Color(0xFFE53935)
+  val potionDisablesPurple = Color(0xFF7E57C2)
+  val bdGliderTeal = Color(0xFF26A69A)
+  val crystalWingsBlue = Color(0xFF29B6F6)
+  val gliderDisablesPink = Color(0xFFEC407A)
+  val provokesDeepPurple = Color(0xFF5C6BC0)
 
   // Overlay background
   val OverlayBackground = Color(0xFF121212)

@@ -63,6 +63,18 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_spe
 import raid_framer_desktop.composeapp.generated.resources.summary_top_potion_drinkers
 import raid_framer_desktop.composeapp.generated.resources.summary_top_silences
 import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_trips
+import raid_framer_desktop.composeapp.generated.resources.summary_top_bubbles
+import raid_framer_desktop.composeapp.generated.resources.summary_top_bracings
+import raid_framer_desktop.composeapp.generated.resources.summary_top_shield_strip
+import raid_framer_desktop.composeapp.generated.resources.summary_top_weapon_disables
+import raid_framer_desktop.composeapp.generated.resources.summary_top_potion_disables
+import raid_framer_desktop.composeapp.generated.resources.summary_top_bd_glider
+import raid_framer_desktop.composeapp.generated.resources.summary_top_crystal_wings
+import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_disables
+import raid_framer_desktop.composeapp.generated.resources.summary_top_provokes
+import raid_framer_desktop.composeapp.generated.resources.summary_top_tiger_strikes
+import raid_framer_desktop.composeapp.generated.resources.summary_top_freezes
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Font
@@ -124,6 +136,18 @@ object ImageExportInteractor {
   private val SILENCE_COLOR       = Color(0xAB47BC)
   private val CHARM_COLOR         = Color(0xEC407A)
   private val DISTRESS_COLOR      = Color(0x7E57C2)
+  private val TRIPS_COLOR = toAwtColor(RFColors.tripsAmber)
+  private val BUBBLES_COLOR = toAwtColor(RFColors.bubblesCyan)
+  private val BRACINGS_COLOR = toAwtColor(RFColors.bracingsGreen)
+  private val SHIELD_STRIP_COLOR = toAwtColor(RFColors.shieldStripOrange)
+  private val WEAPON_DISABLES_COLOR = toAwtColor(RFColors.weaponDisablesRed)
+  private val POTION_DISABLES_COLOR = toAwtColor(RFColors.potionDisablesPurple)
+  private val BD_GLIDER_COLOR = toAwtColor(RFColors.bdGliderTeal)
+  private val CRYSTAL_WINGS_COLOR = toAwtColor(RFColors.crystalWingsBlue)
+  private val GLIDER_DISABLES_COLOR = toAwtColor(RFColors.gliderDisablesPink)
+  private val PROVOKED_COLOR = toAwtColor(RFColors.provokesDeepPurple)
+  private val TIGER_STRIKE_COLOR = toAwtColor(RFColors.techNoTigerStrikes)
+  private val FREEZE_COLOR = toAwtColor(RFColors.freezeIceBlue)
 
   // ── Skill-tree icon cache (SVG → BufferedImage via Skiko) ─────────────────
   private val skillTreeImageCache = mutableMapOf<Pair<SkillTreeType?, Int>, BufferedImage?>()
@@ -248,6 +272,32 @@ object ImageExportInteractor {
     val factionSilenceData: Map<String, Float>,
     val factionCharmData: Map<String, Float>,
     val factionDistressData: Map<String, Float>,
+    // New debuff category rankings
+    val topTigerStrikes: List<PlayerCard>,
+    val topFreezes: List<PlayerCard>,
+    val topTrips: List<PlayerCard>,
+    val topBubbles: List<PlayerCard>,
+    val topBracings: List<PlayerCard>,
+    val topShieldStrip: List<PlayerCard>,
+    val topWeaponDisables: List<PlayerCard>,
+    val topPotionDisables: List<PlayerCard>,
+    val topBdGlider: List<PlayerCard>,
+    val topCrystalWings: List<PlayerCard>,
+    val topGliderDisables: List<PlayerCard>,
+    val topProvoked: List<PlayerCard>,
+    // New faction comparison data
+    val factionTigerStrikeData: Map<String, Float>,
+    val factionFreezeData: Map<String, Float>,
+    val factionTripsData: Map<String, Float>,
+    val factionBubblesData: Map<String, Float>,
+    val factionBracingsData: Map<String, Float>,
+    val factionShieldStripData: Map<String, Float>,
+    val factionWeaponDisablesData: Map<String, Float>,
+    val factionPotionDisablesData: Map<String, Float>,
+    val factionBdGliderData: Map<String, Float>,
+    val factionCrystalWingsData: Map<String, Float>,
+    val factionGliderDisablesData: Map<String, Float>,
+    val factionProvokedData: Map<String, Float>,
   )
 
   data class SpellDamage(val spell: String, val total: Double)
@@ -331,6 +381,32 @@ object ImageExportInteractor {
       factionSilenceData  = PlayerCacheInteractor.factionSilenceComparisonAll.value,
       factionCharmData    = PlayerCacheInteractor.factionCharmComparisonAll.value,
       factionDistressData = PlayerCacheInteractor.factionDistressComparisonAll.value,
+      // New debuff category rankings
+      topTigerStrikes    = PlayerCacheInteractor.topTigerStrikes.value.take(15),
+      topFreezes         = PlayerCacheInteractor.topFreezes.value.take(15),
+      topTrips           = PlayerCacheInteractor.topTrips.value.take(15),
+      topBubbles         = PlayerCacheInteractor.topBubbles.value.take(15),
+      topBracings        = PlayerCacheInteractor.topBracings.value.take(15),
+      topShieldStrip     = PlayerCacheInteractor.topShieldStrip.value.take(15),
+      topWeaponDisables  = PlayerCacheInteractor.topWeaponDisables.value.take(15),
+      topPotionDisables  = PlayerCacheInteractor.topPotionDisables.value.take(15),
+      topBdGlider        = PlayerCacheInteractor.topBdGlider.value.take(15),
+      topCrystalWings    = PlayerCacheInteractor.topCrystalWings.value.take(15),
+      topGliderDisables  = PlayerCacheInteractor.topGliderDisables.value.take(15),
+      topProvoked        = PlayerCacheInteractor.topProvoked.value.take(15),
+      // New faction comparison data
+      factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
+      factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
+      factionTripsData         = PlayerCacheInteractor.factionTripsComparisonAll.value,
+      factionBubblesData       = PlayerCacheInteractor.factionBubblesComparisonAll.value,
+      factionBracingsData      = PlayerCacheInteractor.factionBracingsComparisonAll.value,
+      factionShieldStripData   = PlayerCacheInteractor.factionShieldStripComparisonAll.value,
+      factionWeaponDisablesData = PlayerCacheInteractor.factionWeaponDisablesComparisonAll.value,
+      factionPotionDisablesData = PlayerCacheInteractor.factionPotionDisablesComparisonAll.value,
+      factionBdGliderData      = PlayerCacheInteractor.factionBdGliderComparisonAll.value,
+      factionCrystalWingsData  = PlayerCacheInteractor.factionCrystalWingsComparisonAll.value,
+      factionGliderDisablesData = PlayerCacheInteractor.factionGliderDisablesComparisonAll.value,
+      factionProvokedData      = PlayerCacheInteractor.factionProvokedComparisonAll.value,
     )
   }
 
@@ -497,18 +573,45 @@ object ImageExportInteractor {
   }
 
   private fun makePieChartBlock(data: ExportData, superColWidth: Int): Block {
-    val chartH = CHART_HEIGHT + CARD_PADDING * 2
+    val rowHeight = 150
+    val numRows = 5
+    val chartH = (rowHeight * numRows) + CARD_PADDING * 2
 
     return Block("Charts", chartH) { g2d, x, y, w ->
       drawCardBackgroundTransparent(g2d, x, y, w, chartH)
 
       val chartSpacing = w / 3
       val chartRadius  = 45
-      val chartY       = y + CARD_PADDING + 62
 
-      drawPieChart(g2d, "Silences",   data.factionSilenceData,  chartSpacing / 2, chartY, chartRadius, 0)
-      drawPieChart(g2d, "Charms",     data.factionCharmData,    chartSpacing / 2, chartY, chartRadius, chartSpacing)
-      drawPieChart(g2d, "Distresses", data.factionDistressData, chartSpacing / 2, chartY, chartRadius, chartSpacing * 2)
+      // Row 1: Silences, Charms, Distresses
+      var rowY = y + CARD_PADDING + 62
+      drawPieChart(g2d, "Silences",   data.factionSilenceData,  chartSpacing / 2, rowY, chartRadius, 0)
+      drawPieChart(g2d, "Charms",     data.factionCharmData,    chartSpacing / 2, rowY, chartRadius, chartSpacing)
+      drawPieChart(g2d, "Distresses", data.factionDistressData, chartSpacing / 2, rowY, chartRadius, chartSpacing * 2)
+
+      // Row 2: Trips, Bubbles, Bracings
+      rowY += rowHeight
+      drawPieChart(g2d, "Trips",     data.factionTripsData,     chartSpacing / 2, rowY, chartRadius, 0)
+      drawPieChart(g2d, "Bubbles",   data.factionBubblesData,   chartSpacing / 2, rowY, chartRadius, chartSpacing)
+      drawPieChart(g2d, "Bracings",  data.factionBracingsData,  chartSpacing / 2, rowY, chartRadius, chartSpacing * 2)
+
+      // Row 3: Shield Strip, Weapon Disables, Potion Disables
+      rowY += rowHeight
+      drawPieChart(g2d, "Shield Strip",    data.factionShieldStripData,    chartSpacing / 2, rowY, chartRadius, 0)
+      drawPieChart(g2d, "Weapon Disables", data.factionWeaponDisablesData, chartSpacing / 2, rowY, chartRadius, chartSpacing)
+      drawPieChart(g2d, "Potion Disables", data.factionPotionDisablesData, chartSpacing / 2, rowY, chartRadius, chartSpacing * 2)
+
+      // Row 4: BD Glider, Crystal Wings, Glider Disables
+      rowY += rowHeight
+      drawPieChart(g2d, "BD Glider",       data.factionBdGliderData,       chartSpacing / 2, rowY, chartRadius, 0)
+      drawPieChart(g2d, "Crystal Wings",   data.factionCrystalWingsData,   chartSpacing / 2, rowY, chartRadius, chartSpacing)
+      drawPieChart(g2d, "Glider Disables", data.factionGliderDisablesData, chartSpacing / 2, rowY, chartRadius, chartSpacing * 2)
+
+      // Row 5: Provokes, Tiger Strikes, Freezes
+      rowY += rowHeight
+      drawPieChart(g2d, "Provokes",      data.factionProvokedData,      chartSpacing / 2, rowY, chartRadius, 0)
+      drawPieChart(g2d, "Tiger Strikes", data.factionTigerStrikeData,   chartSpacing / 2, rowY, chartRadius, chartSpacing)
+      drawPieChart(g2d, "Freezes",       data.factionFreezeData,        chartSpacing / 2, rowY, chartRadius, chartSpacing * 2)
     }
   }
 
@@ -1025,6 +1128,34 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_top_silences),  "\uD83D\uDD07", ColumnData.CardData(data.topSilences,  { it.sessionSilenceTotal.toString()  }, SILENCE_COLOR)),
       Triple(getString(Res.string.summary_top_charms),    "\uD83D\uDC96", ColumnData.CardData(data.topCharms,    { it.sessionCharmTotal.toString()    }, CHARM_COLOR)),
       Triple(getString(Res.string.summary_top_distresses), "\uD83D\uDE24", ColumnData.CardData(data.topDistresses, { it.sessionDistressTotal.toString() }, DISTRESS_COLOR)),
+    )))
+
+    // Trips, Bubbles, Bracings
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_trips), "\uf071", ColumnData.CardData(data.topTrips, { it.sessionTripsTotal.toString() }, TRIPS_COLOR)),
+      Triple(getString(Res.string.summary_top_bubbles), "\uf0eb", ColumnData.CardData(data.topBubbles, { it.sessionBubblesTotal.toString() }, BUBBLES_COLOR)),
+      Triple(getString(Res.string.summary_top_bracings), "\uf132", ColumnData.CardData(data.topBracings, { it.sessionBracingsTotal.toString() }, BRACINGS_COLOR)),
+    )))
+
+    // Shield Strip, Weapon Disables, Potion Disables
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_shield_strip), "\uf3ed", ColumnData.CardData(data.topShieldStrip, { it.sessionShieldStripTotal.toString() }, SHIELD_STRIP_COLOR)),
+      Triple(getString(Res.string.summary_top_weapon_disables), "\uf6e2", ColumnData.CardData(data.topWeaponDisables, { it.sessionWeaponDisablesTotal.toString() }, WEAPON_DISABLES_COLOR)),
+      Triple(getString(Res.string.summary_top_potion_disables), "\uf484", ColumnData.CardData(data.topPotionDisables, { it.sessionPotionDisablesTotal.toString() }, POTION_DISABLES_COLOR)),
+    )))
+
+    // BD Glider, Crystal Wings, Glider Disables
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_bd_glider), "\uf072", ColumnData.CardData(data.topBdGlider, { it.sessionBdGliderTotal.toString() }, BD_GLIDER_COLOR)),
+      Triple(getString(Res.string.summary_top_crystal_wings), "\uf06e", ColumnData.CardData(data.topCrystalWings, { it.sessionCrystalWingsTotal.toString() }, CRYSTAL_WINGS_COLOR)),
+      Triple(getString(Res.string.summary_top_glider_disables), "\uf147", ColumnData.CardData(data.topGliderDisables, { it.sessionGliderDisablesTotal.toString() }, GLIDER_DISABLES_COLOR)),
+    )))
+
+    // Provokes, Tiger Strikes, Freezes
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_provokes), "\uf559", ColumnData.CardData(data.topProvoked, { it.sessionProvokedTotal.toString() }, PROVOKED_COLOR)),
+      Triple(getString(Res.string.summary_top_tiger_strikes), "\uf21b", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
+      Triple(getString(Res.string.summary_top_freezes), "\uf2dc", ColumnData.CardData(data.topFreezes, { it.sessionFreezeTotal.toString() }, FREEZE_COLOR)),
     )))
 
     return tripletBlocks

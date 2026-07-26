@@ -9,6 +9,17 @@ import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
 import com.reoky.raidframer.core.definitions.silencedDebuffIds
 import com.reoky.raidframer.core.definitions.tigerStrikeDebuffIds
+import com.reoky.raidframer.core.definitions.freezeDebuffIds
+import com.reoky.raidframer.core.definitions.trippedDebuffIds
+import com.reoky.raidframer.core.definitions.bubbleTrapDebuffIds
+import com.reoky.raidframer.core.definitions.bracingBlastDebuffIds
+import com.reoky.raidframer.core.definitions.shieldStripDebuffIds
+import com.reoky.raidframer.core.definitions.weaponDisablesDebuffIds
+import com.reoky.raidframer.core.definitions.potionDisablesDebuffIds
+import com.reoky.raidframer.core.definitions.bdGliderDebuffIds
+import com.reoky.raidframer.core.definitions.crystalWingsDebuffIds
+import com.reoky.raidframer.core.definitions.gliderDisablesDebuffIds
+import com.reoky.raidframer.core.definitions.provokedDebuffIds
 import com.reoky.raidframer.core.definitions.blacklistedDebuffIds
 import com.reoky.raidframer.core.definitions.blacklistedDebuffNames
 import com.reoky.raidframer.core.definitions.blacklistedBuffNames
@@ -240,6 +251,17 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isGlider = event.debuffId in gliderUsageDebuffIds && System.currentTimeMillis() - this.lastGliderUse > 5000L // glider debuff applied, but only count if more than 5 second since last use to avoid double-counting from game bug
   val isSongs = event.debuffId == 853 || event.debuffId == 847 || event.debuffId == 31367 || event.debuffId == 772 // Unguarded, Lethargy, Weakened Energy, Unpleasant Sensation
   val isTigerStrike = event.debuffId in tigerStrikeDebuffIds
+  val isFreeze = event.debuffId in freezeDebuffIds
+  val isTrips = event.debuffId in trippedDebuffIds
+  val isBubbles = event.debuffId in bubbleTrapDebuffIds
+  val isBracings = event.debuffId in bracingBlastDebuffIds
+  val isShieldStrip = event.debuffId in shieldStripDebuffIds
+  val isWeaponDisables = event.debuffId in weaponDisablesDebuffIds
+  val isPotionDisables = event.debuffId in potionDisablesDebuffIds
+  val isBdGlider = event.debuffId in bdGliderDebuffIds
+  val isCrystalWings = event.debuffId in crystalWingsDebuffIds
+  val isGliderDisables = event.debuffId in gliderDisablesDebuffIds
+  val isProvoked = event.debuffId in provokedDebuffIds
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
@@ -252,7 +274,18 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       lifetimeTotalGliderUses = if (isGlider) (card.cache?.lifetimeTotalGliderUses ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderUses ?: 0L),
       lifetimeTotalDistresses = if (isDistress) (card.cache?.lifetimeTotalDistresses ?: 0L) + 1 else (card.cache?.lifetimeTotalDistresses ?: 0L),
       lifetimeTotalSilences = if (isSilence) (card.cache?.lifetimeTotalSilences ?: 0L) + 1 else (card.cache?.lifetimeTotalSilences ?: 0L),
-      lifetimeTotalTigerStrikes = if (isTigerStrike) (card.cache?.lifetimeTotalTigerStrikes ?: 0L) + 1 else (card.cache?.lifetimeTotalTigerStrikes ?: 0L)
+      lifetimeTotalTigerStrikes = if (isTigerStrike) (card.cache?.lifetimeTotalTigerStrikes ?: 0L) + 1 else (card.cache?.lifetimeTotalTigerStrikes ?: 0L),
+      lifetimeTotalFreezes = if (isFreeze) (card.cache?.lifetimeTotalFreezes ?: 0L) + 1 else (card.cache?.lifetimeTotalFreezes ?: 0L),
+      lifetimeTotalTrips = if (isTrips) (card.cache?.lifetimeTotalTrips ?: 0L) + 1 else (card.cache?.lifetimeTotalTrips ?: 0L),
+      lifetimeTotalBubbles = if (isBubbles) (card.cache?.lifetimeTotalBubbles ?: 0L) + 1 else (card.cache?.lifetimeTotalBubbles ?: 0L),
+      lifetimeTotalBracings = if (isBracings) (card.cache?.lifetimeTotalBracings ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L),
+      lifetimeTotalShieldStrip = if (isShieldStrip) (card.cache?.lifetimeTotalShieldStrip ?: 0L) + 1 else (card.cache?.lifetimeTotalShieldStrip ?: 0L),
+      lifetimeTotalWeaponDisables = if (isWeaponDisables) (card.cache?.lifetimeTotalWeaponDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalWeaponDisables ?: 0L),
+      lifetimeTotalPotionDisables = if (isPotionDisables) (card.cache?.lifetimeTotalPotionDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalPotionDisables ?: 0L),
+      lifetimeTotalBdGlider = if (isBdGlider) (card.cache?.lifetimeTotalBdGlider ?: 0L) + 1 else (card.cache?.lifetimeTotalBdGlider ?: 0L),
+      lifetimeTotalCrystalWings = if (isCrystalWings) (card.cache?.lifetimeTotalCrystalWings ?: 0L) + 1 else (card.cache?.lifetimeTotalCrystalWings ?: 0L),
+      lifetimeTotalGliderDisables = if (isGliderDisables) (card.cache?.lifetimeTotalGliderDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderDisables ?: 0L),
+      lifetimeTotalProvoked = if (isProvoked) (card.cache?.lifetimeTotalProvoked ?: 0L) + 1 else (card.cache?.lifetimeTotalProvoked ?: 0L)
     ),
     recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
@@ -262,6 +295,17 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionSilenceTotal = if (isSilence) sessionSilenceTotal + 1 else sessionSilenceTotal,
     sessionGliderTotal = if (isGlider) sessionGliderTotal + 1 else sessionGliderTotal,
     sessionTigerStrikeTotal = if (isTigerStrike) sessionTigerStrikeTotal + 1 else sessionTigerStrikeTotal,
+    sessionFreezeTotal = if (isFreeze) sessionFreezeTotal + 1 else sessionFreezeTotal,
+    sessionTripsTotal = if (isTrips) sessionTripsTotal + 1 else sessionTripsTotal,
+    sessionBubblesTotal = if (isBubbles) sessionBubblesTotal + 1 else sessionBubblesTotal,
+    sessionBracingsTotal = if (isBracings) sessionBracingsTotal + 1 else sessionBracingsTotal,
+    sessionShieldStripTotal = if (isShieldStrip) sessionShieldStripTotal + 1 else sessionShieldStripTotal,
+    sessionWeaponDisablesTotal = if (isWeaponDisables) sessionWeaponDisablesTotal + 1 else sessionWeaponDisablesTotal,
+    sessionPotionDisablesTotal = if (isPotionDisables) sessionPotionDisablesTotal + 1 else sessionPotionDisablesTotal,
+    sessionBdGliderTotal = if (isBdGlider) sessionBdGliderTotal + 1 else sessionBdGliderTotal,
+    sessionCrystalWingsTotal = if (isCrystalWings) sessionCrystalWingsTotal + 1 else sessionCrystalWingsTotal,
+    sessionGliderDisablesTotal = if (isGliderDisables) sessionGliderDisablesTotal + 1 else sessionGliderDisablesTotal,
+    sessionProvokedTotal = if (isProvoked) sessionProvokedTotal + 1 else sessionProvokedTotal,
     sessionCCTotal = if (isCC) card.sessionCCTotal + 1 else card.sessionCCTotal,
     sessionSpellCCMap = if (isCC) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }

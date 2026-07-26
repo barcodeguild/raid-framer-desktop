@@ -28,6 +28,16 @@ val distressedDebuffIds = listOf(828, 6896, 14284, 15175, 24925)
 val tigerStrikeDebuffIds = listOf(22253)
 val freezeDebuffIds = listOf(93, 94, 21990, 2279, 9000173, 9000156)
 val gliderUsageDebuffIds = listOf(4622, 20121, 8000279)
+val trippedDebuffIds = listOf(27631)
+val bubbleTrapDebuffIds = listOf(21401)
+val bracingBlastDebuffIds = listOf(7105)
+val shieldStripDebuffIds = listOf(23654, 23066, 31837)
+val weaponDisablesDebuffIds = listOf(23107)
+val potionDisablesDebuffIds = listOf(24543)
+val bdGliderDebuffIds = listOf(6670)
+val crystalWingsDebuffIds = listOf(8000605)
+val gliderDisablesDebuffIds = listOf(24544, 22602)
+val provokedDebuffIds = listOf(502, 24060)
 
 data class DebuffsDefinition(
   override val debuffs: List<Debuff> = listOf(

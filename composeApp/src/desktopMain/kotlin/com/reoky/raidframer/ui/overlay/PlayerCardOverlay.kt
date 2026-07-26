@@ -91,6 +91,17 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_silen
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_damage_taken
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_total_heals_received
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_tiger_strikes
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_freezes
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_trips
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_bubbles
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_bracings
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_shield_strip
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_weapon_disables
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_potion_disables
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_bd_glider
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crystal_wings
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_glider_disables
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_provoked
 import raid_framer_desktop.composeapp.generated.resources.player_card_no_cached_data
 import raid_framer_desktop.composeapp.generated.resources.player_card_recent_buffs
 import raid_framer_desktop.composeapp.generated.resources.player_card_recent_damage
@@ -561,6 +572,17 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_distress), cache.lifetimeTotalDistresses, RFColors.distressPurple)
                   StatRow(stringResource(Res.string.player_card_stat_silence), cache.lifetimeTotalSilences, RFColors.silencePurple)
                   StatRow(stringResource(Res.string.player_card_stat_tiger_strikes), cache.lifetimeTotalTigerStrikes, RFColors.techNoTigerStrikes)
+                  StatRow(stringResource(Res.string.player_card_stat_freezes), cache.lifetimeTotalFreezes, RFColors.freezeIceBlue)
+                  StatRow(stringResource(Res.string.player_card_stat_trips), cache.lifetimeTotalTrips, RFColors.tripsAmber)
+                  StatRow(stringResource(Res.string.player_card_stat_bubbles), cache.lifetimeTotalBubbles, RFColors.bubblesCyan)
+                  StatRow(stringResource(Res.string.player_card_stat_bracings), cache.lifetimeTotalBracings, RFColors.bracingsGreen)
+                  StatRow(stringResource(Res.string.player_card_stat_shield_strip), cache.lifetimeTotalShieldStrip, RFColors.shieldStripOrange)
+                  StatRow(stringResource(Res.string.player_card_stat_weapon_disables), cache.lifetimeTotalWeaponDisables, RFColors.weaponDisablesRed)
+                  StatRow(stringResource(Res.string.player_card_stat_potion_disables), cache.lifetimeTotalPotionDisables, RFColors.potionDisablesPurple)
+                  StatRow(stringResource(Res.string.player_card_stat_bd_glider), cache.lifetimeTotalBdGlider, RFColors.bdGliderTeal)
+                  StatRow(stringResource(Res.string.player_card_stat_crystal_wings), cache.lifetimeTotalCrystalWings, RFColors.crystalWingsBlue)
+                  StatRow(stringResource(Res.string.player_card_stat_glider_disables), cache.lifetimeTotalGliderDisables, RFColors.gliderDisablesPink)
+                  StatRow(stringResource(Res.string.player_card_stat_provoked), cache.lifetimeTotalProvoked, RFColors.provokesDeepPurple)
                   StatRow(stringResource(Res.string.player_card_stat_glider), cache.lifetimeTotalGliderUses, RFColors.gliderBlue)
                   StatRow(stringResource(Res.string.player_card_stat_items), cache.lifetimeTotalItemSkillsUsed, RFColors.itemSkillYellow)
                   StatRow(stringResource(Res.string.player_card_stat_potions), cache.lifetimeTotalPotionUsages, RFColors.potionTeal)
