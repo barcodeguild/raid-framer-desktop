@@ -485,7 +485,18 @@ object PlayerCacheInteractor : Interactor() {
           totalDamageTaken = card.sessionDamageTakenTotal,
           totalHealsReceived = card.sessionHealsReceivedTotal,
           totalOdeHeals = card.sessionOdeHealsTotal,
-          totalTigerStrikes = card.sessionTigerStrikeTotal
+          totalTigerStrikes = card.sessionTigerStrikeTotal,
+          totalFreezes = card.sessionFreezeTotal,
+          totalTrips = card.sessionTripsTotal,
+          totalBubbles = card.sessionBubblesTotal,
+          totalBracings = card.sessionBracingsTotal,
+          totalShieldStrip = card.sessionShieldStripTotal,
+          totalWeaponDisables = card.sessionWeaponDisablesTotal,
+          totalPotionDisables = card.sessionPotionDisablesTotal,
+          totalBdGlider = card.sessionBdGliderTotal,
+          totalCrystalWings = card.sessionCrystalWingsTotal,
+          totalGliderDisables = card.sessionGliderDisablesTotal,
+          totalProvoked = card.sessionProvokedTotal
         )
         RFDao.playerSessionDao.insert(entity)
         written++
@@ -516,7 +527,18 @@ object PlayerCacheInteractor : Interactor() {
         card.sessionDamageTakenTotal != 0 ||
         card.sessionHealsReceivedTotal != 0 ||
         card.sessionOdeHealsTotal != 0L ||
-        card.sessionTigerStrikeTotal != 0
+        card.sessionTigerStrikeTotal != 0 ||
+        card.sessionFreezeTotal != 0 ||
+        card.sessionTripsTotal != 0 ||
+        card.sessionBubblesTotal != 0 ||
+        card.sessionBracingsTotal != 0 ||
+        card.sessionShieldStripTotal != 0 ||
+        card.sessionWeaponDisablesTotal != 0 ||
+        card.sessionPotionDisablesTotal != 0 ||
+        card.sessionBdGliderTotal != 0 ||
+        card.sessionCrystalWingsTotal != 0 ||
+        card.sessionGliderDisablesTotal != 0 ||
+        card.sessionProvokedTotal != 0
   }
 
   /**
@@ -559,7 +581,18 @@ object PlayerCacheInteractor : Interactor() {
       totalDamageTaken = sessions.sumOf { it.totalDamageTaken },
       totalHealsReceived = sessions.sumOf { it.totalHealsReceived },
       totalOdeHeals = sessions.sumOf { it.totalOdeHeals },
-      totalTigerStrikes = sessions.sumOf { it.totalTigerStrikes }
+      totalTigerStrikes = sessions.sumOf { it.totalTigerStrikes },
+      totalFreezes = sessions.sumOf { it.totalFreezes },
+      totalTrips = sessions.sumOf { it.totalTrips },
+      totalBubbles = sessions.sumOf { it.totalBubbles },
+      totalBracings = sessions.sumOf { it.totalBracings },
+      totalShieldStrip = sessions.sumOf { it.totalShieldStrip },
+      totalWeaponDisables = sessions.sumOf { it.totalWeaponDisables },
+      totalPotionDisables = sessions.sumOf { it.totalPotionDisables },
+      totalBdGlider = sessions.sumOf { it.totalBdGlider },
+      totalCrystalWings = sessions.sumOf { it.totalCrystalWings },
+      totalGliderDisables = sessions.sumOf { it.totalGliderDisables },
+      totalProvoked = sessions.sumOf { it.totalProvoked }
     )
   }
 
@@ -647,6 +680,26 @@ object PlayerCacheInteractor : Interactor() {
         createCardIfNoneExists(playerName = playerName)
         cards[playerName]?.let { card ->
           val updatedCard = card.updatePlayerLeadership(newLeadership)
+          cards[playerName] = updatedCard
+
+          // Persist to DB
+          updatedCard.cache?.let {
+            RFDao.playerCacheDao.insert(it)
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Manually assigns a player to a faction and persists the change.
+   */
+  fun updatePlayerFactionFor(playerName: String, faction: Faction) {
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(playerName = playerName)
+        cards[playerName]?.let { card ->
+          val updatedCard = card.setFaction(faction, FactionStatus.FRIENDLY)
           cards[playerName] = updatedCard
 
           // Persist to DB
@@ -1199,6 +1252,102 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
+  val topTigerStrikes: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionTigerStrikeTotal > 0 }.sortedByDescending { it.sessionTigerStrikeTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topFreezes: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionFreezeTotal > 0 }.sortedByDescending { it.sessionFreezeTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topTrips: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionTripsTotal > 0 }.sortedByDescending { it.sessionTripsTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topBubbles: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionBubblesTotal > 0 }.sortedByDescending { it.sessionBubblesTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topBracings: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionBracingsTotal > 0 }.sortedByDescending { it.sessionBracingsTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topShieldStrip: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionShieldStripTotal > 0 }.sortedByDescending { it.sessionShieldStripTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topWeaponDisables: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionWeaponDisablesTotal > 0 }.sortedByDescending { it.sessionWeaponDisablesTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topPotionDisables: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionPotionDisablesTotal > 0 }.sortedByDescending { it.sessionPotionDisablesTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topBdGlider: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionBdGliderTotal > 0 }.sortedByDescending { it.sessionBdGliderTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topCrystalWings: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionCrystalWingsTotal > 0 }.sortedByDescending { it.sessionCrystalWingsTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topGliderDisables: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionGliderDisablesTotal > 0 }.sortedByDescending { it.sessionGliderDisablesTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topProvoked: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionProvokedTotal > 0 }.sortedByDescending { it.sessionProvokedTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
   var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionGliderTotal > 0 }.sortedByDescending { it.sessionGliderTotal }
@@ -1446,6 +1595,150 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
+  val factionTigerStrikeComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionTigerStrikeTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionFreezeComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionFreezeTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionTripsComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionTripsTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionBubblesComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionBubblesTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionBracingsComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionBracingsTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionShieldStripComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionShieldStripTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionWeaponDisablesComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionWeaponDisablesTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionPotionDisablesComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionPotionDisablesTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionBdGliderComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionBdGliderTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionCrystalWingsComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionCrystalWingsTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionGliderDisablesComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionGliderDisablesTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionProvokedComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionProvokedTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
   // PvP performance score pumps (one per faction)
   val topPerformanceHaranya: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cardList ->
@@ -1590,6 +1883,19 @@ object PlayerCacheInteractor : Interactor() {
       CombatRankingCategory.POTIONS -> topPotters
       CombatRankingCategory.GLIDERS -> topGliderGamers
       CombatRankingCategory.ITEMS -> topItemSkillCasters
+      CombatRankingCategory.TIGER_STRIKES -> topTigerStrikes
+      CombatRankingCategory.FREEZES -> topFreezes
+      CombatRankingCategory.TRIPS -> topTrips
+      CombatRankingCategory.BUBBLES -> topBubbles
+      CombatRankingCategory.BRACINGS -> topBracings
+      CombatRankingCategory.SHIELD_STRIP -> topShieldStrip
+      CombatRankingCategory.WEAPON_DISABLES -> topWeaponDisables
+      CombatRankingCategory.POTION_DISABLES -> topPotionDisables
+      CombatRankingCategory.BD_GLIDER -> topBdGlider
+      CombatRankingCategory.CRYSTAL_WINGS -> topCrystalWings
+      CombatRankingCategory.GLIDER_DISABLES -> topGliderDisables
+      CombatRankingCategory.PROVOKED -> topProvoked
+      CombatRankingCategory.KILLS -> topKills
     }
   }
 

@@ -80,6 +80,10 @@ import raid_framer_desktop.composeapp.generated.resources.battle_graph_edge_and_
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_open_player_card
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_filter_by_name
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_filter_by_spec
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_assign_to_faction
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_faction_haranya
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_faction_nuia
+import raid_framer_desktop.composeapp.generated.resources.battle_graph_faction_pirate
 import raid_framer_desktop.composeapp.generated.resources.spec_type_unknown
 import com.reoky.raidframer.core.interactor.BattleGraphData
 import com.reoky.raidframer.core.interactor.BattleGraphMode
@@ -101,6 +105,7 @@ fun BattleGraphComponent(
   onOpenPlayerCard: (String) -> Unit,
   onFilterByName: (String) -> Unit,
   onFilterBySpec: (String) -> Unit,
+  onAssignFaction: (String, Faction) -> Unit,
   onNodeSelected: (String?) -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -119,6 +124,9 @@ fun BattleGraphComponent(
       .map { it.source to it.target }
       .toSet()
   }
+  val visibleEdgePairs = remember(edges) {
+    edges.map { it.source to it.target }.toSet()
+  }
 
   val textMeasurer = rememberTextMeasurer()
   val dragLock = LocalDragLock.current
@@ -127,6 +135,7 @@ fun BattleGraphComponent(
   // Right-click context menu state
   var contextMenuNode by remember { mutableStateOf<GraphNode?>(null) }
   var contextMenuPosition by remember { mutableStateOf(Offset.Zero) }
+  var showFactionSubmenu by remember { mutableStateOf(false) }
 
   // Left-click selection state
   var selectedNode by remember { mutableStateOf<GraphNode?>(null) }
@@ -590,6 +599,7 @@ fun BattleGraphComponent(
 
         techAnalysis.edgeHeuristics.forEachIndexed { idx, heuristic ->
           if (heuristic.source == heuristic.target) return@forEachIndexed
+          if ((heuristic.source to heuristic.target) !in visibleEdgePairs) return@forEachIndexed
           val srcIdx = nodeIndexByName[heuristic.source] ?: return@forEachIndexed
           val tgtIdx = nodeIndexByName[heuristic.target] ?: return@forEachIndexed
           if (srcIdx >= animatedX.size || tgtIdx >= animatedX.size) return@forEachIndexed
@@ -810,7 +820,7 @@ fun BattleGraphComponent(
                     if (change != null) {
                       val isRightClick = (event.nativeEvent as? java.awt.event.MouseEvent)?.button ==
                         java.awt.event.MouseEvent.BUTTON3
-                      if (isRightClick) {
+                      if (isRightClick && node.isRealPlayer) {
                         contextMenuNode = node
                         contextMenuPosition = Offset(nodeCx, nodeCy)
                       }
@@ -831,12 +841,19 @@ fun BattleGraphComponent(
           val resolvedNodeLabels = nodeHeuristics.map { h ->
             stringResource(h.labelRes, *h.labelArgs.toTypedArray())
           }
+          val viewerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
           nodeHeuristics.forEachIndexed { hIdx, heuristic ->
             val offsetY = scaledNodeRadius + 4f * density * scale + hIdx * 18f * density * scale
             var labelWidthPx by remember { mutableFloatStateOf(0f) }
+            val factionBgColor = if (heuristic.isMvp) {
+              viewerFaction.getGraphNodeColor(node.faction)
+            } else {
+              null
+            }
             NodeHeuristicLabel(
               label = resolvedNodeLabels[hIdx],
               color = heuristic.color,
+              factionColor = factionBgColor,
               modifier = Modifier
                 .onPlaced { coordinates ->
                   labelWidthPx = coordinates.size.width.toFloat()
@@ -863,7 +880,7 @@ fun BattleGraphComponent(
 
       DropdownMenu(
         expanded = true,
-        onDismissRequest = { contextMenuNode = null },
+        onDismissRequest = { contextMenuNode = null; showFactionSubmenu = false },
         offset = DpOffset((contextMenuPosition.x / density).dp, (contextMenuPosition.y / density).dp)
       ) {
         DropdownMenuItem(onClick = {
@@ -883,6 +900,57 @@ fun BattleGraphComponent(
           contextMenuNode = null
         }) {
           Text(stringResource(Res.string.battle_graph_filter_by_spec), fontSize = 12.sp)
+        }
+
+        // Assign to Faction submenu (only for real players, with 1s delay)
+        if (node.isRealPlayer) {
+          Box {
+            val factionInteractionSource = remember { MutableInteractionSource() }
+            val isFactionHovered by factionInteractionSource.collectIsHoveredAsState()
+
+            LaunchedEffect(isFactionHovered) {
+              if (isFactionHovered && !showFactionSubmenu) {
+                delay(1000)
+                if (isFactionHovered) showFactionSubmenu = true
+              }
+            }
+
+            DropdownMenuItem(
+              onClick = { },
+              interactionSource = factionInteractionSource,
+              modifier = Modifier.hoverable(factionInteractionSource)
+            ) {
+              Text(stringResource(Res.string.battle_graph_assign_to_faction), fontSize = 12.sp)
+            }
+
+            DropdownMenu(
+              expanded = showFactionSubmenu,
+              onDismissRequest = { showFactionSubmenu = false },
+              modifier = Modifier.hoverable(factionInteractionSource)
+            ) {
+              DropdownMenuItem(onClick = {
+                onAssignFaction(node.name, Faction.HARANYA)
+                contextMenuNode = null
+                showFactionSubmenu = false
+              }) {
+                Text(stringResource(Res.string.battle_graph_faction_haranya), fontSize = 12.sp)
+              }
+              DropdownMenuItem(onClick = {
+                onAssignFaction(node.name, Faction.NUIA)
+                contextMenuNode = null
+                showFactionSubmenu = false
+              }) {
+                Text(stringResource(Res.string.battle_graph_faction_nuia), fontSize = 12.sp)
+              }
+              DropdownMenuItem(onClick = {
+                onAssignFaction(node.name, Faction.PIRATE)
+                contextMenuNode = null
+                showFactionSubmenu = false
+              }) {
+                Text(stringResource(Res.string.battle_graph_faction_pirate), fontSize = 12.sp)
+              }
+            }
+          }
         }
       }
     }
@@ -1001,8 +1069,13 @@ private fun NodeComponent(
   isSelected: Boolean = false,
   modifier: Modifier = Modifier
 ) {
-  val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
-  val factionColor = playerFaction.getGraphNodeColor(node.faction)
+  val isMob = !node.isRealPlayer
+  val factionColor = if (isMob) {
+    RFColors.graphNodeMob
+  } else {
+    val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
+    playerFaction.getGraphNodeColor(node.faction)
+  }
 
   val spec = node.spec
   val trees: List<SkillTreeType> = spec?.trees?.sortedByDisplayOrder()?.take(3) ?: emptyList()
@@ -1013,7 +1086,7 @@ private fun NodeComponent(
       .clip(CircleShape)
       .drawBehind {
         drawCircle(
-          color = factionColor.copy(alpha = 0.3f),
+          color = factionColor.copy(alpha = if (isMob) 0.5f else 0.3f),
           radius = size.minDimension / 2f
         )
         // Highlight border for selected node
@@ -1025,7 +1098,7 @@ private fun NodeComponent(
           )
         }
         drawCircle(
-          color = factionColor.copy(alpha = 0.6f),
+          color = factionColor.copy(alpha = if (isMob) 0.85f else 0.6f),
           radius = size.minDimension / 2f,
           style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2f)
         )
@@ -1094,15 +1167,17 @@ private fun SkillTreeIcon(tree: SkillTreeType) {
 private fun NodeHeuristicLabel(
   label: String,
   color: Color,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  factionColor: Color? = null
 ) {
+  val bgColor = factionColor ?: color
   Box(
     modifier = modifier,
     contentAlignment = Alignment.Center
   ) {
     Box(
       modifier = Modifier
-        .background(color.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
+        .background(bgColor.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
         .padding(horizontal = 6.dp, vertical = 2.dp)
     ) {
       Text(

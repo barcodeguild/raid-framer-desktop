@@ -73,6 +73,19 @@ Sie sollten immer noch die Deinstallation der Hauptanwendung abschließen, indem
     <string name="category_potions">Tränke</string>
     <string name="category_gliders">Gleiter</string>
     <string name="category_items">Gegenstände</string>
+    <string name="category_tiger_strikes">Tigerschläge</string>
+    <string name="category_freezes">Einfrieren</string>
+    <string name="category_kills">Abschüsse</string>
+    <string name="category_tripped">Sturz</string>
+    <string name="category_bubble_trap">Blasenfalle</string>
+    <string name="category_bracing_blast">Abstützung</string>
+    <string name="category_shield_strip">Schildentwaffnung</string>
+    <string name="category_weapon_disables">Waffendeaktivierung</string>
+    <string name="category_potion_disables">Trankdeaktivierung</string>
+    <string name="category_bd_glider">BD-Gleiter</string>
+    <string name="category_crystal_wings">Kristallflügel</string>
+    <string name="category_glider_disables">Gleiterdeaktivierung</string>
+    <string name="category_provoked">Herausforderung</string>
     <string name="settings_combat_overlay_title">Kampf-Overlay</string>
     <string name="settings_combat_fade_controls">Symbolsteuerungen automatisch ausblenden, wenn der Cursor das Overlay verlässt.</string>
     <string name="settings_split_chat">OSRS-artiges Split-Chat-Fenster-Overlay aktivieren. (Demnächst)</string>
@@ -182,7 +195,18 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="player_card_stat_kills_killing_blow">Kills (Todesstoß)</string>
     <string name="player_card_stat_total_damage_taken">Gesamter erlittener Schaden</string>
     <string name="player_card_stat_total_heals_received">Gesamte erhaltene Heilungen</string>
-    <string name="player_card_stat_tiger_strikes">Tiger Strikes</string>
+    <string name="player_card_stat_tiger_strikes">Tigerschläge</string>
+    <string name="player_card_stat_freezes">Einfrieren</string>
+    <string name="player_card_stat_trips">Sturz</string>
+    <string name="player_card_stat_bubbles">Blasenfalle</string>
+    <string name="player_card_stat_bracings">Abstützung</string>
+    <string name="player_card_stat_shield_strip">Schildentwaffnung</string>
+    <string name="player_card_stat_weapon_disables">Waffendeaktivierung</string>
+    <string name="player_card_stat_potion_disables">Trankdeaktivierung</string>
+    <string name="player_card_stat_bd_glider">BD-Gleiter</string>
+    <string name="player_card_stat_crystal_wings">Kristallflügel</string>
+    <string name="player_card_stat_glider_disables">Gleiterdeaktivierung</string>
+    <string name="player_card_stat_provoked">Herausforderung</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">Spielerdetails</string>
@@ -259,6 +283,10 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="battle_graph_open_player_card">Spielerkarte öffnen</string>
     <string name="battle_graph_filter_by_name">Nach Name filtern</string>
     <string name="battle_graph_filter_by_spec">Nach Spezialisierung filtern</string>
+    <string name="battle_graph_assign_to_faction">Der Fraktion zuweisen</string>
+    <string name="battle_graph_faction_haranya">Haranya</string>
+    <string name="battle_graph_faction_nuia">Nuia</string>
+    <string name="battle_graph_faction_pirate">Piraten</string>
     <string name="battle_graph_all_spells">Alle</string>
     <string name="battle_graph_show_technical_analysis">Technische Analyse anzeigen</string>
     <string name="battle_graph_show_mvp_labels">MVP-Beschriftungen anzeigen</string>
@@ -281,16 +309,40 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="tech_distress_combo">Keine Bedrängnis?</string>
     <string name="tech_cc_rival">CC-Rivale?</string>
     <string name="tech_no_silences">Keine Stille?</string>
-    <string name="tech_no_tiger_strikes">No Tiger Strikes?</string>
+    <string name="tech_no_tiger_strikes">Keine Tigerschläge?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Kampfzusammenfassung (%1$s)</string>
     <string name="summary_silences_by_faction">Stille nach Fraktion</string>
     <string name="summary_charms_by_faction">Verzauberungen nach Fraktion</string>
     <string name="summary_distresses_by_faction">Bedrängnisse nach Fraktion</string>
+    <string name="summary_trips_by_faction">Sturz nach Fraktion</string>
+    <string name="summary_bubbles_by_faction">Blasenfalle nach Fraktion</string>
+    <string name="summary_bracings_by_faction">Abstützung nach Fraktion</string>
+    <string name="summary_shield_strip_by_faction">Schildentwaffnung nach Fraktion</string>
+    <string name="summary_weapon_disables_by_faction">Waffendeaktivierung nach Fraktion</string>
+    <string name="summary_potion_disables_by_faction">Trankdeaktivierung nach Fraktion</string>
+    <string name="summary_bd_glider_by_faction">BD-Gleiter nach Fraktion</string>
+    <string name="summary_crystal_wings_by_faction">Kristallflügel nach Fraktion</string>
+    <string name="summary_glider_disables_by_faction">Gleiterdeaktivierung nach Fraktion</string>
+    <string name="summary_provokes_by_faction">Herausforderung nach Fraktion</string>
+    <string name="summary_tiger_strikes_by_faction">Tigerschläge nach Fraktion</string>
+    <string name="summary_freezes_by_faction">Einfrieren nach Fraktion</string>
     <string name="summary_top_silences">Top-Stille</string>
     <string name="summary_top_charms">Top-Verzauberungen</string>
     <string name="summary_top_distresses">Top-Bedrängnisse</string>
+    <string name="summary_top_trips">Top Stürze</string>
+    <string name="summary_top_bubbles">Top Blasenfallen</string>
+    <string name="summary_top_bracings">Top Abstützungen</string>
+    <string name="summary_top_shield_strip">Top Schildentwaffnungen</string>
+    <string name="summary_top_weapon_disables">Top Waffendeaktivierungen</string>
+    <string name="summary_top_potion_disables">Top Trankdeaktivierungen</string>
+    <string name="summary_top_bd_glider">Top BD-Gleiter</string>
+    <string name="summary_top_crystal_wings">Top Kristallflügel</string>
+    <string name="summary_top_glider_disables">Top Gleiterdeaktivierungen</string>
+    <string name="summary_top_provokes">Top Herausforderungen</string>
+    <string name="summary_top_tiger_strikes">Top Tigerschläge</string>
+    <string name="summary_top_freezes">Top Einfrierungen</string>
     <string name="summary_top_haranya_spells_damage">Top Haranya-Zauberschaden</string>
     <string name="summary_top_nuia_spells_damage">Top Nuia-Zauberschaden</string>
     <string name="summary_top_pirate_spells_damage">Top Piraten-Zauberschaden</string>
@@ -305,6 +357,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_top_kills_pirate">Top-Kills Piraten</string>
     <string name="summary_top_damage_taken">Top Erlittener Schaden</string>
     <string name="summary_top_heals_received">Top Erhaltene Heilungen</string>
+    <string name="summary_top_heal_ratio">Heilungsrate</string>
     <string name="summary_top_potion_drinkers">Top-Tränke-Trinker</string>
     <string name="summary_top_glider_gamers">Top-Gleiter-Spieler</string>
     <string name="summary_most_item_usages">Meiste Gegenstandsbenutzungen</string>
@@ -320,6 +373,11 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
 
     <!-- Summary Tab Labels -->
     <string name="summary_tab_debuffs">Schwächungszauber</string>
+    <string name="summary_tab_faction_charts">Fraktionsdiagramme</string>
+    <string name="summary_tab_cc_debuffs">CC-Debuffs</string>
+    <string name="summary_tab_utility_debuffs">Utility-Debuffs</string>
+    <string name="summary_tab_glider_debuffs">Gleiter-Debuffs</string>
+    <string name="summary_tab_special_debuffs">Spezial-Debuffs</string>
     <string name="summary_tab_spells">Zauber</string>
     <string name="summary_tab_buffs">Stärkungszauber</string>
     <string name="summary_tab_ode">Ode</string>

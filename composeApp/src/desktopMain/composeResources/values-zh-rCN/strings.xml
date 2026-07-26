@@ -73,6 +73,19 @@
     <string name="category_potions">药水</string>
     <string name="category_gliders">滑翔翼</string>
     <string name="category_items">物品</string>
+    <string name="category_tiger_strikes">猛虎打击</string>
+    <string name="category_freezes">冻结</string>
+    <string name="category_kills">击杀</string>
+    <string name="category_tripped">绊倒</string>
+    <string name="category_bubble_trap">泡泡陷阱</string>
+    <string name="category_bracing_blast">支撑冲击</string>
+    <string name="category_shield_strip">盾牌剥夺</string>
+    <string name="category_weapon_disables">武器无效</string>
+    <string name="category_potion_disables">药水无效</string>
+    <string name="category_bd_glider">BD滑翔翼</string>
+    <string name="category_crystal_wings">水晶之翼</string>
+    <string name="category_glider_disables">滑翔翼无效</string>
+    <string name="category_provoked">挑衅</string>
     <string name="settings_combat_overlay_title">战斗覆盖</string>
     <string name="settings_combat_fade_controls">当光标离开覆盖层时自动淡出图标控件。</string>
     <string name="settings_split_chat">启用OSRS风格的分割聊天窗口覆盖。(即将推出)</string>
@@ -182,7 +195,18 @@
     <string name="player_card_stat_kills_killing_blow">击杀(最后一击)</string>
     <string name="player_card_stat_total_damage_taken">承受总伤害</string>
     <string name="player_card_stat_total_heals_received">接受总治疗</string>
-    <string name="player_card_stat_tiger_strikes">杀戮风暴</string>
+    <string name="player_card_stat_tiger_strikes">猛虎打击</string>
+    <string name="player_card_stat_freezes">冻结</string>
+    <string name="player_card_stat_trips">绊倒</string>
+    <string name="player_card_stat_bubbles">泡泡陷阱</string>
+    <string name="player_card_stat_bracings">支撑冲击</string>
+    <string name="player_card_stat_shield_strip">盾牌剥夺</string>
+    <string name="player_card_stat_weapon_disables">武器无效</string>
+    <string name="player_card_stat_potion_disables">药水无效</string>
+    <string name="player_card_stat_bd_glider">BD滑翔翼</string>
+    <string name="player_card_stat_crystal_wings">水晶之翼</string>
+    <string name="player_card_stat_glider_disables">滑翔翼无效</string>
+    <string name="player_card_stat_provoked">挑衅</string>
 
     <!-- Player Details Section -->
     <string name="player_details_title">玩家详情</string>
@@ -259,6 +283,10 @@
     <string name="battle_graph_open_player_card">打开角色卡片</string>
     <string name="battle_graph_filter_by_name">按名称筛选</string>
     <string name="battle_graph_filter_by_spec">按职业筛选</string>
+    <string name="battle_graph_assign_to_faction">分配到阵营</string>
+    <string name="battle_graph_faction_haranya">哈拉尼亚</string>
+    <string name="battle_graph_faction_nuia">努伊安</string>
+    <string name="battle_graph_faction_pirate">海盗</string>
     <string name="battle_graph_all_spells">全部</string>
     <string name="battle_graph_show_technical_analysis">显示技术分析</string>
     <string name="battle_graph_show_mvp_labels">显示MVP标签</string>
@@ -281,16 +309,40 @@
     <string name="tech_distress_combo">无深度破胆？</string>
     <string name="tech_cc_rival">控制对手？</string>
     <string name="tech_no_silences">无沉默？</string>
-    <string name="tech_no_tiger_strikes">杀戮风暴无？</string>
+    <string name="tech_no_tiger_strikes">无猛虎打击？</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">战斗总结 (%1$s)</string>
     <string name="summary_silences_by_faction">按阵营沉默</string>
     <string name="summary_charms_by_faction">按阵营魅惑</string>
     <string name="summary_distresses_by_faction">按阵营苦恼</string>
+    <string name="summary_trips_by_faction">按阵营绊倒</string>
+    <string name="summary_bubbles_by_faction">按阵营泡泡陷阱</string>
+    <string name="summary_bracings_by_faction">按阵营支撑冲击</string>
+    <string name="summary_shield_strip_by_faction">按阵营盾牌剥夺</string>
+    <string name="summary_weapon_disables_by_faction">按阵营武器无效</string>
+    <string name="summary_potion_disables_by_faction">按阵营药水无效</string>
+    <string name="summary_bd_glider_by_faction">按阵营BD滑翔翼</string>
+    <string name="summary_crystal_wings_by_faction">按阵营水晶之翼</string>
+    <string name="summary_glider_disables_by_faction">按阵营滑翔翼无效</string>
+    <string name="summary_provokes_by_faction">按阵营挑衅</string>
+    <string name="summary_tiger_strikes_by_faction">按阵营猛虎打击</string>
+    <string name="summary_freezes_by_faction">按阵营冻结</string>
     <string name="summary_top_silences">沉默之王</string>
     <string name="summary_top_charms">魅惑之王</string>
     <string name="summary_top_distresses">苦恼之王</string>
+    <string name="summary_top_trips">绊倒排行</string>
+    <string name="summary_top_bubbles">泡泡陷阱排行</string>
+    <string name="summary_top_bracings">支撑冲击排行</string>
+    <string name="summary_top_shield_strip">盾牌剥夺排行</string>
+    <string name="summary_top_weapon_disables">武器无效排行</string>
+    <string name="summary_top_potion_disables">药水无效排行</string>
+    <string name="summary_top_bd_glider">BD滑翔翼排行</string>
+    <string name="summary_top_crystal_wings">水晶之翼排行</string>
+    <string name="summary_top_glider_disables">滑翔翼无效排行</string>
+    <string name="summary_top_provokes">挑衅排行</string>
+    <string name="summary_top_tiger_strikes">猛虎打击排行</string>
+    <string name="summary_top_freezes">冻结排行</string>
     <string name="summary_top_haranya_spells_damage">哈拉尼亚法术伤害榜</string>
     <string name="summary_top_nuia_spells_damage">努伊安法术伤害榜</string>
     <string name="summary_top_pirate_spells_damage">海盗法术伤害榜</string>
@@ -305,6 +357,7 @@
     <string name="summary_top_kills_pirate">海盗击杀榜</string>
     <string name="summary_top_damage_taken">承受伤害榜</string>
     <string name="summary_top_heals_received">接受治疗榜</string>
+    <string name="summary_top_heal_ratio">治疗比例</string>
     <string name="summary_top_potion_drinkers">药水达人榜</string>
     <string name="summary_top_glider_gamers">滑翔翼高手榜</string>
     <string name="summary_most_item_usages">物品使用榜</string>
@@ -320,6 +373,11 @@
 
     <!-- Summary Tab Labels -->
     <string name="summary_tab_debuffs">减益效果</string>
+    <string name="summary_tab_faction_charts">阵营图表</string>
+    <string name="summary_tab_cc_debuffs">控制减益</string>
+    <string name="summary_tab_utility_debuffs">工具减益</string>
+    <string name="summary_tab_glider_debuffs">滑翔翼减益</string>
+    <string name="summary_tab_special_debuffs">特殊减益</string>
     <string name="summary_tab_spells">技能</string>
     <string name="summary_tab_buffs">增益效果</string>
     <string name="summary_tab_ode">赞歌</string>

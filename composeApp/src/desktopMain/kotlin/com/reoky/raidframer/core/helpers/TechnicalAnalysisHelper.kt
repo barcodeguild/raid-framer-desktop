@@ -32,9 +32,11 @@ import raid_framer_desktop.composeapp.generated.resources.tech_no_tiger_strikes
 object TechnicalAnalysisHelper {
 
   private const val HEAL_CIRCULAR_THRESHOLD = 50_000L
+  private const val HEAL_CIRCULAR_RATIO = 0.10f
   private const val HEAL_FOCUS_THRESHOLD = 50_000L
   private const val HEAL_FOCUS_RATIO = 0.10f
   private const val DAMAGE_FOCUSED_THRESHOLD = 150_000L
+  private const val DAMAGE_FOCUSED_RATIO = 0.10f
   private const val HIGH_DAMAGE_THRESHOLD = 500_000L
   private const val SPELL_DOMINANCE_DAMAGE_THRESHOLD = 300_000L
   private const val NEEDS_HEALS_THRESHOLD = 0.5f // ony 50% of received damage healed
@@ -113,7 +115,10 @@ object TechnicalAnalysisHelper {
         val b = healers[j]
         val aHealsB = a.sessionHealToPlayer[b.name] ?: 0L
         val bHealsA = b.sessionHealToPlayer[a.name] ?: 0L
-        if (aHealsB >= HEAL_CIRCULAR_THRESHOLD && bHealsA >= HEAL_CIRCULAR_THRESHOLD) {
+        if (aHealsB >= HEAL_CIRCULAR_THRESHOLD && bHealsA >= HEAL_CIRCULAR_THRESHOLD
+          && (a.sessionHealTotal <= 0 || aHealsB.toFloat() / a.sessionHealTotal >= HEAL_CIRCULAR_RATIO)
+          && (b.sessionHealTotal <= 0 || bHealsA.toFloat() / b.sessionHealTotal >= HEAL_CIRCULAR_RATIO)
+        ) {
           edgeHeuristics.add(EdgeHeuristic(a.name, b.name, Res.string.tech_heal_loop, RFColors.techHealLoop, category = CAT_HEALS))
           edgeHeuristics.add(EdgeHeuristic(b.name, a.name, Res.string.tech_heal_loop, RFColors.techHealLoop, category = CAT_HEALS))
         }
@@ -164,7 +169,8 @@ object TechnicalAnalysisHelper {
             RFColors.techMvpHeals,
             listOf(index + 1),
             isMvp = true,
-            category = CAT_HEALS
+            category = CAT_HEALS,
+            playerFaction = faction
           )
         )
       }
@@ -184,9 +190,11 @@ object TechnicalAnalysisHelper {
       card.isRealPlayer && SpecType.fromName(card.currentBuild) in dpsSpecs
     }.forEach { card ->
 
-      // Heuristic - Focused Target - 150k+ damage to a single target
+      // Heuristic - Focused Target - 150k+ damage to a single target, at least 10% of total damage
       card.sessionDamageToPlayer.forEach { (targetName, damage) ->
-        if (damage >= DAMAGE_FOCUSED_THRESHOLD) {
+        if (damage >= DAMAGE_FOCUSED_THRESHOLD
+          && (card.sessionDamageTotal <= 0 || damage.toFloat() / card.sessionDamageTotal >= DAMAGE_FOCUSED_RATIO)
+        ) {
           edgeHeuristics.add(
             EdgeHeuristic(
               card.name,
@@ -251,7 +259,8 @@ object TechnicalAnalysisHelper {
             RFColors.techMvpDps,
             listOf(index + 1),
             isMvp = true,
-            category = CAT_DAMAGE
+            category = CAT_DAMAGE,
+            playerFaction = faction
           )
         )
       }
@@ -280,7 +289,8 @@ object TechnicalAnalysisHelper {
             RFColors.techMvpCc,
             listOf(index + 1),
             isMvp = true,
-            category = CAT_CC
+            category = CAT_CC,
+            playerFaction = faction
           )
         )
       }

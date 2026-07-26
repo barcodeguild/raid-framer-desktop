@@ -23,6 +23,7 @@ data class GraphNode(
   val spec: SpecType?,
   val gearScore: Int,
   val faction: Faction,
+  val isRealPlayer: Boolean = true,
   var x: Float = 0f,
   var y: Float = 0f,
   var vx: Float = 0f,
@@ -252,7 +253,8 @@ object BattleGraphInteractor : Interactor() {
         name = card.name,
         spec = spec,
         gearScore = card.lastKnownGearScore,
-        faction = faction
+        faction = faction,
+        isRealPlayer = card.isRealPlayer
       )
     }
 
@@ -508,14 +510,16 @@ object BattleGraphInteractor : Interactor() {
             name = name,
             spec = spec,
             gearScore = card.lastKnownGearScore,
-            faction = faction
+            faction = faction,
+            isRealPlayer = card.isRealPlayer
           )
         } else {
           nodeMap[name] = GraphNode(
             name = name,
             spec = null,
             gearScore = 0,
-            faction = Faction.UNKNOWN
+            faction = Faction.UNKNOWN,
+            isRealPlayer = false
           )
         }
       }

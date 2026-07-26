@@ -119,5 +119,16 @@ data class PlayerCard (
   val sessionHealsReceivedTotal: Int = 0,
   val sessionOdeHealsTotal: Long = 0,
   val sessionTigerStrikeTotal: Int = 0,
+  val sessionFreezeTotal: Int = 0,
+  val sessionTripsTotal: Int = 0,
+  val sessionBubblesTotal: Int = 0,
+  val sessionBracingsTotal: Int = 0,
+  val sessionShieldStripTotal: Int = 0,
+  val sessionWeaponDisablesTotal: Int = 0,
+  val sessionPotionDisablesTotal: Int = 0,
+  val sessionBdGliderTotal: Int = 0,
+  val sessionCrystalWingsTotal: Int = 0,
+  val sessionGliderDisablesTotal: Int = 0,
+  val sessionProvokedTotal: Int = 0,
 )
 

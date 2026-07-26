@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 29
+const val SCHEMA_VERSION = 30
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -192,6 +192,17 @@ data class PlayerCacheEntity(
   val lifetimeTotalDamageTaken: Long = 0L,
   val lifetimeTotalHealsReceived: Long = 0L,
   val lifetimeTotalTigerStrikes: Long = 0L,
+  val lifetimeTotalFreezes: Long = 0L,
+  val lifetimeTotalTrips: Long = 0L,
+  val lifetimeTotalBubbles: Long = 0L,
+  val lifetimeTotalBracings: Long = 0L,
+  val lifetimeTotalShieldStrip: Long = 0L,
+  val lifetimeTotalWeaponDisables: Long = 0L,
+  val lifetimeTotalPotionDisables: Long = 0L,
+  val lifetimeTotalBdGlider: Long = 0L,
+  val lifetimeTotalCrystalWings: Long = 0L,
+  val lifetimeTotalGliderDisables: Long = 0L,
+  val lifetimeTotalProvoked: Long = 0L,
 )
 
 /*
@@ -231,6 +242,17 @@ data class PlayerSessionTotalsEntity(
   val totalHealsReceived: Int = 0,
   val totalOdeHeals: Long = 0L,
   val totalTigerStrikes: Int = 0,
+  val totalFreezes: Int = 0,
+  val totalTrips: Int = 0,
+  val totalBubbles: Int = 0,
+  val totalBracings: Int = 0,
+  val totalShieldStrip: Int = 0,
+  val totalWeaponDisables: Int = 0,
+  val totalPotionDisables: Int = 0,
+  val totalBdGlider: Int = 0,
+  val totalCrystalWings: Int = 0,
+  val totalGliderDisables: Int = 0,
+  val totalProvoked: Int = 0,
 )
 
 // global enums below for consolidation
