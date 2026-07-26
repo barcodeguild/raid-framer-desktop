@@ -340,7 +340,10 @@ object CompanionInteractor : Interactor() {
         else -> {}
       }
     } catch (e: Exception) {
-      Log.error(TAG, "Could not decode JSON IPC message: ${e.message}")
+      // Truncated JSON from the addon is expected during normal operation (race between
+      // Lua write and Kotlin read). Log at WARN level with a truncated snippet for debugging.
+      val preview = rawJson.take(120)
+      Log.warn(TAG, "Skipping incomplete IPC message ($preview…): ${e.message}")
     }
   }
 

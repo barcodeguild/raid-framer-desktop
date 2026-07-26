@@ -357,6 +357,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_top_kills_pirate">Top-Kills Piraten</string>
     <string name="summary_top_damage_taken">Top Erlittener Schaden</string>
     <string name="summary_top_heals_received">Top Erhaltene Heilungen</string>
+    <string name="summary_top_heal_ratio">Heilungsrate</string>
     <string name="summary_top_potion_drinkers">Top-Tränke-Trinker</string>
     <string name="summary_top_glider_gamers">Top-Gleiter-Spieler</string>
     <string name="summary_most_item_usages">Meiste Gegenstandsbenutzungen</string>

@@ -357,6 +357,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="summary_top_kills_pirate">Top Kills Pirata</string>
     <string name="summary_top_damage_taken">Top Dano Recebido</string>
     <string name="summary_top_heals_received">Top Curas Recebidas</string>
+    <string name="summary_top_heal_ratio">Taxa de Cura</string>
     <string name="summary_top_potion_drinkers">Top Bebedores de Poção</string>
     <string name="summary_top_glider_gamers">Top Jogadores de Planador</string>
     <string name="summary_most_item_usages">Maior Uso de Itens</string>

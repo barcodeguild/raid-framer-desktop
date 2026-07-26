@@ -91,6 +91,7 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_gam
 import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_item_uses
 import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_spells_damage
 import raid_framer_desktop.composeapp.generated.resources.summary_top_heals_received
+import raid_framer_desktop.composeapp.generated.resources.summary_top_heal_ratio
 import raid_framer_desktop.composeapp.generated.resources.summary_top_kills_haranya
 import raid_framer_desktop.composeapp.generated.resources.summary_top_kills_nuia
 import raid_framer_desktop.composeapp.generated.resources.summary_top_kills_pirate
@@ -231,7 +232,8 @@ fun SummaryOverlay(wm: WindowManager? = null) {
       Box(
         modifier = Modifier
           .align(Alignment.CenterEnd)
-          .padding(end = 36.dp)
+          .offset(y = (-2).dp)
+          .padding(end = 43.dp)
       ) {
         TextButton(
           onClick = { dropdownExpanded = true },
@@ -978,6 +980,20 @@ private fun DamageTakenHealsReceived(
   topHealsReceived: List<PlayerCard>,
   wm: WindowManager?
 ) {
+  // Calculate heal ratio data (damage taken -> heals received ratio)
+  val healRatioData = remember(topDamageTaken) {
+    topDamageTaken
+      .filter { it.sessionDamageTakenTotal > 0 }
+      .sortedByDescending { it.sessionDamageTakenTotal }
+      .take(15)
+      .map { card ->
+        val ratio = if (card.sessionDamageTakenTotal > 0) {
+          card.sessionHealsReceivedTotal.toFloat() / card.sessionDamageTakenTotal.toFloat()
+        } else 0f
+        card to ratio
+      }
+  }
+
   Row(
     modifier = Modifier.fillMaxSize()
   ) {
@@ -1004,6 +1020,63 @@ private fun DamageTakenHealsReceived(
       AppState.selectPlayer(card.name)
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
+
+    StatColumn(
+      icon = "\uD83E\uDE78",
+      title = stringResource(Res.string.summary_top_heal_ratio),
+      cards = healRatioData.map { it.first },
+      valueExtractor = { card ->
+        val ratio = healRatioData.find { it.first.name == card.name }?.second ?: 0f
+        "${(ratio * 100).toInt()}%"
+      },
+      valueColor = Color.White,
+      modifier = Modifier.weight(1f),
+      colorExtractor = { card ->
+        val ratio = healRatioData.find { it.first.name == card.name }?.second ?: 0f
+        healRatioColor(ratio)
+      }
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+  }
+}
+
+/**
+ * Maps a heal ratio (0.0 = 0% healed, 1.0 = 100% healed) to a color gradient:
+ * Red (0%) -> Orange (25%) -> Yellow (50%) -> Green (75%) -> Cyan (100%+)
+ */
+private fun healRatioColor(ratio: Float): Color {
+  val clamped = ratio.coerceIn(0f, 1.5f)
+  return when {
+    clamped < 0.25f -> {
+      val t = clamped / 0.25f
+      Color(
+        (255 * (1 - t * 0.38)).toInt(),
+        (50 * t).toInt(),
+        0,
+        255
+      )
+    }
+    clamped < 0.5f -> {
+      val t = (clamped - 0.25f) / 0.25f
+      Color(
+        (153 + 102 * t).toInt(),
+        (50 + 171 * t).toInt(),
+        0,
+        255
+      )
+    }
+    clamped < 1.0f -> {
+      val t = (clamped - 0.5f) / 0.5f
+      Color(
+        255,
+        (221 + 34 * t).toInt(),
+        (intArrayOf(0, 50, 100, 150, 200, 230).getOrElse((t * 5).toInt()) { 230 }),
+        255
+      )
+    }
+    else -> Color(0, 230, 255, 255) // Cyan for over-healed
   }
 }
 
@@ -1063,6 +1136,7 @@ private fun StatColumn(
   valueExtractor: (PlayerCard) -> String,
   valueColor: Color,
   modifier: Modifier = Modifier,
+  colorExtractor: ((PlayerCard) -> Color)? = null, // Optional dynamic color per card
   onClick: (PlayerCard) -> Unit
 ) {
   val config by RFConfig.state.collectAsState()
@@ -1108,7 +1182,7 @@ private fun StatColumn(
           index = index,
           card = card,
           valueText = valueExtractor(card),
-          valueColor = valueColor,
+          valueColor = colorExtractor?.invoke(card) ?: valueColor,
           isRetribution = card.isBuildingAggression,
           flashingColor = Color.Red,
           isOwnCharacter = card.name == config.playerName,

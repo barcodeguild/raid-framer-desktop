@@ -357,6 +357,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_top_kills_pirate">Top Kills Pirate</string>
     <string name="summary_top_damage_taken">Top Damage Taken</string>
     <string name="summary_top_heals_received">Top Heals Received</string>
+    <string name="summary_top_heal_ratio">Heal Ratio</string>
     <string name="summary_top_potion_drinkers">Top Potion Drinkers</string>
     <string name="summary_top_glider_gamers">Top Glider Gamers</string>
     <string name="summary_most_item_usages">Most Item Usages</string>

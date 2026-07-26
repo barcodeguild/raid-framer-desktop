@@ -357,6 +357,7 @@
     <string name="summary_top_kills_pirate">해적 킬 순위</string>
     <string name="summary_top_damage_taken">받은 피해 순위</string>
     <string name="summary_top_heals_received">받은 힐 순위</string>
+    <string name="summary_top_heal_ratio">치유 비율</string>
     <string name="summary_top_potion_drinkers">물약 사용 순위</string>
     <string name="summary_top_glider_gamers">날틀 사용 순위</string>
     <string name="summary_most_item_usages">아이템 사용 순위</string>
