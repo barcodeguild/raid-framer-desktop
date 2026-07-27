@@ -404,7 +404,7 @@ object PlayerCacheInteractor : Interactor() {
     val currentConfig = RFConfig.state.value
     if (currentConfig.lastSessionStart <= 0L) return
 
-    CombatLogInteractor.stopRecording()
+    CombatLogInteractor.stopRecording(abort = true)
 
     scope.launch {
       mutex.withLock {

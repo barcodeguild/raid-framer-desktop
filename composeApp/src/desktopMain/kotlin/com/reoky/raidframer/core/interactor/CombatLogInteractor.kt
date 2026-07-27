@@ -77,7 +77,7 @@ object CombatLogInteractor : Interactor() {
     Log.info(TAG, "Combat log recording started")
   }
 
-  fun stopRecording() {
+  fun stopRecording(abort: Boolean = false) {
     if (!_isRecording.value) return
     _isRecording.value = false
     val sessionStart = RFConfig.state.value.lastSessionStart
@@ -97,7 +97,9 @@ object CombatLogInteractor : Interactor() {
         lastSessionDurationMs = durationMs,
         lastSessionExportDir = exportDir
       )}
-      exportSummaryImage(durationMs)
+      if (!abort) {
+        exportSummaryImage(durationMs)
+      }
       Log.info(TAG, "Combat log recording stopped")
     }
   }
