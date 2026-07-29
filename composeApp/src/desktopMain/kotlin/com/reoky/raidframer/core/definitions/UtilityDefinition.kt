@@ -77,9 +77,9 @@ fun PlayerCard.copiedWithUtilityItemDetectionMiddleWare(event: CombatEvent): Pla
   return updatedCard.copy(
     lastEvent = now,
     lastItemUse = now,
-    cache = cache?.copy(
+    cache = updatedCard.cache?.copy(
       lastSeen = now,
-      lifetimeTotalItemSkillsUsed = cache.lifetimeTotalItemSkillsUsed + newMatches.size,
+      lifetimeTotalItemSkillsUsed = (updatedCard.cache?.lifetimeTotalItemSkillsUsed ?: 0L) + newMatches.size,
     ),
     sessionItemSkillTotal = sessionItemSkillTotal + newMatches.size,
     recentSkillItemUsages = updatedRecentSkillItemUsages

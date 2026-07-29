@@ -285,3 +285,12 @@ val MIGRATION_29_30 = object : Migration(29, 30) {
   }
 }
 
+// added lastRavenspineWings, lastTWTGlider, lastMoonshadowGlider to player_cache for glider buff tracking
+val MIGRATION_30_31 = object : Migration(30, 31) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastRavenspineWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastTWTGlider INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMoonshadowGlider INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+

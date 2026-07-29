@@ -27,9 +27,13 @@ fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntit
     lastKrakenGlider = c?.lastKrakenGlider ?: 0L,
     lastCrystalWings = c?.lastCrystalWings ?: 0L,
     lastRocketGlider = c?.lastRocketGlider ?: 0L,
+    lastRavenspineWings = c?.lastRavenspineWings ?: 0L,
+    lastTWTGlider = c?.lastTWTGlider ?: 0L,
+    lastMoonshadowGlider = c?.lastMoonshadowGlider ?: 0L,
 
     lastKrakenScepter = c?.lastKrakenScepter ?: 0L,
     lastKrakenSpear = c?.lastKrakenSpear ?: 0L,
+    lastKrakenShield = c?.lastKrakenShield ?: 0L,
     lastLibShieldPull = c?.lastLibShieldPull ?: 0L,
     lastGreatclub = c?.lastGreatclub ?: 0L,
     lastHalcyNecklace = c?.lastHalcyNecklace ?: 0L,

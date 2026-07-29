@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 30
+const val SCHEMA_VERSION = 31
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -139,6 +139,9 @@ data class PlayerCacheEntity(
   val lastKrakenGlider: Long = 0L,
   val lastCrystalWings: Long = 0L,
   val lastRocketGlider: Long = 0L,
+  val lastRavenspineWings: Long = 0L,
+  val lastTWTGlider: Long = 0L,
+  val lastMoonshadowGlider: Long = 0L,
 
   // utility item usages
   val lastKrakenScepter: Long = 0L,

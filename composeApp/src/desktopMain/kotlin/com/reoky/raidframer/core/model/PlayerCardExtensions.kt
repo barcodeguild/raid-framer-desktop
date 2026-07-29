@@ -7,6 +7,7 @@ import com.reoky.raidframer.core.definitions.copiedWithUtilityItemDetectionMiddl
 import com.reoky.raidframer.core.definitions.distressedDebuffIds
 import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
+import com.reoky.raidframer.core.definitions.copiedWithGliderDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.silencedDebuffIds
 import com.reoky.raidframer.core.definitions.tigerStrikeDebuffIds
 import com.reoky.raidframer.core.definitions.freezeDebuffIds
@@ -186,10 +187,10 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
  * Add a buff gained event to the PlayerCard, updating recent events.
  */
 fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
-  //val isBDGlider = if (event.buffId)
-  return this.copy(
+  val card = this.copiedWithGliderDetectionMiddleWare(event) // detects glider usage via self-applied buffs
+  return card.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(
+    cache = card.cache?.copy(
       lastSeen = event.timestamp
     ),
     recentBuffGainedEvents = (this.recentBuffGainedEvents + event).takeLast(200) // optional to takeLast(n)
@@ -211,7 +212,7 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
  * Add a debuff gained event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
-  if (event.source == event.target) return this // skip self-applied debuffs
+  //if (event.source == event.target) return this // skip self-applied debuffs
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
@@ -243,7 +244,7 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
  */
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
-  if (event.source == event.target) return this // skip self-casts (e.g. self-inflicted debuffs)
+  //if (event.source == event.target) return this // skip self-casts (e.g. self-inflicted debuffs)
   val isCC = findDebuffByName(event.debuff)?.consideredCC == true
   val isCharm = event.debuffId in charmedDebuffIds
   val isDistress = event.debuffId in distressedDebuffIds
@@ -394,7 +395,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
  */
 fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
-  if (event.source == event.target) return this // skip self-casts (e.g. resurgence on yourself)
+  //if (event.source == event.target) return this // skip self-casts (e.g. resurgence on yourself)
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,

@@ -67,6 +67,7 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_27_28) // 07/14/26 added allowOdeToRecoveryCountAsHeals to config for filtering Ode heals in rankings
   .addMigrations(MIGRATION_28_29) // 07/23/26 added lifetimeTotalTigerStrikes to cache and totalTigerStrikes to session totals for Battlerage heuristic
   .addMigrations(MIGRATION_29_30) // 07/25/26 added 11 new debuff category totals (freeze/trip/bubble/bracing/shieldstrip/weapondisable/potiondisable/bdglider/crystalwings/gliderdisable/provoke)
+  .addMigrations(MIGRATION_30_31) // 07/29/26 added lastRavenspineWings, lastTWTGlider, lastMoonshadowGlider for glider buff tracking
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

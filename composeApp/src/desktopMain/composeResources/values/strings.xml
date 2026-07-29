@@ -486,6 +486,16 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="item_name_mist_dagger">Mistsong Wicked Whisper Dagger</string>
     <string name="item_name_mist_shield">Mistsong Stealthfang Shield</string>
 
+    <!-- Glider Names -->
+    <string name="glider_name_twt">Furious Titan\'s Wings</string>
+    <string name="glider_name_moonshadow">Moonshadow Glider</string>
+    <string name="glider_name_crystal_wings">Crystal Wings</string>
+    <string name="glider_name_bd_glider">Legendary Dragon Wings</string>
+    <string name="glider_name_rocket_wings">Rocket Wings</string>
+    <string name="glider_name_ravenspine">Ravenspine Wings</string>
+    <string name="glider_name_feathered_dragon">Feathered Dragon Glider</string>
+    <string name="glider_name_sky_emperor">Sky Emperor</string>
+
 
     <!-- Game Potions -->
     <string name="potion_name_minor_healing_rank_one">Veiled Flame (Minor Healing Potion)</string>
