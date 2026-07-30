@@ -76,7 +76,7 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     )}
   ),
   KRAKEN_SHIELD(
-    itemSpecificSkillIds = listOf(36735), // Desolate Sea Guardian
+    itemSpecificSkillIds = listOf(36735), // Desolate Sea Guardianq
     itemSpecificBuffIds = listOf(), // gives slow and snare but no unique buff id
     castTime = 0.0,
     cooldown = 45.0,

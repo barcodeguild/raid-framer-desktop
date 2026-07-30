@@ -962,4 +962,21 @@
     <string name="spec_type_zealot">Zealot</string>
     <string name="spec_type_zephyr">Zephyr</string>
 
+    <!-- Glider Names -->
+    <string name="glider_name_twt">Furious Titan\'s Wings</string>
+    <string name="glider_name_moonshadow">Moonshadow Glider</string>
+    <string name="glider_name_crystal_wings">Crystal Wings</string>
+    <string name="glider_name_bd_glider">Legendary Dragon Wings</string>
+    <string name="glider_name_rocket_wings">Rocket Wings</string>
+    <string name="glider_name_ravenspine">Ravenspine Wings</string>
+    <string name="glider_name_feathered_dragon">Feathered Dragon Glider</string>
+    <string name="glider_name_sky_emperor">Sky Emperor</string>
+
+    <!-- Player Inventory -->
+    <string name="player_inventory_title">Player Inventory</string>
+    <string name="player_inventory_last_used">Last Used: %1$s</string>
+    <string name="player_inventory_uses">%1$d uses</string>
+    <string name="player_inventory_never">Never</string>
+    <string name="player_inventory_controls_hint">Controls the session totals below</string>
+
 </resources>
