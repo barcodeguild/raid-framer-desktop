@@ -156,7 +156,12 @@ object PetAccumulatorInteractor : Interactor() {
       val candidates = PlayerCacheInteractor.getPetEntriesByName(cleanSource)
 
       if (candidates.isEmpty()) {
-        Log.debug(TAG, "No pet card found for damage source: $cleanSource")
+        // No pet card found for this source. The damage was accumulated because
+        // it matched a whitelisted pet skill, but no pet card exists yet.
+        // Route it back to the player cache so it counts as player damage
+        // rather than silently dropping it.
+        Log.info(TAG, "No pet card found for damage source: $cleanSource - routing to player cache")
+        PlayerCacheInteractor.postEventInternal(damage)
         return@forEach
       }
 
@@ -225,12 +230,16 @@ object PetAccumulatorInteractor : Interactor() {
   // Helper functions
 
   private fun isPetRelatedSkill(spellId: Int, spellName: String): Boolean {
-    // Check whitelist
+    // Check whitelist by spell ID (cast/success events from log file have spellId)
     if (petSkillWhitelist.any { it.id == spellId }) return true
 
-    // Check for DoT effects by name patterns
-    val dotPatterns = listOf("Bleeding", "Poison", "Burn")
-    return dotPatterns.any { spellName.contains(it, ignoreCase = true) }
+    // Also check by spell name - IPC addon events always have spellId=0 for damage/heal,
+    // so we must match by name for those events.
+    if (petSkillWhitelist.any { skill ->
+      skill.possibleNames.any { it.equals(spellName, ignoreCase = true) }
+    }) return true
+
+    return false
   }
 
   private fun isRiderSpell(spellName: String): Boolean {
@@ -259,6 +268,7 @@ object PetAccumulatorInteractor : Interactor() {
     return when {
       baseSpell.contains("Scratch") -> "Mara"
       baseSpell.contains("Guided Missiles") -> "Siege Risopoda"
+      baseSpell.contains("Dragon's Breath") -> "Dragon"
       else -> "Unknown Pet"
     }
   }
@@ -267,16 +277,32 @@ object PetAccumulatorInteractor : Interactor() {
     // Direct match
     if (damageSpellId == castSpellId) return true
 
-    // Check if damage spell is a DoT related to the cast
+    // Dragon breath rider spells -> Clinging Flame / Clinging Flame Explosion
+    val dragonBreathRiderIds = setOf(38418, 38699, 38701) // Red, Green, Black
+    val dragonDamageIds = setOf(22608, 22609, 22618) // Clinging Flame x2, Clinging Flame Explosion
+    if (castSpellId in dragonBreathRiderIds && damageSpellId in dragonDamageIds) {
+      return true
+    }
+
+    // Also check by name for IPC events where spellId=0
     val castSkill = petSkillWhitelist.find { it.id == castSpellId }
     if (castSkill != null) {
-      // For Scratch -> Bleeding
+      val isDragonBreath = castSkill.name.contains("Dragon's Breath", ignoreCase = true)
+      val isClingingFlame = damageSpellName.contains("Clinging Flame", ignoreCase = true)
+      if (isDragonBreath && isClingingFlame) return true
+
+      // Scratch -> Bleeding
       if (castSkill.name.contains("Scratch", ignoreCase = true) &&
         damageSpellName.contains("Bleeding", ignoreCase = true)) {
         return true
       }
-      // Add more correlations as needed
     }
+
+    // Fallback: check cast spell name against whitelist for IPC events (spellId=0)
+    val castNameMatch = petSkillWhitelist.find { skill ->
+      skill.possibleNames.any { it.equals(damageSpellName, ignoreCase = true) }
+    }
+    if (castNameMatch != null) return true
 
     return false
   }

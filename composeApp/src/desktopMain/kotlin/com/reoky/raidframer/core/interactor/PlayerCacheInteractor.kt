@@ -793,7 +793,9 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDamage(event: DamageEvent) {
     val cleanSource = event.source.replace("\\s*\\([^)]*\\)$".toRegex(), "").trim()
     val eventSourceIsPet = getPetEntriesByName(cleanSource).isNotEmpty()
-    if (eventSourceIsPet || petSkillWhitelist.any { it.id == event.spellId }) {
+    val isWhitelistedSkill = petSkillWhitelist.any { it.id == event.spellId } ||
+        petSkillWhitelist.any { skill -> skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) } }
+    if (eventSourceIsPet || isWhitelistedSkill) {
       PetAccumulatorInteractor.postEvent(event)
       return
     }
@@ -846,7 +848,9 @@ object PlayerCacheInteractor : Interactor() {
   private fun postSuccessfulCast(event: SuccessfulCastEvent) {
     val cleanSource = event.source.replace("\\s*\\([^)]*\\)$".toRegex(), "").trim()
     val eventSourceIsPet = getPetEntriesByName(cleanSource).isNotEmpty()
-    if (eventSourceIsPet || petSkillWhitelist.any { it.id == event.spellId }) {
+    val isWhitelistedSkill = petSkillWhitelist.any { it.id == event.spellId } ||
+        petSkillWhitelist.any { skill -> skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) } }
+    if (eventSourceIsPet || isWhitelistedSkill) {
       PetAccumulatorInteractor.postEvent(event)
       return
     }
