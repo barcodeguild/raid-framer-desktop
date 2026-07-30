@@ -1,25 +1,5 @@
 package com.reoky.raidframer.core.definitions
 
-//2026-01-29 19:05:38.869 I/CompanionInteractor: At 1769735132000 Siege Risopoda began casting Guided Missiles (id:46055) on Siege Risopoda.
-//2026-01-29 19:05:38.873 I/CompanionInteractor: At 1769735132000 Siege Risopoda successfully cast Guided Missiles (id:46055) on Siege Risopoda.
-//2026-01-29 19:05:38.874 I/CompanionInteractor: At 1769735132000 Omunus began casting Guided Missiles (Rider) (id:46058) on Omunus.
-//2026-01-29 19:05:38.874 I/CompanionInteractor: At 1769735132000 Omunus successfully cast Guided Missiles (Rider) (id:46058) on Omunus.
-//2026-01-29 19:05:38.874 I/CompanionInteractor: At 1769735133000 Nehalem began casting /moonwalk (id:44737) on Nehalem.
-//2026-01-29 19:05:38.879 I/CompanionInteractor: At 1769735133000 Siege Risopoda (12d62) damaged Reoky for 3349 using Guided Missiles.
-//2026-01-29 19:05:38.880 I/CompanionInteractor: At 1769735133000 Reoky applied Absorb Damage (id:23424) (type:BUFF) to Reoky
-//2026-01-29 19:05:38.880 I/CompanionInteractor: At 1769735133000 Reoky began casting Inoch's Lunastone (id:8001575) on Reoky.
-//2026-01-29 19:05:38.880 I/CompanionInteractor: At 1769735133000 Reoky successfully cast Inoch's Lunastone (id:8001575) on Reoky.
-//2026-01-29 19:05:38.881 I/CompanionInteractor: At 1769735133000 Reoky applied Inoch: Gods and Heroes (id:8000576) (type:BUFF) to Reoky
-//2026-01-29 19:05:38.881 I/CompanionInteractor: At 1769735133000 Xaraxa successfully cast Do the Pumped Up Dance Together (id:37690) on .
-//2026-01-29 19:05:38.881 I/CompanionInteractor: At 1769735133000 Siege Risopoda (12d62) damaged Reoky for 3447 using Guided Missiles.
-//2026-01-29 19:05:38.884 I/CompanionInteractor: At 1769735133000 Reoky began casting Earth Lunafrost (id:20993) on Reoky.
-//2026-01-29 19:05:38.884 I/CompanionInteractor: At 1769735133000 Reoky successfully cast Earth Lunafrost (id:20993) on Reoky.
-//2026-01-29 19:05:38.884 I/CompanionInteractor: At 1769735133000 Nehalem successfully cast /moonwalk (id:44737) on Nehalem.
-//2026-01-29 19:05:38.885 I/CompanionInteractor: At 1769735133000 Siege Risopoda (12d62) damaged Reoky for 3042 using Guided Missiles.
-//2026-01-29 19:05:38.886 I/CompanionInteractor: At 1769735133000 Siege Risopoda (12d62) damaged Reoky for 3133 using Guided Missiles.
-//2026-01-29 19:05:38.886 I/CompanionInteractor: At 1769735133000 Siege Risopoda (12d62) damaged Reoky for 3064 using Guided Missiles.
-
-
 /*
  * Whitelisted pet skills that are accumulated and turned into pet damage / casting / debuff events for tracking. There's no way to definitively
  * detect if a combat event is from a pet or not, so we have to whitelist known pet skills here.
@@ -30,14 +10,14 @@ val petSkillWhitelist = listOf(
     name = "Guided Missiles",
     castTime = 0.0,
     cooldown = 60.0,
-    possibleNames = listOf("Guided Missiles")
+    possibleNames = listOf("Guided Missiles", "유도탄", "Ковровая бомбардировка")
   ),
   Skill(
     id = 46058,
     name = "Guided Missiles (Rider)",
     castTime = 0.0,
     cooldown = 60.0,
-    possibleNames = listOf("Guided Missiles (Rider)")
+    possibleNames = listOf("Guided Missiles (Rider)", "유도탄(탑승자용)", "Ковровая бомбардировка")
   ),
 
   // Mara's scratch ~
@@ -53,5 +33,55 @@ val petSkillWhitelist = listOf(
     name = "Scratch (Rider)",
     castTime = 0.0,
     cooldown = 18.0,
-    possibleNames = listOf("Scratch (Rider)"))
+    possibleNames = listOf("Scratch (Rider)")
+  ),
+
+  // Red Dragon's Breath (Rider) - player casts this, dragon does the damage
+  Skill(
+    id = 38418,
+    name = "Red Dragon's Breath (Rider)",
+    castTime = 0.0,
+    cooldown = 30.0,
+    possibleNames = listOf("Red Dragon's Breath (Rider)", "붉은 용의 숨결 (탑승자)", "Огненное дыхание")
+  ),
+  // Green Dragon's Breath (Rider)
+  Skill(
+    id = 38699,
+    name = "Green Dragon's Breath (Rider)",
+    castTime = 0.0,
+    cooldown = 30.0,
+    possibleNames = listOf("Green Dragon's Breath (Rider)", "녹색 용의 숨결 (탑승자)", "Ядовитое дыхание")
+  ),
+  // Black Dragon's Breath (Rider)
+  Skill(
+    id = 38701,
+    name = "Black Dragon's Breath (Rider)",
+    castTime = 0.0,
+    cooldown = 30.0,
+    possibleNames = listOf("Black Dragon's Breath (Rider)", "검은 용의 숨결 (탑승자)", "Дыхание тьмы")
+  ),
+  // Clinging Flame - dragon breath DoT damage
+  Skill(
+    id = 22608,
+    name = "Clinging Flame",
+    castTime = 0.0,
+    cooldown = 0.0,
+    possibleNames = listOf("Clinging Flame", "폭발하는 씨앗", "Раскаленная лава")
+  ),
+  // Clinging Flame - dragon breath DoT damage
+  Skill(
+    id = 22609,
+    name = "Clinging Flame",
+    castTime = 0.0,
+    cooldown = 0.0,
+    possibleNames = listOf("Clinging Flame", "폭발하는 씨앗", "Раскаленная лава")
+  ),
+  // Clinging Flame Explosion - dragon breath burst damage
+  Skill(
+    id = 22618,
+    name = "Clinging Flame Explosion",
+    castTime = 0.0,
+    cooldown = 0.0,
+    possibleNames = listOf("Clinging Flame Explosion", "폭발하는 씨앗", "Раскаленная лава")
+  )
 )
