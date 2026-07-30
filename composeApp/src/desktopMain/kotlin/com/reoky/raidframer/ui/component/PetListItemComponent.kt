@@ -38,7 +38,10 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.model.RiderCastEvent
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.pet_cast_fallback_format
+import raid_framer_desktop.composeapp.generated.resources.pet_cast_overflow_format
 import raid_framer_desktop.composeapp.generated.resources.pet_companion_dmg_label
+import raid_framer_desktop.composeapp.generated.resources.pet_damage_label_format
 import raid_framer_desktop.composeapp.generated.resources.pet_debuffs_label
 import raid_framer_desktop.composeapp.generated.resources.pet_icon_desc_format
 import java.text.SimpleDateFormat
@@ -218,7 +221,7 @@ private fun CastEmoji(emoji: String, castIndex: Int, cast: RiderCastEvent) {
         ) {
           Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp).widthIn(max = 220.dp)) {
             Text(
-              text = cast.spellName.ifEmpty { "Cast #$castIndex" },
+              text = cast.spellName.ifEmpty { stringResource(Res.string.pet_cast_fallback_format, castIndex) },
               color = RFColors.TextPrimary,
               fontSize = 11.sp,
               fontWeight = FontWeight.Bold
@@ -229,7 +232,7 @@ private fun CastEmoji(emoji: String, castIndex: Int, cast: RiderCastEvent) {
               horizontalArrangement = Arrangement.SpaceBetween
             ) {
               Text(
-                text = "Damage: ${cast.damage.humanReadableAbbreviation()}",
+                text = stringResource(Res.string.pet_damage_label_format, cast.damage.humanReadableAbbreviation()),
                 color = RFColors.dpsOrange,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold
@@ -287,7 +290,7 @@ private fun CastEmoji(emoji: String, castIndex: Int, cast: RiderCastEvent) {
               }
               if (sortedTargets.size > 8) {
                 Text(
-                  text = "+${sortedTargets.size - 8} more",
+                  text = stringResource(Res.string.pet_cast_overflow_format, sortedTargets.size - 8),
                   color = RFColors.TextTertiary,
                   fontSize = 8.sp,
                   modifier = Modifier.padding(top = 2.dp)

@@ -216,6 +216,9 @@
     <string name="pet_icon_desc_format">%1$s 아이콘</string>
     <string name="pet_debuffs_label">디버프:</string>
     <string name="pet_companion_dmg_label">동반자 피해</string>
+    <string name="pet_cast_fallback_format">시전 #%1$d</string>
+    <string name="pet_damage_label_format">피해: %1$s</string>
+    <string name="pet_cast_overflow_format">+%1$d개 더</string>
 
     <!-- Pokemon / Companions Overlay -->
     <string name="pokemon_title">드래곤 브레스, 콩벌레, 전투 펫 및 기타 소환수</string>

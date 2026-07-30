@@ -91,20 +91,20 @@ val petSkillWhitelist = listOf(
     name = "Thunderbreath (Rider)",
     castTime = 0.0,
     cooldown = 60.0,
-    possibleNames = listOf("Thunderbreath (Rider)")
+    possibleNames = listOf("Thunderbreath (Rider)", "천둥의 숨결 (탑승자)")
   ),
   Skill(
     id = 35786,
     name = "Thunderbreath",
     castTime = 0.0,
     cooldown = 60.0,
-    possibleNames = listOf("Thunderbreath")
+    possibleNames = listOf("Thunderbreath", "천둥의 숨결")
   ),
   Skill(
     id = 21015,
     name = "Thunderbreath Aftershock",
     castTime = 0.0,
     cooldown = 0.0,
-    possibleNames = listOf("Thunderbreath Aftershock")
+    possibleNames = listOf("Thunderbreath Aftershock", "천둥의 숨결 여파")
   ),
 )

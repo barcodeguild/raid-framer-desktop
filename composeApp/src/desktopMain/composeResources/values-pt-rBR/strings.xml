@@ -216,6 +216,9 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="pet_icon_desc_format">ícone de %1$s</string>
     <string name="pet_debuffs_label">Debuffs:</string>
     <string name="pet_companion_dmg_label">Dano do Companheiro</string>
+    <string name="pet_cast_fallback_format">Conjuração #%1$d</string>
+    <string name="pet_damage_label_format">Dano: %1$s</string>
+    <string name="pet_cast_overflow_format">+%1$d mais</string>
 
     <!-- Pokemon / Companions Overlay -->
     <string name="pokemon_title">Baforadas de Dragão, Risos, Mascotes de Batalha e Outras Criaturas</string>

@@ -993,7 +993,10 @@ object PlayerCacheInteractor : Interactor() {
         val isBreathDamage = event.spellId in DRAGON_BREATH_DAMAGE_SPELL_IDS ||
             event.spellId in DRAKE_BREATH_DAMAGE_SPELL_IDS ||
             event.spell.contains("Clinging Flame", ignoreCase = true) ||
-            event.spell.contains("Thunderbreath", ignoreCase = true)
+            event.spell.contains("폭발하는 씨앗", ignoreCase = true) ||
+            event.spell.contains("Раскаленная лава", ignoreCase = true) ||
+            event.spell.contains("Thunderbreath", ignoreCase = true) ||
+            event.spell.contains("천둥의 숨결", ignoreCase = true)
         val isRocketDamage = event.spellId in GUIDED_MISSILES_DAMAGE_SPELL_IDS
 
         var breathCasts = existing.sessionBreathCasts
@@ -1054,7 +1057,8 @@ object PlayerCacheInteractor : Interactor() {
         val isDragonBreath = event.spellId in DRAGON_BREATH_RIDER_SPELL_IDS ||
             event.spell.contains("Dragon's Breath", ignoreCase = true)
         val isDrakeBreath = event.spellId == DRAKE_BREATH_RIDER_SPELL_ID ||
-            event.spell.contains("Thunderbreath", ignoreCase = true)
+            event.spell.contains("Thunderbreath", ignoreCase = true) ||
+            event.spell.contains("천둥의 숨결", ignoreCase = true)
         val isGuidedMissilesRider = event.spellId == GUIDED_MISSILES_RIDER_SPELL_ID ||
             event.spell.equals("Guided Missiles (Rider)", ignoreCase = true)
 

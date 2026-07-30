@@ -216,6 +216,9 @@
     <string name="pet_icon_desc_format">иконка %1$s</string>
     <string name="pet_debuffs_label">Дебаффы:</string>
     <string name="pet_companion_dmg_label">Урон питомца</string>
+    <string name="pet_cast_fallback_format">Заклинание #%1$d</string>
+    <string name="pet_damage_label_format">Урон: %1$s</string>
+    <string name="pet_cast_overflow_format">+%1$d ещё</string>
 
     <!-- Pokemon / Companions Overlay -->
     <string name="pokemon_title">Драконье дыхание, Рисо, боевые питомцы и другие существа</string>

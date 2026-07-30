@@ -295,11 +295,15 @@ object PetAccumulatorInteractor : Interactor() {
     val castSkill = petSkillWhitelist.find { it.id == castSpellId }
     if (castSkill != null) {
       val isDragonBreath = castSkill.name.contains("Dragon's Breath", ignoreCase = true)
-      val isClingingFlame = damageSpellName.contains("Clinging Flame", ignoreCase = true)
+      val isClingingFlame = damageSpellName.contains("Clinging Flame", ignoreCase = true) ||
+          damageSpellName.contains("폭발하는 씨앗", ignoreCase = true) ||
+          damageSpellName.contains("Раскаленная лава", ignoreCase = true)
       if (isDragonBreath && isClingingFlame) return true
 
-      val isDrakeBreath = castSkill.name.contains("Thunderbreath", ignoreCase = true)
-      val isThunderDmg = damageSpellName.contains("Thunderbreath", ignoreCase = true)
+      val isDrakeBreath = castSkill.name.contains("Thunderbreath", ignoreCase = true) ||
+          castSkill.name.contains("천둥의 숨결", ignoreCase = true)
+      val isThunderDmg = damageSpellName.contains("Thunderbreath", ignoreCase = true) ||
+          damageSpellName.contains("천둥의 숨결", ignoreCase = true)
       if (isDrakeBreath && isThunderDmg) return true
 
       // Scratch -> Bleeding

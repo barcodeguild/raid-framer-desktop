@@ -216,6 +216,9 @@
     <string name="pet_icon_desc_format">%1$s 图标</string>
     <string name="pet_debuffs_label">减益：</string>
     <string name="pet_companion_dmg_label">宠物伤害</string>
+    <string name="pet_cast_fallback_format">施法 #%1$d</string>
+    <string name="pet_damage_label_format">伤害: %1$s</string>
+    <string name="pet_cast_overflow_format">+%1$d 更多</string>
 
     <!-- Pokemon / Companions Overlay -->
     <string name="pokemon_title">龙息、瑞索、战斗宠物及其他生物</string>

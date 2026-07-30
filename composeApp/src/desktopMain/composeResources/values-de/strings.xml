@@ -216,6 +216,9 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="pet_icon_desc_format">%1$s-Symbol</string>
     <string name="pet_debuffs_label">Debuffs:</string>
     <string name="pet_companion_dmg_label">Begleiterschaden</string>
+    <string name="pet_cast_fallback_format">Zauber #%1$d</string>
+    <string name="pet_damage_label_format">Schaden: %1$s</string>
+    <string name="pet_cast_overflow_format">+%1$d weitere</string>
 
     <!-- Pokemon / Companions Overlay -->
     <string name="pokemon_title">Drachen-Atem, Risos, Kampftiere und andere Kreaturen</string>

@@ -221,6 +221,9 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="pet_icon_desc_format">%1$s icon</string>
     <string name="pet_debuffs_label">Debuffs:</string>
     <string name="pet_companion_dmg_label">Companion dmg</string>
+    <string name="pet_cast_fallback_format">Cast #%1$d</string>
+    <string name="pet_damage_label_format">Damage: %1$s</string>
+    <string name="pet_cast_overflow_format">+%1$d more</string>
 
     <!-- Pokemon / Companions Overlay -->
     <string name="pokemon_title">Dragon Breaths, Risos, Battle Pets and Other Creatures</string>
