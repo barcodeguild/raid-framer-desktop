@@ -83,5 +83,28 @@ val petSkillWhitelist = listOf(
     castTime = 0.0,
     cooldown = 0.0,
     possibleNames = listOf("Clinging Flame Explosion", "폭발하는 씨앗", "Раскаленная лава")
-  )
+  ),
+
+  // Typhoon Drake (Used for testing the app and breaths!)
+  Skill(
+    id = 35787,
+    name = "Thunderbreath (Rider)",
+    castTime = 0.0,
+    cooldown = 60.0,
+    possibleNames = listOf("Thunderbreath (Rider)")
+  ),
+  Skill(
+    id = 35786,
+    name = "Thunderbreath",
+    castTime = 0.0,
+    cooldown = 60.0,
+    possibleNames = listOf("Thunderbreath")
+  ),
+  Skill(
+    id = 21015,
+    name = "Thunderbreath Aftershock",
+    castTime = 0.0,
+    cooldown = 0.0,
+    possibleNames = listOf("Thunderbreath Aftershock")
+  ),
 )

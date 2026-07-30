@@ -54,7 +54,14 @@ object PlayerCacheInteractor : Interactor() {
 
   // Rider spell IDs for breath/rocket counters
   private val DRAGON_BREATH_RIDER_SPELL_IDS = setOf(38418, 38699, 38701) // Red, Green, Black
+  private const val DRAKE_BREATH_RIDER_SPELL_ID = 35787 // Thunderbreath (Rider)
   private const val GUIDED_MISSILES_RIDER_SPELL_ID = 46058
+  // Damage spell IDs that result from dragon breath (used for damage attribution)
+  private val DRAGON_BREATH_DAMAGE_SPELL_IDS = setOf(22608, 22609, 22618) // Clinging Flame x2, Clinging Flame Explosion
+  // Damage spell IDs that result from drake breath
+  private val DRAKE_BREATH_DAMAGE_SPELL_IDS = setOf(35786, 21015) // Thunderbreath, Thunderbreath Aftershock
+  // Damage spell IDs that result from guided missiles
+  private val GUIDED_MISSILES_DAMAGE_SPELL_IDS = setOf(46055) // Guided Missiles (non-rider damage)
 
   // Mapping of all the players (and NPCs) sorted in no particular order
   val realtimeComputer = RealtimeComputer(windowBuckets = 60, bucketMillis = 10_000L)
@@ -803,6 +810,11 @@ object PlayerCacheInteractor : Interactor() {
       PetAccumulatorInteractor.postEvent(event)
       return
     }
+    // Diagnostic: if source looks like a pet (non-player NPC with spellId=0 from IPC) but no pet card exists,
+    // this damage will be counted as player damage. This is the likely cause of 0-damage on pet cards.
+    if (event.spellId == 0 && !isRealPlayer(cleanSource)) {
+      Log.info(TAG, "Possible unattributed pet damage: '$cleanSource' (source='${event.source}') dealt ${event.damage} with '${event.spell}' - no pet card found, routing to player cache. Pet cards: ${petCards.keys.toList()}")
+    }
     postDamageInternal(event)
   }
 
@@ -973,13 +985,51 @@ object PlayerCacheInteractor : Interactor() {
       mutex.withLock {
         val existing = petCards[petKey]
         if (existing == null) {
+          Log.info(TAG, "Pet card not found for key '$petKey' when posting damage. Available keys: ${petCards.keys.toList()}")
           return@withLock
         }
+
+        // Attribute damage to the most recent breath/rocket cast if applicable
+        val isBreathDamage = event.spellId in DRAGON_BREATH_DAMAGE_SPELL_IDS ||
+            event.spellId in DRAKE_BREATH_DAMAGE_SPELL_IDS ||
+            event.spell.contains("Clinging Flame", ignoreCase = true) ||
+            event.spell.contains("Thunderbreath", ignoreCase = true)
+        val isRocketDamage = event.spellId in GUIDED_MISSILES_DAMAGE_SPELL_IDS
+
+        var breathCasts = existing.sessionBreathCasts
+        var rocketCasts = existing.sessionRocketCasts
+
+        if (isBreathDamage && breathCasts.isNotEmpty()) {
+          val lastIdx = breathCasts.lastIndex
+          val last = breathCasts[lastIdx]
+          val updatedTargetMap = last.damageByTarget.toMutableMap()
+          updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
+          breathCasts = breathCasts.toMutableList().apply {
+            set(lastIdx, last.copy(
+              damage = last.damage + event.damage.toLong(),
+              damageByTarget = updatedTargetMap
+            ))
+          }
+        } else if (isRocketDamage && rocketCasts.isNotEmpty()) {
+          val lastIdx = rocketCasts.lastIndex
+          val last = rocketCasts[lastIdx]
+          val updatedTargetMap = last.damageByTarget.toMutableMap()
+          updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
+          rocketCasts = rocketCasts.toMutableList().apply {
+            set(lastIdx, last.copy(
+              damage = last.damage + event.damage.toLong(),
+              damageByTarget = updatedTargetMap
+            ))
+          }
+        }
+
         val updated = existing.copy(
           recentDamageEvents = (existing.recentDamageEvents + event).takeLast(100),
           sessionDamageTotal = existing.sessionDamageTotal + event.damage.toLong(),
           recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
-          lastEvent = event.timestamp
+          lastEvent = event.timestamp,
+          sessionBreathCasts = breathCasts,
+          sessionRocketCasts = rocketCasts
         )
         petCards[petKey] = updated
       }
@@ -996,22 +1046,32 @@ object PlayerCacheInteractor : Interactor() {
       mutex.withLock {
         val existing = petCards[petKey]
         if (existing == null) {
+          Log.info(TAG, "Pet card not found for key '$petKey' when posting cast. Available keys: ${petCards.keys.toList()}")
           return@withLock
         }
 
         // Track rider spell casts for breath/rocket counters
         val isDragonBreath = event.spellId in DRAGON_BREATH_RIDER_SPELL_IDS ||
             event.spell.contains("Dragon's Breath", ignoreCase = true)
+        val isDrakeBreath = event.spellId == DRAKE_BREATH_RIDER_SPELL_ID ||
+            event.spell.contains("Thunderbreath", ignoreCase = true)
         val isGuidedMissilesRider = event.spellId == GUIDED_MISSILES_RIDER_SPELL_ID ||
             event.spell.equals("Guided Missiles (Rider)", ignoreCase = true)
+
+        val castEvent = RiderCastEvent(
+          timestamp = event.timestamp,
+          damage = 0L,
+          spellName = event.spell,
+          emoji = if (isDrakeBreath) "\u2744\uFE0F" else "\uD83D\uDD25" // ❄️ for drake, 🔥 for dragon
+        )
 
         val updated = existing.copy(
           recentDebuffAppliedEvents = existing.recentDebuffAppliedEvents,
           recentDamageEvents = existing.recentDamageEvents,
           recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
           lastEvent = event.timestamp,
-          sessionBreathCount = existing.sessionBreathCount + if (isDragonBreath) 1 else 0,
-          sessionRocketCount = existing.sessionRocketCount + if (isGuidedMissilesRider) 1 else 0
+          sessionBreathCasts = if (isDragonBreath || isDrakeBreath) existing.sessionBreathCasts + castEvent else existing.sessionBreathCasts,
+          sessionRocketCasts = if (isGuidedMissilesRider) existing.sessionRocketCasts + castEvent else existing.sessionRocketCasts
         )
         petCards[petKey] = updated
       }
@@ -1882,7 +1942,7 @@ object PlayerCacheInteractor : Interactor() {
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .sample(250L)
     .map { pets ->
-      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 || it.sessionBreathCount > 0 || it.sessionRocketCount > 0 }
+      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 || it.sessionBreathCasts.isNotEmpty() || it.sessionRocketCasts.isNotEmpty() }
         .sortedByDescending { it.sessionDamageTotal }
         .take(50)
     }

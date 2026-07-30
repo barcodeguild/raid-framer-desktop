@@ -1,6 +1,17 @@
 package com.reoky.raidframer.core.model
 
 /**
+ * Tracks a single rider spell cast with its attributed damage and timestamp.
+ */
+data class RiderCastEvent(
+  val timestamp: Long,
+  val damage: Long = 0L,
+  val spellName: String = "",
+  val emoji: String = "\uD83D\uDD25", // 🔥 default fire breath
+  val damageByTarget: Map<String, Long> = emptyMap() // target name -> damage attributed
+)
+
+/**
  * Similar to PlayerCard, except represents a battle companion/pet with associated combat data.
  * The problem is that pets aren't players, but they have owners, so the combat relationship is indirect.
  * So I figure, we just make one and do the same thing right?
@@ -20,6 +31,6 @@ data class PetCard(
   // Session totals
   val sessionDamageTotal: Long = 0L,
   val sessionDebuffTotal: Int = 0,
-  val sessionBreathCount: Int = 0, // Dragon's Breath (Rider) casts attributed to this pet
-  val sessionRocketCount: Int = 0  // Guided Missiles (Rider) casts attributed to this pet
+  val sessionBreathCasts: List<RiderCastEvent> = listOf(), // Dragon's Breath (Rider) casts with damage attribution
+  val sessionRocketCasts: List<RiderCastEvent> = listOf()  // Guided Missiles (Rider) casts with damage attribution
 )

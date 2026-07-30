@@ -5,27 +5,45 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.core.helpers.getPetIcon
-import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.model.RiderCastEvent
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.pet_companion_dmg_label
 import raid_framer_desktop.composeapp.generated.resources.pet_debuffs_label
 import raid_framer_desktop.composeapp.generated.resources.pet_icon_desc_format
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun PetListItem(
@@ -34,8 +52,8 @@ fun PetListItem(
   damage: Long,
   debuffs: List<String>,
   petType: String = "default",
-  breathCount: Int = 0,
-  rocketCount: Int = 0,
+  breathCasts: List<RiderCastEvent> = listOf(),
+  rocketCasts: List<RiderCastEvent> = listOf(),
   modifier: Modifier = Modifier,
   onClick: (() -> Unit)? = null
 ) {
@@ -74,12 +92,11 @@ fun PetListItem(
             .border(1.dp, RFColors.IconBorder, CircleShape),
           contentAlignment = Alignment.Center
         ) {
-          // inner clipped area that crops the image to a circle and zooms it slightly
           val zoom = 1.25f
           Box(
             modifier = Modifier
               .fillMaxSize()
-              .padding(6.dp) // optional inner padding to keep border visible
+              .padding(6.dp)
               .clip(CircleShape),
             contentAlignment = Alignment.Center
           ) {
@@ -111,13 +128,21 @@ fun PetListItem(
             ) {
               Text(text = owner, fontSize = 12.sp, color = RFColors.TextSecondary)
             }
-            if (breathCount > 0 || rocketCount > 0) {
+            if (breathCasts.isNotEmpty() || rocketCasts.isNotEmpty()) {
               Spacer(modifier = Modifier.width(6.dp))
-              repeat(breathCount) {
-                Text(text = "\uD83D\uDD25", fontSize = 14.sp) // 🔥
+              breathCasts.forEachIndexed { idx, cast ->
+                CastEmoji(
+                  emoji = cast.emoji,
+                  castIndex = idx + 1,
+                  cast = cast
+                )
               }
-              repeat(rocketCount) {
-                Text(text = "\uD83D\uDE80", fontSize = 14.sp) // 🚀
+              rocketCasts.forEachIndexed { idx, cast ->
+                CastEmoji(
+                  emoji = "\uD83D\uDE80",
+                  castIndex = idx + 1,
+                  cast = cast
+                )
               }
             }
           }
@@ -164,17 +189,134 @@ fun PetListItem(
   }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun CastEmoji(emoji: String, castIndex: Int, cast: RiderCastEvent) {
+  val emojiInteraction = remember { MutableInteractionSource() }
+  val isEmojiHovered by emojiInteraction.collectIsHoveredAsState()
+  val popupInteraction = remember { MutableInteractionSource() }
+  val isPopupHovered by popupInteraction.collectIsHoveredAsState()
+  val showTooltip = isEmojiHovered || isPopupHovered
+  val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
+
+  Box(
+    modifier = Modifier.hoverable(interactionSource = emojiInteraction)
+  ) {
+    Text(text = emoji, fontSize = 14.sp)
+
+    if (showTooltip) {
+      Popup(
+        alignment = Alignment.TopStart,
+        offset = IntOffset(x = 16, y = 24)
+      ) {
+        Surface(
+          shape = RoundedCornerShape(4.dp),
+          elevation = 4.dp,
+          color = RFColors.PopupBackground.copy(alpha = 0.95f),
+          border = BorderStroke(1.dp, RFColors.CardBorder),
+          modifier = Modifier.hoverable(interactionSource = popupInteraction)
+        ) {
+          Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp).widthIn(max = 220.dp)) {
+            Text(
+              text = cast.spellName.ifEmpty { "Cast #$castIndex" },
+              color = RFColors.TextPrimary,
+              fontSize = 11.sp,
+              fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+              Text(
+                text = "Damage: ${cast.damage.humanReadableAbbreviation()}",
+                color = RFColors.dpsOrange,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold
+              )
+              Text(
+                text = timeFormat.format(Date(cast.timestamp)),
+                color = RFColors.TextTertiary,
+                fontSize = 10.sp
+              )
+            }
+
+            // Damage by target breakdown
+            if (cast.damageByTarget.isNotEmpty()) {
+              Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+              Spacer(modifier = Modifier.height(3.dp))
+              val sortedTargets = cast.damageByTarget.entries.sortedByDescending { it.value }
+              val maxTargetDamage = sortedTargets.first().value
+              sortedTargets.take(8).forEach { (target, dmg) ->
+                val pct = if (maxTargetDamage > 0) dmg.toFloat() / maxTargetDamage else 0f
+                Row(
+                  modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
+                  horizontalArrangement = Arrangement.SpaceBetween,
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Text(
+                    text = target,
+                    color = RFColors.TextSecondary,
+                    fontSize = 9.sp,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                  )
+                  Box(
+                    modifier = Modifier
+                      .width(32.dp)
+                      .height(3.dp)
+                      .clip(RoundedCornerShape(2.dp))
+                      .background(Color.White.copy(alpha = 0.1f))
+                  ) {
+                    Box(
+                      modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(fraction = pct)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(RFColors.dpsOrange.copy(alpha = 0.7f))
+                    )
+                  }
+                  Spacer(modifier = Modifier.width(4.dp))
+                  Text(
+                    text = dmg.humanReadableAbbreviation(),
+                    color = RFColors.dpsOrange,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.SemiBold
+                  )
+                }
+              }
+              if (sortedTargets.size > 8) {
+                Text(
+                  text = "+${sortedTargets.size - 8} more",
+                  color = RFColors.TextTertiary,
+                  fontSize = 8.sp,
+                  modifier = Modifier.padding(top = 2.dp)
+                )
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 
 @Preview
 @Composable
 fun PetListItemPreview() {
   val sampleDebuffs = listOf("Clinging Flame", "Dragon Roar", "Dragon Flap")
+  val sampleBreathCasts = listOf(
+    RiderCastEvent(timestamp = System.currentTimeMillis(), damage = 5420L, spellName = "Red Dragon's Breath (Rider)", emoji = "\uD83D\uDD25"),
+    RiderCastEvent(timestamp = System.currentTimeMillis(), damage = 3100L, spellName = "Thunderbreath (Rider)", emoji = "\u2744\uFE0F")
+  )
   PetListItem(
     petName = "Fluffy",
     owner = "Reoky",
     damage = 11239081L,
     debuffs = sampleDebuffs,
     petType = "green_dragon",
+    breathCasts = sampleBreathCasts,
     modifier = Modifier.padding(8.dp),
     onClick = { /* preview click */ }
   )

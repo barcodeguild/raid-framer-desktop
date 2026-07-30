@@ -160,7 +160,7 @@ object PetAccumulatorInteractor : Interactor() {
         // it matched a whitelisted pet skill, but no pet card exists yet.
         // Route it back to the player cache so it counts as player damage
         // rather than silently dropping it.
-        Log.info(TAG, "No pet card found for damage source: $cleanSource - routing to player cache")
+        Log.info(TAG, "No pet card found for whitelisted skill damage source: $cleanSource (spell='${damage.spell}' id:${damage.spellId}) - routing to player cache. Known pets: ${PlayerCacheInteractor.getPetEntriesByName("").map { it.value.name }}")
         PlayerCacheInteractor.postEventInternal(damage)
         return@forEach
       }
@@ -284,12 +284,23 @@ object PetAccumulatorInteractor : Interactor() {
       return true
     }
 
+    // Drake breath rider spells -> Thunderbreath / Thunderbreath Aftershock
+    val drakeBreathRiderIds = setOf(35787) // Thunderbreath (Rider)
+    val drakeDamageIds = setOf(35786, 21015) // Thunderbreath, Thunderbreath Aftershock
+    if (castSpellId in drakeBreathRiderIds && damageSpellId in drakeDamageIds) {
+      return true
+    }
+
     // Also check by name for IPC events where spellId=0
     val castSkill = petSkillWhitelist.find { it.id == castSpellId }
     if (castSkill != null) {
       val isDragonBreath = castSkill.name.contains("Dragon's Breath", ignoreCase = true)
       val isClingingFlame = damageSpellName.contains("Clinging Flame", ignoreCase = true)
       if (isDragonBreath && isClingingFlame) return true
+
+      val isDrakeBreath = castSkill.name.contains("Thunderbreath", ignoreCase = true)
+      val isThunderDmg = damageSpellName.contains("Thunderbreath", ignoreCase = true)
+      if (isDrakeBreath && isThunderDmg) return true
 
       // Scratch -> Bleeding
       if (castSkill.name.contains("Scratch", ignoreCase = true) &&
