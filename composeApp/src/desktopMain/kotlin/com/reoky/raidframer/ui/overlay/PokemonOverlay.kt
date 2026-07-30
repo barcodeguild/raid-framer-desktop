@@ -74,6 +74,8 @@ fun PokemonOverlay(wm: WindowManager? = null) {
             damage = card.sessionDamageTotal,
             debuffs = card.recentDebuffAppliedEvents.map { it.debuff }.distinct(),
             petType = card.petType,
+            breathCount = card.sessionBreathCount,
+            rocketCount = card.sessionRocketCount,
             modifier = Modifier.fillMaxWidth()
           )
         }

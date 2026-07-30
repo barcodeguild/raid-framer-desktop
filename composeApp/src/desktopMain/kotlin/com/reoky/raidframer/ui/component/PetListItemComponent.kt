@@ -34,6 +34,8 @@ fun PetListItem(
   damage: Long,
   debuffs: List<String>,
   petType: String = "default",
+  breathCount: Int = 0,
+  rocketCount: Int = 0,
   modifier: Modifier = Modifier,
   onClick: (() -> Unit)? = null
 ) {
@@ -108,6 +110,15 @@ fun PetListItem(
                 .padding(horizontal = 8.dp, vertical = 3.dp)
             ) {
               Text(text = owner, fontSize = 12.sp, color = RFColors.TextSecondary)
+            }
+            if (breathCount > 0 || rocketCount > 0) {
+              Spacer(modifier = Modifier.width(6.dp))
+              repeat(breathCount) {
+                Text(text = "\uD83D\uDD25", fontSize = 14.sp) // 🔥
+              }
+              repeat(rocketCount) {
+                Text(text = "\uD83D\uDE80", fontSize = 14.sp) // 🚀
+              }
             }
           }
 

@@ -52,6 +52,10 @@ object PlayerCacheInteractor : Interactor() {
 
   const val TAG = "PlayerCacheInteractor"
 
+  // Rider spell IDs for breath/rocket counters
+  private val DRAGON_BREATH_RIDER_SPELL_IDS = setOf(38418, 38699, 38701) // Red, Green, Black
+  private const val GUIDED_MISSILES_RIDER_SPELL_ID = 46058
+
   // Mapping of all the players (and NPCs) sorted in no particular order
   val realtimeComputer = RealtimeComputer(windowBuckets = 60, bucketMillis = 10_000L)
   private val raids = mutableStateMapOf<Int, List<Party>>()
@@ -994,11 +998,20 @@ object PlayerCacheInteractor : Interactor() {
         if (existing == null) {
           return@withLock
         }
+
+        // Track rider spell casts for breath/rocket counters
+        val isDragonBreath = event.spellId in DRAGON_BREATH_RIDER_SPELL_IDS ||
+            event.spell.contains("Dragon's Breath", ignoreCase = true)
+        val isGuidedMissilesRider = event.spellId == GUIDED_MISSILES_RIDER_SPELL_ID ||
+            event.spell.equals("Guided Missiles (Rider)", ignoreCase = true)
+
         val updated = existing.copy(
           recentDebuffAppliedEvents = existing.recentDebuffAppliedEvents,
           recentDamageEvents = existing.recentDamageEvents,
           recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
-          lastEvent = event.timestamp
+          lastEvent = event.timestamp,
+          sessionBreathCount = existing.sessionBreathCount + if (isDragonBreath) 1 else 0,
+          sessionRocketCount = existing.sessionRocketCount + if (isGuidedMissilesRider) 1 else 0
         )
         petCards[petKey] = updated
       }
@@ -1869,7 +1882,7 @@ object PlayerCacheInteractor : Interactor() {
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .sample(250L)
     .map { pets ->
-      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 }
+      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 || it.sessionBreathCount > 0 || it.sessionRocketCount > 0 }
         .sortedByDescending { it.sessionDamageTotal }
         .take(50)
     }
