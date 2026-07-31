@@ -490,7 +490,8 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="item_name_bd_2h_sword">Black Dragon 2H Sword (Wing-Reaper)</string>
     <string name="item_name_sungold_anth_set_pull">Sungold Anth Set Pull</string>
     <string name="item_name_garden_anth_set_pull">Garden Anth Set Pull</string>
-    <string name="item_name_serp_staff">Corrupted Wit (Serpentis)</string>
+    <string name="item_name_serp_staff">Corrupted Wit (Serpentis Staff)</string>
+    <string name="item_name_serp_shield">Blooddrinker Blossom (Serpentis Shield)</string>
     <string name="item_name_mist_dagger">Mistsong Wicked Whisper Dagger</string>
     <string name="item_name_mist_shield">Mistsong Stealthfang Shield</string>
 

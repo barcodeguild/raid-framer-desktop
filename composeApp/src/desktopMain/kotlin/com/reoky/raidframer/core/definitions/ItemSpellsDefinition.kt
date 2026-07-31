@@ -28,6 +28,7 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_lib_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_library_greatclub
 import raid_framer_desktop.composeapp.generated.resources.item_name_mist_dagger
 import raid_framer_desktop.composeapp.generated.resources.item_name_mist_shield
+import raid_framer_desktop.composeapp.generated.resources.item_name_serp_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_serp_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_greataxe
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_greatsword
@@ -77,7 +78,7 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
   ),
   KRAKEN_SHIELD(
     itemSpecificSkillIds = listOf(36735), // Desolate Sea Guardianq
-    itemSpecificBuffIds = listOf(), // gives slow and snare but no unique buff id
+    itemSpecificBuffIds = listOf(4846, 4848), // gives slow and snare but no unique buff id, 4848 is the buff id, 4846 is the debuff curse id
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_kraken_shield,
@@ -341,6 +342,14 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 180.0,
     friendlyNameRes = Res.string.item_name_serp_staff,
+    possibleSpellNames = listOf("Corrupted Wit")
+  ),
+  SERP_SHIELD(
+    itemSpecificSkillIds = listOf(22445),
+    itemSpecificBuffIds = listOf(6148), //  Blooddrinker Blossom
+    castTime = 0.0,
+    cooldown = 180.0,
+    friendlyNameRes = Res.string.item_name_serp_shield,
     possibleSpellNames = listOf("Corrupted Wit")
   ),
 
