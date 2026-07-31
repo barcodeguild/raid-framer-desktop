@@ -20,6 +20,7 @@ object PetAccumulatorInteractor : Interactor() {
 
   // Configurable window for correlating damage to casts (in milliseconds)
   private const val DEFAULT_ATTRIBUTION_WINDOW_MS = 15000L
+  private const val UNATTRIBUTED_BUFFER_MS = 20_000L
 
   // Track rider spell casts with their attribution windows
   private data class CastWindow(
@@ -31,14 +32,33 @@ object PetAccumulatorInteractor : Interactor() {
     val skillCooldown: Long
   )
 
+  private data class PendingRiderCast(
+    val ownerName: String,
+    val cast: SuccessfulCastEvent,
+    val firstSeen: Long
+  )
+
+  private data class BufferedEvent<T>(val event: T, val firstSeen: Long)
+
+  private fun SuccessfulCastEvent.sameLogicalCast(other: SuccessfulCastEvent): Boolean =
+    timestamp == other.timestamp &&
+      source.equals(other.source, ignoreCase = true) &&
+      target.equals(other.target, ignoreCase = true) &&
+      spellId == other.spellId &&
+      spell.equals(other.spell, ignoreCase = true)
+
   // Event markers for accumulation based on the initiation of the pet skill
   private val riderCastWindow = mutableListOf<CastWindow>()
+  private val pendingRiderCasts = mutableListOf<PendingRiderCast>()
   private val accumulatedDamageEvents = mutableListOf<DamageEvent>()
   private val accumulatedCastEvents = mutableListOf<SuccessfulCastEvent>()
-  private val unattributedDamageBuffer = mutableListOf<DamageEvent>() // damage waiting for pet card creation
-  private val unattributedCastBuffer = mutableListOf<SuccessfulCastEvent>() // casts waiting for pet card creation
-  private const val MAX_BUFFER_RETRIES = 3 // max cycles to keep buffered events before dropping to player cache
-  private var bufferRetryCount = 0
+  private val unattributedDamageBuffer = mutableListOf<BufferedEvent<DamageEvent>>()
+  private val unattributedCastBuffer = mutableListOf<BufferedEvent<SuccessfulCastEvent>>()
+
+  /** Called after Mate metadata is committed, so buffered events are retried immediately. */
+  fun onPetRegistered() {
+    scope.launch { interact() }
+  }
 
   fun postEvent(event: CombatEvent) {
     when (event) {
@@ -82,10 +102,20 @@ object PetAccumulatorInteractor : Interactor() {
 
     scope.launch {
       mutex.withLock {
+        if (petSkill?.isPetInitiator == true && (
+            accumulatedCastEvents.any { it.sameLogicalCast(event) } ||
+              pendingRiderCasts.any { it.cast.sameLogicalCast(event) }
+          )) {
+          Log.debug(TAG, "Ignoring duplicate rider cast '${event.spell}' from ${event.source} at ${event.timestamp}")
+          return@withLock
+        }
         accumulatedCastEvents.add(event)
 
         // If this is a rider spell, create an attribution window
-        if (petSkill != null && isRiderSpell(event.spell)) {
+        if (petSkill?.isPetInitiator == true) {
+          if (pendingRiderCasts.none { it.cast.sameLogicalCast(event) }) {
+            pendingRiderCasts.add(PendingRiderCast(cleanName(event.source), event, System.currentTimeMillis()))
+          }
           val windowDuration = calculateWindowDuration(petSkill.cooldown)
           riderCastWindow.add(
             CastWindow(
@@ -115,8 +145,8 @@ object PetAccumulatorInteractor : Interactor() {
       accumulatedCastEvents.clear()
 
       // Re-evaluate buffered events: try to attribute now that pet cards may exist
-      recheckBufferedDamage = unattributedDamageBuffer.toList()
-      recheckBufferedCasts = unattributedCastBuffer.toList()
+      recheckBufferedDamage = unattributedDamageBuffer.map { it.event }
+      recheckBufferedCasts = unattributedCastBuffer.map { it.event }
       unattributedDamageBuffer.clear()
       unattributedCastBuffer.clear()
 
@@ -141,32 +171,38 @@ object PetAccumulatorInteractor : Interactor() {
       processDamages(recheckBufferedDamage)
     }
 
-    // Track buffer retries - if events stay buffered too long, they'll be dropped on the next cycle
+    // Expire by event time, not by scheduler cadence. The latter dropped events during
+    // a busy frame and made a one-second Lua timestamp especially problematic.
     mutex.withLock {
-      if (unattributedDamageBuffer.isNotEmpty() || unattributedCastBuffer.isNotEmpty()) {
-        bufferRetryCount++
-        if (bufferRetryCount >= MAX_BUFFER_RETRIES) {
-          Log.info(TAG, "Buffer timeout: dropping ${unattributedDamageBuffer.size} buffered damages and ${unattributedCastBuffer.size} buffered casts to player cache")
-          unattributedDamageBuffer.forEach { PlayerCacheInteractor.postEventInternal(it) }
-          unattributedDamageBuffer.clear()
-          unattributedCastBuffer.clear()
-          bufferRetryCount = 0
-        }
-      } else {
-        bufferRetryCount = 0
-      }
+      val now = System.currentTimeMillis()
+      val expiredDamage = unattributedDamageBuffer.filter { now - it.firstSeen >= UNATTRIBUTED_BUFFER_MS }
+      expiredDamage.forEach { PlayerCacheInteractor.postEventInternal(it.event) }
+      unattributedDamageBuffer.removeAll(expiredDamage.toSet())
+      unattributedCastBuffer.removeAll { now - it.firstSeen >= UNATTRIBUTED_BUFFER_MS }
+      pendingRiderCasts.removeAll { now - it.firstSeen >= UNATTRIBUTED_BUFFER_MS }
     }
   }
 
   private fun processCasts(casts: List<SuccessfulCastEvent>) {
     casts.forEach { cast ->
       val cleanSource = cleanName(cast.source)
-      var candidates = PlayerCacheInteractor.getPetEntriesByName(cleanSource)
+      val initiator = isPetInitiator(cast)
+      var candidates = if (initiator) {
+        // Rider skills are emitted by the owner, not the pet. Never resolve the
+        // owner's name as a pet name or broadcast the cast to every owned pet.
+        PlayerCacheInteractor.getPetEntriesByName("")
+          .filter { it.value.owner.equals(cleanSource, ignoreCase = true) }
+      } else {
+        PlayerCacheInteractor.getPetEntriesByName(cleanSource)
+      }
 
       // If no candidates by source name, try inferring pet name from rider spell
-      if (candidates.isEmpty() && isRiderSpell(cast.spell)) {
+      if (candidates.isEmpty() && initiator) {
         val inferredPetName = inferPetNameFromRiderCast(cast)
-        candidates = PlayerCacheInteractor.getPetEntriesByName(inferredPetName)
+        if (inferredPetName.isNotBlank()) {
+          candidates = PlayerCacheInteractor.getPetEntriesByName(inferredPetName)
+            .filter { it.value.owner.equals(cleanSource, ignoreCase = true) }
+        }
       }
 
       when {
@@ -175,22 +211,22 @@ object PetAccumulatorInteractor : Interactor() {
           val petSkill = petSkillWhitelist.find { it.id == cast.spellId }
           if (petSkill != null) {
             Log.info(TAG, "Buffering pet cast for '${cast.source}' (spell='${cast.spell}' id:${cast.spellId}) - waiting for pet card creation")
-            unattributedCastBuffer.add(cast)
+            unattributedCastBuffer.add(BufferedEvent(cast, System.currentTimeMillis()))
           }
         }
         candidates.size == 1 -> {
           PlayerCacheInteractor.postPetSuccessfulCast(candidates.first().key, cast)
         }
         else -> {
-          // Multiple same-named pets; try CID match first
-          val byCid = candidates.find { cast.cid in it.value.recentCids }
-          if (byCid != null) {
-            PlayerCacheInteractor.postPetSuccessfulCast(byCid.key, cast)
-          } else {
+          if (!initiator) {
             // Apply to all candidates (lightweight)
             candidates.forEach {
               PlayerCacheInteractor.postPetSuccessfulCast(it.key, cast)
             }
+          } else {
+            // A rider cast without an exact pet CID is ambiguous. Do not create
+            // false breath/rocket icons on every pet owned by the rider.
+            Log.info(TAG, "Skipping ambiguous rider cast '${cast.spell}' for owner '$cleanSource'; candidate pets=${candidates.map { it.value.name }}")
           }
         }
       }
@@ -200,7 +236,52 @@ object PetAccumulatorInteractor : Interactor() {
   private fun processDamages(damages: List<DamageEvent>) {
     damages.forEach { damage ->
       val cleanSource = cleanName(damage.source)
-      val candidates = PlayerCacheInteractor.getPetEntriesByName(cleanSource)
+      var candidates = PlayerCacheInteractor.getPetEntriesByName(cleanSource)
+      val pendingMatches = pendingRiderCasts.filter { pending ->
+        isRelatedSpell(damage.spellId, damage.spell, pending.cast.spellId) &&
+          damage.timestamp >= pending.cast.timestamp &&
+          damage.timestamp - pending.cast.timestamp <= DEFAULT_ATTRIBUTION_WINDOW_MS
+      }
+
+      // IPC damage has spellId=0 and can arrive before Mate metadata. A rider cast
+      // identifies the owner even when the pet name is arbitrary, so use that owner
+      // to narrow same-named pets before applying the normal window logic.
+      if (candidates.isEmpty()) {
+        val ownerCandidates = riderCastWindow
+          .filter { damage.timestamp >= it.castTime && damage.timestamp <= it.windowEnd }
+          .filter { isRelatedSpell(damage.spellId, damage.spell, it.spellId) }
+          .map { it.ownerName }
+          .distinct()
+        if (ownerCandidates.size == 1) {
+          candidates = PlayerCacheInteractor.getPetEntriesByName("")
+            .filter { it.value.owner.equals(ownerCandidates.single(), ignoreCase = true) }
+        }
+      }
+
+      if (candidates.size > 1) {
+        val matchingWindows = riderCastWindow.filter { window ->
+          window.ownerName.equals(candidates.first().value.owner, ignoreCase = true) &&
+            damage.timestamp >= window.castTime &&
+            damage.timestamp <= window.windowEnd &&
+            isRelatedSpell(damage.spellId, damage.spell, window.spellId)
+        }
+        if (matchingWindows.size == 1) {
+          val owner = matchingWindows.single().ownerName
+          candidates = candidates.filter { it.value.owner.equals(owner, ignoreCase = true) }
+        }
+      }
+
+      if (pendingMatches.size == 1 && candidates.isNotEmpty()) {
+        val pending = pendingMatches.single()
+        val ownerPets = candidates.filter {
+          it.value.owner.equals(pending.ownerName, ignoreCase = true)
+        }
+        if (ownerPets.size == 1) {
+          PlayerCacheInteractor.postPetSuccessfulCast(ownerPets.single().key, pending.cast)
+          pendingRiderCasts.remove(pending)
+          candidates = ownerPets
+        }
+      }
 
       if (candidates.isEmpty()) {
         // No pet card found for this source. The damage was accumulated because
@@ -208,7 +289,7 @@ object PetAccumulatorInteractor : Interactor() {
         // Buffer it for re-attribution when the pet card is created (Mate metadata arrives late).
         if (!PlayerCacheInteractor.isRealPlayer(cleanSource)) {
           Log.info(TAG, "Buffering pet damage for '$cleanSource' (spell='${damage.spell}' id:${damage.spellId}) - waiting for pet card creation")
-          unattributedDamageBuffer.add(damage)
+          unattributedDamageBuffer.add(BufferedEvent(damage, System.currentTimeMillis()))
         } else {
           Log.info(TAG, "No pet card found for damage source: $cleanSource (spell='${damage.spell}' id:${damage.spellId}) - routing to player cache. Known pets: ${PlayerCacheInteractor.getPetEntriesByName("").map { it.value.name }}")
           PlayerCacheInteractor.postEventInternal(damage)
@@ -232,14 +313,9 @@ object PetAccumulatorInteractor : Interactor() {
 
       when {
         relevantWindows.isEmpty() -> {
-          // No active windows; try CID match
-          val byCid = candidates.find { damage.cid in it.value.recentCids }
-          if (byCid != null) {
-            PlayerCacheInteractor.postPetDamage(byCid.key, damage)
-          } else {
-            // Fallback: divide equally among all candidates
-            attributeDamageProportionally(damage, candidates.map { it.key })
-          }
+          // No stable identity exists for a respawned pet. Divide only among
+          // the remaining same-name candidates instead of using ephemeral CIDs.
+          attributeDamageProportionally(damage, candidates.map { it.key })
         }
         relevantWindows.size == 1 -> {
           // Single active caster window
@@ -293,8 +369,13 @@ object PetAccumulatorInteractor : Interactor() {
     return false
   }
 
-  private fun isRiderSpell(spellName: String): Boolean {
-    return spellName.contains("(Rider)", ignoreCase = true)
+  private fun isPetInitiator(cast: SuccessfulCastEvent): Boolean {
+    return petSkillWhitelist.any { skill ->
+      skill.isPetInitiator && (
+        skill.id == cast.spellId ||
+          skill.possibleNames.any { it.equals(cast.spell, ignoreCase = true) }
+      )
+    }
   }
 
   private fun inferPetNameFromRiderCast(cast: SuccessfulCastEvent): String {
@@ -302,25 +383,17 @@ object PetAccumulatorInteractor : Interactor() {
     val baseSpell = cast.spell.replace("\\s*\\(Rider\\)".toRegex(), "").trim()
 
     // Look up the pet skill without rider suffix
-    val petSkill = petSkillWhitelist.find { skill ->
-      skill.possibleNames.any { it.equals(baseSpell, ignoreCase = true) }
-    }
-
     // Try to find the pet card by recent successful casts
-    if (cast.cid != null) {
-      val recentPets = PlayerCacheInteractor.getPetEntriesByName("")
-        .filter { it.value.owner == cast.source && cast.cid in it.value.recentCids }
-      if (recentPets.size == 1) {
-        return recentPets.first().value.name
-      }
-    }
+    val recentPets = PlayerCacheInteractor.getPetEntriesByName("")
+      .filter { it.value.owner.equals(cast.source, ignoreCase = true) }
+    if (recentPets.size == 1) return recentPets.first().value.name
 
     // Fallback: return a generic name based on spell
     return when {
       baseSpell.contains("Scratch") -> "Mara"
       baseSpell.contains("Guided Missiles") -> "Siege Risopoda"
-      baseSpell.contains("Dragon's Breath") -> "Dragon"
-      else -> "Unknown Pet"
+      baseSpell.contains("Dragon's Breath", ignoreCase = true) -> ""
+      else -> ""
     }
   }
 

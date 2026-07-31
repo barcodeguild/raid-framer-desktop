@@ -17,7 +17,8 @@ val petSkillWhitelist = listOf(
     name = "Guided Missiles (Rider)",
     castTime = 0.0,
     cooldown = 60.0,
-    possibleNames = listOf("Guided Missiles (Rider)", "유도탄(탑승자용)", "Ковровая бомбардировка")
+    possibleNames = listOf("Guided Missiles (Rider)", "유도탄(탑승자용)", "Ковровая бомбардировка"),
+    isPetInitiator = true
   ),
 
   // Mara's scratch ~
@@ -33,7 +34,8 @@ val petSkillWhitelist = listOf(
     name = "Scratch (Rider)",
     castTime = 0.0,
     cooldown = 18.0,
-    possibleNames = listOf("Scratch (Rider)")
+    possibleNames = listOf("Scratch (Rider)"),
+    isPetInitiator = true
   ),
 
   // Red Dragon's Breath (Rider) - player casts this, dragon does the damage
@@ -42,7 +44,8 @@ val petSkillWhitelist = listOf(
     name = "Red Dragon's Breath (Rider)",
     castTime = 0.0,
     cooldown = 30.0,
-    possibleNames = listOf("Red Dragon's Breath (Rider)", "붉은 용의 숨결 (탑승자)", "Огненное дыхание")
+    possibleNames = listOf("Red Dragon's Breath (Rider)", "붉은 용의 숨결 (탑승자)", "Огненное дыхание"),
+    isPetInitiator = true
   ),
   // Green Dragon's Breath (Rider)
   Skill(
@@ -50,7 +53,8 @@ val petSkillWhitelist = listOf(
     name = "Green Dragon's Breath (Rider)",
     castTime = 0.0,
     cooldown = 30.0,
-    possibleNames = listOf("Green Dragon's Breath (Rider)", "녹색 용의 숨결 (탑승자)", "Ядовитое дыхание")
+    possibleNames = listOf("Green Dragon's Breath (Rider)", "녹색 용의 숨결 (탑승자)", "Ядовитое дыхание"),
+    isPetInitiator = true
   ),
   // Black Dragon's Breath (Rider)
   Skill(
@@ -58,7 +62,8 @@ val petSkillWhitelist = listOf(
     name = "Black Dragon's Breath (Rider)",
     castTime = 0.0,
     cooldown = 30.0,
-    possibleNames = listOf("Black Dragon's Breath (Rider)", "검은 용의 숨결 (탑승자)", "Дыхание тьмы")
+    possibleNames = listOf("Black Dragon's Breath (Rider)", "검은 용의 숨결 (탑승자)", "Дыхание тьмы"),
+    isPetInitiator = true
   ),
   // Clinging Flame - dragon breath DoT damage
   Skill(
@@ -91,7 +96,8 @@ val petSkillWhitelist = listOf(
     name = "Thunderbreath (Rider)",
     castTime = 0.0,
     cooldown = 60.0,
-    possibleNames = listOf("Thunderbreath (Rider)", "천둥의 숨결 (탑승자)")
+    possibleNames = listOf("Thunderbreath (Rider)", "천둥의 숨결 (탑승자)"),
+    isPetInitiator = true
   ),
   Skill(
     id = 35786,

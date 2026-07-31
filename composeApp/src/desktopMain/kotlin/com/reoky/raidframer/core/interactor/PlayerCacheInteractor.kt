@@ -313,7 +313,9 @@ object PlayerCacheInteractor : Interactor() {
    */
   fun createOrUpdatePetCard(cid: String? = null, petName: String, owner: String, petType: String) {
     val key = "$owner:$petName"
-    scope.launch {
+    // Registration must be visible before the next combat event is drained. The old
+    // fire-and-forget update raced the accumulator and lost short pet attacks.
+    runBlocking {
       mutex.withLock {
         if (!petCards.containsKey(key)) {
           petCards[key] = PetCard(
@@ -338,6 +340,7 @@ object PlayerCacheInteractor : Interactor() {
         }
       }
     }
+    PetAccumulatorInteractor.onPetRegistered()
   }
 
   fun startNewSession(sessionType: String, allowPvE: Boolean) {
@@ -1006,7 +1009,10 @@ object PlayerCacheInteractor : Interactor() {
         var rocketCasts = existing.sessionRocketCasts
 
         if (isBreathDamage && breathCasts.isNotEmpty()) {
-          val lastIdx = breathCasts.lastIndex
+          val lastIdx = breathCasts.indexOfLast { cast ->
+            event.timestamp >= cast.timestamp && event.timestamp - cast.timestamp <= 15_000L
+          }
+          if (lastIdx < 0) return@withLock
           val last = breathCasts[lastIdx]
           val updatedTargetMap = last.damageByTarget.toMutableMap()
           updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
@@ -1017,7 +1023,10 @@ object PlayerCacheInteractor : Interactor() {
             ))
           }
         } else if (isRocketDamage && rocketCasts.isNotEmpty()) {
-          val lastIdx = rocketCasts.lastIndex
+          val lastIdx = rocketCasts.indexOfLast { cast ->
+            event.timestamp >= cast.timestamp && event.timestamp - cast.timestamp <= 15_000L
+          }
+          if (lastIdx < 0) return@withLock
           val last = rocketCasts[lastIdx]
           val updatedTargetMap = last.damageByTarget.toMutableMap()
           updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
@@ -1056,14 +1065,22 @@ object PlayerCacheInteractor : Interactor() {
           return@withLock
         }
 
+        val isDuplicateRider = existing.sessionBreathCasts.any {
+          it.timestamp == event.timestamp && it.spellName.equals(event.spell, ignoreCase = true)
+        } || existing.sessionRocketCasts.any {
+          it.timestamp == event.timestamp && it.spellName.equals(event.spell, ignoreCase = true)
+        }
+
         // Track rider spell casts for breath/rocket counters
-        val isDragonBreath = event.spellId in DRAGON_BREATH_RIDER_SPELL_IDS ||
-            event.spell.contains("Dragon's Breath", ignoreCase = true)
-        val isDrakeBreath = event.spellId == DRAKE_BREATH_RIDER_SPELL_ID ||
-            event.spell.contains("Thunderbreath", ignoreCase = true) ||
-            event.spell.contains("천둥의 숨결", ignoreCase = true)
-        val isGuidedMissilesRider = event.spellId == GUIDED_MISSILES_RIDER_SPELL_ID ||
-            event.spell.equals("Guided Missiles (Rider)", ignoreCase = true)
+        val petSkill = petSkillWhitelist.find { skill ->
+          skill.isPetInitiator && (
+            skill.id == event.spellId ||
+              skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) }
+          )
+        }
+        val isDragonBreath = petSkill?.id in DRAGON_BREATH_RIDER_SPELL_IDS
+        val isDrakeBreath = petSkill?.id == DRAKE_BREATH_RIDER_SPELL_ID
+        val isGuidedMissilesRider = petSkill?.id == GUIDED_MISSILES_RIDER_SPELL_ID
 
         val castEvent = RiderCastEvent(
           timestamp = event.timestamp,
@@ -1077,8 +1094,8 @@ object PlayerCacheInteractor : Interactor() {
           recentDamageEvents = existing.recentDamageEvents,
           recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
           lastEvent = event.timestamp,
-          sessionBreathCasts = if (isDragonBreath || isDrakeBreath) existing.sessionBreathCasts + castEvent else existing.sessionBreathCasts,
-          sessionRocketCasts = if (isGuidedMissilesRider) existing.sessionRocketCasts + castEvent else existing.sessionRocketCasts
+          sessionBreathCasts = if (!isDuplicateRider && (isDragonBreath == true || isDrakeBreath == true)) existing.sessionBreathCasts + castEvent else existing.sessionBreathCasts,
+          sessionRocketCasts = if (!isDuplicateRider && isGuidedMissilesRider) existing.sessionRocketCasts + castEvent else existing.sessionRocketCasts
         )
         petCards[petKey] = updated
       }
@@ -1090,7 +1107,8 @@ object PlayerCacheInteractor : Interactor() {
    * Returns list of Map.Entry\<String, PetCard\> to preserve the internal key.
    */
   fun getPetEntriesByName(petName: String): List<Map.Entry<String, com.reoky.raidframer.core.model.PetCard>> {
-    return petCards.entries.filter { it.value.name.equals(petName, ignoreCase = true) }
+    return if (petName.isBlank()) petCards.entries.toList()
+    else petCards.entries.filter { it.value.name.equals(petName, ignoreCase = true) }
   }
 
 
