@@ -45,7 +45,7 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
  */
 fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
-  if (event.source == event.target) return this // skip self-damage
+  //if (event.source == event.target) return this // skip self-damage
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
@@ -73,7 +73,7 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
-  if (event.source == event.target) return this // skip self-heals
+  //if (event.source == event.target) return this // skip self-heals
   val isOde = isOdeToRecovery(event.spell)
   val allowOdeAsHeal = RFConfig.state.value.allowOdeToRecoveryCountAsHeals
   return this.copy(
