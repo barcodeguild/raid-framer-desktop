@@ -20,6 +20,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.foundation.Image
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -31,6 +32,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -46,9 +48,18 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.database.PlayerSessionTotalsEntity
+import com.reoky.raidframer.core.database.unpackItemUsageCounter
+import com.reoky.raidframer.core.database.unpackItemUsageDate
+import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.definitions.GliderSpell
+import com.reoky.raidframer.core.definitions.ItemSpell
 import com.reoky.raidframer.core.helpers.RFColors
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import com.reoky.raidframer.core.helpers.RFGraphColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.timeAgo
+import com.reoky.raidframer.core.helpers.TimeAgoUnit
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.PlayerCard
@@ -63,9 +74,38 @@ import com.reoky.raidframer.ui.component.graphs.GroupSpec
 import com.reoky.raidframer.ui.component.graphs.MultiPlayerMetricLineChart
 import com.reoky.raidframer.ui.component.PlayerDetailsSection
 import org.jetbrains.compose.resources.InternalResourceApi
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.crystal_wings
+import raid_framer_desktop.composeapp.generated.resources.glider_name_bd_glider
+import raid_framer_desktop.composeapp.generated.resources.glider_name_crystal_wings
+import raid_framer_desktop.composeapp.generated.resources.glider_name_feathered_dragon
+import raid_framer_desktop.composeapp.generated.resources.glider_name_moonshadow
+import raid_framer_desktop.composeapp.generated.resources.glider_name_ravenspine
+import raid_framer_desktop.composeapp.generated.resources.glider_name_rocket_wings
+import raid_framer_desktop.composeapp.generated.resources.glider_name_sky_emperor
+import raid_framer_desktop.composeapp.generated.resources.glider_name_twt
 import raid_framer_desktop.composeapp.generated.resources.graphs_trend_graph
+import raid_framer_desktop.composeapp.generated.resources.halcy_neck
+import raid_framer_desktop.composeapp.generated.resources.honor_nodachi
+import raid_framer_desktop.composeapp.generated.resources.item_name_halcy_neck
+import raid_framer_desktop.composeapp.generated.resources.item_name_honor_nodachi
+import raid_framer_desktop.composeapp.generated.resources.item_name_jola_shield
+import raid_framer_desktop.composeapp.generated.resources.item_name_kraken_shield
+import raid_framer_desktop.composeapp.generated.resources.item_name_kraken_scepter
+import raid_framer_desktop.composeapp.generated.resources.item_name_kraken_spear
+import raid_framer_desktop.composeapp.generated.resources.item_name_lib_shield
+import raid_framer_desktop.composeapp.generated.resources.item_name_library_greatclub
+import raid_framer_desktop.composeapp.generated.resources.item_name_soul_neck
+import raid_framer_desktop.composeapp.generated.resources.jola_shield
+import raid_framer_desktop.composeapp.generated.resources.kraken_glider
+import raid_framer_desktop.composeapp.generated.resources.kraken_scepter
+import raid_framer_desktop.composeapp.generated.resources.kraken_spear
+import raid_framer_desktop.composeapp.generated.resources.kraken_shield
+import raid_framer_desktop.composeapp.generated.resources.lib_shield
+import raid_framer_desktop.composeapp.generated.resources.library_greatclub
+import raid_framer_desktop.composeapp.generated.resources.moonshadow_glider
 import raid_framer_desktop.composeapp.generated.resources.player_card_damage_by_skill
 import raid_framer_desktop.composeapp.generated.resources.player_card_heals_by_skill
 import raid_framer_desktop.composeapp.generated.resources.player_card_cc_by_skill
@@ -112,6 +152,29 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_recent_kd_
 import raid_framer_desktop.composeapp.generated.resources.player_card_lifetime_totals
 import raid_framer_desktop.composeapp.generated.resources.player_card_lifetime_totals_sessions
 import raid_framer_desktop.composeapp.generated.resources.player_card_title_format
+import raid_framer_desktop.composeapp.generated.resources.player_inventory_title
+import raid_framer_desktop.composeapp.generated.resources.player_inventory_last_used
+import raid_framer_desktop.composeapp.generated.resources.player_inventory_uses
+import raid_framer_desktop.composeapp.generated.resources.player_inventory_never
+import raid_framer_desktop.composeapp.generated.resources.player_inventory_controls_hint
+import raid_framer_desktop.composeapp.generated.resources.ravenspine_glider
+import raid_framer_desktop.composeapp.generated.resources.rocket_glider
+import raid_framer_desktop.composeapp.generated.resources.sky_emp_glider
+import raid_framer_desktop.composeapp.generated.resources.soul_neck
+import raid_framer_desktop.composeapp.generated.resources.twt_glider
+import raid_framer_desktop.composeapp.generated.resources.bd_glider
+import raid_framer_desktop.composeapp.generated.resources.player_inventory_time_ago
+import raid_framer_desktop.composeapp.generated.resources.time_ago_just_now
+import raid_framer_desktop.composeapp.generated.resources.time_ago_minutes_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_minutes_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_hours_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_hours_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_days_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_days_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_weeks_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_weeks_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_months_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_months_other
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -260,7 +323,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 .background(WellColor)
                 .border(1.dp, WellBorder, WellShape)
                 .padding(12.dp)
-                .height(300.dp)
+                .heightIn(min = 100.dp, max = 300.dp)
             ) {
               // Damage
               SortableEventListColumn(
@@ -332,7 +395,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 .background(WellColor)
                 .border(1.dp, WellBorder, WellShape)
                 .padding(12.dp)
-                .height(300.dp)
+                .heightIn(min = 100.dp, max = 300.dp)
             ) {
               SortableEventListColumn(
                 title = stringResource(Res.string.player_card_recent_buffs),
@@ -481,6 +544,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
               Spacer(modifier = Modifier.height(12.dp))
             }
+
+            // Player Inventory Section
+            PlayerInventorySection(card)
 
             // Player Details Section
             Column(
@@ -945,7 +1011,7 @@ private fun TotalsFiltersBar(
           fontWeight = FontWeight.Bold
         )
         Text(
-          text = "Controls the session totals below",
+          text = stringResource(Res.string.player_inventory_controls_hint),
           color = RFColors.TextTertiary,
           fontSize = 11.sp
         )
@@ -961,3 +1027,180 @@ private fun TotalsFiltersBar(
 }
 
 // SessionStatRows moved to SessionTotalsComponent.kt as shared composable.
+
+// Data class representing a single inventory item (glider or utility item) for display
+private data class InventoryItem(
+  val nameRes: StringResource,
+  val iconRes: DrawableResource,
+  val usageCount: Long,
+  val lastUsedDate: Date?,
+  val usedInSession: Boolean
+)
+
+// Player Inventory Section - shows gliders and utility items the player has used
+@Composable
+private fun PlayerInventorySection(card: PlayerCard) {
+  val cache = card.cache ?: return
+  val lastSessionStart by remember { derivedStateOf { RFConfig.state.value.lastSessionStart } }
+
+  // Build inventory items from all glider and utility item enum entries
+  val allItems = remember(cache, lastSessionStart) {
+    fun buildItem(nameRes: StringResource, iconRes: DrawableResource, packed: Long): InventoryItem {
+      val lastUsed = packed.unpackItemUsageDate()
+      val usedInSession = lastSessionStart > 0L && lastUsed.time >= lastSessionStart
+      return InventoryItem(
+        nameRes = nameRes,
+        iconRes = iconRes,
+        usageCount = packed.unpackItemUsageCounter(),
+        lastUsedDate = lastUsed,
+        usedInSession = usedInSession
+      )
+    }
+    val gliderItems = GliderSpell.entries.map { glider ->
+      buildItem(glider.friendlyNameRes, glider.iconRes, glider.packedUsageField(cache))
+    }
+    val utilityItems = ItemSpell.entries.map { item ->
+      buildItem(item.friendlyNameRes, item.iconRes, item.packedUsageField(cache))
+    }
+    (gliderItems + utilityItems)
+      .filter { it.usageCount > 0 }
+      .sortedByDescending { it.usageCount }
+  }
+
+  if (allItems.isEmpty()) return
+
+  SectionCard(
+    title = stringResource(Res.string.player_inventory_title),
+    accentColor = RFColors.gliderBlue
+  ) {
+    // Render items in a FlowRow-like layout (wrapped rows)
+    val chunked = allItems.chunked(6) // 6 items per row
+    chunked.forEach { rowItems ->
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+      ) {
+        rowItems.forEach { item ->
+          InventoryItemCard(item, Modifier.weight(1f))
+        }
+        // Fill remaining space in the row with empty boxes if needed
+        repeat(6 - rowItems.size) {
+          Spacer(modifier = Modifier.weight(1f))
+        }
+      }
+    }
+  }
+
+  Spacer(modifier = Modifier.height(12.dp))
+}
+
+@Composable
+private fun InventoryItemCard(item: InventoryItem, modifier: Modifier = Modifier) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
+  val dateFormat = remember { SimpleDateFormat("MMM d, yyyy") }
+  val itemName = stringResource(item.nameRes)
+  val sessionHighlight = item.usedInSession
+
+  Column(
+    modifier = modifier
+      .clip(RoundedCornerShape(6.dp))
+      .background(if (isHovered) Color.White.copy(alpha = 0.05f) else Color.Transparent)
+      .hoverable(interactionSource = interactionSource)
+      .padding(6.dp),
+    horizontalAlignment = Alignment.CenterHorizontally
+  ) {
+    // Icon (48x48)
+    Box(
+      modifier = Modifier
+        .size(48.dp)
+        .clip(RoundedCornerShape(8.dp))
+        .background(Color.Black.copy(alpha = 0.3f))
+        .border(
+          width = if (sessionHighlight) 2.dp else 1.dp,
+          color = if (sessionHighlight) RFColors.graphNodeAllied else WellBorder,
+          shape = RoundedCornerShape(8.dp)
+        ),
+      contentAlignment = Alignment.Center
+    ) {
+      Image(
+        painter = painterResource(item.iconRes),
+        contentDescription = itemName,
+        modifier = Modifier.size(40.dp),
+        contentScale = ContentScale.Fit
+      )
+    }
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    // Name
+    Text(
+      text = itemName,
+      color = if (sessionHighlight) RFColors.graphNodeAllied else RFColors.TextPrimary,
+      fontSize = 10.sp,
+      fontWeight = FontWeight.SemiBold,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      textAlign = TextAlign.Center
+    )
+
+    // Usage count
+    Text(
+      text = stringResource(Res.string.player_inventory_uses, item.usageCount),
+      color = if (sessionHighlight) RFColors.graphNodeAllied.copy(alpha = 0.8f) else RFColors.TextTertiary,
+      fontSize = 9.sp,
+      textAlign = TextAlign.Center
+    )
+
+    // Last used date
+    val lastUsedText = if (item.lastUsedDate != null && item.lastUsedDate.time > 0) {
+      dateFormat.format(item.lastUsedDate)
+    } else {
+      stringResource(Res.string.player_inventory_never)
+    }
+    Text(
+      text = stringResource(Res.string.player_inventory_last_used, lastUsedText),
+      color = RFColors.TextTertiary,
+      fontSize = 9.sp,
+      textAlign = TextAlign.Center
+    )
+
+    // Time ago
+    val timeAgoResult = if (item.lastUsedDate != null && item.lastUsedDate.time > 0) {
+      item.lastUsedDate.time.timeAgo()
+    } else null
+    if (timeAgoResult != null) {
+      val timeAgoText = when (timeAgoResult.unit) {
+        TimeAgoUnit.JUST_NOW -> stringResource(Res.string.time_ago_just_now)
+        TimeAgoUnit.MINUTE -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_minutes_one else Res.string.time_ago_minutes_other
+          stringResource(res, timeAgoResult.value)
+        }
+        TimeAgoUnit.HOUR -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_hours_one else Res.string.time_ago_hours_other
+          stringResource(res, timeAgoResult.value)
+        }
+        TimeAgoUnit.DAY -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_days_one else Res.string.time_ago_days_other
+          stringResource(res, timeAgoResult.value)
+        }
+        TimeAgoUnit.WEEK -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_weeks_one else Res.string.time_ago_weeks_other
+          stringResource(res, timeAgoResult.value)
+        }
+        TimeAgoUnit.MONTH -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_months_one else Res.string.time_ago_months_other
+          stringResource(res, timeAgoResult.value)
+        }
+      }
+      Text(
+        text = stringResource(Res.string.player_inventory_time_ago, timeAgoText),
+        color = RFColors.TextDisabled,
+        fontSize = 8.sp,
+        textAlign = TextAlign.Center
+      )
+    }
+  }
+}

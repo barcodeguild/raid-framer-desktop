@@ -216,6 +216,9 @@
     <string name="pet_icon_desc_format">иконка %1$s</string>
     <string name="pet_debuffs_label">Дебаффы:</string>
     <string name="pet_companion_dmg_label">Урон питомца</string>
+    <string name="pet_cast_fallback_format">Заклинание #%1$d</string>
+    <string name="pet_damage_label_format">Урон: %1$s</string>
+    <string name="pet_cast_overflow_format">+%1$d ещё</string>
 
     <!-- Pokemon / Companions Overlay -->
     <string name="pokemon_title">Драконье дыхание, Рисо, боевые питомцы и другие существа</string>
@@ -963,5 +966,32 @@
     <string name="spec_type_zealot">Zealot</string>
     <string name="spec_type_zephyr">Zephyr</string>
 
+    <!-- Glider Names -->
+    <string name="glider_name_twt">Furious Titan\'s Wings</string>
+    <string name="glider_name_moonshadow">Moonshadow Glider</string>
+    <string name="glider_name_crystal_wings">Crystal Wings</string>
+    <string name="glider_name_bd_glider">Legendary Dragon Wings</string>
+    <string name="glider_name_rocket_wings">Rocket Wings</string>
+    <string name="glider_name_ravenspine">Ravenspine Wings</string>
+    <string name="glider_name_feathered_dragon">Feathered Dragon Glider</string>
+    <string name="glider_name_sky_emperor">Sky Emperor</string>
+
+    <!-- Player Inventory -->
+    <string name="player_inventory_title">Player Inventory</string>
+    <string name="player_inventory_last_used">Last Used: %1$s</string>
+    <string name="player_inventory_uses">%1$d uses</string>
+    <string name="player_inventory_never">Never</string>
+    <string name="time_ago_just_now">только что</string>
+    <string name="time_ago_minutes_one">%1$d минуту назад</string>
+    <string name="time_ago_minutes_other">%1$d минут назад</string>
+    <string name="time_ago_hours_one">%1$d час назад</string>
+    <string name="time_ago_hours_other">%1$d часов назад</string>
+    <string name="time_ago_days_one">%1$d день назад</string>
+    <string name="time_ago_days_other">%1$d дней назад</string>
+    <string name="time_ago_weeks_one">%1$d неделю назад</string>
+    <string name="time_ago_weeks_other">%1$d недель назад</string>
+    <string name="time_ago_months_one">%1$d месяц назад</string>
+    <string name="time_ago_months_other">%1$d месяцев назад</string>
+    <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
 </resources>

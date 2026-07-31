@@ -27,15 +27,55 @@ fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntit
     lastKrakenGlider = c?.lastKrakenGlider ?: 0L,
     lastCrystalWings = c?.lastCrystalWings ?: 0L,
     lastRocketGlider = c?.lastRocketGlider ?: 0L,
+    lastRavenspineWings = c?.lastRavenspineWings ?: 0L,
+    lastTWTGlider = c?.lastTWTGlider ?: 0L,
+    lastMoonshadowGlider = c?.lastMoonshadowGlider ?: 0L,
 
     lastKrakenScepter = c?.lastKrakenScepter ?: 0L,
     lastKrakenSpear = c?.lastKrakenSpear ?: 0L,
+    lastKrakenShield = c?.lastKrakenShield ?: 0L,
     lastLibShieldPull = c?.lastLibShieldPull ?: 0L,
     lastGreatclub = c?.lastGreatclub ?: 0L,
     lastHalcyNecklace = c?.lastHalcyNecklace ?: 0L,
     lastSoulNecklace = c?.lastSoulNecklace ?: 0L,
     lastHonorNodachi = c?.lastHonorNodachi ?: 0L,
     lastJolaShield = c?.lastJolaShield ?: 0L,
+
+    // snake weapons and shield
+    lastSnakeGreatsword = c?.lastSnakeGreatsword ?: 0L,
+    lastSnakeShield = c?.lastSnakeShield ?: 0L,
+    lastSnakeSword = c?.lastSnakeSword ?: 0L,
+    lastSnakeAxe = c?.lastSnakeAxe ?: 0L,
+    lastSnakeScepter = c?.lastSnakeScepter ?: 0L,
+    lastSnakeGun = c?.lastSnakeGun ?: 0L,
+
+    // black dragon items
+    lastBdShield = c?.lastBdShield ?: 0L,
+    lastBdClub = c?.lastBdClub ?: 0L,
+    lastBdBow = c?.lastBdBow ?: 0L,
+    lastBdRifle = c?.lastBdRifle ?: 0L,
+    lastBdStaff = c?.lastBdStaff ?: 0L,
+    lastBdSword = c?.lastBdSword ?: 0L,
+    lastBd2hSword = c?.lastBd2hSword ?: 0L,
+
+    // anthalon items
+    lastAnthSetPull = c?.lastAnthSetPull ?: 0L,
+    lastGardenAnthSetPull = c?.lastGardenAnthSetPull ?: 0L,
+
+    // library dungeon items
+    lastLibBow = c?.lastLibBow ?: 0L,
+    lastLibDagger = c?.lastLibDagger ?: 0L,
+    lastLibShortspear = c?.lastLibShortspear ?: 0L,
+    lastLibStaff = c?.lastLibStaff ?: 0L,
+
+    // serpentis dungeon items
+    lastSerpStaff = c?.lastSerpStaff ?: 0L,
+    lastSerpShield = c?.lastSerpShield ?: 0L,
+
+    // mistsong dungeon items
+    lastMistNodachi = c?.lastMistNodachi ?: 0L,
+    lastMistDagger = c?.lastMistDagger ?: 0L,
+    lastMistShield = c?.lastMistShield ?: 0L,
 
     lastMinorHealingPotion = c?.lastMinorHealingPotion ?: 0L,
     lastMajorHealingPotion = c?.lastMajorHealingPotion ?: 0L,

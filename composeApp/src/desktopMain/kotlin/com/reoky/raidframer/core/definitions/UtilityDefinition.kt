@@ -1,5 +1,6 @@
 package com.reoky.raidframer.core.definitions
 
+import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.model.BuffAppliedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CombatEvent
@@ -7,6 +8,7 @@ import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.DebuffAppliedEvent
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 
 /**
@@ -21,6 +23,8 @@ interface UtilityItem {
   val castTime: Double
   val cooldown: Double
   val friendlyNameRes: StringResource
+  val iconRes: DrawableResource
+  val packedUsageField: (PlayerCacheEntity) -> Long
   val possibleSpellNames: List<String>
   val updateCard: (PlayerCard) -> PlayerCard
 }
@@ -77,9 +81,9 @@ fun PlayerCard.copiedWithUtilityItemDetectionMiddleWare(event: CombatEvent): Pla
   return updatedCard.copy(
     lastEvent = now,
     lastItemUse = now,
-    cache = cache?.copy(
+    cache = updatedCard.cache?.copy(
       lastSeen = now,
-      lifetimeTotalItemSkillsUsed = cache.lifetimeTotalItemSkillsUsed + newMatches.size,
+      lifetimeTotalItemSkillsUsed = (updatedCard.cache?.lifetimeTotalItemSkillsUsed ?: 0L) + newMatches.size,
     ),
     sessionItemSkillTotal = sessionItemSkillTotal + newMatches.size,
     recentSkillItemUsages = updatedRecentSkillItemUsages

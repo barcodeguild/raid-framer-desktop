@@ -123,26 +123,70 @@ fun skillTreeIconPainterFor(tree: SkillTreeType?): Painter {
 @Composable
 fun getPetIcon(petType: String): Painter {
   val resource = when (petType) {
-    "red_dragon" -> Res.drawable.red_dragon
-    "green_dragon" -> Res.drawable.green_dragon
-    "black_dragon" -> Res.drawable.black_dragon
+    "Red Dragon" -> Res.drawable.red_dragon
+    "붉은 용" -> Res.drawable.red_dragon
+    "Green Dragon" -> Res.drawable.green_dragon
+    "녹색 용" -> Res.drawable.green_dragon
+    "Black Dragon" -> Res.drawable.black_dragon
+    "검은 용" -> Res.drawable.black_dragon
+
+    "Siege Risopoda" -> Res.drawable.riso
+    "갑충 병기" -> Res.drawable.riso
     "riso" -> Res.drawable.riso
+
+    // Alikit
+    "Alikit" -> Res.drawable.alikit
+    "뮤닷시" -> Res.drawable.alikit
+
+    "Black Wolfhound" -> Res.drawable.black_wolfhound
+    "Conker's Cube" -> Res.drawable.conkers_cube
     "Ellam" -> Res.drawable.ellam
     "Violet Bloomfang" -> Res.drawable.violet_bloomfang
     "Black Bloomfang" -> Res.drawable.black_bloomfang
+
+    // Mini-miner
+    "Mini-Miner" -> Res.drawable.mini_miner
+    "꼬꼬마 광부 기계" -> Res.drawable.mini_miner
+    "Amethyst Mini-Miner" -> Res.drawable.amethyst_mini_miner
+    "자수정빛 꼬꼬마 광부 기계" -> Res.drawable.amethyst_mini_miner
+    "Ruby Mini-Miner" -> Res.drawable.ruby_mini_miner
+    "홍옥빛 꼬꼬마 광부 기계" -> Res.drawable.ruby_mini_miner
+    "Mini-Miner Nanobot" -> Res.drawable.mini_miner_nanobot
+    "꼬마 광부 기계" -> Res.drawable.mini_miner_nanobot
+
+    // Igneer
     "Igneer" -> Res.drawable.igneer
     "Iceneer" -> Res.drawable.iceneer
     "Mooneer" -> Res.drawable.mooneer
+
+    "Scarlet Dreamwinder" -> Res.drawable.scarlet_dreamwinder
+
     "Ser Meatball" -> Res.drawable.ser_meatball
     "Stormwraith Kirin" -> Res.drawable.stormwraith_kirin
     "Gloomwraith Kirin" -> Res.drawable.gloomwraith_kirin
     "Hellwraith Kirin" -> Res.drawable.hellwraith_kirin
+
+    // Kitsune ~~~
     "Moonlight Kitsu" -> Res.drawable.moonlight_kitsu
+    "흰 구미호" -> Res.drawable.moonlight_kitsu
     "Celestial Kitsu" -> Res.drawable.celestial_kitsu
+    "구미호" -> Res.drawable.celestial_kitsu
+    "Arctic Kitsu" -> Res.drawable.arctic_kitsu
+    "하얀 여우" -> Res.drawable.arctic_kitsu
+    "Woodland Kitsu" -> Res.drawable.woodland_kitsu
+    "갈색 여우" -> Res.drawable.woodland_kitsu
+    "Midnight Kitsu" -> Res.drawable.midnight_kitsu
+    "검은 여우" -> Res.drawable.midnight_kitsu
+
     "Siegeram Taurus" -> Res.drawable.siegeram_taurus
     "Typhoon Drake" -> Res.drawable.typhoon_drake
     "Deathmaw" -> Res.drawable.deathmaw
     "Maahes" -> Res.drawable.maahes
+
+    // Moloch
+    "Moloch" -> Res.drawable.moloch
+
+
     else -> Res.drawable.unknown
   }
   return painterResource(resource)

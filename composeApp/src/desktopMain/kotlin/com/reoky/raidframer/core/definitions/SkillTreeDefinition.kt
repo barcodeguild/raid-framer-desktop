@@ -420,7 +420,8 @@ data class Skill(
   val name: String,
   val castTime: Double,
   val cooldown: Double,
-  val possibleNames: List<String> = emptyList()
+  val possibleNames: List<String> = emptyList(),
+  val isPetInitiator: Boolean = false
 )
 
 // Build a map of all skill-trees to a last-used timestamp initialized to 0.

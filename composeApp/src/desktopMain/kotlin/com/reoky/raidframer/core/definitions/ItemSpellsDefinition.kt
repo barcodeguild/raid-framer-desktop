@@ -1,9 +1,22 @@
 package com.reoky.raidframer.core.definitions
 
+import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.database.incrementPackedItemUsage
 import com.reoky.raidframer.core.model.PlayerCard
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.bd_2h_sword
+import raid_framer_desktop.composeapp.generated.resources.bd_bow
+import raid_framer_desktop.composeapp.generated.resources.bd_club
+import raid_framer_desktop.composeapp.generated.resources.bd_rifle
+import raid_framer_desktop.composeapp.generated.resources.bd_shield
+import raid_framer_desktop.composeapp.generated.resources.bd_staff
+import raid_framer_desktop.composeapp.generated.resources.bd_sword
+import raid_framer_desktop.composeapp.generated.resources.garden_anth_set
+import raid_framer_desktop.composeapp.generated.resources.halcy_neck
+import raid_framer_desktop.composeapp.generated.resources.honor_nodachi
+import raid_framer_desktop.composeapp.generated.resources.jola_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_sungold_anth_set_pull
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_2h_sword
 import raid_framer_desktop.composeapp.generated.resources.item_name_bd_bow
@@ -28,6 +41,7 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_lib_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_library_greatclub
 import raid_framer_desktop.composeapp.generated.resources.item_name_mist_dagger
 import raid_framer_desktop.composeapp.generated.resources.item_name_mist_shield
+import raid_framer_desktop.composeapp.generated.resources.item_name_serp_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_serp_staff
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_greataxe
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_greatsword
@@ -36,6 +50,29 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_snake_scepte
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_shield
 import raid_framer_desktop.composeapp.generated.resources.item_name_snake_sword
 import raid_framer_desktop.composeapp.generated.resources.item_name_soul_neck
+import raid_framer_desktop.composeapp.generated.resources.kraken_scepter
+import raid_framer_desktop.composeapp.generated.resources.kraken_spear
+import raid_framer_desktop.composeapp.generated.resources.kraken_shield
+import raid_framer_desktop.composeapp.generated.resources.lib_bow
+import raid_framer_desktop.composeapp.generated.resources.lib_dagger
+import raid_framer_desktop.composeapp.generated.resources.lib_shield
+import raid_framer_desktop.composeapp.generated.resources.lib_shortspear
+import raid_framer_desktop.composeapp.generated.resources.lib_staff
+import raid_framer_desktop.composeapp.generated.resources.library_greatclub
+import raid_framer_desktop.composeapp.generated.resources.mistsong_dagger
+import raid_framer_desktop.composeapp.generated.resources.mistsong_nodachi
+import raid_framer_desktop.composeapp.generated.resources.mistsong_shield
+import raid_framer_desktop.composeapp.generated.resources.regular_anth_set
+import raid_framer_desktop.composeapp.generated.resources.serp_shield
+import raid_framer_desktop.composeapp.generated.resources.serp_staff
+import raid_framer_desktop.composeapp.generated.resources.snake_axe
+import raid_framer_desktop.composeapp.generated.resources.snake_greatsword
+import raid_framer_desktop.composeapp.generated.resources.snake_gun
+import raid_framer_desktop.composeapp.generated.resources.snake_scepter
+import raid_framer_desktop.composeapp.generated.resources.snake_shield
+import raid_framer_desktop.composeapp.generated.resources.snake_sword
+import raid_framer_desktop.composeapp.generated.resources.soul_neck
+import raid_framer_desktop.composeapp.generated.resources.unknown
 
 /**
  * Special overloaded enum to identify when a utility skill/item is used by players. We're talking about items like kraken scepter, lib shield, etc that can
@@ -45,10 +82,22 @@ import raid_framer_desktop.composeapp.generated.resources.item_name_soul_neck
  * castTime: Cast time in seconds
  * cooldown: Cooldown in seconds
  * friendlyNameRes: String resource for the item name (for i18n)
+ * iconRes: Drawable resource for the item icon (falls back to unknown if missing)
+ * packedUsageField: Lambda to read the packed usage counter + timestamp from the cache
  * possibleSpellNames: List of possible spell names for the item spell in the game logs
  * updateCache: Lambda function code that gets executed on the player cache to update any relevant info (like usage counts)
  */
-enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val itemSpecificBuffIds: List<Int>, override val castTime: Double, override val cooldown: Double, override val friendlyNameRes: StringResource, override val possibleSpellNames: List<String>, override val updateCard: (PlayerCard) -> PlayerCard = { it }) : UtilityItem {
+enum class ItemSpell(
+  override val itemSpecificSkillIds: List<Int>,
+  override val itemSpecificBuffIds: List<Int>,
+  override val castTime: Double,
+  override val cooldown: Double,
+  override val friendlyNameRes: StringResource,
+  override val iconRes: DrawableResource,
+  override val packedUsageField: (PlayerCacheEntity) -> Long,
+  override val possibleSpellNames: List<String>,
+  override val updateCard: (PlayerCard) -> PlayerCard = { it }
+) : UtilityItem {
 
   //
   // Kraken Weapons and Shield
@@ -59,6 +108,8 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_kraken_scepter,
+    iconRes = Res.drawable.kraken_scepter,
+    packedUsageField = { it.lastKrakenScepter },
     possibleSpellNames = listOf("Desolate Sea Sovereign"),
     updateCard = { card -> card.copy(
       cache = card.cache?.copy(lastKrakenScepter = incrementPackedItemUsage(card.cache.lastKrakenScepter))
@@ -70,17 +121,21 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_kraken_spear,
+    iconRes = Res.drawable.kraken_spear,
+    packedUsageField = { it.lastKrakenSpear },
     possibleSpellNames = listOf("Desolate Sea Pillager"),
     updateCard = { card -> card.copy(
       cache = card.cache?.copy(lastKrakenSpear = incrementPackedItemUsage(card.cache.lastKrakenSpear))
     )}
   ),
   KRAKEN_SHIELD(
-    itemSpecificSkillIds = listOf(36735), // Desolate Sea Guardian
-    itemSpecificBuffIds = listOf(), // gives slow and snare but no unique buff id
+    itemSpecificSkillIds = listOf(36735), // Desolate Sea Guardianq
+    itemSpecificBuffIds = listOf(4846, 4848), // gives slow and snare but no unique buff id, 4848 is the buff id, 4846 is the debuff curse id
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_kraken_shield,
+    iconRes = Res.drawable.kraken_shield,
+    packedUsageField = { it.lastKrakenShield },
     possibleSpellNames = listOf("Desolate Sea Guardian"),
     updateCard = { card -> card.copy(
       cache = card.cache?.copy(lastKrakenShield = incrementPackedItemUsage(card.cache.lastKrakenShield))
@@ -92,6 +147,8 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 120.0,
     friendlyNameRes = Res.string.item_name_honor_nodachi,
+    iconRes = Res.drawable.honor_nodachi,
+    packedUsageField = { it.lastHonorNodachi },
     possibleSpellNames = listOf("Honor's Mighty Frenzied Nodachi", "Honor's Frenzied Nodachi"),
     updateCard = { card -> card.copy(
       cache = card.cache?.copy(lastHonorNodachi = incrementPackedItemUsage(card.cache.lastHonorNodachi))
@@ -108,6 +165,8 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_jola_shield,
+    iconRes = Res.drawable.jola_shield,
+    packedUsageField = { it.lastJolaShield },
     possibleSpellNames = listOf("Jola's Grudge"),
     updateCard = { card -> card.copy(
       sessionCCTotal = card.sessionCCTotal + 1, // I guess this counts as cc
@@ -124,6 +183,8 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 120.0,
     friendlyNameRes = Res.string.item_name_halcy_neck,
+    iconRes = Res.drawable.halcy_neck,
+    packedUsageField = { it.lastHalcyNecklace },
     possibleSpellNames = listOf("Halcyon's Spiritual Necklace"),
     updateCard = { card -> card.copy(
       cache = card.cache?.copy(lastHalcyNecklace = incrementPackedItemUsage(card.cache.lastHalcyNecklace))
@@ -135,6 +196,8 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_soul_neck,
+    iconRes = Res.drawable.soul_neck,
+    packedUsageField = { it.lastSoulNecklace },
     possibleSpellNames = listOf("Soulbinder's Necklace"),
     updateCard = { card -> card.copy(
       cache = card.cache?.copy(lastSoulNecklace = incrementPackedItemUsage(card.cache.lastSoulNecklace))
@@ -150,7 +213,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_greatsword,
-    possibleSpellNames = listOf("Soulslake Edge", "Eminent Soulslake Edge")
+    iconRes = Res.drawable.snake_greatsword,
+    packedUsageField = { it.lastSnakeGreatsword },
+    possibleSpellNames = listOf("Soulslake Edge", "Eminent Soulslake Edge"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastSnakeGreatsword = incrementPackedItemUsage(card.cache.lastSnakeGreatsword))
+    )}
   ),
   SNAKE_SHIELD(
     itemSpecificSkillIds = listOf(45798, 45925), // Soulslake Bulwark, Eminent Soulslake Bulwark
@@ -158,7 +226,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_shield,
-    possibleSpellNames = listOf("Soulslake Bulwark", "Eminent Soulslake Bulwark")
+    iconRes = Res.drawable.snake_shield,
+    packedUsageField = { it.lastSnakeShield },
+    possibleSpellNames = listOf("Soulslake Bulwark", "Eminent Soulslake Bulwark"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastSnakeShield = incrementPackedItemUsage(card.cache.lastSnakeShield))
+    )}
   ),
   SNAKE_SWORD(
     itemSpecificSkillIds = listOf(45889, 45892), // Soulslake Razor, Eminent Soulslake Razor
@@ -166,7 +239,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_sword,
-    possibleSpellNames = listOf("Soulslake Razor", "Eminent Soulslake Razor")
+    iconRes = Res.drawable.snake_sword,
+    packedUsageField = { it.lastSnakeSword },
+    possibleSpellNames = listOf("Soulslake Razor", "Eminent Soulslake Razor"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastSnakeSword = incrementPackedItemUsage(card.cache.lastSnakeSword))
+    )}
   ),
   SNAKE_AXE(
     itemSpecificSkillIds = listOf(45919, 45920), // Soulslake Cleaver, Eminent Soulslake Cleaver
@@ -174,7 +252,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_greataxe,
-    possibleSpellNames = listOf("Cleaver Target")
+    iconRes = Res.drawable.snake_axe,
+    packedUsageField = { it.lastSnakeAxe },
+    possibleSpellNames = listOf("Cleaver Target"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastSnakeAxe = incrementPackedItemUsage(card.cache.lastSnakeAxe))
+    )}
   ),
   SNAKE_SCEPTER(
     itemSpecificSkillIds = listOf(45938, 45939), // Soulslake Leech, Eminent Soulslake Leech
@@ -182,7 +265,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_scepter,
-    possibleSpellNames = listOf("Soulslake Leech", "Eminent Soulslake Leech")
+    iconRes = Res.drawable.snake_scepter,
+    packedUsageField = { it.lastSnakeScepter },
+    possibleSpellNames = listOf("Soulslake Leech", "Eminent Soulslake Leech"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastSnakeScepter = incrementPackedItemUsage(card.cache.lastSnakeScepter))
+    )}
   ),
   SNAKE_GUN(
     itemSpecificSkillIds = listOf(47007, 47061), // Soulslake Bullet, Eminent Soulslake Bullet
@@ -190,7 +278,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_gun,
-    possibleSpellNames = listOf("Soulslake Bullet", "Eminent Soulslake Bullet")
+    iconRes = Res.drawable.snake_gun,
+    packedUsageField = { it.lastSnakeGun },
+    possibleSpellNames = listOf("Soulslake Bullet", "Eminent Soulslake Bullet"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastSnakeGun = incrementPackedItemUsage(card.cache.lastSnakeGun))
+    )}
   ),
 
   //
@@ -202,7 +295,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_bd_shield,
-    possibleSpellNames = listOf("Black Dragon's Self-Recovery", "Ferocious Black Dragon's Self-Recovery")
+    iconRes = Res.drawable.bd_shield,
+    packedUsageField = { it.lastBdShield },
+    possibleSpellNames = listOf("Black Dragon's Self-Recovery", "Ferocious Black Dragon's Self-Recovery"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastBdShield = incrementPackedItemUsage(card.cache.lastBdShield))
+    )}
   ),
   BD_CLUB(
     itemSpecificSkillIds = listOf(40541, 44638), // Black Dragon's Serenity, Ferocious Black Dragon's Serenity
@@ -210,15 +308,25 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_bd_club,
-    possibleSpellNames = listOf("Soulslake Bullet", "Ferocious Black Dragon's Serenity")
+    iconRes = Res.drawable.bd_club,
+    packedUsageField = { it.lastBdClub },
+    possibleSpellNames = listOf("Black Dragon's Serenity", "Ferocious Black Dragon's Serenity"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastBdClub = incrementPackedItemUsage(card.cache.lastBdClub))
+    )}
   ),
   BD_BOW(
     itemSpecificSkillIds = listOf(40539, 44635), // Black Dragon's Windsong, Ferocious Black Dragon's Wingbeat
-    itemSpecificBuffIds = listOf(), //
+    itemSpecificBuffIds = listOf(),
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_bd_bow,
-    possibleSpellNames = listOf("Black Dragon's Windsong", "Ferocious Black Dragon's Wingbeat")
+    iconRes = Res.drawable.bd_bow,
+    packedUsageField = { it.lastBdBow },
+    possibleSpellNames = listOf("Black Dragon's Windsong", "Ferocious Black Dragon's Wingbeat"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastBdBow = incrementPackedItemUsage(card.cache.lastBdBow))
+    )}
   ),
   BD_RIFLE(
     itemSpecificSkillIds = listOf(47028, 47029), // Black Dragon's Breath, Ferocious Black Dragon's Bite
@@ -226,23 +334,38 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_bd_gun,
-    possibleSpellNames = listOf("Black Dragon's Breath", "Ferocious Black Dragon's Bite")
+    iconRes = Res.drawable.bd_rifle,
+    packedUsageField = { it.lastBdRifle },
+    possibleSpellNames = listOf("Black Dragon's Breath", "Ferocious Black Dragon's Bite"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastBdRifle = incrementPackedItemUsage(card.cache.lastBdRifle))
+    )}
   ),
   BD_STAFF(
     itemSpecificSkillIds = listOf(40543), // Black Dragon's Meteor Strike
-    itemSpecificBuffIds = listOf(), //
+    itemSpecificBuffIds = listOf(),
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_bd_staff,
-    possibleSpellNames = listOf("Black Dragon's Meteor Strike")
+    iconRes = Res.drawable.bd_staff,
+    packedUsageField = { it.lastBdStaff },
+    possibleSpellNames = listOf("Black Dragon's Meteor Strike"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastBdStaff = incrementPackedItemUsage(card.cache.lastBdStaff))
+    )}
   ),
   BD_SWORD(
     itemSpecificSkillIds = listOf(40537, 44633), // Black Dragon's Breath, Ferocious Black Dragon's Breath
-    itemSpecificBuffIds = listOf(), //
+    itemSpecificBuffIds = listOf(),
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_bd_sword,
-    possibleSpellNames = listOf()
+    iconRes = Res.drawable.bd_sword,
+    packedUsageField = { it.lastBdSword },
+    possibleSpellNames = listOf(),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastBdSword = incrementPackedItemUsage(card.cache.lastBdSword))
+    )}
   ),
   BD_2H_SWORD(
     itemSpecificSkillIds = listOf(40540, 44636), // Black Dragon's Fury, Ferocious Black Dragon's Fury
@@ -250,7 +373,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_bd_2h_sword,
-    possibleSpellNames = listOf("Black Dragon's Fury")
+    iconRes = Res.drawable.bd_2h_sword,
+    packedUsageField = { it.lastBd2hSword },
+    possibleSpellNames = listOf("Black Dragon's Fury"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastBd2hSword = incrementPackedItemUsage(card.cache.lastBd2hSword))
+    )}
   ),
 
   //
@@ -262,15 +390,25 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 2.0,
     cooldown = 180.0,
     friendlyNameRes = Res.string.item_name_sungold_anth_set_pull,
-    possibleSpellNames = listOf("Necromantic Flame")
+    iconRes = Res.drawable.regular_anth_set,
+    packedUsageField = { it.lastAnthSetPull },
+    possibleSpellNames = listOf("Necromantic Flame"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastAnthSetPull = incrementPackedItemUsage(card.cache.lastAnthSetPull))
+    )}
   ),
   GARDEN_ANTH_SET_PULL(
-    itemSpecificSkillIds = listOf(44652), //  Necromantic Flame
-    itemSpecificBuffIds = listOf(25075), //  Necromantic Flame - Pull #3
+    itemSpecificSkillIds = listOf(44652), // Necromantic Flame
+    itemSpecificBuffIds = listOf(25075), // Necromantic Flame - Pull #3
     castTime = 2.0,
     cooldown = 180.0,
     friendlyNameRes = Res.string.item_name_garden_anth_set_pull,
-    possibleSpellNames = listOf("Necromantic Flame")
+    iconRes = Res.drawable.garden_anth_set,
+    packedUsageField = { it.lastGardenAnthSetPull },
+    possibleSpellNames = listOf("Necromantic Flame"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastGardenAnthSetPull = incrementPackedItemUsage(card.cache.lastGardenAnthSetPull))
+    )}
   ),
 
   //
@@ -282,7 +420,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_lib_bow,
-    possibleSpellNames = listOf("Disciple's Bow", "Radiant Disciple's Bow", "Immortal Warden's Bow")
+    iconRes = Res.drawable.lib_bow,
+    packedUsageField = { it.lastLibBow },
+    possibleSpellNames = listOf("Disciple's Bow", "Radiant Disciple's Bow", "Immortal Warden's Bow"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastLibBow = incrementPackedItemUsage(card.cache.lastLibBow))
+    )}
   ),
   LIB_DAGGER(
     itemSpecificSkillIds = listOf(39446, 41228, 45097), // Immortal Warden's Dagger
@@ -290,7 +433,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_lib_dagger,
-    possibleSpellNames = listOf("Immortal Warden's Dagger")
+    iconRes = Res.drawable.lib_dagger,
+    packedUsageField = { it.lastLibDagger },
+    possibleSpellNames = listOf("Immortal Warden's Dagger"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastLibDagger = incrementPackedItemUsage(card.cache.lastLibDagger))
+    )}
   ),
   LIB_SHORTSPEAR(
     itemSpecificSkillIds = listOf(339448, 41230, 45104), // Disciple's, Radiant Disciple's and Immortal Warden's Shortspear
@@ -298,7 +446,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_lib_shortspear,
-    possibleSpellNames = listOf("Immortal Warden's Shortspear")
+    iconRes = Res.drawable.lib_shortspear,
+    packedUsageField = { it.lastLibShortspear },
+    possibleSpellNames = listOf("Immortal Warden's Shortspear"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastLibShortspear = incrementPackedItemUsage(card.cache.lastLibShortspear))
+    )}
   ),
   LIB_STAFF(
     itemSpecificSkillIds = listOf(39462, 41231, 45105), // Disciple's, Radiant Disciple's and Immortal Warden's Staff
@@ -306,7 +459,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_lib_staff,
-    possibleSpellNames = listOf("Immortal Warden's Staff")
+    iconRes = Res.drawable.lib_staff,
+    packedUsageField = { it.lastLibStaff },
+    possibleSpellNames = listOf("Immortal Warden's Staff"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastLibStaff = incrementPackedItemUsage(card.cache.lastLibStaff))
+    )}
   ),
   LIB_GREATCLUB(
     itemSpecificSkillIds = listOf(45099, 39452, 41234),
@@ -314,6 +472,8 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_library_greatclub,
+    iconRes = Res.drawable.library_greatclub,
+    packedUsageField = { it.lastGreatclub },
     possibleSpellNames = listOf("Disciple's Greatclub", "Immortals's Greatclub"),
     updateCard = { card -> card.copy(
       cache = card.cache?.copy(lastGreatclub = incrementPackedItemUsage(card.cache.lastGreatclub))
@@ -325,6 +485,8 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 4.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_lib_shield,
+    iconRes = Res.drawable.lib_shield,
+    packedUsageField = { it.lastLibShieldPull },
     possibleSpellNames = listOf("Disciple's Shield", "Immortal Warden's Shield"),
     updateCard = { card -> card.copy(
       sessionCCTotal = card.sessionCCTotal + 1, // allows us to count lib shield as cc points even though there's no visible debuff
@@ -337,11 +499,29 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
   //
   SERP_STAFF(
     itemSpecificSkillIds = listOf(22438),
-    itemSpecificBuffIds = listOf(6136), //  Corrupted Wit
+    itemSpecificBuffIds = listOf(6136), // Corrupted Wit
     castTime = 0.0,
     cooldown = 180.0,
     friendlyNameRes = Res.string.item_name_serp_staff,
-    possibleSpellNames = listOf("Corrupted Wit")
+    iconRes = Res.drawable.serp_staff,
+    packedUsageField = { it.lastSerpStaff },
+    possibleSpellNames = listOf("Corrupted Wit"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastSerpStaff = incrementPackedItemUsage(card.cache.lastSerpStaff))
+    )}
+  ),
+  SERP_SHIELD(
+    itemSpecificSkillIds = listOf(22445),
+    itemSpecificBuffIds = listOf(6148), // Blooddrinker Blossom
+    castTime = 0.0,
+    cooldown = 180.0,
+    friendlyNameRes = Res.string.item_name_serp_shield,
+    iconRes = Res.drawable.serp_shield,
+    packedUsageField = { it.lastSerpShield },
+    possibleSpellNames = listOf("Corrupted Wit"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastSerpShield = incrementPackedItemUsage(card.cache.lastSerpShield))
+    )}
   ),
 
   //
@@ -353,7 +533,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_mist_nodachi,
-    possibleSpellNames = listOf("Pervasive Black Magic", "Amplified Black Magic")
+    iconRes = Res.drawable.mistsong_nodachi,
+    packedUsageField = { it.lastMistNodachi },
+    possibleSpellNames = listOf("Pervasive Black Magic", "Amplified Black Magic"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastMistNodachi = incrementPackedItemUsage(card.cache.lastMistNodachi))
+    )}
   ),
   MIST_DAGGER(
     itemSpecificSkillIds = listOf(32322, 32426, 33600), // Spell Cast for Dagger Wicked Whisper Dagger, Prime Wicked Whisper Dagger, Supreme Wicked Whisper Dagger
@@ -361,7 +546,12 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_mist_dagger,
-    possibleSpellNames = listOf("Wicked Whisper Dagger", "Prime Wicked Whisper Dagger", "Supreme Wicked Whisper Dagger ")
+    iconRes = Res.drawable.mistsong_dagger,
+    packedUsageField = { it.lastMistDagger },
+    possibleSpellNames = listOf("Wicked Whisper Dagger", "Prime Wicked Whisper Dagger", "Supreme Wicked Whisper Dagger "),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastMistDagger = incrementPackedItemUsage(card.cache.lastMistDagger))
+    )}
   ),
   MIST_SHIELD(
     itemSpecificSkillIds = listOf(32415, 32416, 33603), // Bewitching Talisman
@@ -369,6 +559,11 @@ enum class ItemSpell(override val itemSpecificSkillIds: List<Int>, override val 
     castTime = 0.0,
     cooldown = 45.0,
     friendlyNameRes = Res.string.item_name_mist_shield,
-    possibleSpellNames = listOf("Healing Talisman", "Mistsong Bewitching Talisman")
+    iconRes = Res.drawable.mistsong_shield,
+    packedUsageField = { it.lastMistShield },
+    possibleSpellNames = listOf("Healing Talisman", "Mistsong Bewitching Talisman"),
+    updateCard = { card -> card.copy(
+      cache = card.cache?.copy(lastMistShield = incrementPackedItemUsage(card.cache.lastMistShield))
+    )}
   );
 }

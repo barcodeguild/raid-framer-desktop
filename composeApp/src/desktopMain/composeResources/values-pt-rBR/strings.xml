@@ -216,6 +216,9 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="pet_icon_desc_format">ícone de %1$s</string>
     <string name="pet_debuffs_label">Debuffs:</string>
     <string name="pet_companion_dmg_label">Dano do Companheiro</string>
+    <string name="pet_cast_fallback_format">Conjuração #%1$d</string>
+    <string name="pet_damage_label_format">Dano: %1$s</string>
+    <string name="pet_cast_overflow_format">+%1$d mais</string>
 
     <!-- Pokemon / Companions Overlay -->
     <string name="pokemon_title">Baforadas de Dragão, Risos, Mascotes de Batalha e Outras Criaturas</string>
@@ -963,5 +966,32 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="spec_type_zealot">Zealot</string>
     <string name="spec_type_zephyr">Zephyr</string>
 
+    <!-- Glider Names -->
+    <string name="glider_name_twt">Furious Titan\'s Wings</string>
+    <string name="glider_name_moonshadow">Moonshadow Glider</string>
+    <string name="glider_name_crystal_wings">Crystal Wings</string>
+    <string name="glider_name_bd_glider">Legendary Dragon Wings</string>
+    <string name="glider_name_rocket_wings">Rocket Wings</string>
+    <string name="glider_name_ravenspine">Ravenspine Wings</string>
+    <string name="glider_name_feathered_dragon">Feathered Dragon Glider</string>
+    <string name="glider_name_sky_emperor">Sky Emperor</string>
+
+    <!-- Player Inventory -->
+    <string name="player_inventory_title">Player Inventory</string>
+    <string name="player_inventory_last_used">Last Used: %1$s</string>
+    <string name="player_inventory_uses">%1$d uses</string>
+    <string name="player_inventory_never">Never</string>
+    <string name="time_ago_just_now">agora mesmo</string>
+    <string name="time_ago_minutes_one">%1$d minuto atrás</string>
+    <string name="time_ago_minutes_other">%1$d minutos atrás</string>
+    <string name="time_ago_hours_one">%1$d hora atrás</string>
+    <string name="time_ago_hours_other">%1$d horas atrás</string>
+    <string name="time_ago_days_one">%1$d dia atrás</string>
+    <string name="time_ago_days_other">%1$d dias atrás</string>
+    <string name="time_ago_weeks_one">%1$d semana atrás</string>
+    <string name="time_ago_weeks_other">%1$d semanas atrás</string>
+    <string name="time_ago_months_one">%1$d mês atrás</string>
+    <string name="time_ago_months_other">%1$d meses atrás</string>
+    <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
 </resources>

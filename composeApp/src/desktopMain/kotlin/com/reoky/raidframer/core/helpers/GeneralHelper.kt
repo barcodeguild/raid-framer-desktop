@@ -95,6 +95,50 @@ fun Long.toLocalTimeString(): String {
 }
 
 /**
+ * Represents a unit of time for the "time ago" display.
+ */
+enum class TimeAgoUnit {
+  JUST_NOW,
+  MINUTE,
+  HOUR,
+  DAY,
+  WEEK,
+  MONTH
+}
+
+/**
+ * Structured result from [timeAgo] containing the numeric value and unit.
+ * The caller resolves the actual display string via string resources.
+ */
+data class TimeAgoResult(val value: Long, val unit: TimeAgoUnit)
+
+/**
+ * Returns a [TimeAgoResult] representing the relative time since the given epoch millisecond timestamp.
+ * The caller should resolve the display string using the appropriate string resources.
+ */
+fun Long.timeAgo(): TimeAgoResult {
+  val now = System.currentTimeMillis()
+  val diff = now - this
+  if (diff < 0) return TimeAgoResult(0, TimeAgoUnit.JUST_NOW)
+
+  val seconds = diff / 1000
+  val minutes = seconds / 60
+  val hours = minutes / 60
+  val days = hours / 24
+  val weeks = days / 7
+  val months = days / 30
+
+  return when {
+    seconds < 60 -> TimeAgoResult(0, TimeAgoUnit.JUST_NOW)
+    minutes < 60 -> TimeAgoResult(minutes, TimeAgoUnit.MINUTE)
+    hours < 24 -> TimeAgoResult(hours, TimeAgoUnit.HOUR)
+    days < 7 -> TimeAgoResult(days, TimeAgoUnit.DAY)
+    weeks < 5 -> TimeAgoResult(weeks, TimeAgoUnit.WEEK)
+    else -> TimeAgoResult(months, TimeAgoUnit.MONTH)
+  }
+}
+
+/**
  * Makes a pretty-looking AnnotatedString for the attack event. I brought this code into a different file because
  * it's too and will get used multiple times potentially.
  */
