@@ -50,6 +50,9 @@ import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.database.PlayerSessionTotalsEntity
 import com.reoky.raidframer.core.database.unpackItemUsageCounter
 import com.reoky.raidframer.core.database.unpackItemUsageDate
+import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.definitions.GliderSpell
+import com.reoky.raidframer.core.definitions.ItemSpell
 import com.reoky.raidframer.core.helpers.RFColors
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -1016,129 +1019,40 @@ private data class InventoryItem(
   val nameRes: StringResource,
   val iconRes: DrawableResource,
   val usageCount: Long,
-  val lastUsedDate: Date?
+  val lastUsedDate: Date?,
+  val usedInSession: Boolean
 )
 
 // Player Inventory Section - shows gliders and utility items the player has used
 @Composable
 private fun PlayerInventorySection(card: PlayerCard) {
   val cache = card.cache ?: return
+  val lastSessionStart by remember { derivedStateOf { RFConfig.state.value.lastSessionStart } }
 
-  // Build inventory items from glider packed fields
-  val gliderItems = remember(cache) {
-    listOf(
-      InventoryItem(
-        nameRes = Res.string.glider_name_twt,
-        iconRes = Res.drawable.twt_glider,
-        usageCount = cache.lastTWTGlider.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastTWTGlider.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.glider_name_moonshadow,
-        iconRes = Res.drawable.moonshadow_glider,
-        usageCount = cache.lastMoonshadowGlider.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastMoonshadowGlider.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.glider_name_crystal_wings,
-        iconRes = Res.drawable.crystal_wings,
-        usageCount = cache.lastCrystalWings.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastCrystalWings.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.glider_name_bd_glider,
-        iconRes = Res.drawable.bd_glider,
-        usageCount = cache.lastBDGlider.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastBDGlider.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.glider_name_rocket_wings,
-        iconRes = Res.drawable.rocket_glider,
-        usageCount = cache.lastRocketGlider.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastRocketGlider.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.glider_name_ravenspine,
-        iconRes = Res.drawable.ravenspine_glider,
-        usageCount = cache.lastRavenspineWings.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastRavenspineWings.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.glider_name_feathered_dragon,
-        iconRes = Res.drawable.kraken_glider,
-        usageCount = cache.lastKrakenGlider.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastKrakenGlider.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.glider_name_sky_emperor,
-        iconRes = Res.drawable.sky_emp_glider,
-        usageCount = cache.lastSkyEmpGlider.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastSkyEmpGlider.unpackItemUsageDate()
-      ),
-    ).filter { it.usageCount > 0 }
+  // Build inventory items from all glider and utility item enum entries
+  val allItems = remember(cache, lastSessionStart) {
+    fun buildItem(nameRes: StringResource, iconRes: DrawableResource, packed: Long): InventoryItem {
+      val lastUsed = packed.unpackItemUsageDate()
+      val usedInSession = lastSessionStart > 0L && lastUsed.time >= lastSessionStart
+      return InventoryItem(
+        nameRes = nameRes,
+        iconRes = iconRes,
+        usageCount = packed.unpackItemUsageCounter(),
+        lastUsedDate = lastUsed,
+        usedInSession = usedInSession
+      )
+    }
+    val gliderItems = GliderSpell.entries.map { glider ->
+      buildItem(glider.friendlyNameRes, glider.iconRes, glider.packedUsageField(cache))
+    }
+    val utilityItems = ItemSpell.entries.map { item ->
+      buildItem(item.friendlyNameRes, item.iconRes, item.packedUsageField(cache))
+    }
+    (gliderItems + utilityItems)
+      .filter { it.usageCount > 0 }
+      .sortedByDescending { it.usageCount }
   }
 
-  // Build inventory items from utility item packed fields
-  val itemItems = remember(cache) {
-    listOf(
-      InventoryItem(
-        nameRes = Res.string.item_name_kraken_scepter,
-        iconRes = Res.drawable.kraken_scepter,
-        usageCount = cache.lastKrakenScepter.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastKrakenScepter.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.item_name_kraken_spear,
-        iconRes = Res.drawable.kraken_spear,
-        usageCount = cache.lastKrakenSpear.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastKrakenSpear.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.item_name_kraken_shield,
-        iconRes = Res.drawable.kraken_shield,
-        usageCount = cache.lastKrakenShield.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastKrakenShield.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.item_name_lib_shield,
-        iconRes = Res.drawable.lib_shield,
-        usageCount = cache.lastLibShieldPull.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastLibShieldPull.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.item_name_library_greatclub,
-        iconRes = Res.drawable.library_greatclub,
-        usageCount = cache.lastGreatclub.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastGreatclub.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.item_name_halcy_neck,
-        iconRes = Res.drawable.halcy_neck,
-        usageCount = cache.lastHalcyNecklace.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastHalcyNecklace.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.item_name_soul_neck,
-        iconRes = Res.drawable.soul_neck,
-        usageCount = cache.lastSoulNecklace.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastSoulNecklace.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.item_name_honor_nodachi,
-        iconRes = Res.drawable.honor_nodachi,
-        usageCount = cache.lastHonorNodachi.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastHonorNodachi.unpackItemUsageDate()
-      ),
-      InventoryItem(
-        nameRes = Res.string.item_name_jola_shield,
-        iconRes = Res.drawable.jola_shield,
-        usageCount = cache.lastJolaShield.unpackItemUsageCounter(),
-        lastUsedDate = cache.lastJolaShield.unpackItemUsageDate()
-      ),
-    ).filter { it.usageCount > 0 }
-  }
-
-  val allItems = gliderItems + itemItems
   if (allItems.isEmpty()) return
 
   SectionCard(
@@ -1174,6 +1088,7 @@ private fun InventoryItemCard(item: InventoryItem, modifier: Modifier = Modifier
   val isHovered by interactionSource.collectIsHoveredAsState()
   val dateFormat = remember { SimpleDateFormat("MMM d, yyyy") }
   val itemName = stringResource(item.nameRes)
+  val sessionHighlight = item.usedInSession
 
   Column(
     modifier = modifier
@@ -1189,7 +1104,11 @@ private fun InventoryItemCard(item: InventoryItem, modifier: Modifier = Modifier
         .size(48.dp)
         .clip(RoundedCornerShape(8.dp))
         .background(Color.Black.copy(alpha = 0.3f))
-        .border(1.dp, WellBorder, RoundedCornerShape(8.dp)),
+        .border(
+          width = if (sessionHighlight) 2.dp else 1.dp,
+          color = if (sessionHighlight) RFColors.graphNodeAllied else WellBorder,
+          shape = RoundedCornerShape(8.dp)
+        ),
       contentAlignment = Alignment.Center
     ) {
       Image(
@@ -1205,7 +1124,7 @@ private fun InventoryItemCard(item: InventoryItem, modifier: Modifier = Modifier
     // Name
     Text(
       text = itemName,
-      color = RFColors.TextPrimary,
+      color = if (sessionHighlight) RFColors.graphNodeAllied else RFColors.TextPrimary,
       fontSize = 10.sp,
       fontWeight = FontWeight.SemiBold,
       maxLines = 1,
@@ -1216,7 +1135,7 @@ private fun InventoryItemCard(item: InventoryItem, modifier: Modifier = Modifier
     // Usage count
     Text(
       text = stringResource(Res.string.player_inventory_uses, item.usageCount),
-      color = RFColors.TextTertiary,
+      color = if (sessionHighlight) RFColors.graphNodeAllied.copy(alpha = 0.8f) else RFColors.TextTertiary,
       fontSize = 9.sp,
       textAlign = TextAlign.Center
     )

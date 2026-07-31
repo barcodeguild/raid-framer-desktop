@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 31
+const val SCHEMA_VERSION = 32
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -153,6 +153,42 @@ data class PlayerCacheEntity(
   val lastSoulNecklace: Long = 0L,
   val lastHonorNodachi: Long = 0L,
   val lastJolaShield: Long = 0L,
+
+  // snake weapons and shield usages
+  val lastSnakeGreatsword: Long = 0L,
+  val lastSnakeShield: Long = 0L,
+  val lastSnakeSword: Long = 0L,
+  val lastSnakeAxe: Long = 0L,
+  val lastSnakeScepter: Long = 0L,
+  val lastSnakeGun: Long = 0L,
+
+  // black dragon items usages
+  val lastBdShield: Long = 0L,
+  val lastBdClub: Long = 0L,
+  val lastBdBow: Long = 0L,
+  val lastBdRifle: Long = 0L,
+  val lastBdStaff: Long = 0L,
+  val lastBdSword: Long = 0L,
+  val lastBd2hSword: Long = 0L,
+
+  // anthalon items usages
+  val lastAnthSetPull: Long = 0L,
+  val lastGardenAnthSetPull: Long = 0L,
+
+  // library dungeon items usages
+  val lastLibBow: Long = 0L,
+  val lastLibDagger: Long = 0L,
+  val lastLibShortspear: Long = 0L,
+  val lastLibStaff: Long = 0L,
+
+  // serpentis dungeon items usages
+  val lastSerpStaff: Long = 0L,
+  val lastSerpShield: Long = 0L,
+
+  // mistsong dungeon items usages
+  val lastMistNodachi: Long = 0L,
+  val lastMistDagger: Long = 0L,
+  val lastMistShield: Long = 0L,
 
   // potion/buff item usages
   val lastMinorHealingPotion: Long = 0L,

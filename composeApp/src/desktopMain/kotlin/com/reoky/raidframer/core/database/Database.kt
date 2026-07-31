@@ -68,6 +68,7 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_28_29) // 07/23/26 added lifetimeTotalTigerStrikes to cache and totalTigerStrikes to session totals for Battlerage heuristic
   .addMigrations(MIGRATION_29_30) // 07/25/26 added 11 new debuff category totals (freeze/trip/bubble/bracing/shieldstrip/weapondisable/potiondisable/bdglider/crystalwings/gliderdisable/provoke)
   .addMigrations(MIGRATION_30_31) // 07/29/26 added lastRavenspineWings, lastTWTGlider, lastMoonshadowGlider for glider buff tracking
+  .addMigrations(MIGRATION_31_32) // 07/31/26 added packed usage fields for all utility items (snake, BD, anthalon, library, serpentis, mistsong)
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

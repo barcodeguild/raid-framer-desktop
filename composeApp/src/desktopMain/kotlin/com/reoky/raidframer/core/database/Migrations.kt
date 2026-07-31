@@ -294,3 +294,39 @@ val MIGRATION_30_31 = object : Migration(30, 31) {
   }
 }
 
+// added packed usage fields for all utility items (snake, BD, anthalon, library, serpentis, mistsong)
+val MIGRATION_31_32 = object : Migration(31, 32) {
+  override fun migrate(connection: SQLiteConnection) {
+    // snake weapons and shield
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeGreatsword INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeShield INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeSword INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeAxe INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeScepter INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeGun INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    // black dragon items
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBdShield INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBdClub INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBdBow INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBdRifle INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBdStaff INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBdSword INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBd2hSword INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    // anthalon items
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastAnthSetPull INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastGardenAnthSetPull INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    // library dungeon items
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastLibBow INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastLibDagger INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastLibShortspear INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastLibStaff INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    // serpentis dungeon items
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSerpStaff INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSerpShield INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    // mistsong dungeon items
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMistNodachi INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMistDagger INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMistShield INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+
