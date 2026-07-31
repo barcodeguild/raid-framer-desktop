@@ -35,6 +35,10 @@ object PetAccumulatorInteractor : Interactor() {
   private val riderCastWindow = mutableListOf<CastWindow>()
   private val accumulatedDamageEvents = mutableListOf<DamageEvent>()
   private val accumulatedCastEvents = mutableListOf<SuccessfulCastEvent>()
+  private val unattributedDamageBuffer = mutableListOf<DamageEvent>() // damage waiting for pet card creation
+  private val unattributedCastBuffer = mutableListOf<SuccessfulCastEvent>() // casts waiting for pet card creation
+  private const val MAX_BUFFER_RETRIES = 3 // max cycles to keep buffered events before dropping to player cache
+  private var bufferRetryCount = 0
 
   fun postEvent(event: CombatEvent) {
     when (event) {
@@ -101,12 +105,20 @@ object PetAccumulatorInteractor : Interactor() {
   override suspend fun interact() {
     val drainedDamages: List<DamageEvent>
     val drainedCasts: List<SuccessfulCastEvent>
+    val recheckBufferedDamage: List<DamageEvent>
+    val recheckBufferedCasts: List<SuccessfulCastEvent>
 
     mutex.withLock {
       drainedDamages = accumulatedDamageEvents.toList()
       drainedCasts = accumulatedCastEvents.toList()
       accumulatedDamageEvents.clear()
       accumulatedCastEvents.clear()
+
+      // Re-evaluate buffered events: try to attribute now that pet cards may exist
+      recheckBufferedDamage = unattributedDamageBuffer.toList()
+      recheckBufferedCasts = unattributedCastBuffer.toList()
+      unattributedDamageBuffer.clear()
+      unattributedCastBuffer.clear()
 
       // Clean up expired windows
       val now = System.currentTimeMillis()
@@ -120,16 +132,51 @@ object PetAccumulatorInteractor : Interactor() {
     if (drainedDamages.isNotEmpty()) {
       processDamages(drainedDamages)
     }
+
+    // Re-evaluate previously buffered events against newly created pet cards
+    if (recheckBufferedCasts.isNotEmpty()) {
+      processCasts(recheckBufferedCasts)
+    }
+    if (recheckBufferedDamage.isNotEmpty()) {
+      processDamages(recheckBufferedDamage)
+    }
+
+    // Track buffer retries - if events stay buffered too long, they'll be dropped on the next cycle
+    mutex.withLock {
+      if (unattributedDamageBuffer.isNotEmpty() || unattributedCastBuffer.isNotEmpty()) {
+        bufferRetryCount++
+        if (bufferRetryCount >= MAX_BUFFER_RETRIES) {
+          Log.info(TAG, "Buffer timeout: dropping ${unattributedDamageBuffer.size} buffered damages and ${unattributedCastBuffer.size} buffered casts to player cache")
+          unattributedDamageBuffer.forEach { PlayerCacheInteractor.postEventInternal(it) }
+          unattributedDamageBuffer.clear()
+          unattributedCastBuffer.clear()
+          bufferRetryCount = 0
+        }
+      } else {
+        bufferRetryCount = 0
+      }
+    }
   }
 
   private fun processCasts(casts: List<SuccessfulCastEvent>) {
     casts.forEach { cast ->
       val cleanSource = cleanName(cast.source)
-      val candidates = PlayerCacheInteractor.getPetEntriesByName(cleanSource)
+      var candidates = PlayerCacheInteractor.getPetEntriesByName(cleanSource)
+
+      // If no candidates by source name, try inferring pet name from rider spell
+      if (candidates.isEmpty() && isRiderSpell(cast.spell)) {
+        val inferredPetName = inferPetNameFromRiderCast(cast)
+        candidates = PlayerCacheInteractor.getPetEntriesByName(inferredPetName)
+      }
 
       when {
         candidates.isEmpty() -> {
-          // Pet card doesn't exist yet; will be created by CompanionInteractor
+          // Pet card doesn't exist yet. Buffer the cast for re-attribution when the card is created.
+          val petSkill = petSkillWhitelist.find { it.id == cast.spellId }
+          if (petSkill != null) {
+            Log.info(TAG, "Buffering pet cast for '${cast.source}' (spell='${cast.spell}' id:${cast.spellId}) - waiting for pet card creation")
+            unattributedCastBuffer.add(cast)
+          }
         }
         candidates.size == 1 -> {
           PlayerCacheInteractor.postPetSuccessfulCast(candidates.first().key, cast)
@@ -158,10 +205,14 @@ object PetAccumulatorInteractor : Interactor() {
       if (candidates.isEmpty()) {
         // No pet card found for this source. The damage was accumulated because
         // it matched a whitelisted pet skill, but no pet card exists yet.
-        // Route it back to the player cache so it counts as player damage
-        // rather than silently dropping it.
-        Log.info(TAG, "No pet card found for whitelisted skill damage source: $cleanSource (spell='${damage.spell}' id:${damage.spellId}) - routing to player cache. Known pets: ${PlayerCacheInteractor.getPetEntriesByName("").map { it.value.name }}")
-        PlayerCacheInteractor.postEventInternal(damage)
+        // Buffer it for re-attribution when the pet card is created (Mate metadata arrives late).
+        if (!PlayerCacheInteractor.isRealPlayer(cleanSource)) {
+          Log.info(TAG, "Buffering pet damage for '$cleanSource' (spell='${damage.spell}' id:${damage.spellId}) - waiting for pet card creation")
+          unattributedDamageBuffer.add(damage)
+        } else {
+          Log.info(TAG, "No pet card found for damage source: $cleanSource (spell='${damage.spell}' id:${damage.spellId}) - routing to player cache. Known pets: ${PlayerCacheInteractor.getPetEntriesByName("").map { it.value.name }}")
+          PlayerCacheInteractor.postEventInternal(damage)
+        }
         return@forEach
       }
 
