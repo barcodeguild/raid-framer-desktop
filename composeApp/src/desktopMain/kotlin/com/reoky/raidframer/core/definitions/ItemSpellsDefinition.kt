@@ -6,10 +6,12 @@ import com.reoky.raidframer.core.model.PlayerCard
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.bd_2h_sword
 import raid_framer_desktop.composeapp.generated.resources.bd_bow
 import raid_framer_desktop.composeapp.generated.resources.bd_club
 import raid_framer_desktop.composeapp.generated.resources.bd_rifle
 import raid_framer_desktop.composeapp.generated.resources.bd_shield
+import raid_framer_desktop.composeapp.generated.resources.bd_staff
 import raid_framer_desktop.composeapp.generated.resources.bd_sword
 import raid_framer_desktop.composeapp.generated.resources.garden_anth_set
 import raid_framer_desktop.composeapp.generated.resources.halcy_neck
@@ -63,6 +65,12 @@ import raid_framer_desktop.composeapp.generated.resources.mistsong_shield
 import raid_framer_desktop.composeapp.generated.resources.regular_anth_set
 import raid_framer_desktop.composeapp.generated.resources.serp_shield
 import raid_framer_desktop.composeapp.generated.resources.serp_staff
+import raid_framer_desktop.composeapp.generated.resources.snake_axe
+import raid_framer_desktop.composeapp.generated.resources.snake_greatsword
+import raid_framer_desktop.composeapp.generated.resources.snake_gun
+import raid_framer_desktop.composeapp.generated.resources.snake_scepter
+import raid_framer_desktop.composeapp.generated.resources.snake_shield
+import raid_framer_desktop.composeapp.generated.resources.snake_sword
 import raid_framer_desktop.composeapp.generated.resources.soul_neck
 import raid_framer_desktop.composeapp.generated.resources.unknown
 
@@ -205,7 +213,7 @@ enum class ItemSpell(
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_greatsword,
-    iconRes = Res.drawable.unknown,
+    iconRes = Res.drawable.snake_greatsword,
     packedUsageField = { it.lastSnakeGreatsword },
     possibleSpellNames = listOf("Soulslake Edge", "Eminent Soulslake Edge"),
     updateCard = { card -> card.copy(
@@ -218,7 +226,7 @@ enum class ItemSpell(
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_shield,
-    iconRes = Res.drawable.unknown,
+    iconRes = Res.drawable.snake_shield,
     packedUsageField = { it.lastSnakeShield },
     possibleSpellNames = listOf("Soulslake Bulwark", "Eminent Soulslake Bulwark"),
     updateCard = { card -> card.copy(
@@ -231,7 +239,7 @@ enum class ItemSpell(
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_sword,
-    iconRes = Res.drawable.unknown,
+    iconRes = Res.drawable.snake_sword,
     packedUsageField = { it.lastSnakeSword },
     possibleSpellNames = listOf("Soulslake Razor", "Eminent Soulslake Razor"),
     updateCard = { card -> card.copy(
@@ -244,7 +252,7 @@ enum class ItemSpell(
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_greataxe,
-    iconRes = Res.drawable.unknown,
+    iconRes = Res.drawable.snake_axe,
     packedUsageField = { it.lastSnakeAxe },
     possibleSpellNames = listOf("Cleaver Target"),
     updateCard = { card -> card.copy(
@@ -257,7 +265,7 @@ enum class ItemSpell(
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_scepter,
-    iconRes = Res.drawable.unknown,
+    iconRes = Res.drawable.snake_scepter,
     packedUsageField = { it.lastSnakeScepter },
     possibleSpellNames = listOf("Soulslake Leech", "Eminent Soulslake Leech"),
     updateCard = { card -> card.copy(
@@ -270,7 +278,7 @@ enum class ItemSpell(
     castTime = 0.0,
     cooldown = 60.0,
     friendlyNameRes = Res.string.item_name_snake_gun,
-    iconRes = Res.drawable.unknown,
+    iconRes = Res.drawable.snake_gun,
     packedUsageField = { it.lastSnakeGun },
     possibleSpellNames = listOf("Soulslake Bullet", "Eminent Soulslake Bullet"),
     updateCard = { card -> card.copy(
