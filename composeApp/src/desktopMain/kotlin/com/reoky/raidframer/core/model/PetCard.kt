@@ -22,7 +22,7 @@ data class PetCard(
   val owner: String, // owner's character name
   val recentCids: List<String>, // these change so keeping a list
   val lastEvent: Long, // timestamp of last event
-  val petType: String = "default", // type for icon rendering
+  val petTypes: Set<String> = setOf("default"), // types for icon rendering (may have multiple if same-named pets)
 
   // Recent events held in memory (not persisted)
   val recentDamageEvents: List<DamageEvent> = listOf(),

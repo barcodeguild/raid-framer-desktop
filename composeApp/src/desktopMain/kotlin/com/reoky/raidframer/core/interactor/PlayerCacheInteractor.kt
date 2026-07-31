@@ -323,13 +323,14 @@ object PlayerCacheInteractor : Interactor() {
             owner = owner,
             recentCids = cid?.let { listOf(it) } ?: listOf(),
             lastEvent = System.currentTimeMillis(),
-            petType = petType
+            petTypes = setOf(petType)
           )
         } else {
           petCards[key]?.let { card ->
             petCards[key] = card.copy(
               recentCids = cid?.let { (card.recentCids + it).distinct().takeLast(50) } ?: card.recentCids,
-              lastEvent = System.currentTimeMillis()
+              lastEvent = System.currentTimeMillis(),
+              petTypes = card.petTypes + petType
             )
             //debug print all cids for pet id
             Log.debug(TAG, "Pet ${card.petId} (${card.name}) CIDs: ${petCards[key]?.recentCids}")
@@ -980,6 +981,8 @@ object PlayerCacheInteractor : Interactor() {
    */
   fun postPetDamage(petKey: String, event: DamageEvent) {
     if (!CombatLogInteractor.isRecording.value) return
+    // PvP/PvE filtering: in PvP mode, only count damage towards real players
+    if (!isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return
     Log.info(TAG, "Posting pet damage event to petKey=$petKey: $event")
     scope.launch {
       mutex.withLock {

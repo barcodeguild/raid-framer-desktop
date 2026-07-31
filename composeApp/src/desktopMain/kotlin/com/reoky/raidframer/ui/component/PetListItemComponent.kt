@@ -54,12 +54,14 @@ fun PetListItem(
   owner: String,
   damage: Long,
   debuffs: List<String>,
-  petType: String = "default",
+  petTypes: Set<String> = setOf("default"),
   breathCasts: List<RiderCastEvent> = listOf(),
   rocketCasts: List<RiderCastEvent> = listOf(),
+  ownerFactionColor: Color = RFColors.BadgeBackground,
   modifier: Modifier = Modifier,
   onClick: (() -> Unit)? = null
 ) {
+  val primaryType = petTypes.firstOrNull() ?: "default"
   val content = Modifier
     .fillMaxWidth()
     .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
@@ -84,7 +86,9 @@ fun PetListItem(
           .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
       ) {
-        // Icon with subtle red border
+        // Icon with subtle red border (hoverable for multi-type tooltip)
+        val iconInteraction = remember { MutableInteractionSource() }
+        val isIconHovered by iconInteraction.collectIsHoveredAsState()
         Box(
           modifier = Modifier
             .size(48.dp)
@@ -92,7 +96,8 @@ fun PetListItem(
               color = RFColors.IconBackground,
               shape = CircleShape
             )
-            .border(1.dp, RFColors.IconBorder, CircleShape),
+            .border(1.dp, RFColors.IconBorder, CircleShape)
+            .hoverable(interactionSource = iconInteraction),
           contentAlignment = Alignment.Center
         ) {
           val zoom = 1.25f
@@ -104,13 +109,38 @@ fun PetListItem(
             contentAlignment = Alignment.Center
           ) {
             Image(
-              painter = getPetIcon(petType),
-              contentDescription = stringResource(Res.string.pet_icon_desc_format, petType),
+              painter = getPetIcon(primaryType),
+              contentDescription = stringResource(Res.string.pet_icon_desc_format, primaryType),
               modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { scaleX = zoom; scaleY = zoom },
               contentScale = ContentScale.Crop
             )
+          }
+
+          // Multi-type tooltip
+          if (isIconHovered && petTypes.size > 1) {
+            Popup(
+              alignment = Alignment.TopStart,
+              offset = IntOffset(x = 56, y = 0)
+            ) {
+              Surface(
+                shape = RoundedCornerShape(4.dp),
+                elevation = 4.dp,
+                color = RFColors.PopupBackground.copy(alpha = 0.95f),
+                border = BorderStroke(1.dp, RFColors.CardBorder)
+              ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                  petTypes.forEach { type ->
+                    Text(
+                      text = type,
+                      color = RFColors.TextSecondary,
+                      fontSize = 10.sp
+                    )
+                  }
+                }
+              }
+            }
           }
         }
 
@@ -126,10 +156,10 @@ fun PetListItem(
             Spacer(modifier = Modifier.width(8.dp))
             Box(
               modifier = Modifier
-                .background(color = RFColors.BadgeBackground, shape = RoundedCornerShape(6.dp))
+                .background(color = ownerFactionColor, shape = RoundedCornerShape(6.dp))
                 .padding(horizontal = 8.dp, vertical = 3.dp)
             ) {
-              Text(text = owner, fontSize = 12.sp, color = RFColors.TextSecondary)
+              Text(text = owner, fontSize = 12.sp, color = RFColors.TextPrimary)
             }
             if (breathCasts.isNotEmpty() || rocketCasts.isNotEmpty()) {
               Spacer(modifier = Modifier.width(6.dp))
@@ -173,7 +203,7 @@ fun PetListItem(
               }
             }
           } else {
-            Text(text = petType, fontSize = 12.sp, color = RFColors.TextDisabled)
+            Text(text = primaryType, fontSize = 12.sp, color = RFColors.TextDisabled)
           }
         }
 
@@ -318,8 +348,9 @@ fun PetListItemPreview() {
     owner = "Reoky",
     damage = 11239081L,
     debuffs = sampleDebuffs,
-    petType = "green_dragon",
+    petTypes = setOf("green_dragon", "Typhoon Drake"),
     breathCasts = sampleBreathCasts,
+    ownerFactionColor = Color.Red.copy(alpha = 0.75f),
     modifier = Modifier.padding(8.dp),
     onClick = { /* preview click */ }
   )

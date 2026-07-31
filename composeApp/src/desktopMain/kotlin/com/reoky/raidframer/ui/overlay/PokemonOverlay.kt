@@ -8,11 +8,15 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.PetListItem
@@ -37,6 +41,10 @@ fun PokemonOverlay() {
 @Composable
 fun PokemonOverlay(wm: WindowManager? = null) {
   val activePets = PlayerCacheInteractor.activePets.collectAsState()
+  val config = RFConfig.state.collectAsState()
+  val ownFaction = remember(config.value.playerFaction) {
+    Faction.fromString(config.value.playerFaction)
+  }
 
   Column(
     modifier = Modifier
@@ -68,14 +76,24 @@ fun PokemonOverlay(wm: WindowManager? = null) {
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
         itemsIndexed(activePets.value, key = { _, card -> card.petId }) { index, card ->
+          // Look up owner's faction for badge coloring
+          val ownerCard = remember(card.owner) { PlayerCacheInteractor.getCard(card.owner) }
+          val ownerFaction = remember(ownerCard) {
+            ownerCard?.lastKnownFaction?.let { Faction.fromString(it) } ?: Faction.UNKNOWN
+          }
+          val ownerFactionColor = remember(ownFaction, ownerFaction) {
+            ownFaction.getFactionHighlightColor(ownerFaction)
+          }
+
           PetListItem(
             petName = card.name,
             owner = card.owner,
             damage = card.sessionDamageTotal,
             debuffs = card.recentDebuffAppliedEvents.map { it.debuff }.distinct(),
-            petType = card.petType,
+            petTypes = card.petTypes,
             breathCasts = card.sessionBreathCasts,
             rocketCasts = card.sessionRocketCasts,
+            ownerFactionColor = ownerFactionColor,
             modifier = Modifier.fillMaxWidth()
           )
         }
