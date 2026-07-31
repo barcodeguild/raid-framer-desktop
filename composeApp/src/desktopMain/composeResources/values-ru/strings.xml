@@ -982,16 +982,16 @@
     <string name="player_inventory_uses">%1$d uses</string>
     <string name="player_inventory_never">Never</string>
     <string name="time_ago_just_now">только что</string>
-    <string name="time_ago_minutes_one">%d минуту назад</string>
-    <string name="time_ago_minutes_other">%d минут назад</string>
-    <string name="time_ago_hours_one">%d час назад</string>
-    <string name="time_ago_hours_other">%d часов назад</string>
-    <string name="time_ago_days_one">%d день назад</string>
-    <string name="time_ago_days_other">%d дней назад</string>
-    <string name="time_ago_weeks_one">%d неделю назад</string>
-    <string name="time_ago_weeks_other">%d недель назад</string>
-    <string name="time_ago_months_one">%d месяц назад</string>
-    <string name="time_ago_months_other">%d месяцев назад</string>
+    <string name="time_ago_minutes_one">%1$d минуту назад</string>
+    <string name="time_ago_minutes_other">%1$d минут назад</string>
+    <string name="time_ago_hours_one">%1$d час назад</string>
+    <string name="time_ago_hours_other">%1$d часов назад</string>
+    <string name="time_ago_days_one">%1$d день назад</string>
+    <string name="time_ago_days_other">%1$d дней назад</string>
+    <string name="time_ago_weeks_one">%1$d неделю назад</string>
+    <string name="time_ago_weeks_other">%1$d недель назад</string>
+    <string name="time_ago_months_one">%1$d месяц назад</string>
+    <string name="time_ago_months_other">%1$d месяцев назад</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
 </resources>

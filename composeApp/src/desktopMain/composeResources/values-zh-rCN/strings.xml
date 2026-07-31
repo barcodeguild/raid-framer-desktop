@@ -982,16 +982,16 @@
     <string name="player_inventory_uses">%1$d uses</string>
     <string name="player_inventory_never">Never</string>
     <string name="time_ago_just_now">刚刚</string>
-    <string name="time_ago_minutes_one">%d 分钟前</string>
-    <string name="time_ago_minutes_other">%d 分钟前</string>
-    <string name="time_ago_hours_one">%d 小时前</string>
-    <string name="time_ago_hours_other">%d 小时前</string>
-    <string name="time_ago_days_one">%d 天前</string>
-    <string name="time_ago_days_other">%d 天前</string>
-    <string name="time_ago_weeks_one">%d 周前</string>
-    <string name="time_ago_weeks_other">%d 周前</string>
-    <string name="time_ago_months_one">%d 个月前</string>
-    <string name="time_ago_months_other">%d 个月前</string>
+    <string name="time_ago_minutes_one">%1$d 分钟前</string>
+    <string name="time_ago_minutes_other">%1$d 分钟前</string>
+    <string name="time_ago_hours_one">%1$d 小时前</string>
+    <string name="time_ago_hours_other">%1$d 小时前</string>
+    <string name="time_ago_days_one">%1$d 天前</string>
+    <string name="time_ago_days_other">%1$d 天前</string>
+    <string name="time_ago_weeks_one">%1$d 周前</string>
+    <string name="time_ago_weeks_other">%1$d 周前</string>
+    <string name="time_ago_months_one">%1$d 个月前</string>
+    <string name="time_ago_months_other">%1$d 个月前</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
 </resources>

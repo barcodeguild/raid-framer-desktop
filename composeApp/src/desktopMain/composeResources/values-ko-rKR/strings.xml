@@ -981,16 +981,16 @@
     <string name="player_inventory_uses">%1$d uses</string>
     <string name="player_inventory_never">Never</string>
     <string name="time_ago_just_now">방금</string>
-    <string name="time_ago_minutes_one">%d분 전</string>
-    <string name="time_ago_minutes_other">%d분 전</string>
-    <string name="time_ago_hours_one">%d시간 전</string>
-    <string name="time_ago_hours_other">%d시간 전</string>
-    <string name="time_ago_days_one">%d일 전</string>
-    <string name="time_ago_days_other">%d일 전</string>
-    <string name="time_ago_weeks_one">%d주 전</string>
-    <string name="time_ago_weeks_other">%d주 전</string>
-    <string name="time_ago_months_one">%d개월 전</string>
-    <string name="time_ago_months_other">%d개월 전</string>
+    <string name="time_ago_minutes_one">%1$d분 전</string>
+    <string name="time_ago_minutes_other">%1$d분 전</string>
+    <string name="time_ago_hours_one">%1$d시간 전</string>
+    <string name="time_ago_hours_other">%1$d시간 전</string>
+    <string name="time_ago_days_one">%1$d일 전</string>
+    <string name="time_ago_days_other">%1$d일 전</string>
+    <string name="time_ago_weeks_one">%1$d주 전</string>
+    <string name="time_ago_weeks_other">%1$d주 전</string>
+    <string name="time_ago_months_one">%1$d개월 전</string>
+    <string name="time_ago_months_other">%1$d개월 전</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
 </resources>

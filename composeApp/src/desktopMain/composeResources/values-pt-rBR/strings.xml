@@ -982,16 +982,16 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="player_inventory_uses">%1$d uses</string>
     <string name="player_inventory_never">Never</string>
     <string name="time_ago_just_now">agora mesmo</string>
-    <string name="time_ago_minutes_one">%d minuto atrás</string>
-    <string name="time_ago_minutes_other">%d minutos atrás</string>
-    <string name="time_ago_hours_one">%d hora atrás</string>
-    <string name="time_ago_hours_other">%d horas atrás</string>
-    <string name="time_ago_days_one">%d dia atrás</string>
-    <string name="time_ago_days_other">%d dias atrás</string>
-    <string name="time_ago_weeks_one">%d semana atrás</string>
-    <string name="time_ago_weeks_other">%d semanas atrás</string>
-    <string name="time_ago_months_one">%d mês atrás</string>
-    <string name="time_ago_months_other">%d meses atrás</string>
+    <string name="time_ago_minutes_one">%1$d minuto atrás</string>
+    <string name="time_ago_minutes_other">%1$d minutos atrás</string>
+    <string name="time_ago_hours_one">%1$d hora atrás</string>
+    <string name="time_ago_hours_other">%1$d horas atrás</string>
+    <string name="time_ago_days_one">%1$d dia atrás</string>
+    <string name="time_ago_days_other">%1$d dias atrás</string>
+    <string name="time_ago_weeks_one">%1$d semana atrás</string>
+    <string name="time_ago_weeks_other">%1$d semanas atrás</string>
+    <string name="time_ago_months_one">%1$d mês atrás</string>
+    <string name="time_ago_months_other">%1$d meses atrás</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
 </resources>
