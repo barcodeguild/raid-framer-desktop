@@ -163,6 +163,19 @@ fun Faction.getFactionHighlightColor(faction: Faction): Color {
   }
 }
 
+/**
+ * Returns black or white depending on which provides better contrast against the given background color.
+ * Uses the WCAG 2.0 relative luminance formula.
+ */
+fun Color.contrastTextColor(): Color {
+  val r = (red * 255).toInt()
+  val g = (green * 255).toInt()
+  val b = (blue * 255).toInt()
+  // Compute perceived luminance (ITU-R BT.601)
+  val luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0
+  return if (luminance > 0.5) Color.Black else Color.White
+}
+
 /*
  * Get the graph node color for a target faction from the viewer's faction perspective.
  * Uses RFColors constants for consistency across the battle graph.

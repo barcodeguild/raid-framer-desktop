@@ -123,10 +123,19 @@ fun skillTreeIconPainterFor(tree: SkillTreeType?): Painter {
 @Composable
 fun getPetIcon(petType: String): Painter {
   val resource = when (petType) {
-    "red_dragon" -> Res.drawable.red_dragon
-    "green_dragon" -> Res.drawable.green_dragon
-    "black_dragon" -> Res.drawable.black_dragon
+    "Red Dragon" -> Res.drawable.red_dragon
+    "붉은 용" -> Res.drawable.red_dragon
+    "Green Dragon" -> Res.drawable.green_dragon
+    "녹색 용" -> Res.drawable.green_dragon
+    "Black Dragon" -> Res.drawable.black_dragon
+    "검은 용" -> Res.drawable.black_dragon
+
+    "Siege Risopoda" -> Res.drawable.riso
+    "갑충 병기" -> Res.drawable.riso
     "riso" -> Res.drawable.riso
+
+    "Black Wolfhound" -> Res.drawable.black_wolfhound
+    "Conker's Cube" -> Res.drawable.conkers_cube
     "Ellam" -> Res.drawable.ellam
     "Violet Bloomfang" -> Res.drawable.violet_bloomfang
     "Black Bloomfang" -> Res.drawable.black_bloomfang

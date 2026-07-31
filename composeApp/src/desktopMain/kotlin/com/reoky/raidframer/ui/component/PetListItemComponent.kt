@@ -35,6 +35,7 @@ import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.core.helpers.getPetIcon
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.contrastTextColor
 import com.reoky.raidframer.core.model.RiderCastEvent
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -159,7 +160,7 @@ fun PetListItem(
                 .background(color = ownerFactionColor, shape = RoundedCornerShape(6.dp))
                 .padding(horizontal = 8.dp, vertical = 3.dp)
             ) {
-              Text(text = owner, fontSize = 12.sp, color = RFColors.TextPrimary)
+              Text(text = owner, fontSize = 12.sp, color = ownerFactionColor.contrastTextColor())
             }
             if (breathCasts.isNotEmpty() || rocketCasts.isNotEmpty()) {
               Spacer(modifier = Modifier.width(6.dp))
