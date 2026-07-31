@@ -58,6 +58,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import com.reoky.raidframer.core.helpers.RFGraphColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.timeAgo
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.PlayerCard
@@ -161,6 +162,7 @@ import raid_framer_desktop.composeapp.generated.resources.sky_emp_glider
 import raid_framer_desktop.composeapp.generated.resources.soul_neck
 import raid_framer_desktop.composeapp.generated.resources.twt_glider
 import raid_framer_desktop.composeapp.generated.resources.bd_glider
+import raid_framer_desktop.composeapp.generated.resources.player_inventory_time_ago
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -1152,5 +1154,18 @@ private fun InventoryItemCard(item: InventoryItem, modifier: Modifier = Modifier
       fontSize = 9.sp,
       textAlign = TextAlign.Center
     )
+
+    // Time ago
+    val timeAgoText = if (item.lastUsedDate != null && item.lastUsedDate.time > 0) {
+      item.lastUsedDate.time.timeAgo()
+    } else null
+    if (timeAgoText != null) {
+      Text(
+        text = stringResource(Res.string.player_inventory_time_ago, timeAgoText),
+        color = RFColors.TextDisabled,
+        fontSize = 8.sp,
+        textAlign = TextAlign.Center
+      )
+    }
   }
 }

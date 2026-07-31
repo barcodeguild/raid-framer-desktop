@@ -95,6 +95,32 @@ fun Long.toLocalTimeString(): String {
 }
 
 /**
+ * Returns a human-readable "time ago" string for a given epoch millisecond timestamp.
+ * e.g. "5 minutes ago", "2 hours ago", "3 days ago"
+ */
+fun Long.timeAgo(): String {
+  val now = System.currentTimeMillis()
+  val diff = now - this
+  if (diff < 0) return "just now"
+
+  val seconds = diff / 1000
+  val minutes = seconds / 60
+  val hours = minutes / 60
+  val days = hours / 24
+  val weeks = days / 7
+  val months = days / 30
+
+  return when {
+    seconds < 60 -> "just now"
+    minutes < 60 -> "$minutes minute${if (minutes == 1L) "" else "s"} ago"
+    hours < 24 -> "$hours hour${if (hours == 1L) "" else "s"} ago"
+    days < 7 -> "$days day${if (days == 1L) "" else "s"} ago"
+    weeks < 5 -> "$weeks week${if (weeks == 1L) "" else "s"} ago"
+    else -> "$months month${if (months == 1L) "" else "s"} ago"
+  }
+}
+
+/**
  * Makes a pretty-looking AnnotatedString for the attack event. I brought this code into a different file because
  * it's too and will get used multiple times potentially.
  */
