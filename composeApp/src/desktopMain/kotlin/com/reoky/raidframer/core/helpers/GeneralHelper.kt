@@ -95,13 +95,31 @@ fun Long.toLocalTimeString(): String {
 }
 
 /**
- * Returns a human-readable "time ago" string for a given epoch millisecond timestamp.
- * e.g. "5 minutes ago", "2 hours ago", "3 days ago"
+ * Represents a unit of time for the "time ago" display.
  */
-fun Long.timeAgo(): String {
+enum class TimeAgoUnit {
+  JUST_NOW,
+  MINUTE,
+  HOUR,
+  DAY,
+  WEEK,
+  MONTH
+}
+
+/**
+ * Structured result from [timeAgo] containing the numeric value and unit.
+ * The caller resolves the actual display string via string resources.
+ */
+data class TimeAgoResult(val value: Long, val unit: TimeAgoUnit)
+
+/**
+ * Returns a [TimeAgoResult] representing the relative time since the given epoch millisecond timestamp.
+ * The caller should resolve the display string using the appropriate string resources.
+ */
+fun Long.timeAgo(): TimeAgoResult {
   val now = System.currentTimeMillis()
   val diff = now - this
-  if (diff < 0) return "just now"
+  if (diff < 0) return TimeAgoResult(0, TimeAgoUnit.JUST_NOW)
 
   val seconds = diff / 1000
   val minutes = seconds / 60
@@ -111,12 +129,12 @@ fun Long.timeAgo(): String {
   val months = days / 30
 
   return when {
-    seconds < 60 -> "just now"
-    minutes < 60 -> "$minutes minute${if (minutes == 1L) "" else "s"} ago"
-    hours < 24 -> "$hours hour${if (hours == 1L) "" else "s"} ago"
-    days < 7 -> "$days day${if (days == 1L) "" else "s"} ago"
-    weeks < 5 -> "$weeks week${if (weeks == 1L) "" else "s"} ago"
-    else -> "$months month${if (months == 1L) "" else "s"} ago"
+    seconds < 60 -> TimeAgoResult(0, TimeAgoUnit.JUST_NOW)
+    minutes < 60 -> TimeAgoResult(minutes, TimeAgoUnit.MINUTE)
+    hours < 24 -> TimeAgoResult(hours, TimeAgoUnit.HOUR)
+    days < 7 -> TimeAgoResult(days, TimeAgoUnit.DAY)
+    weeks < 5 -> TimeAgoResult(weeks, TimeAgoUnit.WEEK)
+    else -> TimeAgoResult(months, TimeAgoUnit.MONTH)
   }
 }
 

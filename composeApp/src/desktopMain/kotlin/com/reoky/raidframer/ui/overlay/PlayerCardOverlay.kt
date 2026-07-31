@@ -59,6 +59,7 @@ import org.jetbrains.compose.resources.StringResource
 import com.reoky.raidframer.core.helpers.RFGraphColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.helpers.timeAgo
+import com.reoky.raidframer.core.helpers.TimeAgoUnit
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.PlayerCard
@@ -163,6 +164,17 @@ import raid_framer_desktop.composeapp.generated.resources.soul_neck
 import raid_framer_desktop.composeapp.generated.resources.twt_glider
 import raid_framer_desktop.composeapp.generated.resources.bd_glider
 import raid_framer_desktop.composeapp.generated.resources.player_inventory_time_ago
+import raid_framer_desktop.composeapp.generated.resources.time_ago_just_now
+import raid_framer_desktop.composeapp.generated.resources.time_ago_minutes_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_minutes_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_hours_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_hours_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_days_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_days_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_weeks_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_weeks_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_months_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_months_other
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -1156,10 +1168,33 @@ private fun InventoryItemCard(item: InventoryItem, modifier: Modifier = Modifier
     )
 
     // Time ago
-    val timeAgoText = if (item.lastUsedDate != null && item.lastUsedDate.time > 0) {
+    val timeAgoResult = if (item.lastUsedDate != null && item.lastUsedDate.time > 0) {
       item.lastUsedDate.time.timeAgo()
     } else null
-    if (timeAgoText != null) {
+    if (timeAgoResult != null) {
+      val timeAgoText = when (timeAgoResult.unit) {
+        TimeAgoUnit.JUST_NOW -> stringResource(Res.string.time_ago_just_now)
+        TimeAgoUnit.MINUTE -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_minutes_one else Res.string.time_ago_minutes_other
+          stringResource(res, timeAgoResult.value)
+        }
+        TimeAgoUnit.HOUR -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_hours_one else Res.string.time_ago_hours_other
+          stringResource(res, timeAgoResult.value)
+        }
+        TimeAgoUnit.DAY -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_days_one else Res.string.time_ago_days_other
+          stringResource(res, timeAgoResult.value)
+        }
+        TimeAgoUnit.WEEK -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_weeks_one else Res.string.time_ago_weeks_other
+          stringResource(res, timeAgoResult.value)
+        }
+        TimeAgoUnit.MONTH -> {
+          val res = if (timeAgoResult.value == 1L) Res.string.time_ago_months_one else Res.string.time_ago_months_other
+          stringResource(res, timeAgoResult.value)
+        }
+      }
       Text(
         text = stringResource(Res.string.player_inventory_time_ago, timeAgoText),
         color = RFColors.TextDisabled,

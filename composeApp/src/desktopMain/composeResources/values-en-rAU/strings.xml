@@ -979,6 +979,17 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="player_inventory_last_used">Last Used: %1$s</string>
     <string name="player_inventory_uses">%1$d uses</string>
     <string name="player_inventory_never">Never</string>
+    <string name="time_ago_just_now">just now</string>
+    <string name="time_ago_minutes_one">%d minute ago</string>
+    <string name="time_ago_minutes_other">%d minutes ago</string>
+    <string name="time_ago_hours_one">%d hour ago</string>
+    <string name="time_ago_hours_other">%d hours ago</string>
+    <string name="time_ago_days_one">%d day ago</string>
+    <string name="time_ago_days_other">%d days ago</string>
+    <string name="time_ago_weeks_one">%d week ago</string>
+    <string name="time_ago_weeks_other">%d weeks ago</string>
+    <string name="time_ago_months_one">%d month ago</string>
+    <string name="time_ago_months_other">%d months ago</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
 </resources>

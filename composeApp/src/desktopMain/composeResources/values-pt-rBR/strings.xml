@@ -981,6 +981,17 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="player_inventory_last_used">Last Used: %1$s</string>
     <string name="player_inventory_uses">%1$d uses</string>
     <string name="player_inventory_never">Never</string>
+    <string name="time_ago_just_now">agora mesmo</string>
+    <string name="time_ago_minutes_one">%d minuto atrás</string>
+    <string name="time_ago_minutes_other">%d minutos atrás</string>
+    <string name="time_ago_hours_one">%d hora atrás</string>
+    <string name="time_ago_hours_other">%d horas atrás</string>
+    <string name="time_ago_days_one">%d dia atrás</string>
+    <string name="time_ago_days_other">%d dias atrás</string>
+    <string name="time_ago_weeks_one">%d semana atrás</string>
+    <string name="time_ago_weeks_other">%d semanas atrás</string>
+    <string name="time_ago_months_one">%d mês atrás</string>
+    <string name="time_ago_months_other">%d meses atrás</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
 </resources>

@@ -981,6 +981,17 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="player_inventory_last_used">Last Used: %1$s</string>
     <string name="player_inventory_uses">%1$d uses</string>
     <string name="player_inventory_never">Never</string>
+    <string name="time_ago_just_now">gerade eben</string>
+    <string name="time_ago_minutes_one">vor %d Minute</string>
+    <string name="time_ago_minutes_other">vor %d Minuten</string>
+    <string name="time_ago_hours_one">vor %d Stunde</string>
+    <string name="time_ago_hours_other">vor %d Stunden</string>
+    <string name="time_ago_days_one">vor %d Tag</string>
+    <string name="time_ago_days_other">vor %d Tagen</string>
+    <string name="time_ago_weeks_one">vor %d Woche</string>
+    <string name="time_ago_weeks_other">vor %d Wochen</string>
+    <string name="time_ago_months_one">vor %d Monat</string>
+    <string name="time_ago_months_other">vor %d Monaten</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
 </resources>
