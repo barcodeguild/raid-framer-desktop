@@ -435,10 +435,10 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="item_name_halcy_neck">Halcy-Halskette</string>
     <string name="item_name_soul_neck">Seelenhalskette</string>
     <string name="item_name_mist_nodachi">Schattenschicksal Nodachi</string>
-    <string name="item_name_lib_bow">Bibliothek/Unsterblicher Wächter Bogen</string>
-    <string name="item_name_lib_dagger">Bibliothek/Unsterblicher Wächter Dolch</string>
-    <string name="item_name_lib_shortspear">Bibliothek/Unsterblicher Wächter Kurzspeer</string>
-    <string name="item_name_lib_staff">Bibliothek/Unsterblicher Wächter Stab</string>
+    <string name="item_name_lib_bow">Bibliothek Bogen</string>
+    <string name="item_name_lib_dagger">Bibliothek Dolch</string>
+    <string name="item_name_lib_shortspear">Bibliothek Kurzspeer</string>
+    <string name="item_name_lib_staff">Bibliothek Stab</string>
     <string name="item_name_snake_greatsword">Schlangen-Großschwert (Kante)</string>
     <string name="item_name_snake_shield">Schlangenschild ( Bollwerk)</string>
     <string name="item_name_snake_sword">Schlangenschwert (Rasiermesser)</string>
@@ -570,8 +570,9 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="raid_composition_meta_dancer">Meta Tänzer</string>
     <string name="raid_composition_meta_ranged">Meta Fernkampf</string>
     <string name="raid_composition_other">Andere</string>
-    <string name="raid_composition_other_examples">Weitere Beispiele: %s</string>
+    <string name="raid_composition_other_examples">Weitere Beispiele: %1$s</string>
     <string name="raid_composition_none">keine</string>
+    <string name="raid_composition_more_players">...und %d weitere</string>
     <string name="raid_no_raid_detected">Bitte treten Sie einem Raid bei, um Raid-Management-Funktionen zu nutzen. Sie müssen das Lua-Addon installiert haben. Fenster mit Titelleisten sind keine Overlays, erwägen Sie, sie auf einem anderen Monitor zu platzieren, um die Spiel-UI nicht zu verdecken.</string>
     <string name="raid_main_raid_label">Haupt-Raid</string>
     <string name="raid_coraid_label">Co-Raid</string>
@@ -998,7 +999,7 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="spec_type_zephyr">Zephyr</string>
 
     <!-- Glider Names -->
-    <string name="glider_name_twt">Furious Titan\'s Wings</string>
+    <string name="glider_name_twt">Furious Titan's Wings</string>
     <string name="glider_name_moonshadow">Moonshadow Glider</string>
     <string name="glider_name_crystal_wings">Crystal Wings</string>
     <string name="glider_name_bd_glider">Legendary Dragon Wings</string>

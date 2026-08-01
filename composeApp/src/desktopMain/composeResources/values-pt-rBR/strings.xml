@@ -570,8 +570,9 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="raid_composition_meta_dancer">Dançarino meta</string>
     <string name="raid_composition_meta_ranged">Ranged meta</string>
     <string name="raid_composition_other">Outro</string>
-    <string name="raid_composition_other_examples">Outros exemplos: %s</string>
+    <string name="raid_composition_other_examples">Outros exemplos: %1$s</string>
     <string name="raid_composition_none">nenhum</string>
+    <string name="raid_composition_more_players">...e mais %d</string>
     <string name="raid_no_raid_detected">Por favor, entre em uma raid para usar recursos de gerenciamento de raid. Você deve ter o Addon Lua instalado. Janelas com barras de título não são overlays, considere colocar em outro monitor para evitar cobrir a UI do jogo.</string>
     <string name="raid_main_raid_label">Raid Principal</string>
     <string name="raid_coraid_label">Co-Raid</string>
@@ -998,7 +999,7 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="spec_type_zephyr">Zephyr</string>
 
     <!-- Glider Names -->
-    <string name="glider_name_twt">Furious Titan\'s Wings</string>
+    <string name="glider_name_twt">Furious Titan's Wings</string>
     <string name="glider_name_moonshadow">Moonshadow Glider</string>
     <string name="glider_name_crystal_wings">Crystal Wings</string>
     <string name="glider_name_bd_glider">Legendary Dragon Wings</string>

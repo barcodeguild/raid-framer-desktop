@@ -56,6 +56,7 @@ import com.reoky.raidframer.ui.component.OverlaidGearScoreChart
 import com.reoky.raidframer.ui.component.RaidComponent
 import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.component.PlayerListTooltipComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -106,7 +107,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
   if (!raidWasDetected && (mainRaid.value.isNotEmpty() || coRaid.value.isNotEmpty())) {
     raidWasDetected = true
   }
-  Box(modifier = Modifier.fillMaxSize()) {
+  Box(modifier = Modifier.fillMaxSize().background(Color(0xCC121212))) {
     if (mainRaid.value.isEmpty() && coRaid.value.isEmpty() && !raidWasDetected) {
       Column(
         modifier = Modifier.fillMaxSize(),
@@ -322,7 +323,7 @@ private fun CompositionTab(
         if (maxWidth >= 1040.dp) {
          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(chartGap)) {
            charts.forEach { chart ->
-             CompositionChartComponent(chart, labels, Modifier.weight(1f))
+      CompositionChartComponent(chart, labels, Modifier.weight(1f))
            }
          }
        } else {
@@ -390,14 +391,21 @@ private fun ResponsiveFactionSections(
 private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
       val specs = players.mapNotNull { SpecType.fromName(it.currentBuild) }
       fun has(tree: SkillTreeType, spec: SpecType) = tree in spec.trees
+      fun matching(predicate: (SpecType) -> Boolean) = players.filter { SpecType.fromName(it.currentBuild)?.let(predicate) == true }
       fun row(label: String, yes: Int, total: Int) = CompositionBreakdown(label, yes)
       val battlerage = specs.filter { SkillTreeType.BATTLERAGE in it.trees }
       val dps = specs.filter { it.trees.any { tree -> tree in setOf(SkillTreeType.ARCHERY, SkillTreeType.BATTLERAGE, SkillTreeType.GUNSLINGER, SkillTreeType.MALEDICTION, SkillTreeType.SORCERY, SkillTreeType.SWIFTBLADE) } }
       val vitalism = specs.filter { SkillTreeType.VITALISM in it.trees }
       val dancer = specs.filter { SkillTreeType.SPELLDANCE in it.trees }
-       CompositionBreakdownListComponent(faction, players.size, listOf(
-       row(stringResource(Res.string.raid_composition_shadowplay_vitalism), specs.count { has(SkillTreeType.SHADOWPLAY, it) && has(SkillTreeType.VITALISM, it) }, players.size),
-       row(stringResource(Res.string.raid_composition_shadowplay_without_vitalism), specs.count { has(SkillTreeType.SHADOWPLAY, it) && !has(SkillTreeType.VITALISM, it) }, players.size),
+       val shadowplayVitalism = matching { has(SkillTreeType.SHADOWPLAY, it) && has(SkillTreeType.VITALISM, it) }
+       val shadowplayWithoutVitalism = matching { has(SkillTreeType.SHADOWPLAY, it) && !has(SkillTreeType.VITALISM, it) }
+       val rowPlayers = mutableMapOf(
+         stringResource(Res.string.raid_composition_shadowplay_vitalism) to shadowplayVitalism,
+         stringResource(Res.string.raid_composition_shadowplay_without_vitalism) to shadowplayWithoutVitalism
+       )
+       val breakdownItems = mutableListOf(
+        row(rowPlayers.keys.elementAt(0), shadowplayVitalism.size, players.size),
+        row(rowPlayers.keys.elementAt(1), shadowplayWithoutVitalism.size, players.size),
        row(stringResource(Res.string.raid_composition_battlerage_occultism_witchcraft), battlerage.count { has(SkillTreeType.OCCULTISM, it) || has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
        row(stringResource(Res.string.raid_composition_battlerage_without_either), battlerage.count { !has(SkillTreeType.OCCULTISM, it) && !has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
        row(stringResource(Res.string.raid_composition_battlerage_occultism), battlerage.count { has(SkillTreeType.OCCULTISM, it) }, battlerage.size),
@@ -412,7 +420,23 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
        row(stringResource(Res.string.raid_composition_dancer_seal_resolver), dancer.count { it == SpecType.SEAL_RESOLVER }, dancer.size),
        row(stringResource(Res.string.raid_composition_dancer_tough_dancer), dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
        row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in META_DANCER_SPECS }, dancer.size)
-      ))
+       )
+        androidx.compose.material.Surface(
+          color = RFColors.CardBackground.copy(alpha = 0.78f),
+          shape = RoundedCornerShape(8.dp),
+          border = androidx.compose.foundation.BorderStroke(1.dp, RFColors.CardBorder),
+          modifier = Modifier.fillMaxWidth().padding(12.dp)
+        ) {
+        CompositionBreakdownListComponent(
+         title = faction,
+         total = players.size,
+         items = breakdownItems,
+         itemPlayers = rowPlayers,
+         headingColor = factionHeadingColor(faction),
+         rowHoverColor = factionHeadingColor(faction),
+         sortByCount = false
+       )
+        }
 }
 
 @Composable
@@ -428,21 +452,42 @@ private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
   )
   val known = groups.flatMap { it.second }.toSet()
   val other = specs.filter { it.first !in known }
-  Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-     CompositionBreakdownListComponent(
-      title = faction,
-      total = players.size,
-      items = groups.map { (name, set) -> CompositionBreakdown(name, specs.count { it.first in set }) } +
-        CompositionBreakdown(stringResource(Res.string.raid_composition_other), other.size)
-    )
+   Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.fillMaxWidth()) {
+     androidx.compose.material.Surface(
+       color = RFColors.CardBackground.copy(alpha = 0.78f),
+       shape = RoundedCornerShape(8.dp),
+       border = androidx.compose.foundation.BorderStroke(1.dp, RFColors.CardBorder),
+       modifier = Modifier.fillMaxWidth().padding(12.dp)
+     ) {
+      CompositionBreakdownListComponent(
+       title = faction,
+       total = players.size,
+       items = groups.map { (name, set) -> CompositionBreakdown(name, specs.count { it.first in set }) } +
+         CompositionBreakdown(stringResource(Res.string.raid_composition_other), other.size),
+       headingColor = factionHeadingColor(faction),
+       rowHoverColor = factionHeadingColor(faction)
+     )
+     }
     Text(
-      text = stringResource(Res.string.raid_composition_other_examples, other.map { it.first.name.lowercase().replace('_', ' ') }.ifEmpty { listOf(stringResource(Res.string.raid_composition_none)) }.joinToString(", ")),
+       text = stringResource(Res.string.raid_composition_other_examples, other.map { it.first.name.lowercase().replace('_', ' ') }.ifEmpty { listOf(stringResource(Res.string.raid_composition_none)) }.joinToString(", ")),
       color = RFColors.TextTertiary,
       fontSize = 9.sp,
       lineHeight = 11.sp
     )
   }
 }
+
+private fun factionHeadingColor(faction: String): Color {
+  val target = when {
+    faction.contains("Haranya", ignoreCase = true) -> Faction.HARANYA
+    faction.contains("Nuia", ignoreCase = true) -> Faction.NUIA
+    faction.contains("Pirate", ignoreCase = true) -> Faction.PIRATE
+    else -> Faction.UNKNOWN
+  }
+  return Faction.fromString(RFConfig.state.value.playerFaction).getFactionHighlightColor(target)
+    .takeUnless { it == Color.Transparent } ?: RFColors.TextPrimary
+}
+
 @Composable
 private fun RaidHeaderStrip() {
   Column(

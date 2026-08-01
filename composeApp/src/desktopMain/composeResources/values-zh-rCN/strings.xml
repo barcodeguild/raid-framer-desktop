@@ -570,8 +570,9 @@
     <string name="raid_composition_meta_dancer">主流舞者</string>
     <string name="raid_composition_meta_ranged">主流远程</string>
     <string name="raid_composition_other">其他</string>
-    <string name="raid_composition_other_examples">其他示例：%s</string>
+    <string name="raid_composition_other_examples">其他示例：%1$s</string>
     <string name="raid_composition_none">无</string>
+    <string name="raid_composition_more_players">...以及另外%d人</string>
     <string name="raid_no_raid_detected">请加入团队以使用团队管理功能。您必须安装Lua插件。有标题栏的窗口不是覆盖层，考虑放在另一个显示器上以避免遮挡游戏UI。</string>
     <string name="raid_main_raid_label">主团队</string>
     <string name="raid_coraid_label">协同团队</string>
@@ -998,7 +999,7 @@
     <string name="spec_type_zephyr">Zephyr</string>
 
     <!-- Glider Names -->
-    <string name="glider_name_twt">Furious Titan\'s Wings</string>
+    <string name="glider_name_twt">Furious Titan's Wings</string>
     <string name="glider_name_moonshadow">Moonshadow Glider</string>
     <string name="glider_name_crystal_wings">Crystal Wings</string>
     <string name="glider_name_bd_glider">Legendary Dragon Wings</string>

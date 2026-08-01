@@ -16,10 +16,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.hoverable
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -31,9 +35,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import com.reoky.raidframer.core.definitions.SKILL_TREE_DISPLAY_ORDER
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.model.PlayerCard
 import kotlin.math.cos
 import kotlin.math.sin
 import org.jetbrains.compose.resources.painterResource
@@ -57,16 +64,46 @@ fun CompositionBreakdownListComponent(
   title: String,
   total: Int,
   items: List<CompositionBreakdown>,
+  itemPlayers: Map<String, List<PlayerCard>> = emptyMap(),
+  headingColor: Color = RFColors.TextPrimary,
+  rowHoverColor: Color = RFColors.CardBorderAccent,
+  sortByCount: Boolean = true,
   modifier: Modifier = Modifier
 ) {
-  Column(modifier, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-    Text(title, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-    items.sortedByDescending { it.count }.forEach { item ->
-      Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(item.label, color = RFColors.TextSecondary, fontSize = 11.sp, maxLines = 2, modifier = Modifier.weight(1f))
+  Column(modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+    Text(
+      title,
+      color = headingColor,
+      fontWeight = FontWeight.Bold,
+      fontSize = 13.sp,
+      modifier = Modifier.fillMaxWidth(),
+      textAlign = androidx.compose.ui.text.style.TextAlign.Center
+    )
+    androidx.compose.material.Divider(
+      color = RFColors.CardBorder.copy(alpha = 0.55f),
+      thickness = 1.dp,
+      modifier = Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 4.dp)
+    )
+    (if (sortByCount) items.sortedByDescending { it.count } else items).forEach { item ->
+      val rowInteraction = remember { MutableInteractionSource() }
+      val rowHovered by rowInteraction.collectIsHoveredAsState()
+      PlayerListTooltipComponent(itemPlayers[item.label].orEmpty(), Modifier.fillMaxWidth(), rowHoverColor) { rowModifier ->
+        Row(
+          rowModifier
+            .fillMaxWidth()
+            .background(
+              if (rowHovered) rowHoverColor.copy(alpha = 0.16f) else Color.Transparent,
+              RoundedCornerShape(4.dp)
+            )
+            .hoverable(rowInteraction)
+            .padding(horizontal = 4.dp, vertical = 2.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(item.label, color = RFColors.TextSecondary, fontSize = 11.sp, maxLines = 2, modifier = Modifier.weight(1f))
         Spacer(Modifier.size(8.dp))
         Text("${item.count}", color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 11.sp)
         Text("  ${percentage(item.count, total)}", color = RFColors.TextTertiary, fontSize = 11.sp)
+        }
       }
     }
   }
@@ -190,7 +227,11 @@ fun CompositionChartComponent(
 @Composable
 private fun CompositionTreeBreakdownComponent(composition: FactionComposition, treeLabels: Map<SkillTreeType, String>) {
   Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-     Text(stringResource(Res.string.raid_composition_skill_trees), color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+      androidx.compose.material.Divider(
+        color = RFColors.CardBorder.copy(alpha = 0.55f),
+        thickness = 1.dp,
+        modifier = Modifier.fillMaxWidth(0.72f).align(Alignment.CenterHorizontally).padding(bottom = 6.dp)
+      )
      FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(3.dp), maxItemsInEachRow = 2) {
        SKILL_TREE_DISPLAY_ORDER.forEach { tree ->
          Row(Modifier.fillMaxWidth(0.48f).padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {

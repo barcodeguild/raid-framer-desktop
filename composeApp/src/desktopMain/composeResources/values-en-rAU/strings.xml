@@ -433,10 +433,10 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="item_name_halcy_neck">Halcy Necklace</string>
     <string name="item_name_soul_neck">Soul Necklace</string>
     <string name="item_name_mist_nodachi">Doomshadow Nodachi</string>
-    <string name="item_name_lib_bow">Library/Immortal Warden's Bow</string>
-    <string name="item_name_lib_dagger">Library/Immortal Warden's Dagger</string>
-    <string name="item_name_lib_shortspear">Library/Immortal Warden's Shortspear</string>
-    <string name="item_name_lib_staff">Library/Immortal Warden's Staff</string>
+    <string name="item_name_lib_bow">Library Bow</string>
+    <string name="item_name_lib_dagger">Library Dagger</string>
+    <string name="item_name_lib_shortspear">LibraryShortspear</string>
+    <string name="item_name_lib_staff">Library Staff</string>
     <string name="item_name_snake_greatsword">Snake Greatsword (Edge)</string>
     <string name="item_name_snake_shield">Snake Shield (Bulwark)</string>
     <string name="item_name_snake_sword">Snake Sword (Razor)</string>
@@ -568,8 +568,9 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_composition_meta_dancer">Meta dancer</string>
     <string name="raid_composition_meta_ranged">Meta ranged</string>
     <string name="raid_composition_other">Other</string>
-    <string name="raid_composition_other_examples">Other examples: %s</string>
+    <string name="raid_composition_other_examples">Other examples: %1$s</string>
     <string name="raid_composition_none">none</string>
+    <string name="raid_composition_more_players">...and %d more</string>
     <string name="raid_no_raid_detected">Please join a raid to use raid management features. You must have the Lua Addon installed. Windows with title bars are not overlays, consider placing on another monitor to avoid covering the game UI.</string>
     <string name="raid_main_raid_label">Main Raid</string>
     <string name="raid_coraid_label">Co-Raid</string>
@@ -996,7 +997,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="spec_type_zephyr">Zephyr</string>
 
     <!-- Glider Names -->
-    <string name="glider_name_twt">Furious Titan\'s Wings</string>
+    <string name="glider_name_twt">Furious Titan's Wings</string>
     <string name="glider_name_moonshadow">Moonshadow Glider</string>
     <string name="glider_name_crystal_wings">Crystal Wings</string>
     <string name="glider_name_bd_glider">Legendary Dragon Wings</string>
