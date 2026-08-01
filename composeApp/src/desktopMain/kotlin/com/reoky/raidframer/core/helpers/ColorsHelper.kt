@@ -51,6 +51,22 @@ object RFColors {
   val factionNuia = Color(0xFFEC407A)
   val factionPirate = Color(0xFF7E57C2)
 
+  // Composition skill-tree accents
+  val treeArchery = Color(0xFFE6A23C)
+  val treeAuramancy = Color(0xFF57D6C2)
+  val treeBattlerage = Color(0xFFE85D5D)
+  val treeDefense = Color(0xFF8C9AA8)
+  val treeGunslinger = Color(0xFFB58CFF)
+  val treeMalediction = Color(0xFF8B5CF6)
+  val treeOccultism = Color(0xFF6F7BF7)
+  val treeShadowplay = Color(0xFF4B8DFF)
+  val treeSongcraft = Color(0xFFFFD166)
+  val treeSorcery = Color(0xFFFF8A65)
+  val treeSpelldance = Color(0xFFFF77B7)
+  val treeSwiftblade = Color(0xFF7DD3FC)
+  val treeVitalism = Color(0xFF65D68A)
+  val treeWitchcraft = Color(0xFFC084FC)
+
   // Graph node faction colors (perspective-based)
   val graphNodeAllied = Color(0xFF36F1CC)
   val graphNodeEnemy = Color.Red.copy(alpha = 0.75f)

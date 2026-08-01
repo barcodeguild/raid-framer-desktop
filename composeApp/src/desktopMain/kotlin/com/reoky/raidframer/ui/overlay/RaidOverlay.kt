@@ -40,6 +40,7 @@ import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
 import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
@@ -202,8 +203,8 @@ fun RaidOverlay(wm: WindowManager? = null) {
               mainRaid = mainRaid.value,
               coRaid = coRaid.value,
               nearbyNuia = nearbyNuia.value,
-              nearbyHaranya = nearbyHaranya.value,
-              nearbyPirate = nearbyPirate.value,
+             nearbyHaranya = nearbyHaranya.value,
+             nearbyPirate = nearbyPirate.value,
               playerFaction = playerFaction,
               raidDepartures = raidDepartures.value,
               requirePvPParticipation = requirePvPParticipation,
@@ -227,6 +228,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
+              playerFaction = playerFaction,
               requirePvPParticipation = requirePvPParticipation,
               onRequirePvPParticipationChange = { requirePvPParticipation = it }
             )
@@ -242,22 +244,37 @@ private fun CompositionTab(
   nearbyNuia: List<PlayerCard>,
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
+  playerFaction: Faction = Faction.UNKNOWN,
   requirePvPParticipation: Boolean,
   onRequirePvPParticipationChange: (Boolean) -> Unit
 ) {
-  val filter: (PlayerCard) -> Boolean = { !requirePvPParticipation || it.hasPvPParticipation() }
+  var requireGearOver15k by rememberSaveable { mutableStateOf(false) }
+  val filter: (PlayerCard) -> Boolean = { card ->
+    (!requirePvPParticipation || card.hasPvPParticipation()) &&
+      (!requireGearOver15k || card.lastKnownGearScore > 15000)
+  }
+  val haranyaLabel = stringResource(Res.string.raid_haranya_faction).substringBefore(" (%d)")
+  val nuiaLabel = stringResource(Res.string.raid_nuian_faction).substringBefore(" (%d)")
+  val pirateLabel = stringResource(Res.string.raid_pirate_faction).substringBefore(" (%d)")
   fun chart(label: String, players: List<PlayerCard>, color: Color): FactionComposition {
     val filtered = players.filter(filter)
     val counts = mutableMapOf<SkillTreeType, Int>()
     filtered.forEach { card ->
       SpecType.fromName(card.currentBuild)?.trees?.forEach { tree -> counts[tree] = (counts[tree] ?: 0) + 1 }
     }
-    return FactionComposition(label, filtered.size, counts, color)
+    val chartFaction = when (label) {
+      haranyaLabel -> Faction.HARANYA
+      nuiaLabel -> Faction.NUIA
+      pirateLabel -> Faction.PIRATE
+      else -> Faction.UNKNOWN
+    }
+    val chartColor = playerFaction.getFactionHighlightColor(chartFaction).takeUnless { it == Color.Transparent } ?: color
+    return FactionComposition(label, filtered.size, counts, chartColor)
   }
   val charts = listOf(
-    chart(stringResource(Res.string.raid_haranya_faction).substringBefore(" (%d)"), nearbyHaranya, RFColors.factionHaranya),
-    chart(stringResource(Res.string.raid_nuian_faction).substringBefore(" (%d)"), nearbyNuia, RFColors.factionNuia),
-    chart(stringResource(Res.string.raid_pirate_faction).substringBefore(" (%d)"), nearbyPirate, RFColors.factionPirate)
+    chart(haranyaLabel, nearbyHaranya, RFColors.factionHaranya),
+    chart(nuiaLabel, nearbyNuia, RFColors.factionNuia),
+    chart(pirateLabel, nearbyPirate, RFColors.factionPirate)
   )
   val factionPlayers = listOf(
     charts[0].factionLabel to nearbyHaranya.filter(filter),
@@ -299,12 +316,20 @@ private fun CompositionTab(
          }
        }
      }
-    CheckBoxComponent(
-      label = stringResource(Res.string.raid_composition_require_pvp),
-      initialChecked = requirePvPParticipation,
-      onCheckedChange = onRequirePvPParticipationChange,
-       textColor = RFColors.TextPrimary
-     )
+     Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+       CheckBoxComponent(
+         label = stringResource(Res.string.raid_composition_require_pvp),
+         initialChecked = requirePvPParticipation,
+         onCheckedChange = onRequirePvPParticipationChange,
+         textColor = RFColors.TextPrimary
+       )
+       CheckBoxComponent(
+         label = "Gear over 15k",
+         initialChecked = requireGearOver15k,
+         onCheckedChange = { requireGearOver15k = it },
+         textColor = RFColors.TextPrimary
+       )
+     }
      ResponsiveFactionSections(factionPlayers, "Composition statistics") { faction, players ->
        FactionStatistics(faction, players)
      }
@@ -380,7 +405,20 @@ private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
   )
   val known = groups.flatMap { it.second }.toSet()
   val other = specs.filter { it.first !in known }
-  CompositionBreakdownList(faction, players.size, groups.map { (name, set) -> CompositionBreakdown(name, specs.count { it.first in set }) } + CompositionBreakdown("Other (${other.joinToString { it.first.name.lowercase().replace('_', ' ') }.ifBlank { "none" }})", other.size))
+  Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+    CompositionBreakdownList(
+      title = faction,
+      total = players.size,
+      items = groups.map { (name, set) -> CompositionBreakdown(name, specs.count { it.first in set }) } +
+        CompositionBreakdown("Other", other.size)
+    )
+    Text(
+      text = "Other examples: ${other.map { it.first.name.lowercase().replace('_', ' ') }.ifEmpty { listOf("none") }.joinToString(", ")}",
+      color = RFColors.TextTertiary,
+      fontSize = 9.sp,
+      lineHeight = 11.sp
+    )
+  }
 }
 @Composable
 private fun RaidHeaderStrip() {
