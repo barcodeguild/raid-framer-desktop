@@ -118,8 +118,7 @@ fun OverlaidGearScoreChart(
           Offset(x(count), y(minGear + boundary * binSize))
         }
         val area = Path().apply {
-          moveTo(points.first().x, points.first().y)
-          points.drop(1).forEach { point -> lineTo(point.x, point.y) }
+          addSmoothedLine(points, left, size.width - right, top, size.height - bottom)
           lineTo(left, points.last().y)
           lineTo(left, points.first().y)
           close()
@@ -128,8 +127,7 @@ fun OverlaidGearScoreChart(
           drawPath(area, faction.color.copy(alpha = 0.10f))
         }
         val line = Path().apply {
-          moveTo(points.first().x, points.first().y)
-          points.drop(1).forEach { point -> lineTo(point.x, point.y) }
+          addSmoothedLine(points, left, size.width - right, top, size.height - bottom)
         }
         drawPath(line, faction.color.copy(alpha = 0.85f), style = Stroke(width = 1.5.dp.toPx()))
       }
@@ -149,6 +147,35 @@ fun OverlaidGearScoreChart(
       }
     }.rotate(-90f))
     Text(playerCountLabel, color = RFColors.TextTertiary, fontSize = 10.sp, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp))
+  }
+}
+
+private fun Path.addSmoothedLine(
+  points: List<Offset>,
+  minX: Float,
+  maxX: Float,
+  minY: Float,
+  maxY: Float
+) {
+  if (points.isEmpty()) return
+  moveTo(points.first().x, points.first().y)
+  if (points.size == 1) return
+
+  for (index in 0 until points.lastIndex) {
+    val previous = points[(index - 1).coerceAtLeast(0)]
+    val start = points[index]
+    val end = points[index + 1]
+    val next = points[(index + 2).coerceAtMost(points.lastIndex)]
+    val tangentStart = (end - previous) / 6f
+    val tangentEnd = (next - start) / 6f
+    cubicTo(
+      (start.x + tangentStart.x).coerceIn(minX, maxX),
+      (start.y + tangentStart.y).coerceIn(minY, maxY),
+      (end.x - tangentEnd.x).coerceIn(minX, maxX),
+      (end.y - tangentEnd.y).coerceIn(minY, maxY),
+      end.x,
+      end.y
+    )
   }
 }
 
