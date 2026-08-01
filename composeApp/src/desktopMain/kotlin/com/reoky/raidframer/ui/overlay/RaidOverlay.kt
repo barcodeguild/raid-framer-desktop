@@ -48,7 +48,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CheckBoxComponent
 import com.reoky.raidframer.ui.component.CompositionChartComponent
 import com.reoky.raidframer.ui.component.CompositionBreakdown
-import com.reoky.raidframer.ui.component.CompositionBreakdownList
+import com.reoky.raidframer.ui.component.CompositionBreakdownListComponent
 import com.reoky.raidframer.ui.component.FactionComposition
 import com.reoky.raidframer.ui.component.GearScoreHistogram
 import com.reoky.raidframer.ui.component.GearFactionSeries
@@ -319,7 +319,7 @@ private fun CompositionTab(
   Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
      BoxWithConstraints(Modifier.fillMaxWidth()) {
        val chartGap = 10.dp
-       if (maxWidth >= 1120.dp) {
+        if (maxWidth >= 1040.dp) {
          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(chartGap)) {
            charts.forEach { chart ->
              CompositionChartComponent(chart, labels, Modifier.weight(1f))
@@ -341,22 +341,22 @@ private fun CompositionTab(
          textColor = RFColors.TextPrimary
        )
         CheckBoxComponent(
-          label = "Gear over 15k",
+          label = stringResource(Res.string.raid_composition_gear_over_15k),
          initialChecked = requireGearOver15k,
          onCheckedChange = { requireGearOver15k = it },
           textColor = RFColors.TextPrimary
         )
         CheckBoxComponent(
-          label = "Include Players that Left Raid",
+           label = stringResource(Res.string.raid_include_departed),
           initialChecked = includePlayersThatLeftRaid,
           onCheckedChange = { includePlayersThatLeftRaid = it },
           textColor = RFColors.TextPrimary
         )
      }
-     ResponsiveFactionSections(factionPlayers, "Composition statistics") { faction, players ->
+      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_statistics)) { faction, players ->
        FactionStatistics(faction, players)
      }
-     ResponsiveFactionSections(factionPlayers, "Meta spec breakdown") { faction, players ->
+      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_meta_spec_breakdown)) { faction, players ->
        MetaSpecBreakdown(faction, players)
      }
    }
@@ -371,7 +371,7 @@ private fun ResponsiveFactionSections(
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Text(title, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-      if (maxWidth >= 1120.dp) {
+        if (maxWidth >= 1040.dp) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
           factions.forEach { (faction, players) ->
             Column(Modifier.weight(1f)) { content(faction, players) }
@@ -395,23 +395,23 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
       val dps = specs.filter { it.trees.any { tree -> tree in setOf(SkillTreeType.ARCHERY, SkillTreeType.BATTLERAGE, SkillTreeType.GUNSLINGER, SkillTreeType.MALEDICTION, SkillTreeType.SORCERY, SkillTreeType.SWIFTBLADE) } }
       val vitalism = specs.filter { SkillTreeType.VITALISM in it.trees }
       val dancer = specs.filter { SkillTreeType.SPELLDANCE in it.trees }
-      CompositionBreakdownList(faction, players.size, listOf(
-        row("Shadowplay + Vitalism", specs.count { has(SkillTreeType.SHADOWPLAY, it) && has(SkillTreeType.VITALISM, it) }, players.size),
-        row("Shadowplay without Vitalism", specs.count { has(SkillTreeType.SHADOWPLAY, it) && !has(SkillTreeType.VITALISM, it) }, players.size),
-        row("Battlerage + Occultism or Witchcraft", battlerage.count { has(SkillTreeType.OCCULTISM, it) || has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
-        row("Battlerage without either", battlerage.count { !has(SkillTreeType.OCCULTISM, it) && !has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
-        row("Battlerage + Occultism", battlerage.count { has(SkillTreeType.OCCULTISM, it) }, battlerage.size),
-        row("Battlerage + Witchcraft", battlerage.count { has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
-        row("DPS + Auramancy", dps.count { has(SkillTreeType.AURAMANCY, it) }, dps.size),
-        row("DPS without Auramancy", dps.count { !has(SkillTreeType.AURAMANCY, it) }, dps.size),
-        row("Vitalism: Confessor", vitalism.count { it == SpecType.CONFESSOR }, vitalism.size),
-        row("Vitalism: Assassin", vitalism.count { it == SpecType.ASSASSIN }, vitalism.size),
-        row("Vitalism: Soothsayer", vitalism.count { it == SpecType.SOOTHSAYER }, vitalism.size),
-        row("Vitalism: other", vitalism.count { it != SpecType.CONFESSOR && it != SpecType.ASSASSIN }, vitalism.size),
-        row("Dancer: Comedian", dancer.count { it == SpecType.COMEDIAN }, dancer.size),
-        row("Dancer: Seal Resolver", dancer.count { it == SpecType.SEAL_RESOLVER }, dancer.size),
-        row("Dancer: Tough Dancer", dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
-        row("Dancer: other", dancer.count { it !in META_DANCER_SPECS }, dancer.size)
+       CompositionBreakdownListComponent(faction, players.size, listOf(
+       row(stringResource(Res.string.raid_composition_shadowplay_vitalism), specs.count { has(SkillTreeType.SHADOWPLAY, it) && has(SkillTreeType.VITALISM, it) }, players.size),
+       row(stringResource(Res.string.raid_composition_shadowplay_without_vitalism), specs.count { has(SkillTreeType.SHADOWPLAY, it) && !has(SkillTreeType.VITALISM, it) }, players.size),
+       row(stringResource(Res.string.raid_composition_battlerage_occultism_witchcraft), battlerage.count { has(SkillTreeType.OCCULTISM, it) || has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
+       row(stringResource(Res.string.raid_composition_battlerage_without_either), battlerage.count { !has(SkillTreeType.OCCULTISM, it) && !has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
+       row(stringResource(Res.string.raid_composition_battlerage_occultism), battlerage.count { has(SkillTreeType.OCCULTISM, it) }, battlerage.size),
+       row(stringResource(Res.string.raid_composition_battlerage_witchcraft), battlerage.count { has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
+       row(stringResource(Res.string.raid_composition_dps_auramancy), dps.count { has(SkillTreeType.AURAMANCY, it) }, dps.size),
+       row(stringResource(Res.string.raid_composition_dps_without_auramancy), dps.count { !has(SkillTreeType.AURAMANCY, it) }, dps.size),
+       row(stringResource(Res.string.raid_composition_vitalism_confessor), vitalism.count { it == SpecType.CONFESSOR }, vitalism.size),
+       row(stringResource(Res.string.raid_composition_vitalism_assassin), vitalism.count { it == SpecType.ASSASSIN }, vitalism.size),
+       row(stringResource(Res.string.raid_composition_vitalism_soothsayer), vitalism.count { it == SpecType.SOOTHSAYER }, vitalism.size),
+       row(stringResource(Res.string.raid_composition_vitalism_other), vitalism.count { it != SpecType.CONFESSOR && it != SpecType.ASSASSIN }, vitalism.size),
+       row(stringResource(Res.string.raid_composition_dancer_comedian), dancer.count { it == SpecType.COMEDIAN }, dancer.size),
+       row(stringResource(Res.string.raid_composition_dancer_seal_resolver), dancer.count { it == SpecType.SEAL_RESOLVER }, dancer.size),
+       row(stringResource(Res.string.raid_composition_dancer_tough_dancer), dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
+       row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in META_DANCER_SPECS }, dancer.size)
       ))
 }
 
@@ -419,24 +419,24 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
 private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
   val specs = players.mapNotNull { card -> SpecType.fromName(card.currentBuild)?.let { it to card } }
   val groups = listOf(
-    "Meta CC" to META_CC_SPECS,
-    "Meta melee" to META_MELEE_SPECS,
-    "Meta healer" to META_HEALER_SPECS,
-    "Meta mage" to META_MAGE_SPECS,
-    "Meta dancer" to META_DANCER_SPECS,
-    "Meta ranged" to META_RANGED_SPEC
+    stringResource(Res.string.raid_composition_meta_cc) to META_CC_SPECS,
+    stringResource(Res.string.raid_composition_meta_melee) to META_MELEE_SPECS,
+    stringResource(Res.string.raid_composition_meta_healer) to META_HEALER_SPECS,
+    stringResource(Res.string.raid_composition_meta_mage) to META_MAGE_SPECS,
+    stringResource(Res.string.raid_composition_meta_dancer) to META_DANCER_SPECS,
+    stringResource(Res.string.raid_composition_meta_ranged) to META_RANGED_SPEC
   )
   val known = groups.flatMap { it.second }.toSet()
   val other = specs.filter { it.first !in known }
   Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-    CompositionBreakdownList(
+     CompositionBreakdownListComponent(
       title = faction,
       total = players.size,
       items = groups.map { (name, set) -> CompositionBreakdown(name, specs.count { it.first in set }) } +
-        CompositionBreakdown("Other", other.size)
+        CompositionBreakdown(stringResource(Res.string.raid_composition_other), other.size)
     )
     Text(
-      text = "Other examples: ${other.map { it.first.name.lowercase().replace('_', ' ') }.ifEmpty { listOf("none") }.joinToString(", ")}",
+      text = stringResource(Res.string.raid_composition_other_examples, other.map { it.first.name.lowercase().replace('_', ' ') }.ifEmpty { listOf(stringResource(Res.string.raid_composition_none)) }.joinToString(", ")),
       color = RFColors.TextTertiary,
       fontSize = 9.sp,
       lineHeight = 11.sp
@@ -970,7 +970,7 @@ private fun NearbyGearTab(
       textColor = Color.White
     )
     CheckBoxComponent(
-      label = "Include Players that Left Raid",
+      label = stringResource(Res.string.raid_include_departed),
       initialChecked = includePlayersThatLeftRaid,
       onCheckedChange = { includePlayersThatLeftRaid = it },
       textColor = Color.White
