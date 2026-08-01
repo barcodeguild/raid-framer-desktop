@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -43,6 +44,30 @@ data class FactionComposition(
   val treeCounts: Map<SkillTreeType, Int>,
   val color: Color
 )
+
+data class CompositionBreakdown(val label: String, val count: Int)
+
+fun percentage(count: Int, total: Int): String = if (total == 0) "0%" else "${count * 100 / total}%"
+
+@Composable
+fun CompositionBreakdownList(
+  title: String,
+  total: Int,
+  items: List<CompositionBreakdown>,
+  modifier: Modifier = Modifier
+) {
+  Column(modifier, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+    Text(title, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    items.sortedByDescending { it.count }.forEach { item ->
+      Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(item.label, color = RFColors.TextSecondary, fontSize = 11.sp, maxLines = 2, modifier = Modifier.weight(1f))
+        Spacer(Modifier.size(8.dp))
+        Text("${item.count}", color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+        Text("  ${percentage(item.count, total)}", color = RFColors.TextTertiary, fontSize = 11.sp)
+      }
+    }
+  }
+}
 
 @Composable
 fun CompositionChartComponent(
@@ -121,18 +146,11 @@ fun CompositionChartComponent(
         }
       }
     }
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-      SKILL_TREE_DISPLAY_ORDER.chunked(7).forEach { row ->
-        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-          row.forEach { tree ->
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-              Image(painterResource(tree.iconResource()), treeLabels[tree], modifier = Modifier.size(13.dp))
-              Text(treeLabels[tree] ?: tree.name, color = RFColors.TextTertiary, fontSize = 8.sp)
-            }
-          }
-        }
-      }
-    }
+     CompositionBreakdownList(
+       title = "Skill trees",
+       total = composition.playerCount,
+       items = SKILL_TREE_DISPLAY_ORDER.map { tree -> CompositionBreakdown(treeLabels[tree] ?: tree.name, composition.treeCounts[tree] ?: 0) }
+     )
   }
 }
 

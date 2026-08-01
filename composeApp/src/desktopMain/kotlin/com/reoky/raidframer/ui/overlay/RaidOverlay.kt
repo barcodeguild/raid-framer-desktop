@@ -32,6 +32,12 @@ import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.hasPvPParticipation
 import com.reoky.raidframer.core.definitions.SKILL_TREE_DISPLAY_ORDER
 import com.reoky.raidframer.core.definitions.SkillTreeType
+import com.reoky.raidframer.core.definitions.META_CC_SPECS
+import com.reoky.raidframer.core.definitions.META_DANCER_SPECS
+import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
+import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
+import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
+import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
@@ -40,6 +46,8 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CheckBoxComponent
 import com.reoky.raidframer.ui.component.CompositionChartComponent
+import com.reoky.raidframer.ui.component.CompositionBreakdown
+import com.reoky.raidframer.ui.component.CompositionBreakdownList
 import com.reoky.raidframer.ui.component.FactionComposition
 import com.reoky.raidframer.ui.component.GearScoreHistogram
 import com.reoky.raidframer.ui.component.RaidComponent
@@ -251,6 +259,11 @@ private fun CompositionTab(
     chart(stringResource(Res.string.raid_nuian_faction).substringBefore(" (%d)"), nearbyNuia, RFColors.factionNuia),
     chart(stringResource(Res.string.raid_pirate_faction).substringBefore(" (%d)"), nearbyPirate, RFColors.factionPirate)
   )
+  val factionPlayers = listOf(
+    charts[0].factionLabel to nearbyHaranya.filter(filter),
+    charts[1].factionLabel to nearbyNuia.filter(filter),
+    charts[2].factionLabel to nearbyPirate.filter(filter)
+  )
   val labels = SKILL_TREE_DISPLAY_ORDER.associateWith { tree ->
     stringResource(when (tree) {
       SkillTreeType.ARCHERY -> Res.string.skill_tree_archery
@@ -270,16 +283,104 @@ private fun CompositionTab(
     })
   }
   Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-      charts.forEach { chart -> CompositionChartComponent(chart, labels, Modifier.weight(1f)) }
-    }
+     BoxWithConstraints(Modifier.fillMaxWidth()) {
+       val chartGap = 10.dp
+       if (maxWidth >= 1120.dp) {
+         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(chartGap)) {
+           charts.forEach { chart ->
+             CompositionChartComponent(chart, labels, Modifier.weight(1f))
+           }
+         }
+       } else {
+         Column(verticalArrangement = Arrangement.spacedBy(chartGap)) {
+           charts.forEach { chart ->
+             CompositionChartComponent(chart, labels, Modifier.fillMaxWidth())
+           }
+         }
+       }
+     }
     CheckBoxComponent(
       label = stringResource(Res.string.raid_composition_require_pvp),
       initialChecked = requirePvPParticipation,
       onCheckedChange = onRequirePvPParticipationChange,
-      textColor = RFColors.TextPrimary
-    )
+       textColor = RFColors.TextPrimary
+     )
+     ResponsiveFactionSections(factionPlayers, "Composition statistics") { faction, players ->
+       FactionStatistics(faction, players)
+     }
+     ResponsiveFactionSections(factionPlayers, "Meta spec breakdown") { faction, players ->
+       MetaSpecBreakdown(faction, players)
+     }
+   }
+}
+
+@Composable
+private fun ResponsiveFactionSections(
+  factions: List<Pair<String, List<PlayerCard>>>,
+  title: String,
+  content: @Composable (String, List<PlayerCard>) -> Unit
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Text(title, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+      if (maxWidth >= 1120.dp) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+          factions.forEach { (faction, players) ->
+            Column(Modifier.weight(1f)) { content(faction, players) }
+          }
+        }
+      } else {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+          factions.forEach { (faction, players) -> content(faction, players) }
+        }
+      }
+    }
   }
+}
+
+@Composable
+private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
+      val specs = players.mapNotNull { SpecType.fromName(it.currentBuild) }
+      fun has(tree: SkillTreeType, spec: SpecType) = tree in spec.trees
+      fun row(label: String, yes: Int, total: Int) = CompositionBreakdown(label, yes)
+      val battlerage = specs.filter { SkillTreeType.BATTLERAGE in it.trees }
+      val dps = specs.filter { it.trees.any { tree -> tree in setOf(SkillTreeType.ARCHERY, SkillTreeType.BATTLERAGE, SkillTreeType.GUNSLINGER, SkillTreeType.MALEDICTION, SkillTreeType.SORCERY, SkillTreeType.SWIFTBLADE) } }
+      val vitalism = specs.filter { SkillTreeType.VITALISM in it.trees }
+      val dancer = specs.filter { SkillTreeType.SPELLDANCE in it.trees }
+      CompositionBreakdownList(faction, players.size, listOf(
+        row("Shadowplay + Vitalism", specs.count { has(SkillTreeType.SHADOWPLAY, it) && has(SkillTreeType.VITALISM, it) }, players.size),
+        row("Shadowplay without Vitalism", specs.count { has(SkillTreeType.SHADOWPLAY, it) && !has(SkillTreeType.VITALISM, it) }, players.size),
+        row("Battlerage + Occultism or Witchcraft", battlerage.count { has(SkillTreeType.OCCULTISM, it) || has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
+        row("Battlerage without either", battlerage.count { !has(SkillTreeType.OCCULTISM, it) && !has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
+        row("Battlerage + Occultism", battlerage.count { has(SkillTreeType.OCCULTISM, it) }, battlerage.size),
+        row("Battlerage + Witchcraft", battlerage.count { has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
+        row("DPS + Auramancy", dps.count { has(SkillTreeType.AURAMANCY, it) }, dps.size),
+        row("DPS without Auramancy", dps.count { !has(SkillTreeType.AURAMANCY, it) }, dps.size),
+        row("Vitalism: Confessor", vitalism.count { it == SpecType.CONFESSOR }, vitalism.size),
+        row("Vitalism: Assassin", vitalism.count { it == SpecType.ASSASSIN }, vitalism.size),
+        row("Vitalism: Soothsayer", vitalism.count { it == SpecType.SOOTHSAYER }, vitalism.size),
+        row("Vitalism: other", vitalism.count { it != SpecType.CONFESSOR && it != SpecType.ASSASSIN }, vitalism.size),
+        row("Dancer: Comedian", dancer.count { it == SpecType.COMEDIAN }, dancer.size),
+        row("Dancer: Seal Resolver", dancer.count { it == SpecType.SEAL_RESOLVER }, dancer.size),
+        row("Dancer: Tough Dancer", dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
+        row("Dancer: other", dancer.count { it !in META_DANCER_SPECS }, dancer.size)
+      ))
+}
+
+@Composable
+private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
+  val specs = players.mapNotNull { card -> SpecType.fromName(card.currentBuild)?.let { it to card } }
+  val groups = listOf(
+    "Meta CC" to META_CC_SPECS,
+    "Meta melee" to META_MELEE_SPECS,
+    "Meta healer" to META_HEALER_SPECS,
+    "Meta mage" to META_MAGE_SPECS,
+    "Meta dancer" to META_DANCER_SPECS,
+    "Meta ranged" to META_RANGED_SPEC
+  )
+  val known = groups.flatMap { it.second }.toSet()
+  val other = specs.filter { it.first !in known }
+  CompositionBreakdownList(faction, players.size, groups.map { (name, set) -> CompositionBreakdown(name, specs.count { it.first in set }) } + CompositionBreakdown("Other (${other.joinToString { it.first.name.lowercase().replace('_', ' ') }.ifBlank { "none" }})", other.size))
 }
 @Composable
 private fun RaidHeaderStrip() {
