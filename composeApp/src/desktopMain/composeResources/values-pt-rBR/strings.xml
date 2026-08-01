@@ -541,6 +541,8 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="raid_tab_attendance">Frequência</string>
     <string name="raid_tab_nearby">Próximos</string>
     <string name="raid_tab_nearby_gear">Equipamento Próximo</string>
+    <string name="raid_tab_composition">Composição</string>
+    <string name="raid_composition_require_pvp">Exigir participação (25k dano, 25k curas ou 25+ CC)</string>
     <string name="raid_no_raid_detected">Por favor, entre em uma raid para usar recursos de gerenciamento de raid. Você deve ter o Addon Lua instalado. Janelas com barras de título não são overlays, considere colocar em outro monitor para evitar cobrir a UI do jogo.</string>
     <string name="raid_main_raid_label">Raid Principal</string>
     <string name="raid_coraid_label">Co-Raid</string>

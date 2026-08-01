@@ -541,6 +541,8 @@
     <string name="raid_tab_attendance">出勤</string>
     <string name="raid_tab_nearby">附近</string>
     <string name="raid_tab_nearby_gear">附近装备</string>
+    <string name="raid_tab_composition">构成</string>
+    <string name="raid_composition_require_pvp">要求参与（25k伤害、25k治疗或25+控场）</string>
     <string name="raid_no_raid_detected">请加入团队以使用团队管理功能。您必须安装Lua插件。有标题栏的窗口不是覆盖层，考虑放在另一个显示器上以避免遮挡游戏UI。</string>
     <string name="raid_main_raid_label">主团队</string>
     <string name="raid_coraid_label">协同团队</string>

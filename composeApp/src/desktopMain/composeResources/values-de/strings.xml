@@ -541,6 +541,8 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="raid_tab_attendance">Anwesenheit</string>
     <string name="raid_tab_nearby">In der Nähe</string>
     <string name="raid_tab_nearby_gear">Ausrüstung in der Nähe</string>
+    <string name="raid_tab_composition">Zusammensetzung</string>
+    <string name="raid_composition_require_pvp">Teilnahme erforderlich (25k Schaden, 25k Heilung oder 25+ CC)</string>
     <string name="raid_no_raid_detected">Bitte treten Sie einem Raid bei, um Raid-Management-Funktionen zu nutzen. Sie müssen das Lua-Addon installiert haben. Fenster mit Titelleisten sind keine Overlays, erwägen Sie, sie auf einem anderen Monitor zu platzieren, um die Spiel-UI nicht zu verdecken.</string>
     <string name="raid_main_raid_label">Haupt-Raid</string>
     <string name="raid_coraid_label">Co-Raid</string>

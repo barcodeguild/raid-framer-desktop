@@ -30,11 +30,17 @@ import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.hasPvPParticipation
+import com.reoky.raidframer.core.definitions.SKILL_TREE_DISPLAY_ORDER
+import com.reoky.raidframer.core.definitions.SkillTreeType
+import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CheckBoxComponent
+import com.reoky.raidframer.ui.component.CompositionChartComponent
+import com.reoky.raidframer.ui.component.FactionComposition
 import com.reoky.raidframer.ui.component.GearScoreHistogram
 import com.reoky.raidframer.ui.component.RaidComponent
 import com.reoky.raidframer.ui.component.SelectableTextField
@@ -66,11 +72,14 @@ import raid_framer_desktop.composeapp.generated.resources.raid_require_pvp_filte
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_attendance
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_nearby
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_nearby_gear
+import raid_framer_desktop.composeapp.generated.resources.raid_tab_composition
+import raid_framer_desktop.composeapp.generated.resources.raid_composition_require_pvp
+import raid_framer_desktop.composeapp.generated.resources.*
 import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_subtitle
 import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_title
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
-private enum class RaidTab { ATTENDANCE, NEARBY, NEARBY_GEAR }
+private enum class RaidTab { ATTENDANCE, NEARBY, NEARBY_GEAR, COMPOSITION }
 @Composable
 fun RaidOverlay(wm: WindowManager? = null) {
   val playerFaction = Faction.fromString(RFConfig.state.collectAsState().value.playerFaction)
@@ -156,6 +165,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
                 RaidTab.ATTENDANCE to Res.string.raid_tab_attendance,
                 RaidTab.NEARBY to Res.string.raid_tab_nearby,
                 RaidTab.NEARBY_GEAR to Res.string.raid_tab_nearby_gear
+                ,RaidTab.COMPOSITION to Res.string.raid_tab_composition
               )
               tabs.forEach { (tab, label) ->
                 Tab(
@@ -205,10 +215,70 @@ fun RaidOverlay(wm: WindowManager? = null) {
               requirePvPParticipation = requirePvPParticipation,
               onRequirePvPParticipationChange = { requirePvPParticipation = it }
             )
+            RaidTab.COMPOSITION -> CompositionTab(
+              nearbyNuia = nearbyNuia.value,
+              nearbyHaranya = nearbyHaranya.value,
+              nearbyPirate = nearbyPirate.value,
+              requirePvPParticipation = requirePvPParticipation,
+              onRequirePvPParticipationChange = { requirePvPParticipation = it }
+            )
           }
         }
       }
     }
+  }
+}
+
+@Composable
+private fun CompositionTab(
+  nearbyNuia: List<PlayerCard>,
+  nearbyHaranya: List<PlayerCard>,
+  nearbyPirate: List<PlayerCard>,
+  requirePvPParticipation: Boolean,
+  onRequirePvPParticipationChange: (Boolean) -> Unit
+) {
+  val filter: (PlayerCard) -> Boolean = { !requirePvPParticipation || it.hasPvPParticipation() }
+  fun chart(label: String, players: List<PlayerCard>, color: Color): FactionComposition {
+    val filtered = players.filter(filter)
+    val counts = mutableMapOf<SkillTreeType, Int>()
+    filtered.forEach { card ->
+      SpecType.fromName(card.currentBuild)?.trees?.forEach { tree -> counts[tree] = (counts[tree] ?: 0) + 1 }
+    }
+    return FactionComposition(label, filtered.size, counts, color)
+  }
+  val charts = listOf(
+    chart(stringResource(Res.string.raid_haranya_faction).substringBefore(" (%d)"), nearbyHaranya, RFColors.factionHaranya),
+    chart(stringResource(Res.string.raid_nuian_faction).substringBefore(" (%d)"), nearbyNuia, RFColors.factionNuia),
+    chart(stringResource(Res.string.raid_pirate_faction).substringBefore(" (%d)"), nearbyPirate, RFColors.factionPirate)
+  )
+  val labels = SKILL_TREE_DISPLAY_ORDER.associateWith { tree ->
+    stringResource(when (tree) {
+      SkillTreeType.ARCHERY -> Res.string.skill_tree_archery
+      SkillTreeType.AURAMANCY -> Res.string.skill_tree_auramancy
+      SkillTreeType.BATTLERAGE -> Res.string.skill_tree_battlerage
+      SkillTreeType.DEFENSE -> Res.string.skill_tree_defense
+      SkillTreeType.GUNSLINGER -> Res.string.skill_tree_gunslinger
+      SkillTreeType.MALEDICTION -> Res.string.skill_tree_malediction
+      SkillTreeType.OCCULTISM -> Res.string.skill_tree_occultism
+      SkillTreeType.SHADOWPLAY -> Res.string.skill_tree_shadowplay
+      SkillTreeType.SONGCRAFT -> Res.string.skill_tree_songcraft
+      SkillTreeType.SORCERY -> Res.string.skill_tree_sorcery
+      SkillTreeType.SPELLDANCE -> Res.string.skill_tree_spelldance
+      SkillTreeType.SWIFTBLADE -> Res.string.skill_tree_swiftblade
+      SkillTreeType.VITALISM -> Res.string.skill_tree_vitalism
+      SkillTreeType.WITCHCRAFT -> Res.string.skill_tree_witchcraft
+    })
+  }
+  Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+      charts.forEach { chart -> CompositionChartComponent(chart, labels, Modifier.weight(1f)) }
+    }
+    CheckBoxComponent(
+      label = stringResource(Res.string.raid_composition_require_pvp),
+      initialChecked = requirePvPParticipation,
+      onCheckedChange = onRequirePvPParticipationChange,
+      textColor = RFColors.TextPrimary
+    )
   }
 }
 @Composable
