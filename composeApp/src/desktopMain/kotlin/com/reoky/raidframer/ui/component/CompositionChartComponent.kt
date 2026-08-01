@@ -37,6 +37,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import kotlin.math.cos
 import kotlin.math.sin
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.*
 
@@ -52,7 +53,7 @@ data class CompositionBreakdown(val label: String, val count: Int)
 fun percentage(count: Int, total: Int): String = if (total == 0) "0%" else "${count * 100 / total}%"
 
 @Composable
-fun CompositionBreakdownList(
+fun CompositionBreakdownListComponent(
   title: String,
   total: Int,
   items: List<CompositionBreakdown>,
@@ -71,7 +72,7 @@ fun CompositionBreakdownList(
   }
 }
 
-private fun SkillTreeType.compositionColor() = when (this) {
+private fun SkillTreeType.compositionColorComponent() = when (this) {
   SkillTreeType.ARCHERY -> RFColors.treeArchery
   SkillTreeType.AURAMANCY -> RFColors.treeAuramancy
   SkillTreeType.BATTLERAGE -> RFColors.treeBattlerage
@@ -133,22 +134,24 @@ fun CompositionChartComponent(
             drawPath(ring, RFColors.CardBorder.copy(alpha = 0.8f), style = Stroke(width = 1.dp.toPx()))
           }
           repeat(axes) { index -> drawLine(RFColors.CardBorder, center, point(index, 1f), strokeWidth = 1.dp.toPx()) }
-          val data = Path().apply {
-            SKILL_TREE_DISPLAY_ORDER.forEachIndexed { index, tree ->
-              val scale = (composition.treeCounts[tree] ?: 0).toFloat() / maxCount
-              val p = point(index, scale)
-              if (index == 0) moveTo(p.x, p.y) else lineTo(p.x, p.y)
+           val dataPoints = SKILL_TREE_DISPLAY_ORDER.mapIndexed { index, tree ->
+             val scale = (composition.treeCounts[tree] ?: 0).toFloat() / maxCount
+             point(index, scale)
+           }
+            val data = Path().apply {
+              dataPoints.forEachIndexed { index, point ->
+                if (index == 0) moveTo(point.x, point.y) else lineTo(point.x, point.y)
+              }
+              close()
             }
-            close()
-          }
-          drawPath(data, composition.color.copy(alpha = 0.28f))
-          drawPath(data, composition.color, style = Stroke(width = 2.dp.toPx()))
+           drawPath(data, composition.color.copy(alpha = 0.16f))
+           drawPath(data, composition.color.copy(alpha = 0.68f), style = Stroke(width = 1.dp.toPx()))
           repeat(axes) { index ->
             val tree = SKILL_TREE_DISPLAY_ORDER[index]
             val count = composition.treeCounts[tree] ?: 0
             val scale = count.toFloat() / maxCount
             val p = point(index, scale)
-            drawCircle(composition.color, 2.dp.toPx(), p)
+             drawCircle(composition.color.copy(alpha = 0.55f), 1.25.dp.toPx(), p)
           }
           // Point labels are rendered by the overlay below; keep the graph itself uncluttered.
         }
@@ -179,20 +182,20 @@ fun CompositionChartComponent(
         }
       }
     }
-     CompositionTreeBreakdown(composition, treeLabels)
+      CompositionTreeBreakdownComponent(composition, treeLabels)
   }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun CompositionTreeBreakdown(composition: FactionComposition, treeLabels: Map<SkillTreeType, String>) {
+private fun CompositionTreeBreakdownComponent(composition: FactionComposition, treeLabels: Map<SkillTreeType, String>) {
   Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-    Text("Skill trees", color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(3.dp), maxItemsInEachRow = 2) {
-      SKILL_TREE_DISPLAY_ORDER.forEach { tree ->
-        Row(Modifier.fillMaxWidth(0.48f).padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-          Image(painterResource(tree.iconResource()), treeLabels[tree], modifier = Modifier.size(13.dp))
-          Text(treeLabels[tree] ?: tree.name, color = tree.compositionColor(), fontSize = 10.sp, maxLines = 1, modifier = Modifier.weight(1f))
+     Text(stringResource(Res.string.raid_composition_skill_trees), color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+     FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(3.dp), maxItemsInEachRow = 2) {
+       SKILL_TREE_DISPLAY_ORDER.forEach { tree ->
+         Row(Modifier.fillMaxWidth(0.48f).padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+           Image(painterResource(tree.iconResource()), treeLabels[tree], modifier = Modifier.size(13.dp))
+            Text(treeLabels[tree] ?: tree.name, color = tree.compositionColorComponent(), fontSize = 10.sp, maxLines = 1, modifier = Modifier.padding(start = 4.dp).weight(1f))
           Text("${composition.treeCounts[tree] ?: 0}", color = RFColors.TextTertiary, fontSize = 10.sp)
         }
       }
