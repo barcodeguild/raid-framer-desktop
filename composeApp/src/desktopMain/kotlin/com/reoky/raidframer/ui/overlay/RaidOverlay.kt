@@ -51,6 +51,8 @@ import com.reoky.raidframer.ui.component.CompositionBreakdown
 import com.reoky.raidframer.ui.component.CompositionBreakdownList
 import com.reoky.raidframer.ui.component.FactionComposition
 import com.reoky.raidframer.ui.component.GearScoreHistogram
+import com.reoky.raidframer.ui.component.GearFactionSeries
+import com.reoky.raidframer.ui.component.OverlaidGearScoreChart
 import com.reoky.raidframer.ui.component.RaidComponent
 import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -221,6 +223,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
+              raidDepartures = raidDepartures.value,
               requirePvPParticipation = requirePvPParticipation,
               onRequirePvPParticipationChange = { requirePvPParticipation = it }
             )
@@ -229,6 +232,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
               playerFaction = playerFaction,
+              raidDepartures = raidDepartures.value,
               requirePvPParticipation = requirePvPParticipation,
               onRequirePvPParticipationChange = { requirePvPParticipation = it }
             )
@@ -245,10 +249,20 @@ private fun CompositionTab(
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
   playerFaction: Faction = Faction.UNKNOWN,
+  raidDepartures: Map<Int, Set<String>> = emptyMap(),
   requirePvPParticipation: Boolean,
   onRequirePvPParticipationChange: (Boolean) -> Unit
 ) {
   var requireGearOver15k by rememberSaveable { mutableStateOf(false) }
+  var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
+  val departedNames = remember(raidDepartures) {
+    (raidDepartures[0] ?: emptySet()) + (raidDepartures[1] ?: emptySet())
+  }
+  fun sourcePlayers(players: List<PlayerCard>): List<PlayerCard> = if (!includePlayersThatLeftRaid) {
+    players
+  } else {
+    (players + departedNames.mapNotNull { PlayerCacheInteractor.getCard(it) }).distinctBy { it.name }
+  }
   val filter: (PlayerCard) -> Boolean = { card ->
     (!requirePvPParticipation || card.hasPvPParticipation()) &&
       (!requireGearOver15k || card.lastKnownGearScore > 15000)
@@ -257,7 +271,7 @@ private fun CompositionTab(
   val nuiaLabel = stringResource(Res.string.raid_nuian_faction).substringBefore(" (%d)")
   val pirateLabel = stringResource(Res.string.raid_pirate_faction).substringBefore(" (%d)")
   fun chart(label: String, players: List<PlayerCard>, color: Color): FactionComposition {
-    val filtered = players.filter(filter)
+    val filtered = sourcePlayers(players).filter(filter)
     val counts = mutableMapOf<SkillTreeType, Int>()
     filtered.forEach { card ->
       SpecType.fromName(card.currentBuild)?.trees?.forEach { tree -> counts[tree] = (counts[tree] ?: 0) + 1 }
@@ -277,9 +291,9 @@ private fun CompositionTab(
     chart(pirateLabel, nearbyPirate, RFColors.factionPirate)
   )
   val factionPlayers = listOf(
-    charts[0].factionLabel to nearbyHaranya.filter(filter),
-    charts[1].factionLabel to nearbyNuia.filter(filter),
-    charts[2].factionLabel to nearbyPirate.filter(filter)
+    charts[0].factionLabel to sourcePlayers(nearbyHaranya).filter(filter),
+    charts[1].factionLabel to sourcePlayers(nearbyNuia).filter(filter),
+    charts[2].factionLabel to sourcePlayers(nearbyPirate).filter(filter)
   )
   val labels = SKILL_TREE_DISPLAY_ORDER.associateWith { tree ->
     stringResource(when (tree) {
@@ -323,12 +337,18 @@ private fun CompositionTab(
          onCheckedChange = onRequirePvPParticipationChange,
          textColor = RFColors.TextPrimary
        )
-       CheckBoxComponent(
-         label = "Gear over 15k",
+        CheckBoxComponent(
+          label = "Gear over 15k",
          initialChecked = requireGearOver15k,
          onCheckedChange = { requireGearOver15k = it },
-         textColor = RFColors.TextPrimary
-       )
+          textColor = RFColors.TextPrimary
+        )
+        CheckBoxComponent(
+          label = "Include Players that Left Raid",
+          initialChecked = includePlayersThatLeftRaid,
+          onCheckedChange = { includePlayersThatLeftRaid = it },
+          textColor = RFColors.TextPrimary
+        )
      }
      ResponsiveFactionSections(factionPlayers, "Composition statistics") { faction, players ->
        FactionStatistics(faction, players)
@@ -834,14 +854,24 @@ private fun NearbyGearTab(
   nearbyNuia: List<PlayerCard>,
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
+  raidDepartures: Map<Int, Set<String>> = emptyMap(),
   requirePvPParticipation: Boolean,
   onRequirePvPParticipationChange: (Boolean) -> Unit
 ) {
   val scrollState = rememberScrollState()
+  var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
+  val departedNames = remember(raidDepartures) {
+    (raidDepartures[0] ?: emptySet()) + (raidDepartures[1] ?: emptySet())
+  }
+  fun sourcePlayers(players: List<PlayerCard>): List<PlayerCard> = if (!includePlayersThatLeftRaid) {
+    players
+  } else {
+    (players + departedNames.mapNotNull { PlayerCacheInteractor.getCard(it) }).distinctBy { it.name }
+  }
 
-  val filteredHaranya = if (requirePvPParticipation) nearbyHaranya.filter { it.hasPvPParticipation() } else nearbyHaranya
-  val filteredNuia = if (requirePvPParticipation) nearbyNuia.filter { it.hasPvPParticipation() } else nearbyNuia
-  val filteredPirate = if (requirePvPParticipation) nearbyPirate.filter { it.hasPvPParticipation() } else nearbyPirate
+  val filteredHaranya = sourcePlayers(nearbyHaranya).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
+  val filteredNuia = sourcePlayers(nearbyNuia).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
+  val filteredPirate = sourcePlayers(nearbyPirate).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
 
   val avgHaranya = averageGearScore(filteredHaranya)
   val avgNuia = averageGearScore(filteredNuia)
@@ -932,6 +962,22 @@ private fun NearbyGearTab(
       initialChecked = requirePvPParticipation,
       onCheckedChange = onRequirePvPParticipationChange,
       textColor = Color.White
+    )
+    CheckBoxComponent(
+      label = "Include Players that Left Raid",
+      initialChecked = includePlayersThatLeftRaid,
+      onCheckedChange = { includePlayersThatLeftRaid = it },
+      textColor = Color.White
+    )
+    OverlaidGearScoreChart(
+      series = listOf(
+        GearFactionSeries(stringResource(Res.string.raid_haranya_faction).substringBefore(" (%d)"), filteredHaranya, RFColors.graphNodeAllied),
+        GearFactionSeries(stringResource(Res.string.raid_nuian_faction).substringBefore(" (%d)"), filteredNuia, RFColors.graphNodeEnemy),
+        GearFactionSeries(stringResource(Res.string.raid_pirate_faction).substringBefore(" (%d)"), filteredPirate, RFColors.graphNodePirate)
+      ),
+      gearScoreLabel = "Gear Score",
+      playerCountLabel = "Number of Players",
+      modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
     )
   }
 }
