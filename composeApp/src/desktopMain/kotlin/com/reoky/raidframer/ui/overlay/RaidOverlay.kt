@@ -258,10 +258,13 @@ private fun CompositionTab(
   val departedNames = remember(raidDepartures) {
     (raidDepartures[0] ?: emptySet()) + (raidDepartures[1] ?: emptySet())
   }
-  fun sourcePlayers(players: List<PlayerCard>): List<PlayerCard> = if (!includePlayersThatLeftRaid) {
+  fun sourcePlayers(players: List<PlayerCard>, faction: Faction): List<PlayerCard> = if (!includePlayersThatLeftRaid) {
     players
   } else {
-    (players + departedNames.mapNotNull { PlayerCacheInteractor.getCard(it) }).distinctBy { it.name }
+    val currentNames = players.mapTo(mutableSetOf()) { it.name }
+    val departedPlayers = departedNames.mapNotNull { PlayerCacheInteractor.getCard(it) }
+      .filter { it.name !in currentNames && Faction.fromString(it.lastKnownFaction) == faction }
+    (players + departedPlayers).distinctBy { it.name }
   }
   val filter: (PlayerCard) -> Boolean = { card ->
     (!requirePvPParticipation || card.hasPvPParticipation()) &&
@@ -271,16 +274,16 @@ private fun CompositionTab(
   val nuiaLabel = stringResource(Res.string.raid_nuian_faction).substringBefore(" (%d)")
   val pirateLabel = stringResource(Res.string.raid_pirate_faction).substringBefore(" (%d)")
   fun chart(label: String, players: List<PlayerCard>, color: Color): FactionComposition {
-    val filtered = sourcePlayers(players).filter(filter)
-    val counts = mutableMapOf<SkillTreeType, Int>()
-    filtered.forEach { card ->
-      SpecType.fromName(card.currentBuild)?.trees?.forEach { tree -> counts[tree] = (counts[tree] ?: 0) + 1 }
-    }
     val chartFaction = when (label) {
       haranyaLabel -> Faction.HARANYA
       nuiaLabel -> Faction.NUIA
       pirateLabel -> Faction.PIRATE
       else -> Faction.UNKNOWN
+    }
+    val filtered = sourcePlayers(players, chartFaction).filter(filter)
+    val counts = mutableMapOf<SkillTreeType, Int>()
+    filtered.forEach { card ->
+      SpecType.fromName(card.currentBuild)?.trees?.forEach { tree -> counts[tree] = (counts[tree] ?: 0) + 1 }
     }
     val chartColor = playerFaction.getFactionHighlightColor(chartFaction).takeUnless { it == Color.Transparent } ?: color
     return FactionComposition(label, filtered.size, counts, chartColor)
@@ -291,9 +294,9 @@ private fun CompositionTab(
     chart(pirateLabel, nearbyPirate, RFColors.factionPirate)
   )
   val factionPlayers = listOf(
-    charts[0].factionLabel to sourcePlayers(nearbyHaranya).filter(filter),
-    charts[1].factionLabel to sourcePlayers(nearbyNuia).filter(filter),
-    charts[2].factionLabel to sourcePlayers(nearbyPirate).filter(filter)
+    charts[0].factionLabel to sourcePlayers(nearbyHaranya, Faction.HARANYA).filter(filter),
+    charts[1].factionLabel to sourcePlayers(nearbyNuia, Faction.NUIA).filter(filter),
+    charts[2].factionLabel to sourcePlayers(nearbyPirate, Faction.PIRATE).filter(filter)
   )
   val labels = SKILL_TREE_DISPLAY_ORDER.associateWith { tree ->
     stringResource(when (tree) {
@@ -863,15 +866,18 @@ private fun NearbyGearTab(
   val departedNames = remember(raidDepartures) {
     (raidDepartures[0] ?: emptySet()) + (raidDepartures[1] ?: emptySet())
   }
-  fun sourcePlayers(players: List<PlayerCard>): List<PlayerCard> = if (!includePlayersThatLeftRaid) {
+  fun sourcePlayers(players: List<PlayerCard>, faction: Faction): List<PlayerCard> = if (!includePlayersThatLeftRaid) {
     players
   } else {
-    (players + departedNames.mapNotNull { PlayerCacheInteractor.getCard(it) }).distinctBy { it.name }
+    val currentNames = players.mapTo(mutableSetOf()) { it.name }
+    val departedPlayers = departedNames.mapNotNull { PlayerCacheInteractor.getCard(it) }
+      .filter { it.name !in currentNames && Faction.fromString(it.lastKnownFaction) == faction }
+    (players + departedPlayers).distinctBy { it.name }
   }
 
-  val filteredHaranya = sourcePlayers(nearbyHaranya).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
-  val filteredNuia = sourcePlayers(nearbyNuia).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
-  val filteredPirate = sourcePlayers(nearbyPirate).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
+  val filteredHaranya = sourcePlayers(nearbyHaranya, Faction.HARANYA).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
+  val filteredNuia = sourcePlayers(nearbyNuia, Faction.NUIA).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
+  val filteredPirate = sourcePlayers(nearbyPirate, Faction.PIRATE).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
 
   val avgHaranya = averageGearScore(filteredHaranya)
   val avgNuia = averageGearScore(filteredNuia)
