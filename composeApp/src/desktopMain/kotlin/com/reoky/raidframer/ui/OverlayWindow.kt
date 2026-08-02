@@ -57,8 +57,8 @@ fun OverlayWindow(
   val config by RFConfig.state.collectAsState() // injected into every window
 
   val windowState = rememberWindowState(
-    width = initialSize.width.coerceIn(0.dp, 1000.dp),
-    height = initialSize.height.coerceIn(0.dp, 1000.dp),
+    width = initialSize.width.coerceAtLeast(1.dp),
+    height = initialSize.height.coerceAtLeast(1.dp),
     position = initialPosition
   )
 
@@ -245,10 +245,10 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.COMBAT -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.OVERLAY,
-      lastPositionXDp = 10f,
-      lastPositionYDp = 950f,
-      lastWidthDp = 650f,
-      lastHeightDp = 192f,
+      lastPositionXDp = 9f,
+      lastPositionYDp = 1031f,
+      lastWidthDp = 738f,
+      lastHeightDp = 204f,
       isVisible = true
     )
 
@@ -265,8 +265,8 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.SETTINGS -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 1000f,
-      lastPositionYDp = 300f,
+      lastPositionXDp = 1066f,
+      lastPositionYDp = 303f,
       lastWidthDp = 560f,
       lastHeightDp = 800f,
       isVisible = false
@@ -275,8 +275,8 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.COMPANION -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 800f,
-      lastPositionYDp = 400f,
+      lastPositionXDp = 462f,
+      lastPositionYDp = 303f,
       lastWidthDp = 580f,
       lastHeightDp = 800f,
       isVisible = false
@@ -285,8 +285,8 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.POKEMON -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 900f,
-      lastPositionYDp = 400f,
+      lastPositionXDp = 16f,
+      lastPositionYDp = 206f,
       lastWidthDp = 420f,
       lastHeightDp = 420f,
       isVisible = false
@@ -295,9 +295,9 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.RAID -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 650f,
-      lastPositionYDp = 250f,
-      lastWidthDp = 1500f,
+      lastPositionXDp = 760f,
+      lastPositionYDp = 227f,
+      lastWidthDp = 1063f,
       lastHeightDp = 1000f,
       isVisible = false
     )
@@ -325,8 +325,8 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.NEW_SESSION -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 1000f,
-      lastPositionYDp = 500f,
+      lastPositionXDp = 1154f,
+      lastPositionYDp = 439f,
       lastWidthDp = 375f,
       lastHeightDp = 600f,
       isVisible = false
@@ -365,8 +365,8 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.ABOUT -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 900f,
-      lastPositionYDp = 300f,
+      lastPositionXDp = 1661f,
+      lastPositionYDp = 302f,
       lastWidthDp = 500f,
       lastHeightDp = 740f,
       isVisible = false
@@ -375,10 +375,10 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.SUMMARY -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 700f,
-      lastPositionYDp = 250f,
-      lastWidthDp = 960f,
-      lastHeightDp = 1024f,
+      lastPositionXDp = 784f,
+      lastPositionYDp = 231f,
+      lastWidthDp = 1038f,
+      lastHeightDp = 935f,
       isVisible = false
     )
 
@@ -395,10 +395,10 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.BATTLE_GRAPH -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.TOOLTIP,
-      lastPositionXDp = 700f,
-      lastPositionYDp = 250f,
-      lastWidthDp = 960f,
-      lastHeightDp = 720f,
+      lastPositionXDp = 636f,
+      lastPositionYDp = 156f,
+      lastWidthDp = 1310f,
+      lastHeightDp = 1111f,
       isVisible = false
     )
   }

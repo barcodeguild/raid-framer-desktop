@@ -7,8 +7,8 @@ import com.reoky.raidframer.core.database.WindowStateDao
 import com.reoky.raidframer.core.interactor.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlin.text.get
-import kotlin.text.insert
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class WindowManager(
   private val scope: CoroutineScope,
@@ -21,6 +21,7 @@ class WindowManager(
 
   // Holds actual state for each window
   private val windowStates: MutableMap<OverlayType, MutableState<WindowStateEntity>> = mutableMapOf()
+  private val saveMutexes: MutableMap<OverlayType, Mutex> = mutableMapOf()
 
   // Visibility flags tracked per window type
   val visibilityStates: MutableMap<OverlayType, MutableState<Boolean>> = mutableMapOf()
@@ -46,11 +47,7 @@ class WindowManager(
     visibility.value = false
 
     // Save state
-    scope.launch {
-      windowStates[type]?.value?.let { state ->
-        dao?.insert(state)
-      }
-    }
+    windowStates[type]?.value?.let { saveState(it) }
   }
 
   // Call this on app startup
@@ -85,7 +82,7 @@ class WindowManager(
 
       // replace pre-populated values with the one from the database
       existingWindowState.value = entity
-      visibilityStates.getOrPut(type) { mutableStateOf(type == OverlayType.COMBAT) }
+      visibilityStates[type]?.value = entity.isVisible
     }
   }
 
@@ -106,11 +103,19 @@ class WindowManager(
     val newState = state.value.update()
     windowStates[type]?.value = newState
 
-    scope.launch {
-      dao?.insert(newState)
+    saveState(newState)
+  }
 
-      // debug
-      println("Updated window state for $type: $newState")
+  private fun saveState(state: WindowStateEntity) {
+    val type = OverlayType.valueOf(state.overlayType)
+    val mutex = saveMutexes.getOrPut(type) { Mutex() }
+    scope.launch {
+      mutex.withLock {
+        // Read the latest in-memory value after waiting for any prior write.
+        // This prevents an older geometry event from overwriting a newer one.
+        val latestState = windowStates[type]?.value ?: state
+        dao?.insert(latestState)
+      }
     }
   }
 

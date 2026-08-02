@@ -28,6 +28,7 @@ import com.reoky.raidframer.ui.overlay.PlayerCardOverlay
 import com.reoky.raidframer.ui.overlay.TrackerOverlay
 import com.reoky.raidframer.ui.overlay.BattleGraphOverlay
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.awt.event.ComponentAdapter
 
@@ -77,15 +78,19 @@ fun OverlayContainer(wm: WindowManager) {
           else -> {}
         }
 
-        // initial notify
-        notifyWindowManagerStateChanged(type, wm, window)
-
         // The below code listens for the window to be moved or resized and notifies
         // the WindowManager to update the stored state accordingly. Debounces so we
         // don't spam updates during drag/resize.
         DisposableEffect(window) {
           var updateJob: Job? = null
           val debounceMs = 600L
+
+          // Compose/AWT may report a transient 0/default geometry while the native window is opening.
+          // Do not let that initial value overwrite the restored database state.
+          updateJob = scope.launch {
+            delay(debounceMs)
+            notifyWindowManagerStateChanged(type, wm, window)
+          }
 
           val listener = object : ComponentAdapter() {
             private fun scheduleUpdate() {
@@ -127,13 +132,15 @@ fun notifyWindowManagerStateChanged(
   try {
     val pos = window.locationOnScreen
     val size = window.size
-    windowManager.updateWindowState(type) {
-      copy(
-        lastPositionXDp = pos.x.toFloat(),
-        lastPositionYDp = pos.y.toFloat(),
-        lastWidthDp = size.width.toFloat(),
-        lastHeightDp = size.height.toFloat()
-      )
+    if (size.width > 0 && size.height > 0) {
+      windowManager.updateWindowState(type) {
+        copy(
+          lastPositionXDp = pos.x.toFloat(),
+          lastPositionYDp = pos.y.toFloat(),
+          lastWidthDp = size.width.toFloat(),
+          lastHeightDp = size.height.toFloat()
+        )
+      }
     }
     println("Updated window state for $type: pos=(${pos.x}, ${pos.y}), size=(${size.width}, ${size.height})")
   } catch (e: Exception) {
