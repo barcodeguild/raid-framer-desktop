@@ -13,7 +13,7 @@ import com.reoky.raidframer.core.definitions.tigerStrikeDebuffIds
 import com.reoky.raidframer.core.definitions.freezeDebuffIds
 import com.reoky.raidframer.core.definitions.trippedDebuffIds
 import com.reoky.raidframer.core.definitions.bubbleTrapDebuffIds
-import com.reoky.raidframer.core.definitions.bracingBlastDebuffIds
+import com.reoky.raidframer.core.definitions.bracingBlastImmunityBuffIds
 import com.reoky.raidframer.core.definitions.shieldStripDebuffIds
 import com.reoky.raidframer.core.definitions.weaponDisablesDebuffIds
 import com.reoky.raidframer.core.definitions.potionDisablesDebuffIds
@@ -255,7 +255,6 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isFreeze = event.debuffId in freezeDebuffIds
   val isTrips = event.debuffId in trippedDebuffIds
   val isBubbles = event.debuffId in bubbleTrapDebuffIds
-  val isBracings = event.debuffId in bracingBlastDebuffIds
   val isShieldStrip = event.debuffId in shieldStripDebuffIds
   val isWeaponDisables = event.debuffId in weaponDisablesDebuffIds
   val isPotionDisables = event.debuffId in potionDisablesDebuffIds
@@ -279,7 +278,6 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       lifetimeTotalFreezes = if (isFreeze) (card.cache?.lifetimeTotalFreezes ?: 0L) + 1 else (card.cache?.lifetimeTotalFreezes ?: 0L),
       lifetimeTotalTrips = if (isTrips) (card.cache?.lifetimeTotalTrips ?: 0L) + 1 else (card.cache?.lifetimeTotalTrips ?: 0L),
       lifetimeTotalBubbles = if (isBubbles) (card.cache?.lifetimeTotalBubbles ?: 0L) + 1 else (card.cache?.lifetimeTotalBubbles ?: 0L),
-      lifetimeTotalBracings = if (isBracings) (card.cache?.lifetimeTotalBracings ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L),
       lifetimeTotalShieldStrip = if (isShieldStrip) (card.cache?.lifetimeTotalShieldStrip ?: 0L) + 1 else (card.cache?.lifetimeTotalShieldStrip ?: 0L),
       lifetimeTotalWeaponDisables = if (isWeaponDisables) (card.cache?.lifetimeTotalWeaponDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalWeaponDisables ?: 0L),
       lifetimeTotalPotionDisables = if (isPotionDisables) (card.cache?.lifetimeTotalPotionDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalPotionDisables ?: 0L),
@@ -299,7 +297,6 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionFreezeTotal = if (isFreeze) sessionFreezeTotal + 1 else sessionFreezeTotal,
     sessionTripsTotal = if (isTrips) sessionTripsTotal + 1 else sessionTripsTotal,
     sessionBubblesTotal = if (isBubbles) sessionBubblesTotal + 1 else sessionBubblesTotal,
-    sessionBracingsTotal = if (isBracings) sessionBracingsTotal + 1 else sessionBracingsTotal,
     sessionShieldStripTotal = if (isShieldStrip) sessionShieldStripTotal + 1 else sessionShieldStripTotal,
     sessionWeaponDisablesTotal = if (isWeaponDisables) sessionWeaponDisablesTotal + 1 else sessionWeaponDisablesTotal,
     sessionPotionDisablesTotal = if (isPotionDisables) sessionPotionDisablesTotal + 1 else sessionPotionDisablesTotal,
@@ -396,15 +393,20 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
 fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   //if (event.source == event.target) return this // skip self-casts (e.g. resurgence on yourself)
+  val isBracingImmunity = event.buffId in bracingBlastImmunityBuffIds
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalBuffsApplied = (card.cache?.lifetimeTotalBuffsApplied ?: 0L) + 1
+      lifetimeTotalBuffsApplied = (card.cache?.lifetimeTotalBuffsApplied ?: 0L) + 1,
+      lifetimeTotalCCDelivered = if (isBracingImmunity) (card.cache?.lifetimeTotalCCDelivered ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
+      lifetimeTotalBracings = if (isBracingImmunity) (card.cache?.lifetimeTotalBracings ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L)
     ),
     recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
     sessionBuffTotal = this.sessionBuffTotal + 1,
+    sessionBracingsTotal = if (isBracingImmunity) sessionBracingsTotal + 1 else sessionBracingsTotal,
+    sessionCCTotal = if (isBracingImmunity) card.sessionCCTotal + 1 else card.sessionCCTotal,
     // --- Buff adjacency ---
     sessionBuffToPlayer = this.sessionBuffToPlayer + (event.target to ((this.sessionBuffToPlayer[event.target] ?: 0) + 1)),
     sessionBuffToPlayerBySpell = run {
