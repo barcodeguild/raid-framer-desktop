@@ -352,6 +352,7 @@ object BattleGraphInteractor : Interactor() {
     BattleGraphMode.BUFFS -> {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionBuffToPlayer.forEach { (targetName, buffs) ->
+          if (targetName == sourceCard.name) return@forEach
           val breakdown = sourceCard.sessionBuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
           // Apply both search query (only if it matches a spell) and spell dropdown filter
           val searchFiltered = if (queryMatchesSpell) {
@@ -376,6 +377,7 @@ object BattleGraphInteractor : Interactor() {
     BattleGraphMode.DEBUFFS -> {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionDebuffToPlayer.forEach { (targetName, debuffs) ->
+          if (targetName == sourceCard.name) return@forEach
           val breakdown = sourceCard.sessionDebuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
           // Apply both search query (only if it matches a spell) and spell dropdown filter
           val searchFiltered = if (queryMatchesSpell) {
