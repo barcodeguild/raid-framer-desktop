@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.hoverable
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -87,7 +86,12 @@ fun CompositionBreakdownListComponent(
     (if (sortByCount) items.sortedByDescending { it.count } else items).forEach { item ->
       val rowInteraction = remember { MutableInteractionSource() }
       val rowHovered by rowInteraction.collectIsHoveredAsState()
-      PlayerListTooltipComponent(itemPlayers[item.label].orEmpty(), Modifier.fillMaxWidth(), rowHoverColor) { rowModifier ->
+      PlayerListTooltipComponent(
+        players = itemPlayers[item.label].orEmpty(),
+        modifier = Modifier.fillMaxWidth(),
+        hoverColor = rowHoverColor,
+        interactionSource = rowInteraction
+      ) { rowModifier ->
         Row(
           rowModifier
             .fillMaxWidth()
@@ -95,7 +99,6 @@ fun CompositionBreakdownListComponent(
               if (rowHovered) rowHoverColor.copy(alpha = 0.16f) else Color.Transparent,
               RoundedCornerShape(4.dp)
             )
-            .hoverable(rowInteraction)
             .padding(horizontal = 4.dp, vertical = 2.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {

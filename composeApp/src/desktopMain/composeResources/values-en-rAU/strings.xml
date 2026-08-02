@@ -568,7 +568,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_composition_meta_dancer">Meta dancer</string>
     <string name="raid_composition_meta_ranged">Meta ranged</string>
     <string name="raid_composition_other">Other</string>
-    <string name="raid_composition_other_examples">Other examples: %1$s</string>
+    <string name="raid_composition_other_examples">Other Examples Include: %1$s</string>
     <string name="raid_composition_none">none</string>
     <string name="raid_composition_more_players">...and %d more</string>
     <string name="raid_no_raid_detected">Please join a raid to use raid management features. You must have the Lua Addon installed. Windows with title bars are not overlays, consider placing on another monitor to avoid covering the game UI.</string>

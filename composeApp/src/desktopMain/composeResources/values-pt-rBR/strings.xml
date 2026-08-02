@@ -570,7 +570,7 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="raid_composition_meta_dancer">Dançarino meta</string>
     <string name="raid_composition_meta_ranged">Ranged meta</string>
     <string name="raid_composition_other">Outro</string>
-    <string name="raid_composition_other_examples">Outros exemplos: %1$s</string>
+    <string name="raid_composition_other_examples">Outros exemplos incluem: %1$s</string>
     <string name="raid_composition_none">nenhum</string>
     <string name="raid_composition_more_players">...e mais %d</string>
     <string name="raid_no_raid_detected">Por favor, entre em uma raid para usar recursos de gerenciamento de raid. Você deve ter o Addon Lua instalado. Janelas com barras de título não são overlays, considere colocar em outro monitor para evitar cobrir a UI do jogo.</string>

@@ -570,7 +570,7 @@
     <string name="raid_composition_meta_dancer">Мета танцор</string>
     <string name="raid_composition_meta_ranged">Мета дальнего боя</string>
     <string name="raid_composition_other">Другое</string>
-    <string name="raid_composition_other_examples">Другие примеры: %1$s</string>
+    <string name="raid_composition_other_examples">Другие примеры включают: %1$s</string>
     <string name="raid_composition_none">нет</string>
     <string name="raid_composition_more_players">...и ещё %d</string>
     <string name="raid_no_raid_detected">Пожалуйста, присоединитесь к рейду, чтобы использовать функции управления рейдом. У вас должен быть установлен Lua-аддон. Окна с заголовками не являются оверлеями, рассмотрите возможность размещения на другом мониторе, чтобы не закрывать игровой интерфейс.</string>

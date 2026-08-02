@@ -640,7 +640,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_composition_meta_dancer">Meta dancer</string>
     <string name="raid_composition_meta_ranged">Meta ranged</string>
     <string name="raid_composition_other">Other</string>
-    <string name="raid_composition_other_examples">Other examples: %1$s</string>
+    <string name="raid_composition_other_examples">Other Examples Include: %1$s</string>
     <string name="raid_composition_none">none</string>
     <string name="raid_composition_more_players">...and %d more</string>
     <string name="raid_copy_attendance">Copy Attendance</string>

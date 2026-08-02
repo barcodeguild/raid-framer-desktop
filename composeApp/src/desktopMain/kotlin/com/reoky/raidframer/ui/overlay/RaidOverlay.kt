@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.IconButton
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
@@ -38,6 +40,7 @@ import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
 import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
 import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
 import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
+import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
@@ -271,9 +274,12 @@ private fun CompositionTab(
     (!requirePvPParticipation || card.hasPvPParticipation()) &&
       (!requireGearOver15k || card.lastKnownGearScore > 15000)
   }
-  val haranyaLabel = stringResource(Res.string.raid_haranya_faction).substringBefore(" (%d)")
-  val nuiaLabel = stringResource(Res.string.raid_nuian_faction).substringBefore(" (%d)")
-  val pirateLabel = stringResource(Res.string.raid_pirate_faction).substringBefore(" (%d)")
+  val haranyaFormat = stringResource(Res.string.raid_haranya_faction)
+  val nuiaFormat = stringResource(Res.string.raid_nuian_faction)
+  val pirateFormat = stringResource(Res.string.raid_pirate_faction)
+  val haranyaLabel = haranyaFormat.substringBefore("%d").trimEnd()
+  val nuiaLabel = nuiaFormat.substringBefore("%d").trimEnd()
+  val pirateLabel = pirateFormat.substringBefore("%d").trimEnd()
   fun chart(label: String, players: List<PlayerCard>, color: Color): FactionComposition {
     val chartFaction = when (label) {
       haranyaLabel -> Faction.HARANYA
@@ -369,8 +375,18 @@ private fun ResponsiveFactionSections(
   title: String,
   content: @Composable (String, List<PlayerCard>) -> Unit
 ) {
+  val metaSpecBreakdownTitle = stringResource(Res.string.raid_composition_meta_spec_breakdown)
+
   Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Text(title, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    Row(
+      modifier = Modifier.padding(start = 12.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(title, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+      if (title == metaSpecBreakdownTitle) {
+        MetaSpecHelp()
+      }
+    }
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         if (maxWidth >= 1040.dp) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -384,6 +400,71 @@ private fun ResponsiveFactionSections(
         }
       }
     }
+  }
+}
+
+@Composable
+private fun MetaSpecHelp() {
+  var showHelp by remember { mutableStateOf(false) }
+  Box {
+    IconButton(onClick = { showHelp = !showHelp }, modifier = Modifier.size(28.dp)) {
+      Text("?", color = RFColors.TextSecondary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    }
+    if (showHelp) {
+      Popup {
+        androidx.compose.material.Surface(
+          color = RFColors.PopupBackground.copy(alpha = 0.98f),
+          shape = RoundedCornerShape(8.dp),
+          border = androidx.compose.foundation.BorderStroke(1.dp, RFColors.CardBorder),
+          elevation = 6.dp
+        ) {
+          Column(
+            Modifier.padding(10.dp).widthIn(max = 360.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Text(
+                "Meta Specs",
+                color = RFColors.TextPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
+              )
+              IconButton(
+                onClick = { showHelp = false },
+                modifier = Modifier.size(24.dp)
+              ) {
+                Text("X", color = RFColors.TextSecondary, fontSize = 11.sp)
+              }
+            }
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_cc), META_CC_SPECS)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_melee), META_MELEE_SPECS)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_healer), META_HEALER_SPECS)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_mage), META_MAGE_SPECS)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_dancer), META_DANCER_SPECS)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_ranged), META_RANGED_SPEC)
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>) {
+  val localizedSpecs = specs.map { stringResource(it.localizedDisplayNameRes) }
+
+  Column {
+    Text(label, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+    Text(
+      localizedSpecs.joinToString(", "),
+      color = RFColors.TextSecondary,
+      fontSize = 10.sp,
+      lineHeight = 12.sp
+    )
   }
 }
 
@@ -403,23 +484,50 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
          stringResource(Res.string.raid_composition_shadowplay_vitalism) to shadowplayVitalism,
          stringResource(Res.string.raid_composition_shadowplay_without_vitalism) to shadowplayWithoutVitalism
        )
-       val breakdownItems = mutableListOf(
-        row(rowPlayers.keys.elementAt(0), shadowplayVitalism.size, players.size),
-        row(rowPlayers.keys.elementAt(1), shadowplayWithoutVitalism.size, players.size),
-       row(stringResource(Res.string.raid_composition_battlerage_occultism_witchcraft), battlerage.count { has(SkillTreeType.OCCULTISM, it) || has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
-       row(stringResource(Res.string.raid_composition_battlerage_without_either), battlerage.count { !has(SkillTreeType.OCCULTISM, it) && !has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
-       row(stringResource(Res.string.raid_composition_battlerage_occultism), battlerage.count { has(SkillTreeType.OCCULTISM, it) }, battlerage.size),
-       row(stringResource(Res.string.raid_composition_battlerage_witchcraft), battlerage.count { has(SkillTreeType.WITCHCRAFT, it) }, battlerage.size),
-       row(stringResource(Res.string.raid_composition_dps_auramancy), dps.count { has(SkillTreeType.AURAMANCY, it) }, dps.size),
-       row(stringResource(Res.string.raid_composition_dps_without_auramancy), dps.count { !has(SkillTreeType.AURAMANCY, it) }, dps.size),
-       row(stringResource(Res.string.raid_composition_vitalism_confessor), vitalism.count { it == SpecType.CONFESSOR }, vitalism.size),
-       row(stringResource(Res.string.raid_composition_vitalism_assassin), vitalism.count { it == SpecType.ASSASSIN }, vitalism.size),
-       row(stringResource(Res.string.raid_composition_vitalism_soothsayer), vitalism.count { it == SpecType.SOOTHSAYER }, vitalism.size),
-       row(stringResource(Res.string.raid_composition_vitalism_other), vitalism.count { it != SpecType.CONFESSOR && it != SpecType.ASSASSIN }, vitalism.size),
-       row(stringResource(Res.string.raid_composition_dancer_comedian), dancer.count { it == SpecType.COMEDIAN }, dancer.size),
-       row(stringResource(Res.string.raid_composition_dancer_seal_resolver), dancer.count { it == SpecType.SEAL_RESOLVER }, dancer.size),
-       row(stringResource(Res.string.raid_composition_dancer_tough_dancer), dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
-       row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in META_DANCER_SPECS }, dancer.size)
+        fun addRow(label: String, matchingPlayers: List<PlayerCard>) {
+          rowPlayers[label] = matchingPlayers
+        }
+       val battlerageOccultismOrWitchcraft = players.filter { card ->
+         SpecType.fromName(card.currentBuild)?.let { has(SkillTreeType.BATTLERAGE, it) && (has(SkillTreeType.OCCULTISM, it) || has(SkillTreeType.WITCHCRAFT, it)) } == true
+       }
+       val battlerageWithoutEither = players.filter { card ->
+         SpecType.fromName(card.currentBuild)?.let { has(SkillTreeType.BATTLERAGE, it) && !has(SkillTreeType.OCCULTISM, it) && !has(SkillTreeType.WITCHCRAFT, it) } == true
+       }
+       val battlerageOccultism = players.filter { card -> SpecType.fromName(card.currentBuild)?.let { has(SkillTreeType.BATTLERAGE, it) && has(SkillTreeType.OCCULTISM, it) } == true }
+       val battlerageWitchcraft = players.filter { card -> SpecType.fromName(card.currentBuild)?.let { has(SkillTreeType.BATTLERAGE, it) && has(SkillTreeType.WITCHCRAFT, it) } == true }
+       val dpsAuramancy = players.filter { card -> SpecType.fromName(card.currentBuild)?.let { it in dps && has(SkillTreeType.AURAMANCY, it) } == true }
+       val dpsWithoutAuramancy = players.filter { card -> SpecType.fromName(card.currentBuild)?.let { it in dps && !has(SkillTreeType.AURAMANCY, it) } == true }
+        addRow(stringResource(Res.string.raid_composition_battlerage_occultism_witchcraft), battlerageOccultismOrWitchcraft)
+        addRow(stringResource(Res.string.raid_composition_battlerage_without_either), battlerageWithoutEither)
+        addRow(stringResource(Res.string.raid_composition_battlerage_occultism), battlerageOccultism)
+        addRow(stringResource(Res.string.raid_composition_battlerage_witchcraft), battlerageWitchcraft)
+        addRow(stringResource(Res.string.raid_composition_dps_auramancy), dpsAuramancy)
+        addRow(stringResource(Res.string.raid_composition_dps_without_auramancy), dpsWithoutAuramancy)
+        addRow(stringResource(Res.string.raid_composition_vitalism_confessor), matching { it == SpecType.CONFESSOR })
+        addRow(stringResource(Res.string.raid_composition_vitalism_assassin), matching { it == SpecType.ASSASSIN })
+        addRow(stringResource(Res.string.raid_composition_vitalism_soothsayer), matching { it == SpecType.SOOTHSAYER })
+         addRow(stringResource(Res.string.raid_composition_vitalism_other), matching { has(SkillTreeType.VITALISM, it) && it != SpecType.CONFESSOR && it != SpecType.ASSASSIN })
+        addRow(stringResource(Res.string.raid_composition_dancer_comedian), matching { it == SpecType.COMEDIAN })
+        addRow(stringResource(Res.string.raid_composition_dancer_seal_resolver), matching { it == SpecType.SEAL_RESOLVER })
+        addRow(stringResource(Res.string.raid_composition_dancer_tough_dancer), matching { it == SpecType.TOUGH_DANCER })
+         addRow(stringResource(Res.string.raid_composition_dancer_other), matching { has(SkillTreeType.SPELLDANCE, it) && it !in META_DANCER_SPECS })
+       val breakdownItems = listOf(
+         row(stringResource(Res.string.raid_composition_shadowplay_vitalism), shadowplayVitalism.size, players.size),
+         row(stringResource(Res.string.raid_composition_shadowplay_without_vitalism), shadowplayWithoutVitalism.size, players.size),
+         row(stringResource(Res.string.raid_composition_battlerage_occultism_witchcraft), battlerageOccultismOrWitchcraft.size, battlerage.size),
+         row(stringResource(Res.string.raid_composition_battlerage_without_either), battlerageWithoutEither.size, battlerage.size),
+         row(stringResource(Res.string.raid_composition_battlerage_occultism), battlerageOccultism.size, battlerage.size),
+         row(stringResource(Res.string.raid_composition_battlerage_witchcraft), battlerageWitchcraft.size, battlerage.size),
+         row(stringResource(Res.string.raid_composition_dps_auramancy), dpsAuramancy.size, dps.size),
+         row(stringResource(Res.string.raid_composition_dps_without_auramancy), dpsWithoutAuramancy.size, dps.size),
+         row(stringResource(Res.string.raid_composition_vitalism_confessor), vitalism.count { it == SpecType.CONFESSOR }, vitalism.size),
+         row(stringResource(Res.string.raid_composition_vitalism_assassin), vitalism.count { it == SpecType.ASSASSIN }, vitalism.size),
+         row(stringResource(Res.string.raid_composition_vitalism_soothsayer), vitalism.count { it == SpecType.SOOTHSAYER }, vitalism.size),
+         row(stringResource(Res.string.raid_composition_vitalism_other), vitalism.count { it != SpecType.CONFESSOR && it != SpecType.ASSASSIN }, vitalism.size),
+         row(stringResource(Res.string.raid_composition_dancer_comedian), dancer.count { it == SpecType.COMEDIAN }, dancer.size),
+         row(stringResource(Res.string.raid_composition_dancer_seal_resolver), dancer.count { it == SpecType.SEAL_RESOLVER }, dancer.size),
+         row(stringResource(Res.string.raid_composition_dancer_tough_dancer), dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
+         row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in META_DANCER_SPECS }, dancer.size)
        )
         androidx.compose.material.Surface(
           color = RFColors.CardBackground.copy(alpha = 0.78f),
@@ -452,6 +560,12 @@ private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
   )
   val known = groups.flatMap { it.second }.toSet()
   val other = specs.filter { it.first !in known }
+  val otherExamples = other.map { it.first.name.lowercase().replace('_', ' ') }
+    .ifEmpty { listOf(stringResource(Res.string.raid_composition_none)) }
+    .joinToString(", ")
+  val itemPlayers = groups.associate { (name, set) ->
+    name to specs.filter { it.first in set }.map { it.second }
+  } + (stringResource(Res.string.raid_composition_other) to other.map { it.second })
    Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.fillMaxWidth()) {
      androidx.compose.material.Surface(
        color = RFColors.CardBackground.copy(alpha = 0.78f),
@@ -461,17 +575,19 @@ private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
      ) {
       CompositionBreakdownListComponent(
        title = faction,
-       total = players.size,
-       items = groups.map { (name, set) -> CompositionBreakdown(name, specs.count { it.first in set }) } +
-         CompositionBreakdown(stringResource(Res.string.raid_composition_other), other.size),
-       headingColor = factionHeadingColor(faction),
-       rowHoverColor = factionHeadingColor(faction)
-     )
+        total = players.size,
+        items = groups.map { (name, set) -> CompositionBreakdown(name, specs.count { it.first in set }) } +
+          CompositionBreakdown(stringResource(Res.string.raid_composition_other), other.size),
+        itemPlayers = itemPlayers,
+        headingColor = factionHeadingColor(faction),
+        rowHoverColor = factionHeadingColor(faction)
+      )
      }
     Text(
-       text = stringResource(Res.string.raid_composition_other_examples, other.map { it.first.name.lowercase().replace('_', ' ') }.ifEmpty { listOf(stringResource(Res.string.raid_composition_none)) }.joinToString(", ")),
-      color = RFColors.TextTertiary,
-      fontSize = 9.sp,
+        text = stringResource(Res.string.raid_composition_other_examples, otherExamples),
+       color = RFColors.TextTertiary,
+       fontWeight = FontWeight.Medium,
+       fontSize = 9.sp,
       lineHeight = 11.sp
     )
   }
@@ -927,6 +1043,9 @@ private fun NearbyGearTab(
   val avgHaranya = averageGearScore(filteredHaranya)
   val avgNuia = averageGearScore(filteredNuia)
   val avgPirate = averageGearScore(filteredPirate)
+  val haranyaLabel = stringResource(Res.string.raid_haranya_faction).substringBefore("%d").trimEnd()
+  val nuiaLabel = stringResource(Res.string.raid_nuian_faction).substringBefore("%d").trimEnd()
+  val pirateLabel = stringResource(Res.string.raid_pirate_faction).substringBefore("%d").trimEnd()
 
   Column(
     modifier = Modifier
@@ -1022,9 +1141,9 @@ private fun NearbyGearTab(
     )
     OverlaidGearScoreChart(
       series = listOf(
-        GearFactionSeries(stringResource(Res.string.raid_haranya_faction).substringBefore(" (%d)"), filteredHaranya, RFColors.graphNodeAllied),
-        GearFactionSeries(stringResource(Res.string.raid_nuian_faction).substringBefore(" (%d)"), filteredNuia, RFColors.graphNodeEnemy),
-        GearFactionSeries(stringResource(Res.string.raid_pirate_faction).substringBefore(" (%d)"), filteredPirate, RFColors.graphNodePirate)
+        GearFactionSeries(haranyaLabel, filteredHaranya, RFColors.graphNodeAllied),
+        GearFactionSeries(nuiaLabel, filteredNuia, RFColors.graphNodeEnemy),
+        GearFactionSeries(pirateLabel, filteredPirate, RFColors.graphNodePirate)
       ),
       gearScoreLabel = "Gear Score",
       playerCountLabel = "Number of Players",

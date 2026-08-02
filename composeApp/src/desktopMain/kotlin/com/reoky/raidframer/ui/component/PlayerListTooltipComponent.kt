@@ -38,6 +38,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.raid_composition_more_players
+import java.util.Locale
 
 private const val MAX_TOOLTIP_PLAYERS = 15
 
@@ -47,9 +48,9 @@ fun PlayerListTooltipComponent(
   players: List<PlayerCard>,
   modifier: Modifier = Modifier,
   hoverColor: Color = RFColors.CardBorderAccent,
+  interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
   content: @Composable (Modifier) -> Unit
 ) {
-  val interactionSource = remember { MutableInteractionSource() }
   val isHovered by interactionSource.collectIsHoveredAsState()
   var pointerPosition by remember { mutableStateOf(IntOffset.Zero) }
   content(
@@ -65,9 +66,15 @@ fun PlayerListTooltipComponent(
     Popup(
       popupPositionProvider = object : PopupPositionProvider {
         override fun calculatePosition(anchorBounds: IntRect, windowSize: IntSize, layoutDirection: LayoutDirection, popupContentSize: IntSize): IntOffset {
-          val x = (anchorBounds.left + pointerPosition.x - popupContentSize.width - 12)
+          val cursorX = anchorBounds.left + pointerPosition.x
+          val cursorY = anchorBounds.top + pointerPosition.y
+          val gap = 16
+          val rightX = cursorX + gap
+          val leftX = cursorX - popupContentSize.width - gap
+          val maxX = (windowSize.width - popupContentSize.width - 8).coerceAtLeast(8)
+          val x = if (rightX <= maxX) rightX else leftX
             .coerceIn(8, (windowSize.width - popupContentSize.width - 8).coerceAtLeast(8))
-          val y = (anchorBounds.top + pointerPosition.y + 12)
+          val y = (cursorY - popupContentSize.height / 2)
             .coerceIn(8, (windowSize.height - popupContentSize.height - 8).coerceAtLeast(8))
           return IntOffset(x, y)
         }
@@ -93,7 +100,11 @@ fun PlayerListTooltipComponent(
           }
           if (players.size > MAX_TOOLTIP_PLAYERS) {
             Text(
-              stringResource(Res.string.raid_composition_more_players, players.size - MAX_TOOLTIP_PLAYERS),
+              String.format(
+                Locale.getDefault(),
+                stringResource(Res.string.raid_composition_more_players),
+                players.size - MAX_TOOLTIP_PLAYERS
+              ),
               color = RFColors.TextTertiary,
               fontSize = 9.sp,
               modifier = Modifier.padding(top = 4.dp)

@@ -570,7 +570,7 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="raid_composition_meta_dancer">Meta Tänzer</string>
     <string name="raid_composition_meta_ranged">Meta Fernkampf</string>
     <string name="raid_composition_other">Andere</string>
-    <string name="raid_composition_other_examples">Weitere Beispiele: %1$s</string>
+    <string name="raid_composition_other_examples">Weitere Beispiele umfassen: %1$s</string>
     <string name="raid_composition_none">keine</string>
     <string name="raid_composition_more_players">...und %d weitere</string>
     <string name="raid_no_raid_detected">Bitte treten Sie einem Raid bei, um Raid-Management-Funktionen zu nutzen. Sie müssen das Lua-Addon installiert haben. Fenster mit Titelleisten sind keine Overlays, erwägen Sie, sie auf einem anderen Monitor zu platzieren, um die Spiel-UI nicht zu verdecken.</string>
