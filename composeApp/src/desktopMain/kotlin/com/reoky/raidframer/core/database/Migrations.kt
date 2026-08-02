@@ -330,3 +330,9 @@ val MIGRATION_31_32 = object : Migration(31, 32) {
   }
 }
 
+// added previousSessionStart to config for item highlight persistence across sessions
+val MIGRATION_32_33 = object : Migration(32, 33) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN previousSessionStart INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}

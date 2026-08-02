@@ -126,7 +126,8 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
         lastSessionStart = System.currentTimeMillis(),
         lastSessionType = displayName,
         allowPVEDamage = allowPvEDamage,
-        allowOdeToRecoveryCountAsHeals = allowOdeToRecoveryCountAsHeals
+        allowOdeToRecoveryCountAsHeals = allowOdeToRecoveryCountAsHeals,
+        previousSessionStart = 0L
       )
     }
     PlayerCacheInteractor.startNewSession(displayName, allowPvEDamage)

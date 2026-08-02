@@ -1042,12 +1042,14 @@ private data class InventoryItem(
 private fun PlayerInventorySection(card: PlayerCard) {
   val cache = card.cache ?: return
   val lastSessionStart by remember { derivedStateOf { RFConfig.state.value.lastSessionStart } }
+  val previousSessionStart by remember { derivedStateOf { RFConfig.state.value.previousSessionStart } }
 
   // Build inventory items from all glider and utility item enum entries
-  val allItems = remember(cache, lastSessionStart) {
+  val allItems = remember(cache, lastSessionStart, previousSessionStart) {
     fun buildItem(nameRes: StringResource, iconRes: DrawableResource, packed: Long): InventoryItem {
       val lastUsed = packed.unpackItemUsageDate()
-      val usedInSession = lastSessionStart > 0L && lastUsed.time >= lastSessionStart
+      val sessionStart = if (lastSessionStart > 0L) lastSessionStart else previousSessionStart
+      val usedInSession = sessionStart > 0L && lastUsed.time >= sessionStart
       return InventoryItem(
         nameRes = nameRes,
         iconRes = iconRes,

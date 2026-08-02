@@ -374,7 +374,8 @@ object PlayerCacheInteractor : Interactor() {
         it.copy(
           allowPVEDamage = allowPvE,
           lastSessionStart = System.currentTimeMillis(),
-          lastSessionType = sessionType
+          lastSessionType = sessionType,
+          previousSessionStart = 0L
         )
       }
       // go big or go home: better solution that resetting, just clear on start instead
@@ -405,7 +406,8 @@ object PlayerCacheInteractor : Interactor() {
       )
     }
     // Reset start marker so a subsequent startNewSession knows there's nothing in memory to archive.
-    RFConfig.update { it.copy(lastSessionStart = 0L) }
+    val currentSessionStart = RFConfig.state.value.lastSessionStart
+    RFConfig.update { it.copy(lastSessionStart = 0L, previousSessionStart = currentSessionStart) }
     Log.info(TAG, "Recording session stopped")
   }
 
@@ -441,7 +443,8 @@ object PlayerCacheInteractor : Interactor() {
         lastSessionStart = 0L,
         lastSessionTitle = "",
         lastSessionType = "",
-        lastSessionDurationMs = 0L
+        lastSessionDurationMs = 0L,
+        previousSessionStart = 0L
       )
     }
     Log.info(TAG, "Recording session aborted — no data archived, lifetime totals reverted")

@@ -1186,7 +1186,8 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
       Button(
         onClick = {
           PlayerCacheInteractor.stopSession()
-          RFConfig.update { it.copy(lastSessionStart = 0L) }
+          val currentSessionStart = RFConfig.state.value.lastSessionStart
+          RFConfig.update { it.copy(lastSessionStart = 0L, previousSessionStart = currentSessionStart) }
         },
         colors = ButtonDefaults.buttonColors(RFColors.AccentRed)
       ) {
