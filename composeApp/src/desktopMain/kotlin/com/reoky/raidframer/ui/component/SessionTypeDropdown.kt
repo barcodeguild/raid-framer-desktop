@@ -32,7 +32,7 @@ val SESSION_TYPES = listOf(
   SESSION_TYPE_DONT_CARE,
   "Abyssal Attack / Luscas",
   "Aegis Island",
-  "Akash Invasion",
+  "Akasch Invasion",
   "Black Dragon",
   "CTF Arena",
   "Charbydis",
