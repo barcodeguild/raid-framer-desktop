@@ -277,9 +277,9 @@ private fun CompositionTab(
   val haranyaFormat = stringResource(Res.string.raid_haranya_faction)
   val nuiaFormat = stringResource(Res.string.raid_nuian_faction)
   val pirateFormat = stringResource(Res.string.raid_pirate_faction)
-  val haranyaLabel = haranyaFormat.substringBefore("%d").trimEnd()
-  val nuiaLabel = nuiaFormat.substringBefore("%d").trimEnd()
-  val pirateLabel = pirateFormat.substringBefore("%d").trimEnd()
+  val haranyaLabel = haranyaFormat.substringBefore("(").trimEnd()
+  val nuiaLabel = nuiaFormat.substringBefore("(").trimEnd()
+  val pirateLabel = pirateFormat.substringBefore("(").trimEnd()
   fun chart(label: String, players: List<PlayerCard>, color: Color): FactionComposition {
     val chartFaction = when (label) {
       haranyaLabel -> Faction.HARANYA
@@ -1043,9 +1043,9 @@ private fun NearbyGearTab(
   val avgHaranya = averageGearScore(filteredHaranya)
   val avgNuia = averageGearScore(filteredNuia)
   val avgPirate = averageGearScore(filteredPirate)
-  val haranyaLabel = stringResource(Res.string.raid_haranya_faction).substringBefore("%d").trimEnd()
-  val nuiaLabel = stringResource(Res.string.raid_nuian_faction).substringBefore("%d").trimEnd()
-  val pirateLabel = stringResource(Res.string.raid_pirate_faction).substringBefore("%d").trimEnd()
+  val haranyaLabel = stringResource(Res.string.raid_haranya_faction).substringBefore("(").trimEnd()
+  val nuiaLabel = stringResource(Res.string.raid_nuian_faction).substringBefore("(").trimEnd()
+  val pirateLabel = stringResource(Res.string.raid_pirate_faction).substringBefore("(").trimEnd()
 
   Column(
     modifier = Modifier
