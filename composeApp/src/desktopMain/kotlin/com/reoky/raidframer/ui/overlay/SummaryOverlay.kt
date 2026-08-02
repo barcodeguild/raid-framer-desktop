@@ -1025,7 +1025,6 @@ private fun DamageTakenHealsReceived(
     topDamageTaken
       .filter { it.sessionDamageTakenTotal > 0 }
       .sortedByDescending { it.sessionDamageTakenTotal }
-      .take(15)
       .map { card ->
         val ratio = if (card.sessionDamageTakenTotal > 0) {
           card.sessionHealsReceivedTotal.toFloat() / card.sessionDamageTakenTotal.toFloat()
