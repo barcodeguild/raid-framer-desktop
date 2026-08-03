@@ -98,9 +98,16 @@ fun SessionTypeDropdown(
   var expanded by remember { mutableStateOf(false) }
   var searchQuery by remember { mutableStateOf("") }
   val focusRequester = remember { FocusRequester() }
-  val filteredTypes = SESSION_TYPES.filter { type ->
-    searchQuery.isBlank() || type.contains(searchQuery.trim(), ignoreCase = true)
-  }
+  val normalizedQuery = searchQuery.trim()
+  val filteredTypes = SESSION_TYPES
+    .filter { type ->
+      normalizedQuery.isBlank() || type.contains(normalizedQuery, ignoreCase = true)
+    }
+    .sortedWith(
+      compareBy { type ->
+        !type.startsWith(normalizedQuery, ignoreCase = true)
+      }
+    )
 
   LaunchedEffect(expanded) {
     onExpandedChange?.invoke(expanded)
