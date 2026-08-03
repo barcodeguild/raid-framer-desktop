@@ -97,6 +97,7 @@ fun SessionTypeDropdown(
 ) {
   var expanded by remember { mutableStateOf(false) }
   var searchQuery by remember { mutableStateOf("") }
+  var highlightedIndex by remember { mutableStateOf(0) }
   val focusRequester = remember { FocusRequester() }
   val normalizedQuery = searchQuery.trim()
   val filteredTypes = SESSION_TYPES
@@ -114,6 +115,7 @@ fun SessionTypeDropdown(
 
     if (expanded) {
       searchQuery = ""
+      highlightedIndex = 0
       focusRequester.requestFocus()
     }
   }
@@ -125,20 +127,44 @@ fun SessionTypeDropdown(
   ) {
     TextField(
       value = if (expanded) searchQuery else selectedType,
-      onValueChange = { searchQuery = it },
+      onValueChange = {
+        searchQuery = it
+        highlightedIndex = 0
+      },
       readOnly = !expanded,
       modifier = Modifier
         .fillMaxWidth()
         .focusRequester(focusRequester)
         .onPreviewKeyEvent { event ->
-          if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
-            filteredTypes.firstOrNull()?.let { type ->
-              onTypeSelected(type)
-              expanded = false
-            }
-            true
-          } else {
+          if (event.type != KeyEventType.KeyDown) {
             false
+          } else {
+            when (event.key) {
+              Key.DirectionDown -> {
+                if (filteredTypes.isNotEmpty()) {
+                  highlightedIndex = (highlightedIndex + 1) % filteredTypes.size
+                }
+                true
+              }
+
+              Key.DirectionUp -> {
+                if (filteredTypes.isNotEmpty()) {
+                  highlightedIndex =
+                    (highlightedIndex - 1 + filteredTypes.size) % filteredTypes.size
+                }
+                true
+              }
+
+              Key.Enter -> {
+                filteredTypes.getOrNull(highlightedIndex)?.let { type ->
+                  onTypeSelected(type)
+                  expanded = false
+                }
+                true
+              }
+
+              else -> false
+            }
           }
         },
       colors = TextFieldDefaults.textFieldColors(
@@ -171,6 +197,13 @@ fun SessionTypeDropdown(
               onTypeSelected(type)
               expanded = false
             },
+            modifier = Modifier.background(
+              if (filteredTypes.indexOf(type) == highlightedIndex) {
+                RFColors.AccentRed.copy(alpha = 0.15f)
+              } else {
+                Color.Transparent
+              }
+            ),
             content = {
               Text(
                 text = type,
