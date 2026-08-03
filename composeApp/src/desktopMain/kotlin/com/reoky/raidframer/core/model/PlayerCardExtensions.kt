@@ -6,6 +6,7 @@ import com.reoky.raidframer.core.definitions.charmedDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithUtilityItemDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.distressedDebuffIds
 import com.reoky.raidframer.core.definitions.findDebuffByName
+import com.reoky.raidframer.core.definitions.findDebuffById
 import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithGliderDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.silencedDebuffIds
@@ -213,7 +214,8 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
  */
 fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
   //if (event.source == event.target) return this // skip self-applied debuffs
-  val isCC = findDebuffByName(event.debuff)?.consideredCC == true
+  val isCC = findDebuffById(event.debuffId)?.consideredCC == true
+    ?: findDebuffByName(event.debuff)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
@@ -245,7 +247,8 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   //if (event.source == event.target) return this // skip self-casts (e.g. self-inflicted debuffs)
-  val isCC = findDebuffByName(event.debuff)?.consideredCC == true
+  val isCC = findDebuffById(event.debuffId)?.consideredCC == true
+    ?: findDebuffByName(event.debuff)?.consideredCC == true
   val isCharm = event.debuffId in charmedDebuffIds
   val isDistress = event.debuffId in distressedDebuffIds
   val isSilence = event.debuffId in silencedDebuffIds
