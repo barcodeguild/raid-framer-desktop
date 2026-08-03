@@ -19,7 +19,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -89,9 +96,19 @@ fun SessionTypeDropdown(
   modifier: Modifier = Modifier
 ) {
   var expanded by remember { mutableStateOf(false) }
+  var searchQuery by remember { mutableStateOf("") }
+  val focusRequester = remember { FocusRequester() }
+  val filteredTypes = SESSION_TYPES.filter { type ->
+    searchQuery.isBlank() || type.contains(searchQuery.trim(), ignoreCase = true)
+  }
 
   LaunchedEffect(expanded) {
     onExpandedChange?.invoke(expanded)
+
+    if (expanded) {
+      searchQuery = ""
+      focusRequester.requestFocus()
+    }
   }
 
   ExposedDropdownMenuBox(
@@ -100,11 +117,23 @@ fun SessionTypeDropdown(
     modifier = modifier
   ) {
     TextField(
-      value = selectedType,
-      onValueChange = {},
-      readOnly = true,
+      value = if (expanded) searchQuery else selectedType,
+      onValueChange = { searchQuery = it },
+      readOnly = !expanded,
       modifier = Modifier
-        .fillMaxWidth(),
+        .fillMaxWidth()
+        .focusRequester(focusRequester)
+        .onPreviewKeyEvent { event ->
+          if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
+            filteredTypes.firstOrNull()?.let { type ->
+              onTypeSelected(type)
+              expanded = false
+            }
+            true
+          } else {
+            false
+          }
+        },
       colors = TextFieldDefaults.textFieldColors(
         textColor = RFColors.TextPrimary,
         backgroundColor = Color(0xFF1E1E1E),
@@ -129,7 +158,7 @@ fun SessionTypeDropdown(
           .fillMaxWidth()
           .border(1.dp, RFColors.CardBorder, RoundedCornerShape(8.dp))
       ) {
-        SESSION_TYPES.forEach { type ->
+        filteredTypes.forEach { type ->
           DropdownMenuItem(
             onClick = {
               onTypeSelected(type)
