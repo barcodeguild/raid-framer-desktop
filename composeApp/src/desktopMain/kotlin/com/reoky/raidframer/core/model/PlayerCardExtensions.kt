@@ -54,7 +54,7 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalDamage = (card.cache?.lifetimeTotalDamage ?: 0L) + event.damage
     ),
-    recentDamageEvents = (this.recentDamageEvents + event).takeLast(200),
+    recentDamageEvents = (this.recentDamageEvents + event).takeLast(500),
     sessionSpellDamageMap = run {
       val spellKey = event.spell.ifBlank { "Unknown" }
       this.sessionSpellDamageMap + (spellKey to ((this.sessionSpellDamageMap[spellKey] ?: 0L) + event.damage))
@@ -83,7 +83,7 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount
     ),
-    recentHealEvents = (this.recentHealEvents + event).takeLast(200),
+    recentHealEvents = (this.recentHealEvents + event).takeLast(500),
     sessionHealTotal = if (isOde && !allowOdeAsHeal) this.sessionHealTotal else this.sessionHealTotal + event.amount,
     sessionOdeHealsTotal = if (isOde) this.sessionOdeHealsTotal + event.amount else this.sessionOdeHealsTotal,
     sessionSpellHealMap = run {
@@ -289,7 +289,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       lifetimeTotalGliderDisables = if (isGliderDisables) (card.cache?.lifetimeTotalGliderDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderDisables ?: 0L),
       lifetimeTotalProvoked = if (isProvoked) (card.cache?.lifetimeTotalProvoked ?: 0L) + 1 else (card.cache?.lifetimeTotalProvoked ?: 0L)
     ),
-    recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
+    recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(500), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
     sessionCharmTotal = if (isCharm) sessionCharmTotal + 1 else sessionCharmTotal,
     sessionSongsTotal = if (isSongs) this.sessionSongsTotal + 1 else this.sessionSongsTotal,
@@ -406,7 +406,7 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
       lifetimeTotalCCDelivered = if (isBracingImmunity) (card.cache?.lifetimeTotalCCDelivered ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
       lifetimeTotalBracings = if (isBracingImmunity) (card.cache?.lifetimeTotalBracings ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L)
     ),
-    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
+    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(500), // optional to takeLast(n)
     sessionBuffTotal = this.sessionBuffTotal + 1,
     sessionBracingsTotal = if (isBracingImmunity) sessionBracingsTotal + 1 else sessionBracingsTotal,
     sessionCCTotal = if (isBracingImmunity) card.sessionCCTotal + 1 else card.sessionCCTotal,

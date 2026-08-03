@@ -328,7 +328,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Damage
               SortableEventListColumn(
                 title = stringResource(Res.string.player_card_recent_damage),
-                items = card.recentDamageEvents.take(200),
+                items = card.recentDamageEvents.sortedByDescending { it.timestamp }.take(500),
                 defaultSortDescending = true,
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -348,7 +348,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Heals
               SortableEventListColumn(
                 title = stringResource(Res.string.player_card_recent_heals),
-                items = card.recentHealEvents.take(200),
+                items = card.recentHealEvents.sortedByDescending { it.timestamp }.take(500),
                 defaultSortDescending = true,
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -368,7 +368,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Debuffs
               SortableEventListColumn(
                 title = stringResource(Res.string.player_card_recent_debuffs),
-                items = card.recentDebuffAppliedEvents.take(200),
+                items = card.recentDebuffAppliedEvents.sortedByDescending { it.timestamp }.take(500),
                 defaultSortDescending = true,
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -399,7 +399,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             ) {
               SortableEventListColumn(
                 title = stringResource(Res.string.player_card_recent_buffs),
-                items = card.recentBuffAppliedEvents.take(200),
+                items = card.recentBuffAppliedEvents.sortedByDescending { it.timestamp }.take(500),
                 defaultSortDescending = true,
                 modifier = Modifier.weight(1f)
               ) { evt ->
