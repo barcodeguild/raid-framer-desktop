@@ -852,10 +852,10 @@ private fun NewBuffsTab(
 ) {
   Row(modifier = Modifier.fillMaxSize()) {
     listOf(
-      Triple(stringResource(Res.string.summary_top_defiance), topDefiance, RFColors.defianceGold),
-      Triple(stringResource(Res.string.summary_top_garden_defiance), topGardenDefiance, RFColors.gardenDefianceBlue),
-      Triple(stringResource(Res.string.summary_top_purges), topPurges, RFColors.purgeGreen),
-      Triple(stringResource(Res.string.summary_top_sac_dances), topSacDances, RFColors.sacDancePurple)
+      Triple("\u2694 " + stringResource(Res.string.summary_top_defiance), topDefiance, RFColors.defianceGold),
+      Triple("\u2600 " + stringResource(Res.string.summary_top_garden_defiance), topGardenDefiance, RFColors.gardenDefianceBlue),
+      Triple("\u2728 " + stringResource(Res.string.summary_top_purges), topPurges, RFColors.purgeGreen),
+      Triple("\u2665 " + stringResource(Res.string.summary_top_sac_dances), topSacDances, RFColors.sacDancePurple)
     ).forEach { (title, cards, color) ->
       StatColumn(
         icon = "*",
