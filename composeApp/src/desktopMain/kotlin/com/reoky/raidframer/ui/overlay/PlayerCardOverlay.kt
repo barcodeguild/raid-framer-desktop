@@ -163,6 +163,10 @@ import raid_framer_desktop.composeapp.generated.resources.sky_emp_glider
 import raid_framer_desktop.composeapp.generated.resources.soul_neck
 import raid_framer_desktop.composeapp.generated.resources.twt_glider
 import raid_framer_desktop.composeapp.generated.resources.bd_glider
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_defiance
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_garden_defiance
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_purges
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_sac_dances
 import raid_framer_desktop.composeapp.generated.resources.player_inventory_time_ago
 import raid_framer_desktop.composeapp.generated.resources.time_ago_just_now
 import raid_framer_desktop.composeapp.generated.resources.time_ago_minutes_one
@@ -649,6 +653,10 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_crystal_wings), cache.lifetimeTotalCrystalWings, RFColors.crystalWingsBlue)
                   StatRow(stringResource(Res.string.player_card_stat_glider_disables), cache.lifetimeTotalGliderDisables, RFColors.gliderDisablesPink)
                   StatRow(stringResource(Res.string.player_card_stat_provoked), cache.lifetimeTotalProvoked, RFColors.provokesDeepPurple)
+                  StatRow(stringResource(Res.string.player_card_stat_defiance), cache.lifetimeTotalDefiance, RFColors.defianceGold)
+                  StatRow(stringResource(Res.string.player_card_stat_garden_defiance), cache.lifetimeTotalGardenDefiance, RFColors.gardenDefianceBlue)
+                  StatRow(stringResource(Res.string.player_card_stat_purges), cache.lifetimeTotalPurges, RFColors.purgeGreen)
+                  StatRow(stringResource(Res.string.player_card_stat_sac_dances), cache.lifetimeTotalSacDances, RFColors.sacDancePurple)
                   StatRow(stringResource(Res.string.player_card_stat_glider), cache.lifetimeTotalGliderUses, RFColors.gliderBlue)
                   StatRow(stringResource(Res.string.player_card_stat_items), cache.lifetimeTotalItemSkillsUsed, RFColors.itemSkillYellow)
                   StatRow(stringResource(Res.string.player_card_stat_potions), cache.lifetimeTotalPotionUsages, RFColors.potionTeal)

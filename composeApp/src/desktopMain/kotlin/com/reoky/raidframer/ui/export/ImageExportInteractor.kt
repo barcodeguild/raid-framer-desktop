@@ -96,6 +96,10 @@ import org.jetbrains.skia.Codec
 import org.jetbrains.skia.Data
 import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.svg.SVGDOM
+import raid_framer_desktop.composeapp.generated.resources.summary_top_defiance
+import raid_framer_desktop.composeapp.generated.resources.summary_top_garden_defiance
+import raid_framer_desktop.composeapp.generated.resources.summary_top_purges
+import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dances
 import javax.imageio.ImageIO
 
 object ImageExportInteractor {
@@ -149,6 +153,10 @@ object ImageExportInteractor {
   private val PROVOKED_COLOR = toAwtColor(RFColors.provokesDeepPurple)
   private val TIGER_STRIKE_COLOR = toAwtColor(RFColors.techNoTigerStrikes)
   private val FREEZE_COLOR = toAwtColor(RFColors.freezeIceBlue)
+  private val DEFIANCE_COLOR = toAwtColor(RFColors.defianceGold)
+  private val GARDEN_DEFIANCE_COLOR = toAwtColor(RFColors.gardenDefianceBlue)
+  private val PURGE_COLOR = toAwtColor(RFColors.purgeGreen)
+  private val SAC_DANCE_COLOR = toAwtColor(RFColors.sacDancePurple)
 
   /**
    * Maps a heal ratio (0.0 = 0% healed, 1.0 = 100% healed) to a color gradient:
@@ -324,7 +332,11 @@ object ImageExportInteractor {
     val topBdGlider: List<PlayerCard>,
     val topCrystalWings: List<PlayerCard>,
     val topGliderDisables: List<PlayerCard>,
-    val topProvoked: List<PlayerCard>,
+     val topProvoked: List<PlayerCard>,
+     val topDefiance: List<PlayerCard>,
+     val topGardenDefiance: List<PlayerCard>,
+     val topPurges: List<PlayerCard>,
+     val topSacDances: List<PlayerCard>,
     // New faction comparison data
     val factionTigerStrikeData: Map<String, Float>,
     val factionFreezeData: Map<String, Float>,
@@ -443,6 +455,10 @@ object ImageExportInteractor {
       topCrystalWings    = PlayerCacheInteractor.topCrystalWings.value.take(15),
       topGliderDisables  = PlayerCacheInteractor.topGliderDisables.value.take(15),
       topProvoked        = PlayerCacheInteractor.topProvoked.value.take(15),
+      topDefiance        = PlayerCacheInteractor.topDefiance.value.take(15),
+      topGardenDefiance  = PlayerCacheInteractor.topGardenDefiance.value.take(15),
+      topPurges          = PlayerCacheInteractor.topPurges.value.take(15),
+      topSacDances       = PlayerCacheInteractor.topSacDances.value.take(15),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -1196,6 +1212,15 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_top_provokes), "\u2757", ColumnData.CardData(data.topProvoked, { it.sessionProvokedTotal.toString() }, PROVOKED_COLOR)),
       Triple(getString(Res.string.summary_top_tiger_strikes), "\u26A1", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
       Triple(getString(Res.string.summary_top_freezes), "\u2744", ColumnData.CardData(data.topFreezes, { it.sessionFreezeTotal.toString() }, FREEZE_COLOR)),
+    )))
+
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_defiance), "D", ColumnData.CardData(data.topDefiance, { it.sessionDefianceTotal.toString() }, DEFIANCE_COLOR)),
+      Triple(getString(Res.string.summary_top_garden_defiance), "B", ColumnData.CardData(data.topGardenDefiance, { it.sessionGardenDefianceTotal.toString() }, GARDEN_DEFIANCE_COLOR)),
+      Triple(getString(Res.string.summary_top_purges), "P", ColumnData.CardData(data.topPurges, { it.sessionPurgeTotal.toString() }, PURGE_COLOR)),
+    )))
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_sac_dances), "S", ColumnData.CardData(data.topSacDances, { it.sessionSacDanceTotal.toString() }, SAC_DANCE_COLOR)),
     )))
 
     return tripletBlocks

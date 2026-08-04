@@ -313,6 +313,7 @@
     <string name="tech_cc_rival">控制对手？</string>
     <string name="tech_no_silences">无沉默？</string>
     <string name="tech_no_tiger_strikes">无猛虎打击？</string>
+    <string name="tech_no_defiance">无霸气？</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">战斗总结 (%1$s)</string>
@@ -381,6 +382,15 @@
     <string name="summary_tab_utility_debuffs">工具减益</string>
     <string name="summary_tab_glider_debuffs">滑翔翼减益</string>
     <string name="summary_tab_special_debuffs">特殊减益</string>
+    <string name="summary_tab_new_buffs">特殊增益</string>
+    <string name="player_card_stat_defiance">霸气</string>
+    <string name="player_card_stat_garden_defiance">半神的教诲</string>
+    <string name="player_card_stat_purges">净化</string>
+    <string name="player_card_stat_sac_dances">牺牲之舞</string>
+    <string name="summary_top_defiance">霸气排行</string>
+    <string name="summary_top_garden_defiance">半神的教诲排行</string>
+    <string name="summary_top_purges">净化排行</string>
+    <string name="summary_top_sac_dances">牺牲之舞排行</string>
     <string name="summary_tab_spells">技能</string>
     <string name="summary_tab_buffs">增益效果</string>
     <string name="summary_tab_ode">赞歌</string>

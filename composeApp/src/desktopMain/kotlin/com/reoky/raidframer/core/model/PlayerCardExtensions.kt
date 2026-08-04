@@ -22,11 +22,15 @@ import com.reoky.raidframer.core.definitions.bdGliderDebuffIds
 import com.reoky.raidframer.core.definitions.crystalWingsDebuffIds
 import com.reoky.raidframer.core.definitions.gliderDisablesDebuffIds
 import com.reoky.raidframer.core.definitions.provokedDebuffIds
+import com.reoky.raidframer.core.definitions.defianceBuffIds
+import com.reoky.raidframer.core.definitions.gardenDefianceCastId
+import com.reoky.raidframer.core.definitions.purgeBuffId
 import com.reoky.raidframer.core.definitions.blacklistedDebuffIds
 import com.reoky.raidframer.core.definitions.blacklistedDebuffNames
 import com.reoky.raidframer.core.definitions.blacklistedBuffNames
 import com.reoky.raidframer.core.definitions.copiedWithPotionDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.isOdeToRecovery
+import com.reoky.raidframer.core.definitions.sacrificeBuffIds
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 /**
@@ -169,6 +173,7 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
  */
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
   val isMarasNineTails = event.spell == "Charm (Rider Skill)" && (PlayerCacheInteractor.isRealPlayer(event.target) || RFConfig.state.value.allowPVEDamage)
+  val isGardenDefiance = event.spellId == gardenDefianceCastId
 
   var card = this.copiedWithUtilityItemDetectionMiddleWare(event) // handles item spells
   card = card.copiedWithPotionDetectionMiddleWare(event) // increments potion usages
@@ -177,9 +182,11 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCharms = if (isMarasNineTails) (card.cache?.lifetimeTotalCharms ?: 0) + 1 else (card.cache?.lifetimeTotalCharms ?: 0)
+      lifetimeTotalCharms = if (isMarasNineTails) (card.cache?.lifetimeTotalCharms ?: 0) + 1 else (card.cache?.lifetimeTotalCharms ?: 0),
+      lifetimeTotalGardenDefiance = if (isGardenDefiance) (card.cache?.lifetimeTotalGardenDefiance ?: 0L) + 1 else (card.cache?.lifetimeTotalGardenDefiance ?: 0L)
     ),
     sessionCharmTotal = if (isMarasNineTails) card.sessionCharmTotal + 1 else card.sessionCharmTotal,
+    sessionGardenDefianceTotal = if (isGardenDefiance) card.sessionGardenDefianceTotal + 1 else card.sessionGardenDefianceTotal,
     recentCastSuccessfulCastEvents = (card.recentCastSuccessfulCastEvents + event).takeLast(200)
   )
 }
@@ -189,10 +196,11 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
  */
 fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
   val card = this.copiedWithGliderDetectionMiddleWare(event) // detects glider usage via self-applied buffs
+
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
-      lastSeen = event.timestamp
+      lastSeen = event.timestamp,
     ),
     recentBuffGainedEvents = (this.recentBuffGainedEvents + event).takeLast(200) // optional to takeLast(n)
   )
@@ -287,7 +295,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       lifetimeTotalBdGlider = if (isBdGlider) (card.cache?.lifetimeTotalBdGlider ?: 0L) + 1 else (card.cache?.lifetimeTotalBdGlider ?: 0L),
       lifetimeTotalCrystalWings = if (isCrystalWings) (card.cache?.lifetimeTotalCrystalWings ?: 0L) + 1 else (card.cache?.lifetimeTotalCrystalWings ?: 0L),
       lifetimeTotalGliderDisables = if (isGliderDisables) (card.cache?.lifetimeTotalGliderDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderDisables ?: 0L),
-      lifetimeTotalProvoked = if (isProvoked) (card.cache?.lifetimeTotalProvoked ?: 0L) + 1 else (card.cache?.lifetimeTotalProvoked ?: 0L)
+      lifetimeTotalProvoked = if (isProvoked) (card.cache?.lifetimeTotalProvoked ?: 0L) + 1 else (card.cache?.lifetimeTotalProvoked ?: 0L),
     ),
     recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(500), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
@@ -397,6 +405,9 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   //if (event.source == event.target) return this // skip self-casts (e.g. resurgence on yourself)
   val isBracingImmunity = event.buffId in bracingBlastImmunityBuffIds
+  val isDefiance = event.buffId in defianceBuffIds
+  val isSacDance = event.buffId in sacrificeBuffIds
+  val isPurge = event.buffId == purgeBuffId
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
@@ -404,10 +415,16 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalBuffsApplied = (card.cache?.lifetimeTotalBuffsApplied ?: 0L) + 1,
       lifetimeTotalCCDelivered = if (isBracingImmunity) (card.cache?.lifetimeTotalCCDelivered ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
-      lifetimeTotalBracings = if (isBracingImmunity) (card.cache?.lifetimeTotalBracings ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L)
+      lifetimeTotalBracings = if (isBracingImmunity) (card.cache?.lifetimeTotalBracings ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L),
+      lifetimeTotalDefiance = if (isDefiance) (card.cache?.lifetimeTotalDefiance ?: 0L) + 1 else (card.cache?.lifetimeTotalDefiance ?: 0L),
+      lifetimeTotalSacDances = if (isSacDance) (card.cache?.lifetimeTotalSacDances ?: 0L) + 1 else (card.cache?.lifetimeTotalSacDances ?: 0L),
+      lifetimeTotalPurges = if (isPurge) (card.cache?.lifetimeTotalPurges ?: 0L) + 1 else (card.cache?.lifetimeTotalPurges ?: 0L)
     ),
     recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(500), // optional to takeLast(n)
     sessionBuffTotal = this.sessionBuffTotal + 1,
+    sessionDefianceTotal = if (isDefiance) card.sessionDefianceTotal + 1 else card.sessionDefianceTotal,
+    sessionSacDanceTotal = if (isSacDance) card.sessionSacDanceTotal + 1 else card.sessionSacDanceTotal,
+    sessionPurgeTotal = if (isPurge) sessionPurgeTotal + 1 else sessionPurgeTotal,
     sessionBracingsTotal = if (isBracingImmunity) sessionBracingsTotal + 1 else sessionBracingsTotal,
     sessionCCTotal = if (isBracingImmunity) card.sessionCCTotal + 1 else card.sessionCCTotal,
     // --- Buff adjacency ---

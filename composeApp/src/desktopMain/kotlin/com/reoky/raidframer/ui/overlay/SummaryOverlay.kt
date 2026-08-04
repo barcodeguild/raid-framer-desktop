@@ -72,6 +72,7 @@ import raid_framer_desktop.composeapp.generated.resources.summary_glider_disable
 import raid_framer_desktop.composeapp.generated.resources.summary_provokes_by_faction
 import raid_framer_desktop.composeapp.generated.resources.summary_tiger_strikes_by_faction
 import raid_framer_desktop.composeapp.generated.resources.summary_freezes_by_faction
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_new_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_trips
 import raid_framer_desktop.composeapp.generated.resources.summary_top_bubbles
 import raid_framer_desktop.composeapp.generated.resources.summary_top_bracings
@@ -88,7 +89,9 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
 import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
 import raid_framer_desktop.composeapp.generated.resources.summary_top_debuffs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_distresses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_garden_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_gamers
 import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_item_uses
 import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_spells_damage
@@ -108,6 +111,8 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_haranya_pe
 import raid_framer_desktop.composeapp.generated.resources.summary_top_nuia_performance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_pirate_performance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_potion_drinkers
+import raid_framer_desktop.composeapp.generated.resources.summary_top_purges
+import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dances
 import raid_framer_desktop.composeapp.generated.resources.summary_top_silences
 import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
 import java.text.DateFormat
@@ -178,6 +183,10 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val topCrystalWings by PlayerCacheInteractor.topCrystalWings.collectAsState()
   val topGliderDisables by PlayerCacheInteractor.topGliderDisables.collectAsState()
   val topProvoked by PlayerCacheInteractor.topProvoked.collectAsState()
+  val topDefiance by PlayerCacheInteractor.topDefiance.collectAsState()
+  val topGardenDefiance by PlayerCacheInteractor.topGardenDefiance.collectAsState()
+  val topPurges by PlayerCacheInteractor.topPurges.collectAsState()
+  val topSacDances by PlayerCacheInteractor.topSacDances.collectAsState()
 
   // New faction comparison flows
   val factionTigerStrikeData by PlayerCacheInteractor.factionTigerStrikeComparisonAll.collectAsState()
@@ -203,6 +212,7 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     stringResource(Res.string.summary_tab_utility_debuffs),
     stringResource(Res.string.summary_tab_glider_debuffs),
     stringResource(Res.string.summary_tab_special_debuffs),
+    stringResource(Res.string.summary_tab_new_buffs),
     stringResource(Res.string.summary_tab_spells),
     stringResource(Res.string.summary_tab_buffs),
     stringResource(Res.string.summary_tab_ode),
@@ -368,54 +378,55 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           topFreezes = topFreezes,
           wm = wm
         )
-        6 -> SpellDamageByFaction(
+         6 -> NewBuffsTab(topDefiance, topGardenDefiance, topPurges, topSacDances, wm)
+         7 -> SpellDamageByFaction(
           topDamageSpellsHaranya = topDamageSpellsHaranya,
           topDamageSpellsNuia = topDamageSpellsNuia,
           topDamageSpellsPirate = topDamageSpellsPirate,
           wm = wm
         )
-        7 -> BuffsDebuffsTab(
+         8 -> BuffsDebuffsTab(
           topDebuffs = topDebuffs,
           topSongs = topSongs,
           topBuffers = topBuffers,
           wm = wm
         )
-        8 -> OdeTab(
+         9 -> OdeTab(
           topOdeHaranya = topOdeHaranya,
           topOdeNuia = topOdeNuia,
           topOdePirate = topOdePirate,
           wm = wm
         )
-        9 -> KillsDeathsTab(
+         10 -> KillsDeathsTab(
           topKillsHaranya = topKillsHaranya,
           topKillsNuia = topKillsNuia,
           topKillsPirate = topKillsPirate,
           wm = wm
         )
-        10 -> DamageTakenHealsReceived(
+         11 -> DamageTakenHealsReceived(
           topDamageTaken = topDamageTaken,
           topHealsReceived = tophealsReceived,
           wm = wm
         )
-        11 -> UtilityItemsByFaction(
+         12 -> UtilityItemsByFaction(
           topItemUsesHaranya = topItemUsesHaranya,
           topItemUsesNuia = topItemUsesNuia,
           topItemUsesPirate = topItemUsesPirate,
           wm = wm
         )
-        12 -> UtilityItemsTab(
+         13 -> UtilityItemsTab(
           topPotters = topPotters,
           topGliderGamers = topGliderGamers,
           topItemSkillCasters = topItemSkillCasters,
           wm = wm
         )
-        13 -> PlayerBuildsTab(
+         14 -> PlayerBuildsTab(
           buildCountsHaranya = buildCountsHaranya,
           buildCountsNuia = buildCountsNuia,
           buildCountsPirate = buildCountsPirate,
           wm = wm
         )
-        14 -> PerformanceTab(
+         15 -> PerformanceTab(
           topPerformanceHaranya = topPerformanceHaranya,
           topPerformanceNuia = topPerformanceNuia,
           topPerformancePirate = topPerformancePirate,
@@ -827,6 +838,43 @@ private fun KeyDebuffsTab(
     ) { card ->
       AppState.selectPlayer(card.name)
       wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+  }
+}
+
+@Composable
+private fun NewBuffsTab(
+  topDefiance: List<PlayerCard>,
+  topGardenDefiance: List<PlayerCard>,
+  topPurges: List<PlayerCard>,
+  topSacDances: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    listOf(
+      Triple(stringResource(Res.string.summary_top_defiance), topDefiance, RFColors.defianceGold),
+      Triple(stringResource(Res.string.summary_top_garden_defiance), topGardenDefiance, RFColors.gardenDefianceBlue),
+      Triple(stringResource(Res.string.summary_top_purges), topPurges, RFColors.purgeGreen),
+      Triple(stringResource(Res.string.summary_top_sac_dances), topSacDances, RFColors.sacDancePurple)
+    ).forEach { (title, cards, color) ->
+      StatColumn(
+        icon = "*",
+        title = title,
+        cards = cards,
+        valueExtractor = { card ->
+          when (cards) {
+            topDefiance -> card.sessionDefianceTotal.toString()
+            topGardenDefiance -> card.sessionGardenDefianceTotal.toString()
+            topPurges -> card.sessionPurgeTotal.toString()
+            else -> card.sessionSacDanceTotal.toString()
+          }
+        },
+        valueColor = color,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        AppState.selectPlayer(card.name)
+        wm?.openWindow(OverlayType.PLAYER_CARD)
+      }
     }
   }
 }

@@ -514,7 +514,11 @@ object PlayerCacheInteractor : Interactor() {
           totalBdGlider = card.sessionBdGliderTotal,
           totalCrystalWings = card.sessionCrystalWingsTotal,
           totalGliderDisables = card.sessionGliderDisablesTotal,
-          totalProvoked = card.sessionProvokedTotal
+           totalProvoked = card.sessionProvokedTotal
+           ,totalDefiance = card.sessionDefianceTotal
+           ,totalGardenDefiance = card.sessionGardenDefianceTotal
+           ,totalPurges = card.sessionPurgeTotal
+           ,totalSacDances = card.sessionSacDanceTotal
         )
         RFDao.playerSessionDao.insert(entity)
         written++
@@ -556,7 +560,11 @@ object PlayerCacheInteractor : Interactor() {
         card.sessionBdGliderTotal != 0 ||
         card.sessionCrystalWingsTotal != 0 ||
         card.sessionGliderDisablesTotal != 0 ||
-        card.sessionProvokedTotal != 0
+         card.sessionProvokedTotal != 0
+         || card.sessionDefianceTotal != 0
+         || card.sessionGardenDefianceTotal != 0
+         || card.sessionPurgeTotal != 0
+         || card.sessionSacDanceTotal != 0
   }
 
   /**
@@ -610,7 +618,11 @@ object PlayerCacheInteractor : Interactor() {
       totalBdGlider = sessions.sumOf { it.totalBdGlider },
       totalCrystalWings = sessions.sumOf { it.totalCrystalWings },
       totalGliderDisables = sessions.sumOf { it.totalGliderDisables },
-      totalProvoked = sessions.sumOf { it.totalProvoked }
+       totalProvoked = sessions.sumOf { it.totalProvoked },
+       totalDefiance = sessions.sumOf { it.totalDefiance },
+       totalGardenDefiance = sessions.sumOf { it.totalGardenDefiance },
+       totalPurges = sessions.sumOf { it.totalPurges },
+       totalSacDances = sessions.sumOf { it.totalSacDances }
     )
   }
 
@@ -1452,6 +1464,22 @@ object PlayerCacheInteractor : Interactor() {
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topDefiance: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionDefianceTotal > 0 }.sortedByDescending { card -> card.sessionDefianceTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topGardenDefiance: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionGardenDefianceTotal > 0 }.sortedByDescending { card -> card.sessionGardenDefianceTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topPurges: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionPurgeTotal > 0 }.sortedByDescending { card -> card.sessionPurgeTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topSacDances: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionSacDanceTotal > 0 }.sortedByDescending { card -> card.sessionSacDanceTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->

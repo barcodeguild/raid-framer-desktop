@@ -130,5 +130,9 @@ data class PlayerCard (
   val sessionCrystalWingsTotal: Int = 0,
   val sessionGliderDisablesTotal: Int = 0,
   val sessionProvokedTotal: Int = 0,
+  val sessionDefianceTotal: Int = 0,
+  val sessionGardenDefianceTotal: Int = 0,
+  val sessionPurgeTotal: Int = 0,
+  val sessionSacDanceTotal: Int = 0,
 )
 

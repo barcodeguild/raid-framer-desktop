@@ -336,3 +336,17 @@ val MIGRATION_32_33 = object : Migration(32, 33) {
     connection.prepare("ALTER TABLE config ADD COLUMN previousSessionStart INTEGER NOT NULL DEFAULT 0").use { it.step() }
   }
 }
+
+// added defiance, garden defiance, purge, and sacrifice dance totals (08/04/26)
+val MIGRATION_33_34 = object : Migration(33, 34) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalGardenDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPurges INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalSacDances INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalGardenDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPurges INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalSacDances INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}

@@ -44,6 +44,11 @@ val bdGliderDebuffIds = listOf(6670)
 val crystalWingsDebuffIds = listOf(8000605)
 val gliderDisablesDebuffIds = listOf(24544, 22602)
 val provokedDebuffIds = listOf(502, 24060)
+val defianceBuffIds = listOf(22968, 30018)
+val gardenDefianceCastId = 44385
+// Purge cast ID: 10712. Purge is counted from the gained buff ID below.
+val purgeBuffId = 23347
+val sacrificeBuffIds = listOf(30098, 30137, 30141, 30142)
 
 data class DebuffsDefinition(
   override val debuffs: List<Debuff> = listOf(

@@ -28,6 +28,7 @@ import raid_framer_desktop.composeapp.generated.resources.tech_needs_heals
 import raid_framer_desktop.composeapp.generated.resources.tech_spell_dominance
 import raid_framer_desktop.composeapp.generated.resources.tech_no_silences
 import raid_framer_desktop.composeapp.generated.resources.tech_no_tiger_strikes
+import raid_framer_desktop.composeapp.generated.resources.tech_no_defiance
 
 object TechnicalAnalysisHelper {
 
@@ -90,6 +91,11 @@ object TechnicalAnalysisHelper {
       if (SkillTreeType.DEFENSE in spec.trees && card.sessionDistressTotal == 0) {
         nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_distress_combo, color = RFColors.techDistressCombo, category = CAT_ALL))
       }
+    }
+
+    // No Defiance? - no regular or garden defiance this session
+    cards.filter { it.isRealPlayer && it.sessionDefianceTotal == 0 && it.sessionGardenDefianceTotal == 0 }.forEach { card ->
+      nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_no_defiance, color = RFColors.defianceGold, category = CAT_ALL))
     }
 
     return TechAnalysisResult(

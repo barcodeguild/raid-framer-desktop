@@ -313,6 +313,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="tech_cc_rival">CC-Rivale?</string>
     <string name="tech_no_silences">Keine Stille?</string>
     <string name="tech_no_tiger_strikes">Keine Tigerschläge?</string>
+    <string name="tech_no_defiance">Keine Trotz?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Kampfzusammenfassung (%1$s)</string>
@@ -381,6 +382,15 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_tab_utility_debuffs">Utility-Debuffs</string>
     <string name="summary_tab_glider_debuffs">Gleiter-Debuffs</string>
     <string name="summary_tab_special_debuffs">Spezial-Debuffs</string>
+    <string name="summary_tab_new_buffs">Spezial-Buffs</string>
+    <string name="player_card_stat_defiance">Trotz</string>
+    <string name="player_card_stat_garden_defiance">Göttlicher Segen</string>
+    <string name="player_card_stat_purges">Reinigungen</string>
+    <string name="player_card_stat_sac_dances">Opfertanz</string>
+    <string name="summary_top_defiance">Top Trotz</string>
+    <string name="summary_top_garden_defiance">Top Göttlicher Segen</string>
+    <string name="summary_top_purges">Top Reinigungen</string>
+    <string name="summary_top_sac_dances">Top Opfertänze</string>
     <string name="summary_tab_spells">Zauber</string>
     <string name="summary_tab_buffs">Stärkungszauber</string>
     <string name="summary_tab_ode">Ode</string>

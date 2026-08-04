@@ -99,6 +99,10 @@ object RFColors {
   val crystalWingsBlue = Color(0xFF29B6F6)
   val gliderDisablesPink = Color(0xFFEC407A)
   val provokesDeepPurple = Color(0xFF5C6BC0)
+  val defianceGold = Color(0xFFFFD54F)
+  val gardenDefianceBlue = Color(0xFF42A5F5)
+  val purgeGreen = Color(0xFF66BB6A)
+  val sacDancePurple = Color(0xFFBA68C8)
 
   // Overlay background
   val OverlayBackground = Color(0xFF121212)

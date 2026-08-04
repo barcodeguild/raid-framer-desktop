@@ -313,6 +313,7 @@
     <string name="tech_cc_rival">КК соперник?</string>
     <string name="tech_no_silences">Нет немоты?</string>
     <string name="tech_no_tiger_strikes">Удары тигра?</string>
+    <string name="tech_no_defiance">Нет Дефианса</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Боевая сводка (%1$s)</string>
@@ -381,6 +382,15 @@
     <string name="summary_tab_utility_debuffs">Утилитарные дебаффы</string>
     <string name="summary_tab_glider_debuffs">Дебаффы планера</string>
     <string name="summary_tab_special_debuffs">Особые дебаффы</string>
+    <string name="summary_tab_new_buffs">Особые баффы</string>
+    <string name="player_card_stat_defiance">Неповиновение</string>
+    <string name="player_card_stat_garden_defiance">Божественное благословение</string>
+    <string name="player_card_stat_purges">Очищения</string>
+    <string name="player_card_stat_sac_dances">Танец жертвоприношения</string>
+    <string name="summary_top_defiance">Топ неповиновения</string>
+    <string name="summary_top_garden_defiance">Топ божественного благословения</string>
+    <string name="summary_top_purges">Топ очищений</string>
+    <string name="summary_top_sac_dances">Топ жертвенных танцев</string>
     <string name="summary_tab_spells">Заклинания</string>
     <string name="summary_tab_buffs">Баффы</string>
     <string name="summary_tab_ode">Ода</string>

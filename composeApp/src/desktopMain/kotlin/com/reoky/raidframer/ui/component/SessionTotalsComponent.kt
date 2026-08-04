@@ -52,6 +52,10 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_bd_gl
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crystal_wings
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_glider_disables
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_provoked
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_defiance
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_garden_defiance
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_purges
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_sac_dances
 
 // View-model-agnostic shape so the totals card can render either the in-memory
 // session or an aggregated historical one without branching on the source.
@@ -82,7 +86,11 @@ data class SessionTotals(
   val bdGlider: Int,
   val crystalWings: Int,
   val gliderDisables: Int,
-  val provoked: Int
+  val provoked: Int,
+  val defiance: Int,
+  val gardenDefiance: Int,
+  val purges: Int,
+  val sacDances: Int
 ) {
   companion object {
     fun fromPlayerCard(card: PlayerCard) = SessionTotals(
@@ -112,7 +120,11 @@ data class SessionTotals(
       bdGlider = card.sessionBdGliderTotal,
       crystalWings = card.sessionCrystalWingsTotal,
       gliderDisables = card.sessionGliderDisablesTotal,
-      provoked = card.sessionProvokedTotal
+       provoked = card.sessionProvokedTotal,
+       defiance = card.sessionDefianceTotal,
+       gardenDefiance = card.sessionGardenDefianceTotal,
+       purges = card.sessionPurgeTotal,
+       sacDances = card.sessionSacDanceTotal
     )
 
     fun fromEntity(entity: PlayerSessionTotalsEntity) = SessionTotals(
@@ -142,7 +154,11 @@ data class SessionTotals(
       bdGlider = entity.totalBdGlider,
       crystalWings = entity.totalCrystalWings,
       gliderDisables = entity.totalGliderDisables,
-      provoked = entity.totalProvoked
+       provoked = entity.totalProvoked,
+       defiance = entity.totalDefiance,
+       gardenDefiance = entity.totalGardenDefiance,
+       purges = entity.totalPurges,
+       sacDances = entity.totalSacDances
     )
   }
 }
@@ -169,6 +185,10 @@ fun SessionStatRows(totals: SessionTotals) {
   StatRow(stringResource(Res.string.player_card_stat_crystal_wings), totals.crystalWings.toLong(), RFColors.crystalWingsBlue)
   StatRow(stringResource(Res.string.player_card_stat_glider_disables), totals.gliderDisables.toLong(), RFColors.gliderDisablesPink)
   StatRow(stringResource(Res.string.player_card_stat_provoked), totals.provoked.toLong(), RFColors.provokesDeepPurple)
+  StatRow(stringResource(Res.string.player_card_stat_defiance), totals.defiance.toLong(), RFColors.defianceGold)
+  StatRow(stringResource(Res.string.player_card_stat_garden_defiance), totals.gardenDefiance.toLong(), RFColors.gardenDefianceBlue)
+  StatRow(stringResource(Res.string.player_card_stat_purges), totals.purges.toLong(), RFColors.purgeGreen)
+  StatRow(stringResource(Res.string.player_card_stat_sac_dances), totals.sacDances.toLong(), RFColors.sacDancePurple)
   StatRow(stringResource(Res.string.player_card_stat_glider), totals.glider.toLong(), RFColors.gliderBlue)
   StatRow(stringResource(Res.string.player_card_stat_items), totals.items.toLong(), RFColors.itemSkillYellow)
   StatRow(stringResource(Res.string.player_card_stat_potions), totals.potions.toLong(), RFColors.potionTeal)
@@ -238,6 +258,10 @@ fun CompactSessionTotals(
     CompactStatRow(stringResource(Res.string.player_card_stat_crystal_wings), sessionTotals.crystalWings.toLong(), RFColors.crystalWingsBlue)
     CompactStatRow(stringResource(Res.string.player_card_stat_glider_disables), sessionTotals.gliderDisables.toLong(), RFColors.gliderDisablesPink)
     CompactStatRow(stringResource(Res.string.player_card_stat_provoked), sessionTotals.provoked.toLong(), RFColors.provokesDeepPurple)
+    CompactStatRow(stringResource(Res.string.player_card_stat_defiance), sessionTotals.defiance.toLong(), RFColors.defianceGold)
+    CompactStatRow(stringResource(Res.string.player_card_stat_garden_defiance), sessionTotals.gardenDefiance.toLong(), RFColors.gardenDefianceBlue)
+    CompactStatRow(stringResource(Res.string.player_card_stat_purges), sessionTotals.purges.toLong(), RFColors.purgeGreen)
+    CompactStatRow(stringResource(Res.string.player_card_stat_sac_dances), sessionTotals.sacDances.toLong(), RFColors.sacDancePurple)
     CompactStatRow(stringResource(Res.string.player_card_stat_glider), sessionTotals.glider.toLong(), RFColors.gliderBlue)
     CompactStatRow(stringResource(Res.string.player_card_stat_items), sessionTotals.items.toLong(), RFColors.itemSkillYellow)
     CompactStatRow(stringResource(Res.string.player_card_stat_potions), sessionTotals.potions.toLong(), RFColors.potionTeal)
