@@ -71,6 +71,7 @@ fun initialize(): AppDatabase {
   .addMigrations(MIGRATION_31_32) // 07/31/26 added packed usage fields for all utility items (snake, BD, anthalon, library, serpentis, mistsong)
    .addMigrations(MIGRATION_32_33) // 08/02/26 added previousSessionStart to config for item highlight persistence across sessions
    .addMigrations(MIGRATION_33_34) // 08/04/26 added defiance, garden defiance, purge, and sacrifice dance totals
+   .addMigrations(MIGRATION_34_35) // added PNG export background settings
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

@@ -4,10 +4,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.sin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.DragInteraction
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,11 +33,9 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.ConfigEntity
 import com.reoky.raidframer.core.locale.AppLocale
 import com.reoky.raidframer.core.helpers.RFColors
-import com.reoky.raidframer.core.helpers.colorToSliderValue
 import com.reoky.raidframer.core.helpers.formatFileSize
 import com.reoky.raidframer.core.helpers.getDirectorySizeBytes
 import com.reoky.raidframer.core.helpers.getExportDirectory
-import com.reoky.raidframer.core.helpers.sliderValueToColor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableInteractor
@@ -56,16 +53,22 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.PatchNotesComponent
+import com.reoky.raidframer.ui.component.ColorSliderComponent
+import com.reoky.raidframer.ui.component.DragLockedSlider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.painterResource
 import raid_framer_desktop.composeapp.generated.resources.*
 import java.awt.Desktop
+import java.awt.image.BufferedImage
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale.getDefault
 import kotlin.system.exitProcess
+import javax.imageio.ImageIO
 
 @Composable
 private fun SettingsSection(
@@ -249,7 +252,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
       CombatOverlaySettingsPanel()
 
-      ExportSettingsPanel(wm)
+       ExportSettingsPanel(wm)
+       ExportBackgroundSettingsPanel()
 
       SeedTableSettingsPanel(wm)
 
@@ -441,24 +445,6 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
   val config by RFConfig.state.collectAsState()
   val dragLock = LocalDragLock.current
 
-  val sliderInteractionSource = remember { MutableInteractionSource() }
-  val isSliderDragging = remember { mutableStateOf(false) }
-  LaunchedEffect(sliderInteractionSource) {
-    sliderInteractionSource.interactions.collect { interaction ->
-      when (interaction) {
-        is DragInteraction.Start -> {
-          dragLock.value = true
-          isSliderDragging.value = true
-        }
-        is DragInteraction.Stop,
-        is DragInteraction.Cancel -> {
-          dragLock.value = false
-          isSliderDragging.value = false
-        }
-      }
-    }
-  }
-
   // General Settings
   SettingsSection(
     title = stringResource(Res.string.settings_general_title),
@@ -529,15 +515,9 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       color = RFColors.TextSecondary,
       fontSize = 13.sp
     )
-    Slider(
+    DragLockedSlider(
       value = config.windowOpacity,
-      onValueChange = { newOpacity -> RFConfig.update { it.copy(windowOpacity = newOpacity) } },
-      interactionSource = sliderInteractionSource,
-      colors = SliderDefaults.colors(
-        thumbColor = RFColors.AccentRed,
-        activeTrackColor = RFColors.AccentRed,
-        inactiveTrackColor = RFColors.CardBorder
-      )
+      onValueChange = { newOpacity -> RFConfig.update { it.copy(windowOpacity = newOpacity) } }
     )
 
     Spacer(modifier = Modifier.height(8.dp))
@@ -548,29 +528,9 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       fontSize = 13.sp
     )
 
-    val windowColorSlider = remember { mutableStateOf(colorToSliderValue(config.windowColor)) }
-    LaunchedEffect(config.windowColor) {
-      if (isSliderDragging.value) return@LaunchedEffect
-      val newVal = colorToSliderValue(config.windowColor)
-      val currentColorFromSlider = sliderValueToColor(windowColorSlider.value)
-      if (currentColorFromSlider == config.windowColor) return@LaunchedEffect
-      if (kotlin.math.abs(newVal - windowColorSlider.value) > 0.0001f) {
-        windowColorSlider.value = newVal
-      }
-    }
-
-    Slider(
-      value = windowColorSlider.value,
-      onValueChange = { value ->
-        windowColorSlider.value = value
-        RFConfig.update { it.copy(windowColor = sliderValueToColor(value)) }
-      },
-      interactionSource = sliderInteractionSource,
-      colors = SliderDefaults.colors(
-        thumbColor = RFColors.AccentRed,
-        activeTrackColor = RFColors.AccentRed,
-        inactiveTrackColor = RFColors.CardBorder
-      )
+    ColorSliderComponent(
+      color = config.windowColor,
+      onColorChange = { color -> RFConfig.update { it.copy(windowColor = color) } }
     )
   }
 }
@@ -1336,4 +1296,182 @@ private fun SeedTableSettingsPanel(wm: WindowManager? = null) {
       }
     }
   }
+}
+
+private enum class ExportBackgroundOption(
+  val key: String,
+  val imagePath: String?,
+  val thumbnailPath: String?
+) {
+  REOKY("REOKY", "drawable/reoky_wallpaper.png", "drawable/reoky_wallpaper_thumb.png"),
+  SPAGUETTI("SPAGUETTI", "drawable/spaguetti_wallpaper.png", "drawable/spaguetti_wallpaper_thumb.png"),
+  SPACEA("SPACEA", "drawable/spacea_wallpaper.png", "drawable/spacea_wallpaper_thumb.png"),
+  BROOKLYYN("BROOKLYYN", "drawable/brooklyyn_wallpaper.png", "drawable/brooklyyn_wallpaper_thumb.png"),
+  SOLID_COLOR("SOLID_COLOR", null, null),
+  CUSTOM("CUSTOM", null, null)
+}
+
+@Composable
+private fun ExportBackgroundSettingsPanel() {
+  val config by RFConfig.state.collectAsState()
+  var pickerError by remember { mutableStateOf<String?>(null) }
+  val customFile = remember(config.exportCustomBackgroundPath) {
+    config.exportCustomBackgroundPath.takeIf { it.isNotBlank() }?.let(::File)
+  }
+  val customImage = remember(customFile) {
+    customFile?.takeIf { it.isFile }?.let { runCatching { ImageIO.read(it) }.getOrNull() }
+  }
+
+  LaunchedEffect(config.exportBackgroundSelection, config.exportCustomBackgroundPath) {
+    if (config.exportBackgroundSelection == ExportBackgroundOption.CUSTOM.key &&
+      (customFile == null || customImage == null)
+    ) {
+      RFConfig.update { it.copy(exportBackgroundSelection = ExportBackgroundOption.REOKY.key, exportCustomBackgroundPath = "") }
+    }
+  }
+
+  SettingsSection(
+    title = stringResource(Res.string.settings_export_background_title),
+    description = stringResource(Res.string.settings_export_background_description)
+  ) {
+    Text(
+      text = stringResource(Res.string.settings_export_background_note),
+      color = RFColors.TextTertiary,
+      fontSize = 11.sp
+    )
+    Spacer(modifier = Modifier.height(10.dp))
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      ExportBackgroundOption.entries.chunked(2).forEach { row ->
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          row.forEach { option ->
+            ExportBackgroundCard(
+              option = option,
+              selected = config.exportBackgroundSelection == option.key,
+              customImage = customImage,
+              solidColor = Color(config.exportBackgroundColor),
+              dimness = config.exportBackgroundDimness,
+              modifier = Modifier.weight(1f),
+              onClick = {
+                pickerError = null
+                when (option) {
+                  ExportBackgroundOption.CUSTOM -> chooseCustomExportBackground { path, error ->
+                    pickerError = error
+                    if (path != null) {
+                      RFConfig.update { it.copy(exportBackgroundSelection = option.key, exportCustomBackgroundPath = path) }
+                    }
+                  }
+                  else -> RFConfig.update {
+                    it.copy(
+                      exportBackgroundSelection = option.key,
+                      exportCustomBackgroundPath = ""
+                    )
+                  }
+                }
+              }
+            )
+          }
+        }
+      }
+    }
+
+    if (config.exportBackgroundSelection == ExportBackgroundOption.SOLID_COLOR.key) {
+      Spacer(modifier = Modifier.height(10.dp))
+      Text(stringResource(Res.string.settings_export_background_color), color = RFColors.TextSecondary, fontSize = 13.sp)
+      ColorSliderComponent(
+        color = config.exportBackgroundColor,
+        onColorChange = { color -> RFConfig.update { it.copy(exportBackgroundColor = color) } }
+      )
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(stringResource(Res.string.settings_export_background_dimness), color = RFColors.TextSecondary, fontSize = 13.sp)
+    DragLockedSlider(
+      value = config.exportBackgroundDimness,
+      onValueChange = { value -> RFConfig.update { it.copy(exportBackgroundDimness = value) } },
+      valueRange = 0f..1f
+    )
+
+    if (pickerError != null) {
+      Text(pickerError!!, color = RFColors.AccentRed, fontSize = 12.sp)
+    }
+  }
+}
+
+@Composable
+private fun ExportBackgroundCard(
+  option: ExportBackgroundOption,
+  selected: Boolean,
+  customImage: BufferedImage?,
+  solidColor: Color,
+  dimness: Float,
+  modifier: Modifier,
+  onClick: () -> Unit
+) {
+  val border = if (selected) RFColors.AccentRed else RFColors.CardBorder
+  Surface(
+    modifier = modifier.border(2.dp, border, RoundedCornerShape(8.dp)).clickable(onClick = onClick),
+    color = RFColors.BadgeBackground,
+    shape = RoundedCornerShape(8.dp)
+  ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Box(modifier = Modifier.fillMaxWidth().height(82.dp), contentAlignment = Alignment.Center) {
+        when {
+          option.thumbnailPath != null -> Image(
+            painter = painterResource(when (option) {
+              ExportBackgroundOption.REOKY -> Res.drawable.reoky_wallpaper_thumb
+              ExportBackgroundOption.SPAGUETTI -> Res.drawable.spaguetti_wallpaper_thumb
+              ExportBackgroundOption.SPACEA -> Res.drawable.spacea_wallpaper_thumb
+              ExportBackgroundOption.BROOKLYYN -> Res.drawable.brooklyyn_wallpaper_thumb
+              else -> Res.drawable.reoky_wallpaper_thumb
+            }),
+            contentDescription = null,
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+          )
+          option == ExportBackgroundOption.SOLID_COLOR -> Box(
+            modifier = Modifier.fillMaxSize().background(solidColor)
+          )
+          customImage != null -> Box(modifier = Modifier.fillMaxSize().background(RFColors.UpdateGreen))
+          else -> Box(modifier = Modifier.fillMaxSize().background(RFColors.CardBackground))
+        }
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = dimness.coerceIn(0f, 1f)))
+        )
+      }
+      Text(
+        text = when (option) {
+          ExportBackgroundOption.REOKY -> stringResource(Res.string.settings_export_background_reoky)
+          ExportBackgroundOption.SPAGUETTI -> stringResource(Res.string.settings_export_background_spaguetti)
+          ExportBackgroundOption.SPACEA -> stringResource(Res.string.settings_export_background_spacea)
+          ExportBackgroundOption.BROOKLYYN -> stringResource(Res.string.settings_export_background_brooklyyn)
+          ExportBackgroundOption.SOLID_COLOR -> stringResource(Res.string.settings_export_background_solid)
+          ExportBackgroundOption.CUSTOM -> stringResource(Res.string.settings_export_background_custom)
+        },
+        color = RFColors.TextPrimary,
+        fontSize = 12.sp,
+        modifier = Modifier.padding(vertical = 6.dp)
+      )
+    }
+  }
+}
+
+private fun chooseCustomExportBackground(onResult: (String?, String?) -> Unit) {
+  Thread {
+    val chooser = javax.swing.JFileChooser()
+    chooser.dialogTitle = "Choose PNG background"
+    chooser.fileFilter = javax.swing.filechooser.FileNameExtensionFilter("PNG images (*.png)", "png")
+    if (chooser.showOpenDialog(null) != javax.swing.JFileChooser.APPROVE_OPTION) return@Thread
+    val file = chooser.selectedFile
+    val image = runCatching { ImageIO.read(file) }.getOrNull()
+    if (!file.isFile || image == null) {
+      onResult(null, "The selected file could not be read as a PNG.")
+    } else if (image.width < 2000 || image.height < 2000) {
+      onResult(null, "PNG backgrounds must be at least 2000 x 2000 pixels.")
+    } else {
+      onResult(file.absolutePath, null)
+    }
+  }.start()
 }

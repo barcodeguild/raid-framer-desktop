@@ -18,7 +18,6 @@ import com.reoky.raidframer.core.model.pvpPerformancePoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.arkorean_regular
 import raid_framer_desktop.composeapp.generated.resources.export_no_data
 import raid_framer_desktop.composeapp.generated.resources.export_title_battle_summary
 import raid_framer_desktop.composeapp.generated.resources.export_header_on
@@ -536,18 +535,45 @@ object ImageExportInteractor {
    * 100% automated / programmatically.
    */
   private fun drawWallpaperBackground(g2d: Graphics2D, width: Int, height: Int) {
-    g2d.color = toAwtColor(RFColors.CardBackground)
-    g2d.fillRect(0, 0, width, height)
-
-    try {
-      val resUri = Res.getUri("drawable/reoky_wallpaper.png")
-      val wallpaper = ImageIO.read(URI(resUri).toURL())
-      if (wallpaper != null) {
-        g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
-        g2d.drawImage(wallpaper, 0, 0, width, height, null)
-        g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)
+    val config = RFConfig.state.value
+    val fallbackUri = Res.getUri("drawable/reoky_wallpaper.png")
+    val wallpaper = try {
+      when (config.exportBackgroundSelection) {
+        "SOLID_COLOR" -> null
+        "CUSTOM" -> {
+          val file = File(config.exportCustomBackgroundPath)
+          if (!file.isFile) throw IllegalStateException("Custom background is missing")
+          ImageIO.read(file) ?: throw IllegalStateException("Custom background is unreadable")
+        }
+        "SPAGUETTI" -> ImageIO.read(URI(Res.getUri("drawable/spaguetti_wallpaper.png")).toURL())
+        "SPACEA" -> ImageIO.read(URI(Res.getUri("drawable/spacea_wallpaper.png")).toURL())
+        "BROOKLYYN" -> ImageIO.read(URI(Res.getUri("drawable/brooklyyn_wallpaper.png")).toURL())
+        else -> ImageIO.read(URI(fallbackUri).toURL())
       }
     } catch (_: Exception) {
+      ImageIO.read(URI(fallbackUri).toURL())
+    }
+
+    g2d.color = if (config.exportBackgroundSelection == "SOLID_COLOR") {
+      Color(config.exportBackgroundColor, true)
+    } else {
+      toAwtColor(RFColors.CardBackground)
+    }
+    g2d.fillRect(0, 0, width, height)
+
+    if (wallpaper != null) {
+      val scale = maxOf(width.toDouble() / wallpaper.width, height.toDouble() / wallpaper.height)
+      val drawWidth = (wallpaper.width * scale).toInt()
+      val drawHeight = (wallpaper.height * scale).toInt()
+      val drawX = (width - drawWidth) / 2
+      val drawY = (height - drawHeight) / 2
+      g2d.drawImage(wallpaper, drawX, drawY, drawWidth, drawHeight, null)
+    }
+
+    val dimness = config.exportBackgroundDimness.coerceIn(0f, 1f)
+    if (dimness > 0f) {
+      g2d.color = Color(0, 0, 0, (dimness * 255f).toInt())
+      g2d.fillRect(0, 0, width, height)
     }
   }
 

@@ -350,3 +350,13 @@ val MIGRATION_33_34 = object : Migration(33, 34) {
     connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalSacDances INTEGER NOT NULL DEFAULT 0").use { it.step() }
   }
 }
+
+// Added PNG export background selection, solid color, custom path, and dimness.
+val MIGRATION_34_35 = object : Migration(34, 35) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundSelection TEXT NOT NULL DEFAULT 'REOKY'").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportCustomBackgroundPath TEXT NOT NULL DEFAULT ''").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundColor INTEGER NOT NULL DEFAULT -16777216").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundDimness REAL NOT NULL DEFAULT 0.20").use { it.step() }
+  }
+}
