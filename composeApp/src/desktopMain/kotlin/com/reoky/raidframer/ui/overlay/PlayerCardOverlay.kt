@@ -163,6 +163,10 @@ import raid_framer_desktop.composeapp.generated.resources.sky_emp_glider
 import raid_framer_desktop.composeapp.generated.resources.soul_neck
 import raid_framer_desktop.composeapp.generated.resources.twt_glider
 import raid_framer_desktop.composeapp.generated.resources.bd_glider
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_defiance
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_garden_defiance
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_purges
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_sac_dances
 import raid_framer_desktop.composeapp.generated.resources.player_inventory_time_ago
 import raid_framer_desktop.composeapp.generated.resources.time_ago_just_now
 import raid_framer_desktop.composeapp.generated.resources.time_ago_minutes_one
@@ -328,7 +332,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Damage
               SortableEventListColumn(
                 title = stringResource(Res.string.player_card_recent_damage),
-                items = card.recentDamageEvents.take(200),
+                items = card.recentDamageEvents.sortedByDescending { it.timestamp }.take(500),
                 defaultSortDescending = true,
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -348,7 +352,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Heals
               SortableEventListColumn(
                 title = stringResource(Res.string.player_card_recent_heals),
-                items = card.recentHealEvents.take(200),
+                items = card.recentHealEvents.sortedByDescending { it.timestamp }.take(500),
                 defaultSortDescending = true,
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -368,7 +372,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               // Debuffs
               SortableEventListColumn(
                 title = stringResource(Res.string.player_card_recent_debuffs),
-                items = card.recentDebuffAppliedEvents.take(200),
+                items = card.recentDebuffAppliedEvents.sortedByDescending { it.timestamp }.take(500),
                 defaultSortDescending = true,
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -399,7 +403,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             ) {
               SortableEventListColumn(
                 title = stringResource(Res.string.player_card_recent_buffs),
-                items = card.recentBuffAppliedEvents.take(200),
+                items = card.recentBuffAppliedEvents.sortedByDescending { it.timestamp }.take(500),
                 defaultSortDescending = true,
                 modifier = Modifier.weight(1f)
               ) { evt ->
@@ -649,6 +653,10 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_crystal_wings), cache.lifetimeTotalCrystalWings, RFColors.crystalWingsBlue)
                   StatRow(stringResource(Res.string.player_card_stat_glider_disables), cache.lifetimeTotalGliderDisables, RFColors.gliderDisablesPink)
                   StatRow(stringResource(Res.string.player_card_stat_provoked), cache.lifetimeTotalProvoked, RFColors.provokesDeepPurple)
+                  StatRow(stringResource(Res.string.player_card_stat_defiance), cache.lifetimeTotalDefiance, RFColors.defianceGold)
+                  StatRow(stringResource(Res.string.player_card_stat_garden_defiance), cache.lifetimeTotalGardenDefiance, RFColors.gardenDefianceBlue)
+                  StatRow(stringResource(Res.string.player_card_stat_purges), cache.lifetimeTotalPurges, RFColors.purgeGreen)
+                  StatRow(stringResource(Res.string.player_card_stat_sac_dances), cache.lifetimeTotalSacDances, RFColors.sacDancePurple)
                   StatRow(stringResource(Res.string.player_card_stat_glider), cache.lifetimeTotalGliderUses, RFColors.gliderBlue)
                   StatRow(stringResource(Res.string.player_card_stat_items), cache.lifetimeTotalItemSkillsUsed, RFColors.itemSkillYellow)
                   StatRow(stringResource(Res.string.player_card_stat_potions), cache.lifetimeTotalPotionUsages, RFColors.potionTeal)
@@ -1042,12 +1050,14 @@ private data class InventoryItem(
 private fun PlayerInventorySection(card: PlayerCard) {
   val cache = card.cache ?: return
   val lastSessionStart by remember { derivedStateOf { RFConfig.state.value.lastSessionStart } }
+  val previousSessionStart by remember { derivedStateOf { RFConfig.state.value.previousSessionStart } }
 
   // Build inventory items from all glider and utility item enum entries
-  val allItems = remember(cache, lastSessionStart) {
+  val allItems = remember(cache, lastSessionStart, previousSessionStart) {
     fun buildItem(nameRes: StringResource, iconRes: DrawableResource, packed: Long): InventoryItem {
       val lastUsed = packed.unpackItemUsageDate()
-      val usedInSession = lastSessionStart > 0L && lastUsed.time >= lastSessionStart
+      val sessionStart = if (lastSessionStart > 0L) lastSessionStart else previousSessionStart
+      val usedInSession = sessionStart > 0L && lastUsed.time >= sessionStart
       return InventoryItem(
         nameRes = nameRes,
         iconRes = iconRes,

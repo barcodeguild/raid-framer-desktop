@@ -189,7 +189,8 @@ fun main(args: Array<String>) {
               lastSessionStart = 0L,
               lastSessionTitle = "",
               lastSessionType = "",
-              lastSessionDurationMs = 0L
+              lastSessionDurationMs = 0L,
+              previousSessionStart = config.lastSessionStart
             )
           }
         }

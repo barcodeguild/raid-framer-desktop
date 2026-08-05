@@ -330,3 +330,33 @@ val MIGRATION_31_32 = object : Migration(31, 32) {
   }
 }
 
+// added previousSessionStart to config for item highlight persistence across sessions
+val MIGRATION_32_33 = object : Migration(32, 33) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN previousSessionStart INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+
+// added defiance, garden defiance, purge, and sacrifice dance totals (08/04/26)
+val MIGRATION_33_34 = object : Migration(33, 34) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalGardenDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPurges INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalSacDances INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalGardenDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPurges INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalSacDances INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+
+// Added PNG export background selection, solid color, custom path, and dimness.
+val MIGRATION_34_35 = object : Migration(34, 35) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundSelection TEXT NOT NULL DEFAULT 'REOKY'").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportCustomBackgroundPath TEXT NOT NULL DEFAULT ''").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundColor INTEGER NOT NULL DEFAULT -16777216").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundDimness REAL NOT NULL DEFAULT 0.20").use { it.step() }
+  }
+}

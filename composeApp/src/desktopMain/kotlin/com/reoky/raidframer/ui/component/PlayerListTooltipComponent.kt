@@ -40,7 +40,7 @@ import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.raid_composition_more_players
 import java.util.Locale
 
-private const val MAX_TOOLTIP_PLAYERS = 15
+private const val MAX_TOOLTIP_PLAYERS = 30
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable

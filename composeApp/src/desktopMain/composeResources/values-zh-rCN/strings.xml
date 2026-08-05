@@ -35,6 +35,7 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop 设置</string>
+    <string name="settings_export_background_title">导出背景</string><string name="settings_export_background_description">选择 PNG 排行榜导出所使用的背景。</string><string name="settings_export_background_note">PNG 图片至少需要 2000 x 2000 像素。由于排行榜较宽且纵向较长，建议使用更大的图片。</string><string name="settings_export_background_color">纯色</string><string name="settings_export_background_dimness">背景暗度</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">纯色</string><string name="settings_export_background_custom">自定义 PNG</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">选择 PNG 背景</string><string name="settings_export_background_picker_filter">PNG 图片 (*.png)</string><string name="settings_export_background_invalid_file">无法将所选文件读取为 PNG。</string><string name="settings_export_background_resolution_error">PNG 背景至少需要 2000 x 2000 像素。</string>
     <string name="settings_data_sourcing_title">数据源</string>
     <string name="settings_data_sourcing_description">请确认您在下面看到正确的ArcheRage文档目录。您的游戏文档目录已被自动检测。如果您没有看到正确的目录，或者下面的文字是红色的，您应该报告一个bug。</string>
     <string name="settings_toggle_pvp_damage">仅显示PvP伤害</string>
@@ -313,6 +314,7 @@
     <string name="tech_cc_rival">控制对手？</string>
     <string name="tech_no_silences">无沉默？</string>
     <string name="tech_no_tiger_strikes">无猛虎打击？</string>
+    <string name="tech_no_defiance">无霸气？</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">战斗总结 (%1$s)</string>
@@ -381,6 +383,15 @@
     <string name="summary_tab_utility_debuffs">工具减益</string>
     <string name="summary_tab_glider_debuffs">滑翔翼减益</string>
     <string name="summary_tab_special_debuffs">特殊减益</string>
+    <string name="summary_tab_new_buffs">特殊增益</string>
+    <string name="player_card_stat_defiance">霸气</string>
+    <string name="player_card_stat_garden_defiance">半神的教诲</string>
+    <string name="player_card_stat_purges">净化</string>
+    <string name="player_card_stat_sac_dances">牺牲之舞</string>
+    <string name="summary_top_defiance">霸气排行</string>
+    <string name="summary_top_garden_defiance">半神的教诲排行</string>
+    <string name="summary_top_purges">净化排行</string>
+    <string name="summary_top_sac_dances">牺牲之舞排行</string>
     <string name="summary_tab_spells">技能</string>
     <string name="summary_tab_buffs">增益效果</string>
     <string name="summary_tab_ode">赞歌</string>

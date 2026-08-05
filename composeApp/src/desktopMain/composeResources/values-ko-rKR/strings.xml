@@ -35,6 +35,7 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop 설정</string>
+    <string name="settings_export_background_title">내보내기 배경</string><string name="settings_export_background_description">PNG 리더보드 내보내기에 사용할 배경을 선택하세요.</string><string name="settings_export_background_note">PNG 이미지는 최소 2000 x 2000픽셀이어야 합니다. 리더보드는 넓고 세로로 길기 때문에 더 큰 이미지를 권장합니다.</string><string name="settings_export_background_color">단색</string><string name="settings_export_background_dimness">배경 어둡기</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">단색</string><string name="settings_export_background_custom">사용자 지정 PNG</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">PNG 배경 선택</string><string name="settings_export_background_picker_filter">PNG 이미지 (*.png)</string><string name="settings_export_background_invalid_file">선택한 파일을 PNG로 읽을 수 없습니다.</string><string name="settings_export_background_resolution_error">PNG 배경은 최소 2000 x 2000픽셀이어야 합니다.</string>
     <string name="settings_data_sourcing_title">데이터 소스</string>
     <string name="settings_data_sourcing_description">아래에 표시된 ArcheRage 문서(Documents) 디렉터리가 올바른지 확인해 주십시오. 게임의 문서 디렉터리는 자동으로 감지되었습니다. 올바른 디렉터리가 아니거나 아래 텍스트가 빨간색으로 표시된다면 버그를 신고해 주시기 바랍니다.</string>
     <string name="settings_toggle_pvp_damage">PvP 피해만 표시</string>
@@ -313,6 +314,7 @@
     <string name="tech_cc_rival">CC 라이벌?</string>
     <string name="tech_no_silences">침묵 없음?</string>
     <string name="tech_no_tiger_strikes">폭풍가르기 (폭가) 없음</string>
+    <string name="tech_no_defiance">패기 없음</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>
@@ -381,6 +383,15 @@
     <string name="summary_tab_utility_debuffs">유틸리티 디버프</string>
     <string name="summary_tab_glider_debuffs">날틀 디버프</string>
     <string name="summary_tab_special_debuffs">특수 디버프</string>
+    <string name="summary_tab_new_buffs">특수 버프</string>
+    <string name="player_card_stat_defiance">패기</string>
+    <string name="player_card_stat_garden_defiance">반신의 가르침</string>
+    <string name="player_card_stat_purges">정화</string>
+    <string name="player_card_stat_sac_dances">희생의 춤</string>
+    <string name="summary_top_defiance">패기 상위</string>
+    <string name="summary_top_garden_defiance">반신의 가르침 상위</string>
+    <string name="summary_top_purges">정화 상위</string>
+    <string name="summary_top_sac_dances">희생의 춤 상위</string>
     <string name="summary_tab_spells">스킬</string>
     <string name="summary_tab_buffs">버프</string>
     <string name="summary_tab_ode">치무</string>

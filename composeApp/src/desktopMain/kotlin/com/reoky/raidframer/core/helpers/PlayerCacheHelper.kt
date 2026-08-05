@@ -126,7 +126,11 @@ fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntit
     lifetimeTotalBdGlider = c?.lifetimeTotalBdGlider ?: 0L,
     lifetimeTotalCrystalWings = c?.lifetimeTotalCrystalWings ?: 0L,
     lifetimeTotalGliderDisables = c?.lifetimeTotalGliderDisables ?: 0L,
-    lifetimeTotalProvoked = c?.lifetimeTotalProvoked ?: 0L
+    lifetimeTotalProvoked = c?.lifetimeTotalProvoked ?: 0L,
+    lifetimeTotalDefiance = c?.lifetimeTotalDefiance ?: 0L,
+    lifetimeTotalGardenDefiance = c?.lifetimeTotalGardenDefiance ?: 0L,
+    lifetimeTotalPurges = c?.lifetimeTotalPurges ?: 0L,
+    lifetimeTotalSacDances = c?.lifetimeTotalSacDances ?: 0L
   )
 }
 

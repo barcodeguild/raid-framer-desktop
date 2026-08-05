@@ -35,6 +35,7 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Einstellungen</string>
+    <string name="settings_export_background_title">Export-Hintergrund</string><string name="settings_export_background_description">Wählen Sie den Hintergrund für PNG-Ranglistenexporte.</string><string name="settings_export_background_note">PNG-Bilder müssen mindestens 2000 x 2000 Pixel groß sein. Größere Bilder werden empfohlen, da Ranglisten breit und sehr hoch sind.</string><string name="settings_export_background_color">Einfarbig</string><string name="settings_export_background_dimness">Hintergrundabdunklung</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">Einfarbig</string><string name="settings_export_background_custom">Benutzerdefinierte PNG</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">PNG-Hintergrund auswählen</string><string name="settings_export_background_picker_filter">PNG-Bilder (*.png)</string><string name="settings_export_background_invalid_file">Die ausgewählte Datei konnte nicht als PNG gelesen werden.</string><string name="settings_export_background_resolution_error">PNG-Hintergründe müssen mindestens 2000 x 2000 Pixel groß sein.</string>
     <string name="settings_data_sourcing_title">Datenquelle</string>
     <string name="settings_data_sourcing_description">Bitte bestätigen Sie, dass Sie unten das richtige ArcheRage-Dokumentenverzeichnis sehen. Ihr Spiel-Dokumentenverzeichnis wurde automatisch erkannt. Wenn Sie nicht das richtige Verzeichnis sehen oder der Text unten rot ist, sollten Sie einen Fehler melden.</string>
     <string name="settings_toggle_pvp_damage">Nur PvP-Schaden anzeigen</string>
@@ -313,6 +314,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="tech_cc_rival">CC-Rivale?</string>
     <string name="tech_no_silences">Keine Stille?</string>
     <string name="tech_no_tiger_strikes">Keine Tigerschläge?</string>
+    <string name="tech_no_defiance">Keine Trotz?</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Kampfzusammenfassung (%1$s)</string>
@@ -381,6 +383,15 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_tab_utility_debuffs">Utility-Debuffs</string>
     <string name="summary_tab_glider_debuffs">Gleiter-Debuffs</string>
     <string name="summary_tab_special_debuffs">Spezial-Debuffs</string>
+    <string name="summary_tab_new_buffs">Spezial-Buffs</string>
+    <string name="player_card_stat_defiance">Trotz</string>
+    <string name="player_card_stat_garden_defiance">Göttlicher Segen</string>
+    <string name="player_card_stat_purges">Reinigungen</string>
+    <string name="player_card_stat_sac_dances">Opfertanz</string>
+    <string name="summary_top_defiance">Top Trotz</string>
+    <string name="summary_top_garden_defiance">Top Göttlicher Segen</string>
+    <string name="summary_top_purges">Top Reinigungen</string>
+    <string name="summary_top_sac_dances">Top Opfertänze</string>
     <string name="summary_tab_spells">Zauber</string>
     <string name="summary_tab_buffs">Stärkungszauber</string>
     <string name="summary_tab_ode">Ode</string>

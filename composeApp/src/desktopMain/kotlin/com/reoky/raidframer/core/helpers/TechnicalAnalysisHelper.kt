@@ -28,6 +28,7 @@ import raid_framer_desktop.composeapp.generated.resources.tech_needs_heals
 import raid_framer_desktop.composeapp.generated.resources.tech_spell_dominance
 import raid_framer_desktop.composeapp.generated.resources.tech_no_silences
 import raid_framer_desktop.composeapp.generated.resources.tech_no_tiger_strikes
+import raid_framer_desktop.composeapp.generated.resources.tech_no_defiance
 
 object TechnicalAnalysisHelper {
 
@@ -41,6 +42,7 @@ object TechnicalAnalysisHelper {
   private const val SPELL_DOMINANCE_DAMAGE_THRESHOLD = 300_000L
   private const val NEEDS_HEALS_THRESHOLD = 0.5f // ony 50% of received damage healed
   private const val CC_RIVAL_THRESHOLD = 20
+  private const val CC_RIVAL_RATIO = 0.03f // CC applied to target must be at least 5% of source's total CC
 
   // for our nation's cats of course ~
   // I mean category ~
@@ -89,6 +91,11 @@ object TechnicalAnalysisHelper {
       if (SkillTreeType.DEFENSE in spec.trees && card.sessionDistressTotal == 0) {
         nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_distress_combo, color = RFColors.techDistressCombo, category = CAT_ALL))
       }
+    }
+
+    // No Defiance? - no regular or garden defiance this session
+    cards.filter { it.isRealPlayer && it.sessionDefianceTotal == 0 && it.sessionGardenDefianceTotal == 0 }.forEach { card ->
+      nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_no_defiance, color = RFColors.defianceGold, category = CAT_ALL))
     }
 
     return TechAnalysisResult(
@@ -296,15 +303,18 @@ object TechnicalAnalysisHelper {
       }
     }
 
-    // Heuristic - CC Rival? - someone applying 30+ CC stacks to a CC tank (IE they are fighting back against cc with cc)
+    // Heuristic - CC Rival? - someone applying significant CC stacks to a CC tank (IE they are fighting back against cc with cc)
     val ccTanks = cards.filter { card ->
       card.isRealPlayer && SpecType.fromName(card.currentBuild) in META_CC_SPECS
     }
     cards.filter { it.isRealPlayer }.forEach { source ->
+      val totalCC = source.sessionCCTotal
+      if (totalCC <= 0) return@forEach
       ccTanks.forEach { tank ->
         if (source.name == tank.name) return@forEach
         val ccApplied = source.sessionCCToPlayer[tank.name] ?: 0
-        if (ccApplied >= CC_RIVAL_THRESHOLD) {
+        val ratio = ccApplied.toFloat() / totalCC
+        if (ccApplied >= CC_RIVAL_THRESHOLD && ratio >= CC_RIVAL_RATIO) {
           edgeHeuristics.add(
             EdgeHeuristic(
               source.name,

@@ -6,6 +6,7 @@ import com.reoky.raidframer.core.definitions.charmedDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithUtilityItemDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.distressedDebuffIds
 import com.reoky.raidframer.core.definitions.findDebuffByName
+import com.reoky.raidframer.core.definitions.findDebuffById
 import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithGliderDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.silencedDebuffIds
@@ -13,7 +14,7 @@ import com.reoky.raidframer.core.definitions.tigerStrikeDebuffIds
 import com.reoky.raidframer.core.definitions.freezeDebuffIds
 import com.reoky.raidframer.core.definitions.trippedDebuffIds
 import com.reoky.raidframer.core.definitions.bubbleTrapDebuffIds
-import com.reoky.raidframer.core.definitions.bracingBlastDebuffIds
+import com.reoky.raidframer.core.definitions.bracingBlastImmunityBuffIds
 import com.reoky.raidframer.core.definitions.shieldStripDebuffIds
 import com.reoky.raidframer.core.definitions.weaponDisablesDebuffIds
 import com.reoky.raidframer.core.definitions.potionDisablesDebuffIds
@@ -21,11 +22,15 @@ import com.reoky.raidframer.core.definitions.bdGliderDebuffIds
 import com.reoky.raidframer.core.definitions.crystalWingsDebuffIds
 import com.reoky.raidframer.core.definitions.gliderDisablesDebuffIds
 import com.reoky.raidframer.core.definitions.provokedDebuffIds
+import com.reoky.raidframer.core.definitions.defianceBuffIds
+import com.reoky.raidframer.core.definitions.gardenDefianceCastId
+import com.reoky.raidframer.core.definitions.purgeBuffId
 import com.reoky.raidframer.core.definitions.blacklistedDebuffIds
 import com.reoky.raidframer.core.definitions.blacklistedDebuffNames
 import com.reoky.raidframer.core.definitions.blacklistedBuffNames
 import com.reoky.raidframer.core.definitions.copiedWithPotionDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.isOdeToRecovery
+import com.reoky.raidframer.core.definitions.sacrificeBuffIds
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 /**
@@ -53,7 +58,7 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalDamage = (card.cache?.lifetimeTotalDamage ?: 0L) + event.damage
     ),
-    recentDamageEvents = (this.recentDamageEvents + event).takeLast(200),
+    recentDamageEvents = (this.recentDamageEvents + event).takeLast(500),
     sessionSpellDamageMap = run {
       val spellKey = event.spell.ifBlank { "Unknown" }
       this.sessionSpellDamageMap + (spellKey to ((this.sessionSpellDamageMap[spellKey] ?: 0L) + event.damage))
@@ -82,7 +87,7 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount
     ),
-    recentHealEvents = (this.recentHealEvents + event).takeLast(200),
+    recentHealEvents = (this.recentHealEvents + event).takeLast(500),
     sessionHealTotal = if (isOde && !allowOdeAsHeal) this.sessionHealTotal else this.sessionHealTotal + event.amount,
     sessionOdeHealsTotal = if (isOde) this.sessionOdeHealsTotal + event.amount else this.sessionOdeHealsTotal,
     sessionSpellHealMap = run {
@@ -168,6 +173,7 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
  */
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
   val isMarasNineTails = event.spell == "Charm (Rider Skill)" && (PlayerCacheInteractor.isRealPlayer(event.target) || RFConfig.state.value.allowPVEDamage)
+  val isGardenDefiance = event.spellId == gardenDefianceCastId
 
   var card = this.copiedWithUtilityItemDetectionMiddleWare(event) // handles item spells
   card = card.copiedWithPotionDetectionMiddleWare(event) // increments potion usages
@@ -176,9 +182,11 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCharms = if (isMarasNineTails) (card.cache?.lifetimeTotalCharms ?: 0) + 1 else (card.cache?.lifetimeTotalCharms ?: 0)
+      lifetimeTotalCharms = if (isMarasNineTails) (card.cache?.lifetimeTotalCharms ?: 0) + 1 else (card.cache?.lifetimeTotalCharms ?: 0),
+      lifetimeTotalGardenDefiance = if (isGardenDefiance) (card.cache?.lifetimeTotalGardenDefiance ?: 0L) + 1 else (card.cache?.lifetimeTotalGardenDefiance ?: 0L)
     ),
     sessionCharmTotal = if (isMarasNineTails) card.sessionCharmTotal + 1 else card.sessionCharmTotal,
+    sessionGardenDefianceTotal = if (isGardenDefiance) card.sessionGardenDefianceTotal + 1 else card.sessionGardenDefianceTotal,
     recentCastSuccessfulCastEvents = (card.recentCastSuccessfulCastEvents + event).takeLast(200)
   )
 }
@@ -188,10 +196,11 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
  */
 fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
   val card = this.copiedWithGliderDetectionMiddleWare(event) // detects glider usage via self-applied buffs
+
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
-      lastSeen = event.timestamp
+      lastSeen = event.timestamp,
     ),
     recentBuffGainedEvents = (this.recentBuffGainedEvents + event).takeLast(200) // optional to takeLast(n)
   )
@@ -213,7 +222,8 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
  */
 fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
   //if (event.source == event.target) return this // skip self-applied debuffs
-  val isCC = findDebuffByName(event.debuff)?.consideredCC == true
+  val isCC = findDebuffById(event.debuffId)?.consideredCC == true
+    ?: findDebuffByName(event.debuff)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
@@ -245,7 +255,8 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
 fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   //if (event.source == event.target) return this // skip self-casts (e.g. self-inflicted debuffs)
-  val isCC = findDebuffByName(event.debuff)?.consideredCC == true
+  val isCC = findDebuffById(event.debuffId)?.consideredCC == true
+    ?: findDebuffByName(event.debuff)?.consideredCC == true
   val isCharm = event.debuffId in charmedDebuffIds
   val isDistress = event.debuffId in distressedDebuffIds
   val isSilence = event.debuffId in silencedDebuffIds
@@ -255,7 +266,6 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isFreeze = event.debuffId in freezeDebuffIds
   val isTrips = event.debuffId in trippedDebuffIds
   val isBubbles = event.debuffId in bubbleTrapDebuffIds
-  val isBracings = event.debuffId in bracingBlastDebuffIds
   val isShieldStrip = event.debuffId in shieldStripDebuffIds
   val isWeaponDisables = event.debuffId in weaponDisablesDebuffIds
   val isPotionDisables = event.debuffId in potionDisablesDebuffIds
@@ -279,16 +289,15 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       lifetimeTotalFreezes = if (isFreeze) (card.cache?.lifetimeTotalFreezes ?: 0L) + 1 else (card.cache?.lifetimeTotalFreezes ?: 0L),
       lifetimeTotalTrips = if (isTrips) (card.cache?.lifetimeTotalTrips ?: 0L) + 1 else (card.cache?.lifetimeTotalTrips ?: 0L),
       lifetimeTotalBubbles = if (isBubbles) (card.cache?.lifetimeTotalBubbles ?: 0L) + 1 else (card.cache?.lifetimeTotalBubbles ?: 0L),
-      lifetimeTotalBracings = if (isBracings) (card.cache?.lifetimeTotalBracings ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L),
       lifetimeTotalShieldStrip = if (isShieldStrip) (card.cache?.lifetimeTotalShieldStrip ?: 0L) + 1 else (card.cache?.lifetimeTotalShieldStrip ?: 0L),
       lifetimeTotalWeaponDisables = if (isWeaponDisables) (card.cache?.lifetimeTotalWeaponDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalWeaponDisables ?: 0L),
       lifetimeTotalPotionDisables = if (isPotionDisables) (card.cache?.lifetimeTotalPotionDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalPotionDisables ?: 0L),
       lifetimeTotalBdGlider = if (isBdGlider) (card.cache?.lifetimeTotalBdGlider ?: 0L) + 1 else (card.cache?.lifetimeTotalBdGlider ?: 0L),
       lifetimeTotalCrystalWings = if (isCrystalWings) (card.cache?.lifetimeTotalCrystalWings ?: 0L) + 1 else (card.cache?.lifetimeTotalCrystalWings ?: 0L),
       lifetimeTotalGliderDisables = if (isGliderDisables) (card.cache?.lifetimeTotalGliderDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderDisables ?: 0L),
-      lifetimeTotalProvoked = if (isProvoked) (card.cache?.lifetimeTotalProvoked ?: 0L) + 1 else (card.cache?.lifetimeTotalProvoked ?: 0L)
+      lifetimeTotalProvoked = if (isProvoked) (card.cache?.lifetimeTotalProvoked ?: 0L) + 1 else (card.cache?.lifetimeTotalProvoked ?: 0L),
     ),
-    recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
+    recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(500), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
     sessionCharmTotal = if (isCharm) sessionCharmTotal + 1 else sessionCharmTotal,
     sessionSongsTotal = if (isSongs) this.sessionSongsTotal + 1 else this.sessionSongsTotal,
@@ -299,7 +308,6 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionFreezeTotal = if (isFreeze) sessionFreezeTotal + 1 else sessionFreezeTotal,
     sessionTripsTotal = if (isTrips) sessionTripsTotal + 1 else sessionTripsTotal,
     sessionBubblesTotal = if (isBubbles) sessionBubblesTotal + 1 else sessionBubblesTotal,
-    sessionBracingsTotal = if (isBracings) sessionBracingsTotal + 1 else sessionBracingsTotal,
     sessionShieldStripTotal = if (isShieldStrip) sessionShieldStripTotal + 1 else sessionShieldStripTotal,
     sessionWeaponDisablesTotal = if (isWeaponDisables) sessionWeaponDisablesTotal + 1 else sessionWeaponDisablesTotal,
     sessionPotionDisablesTotal = if (isPotionDisables) sessionPotionDisablesTotal + 1 else sessionPotionDisablesTotal,
@@ -396,15 +404,29 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
 fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   //if (event.source == event.target) return this // skip self-casts (e.g. resurgence on yourself)
+  val isBracingImmunity = event.buffId in bracingBlastImmunityBuffIds
+  val isDefiance = event.buffId in defianceBuffIds
+  val isSacDance = event.buffId in sacrificeBuffIds
+  val isPurge = event.buffId == purgeBuffId
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalBuffsApplied = (card.cache?.lifetimeTotalBuffsApplied ?: 0L) + 1
+      lifetimeTotalBuffsApplied = (card.cache?.lifetimeTotalBuffsApplied ?: 0L) + 1,
+      lifetimeTotalCCDelivered = if (isBracingImmunity) (card.cache?.lifetimeTotalCCDelivered ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
+      lifetimeTotalBracings = if (isBracingImmunity) (card.cache?.lifetimeTotalBracings ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L),
+      lifetimeTotalDefiance = if (isDefiance) (card.cache?.lifetimeTotalDefiance ?: 0L) + 1 else (card.cache?.lifetimeTotalDefiance ?: 0L),
+      lifetimeTotalSacDances = if (isSacDance) (card.cache?.lifetimeTotalSacDances ?: 0L) + 1 else (card.cache?.lifetimeTotalSacDances ?: 0L),
+      lifetimeTotalPurges = if (isPurge) (card.cache?.lifetimeTotalPurges ?: 0L) + 1 else (card.cache?.lifetimeTotalPurges ?: 0L)
     ),
-    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(200), // optional to takeLast(n)
+    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(500), // optional to takeLast(n)
     sessionBuffTotal = this.sessionBuffTotal + 1,
+    sessionDefianceTotal = if (isDefiance) card.sessionDefianceTotal + 1 else card.sessionDefianceTotal,
+    sessionSacDanceTotal = if (isSacDance) card.sessionSacDanceTotal + 1 else card.sessionSacDanceTotal,
+    sessionPurgeTotal = if (isPurge) sessionPurgeTotal + 1 else sessionPurgeTotal,
+    sessionBracingsTotal = if (isBracingImmunity) sessionBracingsTotal + 1 else sessionBracingsTotal,
+    sessionCCTotal = if (isBracingImmunity) card.sessionCCTotal + 1 else card.sessionCCTotal,
     // --- Buff adjacency ---
     sessionBuffToPlayer = this.sessionBuffToPlayer + (event.target to ((this.sessionBuffToPlayer[event.target] ?: 0) + 1)),
     sessionBuffToPlayerBySpell = run {

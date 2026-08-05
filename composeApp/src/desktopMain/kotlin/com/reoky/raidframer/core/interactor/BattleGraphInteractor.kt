@@ -262,6 +262,7 @@ object BattleGraphInteractor : Interactor() {
     BattleGraphMode.DAMAGE -> {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionDamageToPlayer.forEach { (targetName, damage) ->
+          if (targetName == sourceCard.name) return@forEach
           if (damage >= damageThresholdMin) {
             val breakdown = sourceCard.sessionDamageToPlayerBySpell[targetName] ?: emptyMap()
             // Only filter breakdown by search if query matches a spell name
@@ -289,6 +290,7 @@ object BattleGraphInteractor : Interactor() {
     BattleGraphMode.HEALS -> {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionHealToPlayer.forEach { (targetName, heals) ->
+          if (targetName == sourceCard.name) return@forEach
           if (heals >= healThresholdMin) {
             val breakdown = sourceCard.sessionHealToPlayerBySpell[targetName] ?: emptyMap()
             val filteredBreakdown = if (queryMatchesSpell) {
@@ -309,6 +311,7 @@ object BattleGraphInteractor : Interactor() {
     BattleGraphMode.CC -> {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionCCToPlayer.forEach { (targetName, cc) ->
+          if (targetName == sourceCard.name) return@forEach
           if (cc >= ccThresholdMin) {
             val breakdown = sourceCard.sessionCCToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
             val filteredBreakdown = if (queryMatchesSpell) {
@@ -349,6 +352,7 @@ object BattleGraphInteractor : Interactor() {
     BattleGraphMode.BUFFS -> {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionBuffToPlayer.forEach { (targetName, buffs) ->
+          if (targetName == sourceCard.name) return@forEach
           val breakdown = sourceCard.sessionBuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
           // Apply both search query (only if it matches a spell) and spell dropdown filter
           val searchFiltered = if (queryMatchesSpell) {
@@ -373,6 +377,7 @@ object BattleGraphInteractor : Interactor() {
     BattleGraphMode.DEBUFFS -> {
       filteredCards.forEach { sourceCard ->
         sourceCard.sessionDebuffToPlayer.forEach { (targetName, debuffs) ->
+          if (targetName == sourceCard.name) return@forEach
           val breakdown = sourceCard.sessionDebuffToPlayerBySpell[targetName]?.mapValues { it.value.toLong() } ?: emptyMap()
           // Apply both search query (only if it matches a spell) and spell dropdown filter
           val searchFiltered = if (queryMatchesSpell) {

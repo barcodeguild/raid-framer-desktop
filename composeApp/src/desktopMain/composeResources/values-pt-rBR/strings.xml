@@ -35,6 +35,7 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Configurações do Raid Framer Desktop</string>
+    <string name="settings_export_background_title">Fundo da Exportação</string><string name="settings_export_background_description">Escolha o fundo usado nas exportações de rankings em PNG.</string><string name="settings_export_background_note">As imagens PNG devem ter pelo menos 2000 x 2000 pixels. Imagens maiores são recomendadas porque os rankings são largos e altos.</string><string name="settings_export_background_color">Cor Sólida</string><string name="settings_export_background_dimness">Escurecimento do Fundo</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">Cor Sólida</string><string name="settings_export_background_custom">PNG Personalizado</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">Escolher fundo PNG</string><string name="settings_export_background_picker_filter">Imagens PNG (*.png)</string><string name="settings_export_background_invalid_file">Não foi possível ler o arquivo selecionado como PNG.</string><string name="settings_export_background_resolution_error">Os fundos PNG devem ter pelo menos 2000 x 2000 pixels.</string>
     <string name="settings_data_sourcing_title">Fonte de Dados</string>
     <string name="settings_data_sourcing_description">Por favor, confirme que você vê o diretório de documentos do ArcheRage correto abaixo. O diretório de documentos do seu jogo foi detectado automaticamente. Se você não vir o diretório correto, ou o texto abaixo estiver vermelho, você deve reportar um bug.</string>
     <string name="settings_toggle_pvp_damage">Mostrar apenas dano PvP</string>
@@ -313,6 +314,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="tech_cc_rival">Rival de CC?</string>
     <string name="tech_no_silences">Sem Silêncio?</string>
     <string name="tech_no_tiger_strikes">Sem Golpes de Tigre?</string>
+    <string name="tech_no_defiance">Sem Defiance</string>
 
     <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">Resumo da Batalha (%1$s)</string>
@@ -381,6 +383,15 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="summary_tab_utility_debuffs">Debuffs de Utilidade</string>
     <string name="summary_tab_glider_debuffs">Debuffs de Planador</string>
     <string name="summary_tab_special_debuffs">Debuffs Especiais</string>
+    <string name="summary_tab_new_buffs">Buffs Especiais</string>
+    <string name="player_card_stat_defiance">Determinação</string>
+    <string name="player_card_stat_garden_defiance">Bênção Divina</string>
+    <string name="player_card_stat_purges">Purificações</string>
+    <string name="player_card_stat_sac_dances">Dança do Sacrifício</string>
+    <string name="summary_top_defiance">Melhor Determinação</string>
+    <string name="summary_top_garden_defiance">Melhor Bênção Divina</string>
+    <string name="summary_top_purges">Melhores Purificações</string>
+    <string name="summary_top_sac_dances">Melhores Danças do Sacrifício</string>
     <string name="summary_tab_spells">Habilidades</string>
     <string name="summary_tab_buffs">Benefícios</string>
     <string name="summary_tab_ode">Ode</string>

@@ -450,7 +450,8 @@ fun CombatOverlay(wm: WindowManager? = null) {
                       onClick = {
                         showStopPopup = false
                         PlayerCacheInteractor.stopSession()
-                        RFConfig.update { it.copy(lastSessionStart = 0L) }
+                        val currentSessionStart = RFConfig.state.value.lastSessionStart
+                        RFConfig.update { it.copy(lastSessionStart = 0L, previousSessionStart = currentSessionStart) }
                       },
                       contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                     ) {

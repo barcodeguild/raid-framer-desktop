@@ -47,7 +47,7 @@ val blacklistedDebuffIds: Set<Int> = setOf(
   18373, 23079, 23080, // Gleeful Destruction maledictions
   22022, 8000576, // Lucius: Gods and Heroes (Lunastone debuff stacks)
   4844, // Dominator's Curse
-  13789, 14620, // Abyssal Burdon, Abyssal Whisper
+  13789, 14620, // Abyssal Burden, Abyssal Whisper
   9001158, // PvP is undesirable
   31318, // Hide and Seek debuff
 )
@@ -66,7 +66,13 @@ val blacklistedBuffIds: Set<Int> = setOf(
 // Names of debuffs to blacklist (fallback for when IDs aren't available)
 val blacklistedDebuffNames: Set<String> = setOf(
   "Unknown",
-  "Preparing Glider"
+  "Preparing Glider",
+  "Abyssal Whisper",
+  "深渊的私语",
+  "심연의 속삭임",
+  "Abyssal Burden",
+  "深渊的压制",
+  "심연의 억압"
 )
 
 // Names of buffs to blacklist (fallback for when IDs aren't available)

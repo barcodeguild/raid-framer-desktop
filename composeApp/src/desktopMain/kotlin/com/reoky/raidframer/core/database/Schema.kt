@@ -14,7 +14,9 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 32
+const val SCHEMA_VERSION = 35
+
+const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
 /*
  * Used to remember window positions since friends tend to want to position their overlays
@@ -97,6 +99,7 @@ data class ConfigEntity(
   val lastSessionDurationMs: Long = 0L,
   val lastSessionExportDir: String = "",
   val exportIncludeRawJsonLogs: Boolean = false,
+  val previousSessionStart: Long = 0L,
 
   // Seed table config
   val seedTableLastAppliedTimestamp: Long = 0L,
@@ -109,7 +112,13 @@ data class ConfigEntity(
   val autoUpdateEnabled: Boolean = true,
 
   // Ode to Recovery heal filtering
-  val allowOdeToRecoveryCountAsHeals: Boolean = false
+  val allowOdeToRecoveryCountAsHeals: Boolean = false,
+
+  // PNG export background settings
+  val exportBackgroundSelection: String = "REOKY",
+  val exportCustomBackgroundPath: String = "",
+  val exportBackgroundColor: Int = 0xFF000000.toInt(),
+  val exportBackgroundDimness: Float = 0.20f
 )
 
 /*
@@ -242,6 +251,10 @@ data class PlayerCacheEntity(
   val lifetimeTotalCrystalWings: Long = 0L,
   val lifetimeTotalGliderDisables: Long = 0L,
   val lifetimeTotalProvoked: Long = 0L,
+  val lifetimeTotalDefiance: Long = 0L,
+  val lifetimeTotalGardenDefiance: Long = 0L,
+  val lifetimeTotalPurges: Long = 0L,
+  val lifetimeTotalSacDances: Long = 0L,
 )
 
 /*
@@ -292,6 +305,10 @@ data class PlayerSessionTotalsEntity(
   val totalCrystalWings: Int = 0,
   val totalGliderDisables: Int = 0,
   val totalProvoked: Int = 0,
+  val totalDefiance: Int = 0,
+  val totalGardenDefiance: Int = 0,
+  val totalPurges: Int = 0,
+  val totalSacDances: Int = 0,
 )
 
 // global enums below for consolidation

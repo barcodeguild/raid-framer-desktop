@@ -3,6 +3,7 @@ package com.reoky.raidframer.ui.export
 import androidx.compose.ui.graphics.Color as ComposeColor
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.database.MAX_EXPORT_BACKGROUND_DIMNESS
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
@@ -12,13 +13,13 @@ import com.reoky.raidframer.core.helpers.getDocumentsDirectory
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.locale.AppLocale
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.pvpPerformancePoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import raid_framer_desktop.composeapp.generated.resources.Res
-import raid_framer_desktop.composeapp.generated.resources.arkorean_regular
 import raid_framer_desktop.composeapp.generated.resources.export_no_data
 import raid_framer_desktop.composeapp.generated.resources.export_title_battle_summary
 import raid_framer_desktop.composeapp.generated.resources.export_header_on
@@ -96,6 +97,10 @@ import org.jetbrains.skia.Codec
 import org.jetbrains.skia.Data
 import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.svg.SVGDOM
+import raid_framer_desktop.composeapp.generated.resources.summary_top_defiance
+import raid_framer_desktop.composeapp.generated.resources.summary_top_garden_defiance
+import raid_framer_desktop.composeapp.generated.resources.summary_top_purges
+import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dances
 import javax.imageio.ImageIO
 
 object ImageExportInteractor {
@@ -149,6 +154,10 @@ object ImageExportInteractor {
   private val PROVOKED_COLOR = toAwtColor(RFColors.provokesDeepPurple)
   private val TIGER_STRIKE_COLOR = toAwtColor(RFColors.techNoTigerStrikes)
   private val FREEZE_COLOR = toAwtColor(RFColors.freezeIceBlue)
+  private val DEFIANCE_COLOR = toAwtColor(RFColors.defianceGold)
+  private val GARDEN_DEFIANCE_COLOR = toAwtColor(RFColors.gardenDefianceBlue)
+  private val PURGE_COLOR = toAwtColor(RFColors.purgeGreen)
+  private val SAC_DANCE_COLOR = toAwtColor(RFColors.sacDancePurple)
 
   /**
    * Maps a heal ratio (0.0 = 0% healed, 1.0 = 100% healed) to a color gradient:
@@ -324,7 +333,11 @@ object ImageExportInteractor {
     val topBdGlider: List<PlayerCard>,
     val topCrystalWings: List<PlayerCard>,
     val topGliderDisables: List<PlayerCard>,
-    val topProvoked: List<PlayerCard>,
+     val topProvoked: List<PlayerCard>,
+     val topDefiance: List<PlayerCard>,
+     val topGardenDefiance: List<PlayerCard>,
+     val topPurges: List<PlayerCard>,
+     val topSacDances: List<PlayerCard>,
     // New faction comparison data
     val factionTigerStrikeData: Map<String, Float>,
     val factionFreezeData: Map<String, Float>,
@@ -404,7 +417,6 @@ object ImageExportInteractor {
       topHealRatio        = PlayerCacheInteractor.topDamageTaken.value
         .filter { it.sessionDamageTakenTotal > 0 }
         .sortedByDescending { it.sessionDamageTakenTotal }
-        .take(15)
         .map { card ->
           val ratio = if (card.sessionDamageTakenTotal > 0) {
             card.sessionHealsReceivedTotal.toFloat() / card.sessionDamageTakenTotal.toFloat()
@@ -444,6 +456,10 @@ object ImageExportInteractor {
       topCrystalWings    = PlayerCacheInteractor.topCrystalWings.value.take(15),
       topGliderDisables  = PlayerCacheInteractor.topGliderDisables.value.take(15),
       topProvoked        = PlayerCacheInteractor.topProvoked.value.take(15),
+      topDefiance        = PlayerCacheInteractor.topDefiance.value.take(15),
+      topGardenDefiance  = PlayerCacheInteractor.topGardenDefiance.value.take(15),
+      topPurges          = PlayerCacheInteractor.topPurges.value.take(15),
+      topSacDances       = PlayerCacheInteractor.topSacDances.value.take(15),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -521,18 +537,45 @@ object ImageExportInteractor {
    * 100% automated / programmatically.
    */
   private fun drawWallpaperBackground(g2d: Graphics2D, width: Int, height: Int) {
-    g2d.color = toAwtColor(RFColors.CardBackground)
-    g2d.fillRect(0, 0, width, height)
-
-    try {
-      val resUri = Res.getUri("drawable/reoky_wallpaper.png")
-      val wallpaper = ImageIO.read(URI(resUri).toURL())
-      if (wallpaper != null) {
-        g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
-        g2d.drawImage(wallpaper, 0, 0, width, height, null)
-        g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)
+    val config = RFConfig.state.value
+    val fallbackUri = Res.getUri("drawable/reoky_wallpaper.png")
+    val wallpaper = try {
+      when (config.exportBackgroundSelection) {
+        "SOLID_COLOR" -> null
+        "CUSTOM" -> {
+          val file = File(config.exportCustomBackgroundPath)
+          if (!file.isFile) throw IllegalStateException("Custom background is missing")
+          ImageIO.read(file) ?: throw IllegalStateException("Custom background is unreadable")
+        }
+        "SPAGUETTI" -> ImageIO.read(URI(Res.getUri("drawable/spaguetti_wallpaper.png")).toURL())
+        "SPACEA" -> ImageIO.read(URI(Res.getUri("drawable/spacea_wallpaper.png")).toURL())
+        "BROOKLYYN" -> ImageIO.read(URI(Res.getUri("drawable/brooklyyn_wallpaper.png")).toURL())
+        else -> ImageIO.read(URI(fallbackUri).toURL())
       }
     } catch (_: Exception) {
+      ImageIO.read(URI(fallbackUri).toURL())
+    }
+
+    g2d.color = if (config.exportBackgroundSelection == "SOLID_COLOR") {
+      Color(config.exportBackgroundColor, true)
+    } else {
+      toAwtColor(RFColors.CardBackground)
+    }
+    g2d.fillRect(0, 0, width, height)
+
+    if (wallpaper != null) {
+      val scale = maxOf(width.toDouble() / wallpaper.width, height.toDouble() / wallpaper.height)
+      val drawWidth = (wallpaper.width * scale).toInt()
+      val drawHeight = (wallpaper.height * scale).toInt()
+      val drawX = (width - drawWidth) / 2
+      val drawY = (height - drawHeight) / 2
+      g2d.drawImage(wallpaper, drawX, drawY, drawWidth, drawHeight, null)
+    }
+
+    val dimness = config.exportBackgroundDimness.coerceIn(0f, MAX_EXPORT_BACKGROUND_DIMNESS)
+    if (dimness > 0f) {
+      g2d.color = Color(0, 0, 0, (dimness * 255f).toInt())
+      g2d.fillRect(0, 0, width, height)
     }
   }
 
@@ -780,7 +823,7 @@ object ImageExportInteractor {
   }
 
   private fun drawSectionHeader(g2d: Graphics2D, title: String, x: Int, y: Int, width: Int, color: Color, icon: String = "") {
-    val textFont = createFont(Font.BOLD, 13f)
+    val textFont = createFittingHeaderFont(g2d, title, width, icon)
     g2d.font = textFont
     g2d.color = color
     val textWidth = g2d.fontMetrics.stringWidth(title)
@@ -1199,33 +1242,78 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_top_freezes), "\u2744", ColumnData.CardData(data.topFreezes, { it.sessionFreezeTotal.toString() }, FREEZE_COLOR)),
     )))
 
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_defiance), "\u2694", ColumnData.CardData(data.topDefiance, { it.sessionDefianceTotal.toString() }, DEFIANCE_COLOR)),
+      Triple(getString(Res.string.summary_top_garden_defiance), "\u2600", ColumnData.CardData(data.topGardenDefiance, { it.sessionGardenDefianceTotal.toString() }, GARDEN_DEFIANCE_COLOR)),
+      Triple(getString(Res.string.summary_top_purges), "\u2728", ColumnData.CardData(data.topPurges, { it.sessionPurgeTotal.toString() }, PURGE_COLOR)),
+    )))
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_sac_dances), "\u2665", ColumnData.CardData(data.topSacDances, { it.sessionSacDanceTotal.toString() }, SAC_DANCE_COLOR)),
+    )))
+
     return tripletBlocks
   }
 
   private var cachedFont: Font? = null
+  private var cachedFontLanguage: String? = null
   private var cachedEmojiFont: Font? = null
 
   private fun createFont(style: Int, size: Float): Font {
-    val baseFont = cachedFont?.deriveFont(size) ?: run {
-      try {
-        val uri = Res.getUri("font/arkorean_regular.ttf")
-        val font = Font.createFont(Font.TRUETYPE_FONT, URI(uri).toURL().openStream()).deriveFont(size)
-        cachedFont = font
-        return font.deriveFont(style)
-      } catch (_: Exception) { }
-      try {
-        Font("Segoe UI Emoji", style, size.toInt())
-      } catch (_: Exception) {
-        Font("Segoe UI", style, size.toInt())
+    val language = RFConfig.state.value.preferredLanguage
+    val baseFont = cachedFont
+      ?.takeIf { cachedFontLanguage == language }
+      ?.deriveFont(size) ?: run {
+      val font = if (AppLocale.entryFor(RFConfig.state.value.preferredLanguage).code == "cn") {
+        listOf("Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Dialog")
+          .firstNotNullOfOrNull { name ->
+            runCatching { Font(name, Font.PLAIN, size.toInt()) }
+              .getOrNull()
+              ?.takeIf { candidate -> candidate.canDisplay('中') }
+          }
+          ?: Font("Dialog", Font.PLAIN, size.toInt())
+      } else {
+        try {
+          val uri = Res.getUri("font/arkorean_regular.ttf")
+          val koreanFont = Font.createFont(Font.TRUETYPE_FONT, URI(uri).toURL().openStream())
+          if (koreanFont.canDisplay('ç') && koreanFont.canDisplay('õ') && koreanFont.canDisplay('ü')) {
+            koreanFont
+          } else {
+            Font("Dialog", Font.PLAIN, size.toInt())
+          }
+        } catch (_: Exception) {
+          Font("Dialog", Font.PLAIN, size.toInt())
+        }
       }
+      cachedFont = font
+      cachedFontLanguage = language
+      font.deriveFont(style, size)
     }
-    return baseFont.deriveFont(style)
+    return baseFont.deriveFont(style, size)
+  }
+
+  private fun createFittingHeaderFont(g2d: Graphics2D, title: String, width: Int, icon: String): Font {
+    val maxTextWidth = (width - 20).coerceAtLeast(1)
+    var size = 13f
+    while (size > 8f) {
+      val font = createFont(Font.BOLD, size)
+      val iconFont = createEmojiFont(Font.BOLD, size)
+      g2d.font = font
+      val textWidth = g2d.fontMetrics.stringWidth(title)
+      g2d.font = iconFont
+      val iconWidth = if (icon.isEmpty()) 0 else g2d.fontMetrics.stringWidth(icon)
+      val spacingWidth = if (icon.isEmpty()) 0 else g2d.fontMetrics.stringWidth("  ")
+      if (textWidth + iconWidth * 2 + spacingWidth <= maxTextWidth) return font
+      size -= 1f
+    }
+    return createFont(Font.BOLD, 8f)
   }
 
   private fun createEmojiFont(style: Int, size: Float): Font {
     return cachedEmojiFont?.deriveFont(style, size) ?: run {
       try {
-        Font("Segoe UI Emoji", style, size.toInt())
+        val font = Font("Segoe UI Emoji", Font.PLAIN, size.toInt())
+        cachedEmojiFont = font
+        font.deriveFont(style, size)
       } catch (_: Exception) {
         Font("Segoe UI", style, size.toInt())
       }
