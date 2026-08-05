@@ -1321,6 +1321,11 @@ private enum class ExportBackgroundOption(
 @Composable
 private fun ExportBackgroundSettingsPanel(wm: WindowManager? = null) {
   val config by RFConfig.state.collectAsState()
+  val customPickerTitle = stringResource(Res.string.settings_export_background_picker_title)
+  val customPickerFilter = stringResource(Res.string.settings_export_background_picker_filter)
+  val customInvalidFileMessage = stringResource(Res.string.settings_export_background_invalid_file)
+  val customResolutionMessage = stringResource(Res.string.settings_export_background_resolution_error)
+  val customMessageTitle = stringResource(Res.string.settings_export_background_custom)
   var pickerError by remember { mutableStateOf<String?>(null) }
   val customFile = remember(config.exportCustomBackgroundPath) {
     config.exportCustomBackgroundPath.takeIf { it.isNotBlank() }?.let(::File)
@@ -1366,12 +1371,17 @@ private fun ExportBackgroundSettingsPanel(wm: WindowManager? = null) {
                   ExportBackgroundOption.CUSTOM -> {
                     // Swing file choosers must not sit behind this always-on-top overlay.
                     wm?.closeWindow(OverlayType.SETTINGS)
-                    chooseCustomExportBackground { path, error ->
+                     chooseCustomExportBackground(
+                       title = customPickerTitle,
+                       filterDescription = customPickerFilter,
+                       invalidFileMessage = customInvalidFileMessage,
+                       resolutionMessage = customResolutionMessage
+                     ) { path, error ->
                       CoroutineScope(Dispatchers.Main).launch {
                         if (path != null) {
                           RFConfig.update { it.copy(exportBackgroundSelection = option.key, exportCustomBackgroundPath = path) }
                         }
-                        if (error != null) messageBox("Custom PNG", error)
+                         if (error != null) messageBox(customMessageTitle, error)
                         pickerError = null
                         wm?.openWindow(OverlayType.SETTINGS)
                       }
@@ -1492,9 +1502,14 @@ private fun CustomBackgroundStatusPreview(
     contentAlignment = Alignment.Center
   ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-      Text(if (applied) "✓" else "?", color = if (applied) RFColors.UpdateGreen else RFColors.TextSecondary, fontSize = 32.sp, fontWeight = FontWeight.Bold)
       Text(
-        text = fileName ?: "Custom",
+        stringResource(if (applied) Res.string.settings_export_background_applied_icon else Res.string.settings_export_background_missing_icon),
+        color = if (applied) RFColors.UpdateGreen else RFColors.TextSecondary,
+        fontSize = 32.sp,
+        fontWeight = FontWeight.Bold
+      )
+      Text(
+        text = fileName ?: stringResource(Res.string.settings_export_background_custom),
         color = RFColors.TextPrimary,
         fontSize = 10.sp,
         maxLines = 1,
@@ -1507,11 +1522,17 @@ private fun CustomBackgroundStatusPreview(
   }
 }
 
-private fun chooseCustomExportBackground(onResult: (String?, String?) -> Unit) {
+private fun chooseCustomExportBackground(
+  title: String,
+  filterDescription: String,
+  invalidFileMessage: String,
+  resolutionMessage: String,
+  onResult: (String?, String?) -> Unit
+) {
   Thread {
     val chooser = javax.swing.JFileChooser()
-    chooser.dialogTitle = "Choose PNG background"
-    chooser.fileFilter = javax.swing.filechooser.FileNameExtensionFilter("PNG images (*.png)", "png")
+    chooser.dialogTitle = title
+    chooser.fileFilter = javax.swing.filechooser.FileNameExtensionFilter(filterDescription, "png")
     if (chooser.showOpenDialog(null) != javax.swing.JFileChooser.APPROVE_OPTION) {
       onResult(null, null)
       return@Thread
@@ -1519,9 +1540,9 @@ private fun chooseCustomExportBackground(onResult: (String?, String?) -> Unit) {
     val file = chooser.selectedFile
     val image = runCatching { ImageIO.read(file) }.getOrNull()
     if (!file.isFile || image == null) {
-      onResult(null, "The selected file could not be read as a PNG.")
+      onResult(null, invalidFileMessage)
     } else if (image.width < 2000 || image.height < 2000) {
-      onResult(null, "PNG backgrounds must be at least 2000 x 2000 pixels.")
+      onResult(null, resolutionMessage)
     } else {
       onResult(file.absolutePath, null)
     }
