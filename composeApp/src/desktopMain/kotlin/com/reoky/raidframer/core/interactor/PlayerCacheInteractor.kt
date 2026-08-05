@@ -1027,29 +1027,31 @@ object PlayerCacheInteractor : Interactor() {
           val lastIdx = breathCasts.indexOfLast { cast ->
             event.timestamp >= cast.timestamp && event.timestamp - cast.timestamp <= 15_000L
           }
-          if (lastIdx < 0) return@withLock
-          val last = breathCasts[lastIdx]
-          val updatedTargetMap = last.damageByTarget.toMutableMap()
-          updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
-          breathCasts = breathCasts.toMutableList().apply {
-            set(lastIdx, last.copy(
-              damage = last.damage + event.damage.toLong(),
-              damageByTarget = updatedTargetMap
-            ))
+          if (lastIdx >= 0) {
+            val last = breathCasts[lastIdx]
+            val updatedTargetMap = last.damageByTarget.toMutableMap()
+            updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
+            breathCasts = breathCasts.toMutableList().apply {
+              set(lastIdx, last.copy(
+                damage = last.damage + event.damage.toLong(),
+                damageByTarget = updatedTargetMap
+              ))
+            }
           }
         } else if (isRocketDamage && rocketCasts.isNotEmpty()) {
           val lastIdx = rocketCasts.indexOfLast { cast ->
             event.timestamp >= cast.timestamp && event.timestamp - cast.timestamp <= 15_000L
           }
-          if (lastIdx < 0) return@withLock
-          val last = rocketCasts[lastIdx]
-          val updatedTargetMap = last.damageByTarget.toMutableMap()
-          updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
-          rocketCasts = rocketCasts.toMutableList().apply {
-            set(lastIdx, last.copy(
-              damage = last.damage + event.damage.toLong(),
-              damageByTarget = updatedTargetMap
-            ))
+          if (lastIdx >= 0) {
+            val last = rocketCasts[lastIdx]
+            val updatedTargetMap = last.damageByTarget.toMutableMap()
+            updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
+            rocketCasts = rocketCasts.toMutableList().apply {
+              set(lastIdx, last.copy(
+                damage = last.damage + event.damage.toLong(),
+                damageByTarget = updatedTargetMap
+              ))
+            }
           }
         }
 

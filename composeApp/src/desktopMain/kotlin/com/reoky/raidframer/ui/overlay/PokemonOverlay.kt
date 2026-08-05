@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.PetCard
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -42,6 +43,13 @@ fun PokemonOverlay() {
 fun PokemonOverlay(wm: WindowManager? = null) {
   val activePets = PlayerCacheInteractor.activePets.collectAsState()
   val config = RFConfig.state.collectAsState()
+  val sortedPets = remember(activePets.value) {
+    activePets.value.sortedWith(
+      compareByDescending<PetCard> {
+        it.sessionBreathCasts.isNotEmpty() || it.sessionRocketCasts.isNotEmpty()
+      }.thenByDescending { it.sessionDamageTotal }
+    )
+  }
   val ownFaction = remember(config.value.playerFaction) {
     Faction.fromString(config.value.playerFaction)
   }
@@ -75,7 +83,7 @@ fun PokemonOverlay(wm: WindowManager? = null) {
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
-        itemsIndexed(activePets.value, key = { _, card -> card.petId }) { index, card ->
+        itemsIndexed(sortedPets, key = { _, card -> card.petId }) { index, card ->
           // Look up owner's faction for badge coloring
           val ownerCard = remember(card.owner) { PlayerCacheInteractor.getCard(card.owner) }
           val ownerFaction = remember(ownerCard) {

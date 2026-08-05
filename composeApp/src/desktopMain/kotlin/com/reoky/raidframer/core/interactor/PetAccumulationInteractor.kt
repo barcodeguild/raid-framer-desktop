@@ -276,10 +276,27 @@ object PetAccumulatorInteractor : Interactor() {
         val ownerPets = candidates.filter {
           it.value.owner.equals(pending.ownerName, ignoreCase = true)
         }
-        if (ownerPets.size == 1) {
-          PlayerCacheInteractor.postPetSuccessfulCast(ownerPets.single().key, pending.cast)
-          pendingRiderCasts.remove(pending)
-          candidates = ownerPets
+        if (ownerPets.isNotEmpty()) {
+          // A rider cast identifies its owner, while the damage source identifies
+          // the pet. If several pets owned by that rider are possible, use the
+          // matching cast window to avoid losing the cast/damage association.
+          val matchingWindow = riderCastWindow.firstOrNull { window ->
+            window.ownerName.equals(pending.ownerName, ignoreCase = true) &&
+              window.castTime == pending.cast.timestamp &&
+              isRelatedSpell(damage.spellId, damage.spell, window.spellId)
+          }
+          val selectedPet = if (ownerPets.size == 1) {
+            ownerPets.single()
+          } else {
+            matchingWindow?.let { window ->
+              ownerPets.find { it.value.name.equals(window.petName, ignoreCase = true) }
+            }
+          }
+          if (selectedPet != null) {
+            PlayerCacheInteractor.postPetSuccessfulCast(selectedPet.key, pending.cast)
+            pendingRiderCasts.remove(pending)
+            candidates = listOf(selectedPet)
+          }
         }
       }
 
