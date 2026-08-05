@@ -16,6 +16,8 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
 const val SCHEMA_VERSION = 35
 
+const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
+
 /*
  * Used to remember window positions since friends tend to want to position their overlays
  * how they like. ~

@@ -3,6 +3,7 @@ package com.reoky.raidframer.ui.export
 import androidx.compose.ui.graphics.Color as ComposeColor
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.database.MAX_EXPORT_BACKGROUND_DIMNESS
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
@@ -570,7 +571,7 @@ object ImageExportInteractor {
       g2d.drawImage(wallpaper, drawX, drawY, drawWidth, drawHeight, null)
     }
 
-    val dimness = config.exportBackgroundDimness.coerceIn(0f, 1f)
+    val dimness = config.exportBackgroundDimness.coerceIn(0f, MAX_EXPORT_BACKGROUND_DIMNESS)
     if (dimness > 0f) {
       g2d.color = Color(0, 0, 0, (dimness * 255f).toInt())
       g2d.fillRect(0, 0, width, height)
