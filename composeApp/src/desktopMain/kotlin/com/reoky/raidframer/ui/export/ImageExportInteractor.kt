@@ -13,6 +13,7 @@ import com.reoky.raidframer.core.helpers.getDocumentsDirectory
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.locale.AppLocale
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.pvpPerformancePoints
@@ -1254,29 +1255,43 @@ object ImageExportInteractor {
   }
 
   private var cachedFont: Font? = null
+  private var cachedFontLanguage: String? = null
   private var cachedEmojiFont: Font? = null
 
   private fun createFont(style: Int, size: Float): Font {
-    val baseFont = cachedFont?.deriveFont(size) ?: run {
-      try {
-        val uri = Res.getUri("font/arkorean_regular.ttf")
-        val font = Font.createFont(Font.TRUETYPE_FONT, URI(uri).toURL().openStream()).deriveFont(size)
-        cachedFont = font
-        return font.deriveFont(style)
-      } catch (_: Exception) { }
-      try {
-        Font("Segoe UI Emoji", style, size.toInt())
-      } catch (_: Exception) {
-        Font("Segoe UI", style, size.toInt())
+    val language = RFConfig.state.value.preferredLanguage
+    val baseFont = cachedFont
+      ?.takeIf { cachedFontLanguage == language }
+      ?.deriveFont(size) ?: run {
+      val font = if (AppLocale.entryFor(RFConfig.state.value.preferredLanguage).code == "cn") {
+        listOf("Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Dialog")
+          .firstNotNullOfOrNull { name ->
+            runCatching { Font(name, Font.PLAIN, size.toInt()) }
+              .getOrNull()
+              ?.takeIf { candidate -> candidate.canDisplay('中') }
+          }
+          ?: Font("Dialog", Font.PLAIN, size.toInt())
+      } else {
+        try {
+          val uri = Res.getUri("font/arkorean_regular.ttf")
+          Font.createFont(Font.TRUETYPE_FONT, URI(uri).toURL().openStream())
+        } catch (_: Exception) {
+          Font("Dialog", Font.PLAIN, size.toInt())
+        }
       }
+      cachedFont = font
+      cachedFontLanguage = language
+      font.deriveFont(style, size)
     }
-    return baseFont.deriveFont(style)
+    return baseFont.deriveFont(style, size)
   }
 
   private fun createEmojiFont(style: Int, size: Float): Font {
     return cachedEmojiFont?.deriveFont(style, size) ?: run {
       try {
-        Font("Segoe UI Emoji", style, size.toInt())
+        val font = Font("Segoe UI Emoji", Font.PLAIN, size.toInt())
+        cachedEmojiFont = font
+        font.deriveFont(style, size)
       } catch (_: Exception) {
         Font("Segoe UI", style, size.toInt())
       }
