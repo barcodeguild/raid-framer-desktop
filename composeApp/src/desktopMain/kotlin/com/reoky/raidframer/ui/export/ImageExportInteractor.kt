@@ -823,7 +823,7 @@ object ImageExportInteractor {
   }
 
   private fun drawSectionHeader(g2d: Graphics2D, title: String, x: Int, y: Int, width: Int, color: Color, icon: String = "") {
-    val textFont = createFont(Font.BOLD, 13f)
+    val textFont = createFittingHeaderFont(g2d, title, width, icon)
     g2d.font = textFont
     g2d.color = color
     val textWidth = g2d.fontMetrics.stringWidth(title)
@@ -1274,7 +1274,12 @@ object ImageExportInteractor {
       } else {
         try {
           val uri = Res.getUri("font/arkorean_regular.ttf")
-          Font.createFont(Font.TRUETYPE_FONT, URI(uri).toURL().openStream())
+          val koreanFont = Font.createFont(Font.TRUETYPE_FONT, URI(uri).toURL().openStream())
+          if (koreanFont.canDisplay('ç') && koreanFont.canDisplay('õ') && koreanFont.canDisplay('ü')) {
+            koreanFont
+          } else {
+            Font("Dialog", Font.PLAIN, size.toInt())
+          }
         } catch (_: Exception) {
           Font("Dialog", Font.PLAIN, size.toInt())
         }
@@ -1284,6 +1289,23 @@ object ImageExportInteractor {
       font.deriveFont(style, size)
     }
     return baseFont.deriveFont(style, size)
+  }
+
+  private fun createFittingHeaderFont(g2d: Graphics2D, title: String, width: Int, icon: String): Font {
+    val maxTextWidth = (width - 20).coerceAtLeast(1)
+    var size = 13f
+    while (size > 8f) {
+      val font = createFont(Font.BOLD, size)
+      val iconFont = createEmojiFont(Font.BOLD, size)
+      g2d.font = font
+      val textWidth = g2d.fontMetrics.stringWidth(title)
+      g2d.font = iconFont
+      val iconWidth = if (icon.isEmpty()) 0 else g2d.fontMetrics.stringWidth(icon)
+      val spacingWidth = if (icon.isEmpty()) 0 else g2d.fontMetrics.stringWidth("  ")
+      if (textWidth + iconWidth * 2 + spacingWidth <= maxTextWidth) return font
+      size -= 1f
+    }
+    return createFont(Font.BOLD, 8f)
   }
 
   private fun createEmojiFont(style: Int, size: Float): Font {
