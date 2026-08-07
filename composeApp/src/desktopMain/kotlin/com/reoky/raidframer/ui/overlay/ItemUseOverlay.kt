@@ -5,8 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +23,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.ui.OverlayHoverState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -93,7 +92,8 @@ fun ItemUseOverlay() {
     .take(maxVisible)
     .reversed()
 
-  var isHovered by remember { mutableStateOf(false) }
+  // Use shared hover state from OverlayHoverState
+  val isHovered by OverlayHoverState.isAnyOverlayHovered.collectAsState()
 
   val backgroundAlpha by animateFloatAsState(
     targetValue = if (isHovered) 0.42f else 0f,
@@ -104,17 +104,6 @@ fun ItemUseOverlay() {
     modifier = Modifier
       .fillMaxSize()
       .background(Color.Black.copy(alpha = backgroundAlpha))
-      .pointerInput(Unit) {
-        awaitPointerEventScope {
-          while (true) {
-            val event = awaitPointerEvent()
-            when (event.type) {
-              PointerEventType.Enter -> isHovered = true
-              PointerEventType.Exit -> isHovered = false
-            }
-          }
-        }
-      }
   ) {
     Column(
       modifier = Modifier

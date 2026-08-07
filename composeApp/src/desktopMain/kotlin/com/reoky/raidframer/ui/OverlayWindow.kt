@@ -1,6 +1,9 @@
 package com.reoky.raidframer.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -42,6 +45,7 @@ val LocalDragLock = compositionLocalOf<MutableState<Boolean>> { mutableStateOf(f
 @Composable
 fun OverlayWindow(
   title: String,
+  overlayType: OverlayType,
   initialPosition: WindowPosition,
   initialSize: DpSize,
   windowType: OverlayWindowType,
@@ -129,6 +133,23 @@ fun OverlayWindow(
     CompositionLocalProvider(LocalDragLock provides dragLocked) {
       val windowColor = Color(config.windowColor).copy(alpha = config.windowOpacity)
       val contentBackground = if (transparentBackground) Color.Transparent else windowColor
+
+      // Shared hover state for OVERLAY-type windows
+      val overlayInteractionSource = remember { MutableInteractionSource() }
+      val isOverlayHovered by overlayInteractionSource.collectIsHoveredAsState()
+
+      LaunchedEffect(isOverlayHovered) {
+        if (windowType == OverlayWindowType.OVERLAY) {
+          OverlayHoverState.setHovered(overlayType, isOverlayHovered)
+        }
+      }
+
+      val hoverModifier = if (windowType == OverlayWindowType.OVERLAY) {
+        Modifier.hoverable(interactionSource = overlayInteractionSource)
+      } else {
+        Modifier
+      }
+
       if (windowType == OverlayWindowType.TOOLTIP) {
         Box(
           modifier = Modifier
@@ -143,6 +164,7 @@ fun OverlayWindow(
           modifier = Modifier
             .background(contentBackground)
             .fillMaxSize()
+            .then(hoverModifier)
         ) {
           windowContent(composeWindow)
         }

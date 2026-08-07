@@ -35,6 +35,7 @@ import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
+import com.reoky.raidframer.ui.OverlayHoverState
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.core.model.CombatRankingCategory
@@ -193,6 +194,9 @@ fun CombatOverlay(wm: WindowManager? = null) {
   val overlayInteractionSource = remember { MutableInteractionSource() }
   val isOverlayHovered by overlayInteractionSource.collectIsHoveredAsState()
 
+  // Shared hover state — triggers when ANY overlay is hovered
+  val isAnyOverlayHovered by OverlayHoverState.isAnyOverlayHovered.collectAsState()
+
   // Dismiss stop popup when cursor leaves both the overlay and the popup
   LaunchedEffect(isOverlayHovered, isStopPopupHovered) {
     if (!isOverlayHovered && !isStopPopupHovered && showStopPopup) {
@@ -208,13 +212,13 @@ fun CombatOverlay(wm: WindowManager? = null) {
   }
 
   val controlsAlpha by animateFloatAsState(
-    targetValue = if (!config.combatControlsFadeEnabled || isOverlayHovered) 1f else 0f,
+    targetValue = if (!config.combatControlsFadeEnabled || isOverlayHovered || isAnyOverlayHovered) 1f else 0f,
     animationSpec = tween(durationMillis = 500)
   )
   // Animate the title padding to match the icon row width (3 × 32dp = 96dp) so titles
   // expand into the space the icons occupied as they fade out.
   val controlsPaddingFloat by animateFloatAsState(
-    targetValue = if (!config.combatControlsFadeEnabled || isOverlayHovered) 96f else 0f,
+    targetValue = if (!config.combatControlsFadeEnabled || isOverlayHovered || isAnyOverlayHovered) 96f else 0f,
     animationSpec = tween(durationMillis = 500)
   )
 

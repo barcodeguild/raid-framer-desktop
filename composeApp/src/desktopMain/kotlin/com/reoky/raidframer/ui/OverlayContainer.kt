@@ -52,6 +52,7 @@ fun OverlayContainer(wm: WindowManager) {
 
       OverlayWindow(
         title = type.name,
+        overlayType = type,
         initialPosition = WindowPosition(Dp(state.lastPositionXDp), Dp(state.lastPositionYDp)),
         initialSize = DpSize(Dp(state.lastWidthDp), Dp(state.lastHeightDp)),
         windowType = state.windowType,
