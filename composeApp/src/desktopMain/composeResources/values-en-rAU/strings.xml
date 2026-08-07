@@ -38,7 +38,20 @@
     <string name="settings_export_background_title">Export Background</string>
     <string name="settings_export_background_description">Choose the background used for PNG leaderboard exports.</string>
     <string name="settings_export_background_note">PNG images must be at least 2000 x 2000 pixels. Larger images are recommended because leaderboards are wide and vertically tall.</string>
-    <string name="settings_export_background_color">Solid Color</string><string name="settings_export_background_dimness">Background Dimness</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">Solid Color</string><string name="settings_export_background_custom">Custom PNG</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">Choose PNG background</string><string name="settings_export_background_picker_filter">PNG images (*.png)</string><string name="settings_export_background_invalid_file">The selected file could not be read as a PNG.</string><string name="settings_export_background_resolution_error">PNG backgrounds must be at least 2000 x 2000 pixels.</string>
+    <string name="settings_export_background_color">Solid Color</string>
+    <string name="settings_export_background_dimness">Background Dimness</string>
+    <string name="settings_export_background_reoky">Reoky</string>
+    <string name="settings_export_background_spaguetti">Spaguetti</string>
+    <string name="settings_export_background_spacea">Spacea</string>
+    <string name="settings_export_background_brooklyyn">Brooklyyn</string>
+    <string name="settings_export_background_solid">Solid Color</string>
+    <string name="settings_export_background_custom">Custom PNG</string>
+    <string name="settings_export_background_applied_icon">✓</string>
+    <string name="settings_export_background_missing_icon">?</string>
+    <string name="settings_export_background_picker_title">Choose PNG background</string>
+    <string name="settings_export_background_picker_filter">PNG images (*.png)</string>
+    <string name="settings_export_background_invalid_file">The selected file could not be read as a PNG.</string>
+    <string name="settings_export_background_resolution_error">PNG backgrounds must be at least 2000 x 2000 pixels.</string>
     <string name="settings_data_sourcing_title">Data Sourcing</string>
     <string name="settings_data_sourcing_description">Please confirm that you see the correct ArcheRage documents directory below. Your game's documents directory was detected automatically. If you don't see the correct directory, or the text below is red, you should report a bug.</string>
     <string name="settings_toggle_pvp_damage">Show only PvP damage</string>

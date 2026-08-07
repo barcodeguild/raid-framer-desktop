@@ -35,7 +35,23 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Configurações do Raid Framer Desktop</string>
-    <string name="settings_export_background_title">Fundo da Exportação</string><string name="settings_export_background_description">Escolha o fundo usado nas exportações de rankings em PNG.</string><string name="settings_export_background_note">As imagens PNG devem ter pelo menos 2000 x 2000 pixels. Imagens maiores são recomendadas porque os rankings são largos e altos.</string><string name="settings_export_background_color">Cor Sólida</string><string name="settings_export_background_dimness">Escurecimento do Fundo</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">Cor Sólida</string><string name="settings_export_background_custom">PNG Personalizado</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">Escolher fundo PNG</string><string name="settings_export_background_picker_filter">Imagens PNG (*.png)</string><string name="settings_export_background_invalid_file">Não foi possível ler o arquivo selecionado como PNG.</string><string name="settings_export_background_resolution_error">Os fundos PNG devem ter pelo menos 2000 x 2000 pixels.</string>
+    <string name="settings_export_background_title">Fundo da Exportação</string>
+    <string name="settings_export_background_description">Escolha o fundo usado nas exportações de rankings em PNG.</string>
+    <string name="settings_export_background_note">As imagens PNG devem ter pelo menos 2000 x 2000 pixels. Imagens maiores são recomendadas porque os rankings são largos e altos.</string>
+    <string name="settings_export_background_color">Cor Sólida</string>
+    <string name="settings_export_background_dimness">Escurecimento do Fundo</string>
+    <string name="settings_export_background_reoky">Reoky</string>
+    <string name="settings_export_background_spaguetti">Spaguetti</string>
+    <string name="settings_export_background_spacea">Spacea</string>
+    <string name="settings_export_background_brooklyyn">Brooklyyn</string>
+    <string name="settings_export_background_solid">Cor Sólida</string>
+    <string name="settings_export_background_custom">PNG Personalizado</string>
+    <string name="settings_export_background_applied_icon">✓</string>
+    <string name="settings_export_background_missing_icon">?</string>
+    <string name="settings_export_background_picker_title">Escolher fundo PNG</string>
+    <string name="settings_export_background_picker_filter">Imagens PNG (*.png)</string>
+    <string name="settings_export_background_invalid_file">Não foi possível ler o arquivo selecionado como PNG.</string>
+    <string name="settings_export_background_resolution_error">Os fundos PNG devem ter pelo menos 2000 x 2000 pixels.</string>
     <string name="settings_data_sourcing_title">Fonte de Dados</string>
     <string name="settings_data_sourcing_description">Por favor, confirme que você vê o diretório de documentos do ArcheRage correto abaixo. O diretório de documentos do seu jogo foi detectado automaticamente. Se você não vir o diretório correto, ou o texto abaixo estiver vermelho, você deve reportar um bug.</string>
     <string name="settings_toggle_pvp_damage">Mostrar apenas dano PvP</string>

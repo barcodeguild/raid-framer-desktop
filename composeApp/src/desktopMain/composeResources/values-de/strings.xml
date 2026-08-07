@@ -35,7 +35,23 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Einstellungen</string>
-    <string name="settings_export_background_title">Export-Hintergrund</string><string name="settings_export_background_description">Wählen Sie den Hintergrund für PNG-Ranglistenexporte.</string><string name="settings_export_background_note">PNG-Bilder müssen mindestens 2000 x 2000 Pixel groß sein. Größere Bilder werden empfohlen, da Ranglisten breit und sehr hoch sind.</string><string name="settings_export_background_color">Einfarbig</string><string name="settings_export_background_dimness">Hintergrundabdunklung</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">Einfarbig</string><string name="settings_export_background_custom">Benutzerdefinierte PNG</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">PNG-Hintergrund auswählen</string><string name="settings_export_background_picker_filter">PNG-Bilder (*.png)</string><string name="settings_export_background_invalid_file">Die ausgewählte Datei konnte nicht als PNG gelesen werden.</string><string name="settings_export_background_resolution_error">PNG-Hintergründe müssen mindestens 2000 x 2000 Pixel groß sein.</string>
+    <string name="settings_export_background_title">Export-Hintergrund</string>
+    <string name="settings_export_background_description">Wählen Sie den Hintergrund für PNG-Ranglistenexporte.</string>
+    <string name="settings_export_background_note">PNG-Bilder müssen mindestens 2000 x 2000 Pixel groß sein. Größere Bilder werden empfohlen, da Ranglisten breit und sehr hoch sind.</string>
+    <string name="settings_export_background_color">Einfarbig</string>
+    <string name="settings_export_background_dimness">Hintergrundabdunklung</string>
+    <string name="settings_export_background_reoky">Reoky</string>
+    <string name="settings_export_background_spaguetti">Spaguetti</string>
+    <string name="settings_export_background_spacea">Spacea</string>
+    <string name="settings_export_background_brooklyyn">Brooklyyn</string>
+    <string name="settings_export_background_solid">Einfarbig</string>
+    <string name="settings_export_background_custom">Benutzerdefinierte PNG</string>
+    <string name="settings_export_background_applied_icon">✓</string>
+    <string name="settings_export_background_missing_icon">?</string>
+    <string name="settings_export_background_picker_title">PNG-Hintergrund auswählen</string>
+    <string name="settings_export_background_picker_filter">PNG-Bilder (*.png)</string>
+    <string name="settings_export_background_invalid_file">Die ausgewählte Datei konnte nicht als PNG gelesen werden.</string>
+    <string name="settings_export_background_resolution_error">PNG-Hintergründe müssen mindestens 2000 x 2000 Pixel groß sein.</string>
     <string name="settings_data_sourcing_title">Datenquelle</string>
     <string name="settings_data_sourcing_description">Bitte bestätigen Sie, dass Sie unten das richtige ArcheRage-Dokumentenverzeichnis sehen. Ihr Spiel-Dokumentenverzeichnis wurde automatisch erkannt. Wenn Sie nicht das richtige Verzeichnis sehen oder der Text unten rot ist, sollten Sie einen Fehler melden.</string>
     <string name="settings_toggle_pvp_damage">Nur PvP-Schaden anzeigen</string>

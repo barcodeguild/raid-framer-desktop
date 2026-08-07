@@ -35,7 +35,23 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Настройки Raid Framer Desktop</string>
-    <string name="settings_export_background_title">Фон экспорта</string><string name="settings_export_background_description">Выберите фон для экспорта рейтинговых таблиц в PNG.</string><string name="settings_export_background_note">PNG-изображения должны быть не менее 2000 x 2000 пикселей. Рекомендуются изображения большего размера, поскольку таблицы широкие и высокие.</string><string name="settings_export_background_color">Сплошной цвет</string><string name="settings_export_background_dimness">Затемнение фона</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">Сплошной цвет</string><string name="settings_export_background_custom">Пользовательский PNG</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">Выберите PNG-фон</string><string name="settings_export_background_picker_filter">PNG-изображения (*.png)</string><string name="settings_export_background_invalid_file">Не удалось прочитать выбранный файл как PNG.</string><string name="settings_export_background_resolution_error">PNG-фон должен быть не менее 2000 x 2000 пикселей.</string>
+    <string name="settings_export_background_title">Фон экспорта</string>
+    <string name="settings_export_background_description">Выберите фон для экспорта рейтинговых таблиц в PNG.</string>
+    <string name="settings_export_background_note">PNG-изображения должны быть не менее 2000 x 2000 пикселей. Рекомендуются изображения большего размера, поскольку таблицы широкие и высокие.</string>
+    <string name="settings_export_background_color">Сплошной цвет</string>
+    <string name="settings_export_background_dimness">Затемнение фона</string>
+    <string name="settings_export_background_reoky">Reoky</string>
+    <string name="settings_export_background_spaguetti">Spaguetti</string>
+    <string name="settings_export_background_spacea">Spacea</string>
+    <string name="settings_export_background_brooklyyn">Brooklyyn</string>
+    <string name="settings_export_background_solid">Сплошной цвет</string>
+    <string name="settings_export_background_custom">Пользовательский PNG</string>
+    <string name="settings_export_background_applied_icon">✓</string>
+    <string name="settings_export_background_missing_icon">?</string>
+    <string name="settings_export_background_picker_title">Выберите PNG-фон</string>
+    <string name="settings_export_background_picker_filter">PNG-изображения (*.png)</string>
+    <string name="settings_export_background_invalid_file">Не удалось прочитать выбранный файл как PNG.</string>
+    <string name="settings_export_background_resolution_error">PNG-фон должен быть не менее 2000 x 2000 пикселей.</string>
     <string name="settings_data_sourcing_title">Источник данных</string>
     <string name="settings_data_sourcing_description">Пожалуйста, подтвердите, что вы видите правильный каталог документов ArcheRage ниже. Каталог документов вашей игры был обнаружен автоматически. Если вы не видите правильный каталог или текст ниже красный, вам следует сообщить об ошибке.</string>
     <string name="settings_toggle_pvp_damage">Показывать только PvP урон</string>
