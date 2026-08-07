@@ -1018,7 +1018,10 @@ object PlayerCacheInteractor : Interactor() {
             event.spell.contains("Раскаленная лава", ignoreCase = true) ||
             event.spell.contains("Thunderbreath", ignoreCase = true) ||
             event.spell.contains("천둥의 숨결", ignoreCase = true)
-        val isRocketDamage = event.spellId in GUIDED_MISSILES_DAMAGE_SPELL_IDS
+        val isRocketDamage = event.spellId in GUIDED_MISSILES_DAMAGE_SPELL_IDS ||
+            event.spell.contains("Guided Missiles", ignoreCase = true) ||
+            event.spell.contains("유도탄", ignoreCase = true) ||
+            event.spell.contains("Ковровая бомбардировка", ignoreCase = true)
 
         var breathCasts = existing.sessionBreathCasts
         var rocketCasts = existing.sessionRocketCasts

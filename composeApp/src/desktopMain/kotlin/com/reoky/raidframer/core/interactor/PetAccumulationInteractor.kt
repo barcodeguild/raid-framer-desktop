@@ -218,16 +218,11 @@ object PetAccumulatorInteractor : Interactor() {
           PlayerCacheInteractor.postPetSuccessfulCast(candidates.first().key, cast)
         }
         else -> {
-          if (!initiator) {
-            // Apply to all candidates (lightweight)
-            candidates.forEach {
-              PlayerCacheInteractor.postPetSuccessfulCast(it.key, cast)
-            }
-          } else {
-            // A rider cast without an exact pet CID is ambiguous. Do not create
-            // false breath/rocket icons on every pet owned by the rider.
-            Log.info(TAG, "Skipping ambiguous rider cast '${cast.spell}' for owner '$cleanSource'; candidate pets=${candidates.map { it.value.name }}")
-          }
+          // Multiple candidates - ambiguous. Do not broadcast the cast to every
+          // pet owned by the same person. For rider (initiator) spells this avoids
+          // false rocket icons on unrelated pets. For non-initiator spells this
+          // avoids duplicating cast entries on same-named companions.
+          Log.info(TAG, "Skipping ambiguous ${if (initiator) "rider" else "non-initiator"} cast '${cast.spell}' for '$cleanSource'; candidates=${candidates.map { "${it.value.name}(${it.value.owner})" }}")
         }
       }
     }
@@ -289,7 +284,11 @@ object PetAccumulatorInteractor : Interactor() {
             ownerPets.single()
           } else {
             matchingWindow?.let { window ->
-              ownerPets.find { it.value.name.equals(window.petName, ignoreCase = true) }
+              ownerPets.find {
+                it.value.name.equals(window.petName, ignoreCase = true) ||
+                  it.value.name.contains(window.petName, ignoreCase = true) ||
+                  window.petName.contains(it.value.name, ignoreCase = true)
+              }
             }
           }
           if (selectedPet != null) {
@@ -408,7 +407,7 @@ object PetAccumulatorInteractor : Interactor() {
     // Fallback: return a generic name based on spell
     return when {
       baseSpell.contains("Scratch") -> "Mara"
-      baseSpell.contains("Guided Missiles") -> "Siege Risopoda"
+      baseSpell.contains("Guided Missiles") -> "Risopoda"
       baseSpell.contains("Dragon's Breath", ignoreCase = true) -> ""
       else -> ""
     }
@@ -432,6 +431,13 @@ object PetAccumulatorInteractor : Interactor() {
       return true
     }
 
+    // Guided Missiles rider spell -> Guided Missiles damage
+    val guidedMissilesRiderIds = setOf(46058) // Guided Missiles (Rider)
+    val guidedMissilesDamageIds = setOf(46055) // Guided Missiles
+    if (castSpellId in guidedMissilesRiderIds && damageSpellId in guidedMissilesDamageIds) {
+      return true
+    }
+
     // Also check by name for IPC events where spellId=0
     val castSkill = petSkillWhitelist.find { it.id == castSpellId }
     if (castSkill != null) {
@@ -452,6 +458,14 @@ object PetAccumulatorInteractor : Interactor() {
         damageSpellName.contains("Bleeding", ignoreCase = true)) {
         return true
       }
+
+      // Guided Missiles (Rider) -> Guided Missiles damage
+      val isGuidedMissilesRider = castSkill.name.contains("Guided Missiles", ignoreCase = true) &&
+        castSpellId in setOf(46058)
+      val isGuidedMissilesDmg = damageSpellName.contains("Guided Missiles", ignoreCase = true) ||
+        damageSpellName.contains("유도탄", ignoreCase = true) ||
+        damageSpellName.contains("Ковровая бомбардировка", ignoreCase = true)
+      if (isGuidedMissilesRider && isGuidedMissilesDmg) return true
     }
 
     // Fallback: check cast spell name against whitelist for IPC events (spellId=0)
