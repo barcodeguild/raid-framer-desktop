@@ -105,6 +105,8 @@
     <string name="category_provoked">Провокация</string>
     <string name="settings_combat_overlay_title">Боевой оверлей</string>
     <string name="settings_combat_fade_controls">Автоматически скрывать иконки управления, когда курсор покидает оверлей.</string>
+    <string name="settings_combat_show_spec_icons">Показывать иконки деревьев навыков в строках игроков</string>
+    <string name="settings_item_use_overlay">Включить оверлей использования предметов. Показывает недавние использования предметов в стиле ленты убийств. [ЭКСПЕРИМЕНТАЛЬНЫЙ / ПРОТОТИП]</string>
     <string name="settings_split_chat">Включить оверлей окна раздельного чата в стиле OSRS. (Скоро)</string>
     <string name="settings_tabbed_detection">Автоматически скрывать игровые оверлеи при переключении вкладок из игры. Не применяется к подсказкам (те, у которых есть заголовок).</string>
     <string name="settings_allow_pve_damage">Разрешить PvE урон засчитываться в счетчики DPS/убийств. (Полезно для одиночных игроков, которые хотят видеть свой урон по PvE целям)</string>
@@ -193,6 +195,7 @@
     <string name="player_card_session_scope_last_n">Последние %1$d сессий</string>
     <string name="player_card_session_scope_all">Все сессии</string>
     <string name="player_card_no_historical_data">Для этого игрока нет архивных сессий.</string>
+    <string name="player_inventory_time_ago">%1$s</string>
 
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">Общий урон</string>
@@ -314,6 +317,38 @@
     <string name="battle_graph_filters_expanded">▲ Фильтры</string>
     <string name="battle_graph_spell_filter_buff">Бафф</string>
     <string name="battle_graph_spell_filter_debuff">Дебафф</string>
+    <string name="battle_graph_title">Боевой график</string>
+    <string name="battle_graph_heal_prop">Фокус лечения</string>
+    <string name="battle_graph_heal_focus">Фокус лечения</string>
+    <string name="battle_graph_crowd_control_distribution">Распределение контроля толпы</string>
+    <string name="battle_graph_summary">Сводка</string>
+    <string name="battle_graph_view_options">Параметры просмотра</string>
+    <string name="battle_graph_no_data">Нет данных для текущих фильтров</string>
+    <string name="battle_graph_outgoing_format">Исходящий: %1$s</string>
+    <string name="battle_graph_incoming_format">Входящий: %1$s</string>
+    <string name="battle_graph_edge_dmg_format">%1$s урон</string>
+    <string name="battle_graph_edge_heal_format">%1$s лечение</string>
+    <string name="battle_graph_edge_cc_format">%1$s КК</string>
+    <string name="battle_graph_edge_kill_format">%1$s убийство</string>
+    <string name="battle_graph_edge_buff_format">%1$s бафф</string>
+    <string name="battle_graph_edge_debuff_format">%1$s дебафф</string>
+    <string name="battle_graph_edge_charm_format">%1$s очарование</string>
+    <string name="battle_graph_edge_distress_format">%1$s бессилие</string>
+    <string name="battle_graph_edge_silence_format">%1$s немота</string>
+    <string name="battle_graph_kill_count_format">%1$s (%2$d убийств)</string>
+    <string name="battle_graph_min_kills">Мин. убийства</string>
+    <string name="battle_graph_min_buffs">Мин. баффы</string>
+    <string name="battle_graph_min_debuffs">Мин. дебаффы</string>
+    <string name="battle_graph_min_charms">Мин. очарования</string>
+    <string name="battle_graph_min_distress">Мин. бессилие</string>
+    <string name="battle_graph_min_silence">Мин. немота</string>
+    <string name="battle_graph_focused_kills">Авторство убийств</string>
+    <string name="battle_graph_focused_damage">Фокусированный урон</string>
+    <string name="battle_graph_focused_buffs">Распределение баффов</string>
+    <string name="battle_graph_focused_debuffs">Распределение дебаффов</string>
+    <string name="battle_graph_focused_charms">Распределение очарований</string>
+    <string name="battle_graph_focused_distress">Распределение бессилия</string>
+    <string name="battle_graph_focused_silence">Распределение немоты</string>
 
     <!-- Метки технического анализа -->
     <string name="tech_heal_loop">Цикл лечения</string>
@@ -482,6 +517,7 @@
     <string name="item_name_sungold_anth_set_pull">Тяга набора антологии солнечного золота</string>
     <string name="item_name_garden_anth_set_pull">Тяга набора антологии сада</string>
     <string name="item_name_serp_staff">Развращенный ум (Серпентис)</string>
+    <string name="item_name_serp_shield">Цветок пиявки (Щит Серпентиса)</string>
     <string name="item_name_mist_dagger">Туманная песня злого шепота кинжал</string>
     <string name="item_name_mist_shield">Туманная песня скрытого клыка щит</string>
 

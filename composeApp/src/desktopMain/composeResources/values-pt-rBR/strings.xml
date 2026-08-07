@@ -105,6 +105,8 @@ Você ainda deve completar a desinstalação do aplicativo principal desinstalan
     <string name="category_provoked">Provocação</string>
     <string name="settings_combat_overlay_title">Overlay de Combate</string>
     <string name="settings_combat_fade_controls">Desvanecer controles de ícone automaticamente quando o cursor sair do overlay.</string>
+    <string name="settings_combat_show_spec_icons">Mostrar ícones de árvore de habilidades nas linhas de jogadores</string>
+    <string name="settings_item_use_overlay">Ativar Overlay de Uso de Itens. Mostra usos recentes de itens em estilo kill-feed. [EXPERIMENTAL / PROTOTÓTIPO]</string>
     <string name="settings_split_chat">Ativar overlay de janela split-chat estilo OSRS. (Em Breve)</string>
     <string name="settings_tabbed_detection">Ocultar automaticamente overlays do jogo enquanto estiver fora do jogo em abas. Não se aplica a dicas de ferramenta (aquelas com barra de título).</string>
     <string name="settings_allow_pve_damage">Permitir que Dano PvE seja contado para DPS/Contadores de Kills. (Útil para jogadores solo que querem ver sua saída de dano contra alvos PvE)</string>
@@ -193,6 +195,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="player_card_session_scope_last_n">Últimas %1$d Sessões</string>
     <string name="player_card_session_scope_all">Todas as Sessões</string>
     <string name="player_card_no_historical_data">Nenhuma sessão arquivada para este jogador.</string>
+    <string name="player_inventory_time_ago">%1$s</string>
 
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">Dano Total</string>
@@ -314,6 +317,38 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="battle_graph_filters_expanded">▲ Filtros</string>
     <string name="battle_graph_spell_filter_buff">Buff</string>
     <string name="battle_graph_spell_filter_debuff">Debuff</string>
+    <string name="battle_graph_title">Gráfico de Batalha</string>
+    <string name="battle_graph_heal_prop">Foco de Cura</string>
+    <string name="battle_graph_heal_focus">Foco de Cura</string>
+    <string name="battle_graph_crowd_control_distribution">Distribuição de Controle de Grupo</string>
+    <string name="battle_graph_summary">Resumo</string>
+    <string name="battle_graph_view_options">Opções de Visualização</string>
+    <string name="battle_graph_no_data">Sem dados disponíveis para os filtros atuais</string>
+    <string name="battle_graph_outgoing_format">Enviado: %1$s</string>
+    <string name="battle_graph_incoming_format">Recebido: %1$s</string>
+    <string name="battle_graph_edge_dmg_format">%1$s dano</string>
+    <string name="battle_graph_edge_heal_format">%1$s cura</string>
+    <string name="battle_graph_edge_cc_format">%1$s CC</string>
+    <string name="battle_graph_edge_kill_format">%1$s abate</string>
+    <string name="battle_graph_edge_buff_format">%1$s buff</string>
+    <string name="battle_graph_edge_debuff_format">%1$s debuff</string>
+    <string name="battle_graph_edge_charm_format">%1$s encanto</string>
+    <string name="battle_graph_edge_distress_format">%1$s angústia</string>
+    <string name="battle_graph_edge_silence_format">%1$s silêncio</string>
+    <string name="battle_graph_kill_count_format">%1$s (%2$d abates)</string>
+    <string name="battle_graph_min_kills">Mín. Abates</string>
+    <string name="battle_graph_min_buffs">Mín. Buffs</string>
+    <string name="battle_graph_min_debuffs">Mín. Debuffs</string>
+    <string name="battle_graph_min_charms">Mín. Encantos</string>
+    <string name="battle_graph_min_distress">Mín. Angústia</string>
+    <string name="battle_graph_min_silence">Mín. Silêncio</string>
+    <string name="battle_graph_focused_kills">Atribuição de Abates</string>
+    <string name="battle_graph_focused_damage">Dano Focado</string>
+    <string name="battle_graph_focused_buffs">Distribuição de Buffs</string>
+    <string name="battle_graph_focused_debuffs">Distribuição de Debuffs</string>
+    <string name="battle_graph_focused_charms">Distribuição de Encantos</string>
+    <string name="battle_graph_focused_distress">Distribuição de Angústias</string>
+    <string name="battle_graph_focused_silence">Distribuição de Silêncios</string>
 
     <!-- Etiquetas de Heurística da Análise Técnica -->
     <string name="tech_heal_loop">Ciclo de Cura</string>
@@ -482,6 +517,7 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="item_name_sungold_anth_set_pull">Pull Set Antologia Ouro Solar</string>
     <string name="item_name_garden_anth_set_pull">Pull Set Antologia Jardim</string>
     <string name="item_name_serp_staff">Corrupted Wit (Serpentis)</string>
+    <string name="item_name_serp_shield">Flor Bebe-Sangue (Escudo Serpentis)</string>
     <string name="item_name_mist_dagger">Sussurro Perverso Mistsong (Adaga)</string>
     <string name="item_name_mist_shield">Escudo Stealthfang Mistsong</string>
 

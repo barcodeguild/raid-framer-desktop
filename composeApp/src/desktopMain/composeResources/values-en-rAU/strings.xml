@@ -105,6 +105,8 @@ You should still complete the uninstallation of the main application by uninstal
     <string name="category_provoked">Provokes</string>
     <string name="settings_combat_overlay_title">Combat Overlay</string>
     <string name="settings_combat_fade_controls">Auto-fade icon controls when the cursor leaves the overlay.</string>
+    <string name="settings_combat_show_spec_icons">Show skill-tree icons in player rows</string>
+    <string name="settings_item_use_overlay">Enable Item Use Overlay. Shows recent item uses in a kill-feed style. [EXPERIMENTAL / PROTOTYPE]</string>
     <string name="settings_split_chat">Enable OSRS-style split-chat window overlay. (Coming Soon)</string>
     <string name="settings_tabbed_detection">Automatically hide game overlay's while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).</string>
     <string name="settings_allow_pve_damage">Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)</string>
@@ -193,6 +195,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="player_card_session_scope_last_n">Last %1$d Sessions</string>
     <string name="player_card_session_scope_all">All Sessions</string>
     <string name="player_card_no_historical_data">No historical sessions for this player yet.</string>
+    <string name="player_inventory_time_ago">%1$s</string>
 
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">Total Damage</string>
@@ -314,6 +317,37 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="battle_graph_filters_expanded">▲ Filters</string>
     <string name="battle_graph_spell_filter_buff">Buff</string>
     <string name="battle_graph_spell_filter_debuff">Debuff</string>
+    <string name="battle_graph_title">Battle Graph</string>
+    <string name="battle_graph_heal_prop">Heal Prop</string>
+    <string name="battle_graph_crowd_control_distribution">Crowd-Control Distribution</string>
+    <string name="battle_graph_summary">Summary</string>
+    <string name="battle_graph_view_options">View Options</string>
+    <string name="battle_graph_no_data">No data available for current filters</string>
+    <string name="battle_graph_outgoing_format">Outgoing: %1$s</string>
+    <string name="battle_graph_incoming_format">Incoming: %1$s</string>
+    <string name="battle_graph_edge_dmg_format">%1$s dmg</string>
+    <string name="battle_graph_edge_heal_format">%1$s heal</string>
+    <string name="battle_graph_edge_cc_format">%1$s CC</string>
+    <string name="battle_graph_edge_kill_format">%1$s kill</string>
+    <string name="battle_graph_edge_buff_format">%1$s buff</string>
+    <string name="battle_graph_edge_debuff_format">%1$s debuff</string>
+    <string name="battle_graph_edge_charm_format">%1$s charm</string>
+    <string name="battle_graph_edge_distress_format">%1$s distress</string>
+    <string name="battle_graph_edge_silence_format">%1$s silence</string>
+    <string name="battle_graph_kill_count_format">%1$s (%2$d kills)</string>
+    <string name="battle_graph_min_kills">Min Kills</string>
+    <string name="battle_graph_min_buffs">Min Buffs</string>
+    <string name="battle_graph_min_debuffs">Min Debuffs</string>
+    <string name="battle_graph_min_charms">Min Charms</string>
+    <string name="battle_graph_min_distress">Min Distress</string>
+    <string name="battle_graph_min_silence">Min Silence</string>
+    <string name="battle_graph_focused_kills">Kill Attribution</string>
+    <string name="battle_graph_focused_damage">Focused Damage</string>
+    <string name="battle_graph_focused_buffs">Buff Distribution</string>
+    <string name="battle_graph_focused_debuffs">Debuff Distribution</string>
+    <string name="battle_graph_focused_charms">Charm Distribution</string>
+    <string name="battle_graph_focused_distress">Distress Distribution</string>
+    <string name="battle_graph_focused_silence">Silence Distribution</string>
 
     <!-- Technical Analysis Heuristic Labels -->
     <string name="tech_heal_loop">Heal Loop</string>
@@ -414,6 +448,9 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_tab_utility">Utility</string>
     <string name="summary_tab_specs">Specs</string>
     <string name="summary_tab_performance">Performance</string>
+    <string name="summary_top_haranya_performance">Top Performance Haranya</string>
+    <string name="summary_top_nuia_performance">Top Performance Nuia</string>
+    <string name="summary_top_pirate_performance">Top Performance Pirate</string>
 
     <!-- General Strings -->
     <string name="general_about">About</string>
@@ -480,6 +517,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="item_name_sungold_anth_set_pull">Sungold Anth Set Pull</string>
     <string name="item_name_garden_anth_set_pull">Garden Anth Set Pull</string>
     <string name="item_name_serp_staff">Corrupted Wit (Serpentis)</string>
+    <string name="item_name_serp_shield">Blooddrinker Blossom (Serpentis Shield)</string>
     <string name="item_name_mist_dagger">Mistsong Wicked Whisper Dagger</string>
     <string name="item_name_mist_shield">Mistsong Stealthfang Shield</string>
 
