@@ -468,6 +468,17 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       label = stringResource(Res.string.settings_mini_graph_description)
     )
 
+    SettingsCheckbox(
+      checked = config.itemUseOverlayEnabled,
+      onCheckedChange = { isChecked ->
+        CoroutineScope(Dispatchers.Main).launch {
+          RFConfig.update { it.copy(itemUseOverlayEnabled = isChecked) }
+          if (isChecked) wm?.openWindow(OverlayType.ITEM_USE) else wm?.closeWindow(OverlayType.ITEM_USE)
+        }
+      },
+      label = stringResource(Res.string.settings_item_use_overlay)
+    )
+
 //    SettingsCheckbox(
 //      checked = config.splitChatEnabled,
 //      onCheckedChange = { isChecked -> RFConfig.update { it.copy(splitChatEnabled = isChecked) } },
@@ -624,6 +635,12 @@ private fun CombatOverlaySettingsPanel() {
       checked = config.combatControlsFadeEnabled,
       onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatControlsFadeEnabled = isChecked) } },
       label = stringResource(Res.string.settings_combat_fade_controls)
+    )
+
+    SettingsCheckbox(
+      checked = config.combatShowSpecIcons,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatShowSpecIcons = isChecked) } },
+      label = stringResource(Res.string.settings_combat_show_spec_icons)
     )
 
     Spacer(modifier = Modifier.height(12.dp))

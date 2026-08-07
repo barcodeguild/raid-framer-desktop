@@ -50,6 +50,7 @@ fun PlayerRankingRow(
   val interactionSource = remember { MutableInteractionSource() }
   val isHovered by interactionSource.collectIsHoveredAsState()
   var showSpecTooltip by remember { mutableStateOf(false) }
+  val showSpecIcons by RFConfig.state.collectAsState()
 
   // Resolve SpecType from the card's build string
   val spec = remember(card.currentBuild) { SpecType.fromName(card.currentBuild) }
@@ -75,31 +76,33 @@ fun PlayerRankingRow(
 
     // 2. Class Icons Pill (Skill Trees)
     // Only render if we successfully resolved a spec
-    Row(
-      modifier = Modifier
-        .padding(end = 6.dp)
-        .background(Color.Transparent, RoundedCornerShape(4.dp))
-        .onPointerEvent(PointerEventType.Enter) { showSpecTooltip = true }
-        .onPointerEvent(PointerEventType.Exit) { showSpecTooltip = false },
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      if (spec == null || spec == SpecType.UNKNOWN) {
-        val unknownPainter = skillTreeIconPainterFor(null)
-        for (i in 1..3) {
-          Image(
-            painter = unknownPainter,
-            contentDescription = "?",
-            modifier = Modifier.size(16.dp).padding(horizontal = 1.dp)
-          )
-        }
-      } else {
-        spec.trees.sortedByDisplayOrder().forEach { treeName ->
-          val painter = skillTreeIconPainterFor(treeName)
-          Image(
-            painter = painter,
-            contentDescription = "Eek",
-            modifier = Modifier.size(16.dp).padding(horizontal = 1.dp)
-          )
+    if (showSpecIcons.combatShowSpecIcons) {
+      Row(
+        modifier = Modifier
+          .padding(end = 6.dp)
+          .background(Color.Transparent, RoundedCornerShape(4.dp))
+          .onPointerEvent(PointerEventType.Enter) { showSpecTooltip = true }
+          .onPointerEvent(PointerEventType.Exit) { showSpecTooltip = false },
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        if (spec == null || spec == SpecType.UNKNOWN) {
+          val unknownPainter = skillTreeIconPainterFor(null)
+          for (i in 1..3) {
+            Image(
+              painter = unknownPainter,
+              contentDescription = "?",
+              modifier = Modifier.size(16.dp).padding(horizontal = 1.dp)
+            )
+          }
+        } else {
+          spec.trees.sortedByDisplayOrder().forEach { treeName ->
+            val painter = skillTreeIconPainterFor(treeName)
+            Image(
+              painter = painter,
+              contentDescription = "Eek",
+              modifier = Modifier.size(16.dp).padding(horizontal = 1.dp)
+            )
+          }
         }
       }
     }
@@ -168,7 +171,7 @@ fun PlayerRankingRow(
   }
 
   // Tooltip for Spec/Class details
-  if (showSpecTooltip && spec != null) {
+  if (showSpecIcons.combatShowSpecIcons && showSpecTooltip && spec != null) {
     val resolvedTrees = spec.trees.sortedByDisplayOrder().map { stringResource(it.localizedDisplayNameRes) }
     val treeNames = resolvedTrees.joinToString(", ")
     Popup(

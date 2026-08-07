@@ -49,6 +49,7 @@ fun OverlayWindow(
   isEverythingVisible: MutableState<Boolean>,
   isResizable: MutableState<Boolean>,
   isFocusable: Boolean,
+  transparentBackground: Boolean = false,
   onCloseRequest: () -> Unit,
   onWindowCreated: (ComposeWindow) -> Unit = {}, // callback to deliver the real window
   windowContent: @Composable (ComposeWindow) -> Unit
@@ -127,10 +128,11 @@ fun OverlayWindow(
 
     CompositionLocalProvider(LocalDragLock provides dragLocked) {
       val windowColor = Color(config.windowColor).copy(alpha = config.windowOpacity)
+      val contentBackground = if (transparentBackground) Color.Transparent else windowColor
       if (windowType == OverlayWindowType.TOOLTIP) {
         Box(
           modifier = Modifier
-            .background(windowColor)
+            .background(contentBackground)
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.60f))
         ) {
@@ -139,7 +141,7 @@ fun OverlayWindow(
       } else {
         Box(
           modifier = Modifier
-            .background(windowColor)
+            .background(contentBackground)
             .fillMaxSize()
         ) {
           windowContent(composeWindow)
@@ -232,7 +234,7 @@ class OverlayWindowShape(
 }
 
 enum class OverlayType {
-  COMBAT, SETTINGS, SUMMARY, NEW_SESSION, INSTALL, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, AGGRO, PLAYER_CARD, FILTERS, DUMMY, BATTLE_GRAPH
+  COMBAT, SETTINGS, SUMMARY, NEW_SESSION, INSTALL, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, AGGRO, PLAYER_CARD, FILTERS, DUMMY, BATTLE_GRAPH, ITEM_USE
 }
 
 enum class OverlayWindowType {
@@ -399,6 +401,16 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 156f,
       lastWidthDp = 1310f,
       lastHeightDp = 1111f,
+      isVisible = false
+    )
+
+    OverlayType.ITEM_USE -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.OVERLAY,
+      lastPositionXDp = 1600f,
+      lastPositionYDp = 100f,
+      lastWidthDp = 400f,
+      lastHeightDp = 300f,
       isVisible = false
     )
   }

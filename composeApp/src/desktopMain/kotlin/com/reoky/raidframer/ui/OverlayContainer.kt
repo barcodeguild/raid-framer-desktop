@@ -27,6 +27,7 @@ import com.reoky.raidframer.ui.overlay.SettingsOverlay
 import com.reoky.raidframer.ui.overlay.PlayerCardOverlay
 import com.reoky.raidframer.ui.overlay.TrackerOverlay
 import com.reoky.raidframer.ui.overlay.BattleGraphOverlay
+import com.reoky.raidframer.ui.overlay.ItemUseOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -58,6 +59,7 @@ fun OverlayContainer(wm: WindowManager) {
         isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(state.windowType == OverlayWindowType.TOOLTIP),
         isResizable = resizable,
         isFocusable = type == OverlayType.NEW_SESSION || type == OverlayType.BATTLE_GRAPH,
+        transparentBackground = type == OverlayType.ITEM_USE,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->
         val scope = rememberCoroutineScope()
@@ -75,6 +77,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.RAID -> RaidOverlay(wm)
           OverlayType.PLAYER_CARD -> PlayerCardOverlay(wm)
           OverlayType.BATTLE_GRAPH -> BattleGraphOverlay(wm)
+          OverlayType.ITEM_USE -> ItemUseOverlay()
           else -> {}
         }
 

@@ -360,3 +360,11 @@ val MIGRATION_34_35 = object : Migration(34, 35) {
     connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundDimness REAL NOT NULL DEFAULT 0.20").use { it.step() }
   }
 }
+
+// Added item use overlay toggle and combat overlay spec icons toggle.
+val MIGRATION_35_36 = object : Migration(35, 36) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN itemUseOverlayEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN combatShowSpecIcons INTEGER NOT NULL DEFAULT 1").use { it.step() }
+  }
+}
