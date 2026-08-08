@@ -176,6 +176,9 @@ object CompanionInteractor : Interactor() {
             PlayerCacheInteractor.updatePlayersForRaidById(index, chunk)
           }
           // Log buff data for debugging
+          val playersWithBuffs = message.payload.count { it.playerName.isNotBlank() && it.buffs.isNotEmpty() }
+          val totalPlayers = message.payload.count { it.playerName.isNotBlank() }
+          Log.info(TAG, "FRAMES_UPDATE: $totalPlayers players, $playersWithBuffs with buffs")
           for (player in message.payload) {
             if (player.playerName.isBlank()) continue
             if (player.buffs.isNotEmpty()) {

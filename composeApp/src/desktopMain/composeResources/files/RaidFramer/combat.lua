@@ -98,6 +98,7 @@ end
 -- main combat event handler
 function RF.Combat.handleCombatMessage(...)
   RF.IPC.interact() -- Rate limited write of queued messages and also triggers read of incoming messages on a cooldown
+  RF.Raid.ScanBuffs() -- periodic scan of buffs, distance and gearScore (rate limited internally)
 
   local combatEvent = { ... }
   local meta = RF.Parser.ParseCombatEventMetadata(combatEvent)

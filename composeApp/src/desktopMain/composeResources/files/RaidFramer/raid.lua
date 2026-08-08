@@ -15,6 +15,10 @@ RF.Raid.isPrepared = false
 -- flag for isCoraided
 RF.Raid.hasCoRaid = false
 
+-- buff scan rate limiting (called from combat loop, not from roster events)
+RF.Raid.BUFF_SCAN_INTERVAL = 1 -- seconds between buff/distance/gearScore scans
+RF.Raid.LastBuffScan = 0
+
 -- enum of strings different team member change reasons we can filter by to avoid unnecessary processing
 RF.TEAM_CHANGE_REASONS = {
   JOINED = "joined",
@@ -122,28 +126,14 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
   end
   
   -- something must have changed: scan raid slots and update roster (scan both raids if co-raid)
+  -- note: only updates playerName and role, buffs/distance/gearScore are handled by ScanBuffs
   if not RF.Raid.hasCoRaid then
     for position = 1, 50 do
       local raidMember = X2Unit:UnitName(string.format("team%02d", position))
       local raidRole = X2Team:GetRole(0, position)
       if raidMember then
         --RF:Log(string.format("Raid Slot %02d: %s", position, raidMember))
-
-        local unitId = string.format("team%02d", position)
-        local buffCount = X2Unit:UnitBuffCount(unitId)
-        local buffs = {}
-        for buffId = 1, buffCount do
-          local rawBuff = X2Unit:UnitBuff(unitId, buffId)
-          local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
-          local buff = RF.Parser.ParseUnitBuff(rawBuff)
-          buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
-          buffs[#buffs + 1] = buff
-        end
-
-        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole, buffs = buffs })
-      else
-        --RF:Log(string.format("Raid Slot %02d: <empty>", position))
-        RF.Raid.Roster[position] = RF.Raid.NewRaidMember(position) -- clear slot
+        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole })
       end
     end
   else
@@ -152,43 +142,13 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
       local raidRole = X2Team:GetRole(1, position)
       if raidMember then
         --RF:Log(string.format("Main Raid Raid Slot %02d: %s", position, raidMember))
-
-        local unitId = string.format("team_01_%02d", position)
-        local buffCount = X2Unit:UnitBuffCount(unitId)
-        local buffs = {}
-        for buffId = 1, buffCount do
-          local rawBuff = X2Unit:UnitBuff(unitId, buffId)
-          local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
-          local buff = RF.Parser.ParseUnitBuff(rawBuff)
-          buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
-          buffs[#buffs + 1] = buff
-        end
-
-        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole, buffs = buffs })
-      else
-        --RF:Log(string.format("Main Raid Raid Slot %02d: <empty>", position))
-        RF.Raid.Roster[position] = RF.Raid.NewRaidMember(position) -- clear slot
+        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole })
       end
       local raidTwoMember = X2Unit:UnitName(string.format("team_02_%02d", position))
       local raidRole = X2Team:GetRole(2, position)
       if raidTwoMember then
         --RF:Log(string.format("Co-Raid Raid Slot %02d: %s", position + 50, raidTwoMember))
-
-        local unitId = string.format("team_02_%02d", position)
-        local buffCount = X2Unit:UnitBuffCount(unitId)
-        local buffs = {}
-        for buffId = 1, buffCount do
-          local rawBuff = X2Unit:UnitBuff(unitId, buffId)
-          local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
-          local buff = RF.Parser.ParseUnitBuff(rawBuff)
-          buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
-          buffs[#buffs + 1] = buff
-        end
-
-        RF.Raid.UpdateRaidSlot(position + 50, { playerName = raidTwoMember, role = raidRole, buffs = buffs })
-      else
-        --RF:Log(string.format("Co-Raid Raid Slot %02d: <empty>", position + 50))
-        RF.Raid.Roster[position + 50] = RF.Raid.NewRaidMember(position + 50) -- clear slot
+        RF.Raid.UpdateRaidSlot(position + 50, { playerName = raidTwoMember, role = raidRole })
       end
     end
   end
@@ -257,6 +217,119 @@ function scanForCoRaid()
     RF.Raid.hasCoRaid = false
     RF:Log("Joined a raid that does not have a co-raid.")
   end
+end
+
+-- scans buffs for a single unit, returns the buffs table
+function RF.Raid.ScanUnitBuffs(unitId)
+  local buffCount = X2Unit:UnitBuffCount(unitId)
+  if not buffCount or buffCount <= 0 then return {} end
+  local buffs = {}
+  for buffId = 1, buffCount do
+    local rawBuff = X2Unit:UnitBuff(unitId, buffId)
+    if rawBuff then
+      local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
+      local buff = RF.Parser.ParseUnitBuff(rawBuff)
+      if rawTooltip then
+        buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
+      end
+      buffs[#buffs + 1] = buff
+    end
+  end
+  return buffs
+end
+
+-- periodic scan of buffs, distance and gearScore for all occupied roster slots
+-- called from the combat event loop (the only periodic hook in the ArcheAge API)
+function RF.Raid.ScanBuffs()
+  local now = os.time()
+  if (now - RF.Raid.LastBuffScan) < RF.Raid.BUFF_SCAN_INTERVAL then
+    return
+  end
+  RF.Raid.LastBuffScan = now
+
+  if not RF.Raid.isPrepared then return end
+
+  local scanned = 0
+  local withBuffs = 0
+
+  if not RF.Raid.hasCoRaid then
+    for position = 1, 50 do
+      local member = RF.Raid.Roster[position]
+      if member then
+        local raidMember = X2Unit:UnitName(string.format("team%02d", position))
+        if raidMember then
+          local unitId = string.format("team%02d", position)
+          member.playerName = raidMember
+          member.role = X2Team:GetRole(0, position)
+          member.buffs = RF.Raid.ScanUnitBuffs(unitId)
+          local dist = X2Unit:UnitDistance(unitId)
+          if type(dist) == "table" then
+            member.distance = math.floor(dist.distance or -1)
+          elseif type(dist) == "number" then
+            member.distance = math.floor(dist)
+          else
+            member.distance = -1
+          end
+          member.gearScore = tonumber(X2Unit:UnitGearScore(unitId, false)) or 0
+          scanned = scanned + 1
+          if #member.buffs > 0 then withBuffs = withBuffs + 1 end
+        else
+          RF.Raid.Roster[position] = RF.Raid.NewRaidMember(position)
+        end
+      end
+    end
+  else
+    for position = 1, 50 do
+      local member = RF.Raid.Roster[position]
+      if member then
+        local raidMember = X2Unit:UnitName(string.format("team_01_%02d", position))
+        if raidMember then
+          local unitId = string.format("team_01_%02d", position)
+          member.playerName = raidMember
+          member.role = X2Team:GetRole(1, position)
+          member.buffs = RF.Raid.ScanUnitBuffs(unitId)
+          local dist = X2Unit:UnitDistance(unitId)
+          if type(dist) == "table" then
+            member.distance = math.floor(dist.distance or -1)
+          elseif type(dist) == "number" then
+            member.distance = math.floor(dist)
+          else
+            member.distance = -1
+          end
+          member.gearScore = tonumber(X2Unit:UnitGearScore(unitId, false)) or 0
+          scanned = scanned + 1
+          if #member.buffs > 0 then withBuffs = withBuffs + 1 end
+        else
+          RF.Raid.Roster[position] = RF.Raid.NewRaidMember(position)
+        end
+      end
+      local memberTwo = RF.Raid.Roster[position + 50]
+      if memberTwo then
+        local raidTwoMember = X2Unit:UnitName(string.format("team_02_%02d", position))
+        if raidTwoMember then
+          local unitId = string.format("team_02_%02d", position)
+          memberTwo.playerName = raidTwoMember
+          memberTwo.role = X2Team:GetRole(2, position)
+          memberTwo.buffs = RF.Raid.ScanUnitBuffs(unitId)
+          local dist = X2Unit:UnitDistance(unitId)
+          memberTwo.distance = (type(dist) == "table") and dist.distance or dist
+          memberTwo.gearScore = X2Unit:UnitGearScore(unitId, false)
+          scanned = scanned + 1
+          if #memberTwo.buffs > 0 then withBuffs = withBuffs + 1 end
+        else
+          RF.Raid.Roster[position + 50] = RF.Raid.NewRaidMember(position + 50)
+        end
+      end
+    end
+  end
+
+  -- send updated roster to the app immediately
+  RF.IPC.WriteMessage(
+    RF.IPC.MESSAGE_TYPES.FRAMES_UPDATE,
+    RF.Raid.GetRaidRoster()
+  )
+
+  RF:Log(string.format("[Raid] Buff scan: %d players scanned, %d with buffs", scanned, withBuffs))
 end
 
 -- these are updated when the event fires -or- when we detect players in the second raid

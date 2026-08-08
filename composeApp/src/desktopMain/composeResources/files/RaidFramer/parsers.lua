@@ -216,7 +216,7 @@ function RF.Parser.ParseUnitBuffTooltip(t)
   local tooltip = {}
   tooltip.buff_id     = t.buff_id       -- number: matches the buff id
   tooltip.name        = t.name          -- string: display name (e.g. "Mend")
-  tooltip.description = t.description   -- string: full description text
+  tooltip.description = t.description and string.sub(t.description, 1, 80) or "" -- truncated to 80 chars
   tooltip.path        = t.path          -- string: icon texture path
   tooltip.category    = t.category      -- string: "Buff" / "Debuff" etc
   tooltip.tipType     = t.tipType       -- string: "buff" etc
