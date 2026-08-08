@@ -181,6 +181,18 @@ object PlayerCacheInteractor : Interactor() {
       members.forEach { member ->
         if (member.playerName.isNotBlank()) {
           createCardIfNoneExists(playerName = member.playerName)
+          // update Life Mend stats from buff data
+          cards[member.playerName]?.let { card ->
+            member.buffs.forEach { buff ->
+              if (buff.buff_id == LIFE_MEND_BUFF_ID && buff.tooltip.healAmount > 0) {
+                // only record if this is a new heal amount (avoid duplicate entries from periodic scans)
+                val lastAmount = card.lifeMendHealAmounts.lastOrNull()
+                if (lastAmount != buff.tooltip.healAmount) {
+                  cards[member.playerName] = card.updateLifeMendStats(buff.tooltip.healAmount)
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -913,6 +925,7 @@ object PlayerCacheInteractor : Interactor() {
 
         // credit the source because they are the buffer
         event.source?.let { source ->
+          createCardIfNoneExists(cid = event.cid, source)
           cards[source]?.let { card ->
             cards[source] = card.postBuffAppliedEvent(
               BuffAppliedEvent(
@@ -924,6 +937,10 @@ object PlayerCacheInteractor : Interactor() {
                 buffId = event.buffId
               )
             )
+            // track Life Mend casts on the healer's card
+            if (event.buffId == LIFE_MEND_BUFF_ID) {
+              cards[source] = cards[source]!!.postLifeMendApplied(event.target)
+            }
           }
         }
       }
@@ -1330,6 +1347,14 @@ object PlayerCacheInteractor : Interactor() {
   var topBuffs: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionBuffTotal > 0 }.sortedByDescending { it.sessionBuffTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  var topLifeMenders: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.lifeMendTotal > 0 }.sortedByDescending { it.lifeMendTotal }
         .take(100)
     }
     .distinctUntilChanged()

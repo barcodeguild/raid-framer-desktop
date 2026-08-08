@@ -16,7 +16,8 @@ data class BuffTooltipPayload(
   val stack: Int = 0,
   val timeLeft: Int = 0,
   val timeUnit: String = "",
-  val duration: Int = 0
+  val duration: Int = 0,
+  val healAmount: Int = 0
 )
 
 @Serializable

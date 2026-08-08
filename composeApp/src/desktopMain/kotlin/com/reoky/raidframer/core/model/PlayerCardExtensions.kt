@@ -583,3 +583,33 @@ fun PlayerCard.setFaction(faction: Faction, factionStatus: FactionStatus): Playe
   )
 }
 
+// --- Life Mend Tracking (buff 25875) ---
+
+const val LIFE_MEND_BUFF_ID = 25875
+private const val LIFE_MEND_MAX_SAMPLES = 25
+
+/**
+ * Records a Life Mend cast by this healer on a target.
+ * Called when SPELL_AURA_APPLIED fires with buffId 25875.
+ */
+fun PlayerCard.postLifeMendApplied(target: String): PlayerCard {
+  return copy(lifeMendTotal = lifeMendTotal + 1)
+}
+
+/**
+ * Updates Life Mend stats with a new heal amount from the buff tooltip.
+ * Called when FRAMES_UPDATE delivers buff data with healAmount > 0 for buff 25875.
+ * Maintains a running average of the last [LIFE_MEND_MAX_SAMPLES] samples.
+ */
+fun PlayerCard.updateLifeMendStats(healAmount: Int): PlayerCard {
+  if (healAmount <= 0) return this
+  val newAmounts = (lifeMendHealAmounts + healAmount).takeLast(LIFE_MEND_MAX_SAMPLES)
+  val avg = newAmounts.average().toInt()
+  val quality = LifeMendQuality.fromAverage(avg)
+  return copy(
+    lifeMendHealAmounts = newAmounts,
+    lifeMendAverage = avg,
+    lifeMendQuality = quality
+  )
+}
+

@@ -467,6 +467,8 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_tab_utility">Utility</string>
     <string name="summary_tab_specs">Specs</string>
     <string name="summary_tab_performance">Performance</string>
+    <string name="summary_tab_life_mend">Life Mend</string>
+    <string name="summary_top_life_mends">Top Life Mends</string>
 
     <!-- General Strings -->
     <string name="general_about">About</string>

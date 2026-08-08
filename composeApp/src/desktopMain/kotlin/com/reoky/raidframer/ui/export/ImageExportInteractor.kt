@@ -101,6 +101,7 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_garden_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_purges
 import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dances
+import raid_framer_desktop.composeapp.generated.resources.summary_top_life_mends
 import javax.imageio.ImageIO
 
 object ImageExportInteractor {
@@ -338,6 +339,7 @@ object ImageExportInteractor {
      val topGardenDefiance: List<PlayerCard>,
      val topPurges: List<PlayerCard>,
      val topSacDances: List<PlayerCard>,
+     val topLifeMenders: List<PlayerCard>,
     // New faction comparison data
     val factionTigerStrikeData: Map<String, Float>,
     val factionFreezeData: Map<String, Float>,
@@ -460,6 +462,7 @@ object ImageExportInteractor {
       topGardenDefiance  = PlayerCacheInteractor.topGardenDefiance.value.take(15),
       topPurges          = PlayerCacheInteractor.topPurges.value.take(15),
       topSacDances       = PlayerCacheInteractor.topSacDances.value.take(15),
+      topLifeMenders     = PlayerCacheInteractor.topLifeMenders.value.take(15),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -1153,6 +1156,16 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_top_debuffs), "\uD83D\uDD25", ColumnData.CardData(data.topDebuffs, { it.sessionDebuffTotal.toString() }, HARANYA_COLOR)),
       Triple(getString(Res.string.summary_top_songs),   "\u2764", ColumnData.CardData(data.topSongs,   { it.sessionSongsTotal.toString()  }, NUIA_COLOR)),
       Triple(getString(Res.string.summary_top_buffs),   "\u26A1", ColumnData.CardData(data.topBuffs,   { it.sessionBuffTotal.toString()   }, PIRATE_COLOR)),
+    )))
+
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_life_mends), "\u2764", ColumnData.CardData(
+        data.topLifeMenders,
+        { card ->
+          "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${card.lifeMendQuality.label})"
+        },
+        toAwtColor(RFColors.healsGreen)
+      )),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
