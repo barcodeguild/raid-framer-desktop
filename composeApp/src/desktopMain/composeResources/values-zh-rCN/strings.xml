@@ -35,7 +35,23 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop 设置</string>
-    <string name="settings_export_background_title">导出背景</string><string name="settings_export_background_description">选择 PNG 排行榜导出所使用的背景。</string><string name="settings_export_background_note">PNG 图片至少需要 2000 x 2000 像素。由于排行榜较宽且纵向较长，建议使用更大的图片。</string><string name="settings_export_background_color">纯色</string><string name="settings_export_background_dimness">背景暗度</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">纯色</string><string name="settings_export_background_custom">自定义 PNG</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">选择 PNG 背景</string><string name="settings_export_background_picker_filter">PNG 图片 (*.png)</string><string name="settings_export_background_invalid_file">无法将所选文件读取为 PNG。</string><string name="settings_export_background_resolution_error">PNG 背景至少需要 2000 x 2000 像素。</string>
+    <string name="settings_export_background_title">导出背景</string>
+    <string name="settings_export_background_description">选择 PNG 排行榜导出所使用的背景。</string>
+    <string name="settings_export_background_note">PNG 图片至少需要 2000 x 2000 像素。由于排行榜较宽且纵向较长，建议使用更大的图片。</string>
+    <string name="settings_export_background_color">纯色</string>
+    <string name="settings_export_background_dimness">背景暗度</string>
+    <string name="settings_export_background_reoky">Reoky</string>
+    <string name="settings_export_background_spaguetti">Spaguetti</string>
+    <string name="settings_export_background_spacea">Spacea</string>
+    <string name="settings_export_background_brooklyyn">Brooklyyn</string>
+    <string name="settings_export_background_solid">纯色</string>
+    <string name="settings_export_background_custom">自定义 PNG</string>
+    <string name="settings_export_background_applied_icon">✓</string>
+    <string name="settings_export_background_missing_icon">?</string>
+    <string name="settings_export_background_picker_title">选择 PNG 背景</string>
+    <string name="settings_export_background_picker_filter">PNG 图片 (*.png)</string>
+    <string name="settings_export_background_invalid_file">无法将所选文件读取为 PNG。</string>
+    <string name="settings_export_background_resolution_error">PNG 背景至少需要 2000 x 2000 像素。</string>
     <string name="settings_data_sourcing_title">数据源</string>
     <string name="settings_data_sourcing_description">请确认您在下面看到正确的ArcheRage文档目录。您的游戏文档目录已被自动检测。如果您没有看到正确的目录，或者下面的文字是红色的，您应该报告一个bug。</string>
     <string name="settings_toggle_pvp_damage">仅显示PvP伤害</string>
@@ -89,6 +105,8 @@
     <string name="category_provoked">挑衅</string>
     <string name="settings_combat_overlay_title">战斗覆盖</string>
     <string name="settings_combat_fade_controls">当光标离开覆盖层时自动淡出图标控件。</string>
+    <string name="settings_combat_show_spec_icons">在玩家行中显示技能树图标</string>
+    <string name="settings_item_use_overlay">启用物品使用覆盖层。以击杀信息风格显示最近的物品使用。[实验性/原型]</string>
     <string name="settings_split_chat">启用OSRS风格的分割聊天窗口覆盖。(即将推出)</string>
     <string name="settings_tabbed_detection">在标签页切换出游戏时自动隐藏游戏覆盖。不适用于工具提示(那些有标题栏的)。</string>
     <string name="settings_allow_pve_damage">允许PvE伤害计入DPS/击杀计数器。(对于想要查看对PvE目标伤害输出的单人玩家很有用)</string>
@@ -177,6 +195,7 @@
     <string name="player_card_session_scope_last_n">最近 %1$d 场会话</string>
     <string name="player_card_session_scope_all">所有会话</string>
     <string name="player_card_no_historical_data">该玩家暂无归档会话。</string>
+    <string name="player_inventory_time_ago">%1$s</string>
 
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">总伤害</string>
@@ -298,6 +317,37 @@
     <string name="battle_graph_filters_expanded">▲ 筛选器</string>
     <string name="battle_graph_spell_filter_buff">增益</string>
     <string name="battle_graph_spell_filter_debuff">减益</string>
+    <string name="battle_graph_title">战斗图表</string>
+    <string name="battle_graph_heal_prop">治疗集中</string>
+    <string name="battle_graph_crowd_control_distribution">控场分布</string>
+    <string name="battle_graph_summary">摘要</string>
+    <string name="battle_graph_view_options">视图选项</string>
+    <string name="battle_graph_no_data">当前筛选条件下无可用数据</string>
+    <string name="battle_graph_outgoing_format">输出: %1$s</string>
+    <string name="battle_graph_incoming_format">输入: %1$s</string>
+    <string name="battle_graph_edge_dmg_format">%1$s 伤害</string>
+    <string name="battle_graph_edge_heal_format">%1$s 治疗</string>
+    <string name="battle_graph_edge_cc_format">%1$s 控场</string>
+    <string name="battle_graph_edge_kill_format">%1$s 击杀</string>
+    <string name="battle_graph_edge_buff_format">%1$s 增益</string>
+    <string name="battle_graph_edge_debuff_format">%1$s 减益</string>
+    <string name="battle_graph_edge_charm_format">%1$s 魅惑</string>
+    <string name="battle_graph_edge_distress_format">%1$s 苦恼</string>
+    <string name="battle_graph_edge_silence_format">%1$s 沉默</string>
+    <string name="battle_graph_kill_count_format">%1$s (%2$d 击杀)</string>
+    <string name="battle_graph_min_kills">最小击杀</string>
+    <string name="battle_graph_min_buffs">最小增益</string>
+    <string name="battle_graph_min_debuffs">最小减益</string>
+    <string name="battle_graph_min_charms">最小魅惑</string>
+    <string name="battle_graph_min_distress">最小苦恼</string>
+    <string name="battle_graph_min_silence">最小沉默</string>
+    <string name="battle_graph_focused_kills">击杀归属</string>
+    <string name="battle_graph_focused_damage">集中伤害</string>
+    <string name="battle_graph_focused_buffs">增益分布</string>
+    <string name="battle_graph_focused_debuffs">减益分布</string>
+    <string name="battle_graph_focused_charms">魅惑分布</string>
+    <string name="battle_graph_focused_distress">苦恼分布</string>
+    <string name="battle_graph_focused_silence">沉默分布</string>
 
     <!-- 技术分析启发式标签 -->
     <string name="tech_heal_loop">治疗循环</string>
@@ -466,6 +516,7 @@
     <string name="item_name_sungold_anth_set_pull">日金选集套装拉取</string>
     <string name="item_name_garden_anth_set_pull">花园选集套装拉取</string>
     <string name="item_name_serp_staff">腐化智慧(蛇杖)</string>
+    <string name="item_name_serp_shield">嗜血之花(蛇杖盾)</string>
     <string name="item_name_mist_dagger">雾歌邪恶低语匕首</string>
     <string name="item_name_mist_shield">雾歌潜行之牙盾牌</string>
 

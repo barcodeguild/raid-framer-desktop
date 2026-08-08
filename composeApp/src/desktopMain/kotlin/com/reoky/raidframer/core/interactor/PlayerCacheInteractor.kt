@@ -1018,7 +1018,10 @@ object PlayerCacheInteractor : Interactor() {
             event.spell.contains("Раскаленная лава", ignoreCase = true) ||
             event.spell.contains("Thunderbreath", ignoreCase = true) ||
             event.spell.contains("천둥의 숨결", ignoreCase = true)
-        val isRocketDamage = event.spellId in GUIDED_MISSILES_DAMAGE_SPELL_IDS
+        val isRocketDamage = event.spellId in GUIDED_MISSILES_DAMAGE_SPELL_IDS ||
+            event.spell.contains("Guided Missiles", ignoreCase = true) ||
+            event.spell.contains("유도탄", ignoreCase = true) ||
+            event.spell.contains("Ковровая бомбардировка", ignoreCase = true)
 
         var breathCasts = existing.sessionBreathCasts
         var rocketCasts = existing.sessionRocketCasts
@@ -1027,29 +1030,31 @@ object PlayerCacheInteractor : Interactor() {
           val lastIdx = breathCasts.indexOfLast { cast ->
             event.timestamp >= cast.timestamp && event.timestamp - cast.timestamp <= 15_000L
           }
-          if (lastIdx < 0) return@withLock
-          val last = breathCasts[lastIdx]
-          val updatedTargetMap = last.damageByTarget.toMutableMap()
-          updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
-          breathCasts = breathCasts.toMutableList().apply {
-            set(lastIdx, last.copy(
-              damage = last.damage + event.damage.toLong(),
-              damageByTarget = updatedTargetMap
-            ))
+          if (lastIdx >= 0) {
+            val last = breathCasts[lastIdx]
+            val updatedTargetMap = last.damageByTarget.toMutableMap()
+            updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
+            breathCasts = breathCasts.toMutableList().apply {
+              set(lastIdx, last.copy(
+                damage = last.damage + event.damage.toLong(),
+                damageByTarget = updatedTargetMap
+              ))
+            }
           }
         } else if (isRocketDamage && rocketCasts.isNotEmpty()) {
           val lastIdx = rocketCasts.indexOfLast { cast ->
             event.timestamp >= cast.timestamp && event.timestamp - cast.timestamp <= 15_000L
           }
-          if (lastIdx < 0) return@withLock
-          val last = rocketCasts[lastIdx]
-          val updatedTargetMap = last.damageByTarget.toMutableMap()
-          updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
-          rocketCasts = rocketCasts.toMutableList().apply {
-            set(lastIdx, last.copy(
-              damage = last.damage + event.damage.toLong(),
-              damageByTarget = updatedTargetMap
-            ))
+          if (lastIdx >= 0) {
+            val last = rocketCasts[lastIdx]
+            val updatedTargetMap = last.damageByTarget.toMutableMap()
+            updatedTargetMap[event.target] = (updatedTargetMap[event.target] ?: 0L) + event.damage.toLong()
+            rocketCasts = rocketCasts.toMutableList().apply {
+              set(lastIdx, last.copy(
+                damage = last.damage + event.damage.toLong(),
+                damageByTarget = updatedTargetMap
+              ))
+            }
           }
         }
 

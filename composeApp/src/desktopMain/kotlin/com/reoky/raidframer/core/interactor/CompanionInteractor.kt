@@ -148,10 +148,11 @@ object CompanionInteractor : Interactor() {
             }
             is PlayerInfoPayload.Npc -> {
               //println("Metadata for NPC ${payload.name} ${payload.isPortal} received.")
+              Log.info(TAG, "Metadata for NPC ${payload.name} (portal? ${payload.isPortal} : ${payload.portalOwner}) nickName ${payload.nickName} with cid ${payload.cid} expedition ${payload.expeditionName} family ${payload.familyName} faction ${payload.faction} received.")
             }
             // Fixed: Added 'Mate' branch to make 'when' exhaustive
             is PlayerInfoPayload.Mate -> {
-              println("Metadata for companion pet ${payload.name} owned by ${payload.ownerName} with cid ${payload.cid} type ${payload.mateNpcName} received.")
+              Log.info(TAG, "Metadata for companion pet ${payload.name} owned by ${payload.ownerName} with cid ${payload.cid} type ${payload.mateNpcName} received.")
               val petName = payload.name
               if (petName.isBlank()) return
               PlayerCacheInteractor.createOrUpdatePetCard(
@@ -162,6 +163,8 @@ object CompanionInteractor : Interactor() {
               )
             }
             is PlayerInfoPayload.Slave -> {
+              Log.info(TAG, "Metadata for slave ${payload.name} owned by ${payload.ownerName} with cid ${payload.cid} expedition ${payload.expeditionName} family ${payload.familyName} faction ${payload.faction} received.")
+
               //println("Metadata for vehicle summon ${payload.name} owned by ${payload.ownerName} received.")
               // we could do something with this in the future.. god do we love farm carts..
             }

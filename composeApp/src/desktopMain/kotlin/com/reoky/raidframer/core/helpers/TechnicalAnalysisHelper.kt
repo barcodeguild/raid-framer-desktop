@@ -42,7 +42,7 @@ object TechnicalAnalysisHelper {
   private const val SPELL_DOMINANCE_DAMAGE_THRESHOLD = 300_000L
   private const val NEEDS_HEALS_THRESHOLD = 0.5f // ony 50% of received damage healed
   private const val CC_RIVAL_THRESHOLD = 20
-  private const val CC_RIVAL_RATIO = 0.03f // CC applied to target must be at least 5% of source's total CC
+  private const val CC_RIVAL_RATIO = 0.03f // CC applied to target must be at least 3% of source's total CC
 
   // for our nation's cats of course ~
   // I mean category ~

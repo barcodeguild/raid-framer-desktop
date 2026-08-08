@@ -35,7 +35,23 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop 설정</string>
-    <string name="settings_export_background_title">내보내기 배경</string><string name="settings_export_background_description">PNG 리더보드 내보내기에 사용할 배경을 선택하세요.</string><string name="settings_export_background_note">PNG 이미지는 최소 2000 x 2000픽셀이어야 합니다. 리더보드는 넓고 세로로 길기 때문에 더 큰 이미지를 권장합니다.</string><string name="settings_export_background_color">단색</string><string name="settings_export_background_dimness">배경 어둡기</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">단색</string><string name="settings_export_background_custom">사용자 지정 PNG</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">PNG 배경 선택</string><string name="settings_export_background_picker_filter">PNG 이미지 (*.png)</string><string name="settings_export_background_invalid_file">선택한 파일을 PNG로 읽을 수 없습니다.</string><string name="settings_export_background_resolution_error">PNG 배경은 최소 2000 x 2000픽셀이어야 합니다.</string>
+    <string name="settings_export_background_title">내보내기 배경</string>
+    <string name="settings_export_background_description">PNG 리더보드 내보내기에 사용할 배경을 선택하세요.</string>
+    <string name="settings_export_background_note">PNG 이미지는 최소 2000 x 2000픽셀이어야 합니다. 리더보드는 넓고 세로로 길기 때문에 더 큰 이미지를 권장합니다.</string>
+    <string name="settings_export_background_color">단색</string>
+    <string name="settings_export_background_dimness">배경 어둡기</string>
+    <string name="settings_export_background_reoky">Reoky</string>
+    <string name="settings_export_background_spaguetti">Spaguetti</string>
+    <string name="settings_export_background_spacea">Spacea</string>
+    <string name="settings_export_background_brooklyyn">Brooklyyn</string>
+    <string name="settings_export_background_solid">단색</string>
+    <string name="settings_export_background_custom">사용자 지정 PNG</string>
+    <string name="settings_export_background_applied_icon">✓</string>
+    <string name="settings_export_background_missing_icon">?</string>
+    <string name="settings_export_background_picker_title">PNG 배경 선택</string>
+    <string name="settings_export_background_picker_filter">PNG 이미지 (*.png)</string>
+    <string name="settings_export_background_invalid_file">선택한 파일을 PNG로 읽을 수 없습니다.</string>
+    <string name="settings_export_background_resolution_error">PNG 배경은 최소 2000 x 2000픽셀이어야 합니다.</string>
     <string name="settings_data_sourcing_title">데이터 소스</string>
     <string name="settings_data_sourcing_description">아래에 표시된 ArcheRage 문서(Documents) 디렉터리가 올바른지 확인해 주십시오. 게임의 문서 디렉터리는 자동으로 감지되었습니다. 올바른 디렉터리가 아니거나 아래 텍스트가 빨간색으로 표시된다면 버그를 신고해 주시기 바랍니다.</string>
     <string name="settings_toggle_pvp_damage">PvP 피해만 표시</string>
@@ -89,6 +105,8 @@
     <string name="category_provoked">도발</string>
     <string name="settings_combat_overlay_title">전투 오버레이</string>
     <string name="settings_combat_fade_controls">커서가 오버레이를 벗어나면 아이콘 컨트롤 자동 페이드.</string>
+    <string name="settings_combat_show_spec_icons">플레이어 행에 스킬 트리 아이콘 표시</string>
+    <string name="settings_item_use_overlay">아이템 사용 오버레이 활성화. 최근 아이템 사용을 킬 피드 스타일로 표시합니다. [실험적 / 프로토타입]</string>
     <string name="settings_split_chat">OSRS 스타일 분할 채팅 창 오버레이 활성화. (곧 출시)</string>
     <string name="settings_tabbed_detection">게임에서 탭으로 나갔을 때 게임 오버레이 자동 숨기기. 툴팁(제목 표시줄 있는 것)에는 적용되지 않습니다.</string>
     <string name="settings_allow_pve_damage">PvE 피해가 DPS/킬 카운터에 포함되도록 허용. (PvE 대상에 대한 피해량을 보고 싶은 솔로 플레이어에게 유용)</string>
@@ -177,6 +195,7 @@
     <string name="player_card_session_scope_last_n">최근 %1$d개 세션</string>
     <string name="player_card_session_scope_all">모든 세션</string>
     <string name="player_card_no_historical_data">이 플레이어에 대해 보관된 세션이 없습니다.</string>
+    <string name="player_inventory_time_ago">%1$s</string>
 
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">총 피해량</string>
@@ -298,6 +317,38 @@
     <string name="battle_graph_filters_expanded">▲ 필터</string>
     <string name="battle_graph_spell_filter_buff">버프</string>
     <string name="battle_graph_spell_filter_debuff">디버프</string>
+    <string name="battle_graph_title">전투 그래프</string>
+    <string name="battle_graph_heal_prop">치유 집중</string>
+    <string name="battle_graph_heal_focus">치유 집중</string>
+    <string name="battle_graph_crowd_control_distribution">군중 제어 분포</string>
+    <string name="battle_graph_summary">요약</string>
+    <string name="battle_graph_view_options">보기 옵션</string>
+    <string name="battle_graph_no_data">현재 필터에 대한 데이터 없음</string>
+    <string name="battle_graph_outgoing_format">보내기: %1$s</string>
+    <string name="battle_graph_incoming_format">받기: %1$s</string>
+    <string name="battle_graph_edge_dmg_format">%1$s 피해</string>
+    <string name="battle_graph_edge_heal_format">%1$s 치유</string>
+    <string name="battle_graph_edge_cc_format">%1$s CC</string>
+    <string name="battle_graph_edge_kill_format">%1$s 처치</string>
+    <string name="battle_graph_edge_buff_format">%1$s 버프</string>
+    <string name="battle_graph_edge_debuff_format">%1$s 디버프</string>
+    <string name="battle_graph_edge_charm_format">%1$s 매혹</string>
+    <string name="battle_graph_edge_distress_format">%1$s 강위축</string>
+    <string name="battle_graph_edge_silence_format">%1$s 침묵</string>
+    <string name="battle_graph_kill_count_format">%1$s (%2$d 처치)</string>
+    <string name="battle_graph_min_kills">최소 처치</string>
+    <string name="battle_graph_min_buffs">최소 버프</string>
+    <string name="battle_graph_min_debuffs">최소 디버프</string>
+    <string name="battle_graph_min_charms">최소 매혹</string>
+    <string name="battle_graph_min_distress">최소 강위축</string>
+    <string name="battle_graph_min_silence">최소 침묵</string>
+    <string name="battle_graph_focused_kills">킬 기여</string>
+    <string name="battle_graph_focused_damage">집중 피해</string>
+    <string name="battle_graph_focused_buffs">버프 분포</string>
+    <string name="battle_graph_focused_debuffs">디버프 분포</string>
+    <string name="battle_graph_focused_charms">매혹 분포</string>
+    <string name="battle_graph_focused_distress">강위축 분포</string>
+    <string name="battle_graph_focused_silence">침묵 분포</string>
 
     <!-- 기술 분석 휴리스틱 라벨 -->
     <string name="tech_heal_loop">치유 순환</string>
@@ -466,6 +517,7 @@
     <string name="item_name_sungold_anth_set_pull">짭탈사령</string>
     <string name="item_name_garden_anth_set_pull">찐탈사령</string>
     <string name="item_name_serp_staff">나차지팡이</string>
+    <string name="item_name_serp_shield">피 마시는 꽃 (나차 방패)</string>
     <string name="item_name_mist_dagger">향뜰단검</string>
     <string name="item_name_mist_shield">향뜰방패</string>
 

@@ -35,7 +35,23 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Einstellungen</string>
-    <string name="settings_export_background_title">Export-Hintergrund</string><string name="settings_export_background_description">Wählen Sie den Hintergrund für PNG-Ranglistenexporte.</string><string name="settings_export_background_note">PNG-Bilder müssen mindestens 2000 x 2000 Pixel groß sein. Größere Bilder werden empfohlen, da Ranglisten breit und sehr hoch sind.</string><string name="settings_export_background_color">Einfarbig</string><string name="settings_export_background_dimness">Hintergrundabdunklung</string><string name="settings_export_background_reoky">Reoky</string><string name="settings_export_background_spaguetti">Spaguetti</string><string name="settings_export_background_spacea">Spacea</string><string name="settings_export_background_brooklyyn">Brooklyyn</string><string name="settings_export_background_solid">Einfarbig</string><string name="settings_export_background_custom">Benutzerdefinierte PNG</string><string name="settings_export_background_applied_icon">✓</string><string name="settings_export_background_missing_icon">?</string><string name="settings_export_background_picker_title">PNG-Hintergrund auswählen</string><string name="settings_export_background_picker_filter">PNG-Bilder (*.png)</string><string name="settings_export_background_invalid_file">Die ausgewählte Datei konnte nicht als PNG gelesen werden.</string><string name="settings_export_background_resolution_error">PNG-Hintergründe müssen mindestens 2000 x 2000 Pixel groß sein.</string>
+    <string name="settings_export_background_title">Export-Hintergrund</string>
+    <string name="settings_export_background_description">Wählen Sie den Hintergrund für PNG-Ranglistenexporte.</string>
+    <string name="settings_export_background_note">PNG-Bilder müssen mindestens 2000 x 2000 Pixel groß sein. Größere Bilder werden empfohlen, da Ranglisten breit und sehr hoch sind.</string>
+    <string name="settings_export_background_color">Einfarbig</string>
+    <string name="settings_export_background_dimness">Hintergrundabdunklung</string>
+    <string name="settings_export_background_reoky">Reoky</string>
+    <string name="settings_export_background_spaguetti">Spaguetti</string>
+    <string name="settings_export_background_spacea">Spacea</string>
+    <string name="settings_export_background_brooklyyn">Brooklyyn</string>
+    <string name="settings_export_background_solid">Einfarbig</string>
+    <string name="settings_export_background_custom">Benutzerdefinierte PNG</string>
+    <string name="settings_export_background_applied_icon">✓</string>
+    <string name="settings_export_background_missing_icon">?</string>
+    <string name="settings_export_background_picker_title">PNG-Hintergrund auswählen</string>
+    <string name="settings_export_background_picker_filter">PNG-Bilder (*.png)</string>
+    <string name="settings_export_background_invalid_file">Die ausgewählte Datei konnte nicht als PNG gelesen werden.</string>
+    <string name="settings_export_background_resolution_error">PNG-Hintergründe müssen mindestens 2000 x 2000 Pixel groß sein.</string>
     <string name="settings_data_sourcing_title">Datenquelle</string>
     <string name="settings_data_sourcing_description">Bitte bestätigen Sie, dass Sie unten das richtige ArcheRage-Dokumentenverzeichnis sehen. Ihr Spiel-Dokumentenverzeichnis wurde automatisch erkannt. Wenn Sie nicht das richtige Verzeichnis sehen oder der Text unten rot ist, sollten Sie einen Fehler melden.</string>
     <string name="settings_toggle_pvp_damage">Nur PvP-Schaden anzeigen</string>
@@ -89,6 +105,8 @@ Sie sollten immer noch die Deinstallation der Hauptanwendung abschließen, indem
     <string name="category_provoked">Herausforderung</string>
     <string name="settings_combat_overlay_title">Kampf-Overlay</string>
     <string name="settings_combat_fade_controls">Symbolsteuerungen automatisch ausblenden, wenn der Cursor das Overlay verlässt.</string>
+    <string name="settings_combat_show_spec_icons">Fertigkeitsbaum-Symbole in Spielerzeilen anzeigen</string>
+    <string name="settings_item_use_overlay">Gegenstandsverwendungs-Overlay aktivieren. Zeigt letzte Gegenstandsverwendungen im Kill-Feed-Stil. [EXPERIMENTELL / PROTOTYP]</string>
     <string name="settings_split_chat">OSRS-artiges Split-Chat-Fenster-Overlay aktivieren. (Demnächst)</string>
     <string name="settings_tabbed_detection">Spiel-Overlays automatisch ausblenden, während aus dem Spiel herausgetabbt. Gilt nicht für Tooltips (die mit Titelleiste).</string>
     <string name="settings_allow_pve_damage">PvE-Schaden zu DPS/Kill-Zählern zählen lassen. (Nützlich für Einzelspieler, die ihre Schadensausgabe gegen PvE-Ziele sehen möchten)</string>
@@ -177,6 +195,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="player_card_session_scope_last_n">Letzte %1$d Sitzungen</string>
     <string name="player_card_session_scope_all">Alle Sitzungen</string>
     <string name="player_card_no_historical_data">Keine archivierten Sitzungen für diesen Spieler.</string>
+    <string name="player_inventory_time_ago">%1$s</string>
 
     <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">Gesamtschaden</string>
@@ -298,6 +317,38 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="battle_graph_filters_expanded">▲ Filter</string>
     <string name="battle_graph_spell_filter_buff">Buff</string>
     <string name="battle_graph_spell_filter_debuff">Debuff</string>
+    <string name="battle_graph_title">Kampfgrafik</string>
+    <string name="battle_graph_heal_prop">Heilungs-Fokus</string>
+    <string name="battle_graph_heal_focus">Heilungs-Fokus</string>
+    <string name="battle_graph_crowd_control_distribution">Massenkontroll-Verteilung</string>
+    <string name="battle_graph_summary">Zusammenfassung</string>
+    <string name="battle_graph_view_options">Ansichtsoptionen</string>
+    <string name="battle_graph_no_data">Keine Daten für aktuelle Filter verfügbar</string>
+    <string name="battle_graph_outgoing_format">Ausgehend: %1$s</string>
+    <string name="battle_graph_incoming_format">Eingehend: %1$s</string>
+    <string name="battle_graph_edge_dmg_format">%1$s Schaden</string>
+    <string name="battle_graph_edge_heal_format">%1$s Heilung</string>
+    <string name="battle_graph_edge_cc_format">%1$s CC</string>
+    <string name="battle_graph_edge_kill_format">%1$s Kill</string>
+    <string name="battle_graph_edge_buff_format">%1$s Buff</string>
+    <string name="battle_graph_edge_debuff_format">%1$s Debuff</string>
+    <string name="battle_graph_edge_charm_format">%1$s Verzauberung</string>
+    <string name="battle_graph_edge_distress_format">%1$s Bedrängnis</string>
+    <string name="battle_graph_edge_silence_format">%1$s Stille</string>
+    <string name="battle_graph_kill_count_format">%1$s (%2$d Kills)</string>
+    <string name="battle_graph_min_kills">Min. Kills</string>
+    <string name="battle_graph_min_buffs">Min. Buffs</string>
+    <string name="battle_graph_min_debuffs">Min. Debuffs</string>
+    <string name="battle_graph_min_charms">Min. Verzauberungen</string>
+    <string name="battle_graph_min_distress">Min. Bedrängnis</string>
+    <string name="battle_graph_min_silence">Min. Stille</string>
+    <string name="battle_graph_focused_kills">Kill-Zuschreibung</string>
+    <string name="battle_graph_focused_damage">Fokussierter Schaden</string>
+    <string name="battle_graph_focused_buffs">Buff-Verteilung</string>
+    <string name="battle_graph_focused_debuffs">Debuff-Verteilung</string>
+    <string name="battle_graph_focused_charms">Verzauberungs-Verteilung</string>
+    <string name="battle_graph_focused_distress">Bedrängnis-Verteilung</string>
+    <string name="battle_graph_focused_silence">Stille-Verteilung</string>
 
     <!-- Technische Analyse Heuristik-Beschriftungen -->
     <string name="tech_heal_loop">Heilungs-Schleife</string>
@@ -466,6 +517,7 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="item_name_sungold_anth_set_pull">Sonnengold-Anthologie-Set-Zug</string>
     <string name="item_name_garden_anth_set_pull">Garten-Anthologie-Set-Zug</string>
     <string name="item_name_serp_staff">Verderbter Witz (Serpentis)</string>
+    <string name="item_name_serp_shield">Bluttrinkerblüte (Serpentis-Schild)</string>
     <string name="item_name_mist_dagger">Nebellied Böser Flüstern-Dolch</string>
     <string name="item_name_mist_shield">Nebellied Schleichzahn-Schild</string>
 

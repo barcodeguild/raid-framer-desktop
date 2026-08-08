@@ -281,7 +281,7 @@ private fun CastEmoji(emoji: String, castIndex: Int, cast: RiderCastEvent) {
               Spacer(modifier = Modifier.height(3.dp))
               val sortedTargets = cast.damageByTarget.entries.sortedByDescending { it.value }
               val maxTargetDamage = sortedTargets.first().value
-              sortedTargets.take(8).forEach { (target, dmg) ->
+              sortedTargets.take(20).forEach { (target, dmg) ->
                 val pct = if (maxTargetDamage > 0) dmg.toFloat() / maxTargetDamage else 0f
                 Row(
                   modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
@@ -319,9 +319,9 @@ private fun CastEmoji(emoji: String, castIndex: Int, cast: RiderCastEvent) {
                   )
                 }
               }
-              if (sortedTargets.size > 8) {
+              if (sortedTargets.size > 20) {
                 Text(
-                  text = stringResource(Res.string.pet_cast_overflow_format, sortedTargets.size - 8),
+                  text = stringResource(Res.string.pet_cast_overflow_format, sortedTargets.size - 20),
                   color = RFColors.TextTertiary,
                   fontSize = 8.sp,
                   modifier = Modifier.padding(top = 2.dp)

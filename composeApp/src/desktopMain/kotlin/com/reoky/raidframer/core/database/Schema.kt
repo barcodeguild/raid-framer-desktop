@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 35
+const val SCHEMA_VERSION = 36
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -118,7 +118,13 @@ data class ConfigEntity(
   val exportBackgroundSelection: String = "REOKY",
   val exportCustomBackgroundPath: String = "",
   val exportBackgroundColor: Int = 0xFF000000.toInt(),
-  val exportBackgroundDimness: Float = 0.20f
+  val exportBackgroundDimness: Float = 0.20f,
+
+  // Item Use Overlay toggle
+  val itemUseOverlayEnabled: Boolean = false,
+
+  // Combat overlay spec icons toggle
+  val combatShowSpecIcons: Boolean = true
 )
 
 /*
