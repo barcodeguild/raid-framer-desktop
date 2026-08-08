@@ -127,6 +127,14 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
       local raidRole = X2Team:GetRole(0, position)
       if raidMember then
         --RF:Log(string.format("Raid Slot %02d: %s", position, raidMember))
+
+        local buffCount = X2Unit:UnitBuffCount(string.format("team%02d", position))
+        for buffId = 1, buffCount do
+          local buff = X2Unit:UnitBuff(string.format("team%02d", position), buffId)
+          local buffToolTip = X2Unit:UnitBuffTooltip(string.format("team%02d", position), buffId)
+          -- add buff and its nested tooltip to the roster
+        end
+
         RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole })
       else
         --RF:Log(string.format("Raid Slot %02d: <empty>", position))
@@ -158,8 +166,8 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
 
   -- ipc export updated raid roster
   RF.IPC.WriteMessage(
-      RF.IPC.MESSAGE_TYPES.FRAMES_UPDATE,
-      RF.Raid.GetRaidRoster()
+    RF.IPC.MESSAGE_TYPES.FRAMES_UPDATE,
+    RF.Raid.GetRaidRoster()
   )
 
   if not RF.Config.SHOW_RAID_STATUS then
