@@ -329,7 +329,7 @@ function RF.Raid.ScanBuffs()
     RF.Raid.GetRaidRoster()
   )
 
-  RF:Log(string.format("[Raid] Buff scan: %d players scanned, %d with buffs", scanned, withBuffs))
+  --RF:Log(string.format("[Raid] Buff scan: %d players scanned, %d with buffs", scanned, withBuffs))
 end
 
 -- these are updated when the event fires -or- when we detect players in the second raid

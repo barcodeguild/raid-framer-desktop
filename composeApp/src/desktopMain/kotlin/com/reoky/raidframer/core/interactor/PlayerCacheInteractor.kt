@@ -72,6 +72,8 @@ object PlayerCacheInteractor : Interactor() {
   val raidDeparturesFlow: StateFlow<Map<Int, Set<String>>> = _raidDeparturesFlow.asStateFlow()
   private val cards = mutableStateMapOf<String, PlayerCard>()
   private val petCards = mutableStateMapOf<String, PetCard>()
+  // Life Mend caster tracking: target → caster (updated on SPELL_AURA_APPLIED/REMOVED for buff 25875)
+  private val lifeMendCasterMap = mutableMapOf<String, String>()
   private val mutex = Mutex() // to protect critical sections during player card updates from other threads
   private var archiveJob: Job? = null
   private var preSessionCacheSnapshot: MutableMap<String, PlayerCacheEntity?> = mutableMapOf()
@@ -181,14 +183,17 @@ object PlayerCacheInteractor : Interactor() {
       members.forEach { member ->
         if (member.playerName.isNotBlank()) {
           createCardIfNoneExists(playerName = member.playerName)
-          // update Life Mend stats from buff data
-          cards[member.playerName]?.let { card ->
-            member.buffs.forEach { buff ->
-              if (buff.buff_id == LIFE_MEND_BUFF_ID && buff.tooltip.healAmount > 0) {
-                // only record if this is a new heal amount (avoid duplicate entries from periodic scans)
-                val lastAmount = card.lifeMendHealAmounts.lastOrNull()
-                if (lastAmount != buff.tooltip.healAmount) {
-                  cards[member.playerName] = card.updateLifeMendStats(buff.tooltip.healAmount)
+          // update Life Mend stats from buff data — route to the caster, not the target
+          member.buffs.forEach { buff ->
+            if (buff.buff_id == LIFE_MEND_BUFF_ID && buff.tooltip.healAmount > 0) {
+              val caster = lifeMendCasterMap[member.playerName]
+              if (caster != null) {
+                createCardIfNoneExists(playerName = caster)
+                cards[caster]?.let { casterCard ->
+                  val lastAmount = casterCard.lifeMendHealAmounts.lastOrNull()
+                  if (lastAmount != buff.tooltip.healAmount) {
+                    cards[caster] = casterCard.updateLifeMendStats(buff.tooltip.healAmount)
+                  }
                 }
               }
             }
@@ -395,6 +400,7 @@ object PlayerCacheInteractor : Interactor() {
         cards.clear()
         petCards.clear()
         raids.clear()
+        lifeMendCasterMap.clear()
       }
       CombatLogInteractor.startRecording()
       Log.info(TAG, "Started new recording session: type=$sessionType, allowPvE=$allowPvE")
@@ -940,6 +946,7 @@ object PlayerCacheInteractor : Interactor() {
             // track Life Mend casts on the healer's card
             if (event.buffId == LIFE_MEND_BUFF_ID) {
               cards[source] = cards[source]!!.postLifeMendApplied(event.target)
+              lifeMendCasterMap[event.target] = source
             }
           }
         }
@@ -953,6 +960,10 @@ object PlayerCacheInteractor : Interactor() {
         createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.target]?.let { card ->
           cards[event.target] = card.postBuffEndedEvent(event)
+        }
+        // clean up Life Mend caster mapping when buff expires
+        if (event.buffId == LIFE_MEND_BUFF_ID) {
+          lifeMendCasterMap.remove(event.target)
         }
       }
     }
