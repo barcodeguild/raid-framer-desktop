@@ -49,6 +49,7 @@ function RF.Raid.NewRaidMember(slot)
     lastZone = "",               -- string
     distance = -1,               -- meters, -1 = unknown
     lastUpdated = os.time(), -- used to track staleness of data at the higher layers
+    buffs = {},                  -- list of buff objects (each with nested tooltip)
   }
 end
 
@@ -128,14 +129,18 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
       if raidMember then
         --RF:Log(string.format("Raid Slot %02d: %s", position, raidMember))
 
-        local buffCount = X2Unit:UnitBuffCount(string.format("team%02d", position))
+        local unitId = string.format("team%02d", position)
+        local buffCount = X2Unit:UnitBuffCount(unitId)
+        local buffs = {}
         for buffId = 1, buffCount do
-          local buff = X2Unit:UnitBuff(string.format("team%02d", position), buffId)
-          local buffToolTip = X2Unit:UnitBuffTooltip(string.format("team%02d", position), buffId)
-          -- add buff and its nested tooltip to the roster
+          local rawBuff = X2Unit:UnitBuff(unitId, buffId)
+          local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
+          local buff = RF.Parser.ParseUnitBuff(rawBuff)
+          buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
+          buffs[#buffs + 1] = buff
         end
 
-        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole })
+        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole, buffs = buffs })
       else
         --RF:Log(string.format("Raid Slot %02d: <empty>", position))
         RF.Raid.Roster[position] = RF.Raid.NewRaidMember(position) -- clear slot
@@ -147,7 +152,19 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
       local raidRole = X2Team:GetRole(1, position)
       if raidMember then
         --RF:Log(string.format("Main Raid Raid Slot %02d: %s", position, raidMember))
-        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole })
+
+        local unitId = string.format("team_01_%02d", position)
+        local buffCount = X2Unit:UnitBuffCount(unitId)
+        local buffs = {}
+        for buffId = 1, buffCount do
+          local rawBuff = X2Unit:UnitBuff(unitId, buffId)
+          local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
+          local buff = RF.Parser.ParseUnitBuff(rawBuff)
+          buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
+          buffs[#buffs + 1] = buff
+        end
+
+        RF.Raid.UpdateRaidSlot(position, { playerName = raidMember, role = raidRole, buffs = buffs })
       else
         --RF:Log(string.format("Main Raid Raid Slot %02d: <empty>", position))
         RF.Raid.Roster[position] = RF.Raid.NewRaidMember(position) -- clear slot
@@ -156,7 +173,19 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
       local raidRole = X2Team:GetRole(2, position)
       if raidTwoMember then
         --RF:Log(string.format("Co-Raid Raid Slot %02d: %s", position + 50, raidTwoMember))
-        RF.Raid.UpdateRaidSlot(position + 50, { playerName = raidTwoMember, role = raidRole })
+
+        local unitId = string.format("team_02_%02d", position)
+        local buffCount = X2Unit:UnitBuffCount(unitId)
+        local buffs = {}
+        for buffId = 1, buffCount do
+          local rawBuff = X2Unit:UnitBuff(unitId, buffId)
+          local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
+          local buff = RF.Parser.ParseUnitBuff(rawBuff)
+          buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
+          buffs[#buffs + 1] = buff
+        end
+
+        RF.Raid.UpdateRaidSlot(position + 50, { playerName = raidTwoMember, role = raidRole, buffs = buffs })
       else
         --RF:Log(string.format("Co-Raid Raid Slot %02d: <empty>", position + 50))
         RF.Raid.Roster[position + 50] = RF.Raid.NewRaidMember(position + 50) -- clear slot

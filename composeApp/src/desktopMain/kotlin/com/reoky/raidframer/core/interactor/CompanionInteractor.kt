@@ -175,6 +175,16 @@ object CompanionInteractor : Interactor() {
           for ((index, chunk) in chunks.withIndex()) {
             PlayerCacheInteractor.updatePlayersForRaidById(index, chunk)
           }
+          // Log buff data for debugging
+          for (player in message.payload) {
+            if (player.playerName.isBlank()) continue
+            if (player.buffs.isNotEmpty()) {
+              for (buff in player.buffs) {
+                val tooltip = buff.tooltip
+                Log.info(TAG, "Raid buff: ${player.playerName} has ${tooltip.name} (id:${buff.buff_id}) stack:${buff.stack} timeLeft:${buff.timeLeft} mine:${tooltip.mine} category:${tooltip.category} desc:${tooltip.description.take(80)}")
+              }
+            }
+          }
         }
         is IPCMessagePayload.CombatEvent -> {
           when (val event = message.payload) {

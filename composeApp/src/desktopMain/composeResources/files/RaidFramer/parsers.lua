@@ -201,6 +201,33 @@ function RF.Parser.ParseEnergizeEvent(t)
   return event
 end
 
+-- Parses the raw table returned by X2Unit:UnitBuff
+function RF.Parser.ParseUnitBuff(t)
+  local buff = {}
+  buff.buff_id   = t.buff_id    -- number: unique buff identifier
+  buff.path      = t.path       -- string: icon texture path
+  buff.stack     = t.stack      -- number: stack count
+  buff.timeLeft  = t.timeLeft   -- number: remaining time (in timeUnit units)
+  return buff
+end
+
+-- Parses the raw table returned by X2Unit:UnitBuffTooltip
+function RF.Parser.ParseUnitBuffTooltip(t)
+  local tooltip = {}
+  tooltip.buff_id     = t.buff_id       -- number: matches the buff id
+  tooltip.name        = t.name          -- string: display name (e.g. "Mend")
+  tooltip.description = t.description   -- string: full description text
+  tooltip.path        = t.path          -- string: icon texture path
+  tooltip.category    = t.category      -- string: "Buff" / "Debuff" etc
+  tooltip.tipType     = t.tipType       -- string: "buff" etc
+  tooltip.mine        = t.mine          -- boolean: true if cast by self
+  tooltip.stack       = t.stack         -- number: stack count
+  tooltip.timeLeft    = t.timeLeft      -- number: remaining time
+  tooltip.timeUnit    = t.timeUnit      -- string: time unit (e.g. "msec")
+  tooltip.duration    = t.duration      -- number: total duration in timeUnit
+  return tooltip
+end
+
 -- SPELL_DAMAGE
 function RF.Parser.ParseEnvironmentalDamageEvent(t)
   local event = {}
