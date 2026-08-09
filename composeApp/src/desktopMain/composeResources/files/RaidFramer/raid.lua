@@ -19,6 +19,12 @@ RF.Raid.hasCoRaid = false
 RF.Raid.BUFF_SCAN_INTERVAL = 1 -- seconds between buff/distance/gearScore scans
 RF.Raid.LastBuffScan = 0
 
+-- whitelist of buff IDs to include in FRAMES_UPDATE (all others are skipped to reduce IPC payload)
+-- add new buff IDs here as the Kotlin side needs to track them
+RF.Raid.INTERESTING_BUFF_IDS = {
+  [25875] = true,  -- Life Mend (healAmount tracking)
+}
+
 -- enum of strings different team member change reasons we can filter by to avoid unnecessary processing
 RF.TEAM_CHANGE_REASONS = {
   JOINED = "joined",
@@ -219,7 +225,7 @@ function scanForCoRaid()
   end
 end
 
--- scans buffs for a single unit, returns the buffs table
+-- scans buffs for a single unit, returns only buffs whose ID is in INTERESTING_BUFF_IDS
 function RF.Raid.ScanUnitBuffs(unitId)
   local buffCount = X2Unit:UnitBuffCount(unitId)
   if not buffCount or buffCount <= 0 then return {} end
@@ -227,12 +233,14 @@ function RF.Raid.ScanUnitBuffs(unitId)
   for buffId = 1, buffCount do
     local rawBuff = X2Unit:UnitBuff(unitId, buffId)
     if rawBuff then
-      local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
       local buff = RF.Parser.ParseUnitBuff(rawBuff)
-      if rawTooltip then
-        buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
+      if RF.Raid.INTERESTING_BUFF_IDS[buff.buff_id] then
+        local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
+        if rawTooltip then
+          buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
+        end
+        buffs[#buffs + 1] = buff
       end
-      buffs[#buffs + 1] = buff
     end
   end
   return buffs
