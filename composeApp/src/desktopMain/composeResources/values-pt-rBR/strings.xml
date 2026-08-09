@@ -452,6 +452,8 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="summary_tab_utility">Utilitários</string>
     <string name="summary_tab_specs">Especializações</string>
     <string name="summary_tab_performance">Desempenho</string>
+    <string name="summary_tab_life_mend">Cura de Vida</string>
+    <string name="summary_top_life_mends">Top Cura de Vida</string>
 
     <!-- General Strings -->
     <string name="general_about">Sobre</string>

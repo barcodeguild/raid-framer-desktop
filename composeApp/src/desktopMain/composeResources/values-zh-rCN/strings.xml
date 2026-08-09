@@ -451,6 +451,8 @@
     <string name="summary_tab_utility">实用技能</string>
     <string name="summary_tab_specs">天赋/职业</string>
     <string name="summary_tab_performance">表现</string>
+    <string name="summary_tab_life_mend">生命治愈</string>
+    <string name="summary_top_life_mends">生命治愈排行</string>
 
     <!-- General Strings -->
     <string name="general_about">关于</string>

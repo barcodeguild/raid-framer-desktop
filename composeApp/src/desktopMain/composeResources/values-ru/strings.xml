@@ -452,6 +452,8 @@
     <string name="summary_tab_utility">Утилиты</string>
     <string name="summary_tab_specs">Спеки</string>
     <string name="summary_tab_performance">Эффективность</string>
+    <string name="summary_tab_life_mend">Исцеление жизни</string>
+    <string name="summary_top_life_mends">Топ исцелений жизни</string>
 
     <!-- General Strings -->
     <string name="general_about">О программе</string>

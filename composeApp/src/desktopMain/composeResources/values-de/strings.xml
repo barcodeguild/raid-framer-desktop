@@ -452,6 +452,8 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_tab_utility">Nützliches</string>
     <string name="summary_tab_specs">Spezialisierungen</string>
     <string name="summary_tab_performance">Leistung</string>
+    <string name="summary_tab_life_mend">Lebensheilung</string>
+    <string name="summary_top_life_mends">Top Lebensheilungen</string>
 
     <!-- General Strings -->
     <string name="general_about">Über</string>
