@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.helpers
 
 import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.model.LifeMendQuality
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.PetCard
 
@@ -186,6 +187,12 @@ fun PlayerCard.resetSession(): PlayerCard {
     sessionCrystalWingsTotal = 0,
     sessionGliderDisablesTotal = 0,
     sessionProvokedTotal = 0,
+
+    // Life Mend tracking
+    lifeMendTotal = 0,
+    lifeMendHealAmounts = listOf(),
+    lifeMendAverage = 0,
+    lifeMendQuality = LifeMendQuality.NONE,
 
     // Session edge weights for battle graph
     sessionDamageToPlayer = mapOf(),

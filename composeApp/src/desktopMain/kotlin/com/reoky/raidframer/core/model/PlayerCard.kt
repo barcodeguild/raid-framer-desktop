@@ -1,7 +1,32 @@
 package com.reoky.raidframer.core.model
 
+import androidx.compose.ui.graphics.Color
 import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.helpers.RFColors
 import org.jetbrains.compose.resources.StringResource
+
+/**
+ * Quality metric for Life Mend heal amounts (buff 25875).
+ * Based on the raw heal amount shown in the tooltip.
+ * Colors match the gear score gradient for visual consistency.
+ */
+enum class LifeMendQuality(val label: String, val color: Color) {
+  NONE("No Data", Color.Gray),
+  HURTING("Hurting Raid", RFColors.gearRed),        // Red — 0-11k
+  POOR("Poor Quality", RFColors.gearOrange),        // Orange — 11-13k
+  GOOD("Good", RFColors.gearGreen),                 // Green — 13-15k
+  EXCELLENT("Excellent", RFColors.gearBlue);        // Blue — 15k+
+
+  companion object {
+    fun fromAverage(avg: Int): LifeMendQuality = when {
+      avg <= 0 -> NONE
+      avg < 11000 -> HURTING
+      avg < 13000 -> POOR
+      avg < 15000 -> GOOD
+      else -> EXCELLENT
+    }
+  }
+}
 
 /**
  * Represents a real player character with associated cached data and recent events.
@@ -134,5 +159,11 @@ data class PlayerCard (
   val sessionGardenDefianceTotal: Int = 0,
   val sessionPurgeTotal: Int = 0,
   val sessionSacDanceTotal: Int = 0,
+
+  // Life Mend tracking (buff 25875) — healer performance metric
+  val lifeMendTotal: Int = 0,                              // total Life Mends cast this session
+  val lifeMendHealAmounts: List<Int> = listOf(),           // recent heal amounts (capped at 25)
+  val lifeMendAverage: Int = 0,                            // computed from amounts
+  val lifeMendQuality: LifeMendQuality = LifeMendQuality.NONE
 )
 

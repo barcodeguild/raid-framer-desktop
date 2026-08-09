@@ -452,6 +452,8 @@
     <string name="summary_tab_utility">유틸리티</string>
     <string name="summary_tab_specs">직업</string>
     <string name="summary_tab_performance">성과</string>
+    <string name="summary_tab_life_mend">생명 치유</string>
+    <string name="summary_top_life_mends">생명 치유 순위</string>
 
     <!-- General Strings -->
     <string name="general_about">정보</string>

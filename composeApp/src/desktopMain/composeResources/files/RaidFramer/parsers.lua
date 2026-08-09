@@ -201,6 +201,44 @@ function RF.Parser.ParseEnergizeEvent(t)
   return event
 end
 
+-- Parses the raw table returned by X2Unit:UnitBuff
+function RF.Parser.ParseUnitBuff(t)
+  local buff = {}
+  buff.buff_id   = t.buff_id    -- number: unique buff identifier
+  buff.path      = t.path       -- string: icon texture path
+  buff.stack     = t.stack      -- number: stack count
+  buff.timeLeft  = t.timeLeft   -- number: remaining time (in timeUnit units)
+  return buff
+end
+
+-- Parses the raw table returned by X2Unit:UnitBuffTooltip
+function RF.Parser.ParseUnitBuffTooltip(t)
+  local tooltip = {}
+  tooltip.buff_id     = t.buff_id       -- number: matches the buff id
+  tooltip.name        = t.name          -- string: display name (e.g. "Mend")
+  tooltip.description = t.description and string.sub(t.description, 1, 80) or "" -- truncated to 80 chars
+  tooltip.path        = t.path          -- string: icon texture path
+  tooltip.category    = t.category      -- string: "Buff" / "Debuff" etc
+  tooltip.tipType     = t.tipType       -- string: "buff" etc
+  tooltip.mine        = t.mine          -- boolean: true if cast by self
+  tooltip.stack       = t.stack         -- number: stack count
+  tooltip.timeLeft    = t.timeLeft      -- number: remaining time
+  tooltip.timeUnit    = t.timeUnit      -- string: time unit (e.g. "msec")
+  tooltip.duration    = t.duration      -- number: total duration in timeUnit
+  -- extract heal amount from description (e.g. "Regenerates 11304-11321 Health over 10 seconds")
+  -- note: description may contain ArcheAge color codes like |cRRGGBB and |r which we strip first
+  tooltip.healAmount  = 0
+  if t.description then
+    local cleanDesc = string.gsub(t.description, "|c%x%x%x%x%x%x%x%x", "")
+    cleanDesc = string.gsub(cleanDesc, "|r", "")
+    local minHeal, maxHeal = string.match(cleanDesc, "Regenerates%s+(%d+)%-(%d+)%s+Health")
+    if minHeal and maxHeal then
+      tooltip.healAmount = math.floor((tonumber(minHeal) + tonumber(maxHeal)) / 2)
+    end
+  end
+  return tooltip
+end
+
 -- SPELL_DAMAGE
 function RF.Parser.ParseEnvironmentalDamageEvent(t)
   local event = {}
