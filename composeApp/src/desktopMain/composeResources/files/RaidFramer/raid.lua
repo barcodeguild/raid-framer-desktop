@@ -312,8 +312,14 @@ function RF.Raid.ScanBuffs()
           memberTwo.role = X2Team:GetRole(2, position)
           memberTwo.buffs = RF.Raid.ScanUnitBuffs(unitId)
           local dist = X2Unit:UnitDistance(unitId)
-          memberTwo.distance = (type(dist) == "table") and dist.distance or dist
-          memberTwo.gearScore = X2Unit:UnitGearScore(unitId, false)
+          if type(dist) == "table" then
+            memberTwo.distance = math.floor(dist.distance or -1)
+          elseif type(dist) == "number" then
+            memberTwo.distance = math.floor(dist)
+          else
+            memberTwo.distance = -1
+          end
+          memberTwo.gearScore = tonumber(X2Unit:UnitGearScore(unitId, false)) or 0
           scanned = scanned + 1
           if #memberTwo.buffs > 0 then withBuffs = withBuffs + 1 end
         else

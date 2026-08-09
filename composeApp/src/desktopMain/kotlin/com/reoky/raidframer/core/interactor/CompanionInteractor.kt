@@ -184,7 +184,7 @@ object CompanionInteractor : Interactor() {
             if (player.buffs.isNotEmpty()) {
               for (buff in player.buffs) {
                 val tooltip = buff.tooltip
-                Log.info(TAG, "Raid buff: ${player.playerName} has ${tooltip.name} (id:${buff.buff_id}) stack:${buff.stack} timeLeft:${buff.timeLeft} mine:${tooltip.mine} category:${tooltip.category} desc:${tooltip.description.take(80)}")
+                //Log.info(TAG, "Raid buff: ${player.playerName} has ${tooltip.name} (id:${buff.buff_id}) stack:${buff.stack} timeLeft:${buff.timeLeft} mine:${tooltip.mine} category:${tooltip.category} desc:${tooltip.description.take(80)}")
               }
             }
           }
