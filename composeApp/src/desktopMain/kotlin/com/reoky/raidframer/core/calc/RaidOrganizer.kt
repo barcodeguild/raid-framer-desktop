@@ -29,16 +29,16 @@ object RaidOrganizer {
       PlayerRole.fromInt(it.currentRole) == PlayerRole.GREEN && it.leaderships == 0
     }.toMutableList()
     val healers = roster.filter {
-      PlayerRole.fromInt(it.currentRole) == PlayerRole.PINK
+      PlayerRole.fromInt(it.currentRole) == PlayerRole.PINK && it.leaderships == 0
     }.toMutableList()
     val dancers = roster.filter {
-      PlayerRole.fromInt(it.currentRole) == PlayerRole.PURPLE
+      PlayerRole.fromInt(it.currentRole) == PlayerRole.PURPLE && it.leaderships == 0
     }.toMutableList()
     val redDps = roster.filter {
-      PlayerRole.fromInt(it.currentRole) == PlayerRole.RED
+      PlayerRole.fromInt(it.currentRole) == PlayerRole.RED && it.leaderships == 0
     }.toMutableList()
     val blueDps = roster.filter {
-      PlayerRole.fromInt(it.currentRole) == PlayerRole.BLUE
+      PlayerRole.fromInt(it.currentRole) == PlayerRole.BLUE && it.leaderships == 0
     }.toMutableList()
     val others = roster.filter {
       val role = PlayerRole.fromInt(it.currentRole)
@@ -102,10 +102,10 @@ object RaidOrganizer {
       PlayerRole.fromInt(it.currentRole) == PlayerRole.GREEN && it.leaderships == 0
     }.toMutableList()
     val healers = roster.filter {
-      PlayerRole.fromInt(it.currentRole) == PlayerRole.PINK
+      PlayerRole.fromInt(it.currentRole) == PlayerRole.PINK && it.leaderships == 0
     }.toMutableList()
     val dancers = roster.filter {
-      PlayerRole.fromInt(it.currentRole) == PlayerRole.PURPLE
+      PlayerRole.fromInt(it.currentRole) == PlayerRole.PURPLE && it.leaderships == 0
     }.toMutableList()
     val dps = roster.filter {
       val role = PlayerRole.fromInt(it.currentRole)
