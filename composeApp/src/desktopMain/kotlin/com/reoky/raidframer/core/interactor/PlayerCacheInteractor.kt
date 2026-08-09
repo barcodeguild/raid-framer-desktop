@@ -1365,8 +1365,9 @@ object PlayerCacheInteractor : Interactor() {
 
   var topLifeMenders: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { cards ->
-      cards.filter { it.isRealPlayer && it.lifeMendTotal > 0 }.sortedByDescending { it.lifeMendTotal }
-        .take(100)
+      cards.filter { it.isRealPlayer && it.lifeMendTotal > 0 && it.lifeMendHealAmounts.isNotEmpty() }
+        .sortedByDescending { it.lifeMendTotal }
+        .take(25)
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
