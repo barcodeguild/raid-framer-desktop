@@ -15,6 +15,7 @@ import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.locale.AppLocale
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.LifeMendQuality
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.pvpPerformancePoints
 import kotlinx.coroutines.Dispatchers
@@ -106,7 +107,7 @@ import javax.imageio.ImageIO
 
 object ImageExportInteractor {
 
-  private const val IMAGE_WIDTH = 2280
+  private const val IMAGE_WIDTH = 2400
   // Keep the final PNG at the wallpaper's max width, but render content larger first.
   private const val EXPORT_RENDER_SCALE = 2
   private const val SVG_ICON_RENDER_SCALE = 4
@@ -399,23 +400,23 @@ object ImageExportInteractor {
       topDamage           = PlayerCacheInteractor.topDamage.value.take(50),
       topHeals            = PlayerCacheInteractor.topHeals.value.take(50),
       topCC               = PlayerCacheInteractor.topCC.value.take(50),
-      topSilences         = PlayerCacheInteractor.topSilences.value.take(15),
-      topCharms           = PlayerCacheInteractor.topCharms.value.take(15),
-      topDistresses       = PlayerCacheInteractor.topDistresses.value.take(15),
-      topDamageSpellsHaranya = PlayerCacheInteractor.topDamageSpellsHaranya.value.take(15).map { SpellDamage(it.spell, it.total) },
-      topDamageSpellsNuia    = PlayerCacheInteractor.topDamageSpellsNuia.value.take(15).map { SpellDamage(it.spell, it.total) },
-      topDamageSpellsPirate  = PlayerCacheInteractor.topDamageSpellsPirate.value.take(15).map { SpellDamage(it.spell, it.total) },
-      topDebuffs          = PlayerCacheInteractor.topDebuff.value.take(15),
-      topSongs            = PlayerCacheInteractor.topSongs.value.take(15),
-      topBuffs            = PlayerCacheInteractor.topBuffs.value.take(15),
-      topOdeHaranya       = PlayerCacheInteractor.topOdeHaranya.value.take(15),
-      topOdeNuia          = PlayerCacheInteractor.topOdeNuia.value.take(15),
-      topOdePirate        = PlayerCacheInteractor.topOdePirate.value.take(15),
-      topKillsHaranya     = PlayerCacheInteractor.topKillsHaranya.value.take(15),
-      topKillsNuia        = PlayerCacheInteractor.topKillsNuia.value.take(15),
-      topKillsPirate      = PlayerCacheInteractor.topKillsPirate.value.take(15),
-      topDamageTaken      = PlayerCacheInteractor.topDamageTaken.value.take(15),
-      topHealsReceived    = PlayerCacheInteractor.topHealsReceived.value.take(15),
+      topSilences         = PlayerCacheInteractor.topSilences.value.take(25),
+      topCharms           = PlayerCacheInteractor.topCharms.value.take(25),
+      topDistresses       = PlayerCacheInteractor.topDistresses.value.take(25),
+      topDamageSpellsHaranya = PlayerCacheInteractor.topDamageSpellsHaranya.value.take(25).map { SpellDamage(it.spell, it.total) },
+      topDamageSpellsNuia    = PlayerCacheInteractor.topDamageSpellsNuia.value.take(25).map { SpellDamage(it.spell, it.total) },
+      topDamageSpellsPirate  = PlayerCacheInteractor.topDamageSpellsPirate.value.take(25).map { SpellDamage(it.spell, it.total) },
+      topDebuffs          = PlayerCacheInteractor.topDebuff.value.take(25),
+      topSongs            = PlayerCacheInteractor.topSongs.value.take(25),
+      topBuffs            = PlayerCacheInteractor.topBuffs.value.take(25),
+      topOdeHaranya       = PlayerCacheInteractor.topOdeHaranya.value.take(25),
+      topOdeNuia          = PlayerCacheInteractor.topOdeNuia.value.take(25),
+      topOdePirate        = PlayerCacheInteractor.topOdePirate.value.take(25),
+      topKillsHaranya     = PlayerCacheInteractor.topKillsHaranya.value.take(25),
+      topKillsNuia        = PlayerCacheInteractor.topKillsNuia.value.take(25),
+      topKillsPirate      = PlayerCacheInteractor.topKillsPirate.value.take(25),
+      topDamageTaken      = PlayerCacheInteractor.topDamageTaken.value.take(25),
+      topHealsReceived    = PlayerCacheInteractor.topHealsReceived.value.take(25),
       topHealRatio        = PlayerCacheInteractor.topDamageTaken.value
         .filter { it.sessionDamageTakenTotal > 0 }
         .sortedByDescending { it.sessionDamageTakenTotal }
@@ -425,12 +426,12 @@ object ImageExportInteractor {
           } else 0f
           card to ratio
         },
-      topItemUsesHaranya  = PlayerCacheInteractor.topItemUsesHaranya.value.take(15).map { ItemUsage(getString(it.itemName), it.count) },
-      topItemUsesNuia     = PlayerCacheInteractor.topItemUsesNuia.value.take(15).map { ItemUsage(getString(it.itemName), it.count) },
-      topItemUsesPirate   = PlayerCacheInteractor.topItemUsesPirate.value.take(15).map { ItemUsage(getString(it.itemName), it.count) },
-      topPotters          = PlayerCacheInteractor.topPotters.value.take(15),
-      topGliderGamers     = PlayerCacheInteractor.topGliderGamers.value.take(15),
-      topItemSkillCasters = PlayerCacheInteractor.topItemSkillCasters.value.take(15),
+      topItemUsesHaranya  = PlayerCacheInteractor.topItemUsesHaranya.value.take(25).map { ItemUsage(getString(it.itemName), it.count) },
+      topItemUsesNuia     = PlayerCacheInteractor.topItemUsesNuia.value.take(25).map { ItemUsage(getString(it.itemName), it.count) },
+      topItemUsesPirate   = PlayerCacheInteractor.topItemUsesPirate.value.take(25).map { ItemUsage(getString(it.itemName), it.count) },
+      topPotters          = PlayerCacheInteractor.topPotters.value.take(25),
+      topGliderGamers     = PlayerCacheInteractor.topGliderGamers.value.take(25),
+      topItemSkillCasters = PlayerCacheInteractor.topItemSkillCasters.value.take(25),
       buildCountsHaranya  = PlayerCacheInteractor.buildCountsHaranya.value,
       buildCountsNuia     = PlayerCacheInteractor.buildCountsNuia.value,
       buildCountsPirate   = PlayerCacheInteractor.buildCountsPirate.value,
@@ -439,30 +440,30 @@ object ImageExportInteractor {
                               PlayerCacheInteractor.buildCountsPirate.value.keys)
         .distinct()
         .associateWith { name -> SpecType.fromName(name)?.let { getString(it.localizedDisplayNameRes) } ?: name },
-      topPerformanceHaranya = PlayerCacheInteractor.topPerformanceHaranya.value.take(15),
-      topPerformanceNuia    = PlayerCacheInteractor.topPerformanceNuia.value.take(15),
-      topPerformancePirate  = PlayerCacheInteractor.topPerformancePirate.value.take(15),
+      topPerformanceHaranya = PlayerCacheInteractor.topPerformanceHaranya.value.take(25),
+      topPerformanceNuia    = PlayerCacheInteractor.topPerformanceNuia.value.take(25),
+      topPerformancePirate  = PlayerCacheInteractor.topPerformancePirate.value.take(25),
       factionSilenceData  = PlayerCacheInteractor.factionSilenceComparisonAll.value,
       factionCharmData    = PlayerCacheInteractor.factionCharmComparisonAll.value,
       factionDistressData = PlayerCacheInteractor.factionDistressComparisonAll.value,
       // New debuff category rankings
-      topTigerStrikes    = PlayerCacheInteractor.topTigerStrikes.value.take(15),
-      topFreezes         = PlayerCacheInteractor.topFreezes.value.take(15),
-      topTrips           = PlayerCacheInteractor.topTrips.value.take(15),
-      topBubbles         = PlayerCacheInteractor.topBubbles.value.take(15),
-      topBracings        = PlayerCacheInteractor.topBracings.value.take(15),
-      topShieldStrip     = PlayerCacheInteractor.topShieldStrip.value.take(15),
-      topWeaponDisables  = PlayerCacheInteractor.topWeaponDisables.value.take(15),
-      topPotionDisables  = PlayerCacheInteractor.topPotionDisables.value.take(15),
-      topBdGlider        = PlayerCacheInteractor.topBdGlider.value.take(15),
-      topCrystalWings    = PlayerCacheInteractor.topCrystalWings.value.take(15),
-      topGliderDisables  = PlayerCacheInteractor.topGliderDisables.value.take(15),
-      topProvoked        = PlayerCacheInteractor.topProvoked.value.take(15),
-      topDefiance        = PlayerCacheInteractor.topDefiance.value.take(15),
-      topGardenDefiance  = PlayerCacheInteractor.topGardenDefiance.value.take(15),
-      topPurges          = PlayerCacheInteractor.topPurges.value.take(15),
-      topSacDances       = PlayerCacheInteractor.topSacDances.value.take(15),
-      topLifeMenders     = PlayerCacheInteractor.topLifeMenders.value.take(15),
+      topTigerStrikes    = PlayerCacheInteractor.topTigerStrikes.value.take(25),
+      topFreezes         = PlayerCacheInteractor.topFreezes.value.take(25),
+      topTrips           = PlayerCacheInteractor.topTrips.value.take(25),
+      topBubbles         = PlayerCacheInteractor.topBubbles.value.take(25),
+      topBracings        = PlayerCacheInteractor.topBracings.value.take(25),
+      topShieldStrip     = PlayerCacheInteractor.topShieldStrip.value.take(25),
+      topWeaponDisables  = PlayerCacheInteractor.topWeaponDisables.value.take(25),
+      topPotionDisables  = PlayerCacheInteractor.topPotionDisables.value.take(25),
+      topBdGlider        = PlayerCacheInteractor.topBdGlider.value.take(25),
+      topCrystalWings    = PlayerCacheInteractor.topCrystalWings.value.take(25),
+      topGliderDisables  = PlayerCacheInteractor.topGliderDisables.value.take(25),
+      topProvoked        = PlayerCacheInteractor.topProvoked.value.take(25),
+      topDefiance        = PlayerCacheInteractor.topDefiance.value.take(25),
+      topGardenDefiance  = PlayerCacheInteractor.topGardenDefiance.value.take(25),
+      topPurges          = PlayerCacheInteractor.topPurges.value.take(25),
+      topSacDances       = PlayerCacheInteractor.topSacDances.value.take(25),
+      topLifeMenders     = PlayerCacheInteractor.topLifeMenders.value.take(25),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -598,11 +599,12 @@ object ImageExportInteractor {
     val pieChartBlock = makePieChartBlock(data, superColWidth)
     val combatBlock   = makeCombatBlock(data, superColWidth)
 
-    val titleOffset    = TITLE_CARD_HEIGHT + 5          // all cols start here
+    val titleOffset    = TITLE_CARD_HEIGHT + 5          // column 0 starts here
     val col0BaseHeight = titleOffset + pieChartBlock.height + 5 + combatBlock.height
 
     val tripletBlocks = getAllCategoryBlocks(data, superColWidth)
-    val colHeights    = mutableListOf(col0BaseHeight, titleOffset, titleOffset)
+    // Column 0 starts below title; columns 1 and 2 start at top (no title offset)
+    val colHeights    = mutableListOf(col0BaseHeight, 0, 0)
 
     tripletBlocks.forEach { block ->
       val shortestCol = colHeights.indices.minByOrNull { colHeights[it] } ?: 0
@@ -660,7 +662,7 @@ object ImageExportInteractor {
     }
   }
 
-  private const val MAX_ROWS = 15
+  private const val MAX_ROWS = 25
 
   private fun calculateHeight(data: ColumnData): Int {
     val numRows = when (data) {
@@ -698,12 +700,13 @@ object ImageExportInteractor {
   private suspend fun drawMasonryLayout(g2d: Graphics2D, data: ExportData) {
     val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * 2) / 3
 
-    // Full-width title card
-    val titleH      = drawTitleCard(g2d, data, COLUMN_GAP, 10, IMAGE_WIDTH - COLUMN_GAP * 2)
+    // Title card fits within column 0 (above pie charts)
+    val titleH      = drawTitleCard(g2d, data, COLUMN_GAP, 10, superColWidth)
     val titleBottom = 10 + titleH + 5
 
-    val columnY       = mutableListOf(titleBottom, titleBottom, titleBottom)
-    val columnHeights = mutableListOf(titleH, titleH, titleH)
+    // Column 0 starts below the title; columns 1 and 2 start at the top
+    val columnY       = mutableListOf(titleBottom, 10, 10)
+    val columnHeights = mutableListOf(titleH, 0, 0)
 
     val pieBlock = makePieChartBlock(data, superColWidth)
     pieBlock.draw(g2d, COLUMN_GAP, columnY[0], superColWidth)
@@ -1032,8 +1035,9 @@ object ImageExportInteractor {
 
     val makeTriplet: (List<Triple<String, String, ColumnData>>) -> TripletBlock = { columns ->
       val maxBlockHeight = columns.maxOfOrNull { calculateHeight(it.third) } ?: CATEGORY_MIN_HEIGHT
+      val colCount = columns.size.coerceAtLeast(1)
       TripletBlock("", emptyList(), maxBlockHeight) { g2d, x, y, w ->
-        val actualSubColWidth = if (w < superColWidth) (w - COLUMN_GAP * 2) / 3 else subColWidth
+        val actualSubColWidth = if (w < superColWidth) (w - COLUMN_GAP * (colCount - 1)) / colCount else subColWidth
         val actualAvailW      = actualSubColWidth - CARD_PADDING * 2
         columns.forEachIndexed { index, (title, icon, colData) ->
           val xPos = x + index * (actualSubColWidth + COLUMN_GAP)
