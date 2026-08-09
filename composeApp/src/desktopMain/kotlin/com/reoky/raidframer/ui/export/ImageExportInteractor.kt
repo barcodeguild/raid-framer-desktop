@@ -1164,7 +1164,8 @@ object ImageExportInteractor {
         { card ->
           "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${card.lifeMendQuality.label})"
         },
-        toAwtColor(RFColors.healsGreen)
+        toAwtColor(RFColors.healsGreen),
+        { card -> toAwtColor(card.lifeMendQuality.color) }
       )),
     )))
 
