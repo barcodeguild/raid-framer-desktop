@@ -23,9 +23,6 @@ data class BuffTooltipPayload(
 @Serializable
 data class BuffPayload(
   val buff_id: Int = 0,
-  val path: String = "",
-  val stack: Int = 0,
-  val timeLeft: Int = 0,
   val tooltip: BuffTooltipPayload = BuffTooltipPayload()
 )
 

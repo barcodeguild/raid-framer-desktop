@@ -202,12 +202,10 @@ function RF.Parser.ParseEnergizeEvent(t)
 end
 
 -- Parses the raw table returned by X2Unit:UnitBuff
+-- Only sends buff_id; path/stack/timeLeft are redundant with tooltip
 function RF.Parser.ParseUnitBuff(t)
   local buff = {}
   buff.buff_id   = t.buff_id    -- number: unique buff identifier
-  buff.path      = t.path       -- string: icon texture path
-  buff.stack     = t.stack      -- number: stack count
-  buff.timeLeft  = t.timeLeft   -- number: remaining time (in timeUnit units)
   return buff
 end
 
