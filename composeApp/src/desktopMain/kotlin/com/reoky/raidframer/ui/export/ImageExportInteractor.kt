@@ -107,7 +107,7 @@ import javax.imageio.ImageIO
 
 object ImageExportInteractor {
 
-  private const val IMAGE_WIDTH = 2400
+  private const val IMAGE_WIDTH = 2600
   // Keep the final PNG at the wallpaper's max width, but render content larger first.
   private const val EXPORT_RENDER_SCALE = 2
   private const val SVG_ICON_RENDER_SCALE = 4
@@ -626,7 +626,8 @@ object ImageExportInteractor {
       val cards: List<PlayerCard>,
       val getValue: (PlayerCard) -> String,
       val valueColor: Color,
-      val getColor: ((PlayerCard) -> Color)? = null // Optional dynamic color per card
+      val getColor: ((PlayerCard) -> Color)? = null, // Optional dynamic color per card
+      val showIcons: Boolean = true // Skip skill-tree icons for sections where they waste space
     ) : ColumnData()
   }
 
@@ -898,7 +899,8 @@ object ImageExportInteractor {
     valueColor: Color,
     xOffset: Int,
     y: Int,
-    width: Int
+    width: Int,
+    showIcons: Boolean = true
   ) {
     val rowFont   = createFont(Font.PLAIN, 11f)
     val valueFont = createFont(Font.BOLD,  11f)
@@ -912,19 +914,21 @@ object ImageExportInteractor {
     g2d.drawString("${index + 1}.", xOffset + 8, y + 16)
 
     // skill-tree icons (the SVGs being rendered)
-    val spec   = SpecType.fromName(card.currentBuild)
     var iconX  = xOffset + 28
-    val iconY  = y + (ROW_HEIGHT - iconSize) / 2
+    if (showIcons) {
+      val spec   = SpecType.fromName(card.currentBuild)
+      val iconY  = y + (ROW_HEIGHT - iconSize) / 2
 
-    val trees: List<SkillTreeType?> = if (spec != null && spec != SpecType.UNKNOWN) {
-      spec.trees.sortedByDisplayOrder().take(3)
-    } else {
-      listOf(null, null, null)
-    }
-    trees.forEach { treeType ->
-      val img = loadSkillTreeImage(treeType, iconSize * SVG_ICON_RENDER_SCALE)
-      if (img != null) g2d.drawImage(img, iconX, iconY, iconSize, iconSize, null)
-      iconX += iconSize + iconGap
+      val trees: List<SkillTreeType?> = if (spec != null && spec != SpecType.UNKNOWN) {
+        spec.trees.sortedByDisplayOrder().take(3)
+      } else {
+        listOf(null, null, null)
+      }
+      trees.forEach { treeType ->
+        val img = loadSkillTreeImage(treeType, iconSize * SVG_ICON_RENDER_SCALE)
+        if (img != null) g2d.drawImage(img, iconX, iconY, iconSize, iconSize, null)
+        iconX += iconSize + iconGap
+      }
     }
 
     val nameStartX = iconX + 2   // small gap after icons
@@ -1139,7 +1143,8 @@ object ImageExportInteractor {
                     g2d, i, d.cards[i],
                     d.getValue(d.cards[i]), cardColor,
                     xPos + CARD_PADDING, rowY,
-                    actualAvailW
+                    actualAvailW,
+                    showIcons = d.showIcons
                   )
                   rowY += ROW_HEIGHT
                 }
@@ -1163,13 +1168,15 @@ object ImageExportInteractor {
     )))
 
     tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_sac_dances), "\u2665", ColumnData.CardData(data.topSacDances, { it.sessionSacDanceTotal.toString() }, SAC_DANCE_COLOR)),
       Triple(getString(Res.string.summary_top_life_mends), "\u2764", ColumnData.CardData(
         data.topLifeMenders,
         { card ->
           "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${card.lifeMendQuality.label})"
         },
         toAwtColor(RFColors.healsGreen),
-        { card -> toAwtColor(card.lifeMendQuality.color) }
+        { card -> toAwtColor(card.lifeMendQuality.color) },
+        showIcons = false
       )),
     )))
 
@@ -1264,9 +1271,6 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_top_defiance), "\u2694", ColumnData.CardData(data.topDefiance, { it.sessionDefianceTotal.toString() }, DEFIANCE_COLOR)),
       Triple(getString(Res.string.summary_top_garden_defiance), "\u2600", ColumnData.CardData(data.topGardenDefiance, { it.sessionGardenDefianceTotal.toString() }, GARDEN_DEFIANCE_COLOR)),
       Triple(getString(Res.string.summary_top_purges), "\u2728", ColumnData.CardData(data.topPurges, { it.sessionPurgeTotal.toString() }, PURGE_COLOR)),
-    )))
-    tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_sac_dances), "\u2665", ColumnData.CardData(data.topSacDances, { it.sessionSacDanceTotal.toString() }, SAC_DANCE_COLOR)),
     )))
 
     return tripletBlocks
