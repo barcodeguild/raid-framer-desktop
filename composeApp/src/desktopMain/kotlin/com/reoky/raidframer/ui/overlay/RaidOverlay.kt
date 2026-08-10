@@ -67,6 +67,8 @@ import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
+import com.reoky.raidframer.core.helpers.timeAgo
+import com.reoky.raidframer.core.helpers.resolveLocalizedString
 import com.reoky.raidframer.core.serialization.BuffPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
@@ -117,7 +119,6 @@ import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_subt
 import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_title
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
-import java.util.concurrent.TimeUnit
 
 private enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
 @Composable
@@ -891,12 +892,14 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
     }
     selectedPlayer?.let { player ->
       val selectedObservation = PlayerCacheInteractor.resolveRaidBuffObservation(player, gracePeriod)
+      val observationSnapshot = selectedObservation.snapshot
+      val resolvedPlayer = observationSnapshot?.let { player.copy(buffs = it.buffIds.map { id -> BuffPayload(buff_id = id) }) } ?: player
       val observationText = selectedObservation.observedAt?.let { timestamp ->
         if (selectedObservation.isCurrent) {
           stringResource(Res.string.raid_buff_current_scan)
         } else {
-          val ageMinutes = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - timestamp)
-          stringResource(Res.string.raid_buff_last_observed, if (ageMinutes < 1) "less than a minute ago" else "$ageMinutes minutes ago")
+          val timeAgoResult = timestamp.timeAgo()
+          stringResource(Res.string.raid_buff_last_observed, timeAgoResult.resolveLocalizedString())
         }
       } ?: stringResource(Res.string.raid_buff_none_found)
       Popup(
@@ -918,7 +921,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
       ) {
         Surface(color = RFColors.PopupBackground.copy(alpha = 0.98f), shape = RoundedCornerShape(8.dp), border = BorderStroke(1.dp, RFColors.CardBorder), elevation = 6.dp) {
           Column(Modifier.padding(10.dp).widthIn(max = 300.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            val meetsRequirements = requirements.matches(player)
+            val meetsRequirements = requirements.matches(resolvedPlayer)
             val displayName = if (player.playerName.length > 26) player.playerName.take(26) + "\u2026" else player.playerName
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
               Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -933,9 +936,9 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
             }
             Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
             Text(stringResource(Res.string.raid_buff_has_buffs), color = Color(0xFF7CFF8A), fontWeight = FontWeight.Bold, fontSize = 11.sp)
-            Text(requirements.matchedDefinitions(player).joinToString(", ") { localizedBuffLabels[it.key].orEmpty() }.ifBlank { stringResource(Res.string.raid_buff_none_found) }, color = RFColors.TextSecondary, fontSize = 11.sp)
+            Text(requirements.matchedDefinitions(resolvedPlayer).joinToString(", ") { localizedBuffLabels[it.key].orEmpty() }.ifBlank { stringResource(Res.string.raid_buff_none_found) }, color = RFColors.TextSecondary, fontSize = 11.sp)
             Text(stringResource(Res.string.raid_buff_missing_buffs), color = Color(0xFFFF7777), fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
-            val missingBuffText = requirements.missingKeys(player)
+            val missingBuffText = requirements.missingKeys(resolvedPlayer)
               .mapNotNull { localizedBuffLabels[it] }
               .joinToString(", ")
               .ifBlank { stringResource(Res.string.raid_buff_none_found) }
