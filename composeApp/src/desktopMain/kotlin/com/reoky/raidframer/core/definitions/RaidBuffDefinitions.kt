@@ -116,7 +116,15 @@ fun RaidBuffRequirements.matchesResolved(member: RaidFramePayload, gracePeriod: 
 
 fun RaidBuffRequirements.matchedDefinitions(member: RaidFramePayload): List<RaidBuffDefinition> {
   val ids = member.buffs.map { it.buff_id }.toSet()
-  return RAID_BUFF_DEFINITIONS.filter { definition -> definition.ids.any(ids::contains) }
+  return RAID_BUFF_DEFINITIONS.filter { definition ->
+    val acceptedIds = when {
+      definition.key == RaidBuffKey.FEAST_RIBS && !allowMeatballs -> definition.ids - definition.meatballIds
+      definition.key == RaidBuffKey.GOBLET && requireOrangeGoblet -> definition.orangeIds
+      definition.key == RaidBuffKey.LONGING && requireEnhancedLonging -> definition.enhancedIds
+      else -> definition.ids
+    }
+    acceptedIds.any(ids::contains)
+  }
 }
 
 fun RaidBuffRequirements.missingKeys(member: RaidFramePayload): List<RaidBuffKey> {

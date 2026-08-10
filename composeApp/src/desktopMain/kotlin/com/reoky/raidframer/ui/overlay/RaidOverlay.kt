@@ -10,6 +10,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.material.DropdownMenu
@@ -19,6 +20,7 @@ import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,6 +89,7 @@ import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -119,6 +122,7 @@ import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_subt
 import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_title
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
+import kotlin.time.Duration.Companion.milliseconds
 
 private enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
 @Composable
@@ -136,6 +140,10 @@ fun RaidOverlay(wm: WindowManager? = null) {
   if (!raidWasDetected && (mainRaid.value.isNotEmpty() || coRaid.value.isNotEmpty())) {
     raidWasDetected = true
   }
+  LaunchedEffect(Unit) {
+    delay(1500L.milliseconds)
+    raidWasDetected = true
+  }
   Box(modifier = Modifier.fillMaxSize().background(Color(0xCC121212))) {
     if (mainRaid.value.isEmpty() && coRaid.value.isEmpty() && !raidWasDetected) {
       Column(
@@ -143,36 +151,19 @@ fun RaidOverlay(wm: WindowManager? = null) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
+        CircularProgressIndicator(
+          color = Color.White.copy(alpha = 0.7f),
+          strokeWidth = 2.dp,
+          modifier = Modifier.size(28.dp)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
         Text(
-          text = stringResource(Res.string.raid_no_raid_detected),
-          color = Color.LightGray,
-          fontWeight = FontWeight.Bold,
-          fontSize = 14.sp,
+          text = stringResource(Res.string.raid_join_raid_hint),
+          color = Color.White.copy(alpha = 0.6f),
+          fontSize = 12.sp,
           textAlign = TextAlign.Center,
           modifier = Modifier.padding(horizontal = 24.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Button(
-            onClick = {
-              CoroutineScope(Dispatchers.Main).launch {
-                CompanionInteractor.sendMessage(IPCMessagePayload.TestPing())
-              }
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
-          ) {
-            Text(stringResource(Res.string.raid_refresh_button), color = Color.Black)
-          }
-          Button(
-            onClick = { wm?.closeWindow(OverlayType.RAID) },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
-          ) {
-            Text(text = stringResource(Res.string.raid_close), color = Color.Black)
-          }
-        }
       }
     } else {
       Column(modifier = Modifier.fillMaxSize()) {
@@ -964,11 +955,11 @@ private fun RaidBuffGracePeriod.label(): String = when (this) {
 private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>, selected: RaidFramePayload?, requirements: RaidBuffRequirements, gracePeriod: RaidBuffGracePeriod, onSelect: (RaidFramePayload) -> Unit, onSelectAt: (RaidFramePayload, IntOffset) -> Unit, modifier: Modifier) {
   Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.78f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-      if (mainRaid.isNotEmpty()) Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_main_raid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
         RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot?.buffIds?.isNotEmpty() == true })
       }
-      if (coRaid.isNotEmpty()) Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_coraid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
         RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot?.buffIds?.isNotEmpty() == true })
       }
@@ -1071,39 +1062,35 @@ private fun AttendanceRaidPane(
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-      if (mainRaid.isNotEmpty()) {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-          Text(
-            text = stringResource(Res.string.raid_main_raid_label),
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp
-          )
-          RaidComponent(
-            parties = mainRaid,
-            modifier = Modifier.wrapContentSize()
-          )
-        }
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        Text(
+          text = stringResource(Res.string.raid_main_raid_label),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        RaidComponent(
+          parties = mainRaid,
+          modifier = Modifier.wrapContentSize()
+        )
       }
-      if (coRaid.isNotEmpty()) {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-          Text(
-            text = stringResource(Res.string.raid_coraid_label),
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp
-          )
-          RaidComponent(
-            parties = coRaid,
-            modifier = Modifier.wrapContentSize()
-          )
-        }
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        Text(
+          text = stringResource(Res.string.raid_coraid_label),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        RaidComponent(
+          parties = coRaid,
+          modifier = Modifier.wrapContentSize()
+        )
       }
     }
   }

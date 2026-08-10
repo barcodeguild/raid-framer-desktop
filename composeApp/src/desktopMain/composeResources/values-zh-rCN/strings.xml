@@ -643,6 +643,7 @@
     <string name="raid_composition_none">无</string>
     <string name="raid_composition_more_players">...以及另外%d人</string>
     <string name="raid_no_raid_detected">请加入团队以使用团队管理功能。您必须安装Lua插件。有标题栏的窗口不是覆盖层，考虑放在另一个显示器上以避免遮挡游戏UI。</string>
+    <string name="raid_join_raid_hint">加入团队以使用团队相关功能…</string>
     <string name="raid_main_raid_label">主团队</string>
     <string name="raid_coraid_label">协同团队</string>
     <string name="raid_include_main_raid">包含主团队</string>
