@@ -229,7 +229,10 @@ object PlayerCacheInteractor : Interactor() {
     val now = System.currentTimeMillis()
     val currentIds = member.buffs.map { it.buff_id }.toSet()
     val currentTimestamp = member.buffScanTimestamp.takeIf { it > 0L }?.times(1000L)
-    if (currentTimestamp != null && now - currentTimestamp <= gracePeriod.millis) {
+    // Only trust the live scan when it actually contains buff data.
+    // An out-of-range player still produces a fresh buffScanTimestamp but with empty buffs,
+    // so we must fall through to history instead of short-circuiting.
+    if (currentIds.isNotEmpty() && currentTimestamp != null && now - currentTimestamp <= gracePeriod.millis) {
       return RaidBuffObservation(member, RaidBuffSnapshot(currentTimestamp, currentIds, member.distance), true)
     }
     val snapshot = raidBuffHistory[member.playerName]
