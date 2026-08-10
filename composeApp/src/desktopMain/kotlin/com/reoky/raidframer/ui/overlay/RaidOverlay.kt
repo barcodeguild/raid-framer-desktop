@@ -59,6 +59,7 @@ import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
+import com.reoky.raidframer.core.serialization.BuffPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
@@ -109,6 +110,7 @@ import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_subt
 import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_title
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
+import java.util.concurrent.TimeUnit
 private enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
 @Composable
 fun RaidOverlay(wm: WindowManager? = null) {
@@ -815,7 +817,9 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
   val observations = allMembers.associateWith { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod) }
   val notBuffed = allMembers.filter { member ->
     val observation = observations.getValue(member)
-    observation.snapshot == null || !requirements.matches(member.copy(buffs = observation.snapshot.buffIds.map { id -> com.reoky.raidframer.core.serialization.BuffPayload(buff_id = id) }))
+    observation.snapshot == null || !requirements.matches(member.copy(buffs = observation.snapshot.buffIds.map { id ->
+      BuffPayload(buff_id = id)
+    }))
   }.joinToString(", ") { it.playerName }
   val localizedBuffLabels = RAID_BUFF_DEFINITIONS.associate { definition ->
     definition.key to when (definition.key) {
@@ -862,6 +866,15 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
       }
     }
     selectedPlayer?.let { player ->
+      val selectedObservation = PlayerCacheInteractor.resolveRaidBuffObservation(player, gracePeriod)
+      val observationText = selectedObservation.observedAt?.let { timestamp ->
+        if (selectedObservation.isCurrent) {
+          stringResource(Res.string.raid_buff_current_scan)
+        } else {
+          val ageMinutes = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis() - timestamp)
+          stringResource(Res.string.raid_buff_last_observed, if (ageMinutes < 1) "less than a minute ago" else "$ageMinutes minutes ago")
+        }
+      } ?: stringResource(Res.string.raid_buff_none_found)
       Popup(
         offset = IntOffset(selectedPlayerPopupOffset.x - 316, selectedPlayerPopupOffset.y + 20),
         onDismissRequest = { selectedPlayer = null },
@@ -874,6 +887,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
               IconButton(onClick = { selectedPlayer = null }, modifier = Modifier.size(22.dp)) { Text("X", color = RFColors.TextSecondary, fontSize = 11.sp) }
             }
             Text(if (requirements.matches(player)) stringResource(Res.string.raid_buff_passed) else stringResource(Res.string.raid_buff_not_passed), color = if (requirements.matches(player)) Color(0xFF7CFF8A) else Color(0xFFFF7777), fontSize = 12.sp)
+            Text(observationText, color = RFColors.TextTertiary, fontSize = 10.sp)
             Text(stringResource(Res.string.raid_buff_has_buffs), color = Color(0xFF7CFF8A), fontWeight = FontWeight.Bold, fontSize = 11.sp)
             Text(requirements.matchedDefinitions(player).joinToString(", ") { localizedBuffLabels[it.key].orEmpty() }.ifBlank { stringResource(Res.string.raid_buff_none_found) }, color = RFColors.TextSecondary, fontSize = 11.sp)
             Text(stringResource(Res.string.raid_buff_missing_buffs), color = Color(0xFFFF7777), fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
@@ -903,17 +917,11 @@ private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<Li
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       if (mainRaid.isNotEmpty()) Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_main_raid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { member ->
-          val observation = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
-          member.distance > 115 || observation.snapshot == null
-        })
+        RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot?.buffIds?.isNotEmpty() == true })
       }
       if (coRaid.isNotEmpty()) Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_coraid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { member ->
-          val observation = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
-          member.distance > 115 || observation.snapshot == null
-        })
+        RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot?.buffIds?.isNotEmpty() == true })
       }
     }
   }

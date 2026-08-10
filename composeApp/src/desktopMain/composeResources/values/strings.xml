@@ -469,6 +469,11 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_tab_performance">Performance</string>
     <string name="summary_tab_life_mend">Life Mend</string>
     <string name="summary_top_life_mends">Top Life Mends</string>
+    <string name="life_mend_quality_none">No Data</string>
+    <string name="life_mend_quality_hurting">Hurting Raid</string>
+    <string name="life_mend_quality_poor">Poor Quality</string>
+    <string name="life_mend_quality_good">Good</string>
+    <string name="life_mend_quality_excellent">Excellent</string>
 
     <!-- General Strings -->
     <string name="general_about">About</string>
@@ -698,6 +703,8 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_none_found">No tracked buffs found</string>
     <string name="raid_buff_has_buffs">Has Buffs</string>
     <string name="raid_buff_missing_buffs">Missing Buffs</string>
+    <string name="raid_buff_last_observed">Last observed: %1$s</string>
+    <string name="raid_buff_current_scan">Current scan</string>
     <string name="raid_buff_grace_period">Grace Period</string>
     <string name="raid_buff_goblet">Goblet</string>
     <string name="raid_buff_feast_ribs">Feast / Ribs</string>

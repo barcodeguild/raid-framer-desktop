@@ -20,4 +20,6 @@ data class RaidBuffObservation(
   val member: RaidFramePayload,
   val snapshot: RaidBuffSnapshot?,
   val isCurrent: Boolean
-)
+) {
+  val observedAt: Long? get() = snapshot?.observedAt
+}

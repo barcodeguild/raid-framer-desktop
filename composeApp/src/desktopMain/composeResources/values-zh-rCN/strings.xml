@@ -453,6 +453,11 @@
     <string name="summary_tab_performance">表现</string>
     <string name="summary_tab_life_mend">生命治愈</string>
     <string name="summary_top_life_mends">生命治愈排行</string>
+    <string name="life_mend_quality_none">无数据</string>
+    <string name="life_mend_quality_hurting">危害团队</string>
+    <string name="life_mend_quality_poor">质量较差</string>
+    <string name="life_mend_quality_good">良好</string>
+    <string name="life_mend_quality_excellent">优秀</string>
 
     <!-- General Strings -->
     <string name="general_about">关于</string>
@@ -670,6 +675,8 @@
     <string name="raid_buff_none_found">未找到已追踪增益</string>
     <string name="raid_buff_has_buffs">已有增益</string>
     <string name="raid_buff_missing_buffs">缺少增益</string>
+    <string name="raid_buff_last_observed">上次观察：%1$s</string>
+    <string name="raid_buff_current_scan">当前扫描</string>
     <string name="raid_buff_grace_period">宽限期</string>
     <string name="raid_buff_goblet">光荣之盏</string>
     <string name="raid_buff_feast_ribs">餐桌：烤猪大排档 / 烤排骨</string>

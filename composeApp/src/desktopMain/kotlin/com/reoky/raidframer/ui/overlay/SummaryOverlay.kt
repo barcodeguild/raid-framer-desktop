@@ -28,6 +28,7 @@ import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.core.model.LifeMendQuality
 import com.reoky.raidframer.core.model.pvpPerformancePoints
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -1603,6 +1604,7 @@ private fun LifeMendTab(
   topLifeMenders: List<PlayerCard>,
   wm: WindowManager?
 ) {
+  val qualityLabels = LifeMendQuality.entries.associateWith { stringResource(it.labelRes) }
   Row(
     modifier = Modifier.fillMaxSize()
   ) {
@@ -1611,7 +1613,7 @@ private fun LifeMendTab(
       title = stringResource(Res.string.summary_top_life_mends),
       cards = topLifeMenders,
       valueExtractor = { card ->
-        "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${card.lifeMendQuality.label})"
+        "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${qualityLabels[card.lifeMendQuality]})"
       },
       valueColor = Color.White,
       colorExtractor = { it.lifeMendQuality.color },

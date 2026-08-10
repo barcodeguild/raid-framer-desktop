@@ -1036,6 +1036,7 @@ object ImageExportInteractor {
   private suspend fun getAllCategoryBlocks(data: ExportData, superColWidth: Int): List<TripletBlock> {
     val tripletBlocks  = mutableListOf<TripletBlock>()
     val subColWidth    = (superColWidth - COLUMN_GAP * 2) / 3
+    val qualityLabels = LifeMendQuality.entries.associateWith { getString(it.labelRes) }
 
     val makeTriplet: (List<Triple<String, String, ColumnData>>) -> TripletBlock = { columns ->
       val maxBlockHeight = columns.maxOfOrNull { calculateHeight(it.third) } ?: CATEGORY_MIN_HEIGHT
@@ -1172,7 +1173,7 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_top_life_mends), "\u2764", ColumnData.CardData(
         data.topLifeMenders,
         { card ->
-          "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${card.lifeMendQuality.label})"
+          "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${qualityLabels[card.lifeMendQuality]})"
         },
         toAwtColor(RFColors.healsGreen),
         { card -> toAwtColor(card.lifeMendQuality.color) },

@@ -210,7 +210,14 @@ object PlayerCacheInteractor : Interactor() {
   private fun recordRaidBuffSnapshot(member: RaidFramePayload) {
     val now = System.currentTimeMillis()
     val buffIds = member.buffs.map { it.buff_id }.toSet()
-    raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, buffIds, member.distance)
+    val previous = raidBuffHistory[member.playerName]
+    // Empty out-of-range scans are not evidence that the player's buffs expired.
+    if (buffIds.isNotEmpty()) {
+      raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, buffIds, member.distance)
+    } else if (previous == null) {
+      // Retain an initial empty observation so unknown players can still age out naturally.
+      raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, emptySet(), member.distance)
+    }
     if (now - lastRaidBuffHistoryCleanupAt >= 60_000L) {
       val cutoff = now - RAID_BUFF_HISTORY_RETENTION_MS
       raidBuffHistory.entries.removeIf { it.value.observedAt < cutoff }

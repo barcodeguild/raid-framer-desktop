@@ -454,6 +454,11 @@
     <string name="summary_tab_performance">성과</string>
     <string name="summary_tab_life_mend">모두 치유: 생명</string>
     <string name="summary_top_life_mends">모두 치유: 생명 순위</string>
+    <string name="life_mend_quality_none">데이터 없음</string>
+    <string name="life_mend_quality_hurting">공격대에 해로움</string>
+    <string name="life_mend_quality_poor">낮은 품질</string>
+    <string name="life_mend_quality_good">좋음</string>
+    <string name="life_mend_quality_excellent">우수</string>
 
     <!-- General Strings -->
     <string name="general_about">정보</string>
@@ -671,6 +676,8 @@
     <string name="raid_buff_none_found">추적 중인 버프 없음</string>
     <string name="raid_buff_has_buffs">보유 버프</string>
     <string name="raid_buff_missing_buffs">없는 버프</string>
+    <string name="raid_buff_last_observed">마지막 관찰: %1$s</string>
+    <string name="raid_buff_current_scan">현재 스캔</string>
     <string name="raid_buff_grace_period">유예 기간</string>
     <string name="raid_buff_goblet">영광의 잔</string>
     <string name="raid_buff_feast_ribs">고귀한 축복의 요리 탁자 / 갈비</string>

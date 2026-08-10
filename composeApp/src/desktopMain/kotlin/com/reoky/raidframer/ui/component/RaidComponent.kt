@@ -49,6 +49,7 @@ fun RaidComponent(
   onPlayerClickAt: ((RaidFramePayload, IntOffset) -> Unit)? = null,
   isBuffed: ((RaidFramePayload) -> Boolean)? = null,
   isOutOfRange: ((RaidFramePayload) -> Boolean)? = null,
+  isObservationKnown: ((RaidFramePayload) -> Boolean)? = null,
   onPlayerDetails: ((RaidFramePayload) -> Unit)? = null
 ) {
   val paddedParties = parties.toMutableList()
@@ -65,7 +66,7 @@ fun RaidComponent(
         horizontalArrangement = Arrangement.spacedBy(3.dp)
       ) {
         rowParties.forEach { party ->
-            RaidPartyColumn(party, selectedPlayerName, onPlayerClick, onPlayerClickAt, isBuffed, isOutOfRange, onPlayerDetails)
+            RaidPartyColumn(party, selectedPlayerName, onPlayerClick, onPlayerClickAt, isBuffed, isOutOfRange, isObservationKnown, onPlayerDetails)
         }
       }
     }
@@ -80,6 +81,7 @@ private fun RaidPartyColumn(
   onPlayerClickAt: ((RaidFramePayload, IntOffset) -> Unit)?,
   isBuffed: ((RaidFramePayload) -> Boolean)?,
   isOutOfRange: ((RaidFramePayload) -> Boolean)?,
+  isObservationKnown: ((RaidFramePayload) -> Boolean)?,
   onPlayerDetails: ((RaidFramePayload) -> Unit)?
 ) {
   Column(
@@ -99,6 +101,7 @@ private fun RaidPartyColumn(
           onClickAt = onPlayerClickAt?.let { callback -> { offset -> callback(frame, offset) } },
          buffed = isBuffed?.invoke(frame),
          outOfRange = isOutOfRange?.invoke(frame) == true,
+         observationKnown = isObservationKnown?.invoke(frame) ?: true,
          onDetails = onPlayerDetails?.let { callback -> { callback(frame) } }
        )
     }
@@ -113,6 +116,7 @@ fun RaidMemberFrame(
   onClickAt: ((IntOffset) -> Unit)? = null,
   buffed: Boolean? = null,
   outOfRange: Boolean = false,
+  observationKnown: Boolean = true,
   onDetails: (() -> Unit)? = null
 ) {
   var frameWindowPosition by remember { mutableStateOf(Offset.Zero) }
@@ -178,6 +182,8 @@ fun RaidMemberFrame(
     }
     if (member.playerName.isNotEmpty() && outOfRange) {
       Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.32f), frameShape))
+    }
+    if (member.playerName.isNotEmpty() && !observationKnown) {
       Text("?", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.TopEnd).padding(end = 2.dp, top = 1.dp))
     } else if (member.playerName.isNotEmpty() && buffed != null && !buffed) {
       Text("X", color = Color.Red, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.TopEnd).padding(end = 2.dp, top = 1.dp))

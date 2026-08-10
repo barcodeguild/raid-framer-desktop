@@ -226,13 +226,17 @@ function RF.Parser.ParseUnitBuffTooltip(t)
   tooltip.duration    = t.duration      -- number: total duration in timeUnit
   -- extract heal amount from description (e.g. "Regenerates 11304-11321 Health over 10 seconds")
   -- note: description may contain ArcheAge color codes like |cRRGGBB and |r which we strip first
+  -- language-independent: match any numeric range "NNNN-NNNN" (0-250000) in the cleaned text
   tooltip.healAmount  = 0
   if t.description then
     local cleanDesc = string.gsub(t.description, "|c%x%x%x%x%x%x%x%x", "")
     cleanDesc = string.gsub(cleanDesc, "|r", "")
-    local minHeal, maxHeal = string.match(cleanDesc, "Regenerates%s+(%d+)%-(%d+)%s+Health")
+    local minHeal, maxHeal = string.match(cleanDesc, "(%d+)[%-%~](%d+)")
     if minHeal and maxHeal then
-      tooltip.healAmount = math.floor((tonumber(minHeal) + tonumber(maxHeal)) / 2)
+      local avg = math.floor((tonumber(minHeal) + tonumber(maxHeal)) / 2)
+      if avg >= 0 and avg <= 250000 then
+        tooltip.healAmount = avg
+      end
     end
   end
   return tooltip
