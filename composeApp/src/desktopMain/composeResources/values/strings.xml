@@ -731,6 +731,9 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_golden_taffy">Golden Taffy</string>
     <string name="raid_buff_egg_of_fortune">Egg of Fortune</string>
     <string name="raid_copy_not_buffed">Copy Not Buffed</string>
+    <string name="raid_copy_not_buffed_title">Not Buffed</string>
+    <string name="raid_copy_buffed">Copy Buffed</string>
+    <string name="raid_copy_buffed_title">Buffed</string>
     <string name="raid_haranya_faction">Haranya Faction (%d)</string>
     <string name="raid_nuian_faction">Nuian Faction (%d)</string>
     <string name="raid_pirate_faction">Pirate Faction (%d)</string>

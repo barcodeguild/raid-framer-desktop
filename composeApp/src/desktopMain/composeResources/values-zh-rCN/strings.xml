@@ -703,6 +703,9 @@
     <string name="raid_buff_golden_taffy">金黄色药丸</string>
     <string name="raid_buff_egg_of_fortune">幸运之蛋</string>
     <string name="raid_copy_not_buffed">复制未获得增益玩家</string>
+    <string name="raid_copy_not_buffed_title">未获得增益</string>
+    <string name="raid_copy_buffed">复制已获得增益玩家</string>
+    <string name="raid_copy_buffed_title">已获得增益</string>
     <string name="raid_haranya_faction">哈拉尼亚阵营(%d)</string>
     <string name="raid_nuian_faction">努伊安阵营(%d)</string>
     <string name="raid_pirate_faction">海盗阵营(%d)</string>

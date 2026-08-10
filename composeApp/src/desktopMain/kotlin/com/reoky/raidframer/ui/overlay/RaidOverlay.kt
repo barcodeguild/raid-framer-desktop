@@ -805,19 +805,31 @@ private val BUFF_PRESETS = listOf(
   BuffPreset("Uncontested Boss Kill", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.FACTION_WAR_TIME), lootThreshold = 2))
 )
 
+private object BuffsTabState {
+  var requirements = mutableStateOf(RaidBuffRequirements())
+  var selectedPreset = mutableStateOf(BUFF_PRESETS.first())
+  var gracePeriod = mutableStateOf(RaidBuffGracePeriod.IMMEDIATE)
+}
+
 @Composable
 private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>) {
-  var requirements by remember { mutableStateOf(RaidBuffRequirements()) }
+  var requirements by BuffsTabState.requirements
   var selectedPlayer by remember { mutableStateOf<RaidFramePayload?>(null) }
   var selectedPlayerPopupOffset by remember { mutableStateOf(IntOffset.Zero) }
-  var selectedPreset by remember { mutableStateOf(BUFF_PRESETS.first()) }
+  var selectedPreset by BuffsTabState.selectedPreset
   var presetExpanded by remember { mutableStateOf(false) }
-  var gracePeriod by remember { mutableStateOf(RaidBuffGracePeriod.IMMEDIATE) }
+  var gracePeriod by BuffsTabState.gracePeriod
   val allMembers = (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
   val observations = allMembers.associateWith { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod) }
   val notBuffed = allMembers.filter { member ->
     val observation = observations.getValue(member)
     observation.snapshot == null || !requirements.matches(member.copy(buffs = observation.snapshot.buffIds.map { id ->
+      BuffPayload(buff_id = id)
+    }))
+  }.joinToString(", ") { it.playerName }
+  val buffed = allMembers.filter { member ->
+    val observation = observations.getValue(member)
+    observation.snapshot != null && requirements.matches(member.copy(buffs = observation.snapshot.buffIds.map { id ->
       BuffPayload(buff_id = id)
     }))
   }.joinToString(", ") { it.playerName }
@@ -854,13 +866,17 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
       BoxWithConstraints(Modifier.fillMaxWidth()) {
       if (maxWidth >= 760.dp) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
-          BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.weight(1f))
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, notBuffed, Modifier.widthIn(min = 320.dp, max = 390.dp))
+          Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.fillMaxWidth())
+            BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
+          }
+          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, Modifier.widthIn(min = 320.dp, max = 390.dp))
         }
       } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
           BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.fillMaxWidth())
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, notBuffed, Modifier.fillMaxWidth())
+          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, Modifier.fillMaxWidth())
+          BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
         }
       }
       }
@@ -928,7 +944,7 @@ private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<Li
 }
 
 @Composable
-private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, notBuffed: String, modifier: Modifier) {
+private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, modifier: Modifier) {
   Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
     var graceExpanded by remember { mutableStateOf(false) }
     Row(
@@ -965,8 +981,24 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
     Text(stringResource(Res.string.raid_buff_loot_section), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
     ControlledCheckbox(stringResource(Res.string.raid_buff_at_least_one_loot), requirements.lootThreshold == 1) { onRequirements(requirements.copy(lootThreshold = if (it) 1 else 0)) }
     ControlledCheckbox(stringResource(Res.string.raid_buff_two_loot), requirements.lootThreshold == 2) { onRequirements(requirements.copy(lootThreshold = if (it) 2 else 0)) }
-    SelectableTextField(value = notBuffed, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp))
-    Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notBuffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)) { Text(stringResource(Res.string.raid_copy_not_buffed), color = Color.Black) }
+  }
+}
+
+@Composable
+private fun BuffCopyPane(notBuffed: String, buffed: String, modifier: Modifier) {
+  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      Text(stringResource(Res.string.raid_copy_not_buffed_title), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
+      Text(stringResource(Res.string.raid_copy_buffed_title), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
+    }
+    Row(Modifier.fillMaxWidth().heightIn(min = 50.dp, max = 150.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      SelectableTextField(value = notBuffed, modifier = Modifier.weight(1f).fillMaxHeight(), minHeight = 0.dp)
+      SelectableTextField(value = buffed, modifier = Modifier.weight(1f).fillMaxHeight(), minHeight = 0.dp)
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notBuffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_not_buffed), color = Color.Black) }
+      Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(buffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_buffed), color = Color.Black) }
+    }
   }
 }
 
