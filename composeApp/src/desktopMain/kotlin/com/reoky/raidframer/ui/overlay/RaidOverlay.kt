@@ -1,12 +1,16 @@
 ﻿package com.reoky.raidframer.ui.overlay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -25,12 +29,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
@@ -46,7 +55,6 @@ import com.reoky.raidframer.core.definitions.matchedDefinitions
 import com.reoky.raidframer.core.definitions.missingKeys
 import com.reoky.raidframer.core.model.hasPvPParticipation
 import com.reoky.raidframer.core.model.RaidBuffGracePeriod
-import com.reoky.raidframer.core.model.RaidBuffObservation
 import com.reoky.raidframer.core.definitions.SKILL_TREE_DISPLAY_ORDER
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.META_CC_SPECS
@@ -75,7 +83,6 @@ import com.reoky.raidframer.ui.component.OverlaidGearScoreChart
 import com.reoky.raidframer.ui.component.RaidComponent
 import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
-import com.reoky.raidframer.ui.component.PlayerListTooltipComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -111,6 +118,7 @@ import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_titl
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.util.concurrent.TimeUnit
+
 private enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
 @Composable
 fun RaidOverlay(wm: WindowManager? = null) {
@@ -431,10 +439,10 @@ private fun MetaSpecHelp() {
     }
     if (showHelp) {
       Popup {
-        androidx.compose.material.Surface(
+        Surface(
           color = RFColors.PopupBackground.copy(alpha = 0.98f),
           shape = RoundedCornerShape(8.dp),
-          border = androidx.compose.foundation.BorderStroke(1.dp, RFColors.CardBorder),
+          border = BorderStroke(1.dp, RFColors.CardBorder),
           elevation = 6.dp
         ) {
           Column(
@@ -548,10 +556,10 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
          row(stringResource(Res.string.raid_composition_dancer_tough_dancer), dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
          row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in META_DANCER_SPECS }, dancer.size)
        )
-        androidx.compose.material.Surface(
+        Surface(
           color = RFColors.CardBackground.copy(alpha = 0.78f),
           shape = RoundedCornerShape(8.dp),
-          border = androidx.compose.foundation.BorderStroke(1.dp, RFColors.CardBorder),
+          border = BorderStroke(1.dp, RFColors.CardBorder),
           modifier = Modifier.fillMaxWidth().padding(12.dp)
         ) {
         CompositionBreakdownListComponent(
@@ -586,10 +594,10 @@ private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
     name to specs.filter { it.first in set }.map { it.second }
   } + (stringResource(Res.string.raid_composition_other) to other.map { it.second })
    Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.fillMaxWidth()) {
-     androidx.compose.material.Surface(
+     Surface(
        color = RFColors.CardBackground.copy(alpha = 0.78f),
        shape = RoundedCornerShape(8.dp),
-       border = androidx.compose.foundation.BorderStroke(1.dp, RFColors.CardBorder),
+       border = BorderStroke(1.dp, RFColors.CardBorder),
        modifier = Modifier.fillMaxWidth().padding(12.dp)
      ) {
       CompositionBreakdownListComponent(
@@ -867,14 +875,14 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
       if (maxWidth >= 760.dp) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
           Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.fillMaxWidth())
+            BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
             BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
           }
           BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp))
         }
       } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-          BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.fillMaxWidth())
+          BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
           BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.fillMaxWidth())
           BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
         }
@@ -892,18 +900,38 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
         }
       } ?: stringResource(Res.string.raid_buff_none_found)
       Popup(
-        offset = IntOffset(selectedPlayerPopupOffset.x - 316, selectedPlayerPopupOffset.y + 20),
+        popupPositionProvider = object : PopupPositionProvider {
+          override fun calculatePosition(anchorBounds: IntRect, windowSize: IntSize, layoutDirection: LayoutDirection, popupContentSize: IntSize): IntOffset {
+            val gap = 16
+            val rightX = selectedPlayerPopupOffset.x + gap
+            val leftX = selectedPlayerPopupOffset.x - popupContentSize.width - gap
+            val maxX = (windowSize.width - popupContentSize.width - 8).coerceAtLeast(8)
+            val x = if (rightX <= maxX) rightX else leftX
+              .coerceIn(8, maxX)
+            val y = (selectedPlayerPopupOffset.y + gap)
+              .coerceIn(8, (windowSize.height - popupContentSize.height - 8).coerceAtLeast(8))
+            return IntOffset(x, y)
+          }
+        },
         onDismissRequest = { selectedPlayer = null },
         properties = PopupProperties(focusable = false)
       ) {
-        Surface(color = RFColors.PopupBackground.copy(alpha = 0.98f), shape = RoundedCornerShape(8.dp), border = androidx.compose.foundation.BorderStroke(1.dp, RFColors.CardBorder), elevation = 6.dp) {
+        Surface(color = RFColors.PopupBackground.copy(alpha = 0.98f), shape = RoundedCornerShape(8.dp), border = BorderStroke(1.dp, RFColors.CardBorder), elevation = 6.dp) {
           Column(Modifier.padding(10.dp).widthIn(max = 300.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            val meetsRequirements = requirements.matches(player)
+            val displayName = if (player.playerName.length > 26) player.playerName.take(26) + "\u2026" else player.playerName
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-              Text(player.playerName, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+              Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(displayName, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text(
+                  if (meetsRequirements) "(${stringResource(Res.string.raid_buff_passed)})" else "(${stringResource(Res.string.raid_buff_not_passed)})",
+                  color = if (meetsRequirements) Color(0xFF7CFF8A) else Color(0xFFFF7777),
+                  fontSize = 10.sp
+                )
+              }
               IconButton(onClick = { selectedPlayer = null }, modifier = Modifier.size(22.dp)) { Text("X", color = RFColors.TextSecondary, fontSize = 11.sp) }
             }
-            Text(if (requirements.matches(player)) stringResource(Res.string.raid_buff_passed) else stringResource(Res.string.raid_buff_not_passed), color = if (requirements.matches(player)) Color(0xFF7CFF8A) else Color(0xFFFF7777), fontSize = 12.sp)
-            Text(observationText, color = RFColors.TextTertiary, fontSize = 10.sp)
+            Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
             Text(stringResource(Res.string.raid_buff_has_buffs), color = Color(0xFF7CFF8A), fontWeight = FontWeight.Bold, fontSize = 11.sp)
             Text(requirements.matchedDefinitions(player).joinToString(", ") { localizedBuffLabels[it.key].orEmpty() }.ifBlank { stringResource(Res.string.raid_buff_none_found) }, color = RFColors.TextSecondary, fontSize = 11.sp)
             Text(stringResource(Res.string.raid_buff_missing_buffs), color = Color(0xFFFF7777), fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
@@ -912,6 +940,8 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
               .joinToString(", ")
               .ifBlank { stringResource(Res.string.raid_buff_none_found) }
             Text(missingBuffText, color = RFColors.TextSecondary, fontSize = 11.sp)
+            Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+            Text(observationText, color = RFColors.TextTertiary, fontSize = 9.sp, modifier = Modifier.padding(top = 2.dp))
           }
         }
       }
@@ -1015,7 +1045,7 @@ private fun BuffRequirementCheckboxes(requirements: RaidBuffRequirements, onRequ
 @Composable
 private fun ControlledCheckbox(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
   Row(verticalAlignment = Alignment.CenterVertically) {
-    androidx.compose.material.Checkbox(checked = checked, onCheckedChange = onCheckedChange, colors = androidx.compose.material.CheckboxDefaults.colors(checkedColor = Color.Red, uncheckedColor = Color.White))
+    Checkbox(checked = checked, onCheckedChange = onCheckedChange, colors = CheckboxDefaults.colors(checkedColor = Color.Red, uncheckedColor = Color.White))
     Text(label, color = Color.White)
   }
 }
@@ -1242,7 +1272,7 @@ private fun NearbyTab(
       text = stringResource(Res.string.raid_nearby_disclaimer),
       color = Color.LightGray,
       fontSize = 11.sp,
-      fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+      fontStyle = FontStyle.Italic,
       modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
     )
     CheckBoxComponent(
