@@ -3,18 +3,29 @@ package com.reoky.raidframer.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.core.helpers.RaidColors
@@ -35,8 +46,10 @@ fun RaidComponent(
   modifier: Modifier = Modifier,
   selectedPlayerName: String? = null,
   onPlayerClick: ((RaidFramePayload) -> Unit)? = null,
+  onPlayerClickAt: ((RaidFramePayload, IntOffset) -> Unit)? = null,
   isBuffed: ((RaidFramePayload) -> Boolean)? = null,
-  isOutOfRange: ((RaidFramePayload) -> Boolean)? = null
+  isOutOfRange: ((RaidFramePayload) -> Boolean)? = null,
+  onPlayerDetails: ((RaidFramePayload) -> Unit)? = null
 ) {
   val paddedParties = parties.toMutableList()
   while (paddedParties.size < PARTY_COUNT) paddedParties.add(emptyList())
@@ -52,7 +65,7 @@ fun RaidComponent(
         horizontalArrangement = Arrangement.spacedBy(3.dp)
       ) {
         rowParties.forEach { party ->
-           RaidPartyColumn(party, selectedPlayerName, onPlayerClick, isBuffed, isOutOfRange)
+            RaidPartyColumn(party, selectedPlayerName, onPlayerClick, onPlayerClickAt, isBuffed, isOutOfRange, onPlayerDetails)
         }
       }
     }
@@ -64,8 +77,10 @@ private fun RaidPartyColumn(
   party: List<RaidFramePayload>,
   selectedPlayerName: String?,
   onPlayerClick: ((RaidFramePayload) -> Unit)?,
+  onPlayerClickAt: ((RaidFramePayload, IntOffset) -> Unit)?,
   isBuffed: ((RaidFramePayload) -> Boolean)?,
-  isOutOfRange: ((RaidFramePayload) -> Boolean)?
+  isOutOfRange: ((RaidFramePayload) -> Boolean)?,
+  onPlayerDetails: ((RaidFramePayload) -> Unit)?
 ) {
   Column(
     modifier = Modifier
@@ -81,8 +96,10 @@ private fun RaidPartyColumn(
          member = frame,
          selected = frame.playerName.isNotEmpty() && frame.playerName == selectedPlayerName,
          onClick = onPlayerClick?.let { callback -> { callback(frame) } },
+          onClickAt = onPlayerClickAt?.let { callback -> { offset -> callback(frame, offset) } },
          buffed = isBuffed?.invoke(frame),
-         outOfRange = isOutOfRange?.invoke(frame) == true
+         outOfRange = isOutOfRange?.invoke(frame) == true,
+         onDetails = onPlayerDetails?.let { callback -> { callback(frame) } }
        )
     }
   }
@@ -93,16 +110,37 @@ fun RaidMemberFrame(
   member: RaidFramePayload,
   selected: Boolean = false,
   onClick: (() -> Unit)? = null,
+  onClickAt: ((IntOffset) -> Unit)? = null,
   buffed: Boolean? = null,
-  outOfRange: Boolean = false
+  outOfRange: Boolean = false,
+  onDetails: (() -> Unit)? = null
 ) {
+  var frameWindowPosition by remember { mutableStateOf(Offset.Zero) }
   val roleColor = PlayerRole.fromInt(member.role).getRaidColor()
   val frameShape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
 
   Box(
     modifier = Modifier
       .size(width = PARTY_WIDTH, height = MEMBER_FRAME_HEIGHT)
-      .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+      .onGloballyPositioned { coordinates ->
+        frameWindowPosition = coordinates.positionInWindow()
+      }
+      .then(
+        when {
+          onClickAt != null -> Modifier.pointerInput(onClickAt) {
+            detectTapGestures {
+              onClickAt(
+                IntOffset(
+                  (frameWindowPosition.x + it.x).roundToInt(),
+                  (frameWindowPosition.y + it.y).roundToInt()
+                )
+              )
+            }
+          }
+          onClick != null -> Modifier.clickable(onClick = onClick)
+          else -> Modifier
+        }
+      )
   ) {
     // Mana bar only for active members
     if (member.playerName.isNotEmpty()) {
@@ -138,12 +176,16 @@ fun RaidMemberFrame(
         Spacer(modifier = Modifier.fillMaxSize())
       }
     }
-    if (member.playerName.isNotEmpty() && buffed != null && !buffed) {
+    if (member.playerName.isNotEmpty() && outOfRange) {
       Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.32f), frameShape))
-      Text("${if (outOfRange) "?" else "X"}", color = if (outOfRange) Color.White else Color.Red, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.TopEnd).padding(end = 2.dp, top = 1.dp))
+      Text("?", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.TopEnd).padding(end = 2.dp, top = 1.dp))
+    } else if (member.playerName.isNotEmpty() && buffed != null && !buffed) {
+      Text("X", color = Color.Red, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.TopEnd).padding(end = 2.dp, top = 1.dp))
+    } else if (member.playerName.isNotEmpty() && buffed == true) {
+      Text("✓", color = Color(0xFF55E36B), fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.TopEnd).padding(end = 2.dp, top = 1.dp))
     }
     if (selected && member.playerName.isNotEmpty()) {
-      Box(Modifier.matchParentSize().border(2.dp, Color(0xFF4DA3FF), frameShape))
+      Box(Modifier.matchParentSize().border(2.dp, Color(0xFFFFC107), frameShape))
     }
   }
 }

@@ -97,6 +97,22 @@ fun RaidBuffRequirements.matches(member: RaidFramePayload): Boolean {
   return mainMatches && lootCount >= lootThreshold
 }
 
+fun RaidBuffRequirements.matchedDefinitions(member: RaidFramePayload): List<RaidBuffDefinition> {
+  val ids = member.buffs.map { it.buff_id }.toSet()
+  return RAID_BUFF_DEFINITIONS.filter { definition -> definition.ids.any(ids::contains) }
+}
+
+fun RaidBuffRequirements.missingKeys(member: RaidFramePayload): List<RaidBuffKey> {
+  val ids = member.buffs.map { it.buff_id }.toSet()
+  val missing = selected.mapNotNull { key ->
+    val definition = definitionsByKey[key] ?: return@mapNotNull null
+    if (definition.matches(ids, requireOrangeGoblet, allowMeatballs, requireEnhancedLonging)) null else key
+  }.toMutableList()
+  val lootCount = RAID_BUFF_DEFINITIONS.count { it.section == RaidBuffSection.LOOT && it.ids.any(ids::contains) }
+  if (lootThreshold > lootCount) missing += RaidBuffKey.MOONLIGHT_JUICE
+  return missing
+}
+
 fun RaidBuffDefinition.labelKey(): String = labelKey
 
 fun raidBuffDefinition(key: RaidBuffKey): RaidBuffDefinition = definitionsByKey.getValue(key)
