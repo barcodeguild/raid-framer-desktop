@@ -68,6 +68,9 @@ object PlayerCacheInteractor : Interactor() {
   private val raids = mutableStateMapOf<Int, List<Party>>()
   private val raidAttendance = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidDepartures = mutableStateMapOf<Int, MutableSet<String>>()
+  private val raidBuffHistory = mutableMapOf<String, RaidBuffSnapshot>()
+  private const val RAID_BUFF_HISTORY_RETENTION_MS = 6L * 60L * 60L * 1000L
+  private var lastRaidBuffHistoryCleanupAt = 0L
   private val _raidDeparturesFlow = MutableStateFlow<Map<Int, Set<String>>>(emptyMap())
   val raidDeparturesFlow: StateFlow<Map<Int, Set<String>>> = _raidDeparturesFlow.asStateFlow()
   private val cards = mutableStateMapOf<String, PlayerCard>()
@@ -182,6 +185,7 @@ object PlayerCacheInteractor : Interactor() {
       }
       members.forEach { member ->
         if (member.playerName.isNotBlank()) {
+          recordRaidBuffSnapshot(member)
           createCardIfNoneExists(playerName = member.playerName)
           // update Life Mend stats from buff data — route to the caster, not the target
           member.buffs.forEach { buff ->
@@ -201,6 +205,39 @@ object PlayerCacheInteractor : Interactor() {
         }
       }
     }
+  }
+
+  private fun recordRaidBuffSnapshot(member: RaidFramePayload) {
+    val now = System.currentTimeMillis()
+    val buffIds = member.buffs.map { it.buff_id }.toSet()
+    val previous = raidBuffHistory[member.playerName]
+    // Empty out-of-range scans are not evidence that the player's buffs expired.
+    if (buffIds.isNotEmpty()) {
+      raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, buffIds, member.distance)
+    } else if (previous == null) {
+      // Retain an initial empty observation so unknown players can still age out naturally.
+      raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, emptySet(), member.distance)
+    }
+    if (now - lastRaidBuffHistoryCleanupAt >= 60_000L) {
+      val cutoff = now - RAID_BUFF_HISTORY_RETENTION_MS
+      raidBuffHistory.entries.removeIf { it.value.observedAt < cutoff }
+      lastRaidBuffHistoryCleanupAt = now
+    }
+  }
+
+  fun resolveRaidBuffObservation(member: RaidFramePayload, gracePeriod: RaidBuffGracePeriod): RaidBuffObservation {
+    val now = System.currentTimeMillis()
+    val currentIds = member.buffs.map { it.buff_id }.toSet()
+    val currentTimestamp = member.buffScanTimestamp.takeIf { it > 0L }?.times(1000L)
+    // Only trust the live scan when it actually contains buff data.
+    // An out-of-range player still produces a fresh buffScanTimestamp but with empty buffs,
+    // so we must fall through to history instead of short-circuiting.
+    if (currentIds.isNotEmpty() && currentTimestamp != null && now - currentTimestamp <= gracePeriod.millis) {
+      return RaidBuffObservation(member, RaidBuffSnapshot(currentTimestamp, currentIds, member.distance), true)
+    }
+    val snapshot = raidBuffHistory[member.playerName]
+      ?.takeIf { now - it.observedAt <= gracePeriod.millis }
+    return RaidBuffObservation(member, snapshot, false)
   }
 
   /*

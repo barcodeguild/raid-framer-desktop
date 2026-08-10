@@ -4,18 +4,24 @@ import androidx.compose.ui.graphics.Color
 import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.helpers.RFColors
 import org.jetbrains.compose.resources.StringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.life_mend_quality_excellent
+import raid_framer_desktop.composeapp.generated.resources.life_mend_quality_good
+import raid_framer_desktop.composeapp.generated.resources.life_mend_quality_hurting
+import raid_framer_desktop.composeapp.generated.resources.life_mend_quality_none
+import raid_framer_desktop.composeapp.generated.resources.life_mend_quality_poor
 
 /**
  * Quality metric for Life Mend heal amounts (buff 25875).
  * Based on the raw heal amount shown in the tooltip.
  * Colors match the gear score gradient for visual consistency.
  */
-enum class LifeMendQuality(val label: String, val color: Color) {
-  NONE("No Data", Color.Gray),
-  HURTING("Hurting Raid", RFColors.gearRed),        // Red — 0-11k
-  POOR("Poor Quality", RFColors.gearOrange),        // Orange — 11-13k
-  GOOD("Good", RFColors.gearGreen),                 // Green — 13-15k
-  EXCELLENT("Excellent", RFColors.gearBlue);        // Blue — 15k+
+enum class LifeMendQuality(val labelRes: StringResource, val color: Color) {
+  NONE(Res.string.life_mend_quality_none, Color.Gray),
+  HURTING(Res.string.life_mend_quality_hurting, RFColors.gearRed),        // Red — 0-11k
+  POOR(Res.string.life_mend_quality_poor, RFColors.gearOrange),        // Orange — 11-13k
+  GOOD(Res.string.life_mend_quality_good, RFColors.gearGreen),                 // Green — 13-15k
+  EXCELLENT(Res.string.life_mend_quality_excellent, RFColors.gearBlue);        // Blue — 15k+
 
   companion object {
     fun fromAverage(avg: Int): LifeMendQuality = when {

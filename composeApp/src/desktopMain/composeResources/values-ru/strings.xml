@@ -454,6 +454,11 @@
     <string name="summary_tab_performance">Эффективность</string>
     <string name="summary_tab_life_mend">Исцеление жизни</string>
     <string name="summary_top_life_mends">Топ исцелений жизни</string>
+    <string name="life_mend_quality_none">Нет данных</string>
+    <string name="life_mend_quality_hurting">Вредит рейду</string>
+    <string name="life_mend_quality_poor">Низкое качество</string>
+    <string name="life_mend_quality_good">Хорошо</string>
+    <string name="life_mend_quality_excellent">Отлично</string>
 
     <!-- General Strings -->
     <string name="general_about">О программе</string>

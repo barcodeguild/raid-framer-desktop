@@ -8,6 +8,19 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.time_ago_just_now
+import raid_framer_desktop.composeapp.generated.resources.time_ago_minutes_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_minutes_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_hours_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_hours_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_days_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_days_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_weeks_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_weeks_other
+import raid_framer_desktop.composeapp.generated.resources.time_ago_months_one
+import raid_framer_desktop.composeapp.generated.resources.time_ago_months_other
 import java.awt.Desktop
 import java.io.File
 import java.net.URI
@@ -135,6 +148,36 @@ fun Long.timeAgo(): TimeAgoResult {
     days < 7 -> TimeAgoResult(days, TimeAgoUnit.DAY)
     weeks < 5 -> TimeAgoResult(weeks, TimeAgoUnit.WEEK)
     else -> TimeAgoResult(months, TimeAgoUnit.MONTH)
+  }
+}
+
+/**
+ * Resolves a [TimeAgoResult] to a localized string using string resources.
+ */
+@Composable
+fun TimeAgoResult.resolveLocalizedString(): String {
+  return when (unit) {
+    TimeAgoUnit.JUST_NOW -> stringResource(Res.string.time_ago_just_now)
+    TimeAgoUnit.MINUTE -> {
+      val res = if (value == 1L) Res.string.time_ago_minutes_one else Res.string.time_ago_minutes_other
+      stringResource(res, value)
+    }
+    TimeAgoUnit.HOUR -> {
+      val res = if (value == 1L) Res.string.time_ago_hours_one else Res.string.time_ago_hours_other
+      stringResource(res, value)
+    }
+    TimeAgoUnit.DAY -> {
+      val res = if (value == 1L) Res.string.time_ago_days_one else Res.string.time_ago_days_other
+      stringResource(res, value)
+    }
+    TimeAgoUnit.WEEK -> {
+      val res = if (value == 1L) Res.string.time_ago_weeks_one else Res.string.time_ago_weeks_other
+      stringResource(res, value)
+    }
+    TimeAgoUnit.MONTH -> {
+      val res = if (value == 1L) Res.string.time_ago_months_one else Res.string.time_ago_months_other
+      stringResource(res, value)
+    }
   }
 }
 

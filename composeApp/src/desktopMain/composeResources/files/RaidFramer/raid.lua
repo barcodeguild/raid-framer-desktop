@@ -23,6 +23,41 @@ RF.Raid.LastBuffScan = 0
 -- add new buff IDs here as the Kotlin side needs to track them
 RF.Raid.INTERESTING_BUFF_IDS = {
   [25875] = true,  -- Life Mend (healAmount tracking)
+  -- Goblet: orange, blue, yellow, purple, pink, gray variants
+  [24469] = true, [24470] = true, [24471] = true, [24472] = true, [24473] = true, [24474] = true,
+  [21796] = true, [21801] = true, [21806] = true, [21811] = true, [21819] = true, [21846] = true,
+  [21797] = true, [21802] = true, [21807] = true, [21812] = true, [21820] = true,
+  [21798] = true, [21803] = true, [21808] = true, [21813] = true, [21821] = true,
+  [21799] = true, [21804] = true, [21809] = true, [21814] = true, [21822] = true,
+  [21800] = true, [21805] = true, [21810] = true, [21815] = true, [21823] = true,
+  -- Feast table, ribs, and lower-level meatballs
+  [21791] = true, [21792] = true, [21793] = true, [21794] = true,
+  [685] = true, [689] = true, [693] = true, [6970] = true,
+  [680] = true, [686] = true, [690] = true, [694] = true,
+  -- Longing: regular and enhanced
+  [20552] = true, [32381] = true, [32382] = true, [21795] = true, [26581] = true, [26582] = true,
+  [9001811] = true, -- Whisper
+  [31306] = true, -- Blessed Elixir
+  [9000906] = true, [9001797] = true, -- Ancient's Potion
+  [8318] = true, -- Jinhui's Wish
+  [8209] = true, -- Secret Gift
+  [26764] = true, -- Fairy Protection
+  [5861] = true, [5862] = true, [5863] = true, [5864] = true, [5865] = true, -- Cookfire
+  [5700] = true, [32233] = true, [32234] = true, [32235] = true, [32236] = true, [32237] = true, [32238] = true, [32239] = true, -- War Drum
+  [6660] = true, -- Dahuta's Bubble
+  [9002009] = true, -- Monster Hunter's Dream
+  [3076] = true, [3075] = true, -- Flower fruits
+  -- Statue buffs: Haranya, Nuia, and Pirate variants
+  [30767] = true, [30764] = true, [9002338] = true, [9002337] = true, [30773] = true, [30772] = true,
+  [30766] = true, [9002340] = true, [30760] = true, [9002339] = true, [30770] = true, [30771] = true,
+  [30768] = true, [30765] = true, [9002342] = true, [9002341] = true,
+  [23717] = true, [32025] = true, -- Strength of the Faction / War Time
+  -- Loot buffs (+50% and higher)
+  [23215] = true, [9002077] = true, [22516] = true, [22941] = true, [22929] = true, [31422] = true,
+  [8000681] = true, [8000803] = true, [9001658] = true,
+  [8000726] = true, [9001956] = true, [8000779] = true, [8000794] = true, [8000795] = true, [8000796] = true,
+  [23492] = true, [23491] = true, [22292] = true,
+  [23094] = true, [23093] = true, [24157] = true, [31322] = true, [8002787] = true,
 }
 
 -- enum of strings different team member change reasons we can filter by to avoid unnecessary processing
@@ -269,7 +304,8 @@ function RF.Raid.ScanBuffs()
           local unitId = string.format("team%02d", position)
           member.playerName = raidMember
           member.role = X2Team:GetRole(0, position)
-          member.buffs = RF.Raid.ScanUnitBuffs(unitId)
+           member.buffs = RF.Raid.ScanUnitBuffs(unitId)
+           member.buffScanTimestamp = os.time()
           local dist = X2Unit:UnitDistance(unitId)
           if type(dist) == "table" then
             member.distance = math.floor(dist.distance or -1)
@@ -295,7 +331,8 @@ function RF.Raid.ScanBuffs()
           local unitId = string.format("team_01_%02d", position)
           member.playerName = raidMember
           member.role = X2Team:GetRole(1, position)
-          member.buffs = RF.Raid.ScanUnitBuffs(unitId)
+           member.buffs = RF.Raid.ScanUnitBuffs(unitId)
+           member.buffScanTimestamp = os.time()
           local dist = X2Unit:UnitDistance(unitId)
           if type(dist) == "table" then
             member.distance = math.floor(dist.distance or -1)
@@ -318,7 +355,8 @@ function RF.Raid.ScanBuffs()
           local unitId = string.format("team_02_%02d", position)
           memberTwo.playerName = raidTwoMember
           memberTwo.role = X2Team:GetRole(2, position)
-          memberTwo.buffs = RF.Raid.ScanUnitBuffs(unitId)
+           memberTwo.buffs = RF.Raid.ScanUnitBuffs(unitId)
+           memberTwo.buffScanTimestamp = os.time()
           local dist = X2Unit:UnitDistance(unitId)
           if type(dist) == "table" then
             memberTwo.distance = math.floor(dist.distance or -1)

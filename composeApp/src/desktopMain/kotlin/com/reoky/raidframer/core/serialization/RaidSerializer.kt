@@ -35,6 +35,7 @@ data class RaidFramePayload(
   val characterBuild: String = "",
   val lastZone: String = "",
   val distance: Int = -1,
+  val buffScanTimestamp: Long = 0L,
   @Serializable(with = SecondsToMillisSerializer::class)
   val lastUpdated: Long = 0L,
   val buffs: List<BuffPayload> = emptyList()

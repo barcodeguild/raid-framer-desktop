@@ -454,6 +454,11 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_tab_performance">Leistung</string>
     <string name="summary_tab_life_mend">Lebensheilung</string>
     <string name="summary_top_life_mends">Top Lebensheilungen</string>
+    <string name="life_mend_quality_none">Keine Daten</string>
+    <string name="life_mend_quality_hurting">Raid schädigend</string>
+    <string name="life_mend_quality_poor">Schlechte Qualität</string>
+    <string name="life_mend_quality_good">Gut</string>
+    <string name="life_mend_quality_excellent">Ausgezeichnet</string>
 
     <!-- General Strings -->
     <string name="general_about">Über</string>

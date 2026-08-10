@@ -450,6 +450,11 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_tab_performance">Performance</string>
     <string name="summary_tab_life_mend">Life Mend</string>
     <string name="summary_top_life_mends">Top Life Mends</string>
+    <string name="life_mend_quality_none">No Data</string>
+    <string name="life_mend_quality_hurting">Hurting Raid</string>
+    <string name="life_mend_quality_poor">Poor Quality</string>
+    <string name="life_mend_quality_good">Good</string>
+    <string name="life_mend_quality_excellent">Excellent</string>
     <string name="summary_top_haranya_performance">Top Performance Haranya</string>
     <string name="summary_top_nuia_performance">Top Performance Nuia</string>
     <string name="summary_top_pirate_performance">Top Performance Pirate</string>
