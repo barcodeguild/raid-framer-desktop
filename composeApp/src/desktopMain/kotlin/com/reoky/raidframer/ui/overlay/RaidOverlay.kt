@@ -870,12 +870,12 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
             BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.fillMaxWidth())
             BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
           }
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, Modifier.widthIn(min = 320.dp, max = 390.dp))
+          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp))
         }
       } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
           BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.fillMaxWidth())
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, Modifier.fillMaxWidth())
+          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.fillMaxWidth())
           BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
         }
       }
@@ -944,7 +944,7 @@ private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<Li
 }
 
 @Composable
-private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, modifier: Modifier) {
+private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>, modifier: Modifier) {
   Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
     var graceExpanded by remember { mutableStateOf(false) }
     Row(
@@ -972,10 +972,10 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
       val columns = if (maxWidth >= 360.dp) 2 else 1
       if (columns == 2) {
         FlowRow(maxItemsInEachRow = 2, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-          BuffRequirementCheckboxes(requirements, onRequirements)
+          BuffRequirementCheckboxes(requirements, onRequirements, localizedBuffLabels)
         }
       } else {
-        Column { BuffRequirementCheckboxes(requirements, onRequirements) }
+        Column { BuffRequirementCheckboxes(requirements, onRequirements, localizedBuffLabels) }
       }
     }
     Text(stringResource(Res.string.raid_buff_loot_section), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
@@ -1003,9 +1003,9 @@ private fun BuffCopyPane(notBuffed: String, buffed: String, modifier: Modifier) 
 }
 
 @Composable
-private fun BuffRequirementCheckboxes(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit) {
+private fun BuffRequirementCheckboxes(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>) {
   RAID_BUFF_DEFINITIONS.filter { it.section == RaidBuffSection.MAIN }.forEach { definition ->
-    ControlledCheckbox(definition.key.name.replace('_', ' ').lowercase().replaceFirstChar { it.titlecase() }, definition.key in requirements.selected) { checked -> onRequirements(requirements.copy(selected = if (checked) requirements.selected + definition.key else requirements.selected - definition.key)) }
+    ControlledCheckbox(localizedBuffLabels[definition.key].orEmpty(), definition.key in requirements.selected) { checked -> onRequirements(requirements.copy(selected = if (checked) requirements.selected + definition.key else requirements.selected - definition.key)) }
   }
   ControlledCheckbox(stringResource(Res.string.raid_buff_orange_goblet), requirements.requireOrangeGoblet) { onRequirements(requirements.copy(requireOrangeGoblet = it, selected = requirements.selected + RaidBuffKey.GOBLET)) }
   ControlledCheckbox(stringResource(Res.string.raid_buff_allow_meatballs), requirements.allowMeatballs) { onRequirements(requirements.copy(allowMeatballs = it)) }
