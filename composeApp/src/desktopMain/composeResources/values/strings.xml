@@ -698,6 +698,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_none_found">No tracked buffs found</string>
     <string name="raid_buff_has_buffs">Has Buffs</string>
     <string name="raid_buff_missing_buffs">Missing Buffs</string>
+    <string name="raid_buff_grace_period">Grace Period</string>
     <string name="raid_buff_goblet">Goblet</string>
     <string name="raid_buff_feast_ribs">Feast / Ribs</string>
     <string name="raid_buff_longing">Longing</string>

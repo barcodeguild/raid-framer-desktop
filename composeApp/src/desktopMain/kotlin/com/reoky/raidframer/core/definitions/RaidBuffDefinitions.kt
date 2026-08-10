@@ -1,6 +1,8 @@
 package com.reoky.raidframer.core.definitions
 
 import com.reoky.raidframer.core.serialization.RaidFramePayload
+import com.reoky.raidframer.core.model.RaidBuffGracePeriod
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 enum class RaidBuffKey {
   GOBLET,
@@ -95,6 +97,12 @@ fun RaidBuffRequirements.matches(member: RaidFramePayload): Boolean {
   }
   val lootCount = RAID_BUFF_DEFINITIONS.count { it.section == RaidBuffSection.LOOT && it.ids.any(ids::contains) }
   return mainMatches && lootCount >= lootThreshold
+}
+
+fun RaidBuffRequirements.matchesResolved(member: RaidFramePayload, gracePeriod: RaidBuffGracePeriod): Boolean {
+  val observation = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
+  val snapshot = observation.snapshot ?: return false
+  return matches(member.copy(buffs = snapshot.buffIds.map { id -> com.reoky.raidframer.core.serialization.BuffPayload(buff_id = id) }))
 }
 
 fun RaidBuffRequirements.matchedDefinitions(member: RaidFramePayload): List<RaidBuffDefinition> {

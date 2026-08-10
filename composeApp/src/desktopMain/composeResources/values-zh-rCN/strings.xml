@@ -670,6 +670,7 @@
     <string name="raid_buff_none_found">未找到已追踪增益</string>
     <string name="raid_buff_has_buffs">已有增益</string>
     <string name="raid_buff_missing_buffs">缺少增益</string>
+    <string name="raid_buff_grace_period">宽限期</string>
     <string name="raid_buff_goblet">光荣之盏</string>
     <string name="raid_buff_feast_ribs">餐桌：烤猪大排档 / 烤排骨</string>
     <string name="raid_buff_longing">审判的渴望</string>

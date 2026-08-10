@@ -671,6 +671,7 @@
     <string name="raid_buff_none_found">추적 중인 버프 없음</string>
     <string name="raid_buff_has_buffs">보유 버프</string>
     <string name="raid_buff_missing_buffs">없는 버프</string>
+    <string name="raid_buff_grace_period">유예 기간</string>
     <string name="raid_buff_goblet">영광의 잔</string>
     <string name="raid_buff_feast_ribs">고귀한 축복의 요리 탁자 / 갈비</string>
     <string name="raid_buff_longing">심판의 갈망</string>

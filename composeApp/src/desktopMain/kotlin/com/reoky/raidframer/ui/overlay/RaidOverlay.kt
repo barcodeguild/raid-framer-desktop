@@ -41,9 +41,12 @@ import com.reoky.raidframer.core.definitions.RaidBuffRequirements
 import com.reoky.raidframer.core.definitions.RAID_BUFF_DEFINITIONS
 import com.reoky.raidframer.core.definitions.RaidBuffSection
 import com.reoky.raidframer.core.definitions.matches
+import com.reoky.raidframer.core.definitions.matchesResolved
 import com.reoky.raidframer.core.definitions.matchedDefinitions
 import com.reoky.raidframer.core.definitions.missingKeys
 import com.reoky.raidframer.core.model.hasPvPParticipation
+import com.reoky.raidframer.core.model.RaidBuffGracePeriod
+import com.reoky.raidframer.core.model.RaidBuffObservation
 import com.reoky.raidframer.core.definitions.SKILL_TREE_DISPLAY_ORDER
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.META_CC_SPECS
@@ -807,8 +810,13 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
   var selectedPlayerPopupOffset by remember { mutableStateOf(IntOffset.Zero) }
   var selectedPreset by remember { mutableStateOf(BUFF_PRESETS.first()) }
   var presetExpanded by remember { mutableStateOf(false) }
+  var gracePeriod by remember { mutableStateOf(RaidBuffGracePeriod.IMMEDIATE) }
   val allMembers = (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
-  val notBuffed = allMembers.filterNot { requirements.matches(it) }.joinToString(", ") { it.playerName }
+  val observations = allMembers.associateWith { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod) }
+  val notBuffed = allMembers.filter { member ->
+    val observation = observations.getValue(member)
+    observation.snapshot == null || !requirements.matches(member.copy(buffs = observation.snapshot.buffIds.map { id -> com.reoky.raidframer.core.serialization.BuffPayload(buff_id = id) }))
+  }.joinToString(", ") { it.playerName }
   val localizedBuffLabels = RAID_BUFF_DEFINITIONS.associate { definition ->
     definition.key to when (definition.key) {
       RaidBuffKey.GOBLET -> stringResource(Res.string.raid_buff_goblet)
@@ -842,13 +850,13 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
       BoxWithConstraints(Modifier.fillMaxWidth()) {
       if (maxWidth >= 760.dp) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
-          BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.weight(1f))
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, notBuffed, Modifier.widthIn(min = 320.dp, max = 390.dp))
+          BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.weight(1f))
+          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, notBuffed, Modifier.widthIn(min = 320.dp, max = 390.dp))
         }
       } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-          BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.fillMaxWidth())
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, notBuffed, Modifier.fillMaxWidth())
+          BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> selectedPlayer = player; selectedPlayerPopupOffset = offset }, Modifier.fillMaxWidth())
+          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, notBuffed, Modifier.fillMaxWidth())
         }
       }
       }
@@ -881,29 +889,59 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
   }
 }
 
+private fun RaidBuffGracePeriod.label(): String = when (this) {
+  RaidBuffGracePeriod.IMMEDIATE -> "Immediate"
+  RaidBuffGracePeriod.FIFTEEN_MINUTES -> "15 Minutes"
+  RaidBuffGracePeriod.THIRTY_MINUTES -> "30 Minutes"
+  RaidBuffGracePeriod.ONE_HOUR -> "1 Hour"
+  RaidBuffGracePeriod.SIX_HOURS -> "6 Hours"
+}
+
 @Composable
-private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>, selected: RaidFramePayload?, requirements: RaidBuffRequirements, onSelect: (RaidFramePayload) -> Unit, onSelectAt: (RaidFramePayload, IntOffset) -> Unit, modifier: Modifier) {
+private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>, selected: RaidFramePayload?, requirements: RaidBuffRequirements, gracePeriod: RaidBuffGracePeriod, onSelect: (RaidFramePayload) -> Unit, onSelectAt: (RaidFramePayload, IntOffset) -> Unit, modifier: Modifier) {
   Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.78f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       if (mainRaid.isNotEmpty()) Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_main_raid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matches(it) }, isOutOfRange = { it.distance > 115 })
+        RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { member ->
+          val observation = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
+          member.distance > 115 || observation.snapshot == null
+        })
       }
       if (coRaid.isNotEmpty()) Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_coraid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matches(it) }, isOutOfRange = { it.distance > 115 })
+        RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { member ->
+          val observation = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
+          member.distance > 115 || observation.snapshot == null
+        })
       }
     }
   }
 }
 
 @Composable
-private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, notBuffed: String, modifier: Modifier) {
+private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, notBuffed: String, modifier: Modifier) {
   Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-    Text(stringResource(Res.string.raid_buff_preset), color = Color.White, fontWeight = FontWeight.Bold)
-    Box {
-      Button(onClick = onExpanded, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)) { Text(preset.label, color = Color.Black) }
-      DropdownMenu(expanded = expanded, onDismissRequest = onExpanded) { BUFF_PRESETS.forEach { option -> DropdownMenuItem(onClick = { onPreset(option); onExpanded() }) { Text(option.label) } } }
+    var graceExpanded by remember { mutableStateOf(false) }
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      verticalAlignment = Alignment.Bottom
+    ) {
+      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(stringResource(Res.string.raid_buff_preset), color = Color.White, fontWeight = FontWeight.Bold)
+        Box {
+          Button(onClick = onExpanded, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.fillMaxWidth()) { Text(preset.label, color = Color.Black, maxLines = 1) }
+          DropdownMenu(expanded = expanded, onDismissRequest = onExpanded) { BUFF_PRESETS.forEach { option -> DropdownMenuItem(onClick = { onPreset(option); onExpanded() }) { Text(option.label) } } }
+        }
+      }
+      Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(stringResource(Res.string.raid_buff_grace_period), color = Color.White, fontWeight = FontWeight.Bold)
+        Box {
+          Button(onClick = { graceExpanded = !graceExpanded }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.fillMaxWidth()) { Text(gracePeriod.label(), color = Color.Black, maxLines = 1) }
+          DropdownMenu(expanded = graceExpanded, onDismissRequest = { graceExpanded = false }) { RaidBuffGracePeriod.entries.forEach { option -> DropdownMenuItem(onClick = { onGracePeriod(option); graceExpanded = false }) { Text(option.label()) } } }
+        }
+      }
     }
     Text(stringResource(Res.string.raid_buff_requirements), color = Color.White, fontWeight = FontWeight.Bold)
     BoxWithConstraints(Modifier.fillMaxWidth()) {
