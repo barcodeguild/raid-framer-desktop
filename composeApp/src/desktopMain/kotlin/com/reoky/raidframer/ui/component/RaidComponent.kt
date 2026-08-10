@@ -1,11 +1,14 @@
 package com.reoky.raidframer.ui.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -29,7 +32,11 @@ private val MEMBER_FRAME_HEIGHT = MANA_TOP_PADDING + MANA_HEIGHT
 @Composable
 fun RaidComponent(
   parties: List<List<RaidFramePayload>>,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  selectedPlayerName: String? = null,
+  onPlayerClick: ((RaidFramePayload) -> Unit)? = null,
+  isBuffed: ((RaidFramePayload) -> Boolean)? = null,
+  isOutOfRange: ((RaidFramePayload) -> Boolean)? = null
 ) {
   val paddedParties = parties.toMutableList()
   while (paddedParties.size < PARTY_COUNT) paddedParties.add(emptyList())
@@ -45,7 +52,7 @@ fun RaidComponent(
         horizontalArrangement = Arrangement.spacedBy(3.dp)
       ) {
         rowParties.forEach { party ->
-          RaidPartyColumn(party)
+           RaidPartyColumn(party, selectedPlayerName, onPlayerClick, isBuffed, isOutOfRange)
         }
       }
     }
@@ -53,7 +60,13 @@ fun RaidComponent(
 }
 
 @Composable
-private fun RaidPartyColumn(party: List<RaidFramePayload>) {
+private fun RaidPartyColumn(
+  party: List<RaidFramePayload>,
+  selectedPlayerName: String?,
+  onPlayerClick: ((RaidFramePayload) -> Unit)?,
+  isBuffed: ((RaidFramePayload) -> Boolean)?,
+  isOutOfRange: ((RaidFramePayload) -> Boolean)?
+) {
   Column(
     modifier = Modifier
       .width(PARTY_WIDTH)
@@ -63,17 +76,34 @@ private fun RaidPartyColumn(party: List<RaidFramePayload>) {
   ) {
     for (i in 0 until 5) {
       val member = party.getOrNull(i)
-      RaidMemberFrame(member ?: RaidFramePayload(playerName = ""))
+       val frame = member ?: RaidFramePayload(playerName = "")
+       RaidMemberFrame(
+         member = frame,
+         selected = frame.playerName.isNotEmpty() && frame.playerName == selectedPlayerName,
+         onClick = onPlayerClick?.let { callback -> { callback(frame) } },
+         buffed = isBuffed?.invoke(frame),
+         outOfRange = isOutOfRange?.invoke(frame) == true
+       )
     }
   }
 }
 
 @Composable
-fun RaidMemberFrame(member: RaidFramePayload) {
+fun RaidMemberFrame(
+  member: RaidFramePayload,
+  selected: Boolean = false,
+  onClick: (() -> Unit)? = null,
+  buffed: Boolean? = null,
+  outOfRange: Boolean = false
+) {
   val roleColor = PlayerRole.fromInt(member.role).getRaidColor()
   val frameShape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
 
-  Box(modifier = Modifier.size(width = PARTY_WIDTH, height = MEMBER_FRAME_HEIGHT)) {
+  Box(
+    modifier = Modifier
+      .size(width = PARTY_WIDTH, height = MEMBER_FRAME_HEIGHT)
+      .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+  ) {
     // Mana bar only for active members
     if (member.playerName.isNotEmpty()) {
       Box(
@@ -107,6 +137,13 @@ fun RaidMemberFrame(member: RaidFramePayload) {
       } else {
         Spacer(modifier = Modifier.fillMaxSize())
       }
+    }
+    if (member.playerName.isNotEmpty() && buffed != null && !buffed) {
+      Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.32f), frameShape))
+      Text("${if (outOfRange) "?" else "X"}", color = if (outOfRange) Color.White else Color.Red, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.TopEnd).padding(end = 2.dp, top = 1.dp))
+    }
+    if (selected && member.playerName.isNotEmpty()) {
+      Box(Modifier.matchParentSize().border(2.dp, Color(0xFF4DA3FF), frameShape))
     }
   }
 }
