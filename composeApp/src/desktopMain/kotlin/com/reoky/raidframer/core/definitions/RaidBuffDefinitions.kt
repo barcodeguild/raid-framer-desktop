@@ -63,7 +63,7 @@ val RAID_BUFF_DEFINITIONS = listOf(
   RaidBuffDefinition(RaidBuffKey.SECRET_GIFT, setOf(8209), "raid_buff_secret_gift"),
   RaidBuffDefinition(RaidBuffKey.FAIRY_PROTECTION, setOf(26764), "raid_buff_fairy_protection"),
   RaidBuffDefinition(RaidBuffKey.COOKFIRE, setOf(5861, 5862, 5863, 5864, 5865), "raid_buff_cookfire"),
-  RaidBuffDefinition(RaidBuffKey.WAR_DRUM, setOf(32233, 32234, 32235, 32236, 32237, 32238, 32239), "raid_buff_war_drum"),
+  RaidBuffDefinition(RaidBuffKey.WAR_DRUM, setOf(5700, 32233, 32234, 32235, 32236, 32237, 32238, 32239), "raid_buff_war_drum"),
   RaidBuffDefinition(RaidBuffKey.DAHUTAS_BUBBLE, setOf(6660), "raid_buff_dahutas_bubble"),
   RaidBuffDefinition(RaidBuffKey.MONSTER_HUNTERS_DREAM, setOf(9002009), "raid_buff_monster_hunters_dream"),
   RaidBuffDefinition(RaidBuffKey.RED_FLOWER_FRUIT, setOf(3076), "raid_buff_red_flower_fruit"),

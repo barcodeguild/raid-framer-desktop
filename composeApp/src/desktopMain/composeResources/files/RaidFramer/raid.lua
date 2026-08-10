@@ -43,7 +43,7 @@ RF.Raid.INTERESTING_BUFF_IDS = {
   [8209] = true, -- Secret Gift
   [26764] = true, -- Fairy Protection
   [5861] = true, [5862] = true, [5863] = true, [5864] = true, [5865] = true, -- Cookfire
-  [32233] = true, [32234] = true, [32235] = true, [32236] = true, [32237] = true, [32238] = true, [32239] = true, -- War Drum
+  [5700] = true, [32233] = true, [32234] = true, [32235] = true, [32236] = true, [32237] = true, [32238] = true, [32239] = true, -- War Drum
   [6660] = true, -- Dahuta's Bubble
   [9002009] = true, -- Monster Hunter's Dream
   [3076] = true, [3075] = true, -- Flower fruits
