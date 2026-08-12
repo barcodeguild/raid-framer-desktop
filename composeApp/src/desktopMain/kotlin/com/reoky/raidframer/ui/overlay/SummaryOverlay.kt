@@ -860,30 +860,49 @@ private fun NewBuffsTab(
   wm: WindowManager?
 ) {
   Row(modifier = Modifier.fillMaxSize()) {
-    listOf(
-      Triple("\u2694 " + stringResource(Res.string.summary_top_defiance), topDefiance, RFColors.defianceGold),
-      Triple("\u2600 " + stringResource(Res.string.summary_top_garden_defiance), topGardenDefiance, RFColors.gardenDefianceBlue),
-      Triple("\u2728 " + stringResource(Res.string.summary_top_purges), topPurges, RFColors.purgeGreen),
-      Triple("\u2665 " + stringResource(Res.string.summary_top_sac_dances), topSacDances, RFColors.sacDancePurple)
-    ).forEach { (title, cards, color) ->
-      StatColumn(
-        icon = "*",
-        title = title,
-        cards = cards,
-        valueExtractor = { card ->
-          when (cards) {
-            topDefiance -> card.sessionDefianceTotal.toString()
-            topGardenDefiance -> card.sessionGardenDefianceTotal.toString()
-            topPurges -> card.sessionPurgeTotal.toString()
-            else -> card.sessionSacDanceTotal.toString()
-          }
-        },
-        valueColor = color,
-        modifier = Modifier.weight(1f)
-      ) { card ->
-        AppState.selectPlayer(card.name)
-        wm?.openWindow(OverlayType.PLAYER_CARD)
-      }
+    StatColumn(
+      icon = "\u2694",
+      title = stringResource(Res.string.summary_top_defiance),
+      cards = topDefiance,
+      valueExtractor = { it.sessionDefianceTotal.toString() },
+      valueColor = RFColors.defianceGold,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u2600",
+      title = stringResource(Res.string.summary_top_garden_defiance),
+      cards = topGardenDefiance,
+      valueExtractor = { it.sessionGardenDefianceTotal.toString() },
+      valueColor = RFColors.gardenDefianceBlue,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u2728",
+      title = stringResource(Res.string.summary_top_purges),
+      cards = topPurges,
+      valueExtractor = { it.sessionPurgeTotal.toString() },
+      valueColor = RFColors.purgeGreen,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u2665",
+      title = stringResource(Res.string.summary_top_sac_dances),
+      cards = topSacDances,
+      valueExtractor = { it.sessionSacDanceTotal.toString() },
+      valueColor = RFColors.sacDancePurple,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
     }
   }
 }
