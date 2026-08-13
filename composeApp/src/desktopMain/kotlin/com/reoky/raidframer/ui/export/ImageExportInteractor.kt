@@ -1353,7 +1353,7 @@ object ImageExportInteractor {
     // Special Heals: Mana Barrier, Revive, Life Mends
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_mana_barrier), "\uD83D\uDEE1", ColumnData.CardData(data.topManaBarrier, { it.sessionManaBarrierTotal.toString() }, MANA_BARRIER_COLOR)),
-      Triple(getString(Res.string.summary_top_revive), "\u271F", ColumnData.CardData(data.topRevive, { it.sessionReviveTotal.toString() }, REVIVE_COLOR)),
+      Triple(getString(Res.string.summary_top_revive), "\u2618", ColumnData.CardData(data.topRevive, { it.sessionReviveTotal.toString() }, REVIVE_COLOR)),
       Triple(getString(Res.string.summary_top_life_mends), "\u2764", ColumnData.CardData(
         data.topLifeMenders,
         { card ->
@@ -1375,7 +1375,7 @@ object ImageExportInteractor {
     // Special Dances: Sac Dances, Deep Tranquility, Deepend Debuff
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_sac_dances), "\u2665", ColumnData.CardData(data.topSacDances, { it.sessionSacDanceTotal.toString() }, SAC_DANCE_COLOR)),
-      Triple(getString(Res.string.summary_top_deep_tranquility), "\u2727", ColumnData.CardData(data.topDeepTranquility, { it.sessionDeepTranquilityTotal.toString() }, DEEP_TRANQUILITY_COLOR)),
+      Triple(getString(Res.string.summary_top_deep_tranquility), "\u2602", ColumnData.CardData(data.topDeepTranquility, { it.sessionDeepTranquilityTotal.toString() }, DEEP_TRANQUILITY_COLOR)),
       Triple(getString(Res.string.summary_top_deepend_debuff), "\u2B07", ColumnData.CardData(data.topDeependDebuff, { it.sessionDeependDebuffTotal.toString() }, DEEPEND_DEBUFF_COLOR)),
     )))
 

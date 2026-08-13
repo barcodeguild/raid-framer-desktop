@@ -1127,7 +1127,7 @@ private fun SpecialHealsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\u271F",
+      icon = "\u2618",
       title = stringResource(Res.string.summary_top_revive),
       cards = topRevive,
       valueExtractor = { it.sessionReviveTotal.toString() },
@@ -1215,7 +1215,7 @@ private fun SpecialDancesTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\u2727",
+      icon = "\u2602",
       title = stringResource(Res.string.summary_top_deep_tranquility),
       cards = topDeepTranquility,
       valueExtractor = { it.sessionDeepTranquilityTotal.toString() },
