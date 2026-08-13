@@ -76,6 +76,11 @@ object PlayerCacheInteractor : Interactor() {
   private val petCards = mutableStateMapOf<String, PetCard>()
   // Life Mend caster tracking: target → caster (updated on SPELL_AURA_APPLIED/REMOVED for buff 25875)
   private val lifeMendCasterMap = mutableMapOf<String, String>()
+  // Leech steal detection: source → timestamp of last Leech cast (spellId 10104)
+  // Used to filter out buffs stolen via Leech that would otherwise be misattributed as Life Mend casts.
+  private const val LEECH_SPELL_ID = 10104
+  private const val LEECH_WINDOW_MS = 2000L
+  private val recentLeechCasts = mutableMapOf<String, Long>()
   private val mutex = Mutex() // to protect critical sections during player card updates from other threads
   private var archiveJob: Job? = null
   private var preSessionCacheSnapshot: MutableMap<String, PlayerCacheEntity?> = mutableMapOf()
@@ -196,10 +201,11 @@ object PlayerCacheInteractor : Interactor() {
                   val lastAmount = casterCard.lifeMendHealAmounts.lastOrNull()
                   if (lastAmount != buff.tooltip.healAmount) {
                     cards[caster] = casterCard.updateLifeMendStats(buff.tooltip.healAmount)
-                  }
-                }
-              }
-            }
+        }
+      }
+    }
+
+  }
           }
         }
       }
@@ -437,6 +443,7 @@ object PlayerCacheInteractor : Interactor() {
         petCards.clear()
         raids.clear()
         lifeMendCasterMap.clear()
+        recentLeechCasts.clear()
       }
       CombatLogInteractor.startRecording()
       Log.info(TAG, "Started new recording session: type=$sessionType, allowPvE=$allowPvE")
@@ -871,6 +878,10 @@ object PlayerCacheInteractor : Interactor() {
         }
       }
     }
+
+    // Clean up stale Leech cast entries (older than 10 seconds)
+    val now = System.currentTimeMillis()
+    recentLeechCasts.entries.removeIf { now - it.value > 10_000L }
   }
 
   ///////////////////////////
@@ -978,6 +989,9 @@ object PlayerCacheInteractor : Interactor() {
         cards[event.source]?.let { card ->
           cards[event.source] = card.postCastingEvent(event)
         }
+        if (event.spellId == LEECH_SPELL_ID) {
+          recentLeechCasts[event.source] = event.timestamp
+        }
       }
     }
   }
@@ -1000,6 +1014,9 @@ object PlayerCacheInteractor : Interactor() {
         createCardIfNoneExists(cid = event.cid, event.source)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postSuccessfulCastEvent(event)
+        }
+        if (event.spellId == LEECH_SPELL_ID) {
+          recentLeechCasts[event.source] = event.timestamp
         }
       }
     }
@@ -1029,8 +1046,16 @@ object PlayerCacheInteractor : Interactor() {
             )
             // track Life Mend casts on the healer's card
             if (event.buffId == LIFE_MEND_BUFF_ID) {
-              cards[source] = cards[source]!!.postLifeMendApplied(event.target)
-              lifeMendCasterMap[event.target] = source
+              // Filter out Life Mend buffs stolen via Leech: if the source recently cast Leech
+              // and the buff appeared on themselves (source == target), it's a steal, not a cast.
+              val isLeechSteal = event.source == event.target &&
+                  (recentLeechCasts[event.source]?.let { event.timestamp - it <= LEECH_WINDOW_MS } == true)
+              if (!isLeechSteal) {
+                cards[source] = cards[source]!!.postLifeMendApplied(event.target)
+                lifeMendCasterMap[event.target] = source
+              } else {
+                Log.debug(TAG, "Filtered Leech-stolen Life Mend from $source")
+              }
             }
           }
         }
