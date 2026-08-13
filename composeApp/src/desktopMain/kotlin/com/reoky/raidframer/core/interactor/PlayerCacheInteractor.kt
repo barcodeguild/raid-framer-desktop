@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
-import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -574,6 +573,22 @@ object PlayerCacheInteractor : Interactor() {
            ,totalGardenDefiance = card.sessionGardenDefianceTotal
            ,totalPurges = card.sessionPurgeTotal
            ,totalSacDances = card.sessionSacDanceTotal
+           ,totalDeepTranquility = card.sessionDeepTranquilityTotal
+           ,totalDeependDebuff = card.sessionDeependDebuffTotal
+           ,totalThrowDagger = card.sessionThrowDaggerTotal
+           ,totalStuns = card.sessionStunsTotal
+           ,totalStaggers = card.sessionStaggersTotal
+           ,totalPetrification = card.sessionPetrificationTotal
+           ,totalAbsorbLifeforce = card.sessionAbsorbLifeforceTotal
+           ,totalCorrosiveBarrage = card.sessionCorrosiveBarrageTotal
+           ,totalBlindedByCrows = card.sessionBlindedByCrowsTotal
+           ,totalMistSunder = card.sessionMistSunderTotal
+           ,totalRegularSunder = card.sessionRegularSunderTotal
+           ,totalImpaleImmunity = card.sessionImpaleImmunityTotal
+           ,totalProtectiveWings = card.sessionProtectiveWingsTotal
+           ,totalCourageousAction = card.sessionCourageousActionTotal
+           ,totalManaBarrier = card.sessionManaBarrierTotal
+           ,totalRevive = card.sessionReviveTotal
         )
         RFDao.playerSessionDao.insert(entity)
         written++
@@ -620,6 +635,22 @@ object PlayerCacheInteractor : Interactor() {
          || card.sessionGardenDefianceTotal != 0
          || card.sessionPurgeTotal != 0
          || card.sessionSacDanceTotal != 0
+         || card.sessionDeepTranquilityTotal != 0
+         || card.sessionDeependDebuffTotal != 0
+         || card.sessionThrowDaggerTotal != 0
+         || card.sessionStunsTotal != 0
+         || card.sessionStaggersTotal != 0
+         || card.sessionPetrificationTotal != 0
+         || card.sessionAbsorbLifeforceTotal != 0
+         || card.sessionCorrosiveBarrageTotal != 0
+         || card.sessionBlindedByCrowsTotal != 0
+         || card.sessionMistSunderTotal != 0
+         || card.sessionRegularSunderTotal != 0
+         || card.sessionImpaleImmunityTotal != 0
+         || card.sessionProtectiveWingsTotal != 0
+         || card.sessionCourageousActionTotal != 0
+         || card.sessionManaBarrierTotal != 0
+         || card.sessionReviveTotal != 0
   }
 
   /**
@@ -677,7 +708,23 @@ object PlayerCacheInteractor : Interactor() {
        totalDefiance = sessions.sumOf { it.totalDefiance },
        totalGardenDefiance = sessions.sumOf { it.totalGardenDefiance },
        totalPurges = sessions.sumOf { it.totalPurges },
-       totalSacDances = sessions.sumOf { it.totalSacDances }
+       totalSacDances = sessions.sumOf { it.totalSacDances },
+       totalDeepTranquility = sessions.sumOf { it.totalDeepTranquility },
+       totalDeependDebuff = sessions.sumOf { it.totalDeependDebuff },
+       totalThrowDagger = sessions.sumOf { it.totalThrowDagger },
+       totalStuns = sessions.sumOf { it.totalStuns },
+       totalStaggers = sessions.sumOf { it.totalStaggers },
+       totalPetrification = sessions.sumOf { it.totalPetrification },
+       totalAbsorbLifeforce = sessions.sumOf { it.totalAbsorbLifeforce },
+       totalCorrosiveBarrage = sessions.sumOf { it.totalCorrosiveBarrage },
+       totalBlindedByCrows = sessions.sumOf { it.totalBlindedByCrows },
+       totalMistSunder = sessions.sumOf { it.totalMistSunder },
+       totalRegularSunder = sessions.sumOf { it.totalRegularSunder },
+       totalImpaleImmunity = sessions.sumOf { it.totalImpaleImmunity },
+       totalProtectiveWings = sessions.sumOf { it.totalProtectiveWings },
+       totalCourageousAction = sessions.sumOf { it.totalCourageousAction },
+       totalManaBarrier = sessions.sumOf { it.totalManaBarrier },
+       totalRevive = sessions.sumOf { it.totalRevive }
     )
   }
 
@@ -1558,6 +1605,70 @@ object PlayerCacheInteractor : Interactor() {
 
   val topSacDances: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { it.filter { card -> card.isRealPlayer && card.sessionSacDanceTotal > 0 }.sortedByDescending { card -> card.sessionSacDanceTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topDeepTranquility: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionDeepTranquilityTotal > 0 }.sortedByDescending { card -> card.sessionDeepTranquilityTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topDeependDebuff: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionDeependDebuffTotal > 0 }.sortedByDescending { card -> card.sessionDeependDebuffTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topThrowDagger: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionThrowDaggerTotal > 0 }.sortedByDescending { card -> card.sessionThrowDaggerTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topStuns: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionStunsTotal > 0 }.sortedByDescending { card -> card.sessionStunsTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topStaggers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionStaggersTotal > 0 }.sortedByDescending { card -> card.sessionStaggersTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topPetrification: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionPetrificationTotal > 0 }.sortedByDescending { card -> card.sessionPetrificationTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topAbsorbLifeforce: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionAbsorbLifeforceTotal > 0 }.sortedByDescending { card -> card.sessionAbsorbLifeforceTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topCorrosiveBarrage: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionCorrosiveBarrageTotal > 0 }.sortedByDescending { card -> card.sessionCorrosiveBarrageTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topBlindedByCrows: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionBlindedByCrowsTotal > 0 }.sortedByDescending { card -> card.sessionBlindedByCrowsTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topMistSunder: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionMistSunderTotal > 0 }.sortedByDescending { card -> card.sessionMistSunderTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topRegularSunder: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionRegularSunderTotal > 0 }.sortedByDescending { card -> card.sessionRegularSunderTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topImpaleImmunity: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionImpaleImmunityTotal > 0 }.sortedByDescending { card -> card.sessionImpaleImmunityTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topProtectiveWings: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionProtectiveWingsTotal > 0 }.sortedByDescending { card -> card.sessionProtectiveWingsTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topCourageousAction: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionCourageousActionTotal > 0 }.sortedByDescending { card -> card.sessionCourageousActionTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topManaBarrier: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionManaBarrierTotal > 0 }.sortedByDescending { card -> card.sessionManaBarrierTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topRevive: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionReviveTotal > 0 }.sortedByDescending { card -> card.sessionReviveTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }

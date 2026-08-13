@@ -50,6 +50,22 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_weapo
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_potion_disables
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_bd_glider
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crystal_wings
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_deep_tranquility
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_deepend_debuff
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_throw_dagger
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_stuns
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_staggers
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_petrification
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_absorb_lifeforce
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_corrosive_barrage
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_blinded_by_crows
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mist_sunder
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_regular_sunder
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_impale_immunity
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_protective_wings
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_courageous_action
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mana_barrier
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_revive
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_glider_disables
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_provoked
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_defiance
@@ -90,7 +106,23 @@ data class SessionTotals(
   val defiance: Int,
   val gardenDefiance: Int,
   val purges: Int,
-  val sacDances: Int
+  val sacDances: Int,
+  val deepTranquility: Int,
+  val deedendDebuff: Int,
+  val throwDagger: Int,
+  val stuns: Int,
+  val staggers: Int,
+  val petrification: Int,
+  val absorbLifeforce: Int,
+  val corrosiveBarrage: Int,
+  val blindedByCrows: Int,
+  val mistSunder: Int,
+  val regularSunder: Int,
+  val impaleImmunity: Int,
+  val protectiveWings: Int,
+  val courageousAction: Int,
+  val manaBarrier: Int,
+  val revive: Int
 ) {
   companion object {
     fun fromPlayerCard(card: PlayerCard) = SessionTotals(
@@ -124,7 +156,23 @@ data class SessionTotals(
        defiance = card.sessionDefianceTotal,
        gardenDefiance = card.sessionGardenDefianceTotal,
        purges = card.sessionPurgeTotal,
-       sacDances = card.sessionSacDanceTotal
+       sacDances = card.sessionSacDanceTotal,
+       deepTranquility = card.sessionDeepTranquilityTotal,
+       deedendDebuff = card.sessionDeependDebuffTotal,
+       throwDagger = card.sessionThrowDaggerTotal,
+       stuns = card.sessionStunsTotal,
+       staggers = card.sessionStaggersTotal,
+       petrification = card.sessionPetrificationTotal,
+       absorbLifeforce = card.sessionAbsorbLifeforceTotal,
+       corrosiveBarrage = card.sessionCorrosiveBarrageTotal,
+       blindedByCrows = card.sessionBlindedByCrowsTotal,
+       mistSunder = card.sessionMistSunderTotal,
+       regularSunder = card.sessionRegularSunderTotal,
+       impaleImmunity = card.sessionImpaleImmunityTotal,
+       protectiveWings = card.sessionProtectiveWingsTotal,
+       courageousAction = card.sessionCourageousActionTotal,
+       manaBarrier = card.sessionManaBarrierTotal,
+       revive = card.sessionReviveTotal
     )
 
     fun fromEntity(entity: PlayerSessionTotalsEntity) = SessionTotals(
@@ -158,7 +206,23 @@ data class SessionTotals(
        defiance = entity.totalDefiance,
        gardenDefiance = entity.totalGardenDefiance,
        purges = entity.totalPurges,
-       sacDances = entity.totalSacDances
+       sacDances = entity.totalSacDances,
+       deepTranquility = entity.totalDeepTranquility,
+       deedendDebuff = entity.totalDeependDebuff,
+       throwDagger = entity.totalThrowDagger,
+       stuns = entity.totalStuns,
+       staggers = entity.totalStaggers,
+       petrification = entity.totalPetrification,
+       absorbLifeforce = entity.totalAbsorbLifeforce,
+       corrosiveBarrage = entity.totalCorrosiveBarrage,
+       blindedByCrows = entity.totalBlindedByCrows,
+       mistSunder = entity.totalMistSunder,
+       regularSunder = entity.totalRegularSunder,
+       impaleImmunity = entity.totalImpaleImmunity,
+       protectiveWings = entity.totalProtectiveWings,
+       courageousAction = entity.totalCourageousAction,
+       manaBarrier = entity.totalManaBarrier,
+       revive = entity.totalRevive
     )
   }
 }
@@ -189,6 +253,22 @@ fun SessionStatRows(totals: SessionTotals) {
   StatRow(stringResource(Res.string.player_card_stat_garden_defiance), totals.gardenDefiance.toLong(), RFColors.gardenDefianceBlue)
   StatRow(stringResource(Res.string.player_card_stat_purges), totals.purges.toLong(), RFColors.purgeGreen)
   StatRow(stringResource(Res.string.player_card_stat_sac_dances), totals.sacDances.toLong(), RFColors.sacDancePurple)
+  StatRow(stringResource(Res.string.player_card_stat_deep_tranquility), totals.deepTranquility.toLong(), RFColors.deepTranquilityTeal)
+  StatRow(stringResource(Res.string.player_card_stat_deepend_debuff), totals.deedendDebuff.toLong(), RFColors.deedendDebuffRed)
+  StatRow(stringResource(Res.string.player_card_stat_throw_dagger), totals.throwDagger.toLong(), RFColors.throwDaggerAmber)
+  StatRow(stringResource(Res.string.player_card_stat_stuns), totals.stuns.toLong(), RFColors.stunDeepRed)
+  StatRow(stringResource(Res.string.player_card_stat_staggers), totals.staggers.toLong(), RFColors.staggerBrown)
+  StatRow(stringResource(Res.string.player_card_stat_petrification), totals.petrification.toLong(), RFColors.petrificationGray)
+  StatRow(stringResource(Res.string.player_card_stat_absorb_lifeforce), totals.absorbLifeforce.toLong(), RFColors.absorbLifeforceMagenta)
+  StatRow(stringResource(Res.string.player_card_stat_corrosive_barrage), totals.corrosiveBarrage.toLong(), RFColors.corrosiveBarrageLime)
+  StatRow(stringResource(Res.string.player_card_stat_blinded_by_crows), totals.blindedByCrows.toLong(), RFColors.blindedByCrowsDark)
+  StatRow(stringResource(Res.string.player_card_stat_mist_sunder), totals.mistSunder.toLong(), RFColors.mistSunderCyan)
+  StatRow(stringResource(Res.string.player_card_stat_regular_sunder), totals.regularSunder.toLong(), RFColors.regularSunderOrange)
+  StatRow(stringResource(Res.string.player_card_stat_impale_immunity), totals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel)
+  StatRow(stringResource(Res.string.player_card_stat_protective_wings), totals.protectiveWings.toLong(), RFColors.protectiveWingsGold)
+  StatRow(stringResource(Res.string.player_card_stat_courageous_action), totals.courageousAction.toLong(), RFColors.courageousActionBright)
+  StatRow(stringResource(Res.string.player_card_stat_mana_barrier), totals.manaBarrier.toLong(), RFColors.manaBarrierBlue)
+  StatRow(stringResource(Res.string.player_card_stat_revive), totals.revive.toLong(), RFColors.reviveGhostWhite)
   StatRow(stringResource(Res.string.player_card_stat_glider), totals.glider.toLong(), RFColors.gliderBlue)
   StatRow(stringResource(Res.string.player_card_stat_items), totals.items.toLong(), RFColors.itemSkillYellow)
   StatRow(stringResource(Res.string.player_card_stat_potions), totals.potions.toLong(), RFColors.potionTeal)
@@ -262,6 +342,22 @@ fun CompactSessionTotals(
     CompactStatRow(stringResource(Res.string.player_card_stat_garden_defiance), sessionTotals.gardenDefiance.toLong(), RFColors.gardenDefianceBlue)
     CompactStatRow(stringResource(Res.string.player_card_stat_purges), sessionTotals.purges.toLong(), RFColors.purgeGreen)
     CompactStatRow(stringResource(Res.string.player_card_stat_sac_dances), sessionTotals.sacDances.toLong(), RFColors.sacDancePurple)
+    CompactStatRow(stringResource(Res.string.player_card_stat_deep_tranquility), sessionTotals.deepTranquility.toLong(), RFColors.deepTranquilityTeal)
+    CompactStatRow(stringResource(Res.string.player_card_stat_deepend_debuff), sessionTotals.deedendDebuff.toLong(), RFColors.deedendDebuffRed)
+    CompactStatRow(stringResource(Res.string.player_card_stat_throw_dagger), sessionTotals.throwDagger.toLong(), RFColors.throwDaggerAmber)
+    CompactStatRow(stringResource(Res.string.player_card_stat_stuns), sessionTotals.stuns.toLong(), RFColors.stunDeepRed)
+    CompactStatRow(stringResource(Res.string.player_card_stat_staggers), sessionTotals.staggers.toLong(), RFColors.staggerBrown)
+    CompactStatRow(stringResource(Res.string.player_card_stat_petrification), sessionTotals.petrification.toLong(), RFColors.petrificationGray)
+    CompactStatRow(stringResource(Res.string.player_card_stat_absorb_lifeforce), sessionTotals.absorbLifeforce.toLong(), RFColors.absorbLifeforceMagenta)
+    CompactStatRow(stringResource(Res.string.player_card_stat_corrosive_barrage), sessionTotals.corrosiveBarrage.toLong(), RFColors.corrosiveBarrageLime)
+    CompactStatRow(stringResource(Res.string.player_card_stat_blinded_by_crows), sessionTotals.blindedByCrows.toLong(), RFColors.blindedByCrowsDark)
+    CompactStatRow(stringResource(Res.string.player_card_stat_mist_sunder), sessionTotals.mistSunder.toLong(), RFColors.mistSunderCyan)
+    CompactStatRow(stringResource(Res.string.player_card_stat_regular_sunder), sessionTotals.regularSunder.toLong(), RFColors.regularSunderOrange)
+    CompactStatRow(stringResource(Res.string.player_card_stat_impale_immunity), sessionTotals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel)
+    CompactStatRow(stringResource(Res.string.player_card_stat_protective_wings), sessionTotals.protectiveWings.toLong(), RFColors.protectiveWingsGold)
+    CompactStatRow(stringResource(Res.string.player_card_stat_courageous_action), sessionTotals.courageousAction.toLong(), RFColors.courageousActionBright)
+    CompactStatRow(stringResource(Res.string.player_card_stat_mana_barrier), sessionTotals.manaBarrier.toLong(), RFColors.manaBarrierBlue)
+    CompactStatRow(stringResource(Res.string.player_card_stat_revive), sessionTotals.revive.toLong(), RFColors.reviveGhostWhite)
     CompactStatRow(stringResource(Res.string.player_card_stat_glider), sessionTotals.glider.toLong(), RFColors.gliderBlue)
     CompactStatRow(stringResource(Res.string.player_card_stat_items), sessionTotals.items.toLong(), RFColors.itemSkillYellow)
     CompactStatRow(stringResource(Res.string.player_card_stat_potions), sessionTotals.potions.toLong(), RFColors.potionTeal)

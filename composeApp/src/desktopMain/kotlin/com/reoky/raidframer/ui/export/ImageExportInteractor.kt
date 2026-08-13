@@ -98,6 +98,22 @@ import org.jetbrains.skia.Codec
 import org.jetbrains.skia.Data
 import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.svg.SVGDOM
+import raid_framer_desktop.composeapp.generated.resources.summary_top_deep_tranquility
+import raid_framer_desktop.composeapp.generated.resources.summary_top_deepend_debuff
+import raid_framer_desktop.composeapp.generated.resources.summary_top_throw_dagger
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stuns
+import raid_framer_desktop.composeapp.generated.resources.summary_top_staggers
+import raid_framer_desktop.composeapp.generated.resources.summary_top_absorb_lifeforce
+import raid_framer_desktop.composeapp.generated.resources.summary_top_corrosive_barrage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_blinded_by_crows
+import raid_framer_desktop.composeapp.generated.resources.summary_top_mist_sunder
+import raid_framer_desktop.composeapp.generated.resources.summary_top_regular_sunder
+import raid_framer_desktop.composeapp.generated.resources.summary_top_impale_immunity
+import raid_framer_desktop.composeapp.generated.resources.summary_top_protective_wings
+import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
+import raid_framer_desktop.composeapp.generated.resources.summary_top_mana_barrier
+import raid_framer_desktop.composeapp.generated.resources.summary_top_revive
+import raid_framer_desktop.composeapp.generated.resources.summary_top_petrification
 import raid_framer_desktop.composeapp.generated.resources.summary_top_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_garden_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_purges
@@ -160,6 +176,22 @@ object ImageExportInteractor {
   private val GARDEN_DEFIANCE_COLOR = toAwtColor(RFColors.gardenDefianceBlue)
   private val PURGE_COLOR = toAwtColor(RFColors.purgeGreen)
   private val SAC_DANCE_COLOR = toAwtColor(RFColors.sacDancePurple)
+  private val DEEP_TRANQUILITY_COLOR = toAwtColor(RFColors.deepTranquilityTeal)
+  private val DEEPEND_DEBUFF_COLOR = toAwtColor(RFColors.deedendDebuffRed)
+  private val THROW_DAGGER_COLOR = toAwtColor(RFColors.throwDaggerAmber)
+  private val STUNS_COLOR = toAwtColor(RFColors.stunDeepRed)
+  private val STAGGERS_COLOR = toAwtColor(RFColors.staggerBrown)
+  private val PETRIFICATION_COLOR = toAwtColor(RFColors.petrificationGray)
+  private val ABSORB_LIFEFORCE_COLOR = toAwtColor(RFColors.absorbLifeforceMagenta)
+  private val CORROSIVE_BARRAGE_COLOR = toAwtColor(RFColors.corrosiveBarrageLime)
+  private val BLINDED_BY_CROWS_COLOR = toAwtColor(RFColors.blindedByCrowsDark)
+  private val MIST_SUNDER_COLOR = toAwtColor(RFColors.mistSunderCyan)
+  private val REGULAR_SUNDER_COLOR = toAwtColor(RFColors.regularSunderOrange)
+  private val IMPALE_IMMUNITY_COLOR = toAwtColor(RFColors.impaleImmunitySteel)
+  private val PROTECTIVE_WINGS_COLOR = toAwtColor(RFColors.protectiveWingsGold)
+  private val COURAGEOUS_ACTION_COLOR = toAwtColor(RFColors.courageousActionBright)
+  private val MANA_BARRIER_COLOR = toAwtColor(RFColors.manaBarrierBlue)
+  private val REVIVE_COLOR = toAwtColor(RFColors.reviveGhostWhite)
 
   /**
    * Maps a heal ratio (0.0 = 0% healed, 1.0 = 100% healed) to a color gradient:
@@ -339,8 +371,24 @@ object ImageExportInteractor {
      val topDefiance: List<PlayerCard>,
      val topGardenDefiance: List<PlayerCard>,
      val topPurges: List<PlayerCard>,
-     val topSacDances: List<PlayerCard>,
-     val topLifeMenders: List<PlayerCard>,
+      val topSacDances: List<PlayerCard>,
+      val topLifeMenders: List<PlayerCard>,
+      val topDeepTranquility: List<PlayerCard>,
+      val topDeependDebuff: List<PlayerCard>,
+      val topThrowDagger: List<PlayerCard>,
+      val topStuns: List<PlayerCard>,
+      val topStaggers: List<PlayerCard>,
+      val topPetrification: List<PlayerCard>,
+      val topAbsorbLifeforce: List<PlayerCard>,
+      val topCorrosiveBarrage: List<PlayerCard>,
+      val topBlindedByCrows: List<PlayerCard>,
+      val topMistSunder: List<PlayerCard>,
+      val topRegularSunder: List<PlayerCard>,
+      val topImpaleImmunity: List<PlayerCard>,
+      val topProtectiveWings: List<PlayerCard>,
+      val topCourageousAction: List<PlayerCard>,
+      val topManaBarrier: List<PlayerCard>,
+      val topRevive: List<PlayerCard>,
     // New faction comparison data
     val factionTigerStrikeData: Map<String, Float>,
     val factionFreezeData: Map<String, Float>,
@@ -464,6 +512,22 @@ object ImageExportInteractor {
       topPurges          = PlayerCacheInteractor.topPurges.value.take(25),
       topSacDances       = PlayerCacheInteractor.topSacDances.value.take(25),
       topLifeMenders     = PlayerCacheInteractor.topLifeMenders.value.take(25),
+      topDeepTranquility = PlayerCacheInteractor.topDeepTranquility.value.take(25),
+      topDeependDebuff = PlayerCacheInteractor.topDeependDebuff.value.take(25),
+      topThrowDagger = PlayerCacheInteractor.topThrowDagger.value.take(25),
+      topStuns = PlayerCacheInteractor.topStuns.value.take(25),
+      topStaggers = PlayerCacheInteractor.topStaggers.value.take(25),
+      topPetrification = PlayerCacheInteractor.topPetrification.value.take(25),
+      topAbsorbLifeforce = PlayerCacheInteractor.topAbsorbLifeforce.value.take(25),
+      topCorrosiveBarrage = PlayerCacheInteractor.topCorrosiveBarrage.value.take(25),
+      topBlindedByCrows = PlayerCacheInteractor.topBlindedByCrows.value.take(25),
+      topMistSunder = PlayerCacheInteractor.topMistSunder.value.take(25),
+      topRegularSunder = PlayerCacheInteractor.topRegularSunder.value.take(25),
+      topImpaleImmunity = PlayerCacheInteractor.topImpaleImmunity.value.take(25),
+      topProtectiveWings = PlayerCacheInteractor.topProtectiveWings.value.take(25),
+      topCourageousAction = PlayerCacheInteractor.topCourageousAction.value.take(25),
+      topManaBarrier = PlayerCacheInteractor.topManaBarrier.value.take(25),
+      topRevive = PlayerCacheInteractor.topRevive.value.take(25),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -1168,19 +1232,7 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_top_buffs),   "\u26A1", ColumnData.CardData(data.topBuffs,   { it.sessionBuffTotal.toString()   }, PIRATE_COLOR)),
     )))
 
-    tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_sac_dances), "\u2665", ColumnData.CardData(data.topSacDances, { it.sessionSacDanceTotal.toString() }, SAC_DANCE_COLOR)),
-      Triple(getString(Res.string.summary_top_life_mends), "\u2764", ColumnData.CardData(
-        data.topLifeMenders,
-        { card ->
-          "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${qualityLabels[card.lifeMendQuality]})"
-        },
-        toAwtColor(RFColors.healsGreen),
-        { card -> toAwtColor(card.lifeMendQuality.color) },
-        showIcons = false
-      )),
-    )))
-
+    // Ode, Kills, Damage Taken
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_ode_haranya), "\uD83C\uDFB5", ColumnData.CardData(data.topOdeHaranya, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
       Triple(getString(Res.string.summary_top_ode_nuia),    "\uD83C\uDFB5", ColumnData.CardData(data.topOdeNuia,    { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
@@ -1210,6 +1262,7 @@ object ImageExportInteractor {
       )),
     )))
 
+    // Items, Utility, Builds
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_haranya_item_uses), "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesHaranya)),
       Triple(getString(Res.string.summary_top_nuia_item_uses),    "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesNuia)),
@@ -1234,44 +1287,96 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_top_pirate_performance),  "\uD83C\uDFC6", ColumnData.CardData(data.topPerformancePirate,  { it.pvpPerformancePoints().toString() }, PIRATE_COLOR)),
     )))
 
+    // Debuffs: Silences, Charms, Distresses
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_silences),  "\uD83D\uDD07", ColumnData.CardData(data.topSilences,  { it.sessionSilenceTotal.toString()  }, SILENCE_COLOR)),
       Triple(getString(Res.string.summary_top_charms),    "\uD83D\uDC96", ColumnData.CardData(data.topCharms,    { it.sessionCharmTotal.toString()    }, CHARM_COLOR)),
       Triple(getString(Res.string.summary_top_distresses), "\uD83D\uDE24", ColumnData.CardData(data.topDistresses, { it.sessionDistressTotal.toString() }, DISTRESS_COLOR)),
     )))
 
-    // Trips, Bubbles, Bracings
+    // CC Debuffs: Trips, Bubbles, Bracings
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_trips), "\u2193", ColumnData.CardData(data.topTrips, { it.sessionTripsTotal.toString() }, TRIPS_COLOR)),
       Triple(getString(Res.string.summary_top_bubbles), "\u25CF", ColumnData.CardData(data.topBubbles, { it.sessionBubblesTotal.toString() }, BUBBLES_COLOR)),
       Triple(getString(Res.string.summary_top_bracings), "\u27A1", ColumnData.CardData(data.topBracings, { it.sessionBracingsTotal.toString() }, BRACINGS_COLOR)),
     )))
 
-    // Shield Strip, Weapon Disables, Potion Disables
+    // Utility Debuffs: Shield Strip, Weapon Disables, Potion Disables
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_shield_strip), "\u2694", ColumnData.CardData(data.topShieldStrip, { it.sessionShieldStripTotal.toString() }, SHIELD_STRIP_COLOR)),
       Triple(getString(Res.string.summary_top_weapon_disables), "\u2620", ColumnData.CardData(data.topWeaponDisables, { it.sessionWeaponDisablesTotal.toString() }, WEAPON_DISABLES_COLOR)),
       Triple(getString(Res.string.summary_top_potion_disables), "\u2697", ColumnData.CardData(data.topPotionDisables, { it.sessionPotionDisablesTotal.toString() }, POTION_DISABLES_COLOR)),
     )))
 
-    // BD Glider, Crystal Wings, Glider Disables
+    // Glider Debuffs: BD Glider, Crystal Wings, Glider Disables
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_bd_glider), "\u2708", ColumnData.CardData(data.topBdGlider, { it.sessionBdGliderTotal.toString() }, BD_GLIDER_COLOR)),
       Triple(getString(Res.string.summary_top_crystal_wings), "\u2708", ColumnData.CardData(data.topCrystalWings, { it.sessionCrystalWingsTotal.toString() }, CRYSTAL_WINGS_COLOR)),
       Triple(getString(Res.string.summary_top_glider_disables), "\u2708", ColumnData.CardData(data.topGliderDisables, { it.sessionGliderDisablesTotal.toString() }, GLIDER_DISABLES_COLOR)),
     )))
 
-    // Provokes, Tiger Strikes, Freezes
+    // Special Debuffs: Provokes, Petrification, Freezes
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_provokes), "\u2757", ColumnData.CardData(data.topProvoked, { it.sessionProvokedTotal.toString() }, PROVOKED_COLOR)),
-      Triple(getString(Res.string.summary_top_tiger_strikes), "\u26A1", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
+      Triple(getString(Res.string.summary_top_petrification), "\u26CF", ColumnData.CardData(data.topPetrification, { it.sessionPetrificationTotal.toString() }, PETRIFICATION_COLOR)),
       Triple(getString(Res.string.summary_top_freezes), "\u2744", ColumnData.CardData(data.topFreezes, { it.sessionFreezeTotal.toString() }, FREEZE_COLOR)),
     )))
 
+    // Debuffs Continued: Throw Dagger, Stuns, Staggers
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_throw_dagger), "\uD83D\uDDE1", ColumnData.CardData(data.topThrowDagger, { it.sessionThrowDaggerTotal.toString() }, THROW_DAGGER_COLOR)),
+      Triple(getString(Res.string.summary_top_stuns), "\u26A0", ColumnData.CardData(data.topStuns, { it.sessionStunsTotal.toString() }, STUNS_COLOR)),
+      Triple(getString(Res.string.summary_top_staggers), "\u2195", ColumnData.CardData(data.topStaggers, { it.sessionStaggersTotal.toString() }, STAGGERS_COLOR)),
+    )))
+
+    // Debuffs Extended: Absorb Lifeforce, Corrosive Barrage, Blinded by Crows
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_absorb_lifeforce), "\uD83E\uDE78", ColumnData.CardData(data.topAbsorbLifeforce, { it.sessionAbsorbLifeforceTotal.toString() }, ABSORB_LIFEFORCE_COLOR)),
+      Triple(getString(Res.string.summary_top_corrosive_barrage), "\u2622", ColumnData.CardData(data.topCorrosiveBarrage, { it.sessionCorrosiveBarrageTotal.toString() }, CORROSIVE_BARRAGE_COLOR)),
+      Triple(getString(Res.string.summary_top_blinded_by_crows), "\uD83E\uDD85", ColumnData.CardData(data.topBlindedByCrows, { it.sessionBlindedByCrowsTotal.toString() }, BLINDED_BY_CROWS_COLOR)),
+    )))
+
+    // Special Buffs: Defiance, Divine Blessing, Purges
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_defiance), "\u2694", ColumnData.CardData(data.topDefiance, { it.sessionDefianceTotal.toString() }, DEFIANCE_COLOR)),
       Triple(getString(Res.string.summary_top_garden_defiance), "\u2600", ColumnData.CardData(data.topGardenDefiance, { it.sessionGardenDefianceTotal.toString() }, GARDEN_DEFIANCE_COLOR)),
       Triple(getString(Res.string.summary_top_purges), "\u2728", ColumnData.CardData(data.topPurges, { it.sessionPurgeTotal.toString() }, PURGE_COLOR)),
+    )))
+
+    // Special Buffs Continued: Impale Immunity, Protective Wings, Courageous Action
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_impale_immunity), "\uD83D\uDEE1", ColumnData.CardData(data.topImpaleImmunity, { it.sessionImpaleImmunityTotal.toString() }, IMPALE_IMMUNITY_COLOR)),
+      Triple(getString(Res.string.summary_top_protective_wings), "\uD83E\uDD85", ColumnData.CardData(data.topProtectiveWings, { it.sessionProtectiveWingsTotal.toString() }, PROTECTIVE_WINGS_COLOR)),
+      Triple(getString(Res.string.summary_top_courageous_action), "\u2728", ColumnData.CardData(data.topCourageousAction, { it.sessionCourageousActionTotal.toString() }, COURAGEOUS_ACTION_COLOR)),
+    )))
+
+    // Special Heals: Mana Barrier, Revive, Life Mends
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_mana_barrier), "\uD83D\uDEE1", ColumnData.CardData(data.topManaBarrier, { it.sessionManaBarrierTotal.toString() }, MANA_BARRIER_COLOR)),
+      Triple(getString(Res.string.summary_top_revive), "\u271F", ColumnData.CardData(data.topRevive, { it.sessionReviveTotal.toString() }, REVIVE_COLOR)),
+      Triple(getString(Res.string.summary_top_life_mends), "\u2764", ColumnData.CardData(
+        data.topLifeMenders,
+        { card ->
+          "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${qualityLabels[card.lifeMendQuality]})"
+        },
+        toAwtColor(RFColors.healsGreen),
+        { card -> toAwtColor(card.lifeMendQuality.color) },
+        showIcons = false
+      )),
+    )))
+
+    // Special Melee: Tiger Strikes, Mist Sunder, Regular Sunder
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_tiger_strikes), "\u26A1", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
+      Triple(getString(Res.string.summary_top_mist_sunder), "\u26CF", ColumnData.CardData(data.topMistSunder, { it.sessionMistSunderTotal.toString() }, MIST_SUNDER_COLOR)),
+      Triple(getString(Res.string.summary_top_regular_sunder), "\u26CF", ColumnData.CardData(data.topRegularSunder, { it.sessionRegularSunderTotal.toString() }, REGULAR_SUNDER_COLOR)),
+    )))
+
+    // Special Dances: Sac Dances, Deep Tranquility, Deepend Debuff
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_sac_dances), "\u2665", ColumnData.CardData(data.topSacDances, { it.sessionSacDanceTotal.toString() }, SAC_DANCE_COLOR)),
+      Triple(getString(Res.string.summary_top_deep_tranquility), "\u2727", ColumnData.CardData(data.topDeepTranquility, { it.sessionDeepTranquilityTotal.toString() }, DEEP_TRANQUILITY_COLOR)),
+      Triple(getString(Res.string.summary_top_deepend_debuff), "\u2B07", ColumnData.CardData(data.topDeependDebuff, { it.sessionDeependDebuffTotal.toString() }, DEEPEND_DEBUFF_COLOR)),
     )))
 
     return tripletBlocks

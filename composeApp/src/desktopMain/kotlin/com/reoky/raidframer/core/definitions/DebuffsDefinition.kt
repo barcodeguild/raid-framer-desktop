@@ -49,6 +49,22 @@ val gardenDefianceCastId = 44385
 // Purge cast ID: 10712. Purge is counted from the gained buff ID below.
 val purgeBuffId = 23347
 val sacrificeBuffIds = listOf(30098, 30137, 30141, 30142)
+val deepTranquilityBuffId = 29951
+val deedendDebuffIds = listOf(29954)
+val manaBarrierBuffIds = listOf(16870, 16871, 16872)
+val throwDaggerDebuffIds = listOf(6829)
+val absorbLifeforceDebuffIds = listOf(23360)
+val blindedByCrowsDebuffIds = listOf(4807, 20934)
+val mistSunderDebuffIds = listOf(24562)
+val corrosiveBarrageDebuffIds = listOf(26722, 29645)
+val regularSunderBuffIds = listOf(2596)
+val impaleImmunityBuffIds = listOf(5007, 5669, 5929, 6415, 22550)
+val protectiveWingsBuffIds = listOf(21630, 258)
+val courageousActionBuffIds = listOf(499)
+val reviveSpellIds = listOf(10546, 15066, 25518, 36745, 36748, 8002318)
+val stunDebuffIds = listOf(243, 416, 501, 1786, 2510, 2846, 3127, 3601, 4825, 4827, 6873, 6892, 18470, 20815, 20825, 20936, 22519, 22532, 23958, 23961, 24196, 24411, 26964, 27707, 29273, 8000340, 8000344, 21361, 27279, 27575, 31372)
+val staggerDebuffIds = listOf(26097, 1449, 22900, 26351, 22375, 29903)
+val petrificationDebuffIds = listOf(24391, 23198, 27124, 23061)
 
 data class DebuffsDefinition(
   override val debuffs: List<Debuff> = listOf(
@@ -58,8 +74,9 @@ data class DebuffsDefinition(
     Debuff(ids = listOf(5784, 21461, 21462, 20997, 2309, 23149, 23307, 23962, 26932, 2723, 27706, 2778, 28677, 28686, 28701, 29303, 4693), name = "Slow", consideredCC = true), // reduced movement speed
     Debuff(ids = listOf(27631, 27632, 138, 141, 17423, 21, 505, 5410, 7), name = "Tripped", consideredCC = true), // can't move
     Debuff(ids = listOf(7649), name = "Weak (Rank 4)", consideredCC = true), // increases confinement duration
-    Debuff(ids = listOf(20936), name = "Stunned", consideredCC = true), // can't move can't cast
-    Debuff(ids = listOf(20815, 20825, 22519, 22532, 23958, 23961, 27707, 3127, 3601, 8000340, 8000344), name = "Stun", consideredCC = true), // can't move can't cast (alternate stun variants)
+    // stun ids before validation 243, 416, 443, 501, 509, 913, 925, 991, 1208, 1525, 1561, 1596, 1711, 1786, 15220, 15228, 7191, 7335, 6359, 6360, 6873, 6892, 15731, 15766, 15767, 16257, 16502, 16503, 5135, 5297, 5337, 5352, 5371, 5376, 5477, 5499, 5639, 5947, 2107, 2108, 2109, 2110, 2219, 2228, 2244, 2306, 2510, 2541, 2736, 2819, 2820, 2821, 2822, 2843, 2844, 2845, 2846, 3127, 3601, 3934, 3894, 3960, 3986, 4064, 4186, 4202, 4299, 4429, 4503, 4825, 4827, 4945, 4963, 26173, 26801, 26936, 26964, 20681, 20778, 20780, 20815, 20825, 20936, 21361, 23958, 23961, 24196, 24606, 24617, 24912, 25692, 25712, 23359, 23710, 23818, 27279, 27333, 27362, 27575, 27707, 27850, 17903, 18470, 21982, 21983, 21991, 22519, 22532, 16873, 16953, 16959, 16960, 16999, 17421, 20418, 29273, 29896, 29925, 30726, 30910, 30915, 31372, 31733, 32112, 8000340, 8000344, 9000770, 9002141, 3443, 4091, 26167, 23986, 24411
+    // after stun validation:
+    Debuff(ids = listOf(243, 416, 501, 1786, 2510, 2846, 3127, 3601, 4825, 4827, 6873, 6892, 18470, 20815, 20825, 20936, 22519, 22532, 23958, 23961, 24196, 24411, 26964, 27707, 29273, 8000340, 8000344, 21361, 27279, 27575, 31372), name = "Stun", consideredCC = true), // can't move can't cast (alternate stun variants)
     Debuff(ids = listOf(18401, 22685, 23642, 23956), name = "Impaled", consideredCC = true), // can't move
     Debuff(ids = listOf(23361), name = "Flame Hell Spear", consideredCC = true), // same as impaled
     Debuff(ids = listOf(93, 21990, 2279, 9000173, 9000156), name = "Freeze", consideredCC = true), // can't move can't cast (tracks)
@@ -87,7 +104,7 @@ data class DebuffsDefinition(
     Debuff(ids = listOf(18950), name = "Sonic Wave", consideredCC = true), // prevents targeting
     Debuff(ids = listOf(2871, 2872, 2873, 2874, 2875), name = "Focal Concussion", consideredCC = true), // it's a sleep, but the buff isn't the sleep debuff
     Debuff(ids = listOf(1366, 24051, 31626), name = "Dahuta's Breath", consideredCC = true), // pushes / pulls enough to pull someone off the castle walls, so that's pvp I guess
-    Debuff(ids = listOf(26097, 1449, 22900), name = "Staggered", consideredCC = true), // player can't move or cast for a short time
+    Debuff(ids = listOf(26097, 1449, 22900, 26351, 22375, 29903), name = "Staggered", consideredCC = true), // player can't move or cast for a short time
     Debuff(ids = listOf(23107), name = "Disables Right-Hand weapon", consideredCC = true), // Ring toss
     Debuff(ids = listOf(23654, 23066, 31837), name = "Disable Left-Hand weapon", consideredCC = true), // shield strip
     Debuff(ids = listOf(7105), name = "Bracing Blast Immunity", consideredCC = true), // result of bracing blast that pushes

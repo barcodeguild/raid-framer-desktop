@@ -368,3 +368,51 @@ val MIGRATION_35_36 = object : Migration(35, 36) {
     connection.prepare("ALTER TABLE config ADD COLUMN combatShowSpecIcons INTEGER NOT NULL DEFAULT 1").use { it.step() }
   }
 }
+
+// added Deep Tranquility buff tracking (buff id 29951)
+val MIGRATION_36_37 = object : Migration(36, 37) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDeepTranquility INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDeepTranquility INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+
+// added new debuff/buff/spell tracking columns (08/13/26)
+val MIGRATION_37_38 = object : Migration(37, 38) {
+  override fun migrate(connection: SQLiteConnection) {
+    // Debuffs
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDeependDebuff INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalThrowDagger INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalStuns INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalStaggers INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPetrification INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalAbsorbLifeforce INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCorrosiveBarrage INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBlindedByCrows INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalMistSunder INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    // Buffs
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalRegularSunder INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalImpaleImmunity INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalProtectiveWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCourageousAction INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalManaBarrier INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    // Spells
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalRevive INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    // Session totals
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDeependDebuff INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalThrowDagger INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStuns INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStaggers INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPetrification INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalAbsorbLifeforce INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCorrosiveBarrage INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBlindedByCrows INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMistSunder INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalRegularSunder INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalImpaleImmunity INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalProtectiveWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCourageousAction INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalManaBarrier INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalRevive INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}

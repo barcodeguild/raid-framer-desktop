@@ -76,6 +76,12 @@ import raid_framer_desktop.composeapp.generated.resources.summary_provokes_by_fa
 import raid_framer_desktop.composeapp.generated.resources.summary_tiger_strikes_by_faction
 import raid_framer_desktop.composeapp.generated.resources.summary_freezes_by_faction
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_new_buffs
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_debuffs_continued
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_debuffs_extended
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_special_buffs_continued
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_special_heals
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_special_melee
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_special_dances
 import raid_framer_desktop.composeapp.generated.resources.summary_top_trips
 import raid_framer_desktop.composeapp.generated.resources.summary_top_bubbles
 import raid_framer_desktop.composeapp.generated.resources.summary_top_bracings
@@ -92,6 +98,22 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
 import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
 import raid_framer_desktop.composeapp.generated.resources.summary_top_debuffs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_deep_tranquility
+import raid_framer_desktop.composeapp.generated.resources.summary_top_deepend_debuff
+import raid_framer_desktop.composeapp.generated.resources.summary_top_throw_dagger
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stuns
+import raid_framer_desktop.composeapp.generated.resources.summary_top_staggers
+import raid_framer_desktop.composeapp.generated.resources.summary_top_absorb_lifeforce
+import raid_framer_desktop.composeapp.generated.resources.summary_top_corrosive_barrage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_blinded_by_crows
+import raid_framer_desktop.composeapp.generated.resources.summary_top_mist_sunder
+import raid_framer_desktop.composeapp.generated.resources.summary_top_regular_sunder
+import raid_framer_desktop.composeapp.generated.resources.summary_top_impale_immunity
+import raid_framer_desktop.composeapp.generated.resources.summary_top_protective_wings
+import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
+import raid_framer_desktop.composeapp.generated.resources.summary_top_mana_barrier
+import raid_framer_desktop.composeapp.generated.resources.summary_top_revive
+import raid_framer_desktop.composeapp.generated.resources.summary_top_petrification
 import raid_framer_desktop.composeapp.generated.resources.summary_top_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_distresses
 import raid_framer_desktop.composeapp.generated.resources.summary_top_garden_defiance
@@ -191,6 +213,22 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val topGardenDefiance by PlayerCacheInteractor.topGardenDefiance.collectAsState()
   val topPurges by PlayerCacheInteractor.topPurges.collectAsState()
   val topSacDances by PlayerCacheInteractor.topSacDances.collectAsState()
+  val topDeepTranquility by PlayerCacheInteractor.topDeepTranquility.collectAsState()
+  val topDeependDebuff by PlayerCacheInteractor.topDeependDebuff.collectAsState()
+  val topThrowDagger by PlayerCacheInteractor.topThrowDagger.collectAsState()
+  val topStuns by PlayerCacheInteractor.topStuns.collectAsState()
+  val topStaggers by PlayerCacheInteractor.topStaggers.collectAsState()
+  val topPetrification by PlayerCacheInteractor.topPetrification.collectAsState()
+  val topAbsorbLifeforce by PlayerCacheInteractor.topAbsorbLifeforce.collectAsState()
+  val topCorrosiveBarrage by PlayerCacheInteractor.topCorrosiveBarrage.collectAsState()
+  val topBlindedByCrows by PlayerCacheInteractor.topBlindedByCrows.collectAsState()
+  val topMistSunder by PlayerCacheInteractor.topMistSunder.collectAsState()
+  val topRegularSunder by PlayerCacheInteractor.topRegularSunder.collectAsState()
+  val topImpaleImmunity by PlayerCacheInteractor.topImpaleImmunity.collectAsState()
+  val topProtectiveWings by PlayerCacheInteractor.topProtectiveWings.collectAsState()
+  val topCourageousAction by PlayerCacheInteractor.topCourageousAction.collectAsState()
+  val topManaBarrier by PlayerCacheInteractor.topManaBarrier.collectAsState()
+  val topRevive by PlayerCacheInteractor.topRevive.collectAsState()
 
   // New faction comparison flows
   val factionTigerStrikeData by PlayerCacheInteractor.factionTigerStrikeComparisonAll.collectAsState()
@@ -216,7 +254,13 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     stringResource(Res.string.summary_tab_utility_debuffs),
     stringResource(Res.string.summary_tab_glider_debuffs),
     stringResource(Res.string.summary_tab_special_debuffs),
+    stringResource(Res.string.summary_tab_debuffs_continued),
+    stringResource(Res.string.summary_tab_debuffs_extended),
     stringResource(Res.string.summary_tab_new_buffs),
+    stringResource(Res.string.summary_tab_special_buffs_continued),
+    stringResource(Res.string.summary_tab_special_heals),
+    stringResource(Res.string.summary_tab_special_melee),
+    stringResource(Res.string.summary_tab_special_dances),
     stringResource(Res.string.summary_tab_spells),
     stringResource(Res.string.summary_tab_buffs),
     stringResource(Res.string.summary_tab_ode),
@@ -379,65 +423,101 @@ fun SummaryOverlay(wm: WindowManager? = null) {
         )
         5 -> SpecialDebuffsTab(
           topProvoked = topProvoked,
-          topTigerStrikes = topTigerStrikes,
+          topPetrification = topPetrification,
           topFreezes = topFreezes,
           wm = wm
         )
-         6 -> NewBuffsTab(topDefiance, topGardenDefiance, topPurges, topSacDances, wm)
-         7 -> SpellDamageByFaction(
+        6 -> DebuffsContinuedTab(
+          topThrowDagger = topThrowDagger,
+          topStuns = topStuns,
+          topStaggers = topStaggers,
+          wm = wm
+        )
+        7 -> DebuffsExtendedTab(
+          topAbsorbLifeforce = topAbsorbLifeforce,
+          topCorrosiveBarrage = topCorrosiveBarrage,
+          topBlindedByCrows = topBlindedByCrows,
+          wm = wm
+        )
+         8 -> SpecialBuffsTab(topDefiance, topGardenDefiance, topPurges, wm)
+         9 -> SpecialBuffsContinuedTab(
+          topImpaleImmunity = topImpaleImmunity,
+          topProtectiveWings = topProtectiveWings,
+          topCourageousAction = topCourageousAction,
+          wm = wm
+        )
+         10 -> SpecialHealsTab(
+          topManaBarrier = topManaBarrier,
+          topRevive = topRevive,
+          topLifeMenders = topLifeMenders,
+          wm = wm
+        )
+         11 -> SpecialMeleeTab(
+          topTigerStrikes = topTigerStrikes,
+          topMistSunder = topMistSunder,
+          topRegularSunder = topRegularSunder,
+          wm = wm
+        )
+         12 -> SpecialDancesTab(
+          topSacDances = topSacDances,
+          topDeepTranquility = topDeepTranquility,
+          topDeependDebuff = topDeependDebuff,
+          wm = wm
+        )
+         13 -> SpellDamageByFaction(
           topDamageSpellsHaranya = topDamageSpellsHaranya,
           topDamageSpellsNuia = topDamageSpellsNuia,
           topDamageSpellsPirate = topDamageSpellsPirate,
           wm = wm
         )
-         8 -> BuffsDebuffsTab(
+         14 -> BuffsDebuffsTab(
           topDebuffs = topDebuffs,
           topSongs = topSongs,
           topBuffers = topBuffers,
           wm = wm
         )
-         9 -> OdeTab(
+         15 -> OdeTab(
           topOdeHaranya = topOdeHaranya,
           topOdeNuia = topOdeNuia,
           topOdePirate = topOdePirate,
           wm = wm
         )
-         10 -> KillsDeathsTab(
+         16 -> KillsDeathsTab(
           topKillsHaranya = topKillsHaranya,
           topKillsNuia = topKillsNuia,
           topKillsPirate = topKillsPirate,
           wm = wm
         )
-         11 -> DamageTakenHealsReceived(
+         17 -> DamageTakenHealsReceived(
           topDamageTaken = topDamageTaken,
           topHealsReceived = tophealsReceived,
           wm = wm
         )
-         12 -> UtilityItemsByFaction(
+         18 -> UtilityItemsByFaction(
           topItemUsesHaranya = topItemUsesHaranya,
           topItemUsesNuia = topItemUsesNuia,
           topItemUsesPirate = topItemUsesPirate,
           wm = wm
         )
-         13 -> UtilityItemsTab(
+         19 -> UtilityItemsTab(
           topPotters = topPotters,
           topGliderGamers = topGliderGamers,
           topItemSkillCasters = topItemSkillCasters,
           wm = wm
         )
-         14 -> PlayerBuildsTab(
+         20 -> PlayerBuildsTab(
           buildCountsHaranya = buildCountsHaranya,
           buildCountsNuia = buildCountsNuia,
           buildCountsPirate = buildCountsPirate,
           wm = wm
         )
-         15 -> PerformanceTab(
+         21 -> PerformanceTab(
           topPerformanceHaranya = topPerformanceHaranya,
           topPerformanceNuia = topPerformanceNuia,
           topPerformancePirate = topPerformancePirate,
           wm = wm
         )
-         16 -> LifeMendTab(
+         22 -> LifeMendTab(
           topLifeMenders = topLifeMenders,
           wm = wm
         )
@@ -762,7 +842,7 @@ private fun GliderDebuffsTab(
 @Composable
 private fun SpecialDebuffsTab(
   topProvoked: List<PlayerCard>,
-  topTigerStrikes: List<PlayerCard>,
+  topPetrification: List<PlayerCard>,
   topFreezes: List<PlayerCard>,
   wm: WindowManager?
 ) {
@@ -781,11 +861,11 @@ private fun SpecialDebuffsTab(
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
     StatColumn(
-      icon = "\u26A1",
-      title = stringResource(Res.string.summary_top_tiger_strikes),
-      cards = topTigerStrikes,
-      valueExtractor = { it.sessionTigerStrikeTotal.toString() },
-      valueColor = RFColors.techNoTigerStrikes,
+      icon = "\u26CF",
+      title = stringResource(Res.string.summary_top_petrification),
+      cards = topPetrification,
+      valueExtractor = { it.sessionPetrificationTotal.toString() },
+      valueColor = RFColors.petrificationGray,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
@@ -852,11 +932,10 @@ private fun KeyDebuffsTab(
 }
 
 @Composable
-private fun NewBuffsTab(
+private fun SpecialBuffsTab(
   topDefiance: List<PlayerCard>,
   topGardenDefiance: List<PlayerCard>,
   topPurges: List<PlayerCard>,
-  topSacDances: List<PlayerCard>,
   wm: WindowManager?
 ) {
   Row(modifier = Modifier.fillMaxSize()) {
@@ -893,12 +972,265 @@ private fun NewBuffsTab(
       AppState.selectPlayer(card.name)
       wm?.openWindow(OverlayType.PLAYER_CARD)
     }
+  }
+}
+
+@Composable
+private fun DebuffsContinuedTab(
+  topThrowDagger: List<PlayerCard>,
+  topStuns: List<PlayerCard>,
+  topStaggers: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\uD83D\uDDE1",
+      title = stringResource(Res.string.summary_top_throw_dagger),
+      cards = topThrowDagger,
+      valueExtractor = { it.sessionThrowDaggerTotal.toString() },
+      valueColor = RFColors.throwDaggerAmber,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u26A0",
+      title = stringResource(Res.string.summary_top_stuns),
+      cards = topStuns,
+      valueExtractor = { it.sessionStunsTotal.toString() },
+      valueColor = RFColors.stunDeepRed,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u2195",
+      title = stringResource(Res.string.summary_top_staggers),
+      cards = topStaggers,
+      valueExtractor = { it.sessionStaggersTotal.toString() },
+      valueColor = RFColors.staggerBrown,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+  }
+}
+
+@Composable
+private fun DebuffsExtendedTab(
+  topAbsorbLifeforce: List<PlayerCard>,
+  topCorrosiveBarrage: List<PlayerCard>,
+  topBlindedByCrows: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\uD83E\uDE78",
+      title = stringResource(Res.string.summary_top_absorb_lifeforce),
+      cards = topAbsorbLifeforce,
+      valueExtractor = { it.sessionAbsorbLifeforceTotal.toString() },
+      valueColor = RFColors.absorbLifeforceMagenta,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u2622",
+      title = stringResource(Res.string.summary_top_corrosive_barrage),
+      cards = topCorrosiveBarrage,
+      valueExtractor = { it.sessionCorrosiveBarrageTotal.toString() },
+      valueColor = RFColors.corrosiveBarrageLime,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\uD83E\uDD85",
+      title = stringResource(Res.string.summary_top_blinded_by_crows),
+      cards = topBlindedByCrows,
+      valueExtractor = { it.sessionBlindedByCrowsTotal.toString() },
+      valueColor = RFColors.blindedByCrowsDark,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+  }
+}
+
+@Composable
+private fun SpecialBuffsContinuedTab(
+  topImpaleImmunity: List<PlayerCard>,
+  topProtectiveWings: List<PlayerCard>,
+  topCourageousAction: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\uD83D\uDEE1",
+      title = stringResource(Res.string.summary_top_impale_immunity),
+      cards = topImpaleImmunity,
+      valueExtractor = { it.sessionImpaleImmunityTotal.toString() },
+      valueColor = RFColors.impaleImmunitySteel,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\uD83E\uDD85",
+      title = stringResource(Res.string.summary_top_protective_wings),
+      cards = topProtectiveWings,
+      valueExtractor = { it.sessionProtectiveWingsTotal.toString() },
+      valueColor = RFColors.protectiveWingsGold,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u2728",
+      title = stringResource(Res.string.summary_top_courageous_action),
+      cards = topCourageousAction,
+      valueExtractor = { it.sessionCourageousActionTotal.toString() },
+      valueColor = RFColors.courageousActionBright,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+  }
+}
+
+@Composable
+private fun SpecialHealsTab(
+  topManaBarrier: List<PlayerCard>,
+  topRevive: List<PlayerCard>,
+  topLifeMenders: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\uD83D\uDEE1",
+      title = stringResource(Res.string.summary_top_mana_barrier),
+      cards = topManaBarrier,
+      valueExtractor = { it.sessionManaBarrierTotal.toString() },
+      valueColor = RFColors.manaBarrierBlue,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u271F",
+      title = stringResource(Res.string.summary_top_revive),
+      cards = topRevive,
+      valueExtractor = { it.sessionReviveTotal.toString() },
+      valueColor = RFColors.reviveGhostWhite,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\uD83D\uDC89",
+      title = stringResource(Res.string.summary_top_life_mends),
+      cards = topLifeMenders,
+      valueExtractor = { it.lifeMendTotal.toString() },
+      valueColor = RFColors.healsGreen,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+  }
+}
+
+@Composable
+private fun SpecialMeleeTab(
+  topTigerStrikes: List<PlayerCard>,
+  topMistSunder: List<PlayerCard>,
+  topRegularSunder: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\u26A1",
+      title = stringResource(Res.string.summary_top_tiger_strikes),
+      cards = topTigerStrikes,
+      valueExtractor = { it.sessionTigerStrikeTotal.toString() },
+      valueColor = RFColors.techNoTigerStrikes,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u26CF",
+      title = stringResource(Res.string.summary_top_mist_sunder),
+      cards = topMistSunder,
+      valueExtractor = { it.sessionMistSunderTotal.toString() },
+      valueColor = RFColors.mistSunderCyan,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u26CF",
+      title = stringResource(Res.string.summary_top_regular_sunder),
+      cards = topRegularSunder,
+      valueExtractor = { it.sessionRegularSunderTotal.toString() },
+      valueColor = RFColors.regularSunderOrange,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+  }
+}
+
+@Composable
+private fun SpecialDancesTab(
+  topSacDances: List<PlayerCard>,
+  topDeepTranquility: List<PlayerCard>,
+  topDeependDebuff: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
     StatColumn(
       icon = "\u2665",
       title = stringResource(Res.string.summary_top_sac_dances),
       cards = topSacDances,
       valueExtractor = { it.sessionSacDanceTotal.toString() },
       valueColor = RFColors.sacDancePurple,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u2727",
+      title = stringResource(Res.string.summary_top_deep_tranquility),
+      cards = topDeepTranquility,
+      valueExtractor = { it.sessionDeepTranquilityTotal.toString() },
+      valueColor = RFColors.deepTranquilityTeal,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      AppState.selectPlayer(card.name)
+      wm?.openWindow(OverlayType.PLAYER_CARD)
+    }
+    StatColumn(
+      icon = "\u2B07",
+      title = stringResource(Res.string.summary_top_deepend_debuff),
+      cards = topDeependDebuff,
+      valueExtractor = { it.sessionDeependDebuffTotal.toString() },
+      valueColor = RFColors.deedendDebuffRed,
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
