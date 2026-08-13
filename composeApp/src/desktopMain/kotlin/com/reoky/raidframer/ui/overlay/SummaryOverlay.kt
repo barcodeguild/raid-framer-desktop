@@ -52,7 +52,6 @@ import raid_framer_desktop.composeapp.generated.resources.summary_tab_items
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_kd
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_ode
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_performance
-import raid_framer_desktop.composeapp.generated.resources.summary_tab_life_mend
 import raid_framer_desktop.composeapp.generated.resources.summary_top_life_mends
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_received
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_specs
@@ -269,8 +268,7 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     stringResource(Res.string.summary_tab_items),
     stringResource(Res.string.summary_tab_utility),
     stringResource(Res.string.summary_tab_specs),
-    stringResource(Res.string.summary_tab_performance),
-    stringResource(Res.string.summary_tab_life_mend)
+    stringResource(Res.string.summary_tab_performance)
   )
 
   val scope = rememberCoroutineScope()
@@ -515,10 +513,6 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           topPerformanceHaranya = topPerformanceHaranya,
           topPerformanceNuia = topPerformanceNuia,
           topPerformancePirate = topPerformancePirate,
-          wm = wm
-        )
-         22 -> LifeMendTab(
-          topLifeMenders = topLifeMenders,
           wm = wm
         )
       }
@@ -1942,32 +1936,6 @@ private fun PerformanceTab(
       cards = topPerformancePirate,
       valueExtractor = { it.pvpPerformancePoints().toString() },
       valueColor = RFColors.factionPirate,
-      modifier = Modifier.weight(1f)
-    ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
-    }
-  }
-}
-
-@Composable
-private fun LifeMendTab(
-  topLifeMenders: List<PlayerCard>,
-  wm: WindowManager?
-) {
-  val qualityLabels = LifeMendQuality.entries.associateWith { stringResource(it.labelRes) }
-  Row(
-    modifier = Modifier.fillMaxSize()
-  ) {
-    StatColumn(
-      icon = "\u2764",
-      title = stringResource(Res.string.summary_top_life_mends),
-      cards = topLifeMenders,
-      valueExtractor = { card ->
-        "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${qualityLabels[card.lifeMendQuality]})"
-      },
-      valueColor = Color.White,
-      colorExtractor = { it.lifeMendQuality.color },
       modifier = Modifier.weight(1f)
     ) { card ->
       AppState.selectPlayer(card.name)
