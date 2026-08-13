@@ -1108,6 +1108,7 @@ private fun SpecialHealsTab(
   topLifeMenders: List<PlayerCard>,
   wm: WindowManager?
 ) {
+  val qualityLabels = LifeMendQuality.entries.associateWith { stringResource(it.labelRes) }
   Row(modifier = Modifier.fillMaxSize()) {
     StatColumn(
       icon = "\uD83D\uDEE1",
@@ -1135,9 +1136,13 @@ private fun SpecialHealsTab(
       icon = "\uD83D\uDC89",
       title = stringResource(Res.string.summary_top_life_mends),
       cards = topLifeMenders,
-      valueExtractor = { it.lifeMendTotal.toString() },
+      valueExtractor = {
+        val qualityLabel = qualityLabels[it.lifeMendQuality] ?: ""
+        "${it.lifeMendTotal} (${it.lifeMendAverage.toLong().humanReadableAbbreviation()} - $qualityLabel)"
+      },
       valueColor = RFColors.healsGreen,
-      modifier = Modifier.weight(1f)
+      modifier = Modifier.weight(1f),
+      colorExtractor = { it.lifeMendQuality.color }
     ) { card ->
       AppState.selectPlayer(card.name)
       wm?.openWindow(OverlayType.PLAYER_CARD)
