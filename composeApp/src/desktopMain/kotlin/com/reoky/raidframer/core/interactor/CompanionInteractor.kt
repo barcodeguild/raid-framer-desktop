@@ -228,6 +228,7 @@ object CompanionInteractor : Interactor() {
                 spellId = 0
               ).normalize<DamageEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} damaged ${combatEvent.target} (${combatEvent.cid}) for ${combatEvent.damage} using ${combatEvent.spell}.")
+              AreaEffectAttributorInteractor.onDamageEvent(combatEvent)
               PlayerCacheInteractor.postEvent(combatEvent)
             }
 
@@ -256,19 +257,26 @@ object CompanionInteractor : Interactor() {
                 buffId = event.buffId,
               ).normalize<BuffGainedEvent>()
               if (event.buffType == "DEBUFF") {
-                PlayerCacheInteractor.postEvent(
-                  DebuffGainedEvent(
-                    timestamp = event.timestamp,
-                    cid = event.cid,
-                    source = combatEvent.source,
-                    target = combatEvent.target,
-                    debuff = event.buffName,
-                    debuffId = event.buffId,
-                  )
+                val debuffEvent = DebuffGainedEvent(
+                  timestamp = event.timestamp,
+                  cid = event.cid,
+                  source = combatEvent.source,
+                  target = combatEvent.target,
+                  debuff = event.buffName,
+                  debuffId = event.buffId,
                 )
+                if (AreaEffectAttributorInteractor.isAreaEffectAura(debuffEvent)) {
+                  AreaEffectAttributorInteractor.onAuraEvent(debuffEvent)
+                } else {
+                  PlayerCacheInteractor.postEvent(debuffEvent)
+                }
                 Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} applied debuff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target} with CID ${combatEvent.cid}.")
               } else {
-                PlayerCacheInteractor.postEvent(combatEvent)
+                if (AreaEffectAttributorInteractor.isAreaEffectAura(combatEvent)) {
+                  AreaEffectAttributorInteractor.onAuraEvent(combatEvent)
+                } else {
+                  PlayerCacheInteractor.postEvent(combatEvent)
+                }
                 Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} applied buff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target} with CID ${combatEvent.cid}.")
               }
             }

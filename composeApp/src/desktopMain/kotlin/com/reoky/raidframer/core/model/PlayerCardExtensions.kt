@@ -456,6 +456,7 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   val isPurge = event.buffId == purgeBuffId
   val isDeepTranquility = event.buffId == deepTranquilityBuffId
   val isRegularSunder = event.buffId in regularSunderBuffIds
+  val isMistSunder = event.buffId in mistSunderDebuffIds
   val isImpaleImmunity = event.buffId in impaleImmunityBuffIds
   val isProtectiveWings = event.buffId in protectiveWingsBuffIds
   val isCourageousAction = event.buffId in courageousActionBuffIds
@@ -473,6 +474,7 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
       lifetimeTotalPurges = if (isPurge) (card.cache?.lifetimeTotalPurges ?: 0L) + 1 else (card.cache?.lifetimeTotalPurges ?: 0L),
       lifetimeTotalDeepTranquility = if (isDeepTranquility) (card.cache?.lifetimeTotalDeepTranquility ?: 0L) + 1 else (card.cache?.lifetimeTotalDeepTranquility ?: 0L),
       lifetimeTotalRegularSunder = if (isRegularSunder) (card.cache?.lifetimeTotalRegularSunder ?: 0L) + 1 else (card.cache?.lifetimeTotalRegularSunder ?: 0L),
+      lifetimeTotalMistSunder = if (isMistSunder) (card.cache?.lifetimeTotalMistSunder ?: 0L) + 1 else (card.cache?.lifetimeTotalMistSunder ?: 0L),
       lifetimeTotalImpaleImmunity = if (isImpaleImmunity) (card.cache?.lifetimeTotalImpaleImmunity ?: 0L) + 1 else (card.cache?.lifetimeTotalImpaleImmunity ?: 0L),
       lifetimeTotalProtectiveWings = if (isProtectiveWings) (card.cache?.lifetimeTotalProtectiveWings ?: 0L) + 1 else (card.cache?.lifetimeTotalProtectiveWings ?: 0L),
       lifetimeTotalCourageousAction = if (isCourageousAction) (card.cache?.lifetimeTotalCourageousAction ?: 0L) + 1 else (card.cache?.lifetimeTotalCourageousAction ?: 0L),
@@ -485,6 +487,7 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
     sessionPurgeTotal = if (isPurge) sessionPurgeTotal + 1 else sessionPurgeTotal,
     sessionDeepTranquilityTotal = if (isDeepTranquility) sessionDeepTranquilityTotal + 1 else sessionDeepTranquilityTotal,
     sessionRegularSunderTotal = if (isRegularSunder) sessionRegularSunderTotal + 1 else sessionRegularSunderTotal,
+    sessionMistSunderTotal = if (isMistSunder) sessionMistSunderTotal + 1 else sessionMistSunderTotal,
     sessionImpaleImmunityTotal = if (isImpaleImmunity) sessionImpaleImmunityTotal + 1 else sessionImpaleImmunityTotal,
     sessionProtectiveWingsTotal = if (isProtectiveWings) sessionProtectiveWingsTotal + 1 else sessionProtectiveWingsTotal,
     sessionCourageousActionTotal = if (isCourageousAction) sessionCourageousActionTotal + 1 else sessionCourageousActionTotal,

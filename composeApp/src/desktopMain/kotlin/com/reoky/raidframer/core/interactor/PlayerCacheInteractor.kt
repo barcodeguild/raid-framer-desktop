@@ -389,7 +389,7 @@ object PlayerCacheInteractor : Interactor() {
         } else {
           petCards[key]?.let { card ->
             petCards[key] = card.copy(
-              recentCids = cid?.let { (card.recentCids + it).distinct().takeLast(50) } ?: card.recentCids,
+            recentCids = cid?.let { (listOf(it) + card.recentCids).distinct().take(5) } ?: card.recentCids,
               lastEvent = System.currentTimeMillis(),
               petTypes = card.petTypes + petType
             )
@@ -744,6 +744,15 @@ object PlayerCacheInteractor : Interactor() {
     return cards[name]
   }
 
+  /**
+   * Reverse-lookup: given a CID, find the player name whose card contains that CID.
+   * CIDs are ephemeral identifiers assigned per login session; this finds the player
+   * who most recently used the given CID.
+   */
+  fun getPlayerNameByCid(cid: String): String? {
+    return cards.values.find { cid in it.recentCids }?.name
+  }
+
   // gets a list of player cards matching a filter predicate
   fun getGroupCards(filter: (PlayerCard) -> Boolean): List<PlayerCard> {
     return cards.values.filter(filter)
@@ -953,7 +962,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDamageInternal(event: DamageEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid, playerName = event.source)
+        createCardIfNoneExists(cid = null, playerName = event.source)
         createCardIfNoneExists(cid = event.cid, playerName = event.target)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postDamageEvent(event)
@@ -969,7 +978,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postHeal(event: HealEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid, event.source)
+        createCardIfNoneExists(cid = null, event.source)
         createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postHealEvent(event)

@@ -66,6 +66,44 @@ val stunDebuffIds = listOf(243, 416, 501, 1786, 2510, 2846, 3127, 3601, 4825, 48
 val staggerDebuffIds = listOf(26097, 1449, 22900, 26351, 22375, 29903)
 val petrificationDebuffIds = listOf(24391, 23198, 27124, 23061)
 
+/**
+ * Configuration for area-effect spells where the buff/debuff source is an NPC area object
+ * rather than the player who cast the spell. The attributor correlates SPELL_DAMAGE events
+ * (which have the real player as source) with SPELL_AURA_APPLIED events (which have the
+ * area NPC as source) to determine the actual caster.
+ */
+data class AreaEffectSpellConfig(
+  val name: String,
+  val auraBuffIds: Set<Int>,
+  val damageSpellNames: Set<String>, // localized spell names that identify the caster from SPELL_DAMAGE events
+  val appliesToAllies: Boolean, // true = buff on allies (caster-in-area match OK), false = debuff on enemies (skip caster-in-area)
+  val correlationWindowMs: Long = 2000L,
+  val areaLifetimeMs: Long = 7000L,
+)
+
+val areaEffectSpellConfigs = listOf(
+  // Regular Sunder (Earth Energy:2596) — buff on allies, caster stands in their own area
+  AreaEffectSpellConfig(
+    name = "Sunder Earth (Regular)",
+    auraBuffIds = setOf(2596),
+    damageSpellNames = setOf("Sunder Earth", "\uB300\uC9C0 \uAC00\uB974\uAE30", "\u88C2\u5CA9\u65A9"), // EN/KR/CN
+    appliesToAllies = true,
+    correlationWindowMs = 2000L,
+    areaLifetimeMs = 7000L,
+  ),
+  // Mist Sunder (Earth's Authority:24562) — debuff on enemies, caster is NOT in the area
+  AreaEffectSpellConfig(
+    name = "Sunder Earth (Mist)",
+    auraBuffIds = setOf(24562),
+    damageSpellNames = setOf("Sunder Earth", "\uB300\uC9C0 \uAC00\uB974\uAE30", "\u88C2\u5CA9\u65A9"), // EN/KR/CN
+    appliesToAllies = false,
+    correlationWindowMs = 2000L,
+    areaLifetimeMs = 7000L,
+  ),
+)
+
+val areaEffectBuffIds: Set<Int> = areaEffectSpellConfigs.flatMap { it.auraBuffIds }.toSet()
+
 data class DebuffsDefinition(
   override val debuffs: List<Debuff> = listOf(
     Debuff(ids = listOf(771, 21432, 21434), name = "Charmed", consideredCC = false),
