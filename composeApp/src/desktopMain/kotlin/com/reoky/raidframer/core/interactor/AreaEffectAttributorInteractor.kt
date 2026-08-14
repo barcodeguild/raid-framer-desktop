@@ -43,6 +43,17 @@ object AreaEffectAttributorInteractor : Interactor() {
     val spell: String,
   )
 
+  private data class Attribution(
+    val caster: String,
+    val confidence: Confidence,
+  )
+
+  private enum class Confidence {
+    DIRECT_CID,
+    CASTER_IN_AREA,
+    FALLBACK,
+  }
+
   private data class PendingAura(
     val event: CombatEvent,
     val buffId: Int,
@@ -113,7 +124,6 @@ object AreaEffectAttributorInteractor : Interactor() {
       mutex.withLock {
         pendingAuras.add(PendingAura(event, buffId, targetCID, targetName, timestamp))
       }
-      tryAttributePendingAuras()
     }
   }
 
@@ -130,29 +140,39 @@ object AreaEffectAttributorInteractor : Interactor() {
       val stillPending = mutableListOf<PendingAura>()
 
       for (aura in pendingAuras) {
-        val caster = findCasterForAura(aura)
-        if (caster != null) {
-          postAttributedEvent(aura, caster)
-          learnSunderType(caster, aura.buffId, aura.timestamp)
+        val attribution = findCasterForAura(aura)
+        if (attribution != null) {
+          postAttributedEvent(aura, attribution.caster)
+          // Only direct CID correlation can safely teach us which Sunder variant
+          // a caster owns; fallback/area guesses may belong to another player's area.
+          if (attribution.confidence == Confidence.DIRECT_CID) {
+            learnSunderType(attribution.caster, aura.buffId, aura.timestamp)
+          }
           val config = areaEffectSpellConfigs.find { aura.buffId in it.auraBuffIds }
           if (config != null) {
-            activeAreas.add(
-              ActiveArea(
-                caster = caster,
-                config = config,
-                startTime = aura.timestamp,
-                endTime = aura.timestamp + config.areaLifetimeMs,
+            val hasArea = activeAreas.any { area ->
+              area.caster.equals(attribution.caster, ignoreCase = true) &&
+                area.config.auraBuffIds == config.auraBuffIds &&
+                aura.timestamp in (area.startTime - config.correlationWindowMs)..area.endTime
+            }
+            if (!hasArea) {
+              activeAreas.add(
+                ActiveArea(
+                  caster = attribution.caster,
+                  config = config,
+                  startTime = aura.timestamp,
+                  endTime = aura.timestamp + config.areaLifetimeMs,
+                )
               )
-            )
+            }
           }
         } else if (now - aura.receivedAt < AURA_TIMEOUT_MS) {
           stillPending.add(aura)
         } else {
-          // Timed out — try single-caster fallback
+          // Timed out — only use a fallback when the caster's learned type agrees.
           val singleCaster = findSingleCasterInWindow(aura.timestamp)
-          if (singleCaster != null) {
+          if (singleCaster != null && knownTypes[singleCaster]?.buffId == aura.buffId) {
             postAttributedEvent(aura, singleCaster)
-            learnSunderType(singleCaster, aura.buffId, aura.timestamp)
           } else {
             Log.debug(TAG, "Giving up on aura ${aura.buffId} on ${aura.targetName} (CID:${aura.targetCID}) — ambiguous attribution")
           }
@@ -165,7 +185,7 @@ object AreaEffectAttributorInteractor : Interactor() {
 
   // --- Attribution logic ---
 
-  private fun findCasterForAura(aura: PendingAura): String? {
+  private fun findCasterForAura(aura: PendingAura): Attribution? {
     val config = areaEffectSpellConfigs.find { aura.buffId in it.auraBuffIds } ?: return null
     val windowStart = aura.timestamp - config.correlationWindowMs
     val windowEnd = aura.timestamp + config.correlationWindowMs
@@ -177,13 +197,13 @@ object AreaEffectAttributorInteractor : Interactor() {
     }
     if (cidMatches.size == 1) {
       Log.debug(TAG, "CID match: ${cidMatches.single().source} for aura ${aura.buffId} on ${aura.targetName}")
-      return cidMatches.single().source
+      return Attribution(cidMatches.single().source, Confidence.DIRECT_CID)
     }
     if (cidMatches.size > 1) {
       val disambiguated = disambiguateByKnownType(cidMatches.map { it.source }, aura.buffId)
       if (disambiguated != null) {
         Log.debug(TAG, "CID match + known type disambiguation: $disambiguated for aura ${aura.buffId} on ${aura.targetName}")
-        return disambiguated
+        return Attribution(disambiguated, Confidence.DIRECT_CID)
       }
     }
 
@@ -199,21 +219,27 @@ object AreaEffectAttributorInteractor : Interactor() {
       }
       if (casterInArea.size == 1) {
         Log.debug(TAG, "Caster-in-area match: ${casterInArea.single().source} for aura ${aura.buffId} on ${aura.targetName}")
-        return casterInArea.single().source
+        return Attribution(casterInArea.single().source, Confidence.CASTER_IN_AREA)
       }
     }
 
     // Strategy 3: Active area match (for ongoing 7s attribution when players walk in/out)
     val activeMatch = activeAreas.filter { area ->
-      aura.timestamp in area.startTime..area.endTime && aura.buffId in area.config.auraBuffIds
+      aura.timestamp in area.startTime..area.endTime &&
+        aura.buffId in area.config.auraBuffIds &&
+        knownTypes[area.caster]?.buffId == aura.buffId
     }
     if (activeMatch.size == 1) {
       Log.debug(TAG, "Active area match: ${activeMatch.single().caster} for aura ${aura.buffId} on ${aura.targetName}")
-      return activeMatch.single().caster
+      return Attribution(activeMatch.single().caster, Confidence.FALLBACK)
     }
 
     // Strategy 4: Single-caster fallback (only one unique source in window)
-    return findSingleCasterInWindow(aura.timestamp)
+    val fallback = findSingleCasterInWindow(aura.timestamp)
+    if (fallback != null && knownTypes[fallback]?.buffId == aura.buffId) {
+      return Attribution(fallback, Confidence.FALLBACK)
+    }
+    return null
   }
 
   private fun findSingleCasterInWindow(timestamp: Long): String? {
