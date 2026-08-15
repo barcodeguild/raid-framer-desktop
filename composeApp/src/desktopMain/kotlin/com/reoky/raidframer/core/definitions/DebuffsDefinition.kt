@@ -58,7 +58,20 @@ val blindedByCrowsDebuffIds = listOf(4807, 20934)
 val mistSunderDebuffIds = listOf(24562)
 val corrosiveBarrageDebuffIds = listOf(26722, 29645)
 val regularSunderBuffIds = listOf(2596)
-val impaleImmunityBuffIds = listOf(5007, 5669, 5929, 6415, 22550)
+val impaleDebuffIds = listOf(
+  // Skewer (same as impale)
+  439, 2127, 2128, 6368, 6911, 18396, 18420,
+  // Cursed Thorns
+  22548,
+  // Sharp Thorn
+  28232,
+  // Impaled
+  4351, 6860, 18401, 22685, 23642, 23956, 27693,
+  // Hell Spear (same as impaled)
+  87, 1708, 2304, 18354, 18380, 22942, 23793, 32647,
+  // Flame Hell Spear (same as impaled)
+  23361,
+)
 val protectiveWingsBuffIds = listOf(21630, 258)
 val courageousActionBuffIds = listOf(499)
 val reviveSpellIds = listOf(10546, 15066, 25518, 36745, 36748, 8002318)
@@ -115,7 +128,11 @@ data class DebuffsDefinition(
     // stun ids before validation 243, 416, 443, 501, 509, 913, 925, 991, 1208, 1525, 1561, 1596, 1711, 1786, 15220, 15228, 7191, 7335, 6359, 6360, 6873, 6892, 15731, 15766, 15767, 16257, 16502, 16503, 5135, 5297, 5337, 5352, 5371, 5376, 5477, 5499, 5639, 5947, 2107, 2108, 2109, 2110, 2219, 2228, 2244, 2306, 2510, 2541, 2736, 2819, 2820, 2821, 2822, 2843, 2844, 2845, 2846, 3127, 3601, 3934, 3894, 3960, 3986, 4064, 4186, 4202, 4299, 4429, 4503, 4825, 4827, 4945, 4963, 26173, 26801, 26936, 26964, 20681, 20778, 20780, 20815, 20825, 20936, 21361, 23958, 23961, 24196, 24606, 24617, 24912, 25692, 25712, 23359, 23710, 23818, 27279, 27333, 27362, 27575, 27707, 27850, 17903, 18470, 21982, 21983, 21991, 22519, 22532, 16873, 16953, 16959, 16960, 16999, 17421, 20418, 29273, 29896, 29925, 30726, 30910, 30915, 31372, 31733, 32112, 8000340, 8000344, 9000770, 9002141, 3443, 4091, 26167, 23986, 24411
     // after stun validation:
     Debuff(ids = listOf(243, 416, 501, 1786, 2510, 2846, 3127, 3601, 4825, 4827, 6873, 6892, 18470, 20815, 20825, 20936, 22519, 22532, 23958, 23961, 24196, 24411, 26964, 27707, 29273, 8000340, 8000344, 21361, 27279, 27575, 31372), name = "Stun", consideredCC = true), // can't move can't cast (alternate stun variants)
-    Debuff(ids = listOf(18401, 22685, 23642, 23956), name = "Impaled", consideredCC = true), // can't move
+    Debuff(ids = listOf(439, 2127, 2128, 6368, 6911, 18396, 18420), name = "Skewer", consideredCC = true), // same as impale
+    Debuff(ids = listOf(22548), name = "Cursed Thorns", consideredCC = true), // can't move
+    Debuff(ids = listOf(28232), name = "Sharp Thorn", consideredCC = true), // can't move
+    Debuff(ids = listOf(4351, 6860, 18401, 22685, 23642, 23956, 27693), name = "Impaled", consideredCC = true), // can't move
+    Debuff(ids = listOf(87, 1708, 2304, 18354, 18380, 22942, 23793, 32647), name = "Hell Spear", consideredCC = true), // same as impaled
     Debuff(ids = listOf(23361), name = "Flame Hell Spear", consideredCC = true), // same as impaled
     Debuff(ids = listOf(93, 21990, 2279, 9000173, 9000156), name = "Freeze", consideredCC = true), // can't move can't cast (tracks)
     Debuff(ids = listOf(15216, 9000169), name = "Deep Freeze", consideredCC = true), // can't move can't cast (tracks)

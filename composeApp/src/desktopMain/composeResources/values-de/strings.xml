@@ -450,7 +450,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="player_card_stat_blinded_by_crows">Krähenblendung</string>
     <string name="player_card_stat_mist_sunder">Nebelzertrümmerung</string>
     <string name="player_card_stat_regular_sunder">Normaler Zerschmetterer</string>
-    <string name="player_card_stat_impale_immunity">Impaler-Immunität</string>
+    <string name="player_card_stat_impales">Durchstechungen</string>
     <string name="player_card_stat_protective_wings">Schutzflügel</string>
     <string name="player_card_stat_courageous_action">Tapfere Handlung</string>
     <string name="player_card_stat_mana_barrier">Manabarriere</string>
@@ -469,7 +469,7 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_top_blinded_by_crows">Top Krähenblendung</string>
     <string name="summary_top_mist_sunder">Top Nebelzertrümmerung</string>
     <string name="summary_top_regular_sunder">Top Normaler Zerschmetterer</string>
-    <string name="summary_top_impale_immunity">Top Impaler-Immunität</string>
+    <string name="summary_top_impales">Top Durchstechungen</string>
     <string name="summary_top_protective_wings">Top Schutzflügel</string>
     <string name="summary_top_courageous_action">Top Tapfere Handlung</string>
     <string name="summary_top_mana_barrier">Top Manabarriere</string>

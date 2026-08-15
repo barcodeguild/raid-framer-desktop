@@ -450,7 +450,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="player_card_stat_blinded_by_crows">Cegado por Corvos</string>
     <string name="player_card_stat_mist_sunder">Divisor de Névoa</string>
     <string name="player_card_stat_regular_sunder">Divisor Regular</string>
-    <string name="player_card_stat_impale_immunity">Imunidade a Empalar</string>
+    <string name="player_card_stat_impales">Empalamentos</string>
     <string name="player_card_stat_protective_wings">Asas Protetoras</string>
     <string name="player_card_stat_courageous_action">Ação Corajosa</string>
     <string name="player_card_stat_mana_barrier">Barreira de Mana</string>
@@ -469,7 +469,7 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="summary_top_blinded_by_crows">Top Cegado por Corvos</string>
     <string name="summary_top_mist_sunder">top Divisor de Névoa</string>
     <string name="summary_top_regular_sunder">Top Divisor Regular</string>
-    <string name="summary_top_impale_immunity">Top Imunidade a Empalar</string>
+    <string name="summary_top_impales">Top Empalamentos</string>
     <string name="summary_top_protective_wings">Top Asas Protetoras</string>
     <string name="summary_top_courageous_action">Top Ação Corajosa</string>
     <string name="summary_top_mana_barrier">Top Barreira de Mana</string>

@@ -110,7 +110,7 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_corrosive_
 import raid_framer_desktop.composeapp.generated.resources.summary_top_blinded_by_crows
 import raid_framer_desktop.composeapp.generated.resources.summary_top_mist_sunder
 import raid_framer_desktop.composeapp.generated.resources.summary_top_regular_sunder
-import raid_framer_desktop.composeapp.generated.resources.summary_top_impale_immunity
+import raid_framer_desktop.composeapp.generated.resources.summary_top_impales
 import raid_framer_desktop.composeapp.generated.resources.summary_top_protective_wings
 import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
 import raid_framer_desktop.composeapp.generated.resources.summary_top_mana_barrier
@@ -1368,7 +1368,7 @@ object ImageExportInteractor {
 
     // Special Buffs Continued: Impale Immunity, Protective Wings, Courageous Action
     tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_impale_immunity), "\uD83D\uDEE1", ColumnData.CardData(data.topImpaleImmunity, { it.sessionImpaleImmunityTotal.toString() }, IMPALE_IMMUNITY_COLOR)),
+      Triple(getString(Res.string.summary_top_impales), "\uD83D\uDEE1", ColumnData.CardData(data.topImpaleImmunity, { it.sessionImpaleImmunityTotal.toString() }, IMPALE_IMMUNITY_COLOR)),
       Triple(getString(Res.string.summary_top_protective_wings), "\uD83E\uDD85", ColumnData.CardData(data.topProtectiveWings, { it.sessionProtectiveWingsTotal.toString() }, PROTECTIVE_WINGS_COLOR)),
       Triple(getString(Res.string.summary_top_courageous_action), "\u2728", ColumnData.CardData(data.topCourageousAction, { it.sessionCourageousActionTotal.toString() }, COURAGEOUS_ACTION_COLOR)),
     )))

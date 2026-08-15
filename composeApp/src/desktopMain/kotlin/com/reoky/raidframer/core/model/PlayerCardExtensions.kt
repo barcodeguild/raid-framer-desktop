@@ -42,7 +42,7 @@ import com.reoky.raidframer.core.definitions.staggerDebuffIds
 import com.reoky.raidframer.core.definitions.petrificationDebuffIds
 import com.reoky.raidframer.core.definitions.deedendDebuffIds
 import com.reoky.raidframer.core.definitions.regularSunderBuffIds
-import com.reoky.raidframer.core.definitions.impaleImmunityBuffIds
+import com.reoky.raidframer.core.definitions.impaleDebuffIds
 import com.reoky.raidframer.core.definitions.protectiveWingsBuffIds
 import com.reoky.raidframer.core.definitions.courageousActionBuffIds
 import com.reoky.raidframer.core.definitions.manaBarrierBuffIds
@@ -301,6 +301,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isBlindedByCrows = event.debuffId in blindedByCrowsDebuffIds
   val isMistSunder = event.debuffId in mistSunderDebuffIds
   val isDeependDebuff = event.debuffId in deedendDebuffIds
+  val isImpale = event.debuffId in impaleDebuffIds
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
@@ -333,6 +334,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       lifetimeTotalBlindedByCrows = if (isBlindedByCrows) (card.cache?.lifetimeTotalBlindedByCrows ?: 0L) + 1 else (card.cache?.lifetimeTotalBlindedByCrows ?: 0L),
       lifetimeTotalMistSunder = if (isMistSunder) (card.cache?.lifetimeTotalMistSunder ?: 0L) + 1 else (card.cache?.lifetimeTotalMistSunder ?: 0L),
       lifetimeTotalDeependDebuff = if (isDeependDebuff) (card.cache?.lifetimeTotalDeependDebuff ?: 0L) + 1 else (card.cache?.lifetimeTotalDeependDebuff ?: 0L),
+      lifetimeTotalImpaleImmunity = if (isImpale) (card.cache?.lifetimeTotalImpaleImmunity ?: 0L) + 1 else (card.cache?.lifetimeTotalImpaleImmunity ?: 0L),
     ),
     recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(500), // optional to takeLast(n)
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
@@ -361,6 +363,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionBlindedByCrowsTotal = if (isBlindedByCrows) sessionBlindedByCrowsTotal + 1 else sessionBlindedByCrowsTotal,
     sessionMistSunderTotal = if (isMistSunder) sessionMistSunderTotal + 1 else sessionMistSunderTotal,
     sessionDeependDebuffTotal = if (isDeependDebuff) sessionDeependDebuffTotal + 1 else sessionDeependDebuffTotal,
+    sessionImpaleImmunityTotal = if (isImpale) sessionImpaleImmunityTotal + 1 else sessionImpaleImmunityTotal,
     sessionCCTotal = if (isCC) card.sessionCCTotal + 1 else card.sessionCCTotal,
     sessionSpellCCMap = if (isCC) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
@@ -457,7 +460,6 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   val isDeepTranquility = event.buffId == deepTranquilityBuffId
   val isRegularSunder = event.buffId in regularSunderBuffIds
   val isMistSunder = event.buffId in mistSunderDebuffIds
-  val isImpaleImmunity = event.buffId in impaleImmunityBuffIds
   val isProtectiveWings = event.buffId in protectiveWingsBuffIds
   val isCourageousAction = event.buffId in courageousActionBuffIds
   val isManaBarrier = event.buffId in manaBarrierBuffIds
@@ -475,7 +477,6 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
       lifetimeTotalDeepTranquility = if (isDeepTranquility) (card.cache?.lifetimeTotalDeepTranquility ?: 0L) + 1 else (card.cache?.lifetimeTotalDeepTranquility ?: 0L),
       lifetimeTotalRegularSunder = if (isRegularSunder) (card.cache?.lifetimeTotalRegularSunder ?: 0L) + 1 else (card.cache?.lifetimeTotalRegularSunder ?: 0L),
       lifetimeTotalMistSunder = if (isMistSunder) (card.cache?.lifetimeTotalMistSunder ?: 0L) + 1 else (card.cache?.lifetimeTotalMistSunder ?: 0L),
-      lifetimeTotalImpaleImmunity = if (isImpaleImmunity) (card.cache?.lifetimeTotalImpaleImmunity ?: 0L) + 1 else (card.cache?.lifetimeTotalImpaleImmunity ?: 0L),
       lifetimeTotalProtectiveWings = if (isProtectiveWings) (card.cache?.lifetimeTotalProtectiveWings ?: 0L) + 1 else (card.cache?.lifetimeTotalProtectiveWings ?: 0L),
       lifetimeTotalCourageousAction = if (isCourageousAction) (card.cache?.lifetimeTotalCourageousAction ?: 0L) + 1 else (card.cache?.lifetimeTotalCourageousAction ?: 0L),
       lifetimeTotalManaBarrier = if (isManaBarrier) (card.cache?.lifetimeTotalManaBarrier ?: 0L) + 1 else (card.cache?.lifetimeTotalManaBarrier ?: 0L),
@@ -488,7 +489,6 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
     sessionDeepTranquilityTotal = if (isDeepTranquility) sessionDeepTranquilityTotal + 1 else sessionDeepTranquilityTotal,
     sessionRegularSunderTotal = if (isRegularSunder) sessionRegularSunderTotal + 1 else sessionRegularSunderTotal,
     sessionMistSunderTotal = if (isMistSunder) sessionMistSunderTotal + 1 else sessionMistSunderTotal,
-    sessionImpaleImmunityTotal = if (isImpaleImmunity) sessionImpaleImmunityTotal + 1 else sessionImpaleImmunityTotal,
     sessionProtectiveWingsTotal = if (isProtectiveWings) sessionProtectiveWingsTotal + 1 else sessionProtectiveWingsTotal,
     sessionCourageousActionTotal = if (isCourageousAction) sessionCourageousActionTotal + 1 else sessionCourageousActionTotal,
     sessionManaBarrierTotal = if (isManaBarrier) sessionManaBarrierTotal + 1 else sessionManaBarrierTotal,

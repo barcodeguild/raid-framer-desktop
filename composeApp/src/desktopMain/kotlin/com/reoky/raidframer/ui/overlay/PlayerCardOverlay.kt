@@ -174,7 +174,7 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_corro
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_blinded_by_crows
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mist_sunder
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_regular_sunder
-import raid_framer_desktop.composeapp.generated.resources.player_card_stat_impale_immunity
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_impales
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_protective_wings
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_courageous_action
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mana_barrier
@@ -684,7 +684,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_blinded_by_crows), cache.lifetimeTotalBlindedByCrows, RFColors.blindedByCrowsDark)
                   StatRow(stringResource(Res.string.player_card_stat_mist_sunder), cache.lifetimeTotalMistSunder, RFColors.mistSunderCyan)
                   StatRow(stringResource(Res.string.player_card_stat_regular_sunder), cache.lifetimeTotalRegularSunder, RFColors.regularSunderOrange)
-                  StatRow(stringResource(Res.string.player_card_stat_impale_immunity), cache.lifetimeTotalImpaleImmunity, RFColors.impaleImmunitySteel)
+                  StatRow(stringResource(Res.string.player_card_stat_impales), cache.lifetimeTotalImpaleImmunity, RFColors.impaleImmunitySteel)
                   StatRow(stringResource(Res.string.player_card_stat_protective_wings), cache.lifetimeTotalProtectiveWings, RFColors.protectiveWingsGold)
                   StatRow(stringResource(Res.string.player_card_stat_courageous_action), cache.lifetimeTotalCourageousAction, RFColors.courageousActionBright)
                   StatRow(stringResource(Res.string.player_card_stat_mana_barrier), cache.lifetimeTotalManaBarrier, RFColors.manaBarrierBlue)

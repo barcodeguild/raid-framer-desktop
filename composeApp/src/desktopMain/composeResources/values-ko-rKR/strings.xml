@@ -450,7 +450,7 @@
     <string name="player_card_stat_blinded_by_crows">까마귀의 방해</string>
     <string name="player_card_stat_mist_sunder">대지 가르기: 안개</string>
     <string name="player_card_stat_regular_sunder">대지 가르기</string>
-    <string name="player_card_stat_impale_immunity">창 꽂힘 면역</string>
+    <string name="player_card_stat_impales">지옥의 창</string>
     <string name="player_card_stat_protective_wings">보호의 날개</string>
     <string name="player_card_stat_courageous_action">각성</string>
     <string name="player_card_stat_mana_barrier">활력 보호막</string>
@@ -469,7 +469,7 @@
     <string name="summary_top_blinded_by_crows">까마귀의 방해 상위</string>
     <string name="summary_top_mist_sunder">대지 가르기: 안개 상위</string>
     <string name="summary_top_regular_sunder">대지 가르기 상위</string>
-    <string name="summary_top_impale_immunity">창 꽂힘 면역 상위</string>
+    <string name="summary_top_impales">지옥의 창 상위</string>
     <string name="summary_top_protective_wings">보호의 날개 상위</string>
     <string name="summary_top_courageous_action">각성 상위</string>
     <string name="summary_top_mana_barrier">활력 보호막 상위</string>

@@ -107,7 +107,7 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_corrosive_
 import raid_framer_desktop.composeapp.generated.resources.summary_top_blinded_by_crows
 import raid_framer_desktop.composeapp.generated.resources.summary_top_mist_sunder
 import raid_framer_desktop.composeapp.generated.resources.summary_top_regular_sunder
-import raid_framer_desktop.composeapp.generated.resources.summary_top_impale_immunity
+import raid_framer_desktop.composeapp.generated.resources.summary_top_impales
 import raid_framer_desktop.composeapp.generated.resources.summary_top_protective_wings
 import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
 import raid_framer_desktop.composeapp.generated.resources.summary_top_mana_barrier
@@ -1067,7 +1067,7 @@ private fun SpecialBuffsContinuedTab(
   Row(modifier = Modifier.fillMaxSize()) {
     StatColumn(
       icon = "\uD83D\uDEE1",
-      title = stringResource(Res.string.summary_top_impale_immunity),
+      title = stringResource(Res.string.summary_top_impales),
       cards = topImpaleImmunity,
       valueExtractor = { it.sessionImpaleImmunityTotal.toString() },
       valueColor = RFColors.impaleImmunitySteel,

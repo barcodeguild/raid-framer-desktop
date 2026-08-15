@@ -446,7 +446,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="player_card_stat_blinded_by_crows">Blinded by Crows</string>
     <string name="player_card_stat_mist_sunder">Mist Sunder</string>
     <string name="player_card_stat_regular_sunder">Regular Sunder</string>
-    <string name="player_card_stat_impale_immunity">Impale Immunity</string>
+    <string name="player_card_stat_impales">Impales</string>
     <string name="player_card_stat_protective_wings">Protective Wings</string>
     <string name="player_card_stat_courageous_action">Courageous Action</string>
     <string name="player_card_stat_mana_barrier">Mana Barrier</string>
@@ -465,7 +465,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_top_blinded_by_crows">Top Blinded by Crows</string>
     <string name="summary_top_mist_sunder">Top Mist Sunder</string>
     <string name="summary_top_regular_sunder">Top Regular Sunder</string>
-    <string name="summary_top_impale_immunity">Top Impale Immunity</string>
+    <string name="summary_top_impales">Top Impales</string>
     <string name="summary_top_protective_wings">Top Protective Wings</string>
     <string name="summary_top_courageous_action">Top Courageous Action</string>
     <string name="summary_top_mana_barrier">Top Mana Barrier</string>

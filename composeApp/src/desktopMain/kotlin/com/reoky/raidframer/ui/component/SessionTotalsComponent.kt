@@ -61,7 +61,7 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_corro
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_blinded_by_crows
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mist_sunder
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_regular_sunder
-import raid_framer_desktop.composeapp.generated.resources.player_card_stat_impale_immunity
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_impales
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_protective_wings
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_courageous_action
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mana_barrier
@@ -264,7 +264,7 @@ fun SessionStatRows(totals: SessionTotals) {
   StatRow(stringResource(Res.string.player_card_stat_blinded_by_crows), totals.blindedByCrows.toLong(), RFColors.blindedByCrowsDark)
   StatRow(stringResource(Res.string.player_card_stat_mist_sunder), totals.mistSunder.toLong(), RFColors.mistSunderCyan)
   StatRow(stringResource(Res.string.player_card_stat_regular_sunder), totals.regularSunder.toLong(), RFColors.regularSunderOrange)
-  StatRow(stringResource(Res.string.player_card_stat_impale_immunity), totals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel)
+  StatRow(stringResource(Res.string.player_card_stat_impales), totals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel)
   StatRow(stringResource(Res.string.player_card_stat_protective_wings), totals.protectiveWings.toLong(), RFColors.protectiveWingsGold)
   StatRow(stringResource(Res.string.player_card_stat_courageous_action), totals.courageousAction.toLong(), RFColors.courageousActionBright)
   StatRow(stringResource(Res.string.player_card_stat_mana_barrier), totals.manaBarrier.toLong(), RFColors.manaBarrierBlue)
@@ -353,7 +353,7 @@ fun CompactSessionTotals(
     CompactStatRow(stringResource(Res.string.player_card_stat_blinded_by_crows), sessionTotals.blindedByCrows.toLong(), RFColors.blindedByCrowsDark)
     CompactStatRow(stringResource(Res.string.player_card_stat_mist_sunder), sessionTotals.mistSunder.toLong(), RFColors.mistSunderCyan)
     CompactStatRow(stringResource(Res.string.player_card_stat_regular_sunder), sessionTotals.regularSunder.toLong(), RFColors.regularSunderOrange)
-    CompactStatRow(stringResource(Res.string.player_card_stat_impale_immunity), sessionTotals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel)
+    CompactStatRow(stringResource(Res.string.player_card_stat_impales), sessionTotals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel)
     CompactStatRow(stringResource(Res.string.player_card_stat_protective_wings), sessionTotals.protectiveWings.toLong(), RFColors.protectiveWingsGold)
     CompactStatRow(stringResource(Res.string.player_card_stat_courageous_action), sessionTotals.courageousAction.toLong(), RFColors.courageousActionBright)
     CompactStatRow(stringResource(Res.string.player_card_stat_mana_barrier), sessionTotals.manaBarrier.toLong(), RFColors.manaBarrierBlue)

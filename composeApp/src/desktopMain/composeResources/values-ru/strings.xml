@@ -450,7 +450,7 @@
     <string name="player_card_stat_blinded_by_crows">Ослепление воронами</string>
     <string name="player_card_stat_mist_sunder">Разрубание тумана</string>
     <string name="player_card_stat_regular_sunder">Обычное разрубание</string>
-    <string name="player_card_stat_impale_immunity">Иммунитет к проколу</string>
+    <string name="player_card_stat_impales">Проколы</string>
     <string name="player_card_stat_protective_wings">Защитные крылья</string>
     <string name="player_card_stat_courageous_action">Мужественное действие</string>
     <string name="player_card_stat_mana_barrier">Мановый барьер</string>
@@ -469,7 +469,7 @@
     <string name="summary_top_blinded_by_crows">Топ ослепления воронами</string>
     <string name="summary_top_mist_sunder">Топ разрубания тумана</string>
     <string name="summary_top_regular_sunder">Топ обычного разрубания</string>
-    <string name="summary_top_impale_immunity">Топ иммунитета к проколу</string>
+    <string name="summary_top_impales">Топ проколы</string>
     <string name="summary_top_protective_wings">Топ защитных крыльев</string>
     <string name="summary_top_courageous_action">Топ мужественного действия</string>
     <string name="summary_top_mana_barrier">Топ манового барьера</string>
