@@ -52,8 +52,8 @@ val RAID_BUFF_DEFINITIONS = listOf(
   // Pink: 21799 21804 21809 21814 21822
   // Gray: 21800 21805 21810 21815 21823
   RaidBuffDefinition(RaidBuffKey.GOBLET, setOf(24469, 24470, 24471, 24472, 24473, 24474, 21796, 21801, 21806, 21811, 21819, 21846, 21797, 21802, 21807, 21812, 21820, 21798, 21803, 21808, 21813, 21821, 21799, 21804, 21809, 21814, 21822, 21800, 21805, 21810, 21815, 21823), "raid_buff_goblet", orangeIds = setOf(24469, 24470, 24471, 24472, 24473, 24474)),
-  // Feast / Ribs: Feast table (21791-21794) is best; Ribs (685 689 693 6970); Meatballs (680 686 690 694) are lower-tier.
-  RaidBuffDefinition(RaidBuffKey.FEAST_RIBS, setOf(21791, 21792, 21793, 21794, 685, 689, 693, 6970, 680, 686, 690, 694), "raid_buff_feast_ribs", meatballIds = setOf(680, 686, 690, 694)),
+  // Feast / Ribs: Feast table (21791-21794) is best; Ribs (685 689 693 697); Meatballs (680 686 690 694) are lower-tier.
+  RaidBuffDefinition(RaidBuffKey.FEAST_RIBS, setOf(21791, 21792, 21793, 21794, 685, 689, 693, 697, 680, 686, 690, 694), "raid_buff_feast_ribs", meatballIds = setOf(680, 686, 690, 694)),
   // Longing (Book): Regular (20552 32381 32382 21795); Enhanced (26581 26582) - has "Require Enhanced Version" toggle.
   RaidBuffDefinition(RaidBuffKey.LONGING, setOf(20552, 32381, 32382, 21795, 26581, 26582), "raid_buff_longing", enhancedIds = setOf(26581, 26582)),
   RaidBuffDefinition(RaidBuffKey.WHISPER, setOf(9001811), "raid_buff_whisper"),
