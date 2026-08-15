@@ -32,6 +32,8 @@ object AreaEffectAttributorInteractor : Interactor() {
   private const val DAMAGE_BUFFER_RETENTION_MS = 10_000L
   private const val AURA_TIMEOUT_MS = 10_000L
   private const val TYPE_LEARNING_RETENTION_MS = 3_600_000L // 1 hour
+  // Lua combat timestamps are second-granular, so a timestamp window is inherently ambiguous.
+  private const val COARSE_TIMESTAMP_TOLERANCE_MS = 1000L
 
   // --- Internal data classes ---
 
@@ -60,7 +62,6 @@ object AreaEffectAttributorInteractor : Interactor() {
     val targetCID: String,
     val targetName: String,
     val timestamp: Long,
-    val receivedAt: Long = System.currentTimeMillis(),
   )
 
   private data class ActiveArea(
@@ -81,14 +82,16 @@ object AreaEffectAttributorInteractor : Interactor() {
   private val pendingAuras = mutableListOf<PendingAura>()
   private val activeAreas = mutableListOf<ActiveArea>()
   private val knownTypes = mutableMapOf<String, SunderTypeRecord>()
+  private var latestEventTimestamp: Long = 0L
 
   // --- Public API ---
 
   /** Called for ALL damage events. Only buffers damage that matches a known area-effect spell name. */
   fun onDamageEvent(event: DamageEvent) {
-    val matchedConfig = areaEffectSpellConfigs.find { event.spell in it.damageSpellNames } ?: return
+    if (areaEffectSpellConfigs.none { event.spell in it.damageSpellNames }) return
     scope.launch {
       mutex.withLock {
+        latestEventTimestamp = maxOf(latestEventTimestamp, event.timestamp)
         recentDamages.add(
           DamageRecord(
             source = event.source,
@@ -98,7 +101,7 @@ object AreaEffectAttributorInteractor : Interactor() {
             spell = event.spell,
           )
         )
-        val cutoff = System.currentTimeMillis() - DAMAGE_BUFFER_RETENTION_MS
+        val cutoff = latestEventTimestamp - DAMAGE_BUFFER_RETENTION_MS
         recentDamages.removeAll { it.timestamp < cutoff }
       }
     }
@@ -122,6 +125,7 @@ object AreaEffectAttributorInteractor : Interactor() {
 
     scope.launch {
       mutex.withLock {
+        latestEventTimestamp = maxOf(latestEventTimestamp, timestamp)
         pendingAuras.add(PendingAura(event, buffId, targetCID, targetName, timestamp))
       }
     }
@@ -136,7 +140,7 @@ object AreaEffectAttributorInteractor : Interactor() {
 
   private suspend fun tryAttributePendingAuras() {
     mutex.withLock {
-      val now = System.currentTimeMillis()
+      val eventNow = latestEventTimestamp
       val stillPending = mutableListOf<PendingAura>()
 
       for (aura in pendingAuras) {
@@ -145,7 +149,9 @@ object AreaEffectAttributorInteractor : Interactor() {
           postAttributedEvent(aura, attribution.caster)
           // Only direct CID correlation can safely teach us which Sunder variant
           // a caster owns; fallback/area guesses may belong to another player's area.
-          if (attribution.confidence == Confidence.DIRECT_CID) {
+          if (attribution.confidence == Confidence.DIRECT_CID && isIsolatedCasterWindow(aura.timestamp)) {
+            learnSunderType(attribution.caster, aura.buffId, aura.timestamp)
+          } else if (attribution.confidence == Confidence.CASTER_IN_AREA) {
             learnSunderType(attribution.caster, aura.buffId, aura.timestamp)
           }
           val config = areaEffectSpellConfigs.find { aura.buffId in it.auraBuffIds }
@@ -166,7 +172,7 @@ object AreaEffectAttributorInteractor : Interactor() {
               )
             }
           }
-        } else if (now - aura.receivedAt < AURA_TIMEOUT_MS) {
+        } else if (eventNow - aura.timestamp < AURA_TIMEOUT_MS) {
           stillPending.add(aura)
         } else {
           // Timed out — only use a fallback when the caster's learned type agrees.
@@ -187,20 +193,23 @@ object AreaEffectAttributorInteractor : Interactor() {
 
   private fun findCasterForAura(aura: PendingAura): Attribution? {
     val config = areaEffectSpellConfigs.find { aura.buffId in it.auraBuffIds } ?: return null
-    val windowStart = aura.timestamp - config.correlationWindowMs
-    val windowEnd = aura.timestamp + config.correlationWindowMs
+    // Do not widen beyond the Lua clock's resolution during direct correlation.
+    val correlationWindow = minOf(config.correlationWindowMs, COARSE_TIMESTAMP_TOLERANCE_MS)
+    val windowStart = aura.timestamp - correlationWindow
+    val windowEnd = aura.timestamp + correlationWindow
 
     // Strategy 1: Direct CID match — only sunder damage events are in recentDamages (filtered by spell name),
     // so the caster is the one whose damage target CID matches the aura target CID.
     val cidMatches = recentDamages.filter { dmg ->
       dmg.timestamp in windowStart..windowEnd && dmg.targetCID == aura.targetCID
     }
-    if (cidMatches.size == 1) {
-      Log.debug(TAG, "CID match: ${cidMatches.single().source} for aura ${aura.buffId} on ${aura.targetName}")
-      return Attribution(cidMatches.single().source, Confidence.DIRECT_CID)
+    val cidSources = cidMatches.map { it.source }.distinct()
+    if (cidSources.size == 1) {
+      Log.debug(TAG, "CID match: ${cidSources.single()} for aura ${aura.buffId} on ${aura.targetName}")
+      return Attribution(cidSources.single(), Confidence.DIRECT_CID)
     }
-    if (cidMatches.size > 1) {
-      val disambiguated = disambiguateByKnownType(cidMatches.map { it.source }, aura.buffId)
+    if (cidSources.size > 1) {
+      val disambiguated = disambiguateByKnownType(cidSources, aura.buffId)
       if (disambiguated != null) {
         Log.debug(TAG, "CID match + known type disambiguation: $disambiguated for aura ${aura.buffId} on ${aura.targetName}")
         return Attribution(disambiguated, Confidence.DIRECT_CID)
@@ -217,9 +226,10 @@ object AreaEffectAttributorInteractor : Interactor() {
         val sourceCard = PlayerCacheInteractor.getCard(dmg.source)
         sourceCard != null && aura.targetCID in sourceCard.recentCids
       }
-      if (casterInArea.size == 1) {
-        Log.debug(TAG, "Caster-in-area match: ${casterInArea.single().source} for aura ${aura.buffId} on ${aura.targetName}")
-        return Attribution(casterInArea.single().source, Confidence.CASTER_IN_AREA)
+      val casterSources = casterInArea.map { it.source }.distinctBy { it.lowercase() }
+      if (casterSources.size == 1) {
+        Log.debug(TAG, "Caster-in-area match: ${casterSources.single()} for aura ${aura.buffId} on ${aura.targetName}")
+        return Attribution(casterSources.single(), Confidence.CASTER_IN_AREA)
       }
     }
 
@@ -229,9 +239,11 @@ object AreaEffectAttributorInteractor : Interactor() {
         aura.buffId in area.config.auraBuffIds &&
         knownTypes[area.caster]?.buffId == aura.buffId
     }
-    if (activeMatch.size == 1) {
-      Log.debug(TAG, "Active area match: ${activeMatch.single().caster} for aura ${aura.buffId} on ${aura.targetName}")
-      return Attribution(activeMatch.single().caster, Confidence.FALLBACK)
+    val activeCasters = activeMatch.map { it.caster }.distinctBy { it.lowercase() }
+    if (activeCasters.size == 1) {
+      val caster = activeCasters.single()
+      Log.debug(TAG, "Active area match: $caster for aura ${aura.buffId} on ${aura.targetName}")
+      return Attribution(caster, Confidence.FALLBACK)
     }
 
     // Strategy 4: Single-caster fallback (only one unique source in window)
@@ -244,8 +256,8 @@ object AreaEffectAttributorInteractor : Interactor() {
 
   private fun findSingleCasterInWindow(timestamp: Long): String? {
     // Use a slightly wider window for the fallback since auras can arrive out of order
-    val windowStart = timestamp - 3000L
-    val windowEnd = timestamp + 3000L
+    val windowStart = timestamp - COARSE_TIMESTAMP_TOLERANCE_MS
+    val windowEnd = timestamp + COARSE_TIMESTAMP_TOLERANCE_MS
     val sources = recentDamages
       .filter { it.timestamp in windowStart..windowEnd }
       .map { it.source }
@@ -255,6 +267,16 @@ object AreaEffectAttributorInteractor : Interactor() {
       return sources.single()
     }
     return null
+  }
+
+  private fun isIsolatedCasterWindow(timestamp: Long): Boolean {
+    val windowStart = timestamp - COARSE_TIMESTAMP_TOLERANCE_MS
+    val windowEnd = timestamp + COARSE_TIMESTAMP_TOLERANCE_MS
+    return recentDamages
+      .filter { it.timestamp in windowStart..windowEnd }
+      .map { it.source.lowercase() }
+      .distinct()
+      .size == 1
   }
 
   private fun disambiguateByKnownType(candidates: List<String>, buffId: Int): String? {
@@ -296,10 +318,10 @@ object AreaEffectAttributorInteractor : Interactor() {
 
   private suspend fun cleanupExpiredEntries() {
     mutex.withLock {
-      val now = System.currentTimeMillis()
-      recentDamages.removeAll { now - it.timestamp > DAMAGE_BUFFER_RETENTION_MS }
-      activeAreas.removeAll { now > it.endTime }
-      knownTypes.entries.removeIf { now - it.value.learnedAt > TYPE_LEARNING_RETENTION_MS }
+      val eventCutoff = latestEventTimestamp - DAMAGE_BUFFER_RETENTION_MS
+      recentDamages.removeAll { it.timestamp < eventCutoff }
+      activeAreas.removeAll { latestEventTimestamp > it.endTime }
+      knownTypes.entries.removeIf { latestEventTimestamp - it.value.learnedAt > TYPE_LEARNING_RETENTION_MS }
     }
   }
 

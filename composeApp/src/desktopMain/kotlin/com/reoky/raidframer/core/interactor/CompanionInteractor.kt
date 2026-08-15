@@ -201,6 +201,7 @@ object CompanionInteractor : Interactor() {
                 spellId = event.spellId
               ).normalize<CastingEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} began casting ${combatEvent.spell} (id:${combatEvent.spellId}) on ${combatEvent.target} (${combatEvent.cid}).")
+              ProtectiveWingsAttributorInteractor.onCast(combatEvent)
               PlayerCacheInteractor.postEvent(combatEvent)
             }
 
@@ -272,7 +273,9 @@ object CompanionInteractor : Interactor() {
                 }
                 Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} applied debuff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target} with CID ${combatEvent.cid}.")
               } else {
-                if (AreaEffectAttributorInteractor.isAreaEffectAura(combatEvent)) {
+                if (ProtectiveWingsAttributorInteractor.isProtectiveWingsBuff(combatEvent)) {
+                  ProtectiveWingsAttributorInteractor.onAura(combatEvent)
+                } else if (AreaEffectAttributorInteractor.isAreaEffectAura(combatEvent)) {
                   AreaEffectAttributorInteractor.onAuraEvent(combatEvent)
                 } else {
                   PlayerCacheInteractor.postEvent(combatEvent)

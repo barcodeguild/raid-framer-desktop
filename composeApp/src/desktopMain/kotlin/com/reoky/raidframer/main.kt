@@ -23,6 +23,7 @@ import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.core.interactor.OverlayInteractor
 import com.reoky.raidframer.core.interactor.PetAccumulatorInteractor
+import com.reoky.raidframer.core.interactor.ProtectiveWingsAttributorInteractor
 import com.reoky.raidframer.core.interactor.AreaEffectAttributorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableInteractor
@@ -94,7 +95,8 @@ fun main(args: Array<String>) {
     OverlayInteractor.start(delay = 50L)
     DeathAccumulatorInteractor.start()
     PetAccumulatorInteractor.start()
-    AreaEffectAttributorInteractor.start()
+    AreaEffectAttributorInteractor.start(delay = 1000L)
+    ProtectiveWingsAttributorInteractor.start()
     CombatLogInteractor.start(delay = 3000L)
     SeedTableInteractor.start(delay = 2000L)
     BattleGraphInteractor.start()
