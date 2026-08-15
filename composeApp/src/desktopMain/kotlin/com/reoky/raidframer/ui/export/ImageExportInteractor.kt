@@ -123,7 +123,7 @@ import javax.imageio.ImageIO
 
 object ImageExportInteractor {
 
-  private const val IMAGE_WIDTH = 2600
+  private const val IMAGE_WIDTH = 3200
   // Keep the final PNG at the wallpaper's max width, but render content larger first.
   private const val EXPORT_RENDER_SCALE = 2
   private const val SVG_ICON_RENDER_SCALE = 4
@@ -134,6 +134,7 @@ object ImageExportInteractor {
   private const val COLUMN_GAP = 10
   private const val CARD_PADDING = 8
   private const val SUPER_COL_GAP = 10
+  private const val SUPER_COLUMN_COUNT = 4
 
   // Title card is now full-width; store its fixed height, so both layout functions agree.
   private const val TITLE_CARD_HEIGHT = 90
@@ -658,7 +659,7 @@ object ImageExportInteractor {
    * additionally holds the pie-chart and combat blocks.
    */
   private suspend fun computeColumnHeights(data: ExportData): List<Int> {
-    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * 2) / 3
+    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * (SUPER_COLUMN_COUNT - 1)) / SUPER_COLUMN_COUNT
 
     val pieChartBlock = makePieChartBlock(data, superColWidth)
     val combatBlock   = makeCombatBlock(data, superColWidth)
@@ -667,8 +668,9 @@ object ImageExportInteractor {
     val col0BaseHeight = titleOffset + pieChartBlock.height + 5 + combatBlock.height
 
     val tripletBlocks = getAllCategoryBlocks(data, superColWidth)
-    // Column 0 starts below title; columns 1 and 2 start at top (no title offset)
-    val colHeights    = mutableListOf(col0BaseHeight, 0, 0)
+    // Column 0 starts below title; remaining columns start at top (no title offset)
+    val colHeights    = MutableList(SUPER_COLUMN_COUNT) { 0 }
+    colHeights[0] = col0BaseHeight
 
     tripletBlocks.forEach { block ->
       val shortestCol = colHeights.indices.minByOrNull { colHeights[it] } ?: 0
@@ -763,15 +765,17 @@ object ImageExportInteractor {
    * a dynamic layout like masonry because each battle is going to be different have different-sized cards for each section.
    */
   private suspend fun drawMasonryLayout(g2d: Graphics2D, data: ExportData) {
-    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * 2) / 3
+    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * (SUPER_COLUMN_COUNT - 1)) / SUPER_COLUMN_COUNT
 
     // Title card fits within column 0 (above pie charts)
     val titleH      = drawTitleCard(g2d, data, COLUMN_GAP, 10, superColWidth)
     val titleBottom = 10 + titleH + 5
 
-    // Column 0 starts below the title; columns 1 and 2 start at the top
-    val columnY       = mutableListOf(titleBottom, 10, 10)
-    val columnHeights = mutableListOf(titleH, 0, 0)
+    // Column 0 starts below the title; remaining columns start at the top
+    val columnY       = MutableList(SUPER_COLUMN_COUNT) { 10 }
+    columnY[0] = titleBottom
+    val columnHeights = MutableList(SUPER_COLUMN_COUNT) { 0 }
+    columnHeights[0] = titleH
 
     val pieBlock = makePieChartBlock(data, superColWidth)
     pieBlock.draw(g2d, COLUMN_GAP, columnY[0], superColWidth)
@@ -787,7 +791,7 @@ object ImageExportInteractor {
     tripletBlocks.forEach { block ->
       val shortestCol = columnHeights.indices.minByOrNull { columnHeights[it] } ?: 0
       val xPos        = COLUMN_GAP + shortestCol * (superColWidth + SUPER_COL_GAP)
-      val drawWidth   = if (shortestCol == 2) IMAGE_WIDTH - xPos - COLUMN_GAP else superColWidth
+      val drawWidth   = if (shortestCol == SUPER_COLUMN_COUNT - 1) IMAGE_WIDTH - xPos - COLUMN_GAP else superColWidth
       block.draw(g2d, xPos, columnY[shortestCol], drawWidth)
       columnY[shortestCol]       += block.height + 5
       columnHeights[shortestCol] += block.height + 5
