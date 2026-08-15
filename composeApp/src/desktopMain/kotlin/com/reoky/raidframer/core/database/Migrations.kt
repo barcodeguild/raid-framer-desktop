@@ -416,3 +416,11 @@ val MIGRATION_37_38 = object : Migration(37, 38) {
     connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalRevive INTEGER NOT NULL DEFAULT 0").use { it.step() }
   }
 }
+
+// Added PNG export toggle and additional export language selections.
+val MIGRATION_38_39 = object : Migration(38, 39) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN exportPngEnabled INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportPngLanguages TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}

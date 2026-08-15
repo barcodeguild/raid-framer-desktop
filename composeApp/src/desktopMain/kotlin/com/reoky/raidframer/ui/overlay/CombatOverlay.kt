@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
@@ -70,6 +71,7 @@ import raid_framer_desktop.composeapp.generated.resources.combat_stop_and_save
 import raid_framer_desktop.composeapp.generated.resources.combat_abort_and_discard
 import raid_framer_desktop.composeapp.generated.resources.combat_save_and_exit_tooltip
 import raid_framer_desktop.composeapp.generated.resources.combat_export_saving_session
+import raid_framer_desktop.composeapp.generated.resources.combat_export_saving_language
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_summary
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_title
 
@@ -695,7 +697,17 @@ fun CombatOverlay(wm: WindowManager? = null) {
           horizontalAlignment = Alignment.CenterHorizontally
         ) {
           Text(
-            text = stringResource(Res.string.combat_export_saving_session, exportProgress.current, exportProgress.total),
+            text = if (exportProgress.languageCode.isBlank()) {
+              stringResource(Res.string.combat_export_saving_session, exportProgress.current, exportProgress.total)
+            } else {
+              stringResource(
+                Res.string.combat_export_saving_language,
+                exportProgress.item.ifBlank { exportProgress.languageCode },
+                exportProgress.current,
+                exportProgress.total,
+                ""
+              )
+            },
             color = Color.White,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium

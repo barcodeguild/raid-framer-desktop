@@ -613,7 +613,8 @@
     <string name="settings_export_directory_label">导出目录:</string>
     <string name="settings_export_size_label">已用空间:</string>
     <string name="settings_export_open_folder">打开文件夹</string>
-    <string name="settings_export_include_raw_json">导出时包含原始JSON格式日志。(使用磁盘空间)</string>
+    <string name="settings_export_include_raw_json">导出原始 JSON 日志</string>
+    <string name="settings_export_storage_estimate">PNG 导出通常每个文件占用 10-15 MB；原始 JSON 日志每个会话可能占用 100-250 MB。</string>
     <string name="settings_export_directory_not_found">目录未找到</string>
 
     <!-- About / Update Strings -->
@@ -1189,6 +1190,12 @@
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
     <!-- Export Progress -->
-    <string name="combat_export_saving_session">保存会话 %1$d/%2$d</string>
+    <string name="settings_export_png">将会话摘要导出为 PNG</string>
+    <string name="settings_export_languages_label">PNG 导出语言</string>
+    <string name="settings_export_languages_description">始终导出当前语言。选择其他语言以创建更多 PNG 文件。</string>
+    <string name="settings_export_spell_language_notice">技能名称始终以游戏客户端使用的语言显示。</string>
+    <string name="settings_export_language_current">当前语言</string>
+    <string name="combat_export_saving_session">正在保存会话 %1$d/%2$d</string>
+    <string name="combat_export_saving_language">正在保存 %1$s 导出 %2$d/%3$d</string>
 
 </resources>

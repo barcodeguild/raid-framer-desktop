@@ -614,7 +614,13 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="settings_export_directory_label">Export Directory:</string>
     <string name="settings_export_size_label">Space Used:</string>
     <string name="settings_export_open_folder">Open Folder</string>
-    <string name="settings_export_include_raw_json">Include raw JSON formatted logs when exporting. (Uses disk space)</string>
+    <string name="settings_export_include_raw_json">Export raw JSON logs</string>
+    <string name="settings_export_storage_estimate">PNG exports are typically 10-15 MB each; raw JSON logs may use 100-250 MB per session.</string>
+    <string name="settings_export_png">Export session summary to PNG</string>
+    <string name="settings_export_languages_label">PNG Export Languages</string>
+    <string name="settings_export_languages_description">Your current language is always exported. Select additional languages to create more PNG files. Spell names remain in the game client language.</string>
+    <string name="settings_export_spell_language_notice">Spell names are always displayed in the language used by the game client.</string>
+    <string name="settings_export_language_current">current language</string>
     <string name="settings_export_directory_not_found">Directory not found</string>
 
     <!-- About / Update Strings -->
@@ -1136,5 +1142,6 @@ This will allow the app to use this seed table as a reference for player data.</
 
     <!-- Export Progress -->
     <string name="combat_export_saving_session">Saving session %1$d/%2$d</string>
+    <string name="combat_export_saving_language">Saving %1$s export %2$d/%3$d</string>
 
 </resources>

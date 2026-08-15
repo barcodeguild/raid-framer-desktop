@@ -38,11 +38,23 @@ object AppLocale {
    */
   fun apply(code: String) {
     if (code.isBlank()) return
-    val locale = ENTRIES.firstOrNull { it.code == code }?.locale ?: return
+    val entry = ENTRIES.firstOrNull { it.code == code }
+    if (entry == null) {
+      println("Ignoring unknown language preference: $code")
+      return
+    }
+    val locale = entry.locale
     Locale.setDefault(locale)
     println("Applied language preference: $code -> ${locale.toLanguageTag()}")
   }
 
   fun entryFor(code: String): Entry =
     ENTRIES.firstOrNull { it.code == code } ?: SYSTEM_DEFAULT
+
+  fun validEntriesForCodes(codes: String): List<Entry> = codes
+    .split(',')
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
+    .distinct()
+    .mapNotNull { code -> ENTRIES.firstOrNull { it.code == code } }
 }

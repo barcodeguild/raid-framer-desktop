@@ -13,6 +13,7 @@ import com.reoky.raidframer.core.helpers.getDocumentsDirectory
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.locale.AppLocale
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.LifeMendQuality
@@ -130,6 +131,8 @@ object ImageExportInteractor {
     val progress: Float = 0f,
     val current: Int = 0,
     val total: Int = 1,
+    val languageCode: String = "",
+    val item: String = "",
   )
 
   private val _progress = MutableStateFlow(ExportProgress())
@@ -420,6 +423,18 @@ object ImageExportInteractor {
   data class SpellDamage(val spell: String, val total: Double)
   data class ItemUsage(val itemName: String, val count: Int)
 
+  data class ExportLanguage(val code: String, val locale: Locale, val nativeLabel: String)
+
+  private fun selectedExportLanguages(): List<ExportLanguage> {
+    val config = RFConfig.state.value
+    val current = AppLocale.entryFor(config.preferredLanguage)
+    val entries = buildList {
+      if (current.code.isNotBlank()) add(current)
+      addAll(AppLocale.validEntriesForCodes(config.exportPngLanguages))
+    }.distinctBy { it.code }
+    return entries.map { ExportLanguage(it.code, it.locale, it.nativeLabel) }
+  }
+
   suspend fun captureSnapshot(explicitDurationMs: Long? = null): ExportData {
     val config = RFConfig.state.value
     val sessionStart = config.lastSessionStart
@@ -558,27 +573,38 @@ object ImageExportInteractor {
   }
 
   suspend fun exportToPng(data: ExportData): File? {
-    _progress.value = ExportProgress(isExporting = true, current = 1, total = 1)
+    val languages = selectedExportLanguages()
+    if (!RFConfig.state.value.exportPngEnabled || languages.isEmpty()) return null
+    _progress.value = ExportProgress(isExporting = true, current = 0, total = languages.size)
     return withContext(Dispatchers.IO) {
+      var firstOutput: File? = null
       try {
-        _progress.value = ExportProgress(true, 0.05f, 1, 1)
-        val imageHeight = calculateImageHeight(data)
-        val renderWidth = IMAGE_WIDTH * EXPORT_RENDER_SCALE
-        val renderHeight = imageHeight * EXPORT_RENDER_SCALE
-        val renderedImage = BufferedImage(renderWidth, renderHeight, BufferedImage.TYPE_INT_ARGB)
-        val g2d = renderedImage.createGraphics()
+        languages.forEachIndexed { index, language ->
+          val previousLocale = Locale.getDefault()
+          try {
+            // Compose resources and DateFormat use the JVM default locale. Change it only for
+            // this synchronous render, then restore it before another export or UI work runs.
+            Locale.setDefault(language.locale)
+            _progress.value = ExportProgress(true, 0f, index, languages.size, language.code, language.nativeLabel)
+            val localizedData = captureLocalizedData(data)
+            _progress.value = ExportProgress(true, 0.05f, index, languages.size, language.code, language.nativeLabel)
+            val imageHeight = calculateImageHeight(localizedData)
+            val renderWidth = IMAGE_WIDTH * EXPORT_RENDER_SCALE
+            val renderHeight = imageHeight * EXPORT_RENDER_SCALE
+            val renderedImage = BufferedImage(renderWidth, renderHeight, BufferedImage.TYPE_INT_ARGB)
+            val g2d = renderedImage.createGraphics()
 
-        applyHighQualityRenderingHints(g2d)
-        g2d.scale(EXPORT_RENDER_SCALE.toDouble(), EXPORT_RENDER_SCALE.toDouble())
+            applyHighQualityRenderingHints(g2d)
+            g2d.scale(EXPORT_RENDER_SCALE.toDouble(), EXPORT_RENDER_SCALE.toDouble())
 
-        drawWallpaperBackground(g2d, IMAGE_WIDTH, imageHeight)
-        drawMasonryLayout(g2d, data)
-        _progress.value = ExportProgress(true, 0.72f, 1, 1)
+            drawWallpaperBackground(g2d, IMAGE_WIDTH, imageHeight)
+            drawMasonryLayout(g2d, localizedData)
+            _progress.value = ExportProgress(true, 0.72f, index, languages.size, language.code, language.nativeLabel)
 
-        g2d.dispose()
+            g2d.dispose()
 
-        val image = downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
-        _progress.value = ExportProgress(true, 0.88f, 1, 1)
+            val image = downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
+            _progress.value = ExportProgress(true, 0.88f, index, languages.size, language.code, language.nativeLabel)
 
         val config = RFConfig.state.value
         val exportDir = if (config.lastSessionExportDir.isNotBlank()) {
@@ -591,19 +617,46 @@ object ImageExportInteractor {
           Paths.get(documentsDir, "RFExports", year, month)
         }
         Files.createDirectories(exportDir)
-        val outputFile = exportDir.resolve("${data.sessionTitle}.png").toFile()
+            val outputFile = exportDir.resolve("${safeFileName(data.sessionTitle)}_${language.code}.png").toFile()
 
-        ImageIO.write(image, "png", outputFile)
-        _progress.value = ExportProgress(true, 1f, 1, 1)
-        outputFile
-      } catch (e: Exception) {
-        e.printStackTrace()
-        null
+            ImageIO.write(image, "png", outputFile)
+            if (firstOutput == null) firstOutput = outputFile
+            _progress.value = ExportProgress(true, 1f, index + 1, languages.size, language.code, language.nativeLabel)
+          } catch (e: Exception) {
+            Log.error("ImageExport", "Failed to export ${language.code} PNG: ${e.message}")
+          } finally {
+            Locale.setDefault(previousLocale)
+          }
+        }
+        firstOutput
       } finally {
         _progress.value = ExportProgress()
       }
     }
   }
+
+  private suspend fun captureLocalizedData(data: ExportData): ExportData {
+    return data.copy(
+      sessionDate = DateFormat.getDateInstance(DateFormat.SHORT).format(Date()),
+      battleSummaryTitle = getString(Res.string.export_title_battle_summary),
+      noDataText = getString(Res.string.export_no_data),
+      exportHeaderOn = getString(Res.string.export_header_on),
+      exportHeaderOff = getString(Res.string.export_header_off),
+      exportHeaderOdeLabel = getString(Res.string.export_header_ode_label),
+      exportHeaderPveLabel = getString(Res.string.export_header_pve_label),
+      exportHeaderKillsLabel = getString(Res.string.export_header_kills_label),
+      exportHeaderMostDamage = getString(Res.string.export_header_most_damage),
+      exportHeaderKillingBlow = getString(Res.string.export_header_killing_blow),
+      combatDamageTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_damage else Res.string.export_combat_pvp_damage),
+      combatHealsTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_heals else Res.string.export_combat_pvp_heals),
+      combatCCTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_cc else Res.string.export_combat_pvp_cc),
+    )
+  }
+
+  private fun safeFileName(value: String): String = value
+    .replace(Regex("[\\\\/:*?\"<>|]"), "_")
+    .trim()
+    .ifBlank { "session" }
 
   /*
    * So the reason we downsample the image from a higher resolution is because of the icons and fonts being pixelated
@@ -1410,11 +1463,11 @@ object ImageExportInteractor {
   private var cachedEmojiFont: Font? = null
 
   private fun createFont(style: Int, size: Float): Font {
-    val language = RFConfig.state.value.preferredLanguage
+    val language = Locale.getDefault().language
     val baseFont = cachedFont
       ?.takeIf { cachedFontLanguage == language }
       ?.deriveFont(size) ?: run {
-      val font = if (AppLocale.entryFor(RFConfig.state.value.preferredLanguage).code == "cn") {
+      val font = if (language == "zh") {
         listOf("Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Dialog")
           .firstNotNullOfOrNull { name ->
             runCatching { Font(name, Font.PLAIN, size.toInt()) }
@@ -1422,11 +1475,11 @@ object ImageExportInteractor {
               ?.takeIf { candidate -> candidate.canDisplay('中') }
           }
           ?: Font("Dialog", Font.PLAIN, size.toInt())
-      } else {
+      } else if (language == "ko") {
         try {
           val uri = Res.getUri("font/arkorean_regular.ttf")
           val koreanFont = Font.createFont(Font.TRUETYPE_FONT, URI(uri).toURL().openStream())
-          if (koreanFont.canDisplay('ç') && koreanFont.canDisplay('õ') && koreanFont.canDisplay('ü')) {
+          if (koreanFont.canDisplay('한')) {
             koreanFont
           } else {
             Font("Dialog", Font.PLAIN, size.toInt())
@@ -1434,6 +1487,8 @@ object ImageExportInteractor {
         } catch (_: Exception) {
           Font("Dialog", Font.PLAIN, size.toInt())
         }
+      } else {
+        Font("Dialog", Font.PLAIN, size.toInt())
       }
       cachedFont = font
       cachedFontLanguage = language

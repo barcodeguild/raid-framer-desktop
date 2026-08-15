@@ -614,7 +614,8 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="settings_export_directory_label">Exportverzeichnis:</string>
     <string name="settings_export_size_label">Genutzter Speicherplatz:</string>
     <string name="settings_export_open_folder">Ordner öffnen</string>
-    <string name="settings_export_include_raw_json">Rohe JSON-formatierte Logs beim Exportieren einschließen. (Verwendet Speicherplatz)</string>
+    <string name="settings_export_include_raw_json">Rohe JSON-Logs exportieren</string>
+    <string name="settings_export_storage_estimate">PNG-Exporte benötigen normalerweise 10-15 MB pro Datei; rohe JSON-Protokolle können 100-250 MB pro Sitzung benötigen.</string>
     <string name="settings_export_directory_not_found">Verzeichnis nicht gefunden</string>
 
     <!-- About / Update Strings -->
@@ -1135,6 +1136,12 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
     <!-- Export Progress -->
+    <string name="settings_export_png">Sitzungszusammenfassung als PNG exportieren</string>
+    <string name="settings_export_languages_label">PNG-Exportsprachen</string>
+    <string name="settings_export_languages_description">Ihre aktuelle Sprache wird immer exportiert. Wählen Sie weitere Sprachen für zusätzliche PNG-Dateien.</string>
+    <string name="settings_export_spell_language_notice">Zaubernamen werden immer in der Sprache des Spielclients angezeigt.</string>
+    <string name="settings_export_language_current">aktuelle Sprache</string>
     <string name="combat_export_saving_session">Sitzung wird gespeichert %1$d/%2$d</string>
+    <string name="combat_export_saving_language">%1$s-Export wird gespeichert %2$d/%3$d</string>
 
 </resources>

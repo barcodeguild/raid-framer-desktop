@@ -614,7 +614,8 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="settings_export_directory_label">Diretório de Exportação:</string>
     <string name="settings_export_size_label">Espaço Usado:</string>
     <string name="settings_export_open_folder">Abrir Pasta</string>
-    <string name="settings_export_include_raw_json">Incluir logs formatados JSON brutos ao exportar. (Usa espaço em disco)</string>
+    <string name="settings_export_include_raw_json">Exportar logs JSON brutos</string>
+    <string name="settings_export_storage_estimate">As exportações PNG normalmente usam 10-15 MB cada; os logs JSON brutos podem usar 100-250 MB por sessão.</string>
     <string name="settings_export_directory_not_found">Diretório não encontrado</string>
 
     <!-- About / Update Strings -->
@@ -1135,6 +1136,12 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
     <!-- Export Progress -->
+    <string name="settings_export_png">Exportar resumo da sessão para PNG</string>
+    <string name="settings_export_languages_label">Idiomas de exportação PNG</string>
+    <string name="settings_export_languages_description">Seu idioma atual sempre será exportado. Selecione idiomas adicionais para criar mais arquivos PNG.</string>
+    <string name="settings_export_spell_language_notice">Os nomes das habilidades são sempre exibidos no idioma usado pelo cliente do jogo.</string>
+    <string name="settings_export_language_current">idioma atual</string>
     <string name="combat_export_saving_session">Salvando sessão %1$d/%2$d</string>
+    <string name="combat_export_saving_language">Salvando exportação em %1$s %2$d/%3$d</string>
 
 </resources>

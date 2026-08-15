@@ -614,7 +614,8 @@
     <string name="settings_export_directory_label">Каталог экспорта:</string>
     <string name="settings_export_size_label">Использовано места:</string>
     <string name="settings_export_open_folder">Открыть папку</string>
-    <string name="settings_export_include_raw_json">Включать необработанные логи в формате JSON при экспорте. (Использует место на диске)</string>
+    <string name="settings_export_include_raw_json">Экспортировать необработанные логи JSON</string>
+    <string name="settings_export_storage_estimate">Экспорт PNG обычно занимает 10-15 МБ на файл; необработанные логи JSON могут занимать 100-250 МБ на сессию.</string>
     <string name="settings_export_directory_not_found">Каталог не найден</string>
 
     <!-- About / Update Strings -->
@@ -1135,6 +1136,12 @@
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
     <!-- Export Progress -->
+    <string name="settings_export_png">Экспортировать сводку сессии в PNG</string>
+    <string name="settings_export_languages_label">Языки экспорта PNG</string>
+    <string name="settings_export_languages_description">Ваш текущий язык экспортируется всегда. Выберите дополнительные языки для создания PNG-файлов.</string>
+    <string name="settings_export_spell_language_notice">Названия заклинаний всегда отображаются на языке игрового клиента.</string>
+    <string name="settings_export_language_current">текущий язык</string>
     <string name="combat_export_saving_session">Сохранение сессии %1$d/%2$d</string>
+    <string name="combat_export_saving_language">Сохранение экспорта на языке %1$s %2$d/%3$d</string>
 
 </resources>

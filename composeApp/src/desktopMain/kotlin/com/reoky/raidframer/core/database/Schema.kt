@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 38
+const val SCHEMA_VERSION = 39
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -115,6 +115,9 @@ data class ConfigEntity(
   val allowOdeToRecoveryCountAsHeals: Boolean = false,
 
   // PNG export background settings
+  val exportPngEnabled: Boolean = true,
+  // Comma-separated AppLocale codes for additional PNG exports. The current app language is always added.
+  val exportPngLanguages: String = "",
   val exportBackgroundSelection: String = "REOKY",
   val exportCustomBackgroundPath: String = "",
   val exportBackgroundColor: Int = 0xFF000000.toInt(),

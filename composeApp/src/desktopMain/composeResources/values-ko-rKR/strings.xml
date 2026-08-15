@@ -614,7 +614,8 @@
     <string name="settings_export_directory_label">내보내기 디렉토리:</string>
     <string name="settings_export_size_label">사용된 공간:</string>
     <string name="settings_export_open_folder">폴더 열기</string>
-    <string name="settings_export_include_raw_json">내보낼 때 원시 JSON 형식 로그 포함. (디스크 공간 사용)</string>
+    <string name="settings_export_include_raw_json">원시 JSON 로그 내보내기</string>
+    <string name="settings_export_storage_estimate">PNG 내보내기는 보통 파일당 10-15MB이며, 원시 JSON 로그는 세션당 100-250MB를 사용할 수 있습니다.</string>
     <string name="settings_export_directory_not_found">디렉토리를 찾을 수 없음</string>
 
     <!-- About / Update Strings -->
@@ -1189,6 +1190,12 @@
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
     <!-- Export Progress -->
+    <string name="settings_export_png">세션 요약을 PNG로 내보내기</string>
+    <string name="settings_export_languages_label">PNG 내보내기 언어</string>
+    <string name="settings_export_languages_description">현재 언어는 항상 내보냅니다. 추가 PNG 파일을 만들 언어를 선택하세요.</string>
+    <string name="settings_export_spell_language_notice">주문 이름은 항상 게임 클라이언트에서 사용하는 언어로 표시됩니다.</string>
+    <string name="settings_export_language_current">현재 언어</string>
     <string name="combat_export_saving_session">세션 저장 중 %1$d/%2$d</string>
+    <string name="combat_export_saving_language">%1$s 내보내기 저장 중 %2$d/%3$d</string>
 
 </resources>
