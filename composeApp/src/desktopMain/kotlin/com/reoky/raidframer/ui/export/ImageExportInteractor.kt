@@ -20,6 +20,8 @@ import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.pvpPerformancePoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.export_no_data
 import raid_framer_desktop.composeapp.generated.resources.export_title_battle_summary
@@ -123,7 +125,17 @@ import javax.imageio.ImageIO
 
 object ImageExportInteractor {
 
-  private const val IMAGE_WIDTH = 3200
+  data class ExportProgress(
+    val isExporting: Boolean = false,
+    val progress: Float = 0f,
+    val current: Int = 0,
+    val total: Int = 1,
+  )
+
+  private val _progress = MutableStateFlow(ExportProgress())
+  val progress = _progress.asStateFlow()
+
+  private const val IMAGE_WIDTH = 4000
   // Keep the final PNG at the wallpaper's max width, but render content larger first.
   private const val EXPORT_RENDER_SCALE = 2
   private const val SVG_ICON_RENDER_SCALE = 4
@@ -134,7 +146,7 @@ object ImageExportInteractor {
   private const val COLUMN_GAP = 10
   private const val CARD_PADDING = 8
   private const val SUPER_COL_GAP = 10
-  private const val SUPER_COLUMN_COUNT = 4
+  private const val SUPER_COLUMN_COUNT = 5
 
   // Title card is now full-width; store its fixed height, so both layout functions agree.
   private const val TITLE_CARD_HEIGHT = 90
@@ -546,8 +558,10 @@ object ImageExportInteractor {
   }
 
   suspend fun exportToPng(data: ExportData): File? {
+    _progress.value = ExportProgress(isExporting = true, current = 1, total = 1)
     return withContext(Dispatchers.IO) {
       try {
+        _progress.value = ExportProgress(true, 0.05f, 1, 1)
         val imageHeight = calculateImageHeight(data)
         val renderWidth = IMAGE_WIDTH * EXPORT_RENDER_SCALE
         val renderHeight = imageHeight * EXPORT_RENDER_SCALE
@@ -559,10 +573,12 @@ object ImageExportInteractor {
 
         drawWallpaperBackground(g2d, IMAGE_WIDTH, imageHeight)
         drawMasonryLayout(g2d, data)
+        _progress.value = ExportProgress(true, 0.72f, 1, 1)
 
         g2d.dispose()
 
         val image = downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
+        _progress.value = ExportProgress(true, 0.88f, 1, 1)
 
         val config = RFConfig.state.value
         val exportDir = if (config.lastSessionExportDir.isNotBlank()) {
@@ -578,10 +594,13 @@ object ImageExportInteractor {
         val outputFile = exportDir.resolve("${data.sessionTitle}.png").toFile()
 
         ImageIO.write(image, "png", outputFile)
+        _progress.value = ExportProgress(true, 1f, 1, 1)
         outputFile
       } catch (e: Exception) {
         e.printStackTrace()
         null
+      } finally {
+        _progress.value = ExportProgress()
       }
     }
   }

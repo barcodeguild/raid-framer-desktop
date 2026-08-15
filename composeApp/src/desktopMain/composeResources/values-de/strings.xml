@@ -1134,4 +1134,7 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="time_ago_months_other">vor %1$d Monaten</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
+    <!-- Export Progress -->
+    <string name="combat_export_saving_session">Sitzung wird gespeichert %1$d/%2$d</string>
+
 </resources>

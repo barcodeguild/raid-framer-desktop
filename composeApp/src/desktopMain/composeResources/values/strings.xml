@@ -1188,5 +1188,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="spec_type_zealot">Zealot</string>
     <string name="spec_type_zephyr">Zephyr</string>
 
+    <!-- Export Progress -->
+    <string name="combat_export_saving_session">Saving session %1$d/%2$d</string>
 
 </resources>

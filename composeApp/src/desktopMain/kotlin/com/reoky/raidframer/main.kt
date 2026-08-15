@@ -269,8 +269,10 @@ suspend fun quitAfterSessionStop() {
   if (CombatLogInteractor.isRecording.value) {
     Log.info(TAG, "Session active — stopping recording and awaiting export before quit...")
     PlayerCacheInteractor.stopSession()
-    CombatLogInteractor.awaitExport()
-    PlayerCacheInteractor.awaitArchive()
   }
+  // The session may already have been stopped from the combat/settings controls.
+  // Always await any jobs started by that stop before terminating the process.
+  CombatLogInteractor.awaitExport()
+  PlayerCacheInteractor.awaitArchive()
   quit()
 }

@@ -1134,4 +1134,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="time_ago_months_other">%1$d months ago</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
+    <!-- Export Progress -->
+    <string name="combat_export_saving_session">Saving session %1$d/%2$d</string>
+
 </resources>

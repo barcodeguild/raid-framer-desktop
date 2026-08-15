@@ -1188,4 +1188,7 @@
     <string name="time_ago_months_other">%1$d개월 전</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
 
+    <!-- Export Progress -->
+    <string name="combat_export_saving_session">세션 저장 중 %1$d/%2$d</string>
+
 </resources>

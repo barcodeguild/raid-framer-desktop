@@ -59,6 +59,9 @@ object CombatLogInteractor : Interactor() {
   val isRecording = _isRecording.asStateFlow()
   val showHint = _showHint.asStateFlow()
 
+  val isExporting
+    get() = ImageExportInteractor.progress.value.isExporting || exportJob?.isActive == true
+
   private var writer: BufferedWriter? = null
   private var currentOutputFile: java.nio.file.Path? = null
   private var exportJob: Job? = null
