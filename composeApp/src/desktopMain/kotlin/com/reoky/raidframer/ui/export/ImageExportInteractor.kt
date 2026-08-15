@@ -249,6 +249,7 @@ object ImageExportInteractor {
 
   // ── Skill-tree icon cache (SVG → BufferedImage via Skiko) ─────────────────
   private val skillTreeImageCache = mutableMapOf<Pair<SkillTreeType?, Int>, BufferedImage?>()
+  private val wallpaperCache = mutableMapOf<String, BufferedImage?>()
 
   private fun applyHighQualityRenderingHints(g2d: Graphics2D) {
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -666,7 +667,11 @@ object ImageExportInteractor {
   private fun downsampleImage(source: BufferedImage, width: Int, height: Int): BufferedImage {
     val scaled = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
     val sg = scaled.createGraphics()
-    applyHighQualityRenderingHints(sg)
+    // Bilinear is substantially cheaper than bicubic for this large full-image pass,
+    // while the 2x render still preserves smooth text, icons, and chart edges.
+    sg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
+    sg.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED)
+    sg.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED)
     sg.drawImage(source, 0, 0, width, height, null)
     sg.dispose()
     return scaled
@@ -680,21 +685,27 @@ object ImageExportInteractor {
   private fun drawWallpaperBackground(g2d: Graphics2D, width: Int, height: Int) {
     val config = RFConfig.state.value
     val fallbackUri = Res.getUri("drawable/reoky_wallpaper.png")
-    val wallpaper = try {
-      when (config.exportBackgroundSelection) {
-        "SOLID_COLOR" -> null
-        "CUSTOM" -> {
-          val file = File(config.exportCustomBackgroundPath)
-          if (!file.isFile) throw IllegalStateException("Custom background is missing")
-          ImageIO.read(file) ?: throw IllegalStateException("Custom background is unreadable")
+    val wallpaperKey = when (config.exportBackgroundSelection) {
+      "CUSTOM" -> "CUSTOM:${config.exportCustomBackgroundPath}"
+      else -> config.exportBackgroundSelection
+    }
+    val wallpaper = wallpaperCache.getOrPut(wallpaperKey) {
+      try {
+        when (config.exportBackgroundSelection) {
+          "SOLID_COLOR" -> null
+          "CUSTOM" -> {
+            val file = File(config.exportCustomBackgroundPath)
+            if (!file.isFile) throw IllegalStateException("Custom background is missing")
+            ImageIO.read(file) ?: throw IllegalStateException("Custom background is unreadable")
+          }
+          "SPAGUETTI" -> ImageIO.read(URI(Res.getUri("drawable/spaguetti_wallpaper.png")).toURL())
+          "SPACEA" -> ImageIO.read(URI(Res.getUri("drawable/spacea_wallpaper.png")).toURL())
+          "BROOKLYYN" -> ImageIO.read(URI(Res.getUri("drawable/brooklyyn_wallpaper.png")).toURL())
+          else -> ImageIO.read(URI(fallbackUri).toURL())
         }
-        "SPAGUETTI" -> ImageIO.read(URI(Res.getUri("drawable/spaguetti_wallpaper.png")).toURL())
-        "SPACEA" -> ImageIO.read(URI(Res.getUri("drawable/spacea_wallpaper.png")).toURL())
-        "BROOKLYYN" -> ImageIO.read(URI(Res.getUri("drawable/brooklyyn_wallpaper.png")).toURL())
-        else -> ImageIO.read(URI(fallbackUri).toURL())
+      } catch (_: Exception) {
+        ImageIO.read(URI(fallbackUri).toURL())
       }
-    } catch (_: Exception) {
-      ImageIO.read(URI(fallbackUri).toURL())
     }
 
     g2d.color = if (config.exportBackgroundSelection == "SOLID_COLOR") {
