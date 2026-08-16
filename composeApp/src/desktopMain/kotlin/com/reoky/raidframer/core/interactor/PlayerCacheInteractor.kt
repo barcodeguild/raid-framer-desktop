@@ -389,7 +389,7 @@ object PlayerCacheInteractor : Interactor() {
         } else {
           petCards[key]?.let { card ->
             petCards[key] = card.copy(
-            recentCids = cid?.let { (listOf(it) + card.recentCids).distinct().take(5) } ?: card.recentCids,
+              recentCids = cid?.let { (listOf(it) + card.recentCids).distinct().take(50) } ?: card.recentCids,
               lastEvent = System.currentTimeMillis(),
               petTypes = card.petTypes + petType
             )
@@ -400,6 +400,11 @@ object PlayerCacheInteractor : Interactor() {
       }
     }
     PetAccumulatorInteractor.onPetRegistered()
+  }
+
+  fun createPetCardFromWhitelistedSpell(owner: String, petName: String, petType: String = "Unknown Pet") {
+    if (owner.isBlank() || petName.isBlank()) return
+    createOrUpdatePetCard(petName = petName, owner = owner, petType = petType)
   }
 
   fun startNewSession(sessionType: String, allowPvE: Boolean) {
@@ -945,18 +950,21 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDamage(event: DamageEvent) {
     val cleanSource = event.source.replace("\\s*\\([^)]*\\)$".toRegex(), "").trim()
     val eventSourceIsPet = getPetEntriesByName(cleanSource).isNotEmpty()
-    val isWhitelistedSkill = petSkillWhitelist.any { it.id == event.spellId } ||
-        petSkillWhitelist.any { skill -> skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) } }
-    if (eventSourceIsPet || isWhitelistedSkill) {
+    val isWhitelistedSkill = isWhitelistedPetSkill(event.spellId, event.spell)
+    // Pet attribution is spell-whitelist driven. A registered pet may emit
+    // ordinary game abilities, but those abilities must not enter pet totals.
+    if (isWhitelistedSkill) {
       PetAccumulatorInteractor.postEvent(event)
       return
     }
-    // Diagnostic: if source looks like a pet (non-player NPC with spellId=0 from IPC) but no pet card exists,
-    // this damage will be counted as player damage. This is the likely cause of 0-damage on pet cards.
-    if (event.spellId == 0 && !isRealPlayer(cleanSource)) {
-      Log.info(TAG, "Possible unattributed pet damage: '$cleanSource' (source='${event.source}') dealt ${event.damage} with '${event.spell}' - no pet card found, routing to player cache. Pet cards: ${petCards.keys.toList()}")
-    }
     postDamageInternal(event)
+  }
+
+  private fun isWhitelistedPetSkill(spellId: Int, spellName: String): Boolean {
+    return petSkillWhitelist.any { skill ->
+      !skill.isPetInitiator &&
+        (skill.id == spellId || skill.possibleNames.any { it.equals(spellName, ignoreCase = true) })
+    }
   }
 
   private fun postDamageInternal(event: DamageEvent) {
@@ -992,6 +1000,11 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   private fun postCasting(event: CastingEvent) {
+    if (isWhitelistedPetSkill(event.spellId, event.spell)) {
+      // A cast-start event is still subject to the pet spell whitelist. Generic
+      // abilities such as Melee Attack must not become pet attribution signals.
+      return
+    }
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, event.source)
@@ -1008,9 +1021,8 @@ object PlayerCacheInteractor : Interactor() {
   private fun postSuccessfulCast(event: SuccessfulCastEvent) {
     val cleanSource = event.source.replace("\\s*\\([^)]*\\)$".toRegex(), "").trim()
     val eventSourceIsPet = getPetEntriesByName(cleanSource).isNotEmpty()
-    val isWhitelistedSkill = petSkillWhitelist.any { it.id == event.spellId } ||
-        petSkillWhitelist.any { skill -> skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) } }
-    if (eventSourceIsPet || isWhitelistedSkill) {
+    val isWhitelistedSkill = isWhitelistedPetSkill(event.spellId, event.spell)
+    if (isWhitelistedSkill) {
       PetAccumulatorInteractor.postEvent(event)
       return
     }
@@ -1244,9 +1256,9 @@ object PlayerCacheInteractor : Interactor() {
               skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) }
           )
         }
-        val isDragonBreath = petSkill?.id in DRAGON_BREATH_RIDER_SPELL_IDS
-        val isDrakeBreath = petSkill?.id == DRAKE_BREATH_RIDER_SPELL_ID
-        val isGuidedMissilesRider = petSkill?.id == GUIDED_MISSILES_RIDER_SPELL_ID
+        val isDragonBreath = petSkill?.id in DRAGON_BREATH_RIDER_SPELL_IDS || event.spell.contains("Dragon's Breath", true)
+        val isDrakeBreath = petSkill?.id == DRAKE_BREATH_RIDER_SPELL_ID || event.spell.contains("Thunderbreath", true)
+        val isGuidedMissilesRider = petSkill?.id == GUIDED_MISSILES_RIDER_SPELL_ID || event.spell.contains("Guided Missiles", true)
 
         val castEvent = RiderCastEvent(
           timestamp = event.timestamp,
@@ -2222,7 +2234,7 @@ object PlayerCacheInteractor : Interactor() {
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .sample(250L)
     .map { pets ->
-      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 || it.sessionBreathCasts.isNotEmpty() || it.sessionRocketCasts.isNotEmpty() }
+      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 || it.sessionBreathCasts.isNotEmpty() || it.sessionRocketCasts.isNotEmpty() || it.recentDamageEvents.isNotEmpty() }
         .sortedByDescending { it.sessionDamageTotal }
         .take(50)
     }

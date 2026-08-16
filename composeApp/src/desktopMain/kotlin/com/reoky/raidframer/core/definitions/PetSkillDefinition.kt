@@ -10,7 +10,9 @@ val petSkillWhitelist = listOf(
     name = "Guided Missiles",
     castTime = 0.0,
     cooldown = 60.0,
-    possibleNames = listOf("Guided Missiles", "유도탄", "Ковровая бомбардировка")
+    possibleNames = listOf("Guided Missiles", "유도탄", "Ковровая бомбардировка"),
+    allowedPetTypes = setOf("Siege Risopoda", "갑충 병기", "甲虫兵器", "riso"),
+    relatedDamageIds = setOf(46055)
   ),
   Skill(
     id = 46058,
@@ -18,26 +20,10 @@ val petSkillWhitelist = listOf(
     castTime = 0.0,
     cooldown = 60.0,
     possibleNames = listOf("Guided Missiles (Rider)", "유도탄(탑승자용)", "Ковровая бомбардировка"),
-    isPetInitiator = true
+    isPetInitiator = true,
+    allowedPetTypes = setOf("Siege Risopoda", "갑충 병기", "甲虫兵器", "riso"),
+    relatedDamageIds = setOf(46055)
   ),
-
-  // Mara's scratch ~
-  Skill(
-    id = 8001707,
-    name = "Scratch",
-    castTime = 0.0,
-    cooldown = 18.0,
-    possibleNames = listOf("Scratch")
-  ),
-  Skill(
-    id = 8001708,
-    name = "Scratch (Rider)",
-    castTime = 0.0,
-    cooldown = 18.0,
-    possibleNames = listOf("Scratch (Rider)"),
-    isPetInitiator = true
-  ),
-
   // Red Dragon's Breath (Rider) - player casts this, dragon does the damage
   Skill(
     id = 38418,
@@ -45,7 +31,9 @@ val petSkillWhitelist = listOf(
     castTime = 0.0,
     cooldown = 30.0,
     possibleNames = listOf("Red Dragon's Breath (Rider)", "붉은 용의 숨결 (탑승자)", "Огненное дыхание"),
-    isPetInitiator = true
+    isPetInitiator = true,
+    allowedPetTypes = setOf("Red Dragon", "붉은 용"),
+    relatedDamageIds = setOf(22608, 22609, 22618)
   ),
   // Green Dragon's Breath (Rider)
   Skill(
@@ -54,7 +42,9 @@ val petSkillWhitelist = listOf(
     castTime = 0.0,
     cooldown = 30.0,
     possibleNames = listOf("Green Dragon's Breath (Rider)", "녹색 용의 숨결 (탑승자)", "Ядовитое дыхание"),
-    isPetInitiator = true
+    isPetInitiator = true,
+    allowedPetTypes = setOf("Green Dragon", "녹색 용"),
+    relatedDamageIds = setOf(22608, 22609, 22618)
   ),
   // Black Dragon's Breath (Rider)
   Skill(
@@ -63,7 +53,9 @@ val petSkillWhitelist = listOf(
     castTime = 0.0,
     cooldown = 30.0,
     possibleNames = listOf("Black Dragon's Breath (Rider)", "검은 용의 숨결 (탑승자)", "Дыхание тьмы"),
-    isPetInitiator = true
+    isPetInitiator = true,
+    allowedPetTypes = setOf("Black Dragon", "검은 용"),
+    relatedDamageIds = setOf(22608, 22609, 22618)
   ),
   // Clinging Flame - dragon breath DoT damage
   Skill(
@@ -71,7 +63,8 @@ val petSkillWhitelist = listOf(
     name = "Clinging Flame",
     castTime = 0.0,
     cooldown = 0.0,
-    possibleNames = listOf("Clinging Flame", "폭발하는 씨앗", "Раскаленная лава")
+    possibleNames = listOf("Clinging Flame", "폭발하는 씨앗", "Раскаленная лава"),
+    allowedPetTypes = setOf("Red Dragon", "붉은 용", "Green Dragon", "녹색 용", "Black Dragon", "검은 용")
   ),
   // Clinging Flame - dragon breath DoT damage
   Skill(
@@ -79,7 +72,8 @@ val petSkillWhitelist = listOf(
     name = "Clinging Flame",
     castTime = 0.0,
     cooldown = 0.0,
-    possibleNames = listOf("Clinging Flame", "폭발하는 씨앗", "Раскаленная лава")
+    possibleNames = listOf("Clinging Flame", "폭발하는 씨앗", "Раскаленная лава"),
+    allowedPetTypes = setOf("Red Dragon", "붉은 용", "Green Dragon", "녹색 용", "Black Dragon", "검은 용")
   ),
   // Clinging Flame Explosion - dragon breath burst damage
   Skill(
@@ -87,7 +81,8 @@ val petSkillWhitelist = listOf(
     name = "Clinging Flame Explosion",
     castTime = 0.0,
     cooldown = 0.0,
-    possibleNames = listOf("Clinging Flame Explosion", "폭발하는 씨앗", "Раскаленная лава")
+    possibleNames = listOf("Clinging Flame Explosion", "폭발하는 씨앗", "Раскаленная лава"),
+    allowedPetTypes = setOf("Red Dragon", "붉은 용", "Green Dragon", "녹색 용", "Black Dragon", "검은 용")
   ),
 
   // Typhoon Drake (Used for testing the app and breaths!)
@@ -97,20 +92,24 @@ val petSkillWhitelist = listOf(
     castTime = 0.0,
     cooldown = 60.0,
     possibleNames = listOf("Thunderbreath (Rider)", "천둥의 숨결 (탑승자)"),
-    isPetInitiator = true
+    isPetInitiator = true,
+    allowedPetTypes = setOf("Typhoon Drake"),
+    relatedDamageIds = setOf(35786, 21015)
   ),
   Skill(
     id = 35786,
     name = "Thunderbreath",
     castTime = 0.0,
     cooldown = 60.0,
-    possibleNames = listOf("Thunderbreath", "천둥의 숨결")
+    possibleNames = listOf("Thunderbreath", "천둥의 숨결"),
+    allowedPetTypes = setOf("Typhoon Drake")
   ),
   Skill(
     id = 21015,
     name = "Thunderbreath Aftershock",
     castTime = 0.0,
     cooldown = 0.0,
-    possibleNames = listOf("Thunderbreath Aftershock", "천둥의 숨결 여파")
+    possibleNames = listOf("Thunderbreath Aftershock", "천둥의 숨결 여파"),
+    allowedPetTypes = setOf("Typhoon Drake")
   ),
 )

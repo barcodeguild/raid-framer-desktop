@@ -1,5 +1,6 @@
 package com.reoky.raidframer.core.interactor
 
+import com.reoky.raidframer.core.definitions.Skill
 import com.reoky.raidframer.core.definitions.petSkillWhitelist
 import com.reoky.raidframer.core.model.CombatEvent
 import com.reoky.raidframer.core.model.DamageEvent
@@ -26,6 +27,7 @@ object PetAccumulatorInteractor : Interactor() {
   private data class CastWindow(
     val ownerName: String,
     val petName: String,
+    var attributedPetKey: String? = null,
     val spellId: Int,
     val castTime: Long,
     val windowEnd: Long,
@@ -35,7 +37,8 @@ object PetAccumulatorInteractor : Interactor() {
   private data class PendingRiderCast(
     val ownerName: String,
     val cast: SuccessfulCastEvent,
-    val firstSeen: Long
+    val firstSeen: Long,
+    var petKey: String? = null
   )
 
   private data class BufferedEvent<T>(val event: T, val firstSeen: Long)
@@ -70,11 +73,11 @@ object PetAccumulatorInteractor : Interactor() {
 
   private fun handleDamage(event: DamageEvent) {
     val cleanSource = cleanName(event.source)
-    val isKnownPet = PlayerCacheInteractor.getPetEntriesByName(cleanSource).isNotEmpty()
     val isPetSkill = isPetRelatedSkill(event.spellId, event.spell)
-    
-    if (!isKnownPet && !isPetSkill) {
-      // It's neither known as a pet nor uses a pet skill, send it to PlayerCache
+
+    if (!isPetSkill) {
+      // Pet damage is strictly whitelist-driven. This prevents a player sharing
+      // a pet's name from having ordinary damage credited to the pet.
       PlayerCacheInteractor.postEventInternal(event)
       return
     }
@@ -88,13 +91,13 @@ object PetAccumulatorInteractor : Interactor() {
   }
 
   private fun handleSuccessfulCast(event: SuccessfulCastEvent) {
-    val petSkill = petSkillWhitelist.find { it.id == event.spellId }
-    val cleanSource = cleanName(event.source)
-    val isKnownPet = PlayerCacheInteractor.getPetEntriesByName(cleanSource).isNotEmpty()
+    val petSkill = petSkillWhitelist.find { skillMatches(it, event.spellId, event.spell) }
 
-    if (petSkill == null && !isKnownPet) {
-        PlayerCacheInteractor.postEventInternal(event)
-        return
+    if (petSkill == null) {
+      // Successful casts follow the same whitelist rule as damage. Rider casts
+      // are only useful for pet attribution when the rider spell is whitelisted.
+      PlayerCacheInteractor.postEventInternal(event)
+      return
     }
     
     // We may not have a petSkill here if it's a known pet doing a non-whitelisted spell, but we still log it.
@@ -102,7 +105,7 @@ object PetAccumulatorInteractor : Interactor() {
 
     scope.launch {
       mutex.withLock {
-        if (petSkill?.isPetInitiator == true && (
+        if (petSkill.isPetInitiator && (
             accumulatedCastEvents.any { it.sameLogicalCast(event) } ||
               pendingRiderCasts.any { it.cast.sameLogicalCast(event) }
           )) {
@@ -112,7 +115,7 @@ object PetAccumulatorInteractor : Interactor() {
         accumulatedCastEvents.add(event)
 
         // If this is a rider spell, create an attribution window
-        if (petSkill?.isPetInitiator == true) {
+        if (petSkill.isPetInitiator) {
           if (pendingRiderCasts.none { it.cast.sameLogicalCast(event) }) {
             pendingRiderCasts.add(PendingRiderCast(cleanName(event.source), event, System.currentTimeMillis()))
           }
@@ -187,6 +190,11 @@ object PetAccumulatorInteractor : Interactor() {
     casts.forEach { cast ->
       val cleanSource = cleanName(cast.source)
       val initiator = isPetInitiator(cast)
+      val castSkill = petSkillWhitelist.find { skillMatches(it, cast.spellId, cast.spell) }
+      val inferredPetName = inferPetNameFromPetSkill(cast)
+      if (!initiator && inferredPetName.isNotBlank() && PlayerCacheInteractor.getPetEntriesByName(cleanSource).isEmpty()) {
+        PlayerCacheInteractor.createPetCardFromWhitelistedSpell(cleanSource, inferredPetName)
+      }
       var candidates = if (initiator) {
         // Rider skills are emitted by the owner, not the pet. Never resolve the
         // owner's name as a pet name or broadcast the cast to every owned pet.
@@ -194,6 +202,10 @@ object PetAccumulatorInteractor : Interactor() {
           .filter { it.value.owner.equals(cleanSource, ignoreCase = true) }
       } else {
         PlayerCacheInteractor.getPetEntriesByName(cleanSource)
+      }
+
+      if (castSkill != null) {
+        candidates = candidates.filter { petMatchesSkill(it.value.petTypes, castSkill) }
       }
 
       // If no candidates by source name, try inferring pet name from rider spell
@@ -205,17 +217,45 @@ object PetAccumulatorInteractor : Interactor() {
         }
       }
 
+      if (initiator && candidates.isEmpty()) {
+        val inferredPetName = inferPetNameFromRiderCast(cast)
+        if (inferredPetName.isNotBlank()) {
+          PlayerCacheInteractor.createPetCardFromWhitelistedSpell(cast.source, inferredPetName)
+          candidates = PlayerCacheInteractor.getPetEntriesByName(inferredPetName)
+            .filter { it.value.owner.equals(cleanSource, ignoreCase = true) }
+        }
+      }
+
+      // Rider events originate from the owner. Never assign them to an arbitrary
+      // owner pet when the actual companion is not identified yet.
+      if (initiator && candidates.size != 1) {
+        if (unattributedCastBuffer.none { it.event.sameLogicalCast(cast) }) {
+          Log.info(TAG, "Buffering ambiguous rider cast for '${cast.source}' (spell='${cast.spell}' id:${cast.spellId})")
+          unattributedCastBuffer.add(BufferedEvent(cast, System.currentTimeMillis()))
+        }
+        return@forEach
+      }
+
       when {
         candidates.isEmpty() -> {
           // Pet card doesn't exist yet. Buffer the cast for re-attribution when the card is created.
           val petSkill = petSkillWhitelist.find { it.id == cast.spellId }
           if (petSkill != null) {
             Log.info(TAG, "Buffering pet cast for '${cast.source}' (spell='${cast.spell}' id:${cast.spellId}) - waiting for pet card creation")
-            unattributedCastBuffer.add(BufferedEvent(cast, System.currentTimeMillis()))
+            if (unattributedCastBuffer.none { it.event.sameLogicalCast(cast) }) {
+              unattributedCastBuffer.add(BufferedEvent(cast, System.currentTimeMillis()))
+            }
           }
         }
         candidates.size == 1 -> {
-          PlayerCacheInteractor.postPetSuccessfulCast(candidates.first().key, cast)
+          val selectedPetKey = candidates.first().key
+          PlayerCacheInteractor.postPetSuccessfulCast(selectedPetKey, cast)
+          riderCastWindow
+            .filter { it.ownerName.equals(cleanSource, ignoreCase = true) && it.castTime == cast.timestamp }
+            .forEach { it.attributedPetKey = selectedPetKey }
+          pendingRiderCasts
+            .filter { it.cast.sameLogicalCast(cast) }
+            .forEach { it.petKey = selectedPetKey }
         }
         else -> {
           // Multiple candidates - ambiguous. Do not broadcast the cast to every
@@ -232,28 +272,46 @@ object PetAccumulatorInteractor : Interactor() {
     damages.forEach { damage ->
       val cleanSource = cleanName(damage.source)
       var candidates = PlayerCacheInteractor.getPetEntriesByName(cleanSource)
+      val matchingSkills = petSkillWhitelist.filter { skillMatches(it, damage.spellId, damage.spell) }
+      if (matchingSkills.isNotEmpty()) {
+        candidates = candidates.filter { pet ->
+          matchingSkills.any { skill -> petMatchesSkill(pet.value.petTypes, skill) }
+        }
+      }
       val pendingMatches = pendingRiderCasts.filter { pending ->
         isRelatedSpell(damage.spellId, damage.spell, pending.cast.spellId) &&
           damage.timestamp >= pending.cast.timestamp &&
           damage.timestamp - pending.cast.timestamp <= DEFAULT_ATTRIBUTION_WINDOW_MS
       }
 
-      // IPC damage has spellId=0 and can arrive before Mate metadata. A rider cast
-      // identifies the owner even when the pet name is arbitrary, so use that owner
-      // to narrow same-named pets before applying the normal window logic.
-      if (candidates.isEmpty()) {
-        val ownerCandidates = riderCastWindow
-          .filter { damage.timestamp >= it.castTime && damage.timestamp <= it.windowEnd }
-          .filter { isRelatedSpell(damage.spellId, damage.spell, it.spellId) }
-          .map { it.ownerName }
-          .distinct()
-        if (ownerCandidates.size == 1) {
-          candidates = PlayerCacheInteractor.getPetEntriesByName("")
-            .filter { it.value.owner.equals(ownerCandidates.single(), ignoreCase = true) }
+      val pendingPetKeys = pendingMatches.mapNotNull { it.petKey }.distinct()
+      if (pendingPetKeys.size == 1) {
+        PlayerCacheInteractor.postPetDamage(pendingPetKeys.single(), damage)
+        return@forEach
+      }
+
+      val boundPetKeys = relevantCastWindows(damage).mapNotNull { it.attributedPetKey }.distinct()
+      if (boundPetKeys.size == 1) {
+        PlayerCacheInteractor.postPetDamage(boundPetKeys.single(), damage)
+        return@forEach
+      }
+
+      val riderWindows = relevantCastWindows(damage).filter { it.ownerName.equals(cleanSource, ignoreCase = true) }
+      if (riderWindows.isNotEmpty() && riderWindows.none { it.attributedPetKey != null }) {
+        // The event is related to a rider cast, but the rider cast has not yet
+        // resolved to a specific pet. Do not guess another mount.
+        if (unattributedDamageBuffer.none { it.event == damage }) {
+          unattributedDamageBuffer.add(BufferedEvent(damage, System.currentTimeMillis()))
         }
+        return@forEach
       }
 
       if (candidates.size > 1) {
+        val cidMatches = candidates.filter { damage.cid in it.value.recentCids }
+        if (cidMatches.size == 1) {
+          PlayerCacheInteractor.postPetDamage(cidMatches.single().key, damage)
+          return@forEach
+        }
         val matchingWindows = riderCastWindow.filter { window ->
           window.ownerName.equals(candidates.first().value.owner, ignoreCase = true) &&
             damage.timestamp >= window.castTime &&
@@ -264,6 +322,25 @@ object PetAccumulatorInteractor : Interactor() {
           val owner = matchingWindows.single().ownerName
           candidates = candidates.filter { it.value.owner.equals(owner, ignoreCase = true) }
         }
+      }
+
+      // A current CID is useful when the source name is ambiguous, but it must
+      // never be required for counting the pet's general damage total.
+      if (candidates.isEmpty()) {
+        val inferredPetName = inferPetNameFromPetSkill(damage)
+        if (inferredPetName.isNotBlank()) {
+          PlayerCacheInteractor.createPetCardFromWhitelistedSpell(cleanSource, inferredPetName)
+          candidates = PlayerCacheInteractor.getPetEntriesByName(cleanSource)
+        }
+      }
+
+      if (candidates.isEmpty()) {
+        if (!PlayerCacheInteractor.isRealPlayer(cleanSource)) {
+          unattributedDamageBuffer.add(BufferedEvent(damage, System.currentTimeMillis()))
+        } else {
+          PlayerCacheInteractor.postEventInternal(damage)
+        }
+        return@forEach
       }
 
       if (pendingMatches.size == 1 && candidates.isNotEmpty()) {
@@ -293,6 +370,10 @@ object PetAccumulatorInteractor : Interactor() {
           }
           if (selectedPet != null) {
             PlayerCacheInteractor.postPetSuccessfulCast(selectedPet.key, pending.cast)
+            pending.petKey = selectedPet.key
+            riderCastWindow
+              .filter { it.ownerName.equals(pending.ownerName, ignoreCase = true) && it.castTime == pending.cast.timestamp }
+              .forEach { it.attributedPetKey = selectedPet.key }
             pendingRiderCasts.remove(pending)
             candidates = listOf(selectedPet)
           }
@@ -355,6 +436,14 @@ object PetAccumulatorInteractor : Interactor() {
     }
   }
 
+  private fun relevantCastWindows(damage: DamageEvent): List<CastWindow> {
+    return riderCastWindow.filter { window ->
+      damage.timestamp >= window.castTime &&
+        damage.timestamp <= window.windowEnd &&
+        isRelatedSpell(damage.spellId, damage.spell, window.spellId)
+    }
+  }
+
   private fun attributeDamageProportionally(damage: DamageEvent, petKeys: List<String>) {
     if (petKeys.isEmpty()) return
 
@@ -374,15 +463,31 @@ object PetAccumulatorInteractor : Interactor() {
 
   private fun isPetRelatedSkill(spellId: Int, spellName: String): Boolean {
     // Check whitelist by spell ID (cast/success events from log file have spellId)
-    if (petSkillWhitelist.any { it.id == spellId }) return true
+    if (petSkillWhitelist.any { !it.isPetInitiator && it.id == spellId }) return true
 
     // Also check by spell name - IPC addon events always have spellId=0 for damage/heal,
     // so we must match by name for those events.
     if (petSkillWhitelist.any { skill ->
+      !skill.isPetInitiator &&
       skill.possibleNames.any { it.equals(spellName, ignoreCase = true) }
     }) return true
 
     return false
+  }
+
+  private fun skillMatches(skill: Skill, spellId: Int, spellName: String): Boolean {
+    return skill.id == spellId || skill.possibleNames.any { it.equals(spellName, ignoreCase = true) }
+  }
+
+  private fun petMatchesSkill(petTypes: Set<String>, skill: Skill): Boolean {
+    if (skill.allowedPetTypes.isEmpty()) return true
+    return petTypes.any { petType ->
+      skill.allowedPetTypes.any { allowed ->
+        petType.equals(allowed, ignoreCase = true) ||
+          petType.contains(allowed, ignoreCase = true) ||
+          allowed.contains(petType, ignoreCase = true)
+      }
+    }
   }
 
   private fun isPetInitiator(cast: SuccessfulCastEvent): Boolean {
@@ -413,9 +518,29 @@ object PetAccumulatorInteractor : Interactor() {
     }
   }
 
+  private fun inferPetNameFromPetSkill(cast: SuccessfulCastEvent): String {
+    return when {
+      cast.spell.equals("Scratch", ignoreCase = true) || cast.spellId == 8001707 -> "Mara"
+      else -> ""
+    }
+  }
+
+  private fun inferPetNameFromPetSkill(damage: DamageEvent): String {
+    return when {
+      damage.spell.equals("Scratch", ignoreCase = true) || damage.spellId == 8001707 -> "Mara"
+      damage.spell.contains("Bleeding", ignoreCase = true) -> "Mara"
+      else -> ""
+    }
+  }
+
   private fun isRelatedSpell(damageSpellId: Int, damageSpellName: String, castSpellId: Int): Boolean {
     // Direct match
     if (damageSpellId == castSpellId) return true
+
+    petSkillWhitelist.find { it.id == castSpellId }?.let { castSkill ->
+      if (damageSpellId in castSkill.relatedDamageIds) return true
+      if (castSkill.possibleNames.any { it.equals(damageSpellName, ignoreCase = true) }) return true
+    }
 
     // Dragon breath rider spells -> Clinging Flame / Clinging Flame Explosion
     val dragonBreathRiderIds = setOf(38418, 38699, 38701) // Red, Green, Black
