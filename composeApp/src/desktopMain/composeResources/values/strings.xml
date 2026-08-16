@@ -35,6 +35,25 @@
 
     <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop Settings</string>
+    <string name="settings_help_button">Open Help and Installation Guide</string>
+    <string name="help_button">? Help</string>
+    <string name="about_help_button">? Help</string>
+    <string name="help_title">Raid Framer Help</string>
+    <string name="help_before_installing_title">Before Installing</string>
+    <string name="help_before_installing_body">Configure ArcheRage before installing Raid Framer:\n1. Press ESC and open Options -&gt; Game Info.\n2. Enable "Enable Combat Messages".\n3. Change the message range from SELF to ALL.\n4. Set the message distance to 100 meters.\n5. Close ArcheRage completely before continuing.\n\nRaid Framer works best when ArcheRage is running in windowed mode.</string>
+    <string name="help_install_title">Install Raid Framer</string>
+    <string name="help_install_body">1. Download the MSI installer and double-click it to run.\n2. When installation finishes, launch Raid Framer once from the Windows Start Menu. On first launch, Raid Framer copies its Lua addon into your ArcheRage/Addon folder.\n3. After Raid Framer has opened at least once, launch ArcheRage.</string>
+    <string name="help_recording_title">Recording a PvP Battle</string>
+    <string name="help_recording_body">Whenever you want to record a PvP battle, launch Raid Framer from the Windows Start Menu. In the in-game addon, press the + button to start a new session. Combat data will appear while a session is active.</string>
+    <string name="help_troubleshooting_title">Troubleshooting</string>
+    <string name="help_troubleshooting_addon_line">On the character select screen, open the wrench (tools) menu and confirm that "raidframer" appears in the addon list. It should be checked by default.</string>
+    <string name="help_troubleshooting_body">If no combat data appears, check:\n• ESC -&gt; Options -&gt; Game Info: Enable Combat Messages is enabled.\n• The message range is ALL, not SELF.\n• The message distance is 100 meters.\n• You pressed the + button in the addon to start a session.\n• You completely restarted ArcheRage after installing Raid Framer.\n• You opened the Raid Framer desktop app at least once after installation.</string>
+    <string name="help_updating_title">Updating an Existing RF2 Installation</string>
+    <string name="help_updating_body">If RF2 is already installed, launching your existing Raid Framer installation should offer an update when one is available. You normally do not need to download the MSI manually again.</string>
+    <string name="help_resetting_title">Resetting Raid Framer</string>
+    <string name="help_resetting_body">If everything else fails, close Raid Framer and delete this folder to reset its local settings and database:\nC:\\Users\\&lt;YourWindowsUsername&gt;\\.RaidFramer\\\nReplace &lt;YourWindowsUsername&gt; with your Windows account name. Deleting this folder removes Raid Framer's saved local settings and database, so the app will start fresh next time it is opened.</string>
+    <string name="help_performance_title">Performance and FPS</string>
+    <string name="help_performance_body">A 100-meter message distance can reduce performance when many players are nearby. Lowering the distance slider can reduce the hit, but also reduces the maximum distance of recorded events. If performance is still poor, choose a narrower message range such as SELF, PARTY, RAID, or GUILD instead of ALL to limit the events the game sends.</string>
     <string name="settings_export_background_title">Export Background</string>
     <string name="settings_export_background_description">Choose the background used for PNG leaderboard exports.</string>
     <string name="settings_export_background_note">PNG images must be at least 2000 x 2000 pixels. Larger images are recommended because leaderboards are wide and vertically tall.</string>

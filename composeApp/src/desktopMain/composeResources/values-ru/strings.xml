@@ -5,6 +5,23 @@
     <string name="graphs_no_recent_data">Нет недавних данных</string>
     <string name="graphs_player_metric_format">%2$s %1$s</string>
     <string name="graphs_one_minute">1 минута</string>
+    <string name="help_button">? Справка</string>
+    <string name="help_title">Справка Raid Framer</string>
+    <string name="help_before_installing_title">Перед установкой</string>
+    <string name="help_before_installing_body">Настройте ArcheRage перед установкой Raid Framer:\n1. Нажмите ESC и откройте Опции -&gt; Игровая информация.\n2. Включите «Включить боевые сообщения».\n3. Измените диапазон сообщений с SELF на ALL.\n4. Установите дальность сообщений 100 метров.\n5. Полностью закройте ArcheRage перед продолжением.\n\nRaid Framer лучше всего работает, когда ArcheRage запущен в оконном режиме.</string>
+    <string name="help_install_title">Установка Raid Framer</string>
+    <string name="help_install_body">1. Скачайте установщик MSI и дважды щёлкните по нему.\n2. После установки один раз запустите Raid Framer через меню «Пуск» Windows. При первом запуске Raid Framer скопирует Lua-аддон в папку ArcheRage/Addon.\n3. После первого запуска Raid Framer запустите ArcheRage.</string>
+    <string name="help_recording_title">Запись PvP-сражения</string>
+    <string name="help_recording_body">Чтобы записать PvP-сражение, запустите Raid Framer через меню «Пуск» Windows. В игровом аддоне нажмите кнопку +, чтобы начать новую сессию. Боевые данные будут отображаться, пока сессия активна.</string>
+    <string name="help_troubleshooting_title">Устранение неполадок</string>
+    <string name="help_troubleshooting_addon_line">На экране выбора персонажа откройте меню инструментов с ключом и убедитесь, что «raidframer» отображается в списке аддонов. По умолчанию он должен быть отмечен.</string>
+    <string name="help_troubleshooting_body">Если боевые данные не появляются, проверьте:\n• ESC -&gt; Опции -&gt; Игровая информация: включены боевые сообщения.\n• Диапазон сообщений установлен на ALL, а не SELF.\n• Дальность сообщений установлена на 100 метров.\n• Вы нажали кнопку + в аддоне, чтобы начать сессию.\n• Вы полностью перезапустили ArcheRage после установки Raid Framer.\n• Вы хотя бы один раз открыли настольное приложение Raid Framer после установки.</string>
+    <string name="help_updating_title">Обновление существующей установки RF2</string>
+    <string name="help_updating_body">Если RF2 уже установлен, запуск существующей установки Raid Framer должен предложить обновление, когда оно доступно. Обычно повторно скачивать MSI вручную не нужно.</string>
+    <string name="help_resetting_title">Сброс Raid Framer</string>
+    <string name="help_resetting_body">Если ничего не помогает, закройте Raid Framer и удалите эту папку, чтобы сбросить локальные настройки и базу данных:\nC:\\Users\\&lt;ИмяПользователяWindows&gt;\\.RaidFramer\\\nЗамените &lt;ИмяПользователяWindows&gt; именем своей учётной записи Windows. Удаление папки удалит сохранённые локальные настройки и базу данных.</string>
+    <string name="help_performance_title">Производительность и FPS</string>
+    <string name="help_performance_body">Дальность сообщений 100 метров может снизить производительность, если рядом находится много игроков. Уменьшение дальности может снизить нагрузку, но также уменьшит максимальную дальность записываемых событий. Если производительность всё ещё низкая, выберите более узкий диапазон SELF, PARTY, RAID или GUILD вместо ALL.</string>
 
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Lua-аддон получает данные о бое из игры. Именно он позволяет нативные функции, такие как отслеживание дебаффов по цели, управление рейдом и визуальные/звуковые эффекты в игре. Если вы удалите lua-аддон из игры, функции не будут работать как положено.</string>

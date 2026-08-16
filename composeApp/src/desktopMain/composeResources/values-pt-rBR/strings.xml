@@ -5,6 +5,23 @@
     <string name="graphs_no_recent_data">Sem Dados Recentes</string>
     <string name="graphs_player_metric_format">%1$s - %2$s</string>
     <string name="graphs_one_minute">1 Minuto</string>
+    <string name="help_button">? Ajuda</string>
+    <string name="help_title">Ajuda do Raid Framer</string>
+    <string name="help_before_installing_title">Antes de instalar</string>
+    <string name="help_before_installing_body">Configure o ArcheRage antes de instalar o Raid Framer:\n1. Pressione ESC e abra Opções -&gt; Informações do jogo.\n2. Ative "Ativar mensagens de combate".\n3. Altere o alcance das mensagens de SELF para ALL.\n4. Defina a distância das mensagens como 100 metros.\n5. Feche o ArcheRage completamente antes de continuar.\n\nO Raid Framer funciona melhor quando o ArcheRage está no modo janela.</string>
+    <string name="help_install_title">Instalar o Raid Framer</string>
+    <string name="help_install_body">1. Baixe o instalador MSI e clique duas vezes para executá-lo.\n2. Quando a instalação terminar, abra o Raid Framer uma vez pelo menu Iniciar do Windows. Na primeira execução, o Raid Framer copia seu addon Lua para a pasta ArcheRage/Addon.\n3. Depois que o Raid Framer tiver sido aberto pelo menos uma vez, inicie o ArcheRage.</string>
+    <string name="help_recording_title">Gravando uma batalha PvP</string>
+    <string name="help_recording_body">Quando quiser gravar uma batalha PvP, abra o Raid Framer pelo menu Iniciar do Windows. No addon dentro do jogo, pressione o botão + para iniciar uma nova sessão. Os dados de combate aparecerão enquanto uma sessão estiver ativa.</string>
+    <string name="help_troubleshooting_title">Solução de problemas</string>
+    <string name="help_troubleshooting_addon_line">Na tela de seleção de personagem, abra o menu de ferramentas (chave inglesa) e confirme que "raidframer" aparece na lista de addons. Ele deve estar marcado por padrão.</string>
+    <string name="help_troubleshooting_body">Se nenhum dado de combate aparecer, verifique:\n• ESC -&gt; Opções -&gt; Informações do jogo: "Ativar mensagens de combate" está ativado.\n• O alcance das mensagens está definido como ALL, não SELF.\n• A distância das mensagens está definida como 100 metros.\n• Você pressionou o botão + no addon para iniciar uma sessão.\n• Você reiniciou completamente o ArcheRage após instalar o Raid Framer.\n• Você abriu o aplicativo desktop Raid Framer pelo menos uma vez após a instalação.</string>
+    <string name="help_updating_title">Atualizando uma instalação RF2 existente</string>
+    <string name="help_updating_body">Se o RF2 já estiver instalado, iniciar sua instalação existente do Raid Framer deverá oferecer uma atualização quando houver uma disponível. Normalmente não é necessário baixar o MSI novamente.</string>
+    <string name="help_resetting_title">Redefinindo o Raid Framer</string>
+    <string name="help_resetting_body">Se nada mais funcionar, feche o Raid Framer e exclua esta pasta para redefinir as configurações locais e o banco de dados:\nC:\\Users\\&lt;SeuNomeDeUsuarioWindows&gt;\\.RaidFramer\\\nSubstitua &lt;SeuNomeDeUsuarioWindows&gt; pelo nome da sua conta do Windows. Excluir esta pasta remove as configurações locais salvas e o banco de dados.</string>
+    <string name="help_performance_title">Desempenho e FPS</string>
+    <string name="help_performance_body">Uma distância de mensagens de 100 metros pode reduzir o desempenho quando há muitos jogadores por perto. Reduzir o controle deslizante de distância pode diminuir o impacto, mas também reduz a distância máxima dos eventos gravados. Se o desempenho continuar ruim, escolha um alcance mais limitado, como SELF, PARTY, RAID ou GUILD, em vez de ALL.</string>
 
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">O Addon Lua obtém dados de combate do jogo. É o que permite funcionalidades nativas como rastreamento de debuffs baseado em alvo, gerenciamento de raid e efeitos visuais/sonoros no jogo. Se você remover o addon lua, os recursos não funcionarão como esperado.</string>

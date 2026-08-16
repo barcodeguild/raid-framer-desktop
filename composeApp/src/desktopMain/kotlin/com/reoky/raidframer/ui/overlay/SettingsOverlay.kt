@@ -207,7 +207,12 @@ fun SettingsOverlay(wm: WindowManager? = null) {
     Column {
       TitleBarComponent(
         title = stringResource(Res.string.settings_title),
-        onClose = { wm?.closeWindow(OverlayType.SETTINGS) }
+        onClose = { wm?.closeWindow(OverlayType.SETTINGS) },
+        actionLabel = stringResource(Res.string.help_button),
+        onAction = {
+          wm?.closeWindow(OverlayType.SETTINGS)
+          wm?.openWindow(OverlayType.HELP)
+        }
       )
 
       Spacer(modifier = Modifier.height(8.dp))

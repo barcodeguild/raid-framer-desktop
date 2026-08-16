@@ -24,6 +24,7 @@ import com.reoky.raidframer.ui.overlay.NewSessionOverlay
 import com.reoky.raidframer.ui.overlay.PokemonOverlay
 import com.reoky.raidframer.ui.overlay.RaidOverlay
 import com.reoky.raidframer.ui.overlay.SettingsOverlay
+import com.reoky.raidframer.ui.overlay.HelpOverlay
 import com.reoky.raidframer.ui.overlay.PlayerCardOverlay
 import com.reoky.raidframer.ui.overlay.TrackerOverlay
 import com.reoky.raidframer.ui.overlay.BattleGraphOverlay
@@ -72,6 +73,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.SUMMARY -> SummaryOverlay(wm)
           OverlayType.MINI -> MiniOverlay(wm)
           OverlayType.SETTINGS -> SettingsOverlay(wm)
+          OverlayType.HELP -> HelpOverlay(wm)
           OverlayType.COMPANION -> CompanionOverlay(wm)
           OverlayType.POKEMON -> PokemonOverlay(wm)
           OverlayType.TRACKER -> TrackerOverlay(wm)

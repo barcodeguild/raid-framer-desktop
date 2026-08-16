@@ -5,6 +5,23 @@
     <string name="graphs_no_recent_data">Keine aktuellen Daten</string>
     <string name="graphs_player_metric_format">%2$s von %1$s</string>
     <string name="graphs_one_minute">1 Minute</string>
+    <string name="help_button">? Hilfe</string>
+    <string name="help_title">Raid Framer Hilfe</string>
+    <string name="help_before_installing_title">Vor der Installation</string>
+    <string name="help_before_installing_body">Konfigurieren Sie ArcheRage vor der Installation von Raid Framer:\n1. Drücken Sie ESC und öffnen Sie Optionen -&gt; Spielinfo.\n2. Aktivieren Sie "Kampfmeldungen aktivieren".\n3. Ändern Sie die Nachrichtenreichweite von SELF auf ALL.\n4. Setzen Sie die Nachrichtenentfernung auf 100 Meter.\n5. Schließen Sie ArcheRage vollständig, bevor Sie fortfahren.\n\nRaid Framer funktioniert am besten, wenn ArcheRage im Fenstermodus läuft.</string>
+    <string name="help_install_title">Raid Framer installieren</string>
+    <string name="help_install_body">1. Laden Sie den MSI-Installer herunter und doppelklicken Sie ihn.\n2. Starten Sie Raid Framer nach der Installation einmal über das Windows-Startmenü. Beim ersten Start kopiert Raid Framer sein Lua-Addon in Ihren ArcheRage/Addon-Ordner.\n3. Starten Sie ArcheRage, nachdem Raid Framer mindestens einmal geöffnet wurde.</string>
+    <string name="help_recording_title">Eine PvP-Schlacht aufzeichnen</string>
+    <string name="help_recording_body">Starten Sie Raid Framer über das Windows-Startmenü, wenn Sie eine PvP-Schlacht aufzeichnen möchten. Drücken Sie im Addon im Spiel die +-Schaltfläche, um eine neue Sitzung zu starten. Kampfdaten werden angezeigt, solange eine Sitzung aktiv ist.</string>
+    <string name="help_troubleshooting_title">Fehlerbehebung</string>
+    <string name="help_troubleshooting_addon_line">Öffnen Sie auf dem Charakterauswahlbildschirm das Schraubenschlüsselmenü und bestätigen Sie, dass "raidframer" in der Addon-Liste erscheint. Es sollte standardmäßig aktiviert sein.</string>
+    <string name="help_troubleshooting_body">Wenn keine Kampfdaten erscheinen, prüfen Sie:\n• ESC -&gt; Optionen -&gt; Spielinfo: "Kampfmeldungen aktivieren" ist aktiviert.\n• Die Nachrichtenreichweite ist ALL, nicht SELF.\n• Die Nachrichtenentfernung ist auf 100 Meter eingestellt.\n• Sie haben im Addon die +-Schaltfläche gedrückt, um eine Sitzung zu starten.\n• Sie haben ArcheRage nach der Installation vollständig neu gestartet.\n• Sie haben die Raid-Framer-Desktop-App nach der Installation mindestens einmal geöffnet.</string>
+    <string name="help_updating_title">Eine vorhandene RF2-Installation aktualisieren</string>
+    <string name="help_updating_body">Wenn RF2 bereits installiert ist, sollte das Starten Ihrer vorhandenen Raid-Framer-Installation ein Update anbieten, sobald eines verfügbar ist. Normalerweise müssen Sie die MSI-Datei nicht erneut manuell herunterladen.</string>
+    <string name="help_resetting_title">Raid Framer zurücksetzen</string>
+    <string name="help_resetting_body">Wenn nichts anderes hilft, schließen Sie Raid Framer und löschen Sie diesen Ordner, um die lokalen Einstellungen und die Datenbank zurückzusetzen:\nC:\\Users\\&lt;IhrWindowsBenutzername&gt;\\.RaidFramer\\\nErsetzen Sie &lt;IhrWindowsBenutzername&gt; durch den Namen Ihres Windows-Kontos. Das Löschen dieses Ordners entfernt die gespeicherten lokalen Einstellungen und die Datenbank.</string>
+    <string name="help_performance_title">Leistung und FPS</string>
+    <string name="help_performance_body">Eine Nachrichtenentfernung von 100 Metern kann die Leistung beeinträchtigen, wenn sich viele Spieler in der Nähe befinden. Eine Verringerung des Reglers kann die Belastung reduzieren, verringert aber auch die maximale Entfernung aufgezeichneter Ereignisse. Bei weiterhin schlechter Leistung können Sie statt ALL einen engeren Bereich wie SELF, PARTY, RAID oder GUILD wählen.</string>
 
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Das Lua-Addon bezieht Kampfdaten aus dem Spiel. Es ermöglicht native Funktionen wie zielbasiertes Debuff-Tracking, Raid-Management und visuelle/akustische Effekte im Spiel. Wenn Sie das Lua-Addon aus dem Spiel entfernen, funktionieren die Features nicht wie beabsichtigt.</string>

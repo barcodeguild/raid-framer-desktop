@@ -2,6 +2,9 @@ package com.reoky.raidframer.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,11 +20,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.helpers.FontsHelper
+import androidx.compose.material.TextButton
 
 @Composable
 fun TitleBarComponent(
   title: String,
   onClose: () -> Unit,
+  actionLabel: String? = null,
+  onAction: (() -> Unit)? = null,
   height: Dp = 46.dp,
   modifier: Modifier = Modifier
 ) {
@@ -76,6 +82,15 @@ fun TitleBarComponent(
         fontFamily = FontsHelper.arKorean()
       )
     )
+
+    if (actionLabel != null && onAction != null) {
+      TextButton(
+        onClick = onAction,
+        modifier = Modifier.align(Alignment.CenterStart).padding(start = 6.dp)
+      ) {
+        Text(actionLabel, color = Color.White)
+      }
+    }
 
     CloseButton(
       onClose = onClose,

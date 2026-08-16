@@ -5,6 +5,23 @@
     <string name="graphs_no_recent_data">无近期数据</string>
     <string name="graphs_player_metric_format">%1$s 的 %2$s</string>
     <string name="graphs_one_minute">1分钟</string>
+    <string name="help_button">? 帮助</string>
+    <string name="help_title">Raid Framer 帮助</string>
+    <string name="help_before_installing_title">安装前</string>
+    <string name="help_before_installing_body">安装 Raid Framer 前请先配置 ArcheRage：\n1. 按 ESC，打开选项 -&gt; 游戏信息。\n2. 启用“启用战斗消息”。\n3. 将消息范围从 SELF 改为 ALL。\n4. 将消息距离设置为 100 米。\n5. 继续之前完全关闭 ArcheRage。\n\nArcheRage 使用窗口模式运行时，Raid Framer 的效果最佳。</string>
+    <string name="help_install_title">安装 Raid Framer</string>
+    <string name="help_install_body">1. 下载 MSI 安装程序并双击运行。\n2. 安装完成后，从 Windows 开始菜单启动一次 Raid Framer。首次启动时，Raid Framer 会将 Lua 插件复制到 ArcheRage/Addon 文件夹。\n3. Raid Framer 至少打开过一次后，再启动 ArcheRage。</string>
+    <string name="help_recording_title">录制 PvP 战斗</string>
+    <string name="help_recording_body">需要录制 PvP 战斗时，请从 Windows 开始菜单启动 Raid Framer。在游戏内插件中按 + 按钮开始新会话。会话激活期间会显示战斗数据。</string>
+    <string name="help_troubleshooting_title">故障排除</string>
+    <string name="help_troubleshooting_addon_line">在角色选择界面打开扳手（工具）菜单，确认插件列表中出现“raidframer”。默认情况下它应该已经勾选。</string>
+    <string name="help_troubleshooting_body">如果没有战斗数据，请检查：\n• ESC -&gt; 选项 -&gt; 游戏信息：已启用“启用战斗消息”。\n• 消息范围设置为 ALL，而不是 SELF。\n• 消息距离设置为 100 米。\n• 你已在插件中按 + 按钮开始会话。\n• 安装 Raid Framer 后已完全重启 ArcheRage。\n• 安装后至少打开过一次 Raid Framer 桌面应用。</string>
+    <string name="help_updating_title">更新现有 RF2 安装</string>
+    <string name="help_updating_body">如果已经安装 RF2，启动现有的 Raid Framer 安装程序后，在有可用更新时应该会提供更新选项。通常不需要再次手动下载 MSI。</string>
+    <string name="help_resetting_title">重置 Raid Framer</string>
+    <string name="help_resetting_body">如果其他方法都失败，请关闭 Raid Framer 并删除以下文件夹，以重置本地设置和数据库：\nC:\\Users\\&lt;你的Windows用户名&gt;\\.RaidFramer\\\n将 &lt;你的Windows用户名&gt; 替换为你的 Windows 账户名称。删除此文件夹会移除 Raid Framer 保存的本地设置和数据库。</string>
+    <string name="help_performance_title">性能和 FPS</string>
+    <string name="help_performance_body">附近玩家较多时，100 米的消息距离可能会降低性能。降低距离滑块可以减轻影响，但也会降低记录事件的最大距离。如果性能仍然很差，可以选择 SELF、PARTY、RAID 或 GUILD 等更小的消息范围，而不是 ALL。</string>
 
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Lua插件从游戏中获取战斗数据。它使得基于原生的功能成为可能，例如基于目标减益追踪、团队管理和游戏内视觉/声音效果。如果你从游戏中移除lua插件，功能将无法按预期工作。</string>
