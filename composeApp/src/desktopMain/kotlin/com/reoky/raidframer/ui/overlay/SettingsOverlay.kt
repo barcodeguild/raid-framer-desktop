@@ -24,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.Color
@@ -124,7 +125,8 @@ private fun SettingsCheckbox(
   checked: Boolean,
   onCheckedChange: (Boolean) -> Unit,
   label: String,
-  accent: Boolean = true
+  accent: Boolean = true,
+  enabled: Boolean = true
 ) {
   Row(
     verticalAlignment = Alignment.CenterVertically,
@@ -133,20 +135,47 @@ private fun SettingsCheckbox(
       .padding(vertical = 3.dp)
   ) {
     Checkbox(
+      modifier = Modifier.size(32.dp),
+      checked = checked,
+      onCheckedChange = if (enabled) onCheckedChange else null,
+      colors = CheckboxDefaults.colors(
+        checkmarkColor = Color.White,
+        checkedColor = if (enabled) RFColors.AccentRed else RFColors.TextTertiary,
+        uncheckedColor = RFColors.TextTertiary
+      )
+    )
+    Spacer(modifier = Modifier.width(4.dp))
+    Text(
+      text = label,
+      color = if (enabled) RFColors.TextPrimary else RFColors.TextTertiary,
+      fontSize = 14.sp
+    )
+  }
+}
+
+@Composable
+private fun CompactSettingsCheckbox(
+  checked: Boolean,
+  onCheckedChange: (Boolean) -> Unit,
+  label: String,
+  accent: Boolean = true
+) {
+  Row(
+    modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Checkbox(
       checked = checked,
       onCheckedChange = onCheckedChange,
       colors = CheckboxDefaults.colors(
         checkmarkColor = Color.White,
         checkedColor = if (accent) RFColors.AccentRed else RFColors.TextSecondary,
         uncheckedColor = RFColors.TextTertiary
-      )
+      ),
+      modifier = Modifier.size(32.dp)
     )
-    Spacer(modifier = Modifier.width(8.dp))
-    Text(
-      text = label,
-      color = RFColors.TextPrimary,
-      fontSize = 14.sp
-    )
+    Spacer(modifier = Modifier.width(4.dp))
+    Text(text = label, color = RFColors.TextPrimary, fontSize = 12.sp, lineHeight = 15.sp)
   }
 }
 
@@ -178,7 +207,12 @@ fun SettingsOverlay(wm: WindowManager? = null) {
     Column {
       TitleBarComponent(
         title = stringResource(Res.string.settings_title),
-        onClose = { wm?.closeWindow(OverlayType.SETTINGS) }
+        onClose = { wm?.closeWindow(OverlayType.SETTINGS) },
+        actionLabel = stringResource(Res.string.help_button),
+        onAction = {
+          wm?.closeWindow(OverlayType.SETTINGS)
+          wm?.openWindow(OverlayType.HELP)
+        }
       )
 
       Spacer(modifier = Modifier.height(8.dp))
@@ -818,12 +852,83 @@ private fun ExportSettingsPanel(wm: WindowManager?) {
 
     Spacer(modifier = Modifier.height(12.dp))
 
-    SettingsCheckbox(
-      checked = config.exportIncludeRawJsonLogs,
-      onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportIncludeRawJsonLogs = isChecked) } },
-      label = stringResource(Res.string.settings_export_include_raw_json),
-      accent = true
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Box(modifier = Modifier.weight(1f)) {
+        CompactSettingsCheckbox(
+          checked = config.exportPngEnabled,
+          onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportPngEnabled = isChecked) } },
+          label = stringResource(Res.string.settings_export_png),
+          accent = true
+        )
+      }
+      Box(modifier = Modifier.weight(1f)) {
+        CompactSettingsCheckbox(
+          checked = config.exportIncludeRawJsonLogs,
+          onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportIncludeRawJsonLogs = isChecked) } },
+          label = stringResource(Res.string.settings_export_include_raw_json),
+          accent = true
+        )
+      }
+    }
+
+    Text(
+      text = stringResource(Res.string.settings_export_storage_estimate),
+      color = RFColors.TextTertiary.copy(alpha = 0.85f),
+      fontSize = 11.sp,
+      fontWeight = FontWeight.Light,
+      modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)
     )
+
+    Text(
+      text = stringResource(Res.string.settings_export_languages_label),
+      color = RFColors.TextSecondary,
+      fontSize = 13.sp,
+      fontWeight = FontWeight.Bold,
+      modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+    )
+    Text(
+      text = stringResource(Res.string.settings_export_languages_description),
+      color = RFColors.TextTertiary,
+      fontSize = 11.sp,
+      modifier = Modifier.padding(bottom = 4.dp)
+    )
+    Text(
+      text = stringResource(Res.string.settings_export_spell_language_notice),
+      color = RFColors.TextTertiary.copy(alpha = 0.8f),
+      fontSize = 11.sp,
+      fontWeight = FontWeight.Light,
+      modifier = Modifier.padding(bottom = 6.dp)
+    )
+    val currentLanguage = config.preferredLanguage
+    val additionalLanguages = remember(config.exportPngLanguages) {
+      config.exportPngLanguages.split(',').filter { it.isNotBlank() }.toSet()
+    }
+    AppLocale.ENTRIES.forEach { entry ->
+      val isCurrent = entry.code == currentLanguage
+      SettingsCheckbox(
+        checked = isCurrent || entry.code in additionalLanguages,
+        onCheckedChange = { checked ->
+          if (!isCurrent) {
+            RFConfig.update { current ->
+              val selected = current.exportPngLanguages.split(',')
+                .filter { it.isNotBlank() }
+                .toMutableSet()
+              if (checked) selected += entry.code else selected -= entry.code
+              current.copy(exportPngLanguages = selected.sorted().joinToString(","))
+            }
+          }
+        },
+        label = if (isCurrent) "${entry.nativeLabel} (${stringResource(Res.string.settings_export_language_current)})"
+        else entry.nativeLabel,
+        accent = true,
+        enabled = !isCurrent
+      )
+    }
+
   }
 }
 

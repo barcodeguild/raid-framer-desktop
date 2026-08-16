@@ -165,6 +165,22 @@ data class PlayerCard (
   val sessionGardenDefianceTotal: Int = 0,
   val sessionPurgeTotal: Int = 0,
   val sessionSacDanceTotal: Int = 0,
+  val sessionDeepTranquilityTotal: Int = 0,
+  val sessionThrowDaggerTotal: Int = 0,
+  val sessionStunsTotal: Int = 0,
+  val sessionStaggersTotal: Int = 0,
+  val sessionPetrificationTotal: Int = 0,
+  val sessionAbsorbLifeforceTotal: Int = 0,
+  val sessionCorrosiveBarrageTotal: Int = 0,
+  val sessionBlindedByCrowsTotal: Int = 0,
+  val sessionMistSunderTotal: Int = 0,
+  val sessionRegularSunderTotal: Int = 0,
+  val sessionImpaleImmunityTotal: Int = 0,
+  val sessionProtectiveWingsTotal: Int = 0,
+  val sessionCourageousActionTotal: Int = 0,
+  val sessionManaBarrierTotal: Int = 0,
+  val sessionReviveTotal: Int = 0,
+  val sessionDeependDebuffTotal: Int = 0,
 
   // Life Mend tracking (buff 25875) — healer performance metric
   val lifeMendTotal: Int = 0,                              // total Life Mends cast this session

@@ -5,6 +5,23 @@
     <string name="graphs_no_recent_data">Keine aktuellen Daten</string>
     <string name="graphs_player_metric_format">%2$s von %1$s</string>
     <string name="graphs_one_minute">1 Minute</string>
+    <string name="help_button">? Hilfe</string>
+    <string name="help_title">Raid Framer Hilfe</string>
+    <string name="help_before_installing_title">Vor der Installation</string>
+    <string name="help_before_installing_body">Konfigurieren Sie ArcheRage vor der Installation von Raid Framer:\n1. Drücken Sie ESC und öffnen Sie Optionen -&gt; Spielinfo.\n2. Aktivieren Sie "Kampfmeldungen aktivieren".\n3. Ändern Sie die Nachrichtenreichweite von SELF auf ALL.\n4. Setzen Sie die Nachrichtenentfernung auf 100 Meter.\n5. Schließen Sie ArcheRage vollständig, bevor Sie fortfahren.\n\nRaid Framer funktioniert am besten, wenn ArcheRage im Fenstermodus läuft.</string>
+    <string name="help_install_title">Raid Framer installieren</string>
+    <string name="help_install_body">1. Laden Sie den MSI-Installer herunter und doppelklicken Sie ihn.\n2. Starten Sie Raid Framer nach der Installation einmal über das Windows-Startmenü. Beim ersten Start kopiert Raid Framer sein Lua-Addon in Ihren ArcheRage/Addon-Ordner.\n3. Starten Sie ArcheRage, nachdem Raid Framer mindestens einmal geöffnet wurde.</string>
+    <string name="help_recording_title">Eine PvP-Schlacht aufzeichnen</string>
+    <string name="help_recording_body">Starten Sie Raid Framer über das Windows-Startmenü, wenn Sie eine PvP-Schlacht aufzeichnen möchten. Drücken Sie im Addon im Spiel die +-Schaltfläche, um eine neue Sitzung zu starten. Kampfdaten werden angezeigt, solange eine Sitzung aktiv ist.</string>
+    <string name="help_troubleshooting_title">Fehlerbehebung</string>
+    <string name="help_troubleshooting_addon_line">Öffnen Sie auf dem Charakterauswahlbildschirm das Schraubenschlüsselmenü und bestätigen Sie, dass "raidframer" in der Addon-Liste erscheint. Es sollte standardmäßig aktiviert sein.</string>
+    <string name="help_troubleshooting_body">Wenn keine Kampfdaten erscheinen, prüfen Sie:\n• ESC -&gt; Optionen -&gt; Spielinfo: "Kampfmeldungen aktivieren" ist aktiviert.\n• Die Nachrichtenreichweite ist ALL, nicht SELF.\n• Die Nachrichtenentfernung ist auf 100 Meter eingestellt.\n• Sie haben im Addon die +-Schaltfläche gedrückt, um eine Sitzung zu starten.\n• Sie haben ArcheRage nach der Installation vollständig neu gestartet.\n• Sie haben die Raid-Framer-Desktop-App nach der Installation mindestens einmal geöffnet.</string>
+    <string name="help_updating_title">Eine vorhandene RF2-Installation aktualisieren</string>
+    <string name="help_updating_body">Wenn RF2 bereits installiert ist, sollte das Starten Ihrer vorhandenen Raid-Framer-Installation ein Update anbieten, sobald eines verfügbar ist. Normalerweise müssen Sie die MSI-Datei nicht erneut manuell herunterladen.</string>
+    <string name="help_resetting_title">Raid Framer zurücksetzen</string>
+    <string name="help_resetting_body">Wenn nichts anderes hilft, schließen Sie Raid Framer und löschen Sie diesen Ordner, um die lokalen Einstellungen und die Datenbank zurückzusetzen:\nC:\\Users\\&lt;IhrWindowsBenutzername&gt;\\.RaidFramer\\\nErsetzen Sie &lt;IhrWindowsBenutzername&gt; durch den Namen Ihres Windows-Kontos. Das Löschen dieses Ordners entfernt die gespeicherten lokalen Einstellungen und die Datenbank.</string>
+    <string name="help_performance_title">Leistung und FPS</string>
+    <string name="help_performance_body">Eine Nachrichtenentfernung von 100 Metern kann die Leistung beeinträchtigen, wenn sich viele Spieler in der Nähe befinden. Eine Verringerung des Reglers kann die Belastung reduzieren, verringert aber auch die maximale Entfernung aufgezeichneter Ereignisse. Bei weiterhin schlechter Leistung können Sie statt ALL einen engeren Bereich wie SELF, PARTY, RAID oder GUILD wählen.</string>
 
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Das Lua-Addon bezieht Kampfdaten aus dem Spiel. Es ermöglicht native Funktionen wie zielbasiertes Debuff-Tracking, Raid-Management und visuelle/akustische Effekte im Spiel. Wenn Sie das Lua-Addon aus dem Spiel entfernen, funktionieren die Features nicht wie beabsichtigt.</string>
@@ -439,10 +456,42 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="player_card_stat_garden_defiance">Göttlicher Segen</string>
     <string name="player_card_stat_purges">Reinigungen</string>
     <string name="player_card_stat_sac_dances">Opfertanz</string>
+    <string name="player_card_stat_deep_tranquility">Tiefe Ruhe</string>
+    <string name="player_card_stat_deepend_debuff">Vertiefte Schwäche</string>
+    <string name="player_card_stat_throw_dagger">Dolchwurf</string>
+    <string name="player_card_stat_stuns">Betäubungen</string>
+    <string name="player_card_stat_staggers">Stupser</string>
+    <string name="player_card_stat_petrification">Versteinerung</string>
+    <string name="player_card_stat_absorb_lifeforce">Lebenskraftabsorption</string>
+    <string name="player_card_stat_corrosive_barrage">Korrosion</string>
+    <string name="player_card_stat_blinded_by_crows">Krähenblendung</string>
+    <string name="player_card_stat_mist_sunder">Nebelzertrümmerung</string>
+    <string name="player_card_stat_regular_sunder">Normaler Zerschmetterer</string>
+    <string name="player_card_stat_impales">Durchstechungen</string>
+    <string name="player_card_stat_protective_wings">Schutzflügel</string>
+    <string name="player_card_stat_courageous_action">Tapfere Handlung</string>
+    <string name="player_card_stat_mana_barrier">Manabarriere</string>
+    <string name="player_card_stat_revive">Wiederbelebung</string>
     <string name="summary_top_defiance">Top Trotz</string>
     <string name="summary_top_garden_defiance">Top Göttlicher Segen</string>
     <string name="summary_top_purges">Top Reinigungen</string>
     <string name="summary_top_sac_dances">Top Opfertänze</string>
+    <string name="summary_top_deep_tranquility">Top Tiefe Ruhe</string>
+    <string name="summary_top_deepend_debuff">Top Schwächung</string>
+    <string name="summary_top_throw_dagger">Top Dolchwurf</string>
+    <string name="summary_top_stuns">Top Betäubungen</string>
+    <string name="summary_top_staggers">Top Stupser</string>
+    <string name="summary_top_absorb_lifeforce">Top Lebenskraftabsorption</string>
+    <string name="summary_top_corrosive_barrage">Top Ätzender Beschuss</string>
+    <string name="summary_top_blinded_by_crows">Top Krähenblendung</string>
+    <string name="summary_top_mist_sunder">Top Nebelzertrümmerung</string>
+    <string name="summary_top_regular_sunder">Top Normaler Zerschmetterer</string>
+    <string name="summary_top_impales">Top Durchstechungen</string>
+    <string name="summary_top_protective_wings">Top Schutzflügel</string>
+    <string name="summary_top_courageous_action">Top Tapfere Handlung</string>
+    <string name="summary_top_mana_barrier">Top Manabarriere</string>
+    <string name="summary_top_revive">Top Wiederbelebung</string>
+    <string name="summary_top_petrification">Top Versteinerung</string>
     <string name="summary_tab_spells">Zauber</string>
     <string name="summary_tab_buffs">Stärkungszauber</string>
     <string name="summary_tab_ode">Ode</string>
@@ -453,6 +502,12 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_tab_specs">Spezialisierungen</string>
     <string name="summary_tab_performance">Leistung</string>
     <string name="summary_tab_life_mend">Lebensheilung</string>
+    <string name="summary_tab_debuffs_continued">Debuffs Continued</string>
+    <string name="summary_tab_debuffs_extended">Debuffs Extended</string>
+    <string name="summary_tab_special_buffs_continued">Special Buffs Continued</string>
+    <string name="summary_tab_special_heals">Special Heals</string>
+    <string name="summary_tab_special_melee">Special Melee</string>
+    <string name="summary_tab_special_dances">Special Dances</string>
     <string name="summary_top_life_mends">Top Lebensheilungen</string>
     <string name="life_mend_quality_none">Keine Daten</string>
     <string name="life_mend_quality_hurting">Raid schädigend</string>
@@ -576,7 +631,8 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="settings_export_directory_label">Exportverzeichnis:</string>
     <string name="settings_export_size_label">Genutzter Speicherplatz:</string>
     <string name="settings_export_open_folder">Ordner öffnen</string>
-    <string name="settings_export_include_raw_json">Rohe JSON-formatierte Logs beim Exportieren einschließen. (Verwendet Speicherplatz)</string>
+    <string name="settings_export_include_raw_json">Rohe JSON-Logs exportieren</string>
+    <string name="settings_export_storage_estimate">PNG-Exporte benötigen normalerweise 10-15 MB pro Datei; rohe JSON-Protokolle können 100-250 MB pro Sitzung benötigen.</string>
     <string name="settings_export_directory_not_found">Verzeichnis nicht gefunden</string>
 
     <!-- About / Update Strings -->
@@ -1095,5 +1151,14 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="time_ago_months_one">vor %1$d Monat</string>
     <string name="time_ago_months_other">vor %1$d Monaten</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
+
+    <!-- Export Progress -->
+    <string name="settings_export_png">Sitzungszusammenfassung als PNG exportieren</string>
+    <string name="settings_export_languages_label">PNG-Exportsprachen</string>
+    <string name="settings_export_languages_description">Ihre aktuelle Sprache wird immer exportiert. Wählen Sie weitere Sprachen für zusätzliche PNG-Dateien.</string>
+    <string name="settings_export_spell_language_notice">Zaubernamen werden immer in der Sprache des Spielclients angezeigt.</string>
+    <string name="settings_export_language_current">aktuelle Sprache</string>
+    <string name="combat_export_saving_session">Sitzung wird gespeichert %1$d/%2$d</string>
+    <string name="combat_export_saving_language">%1$s-Export wird gespeichert %2$d/%3$d</string>
 
 </resources>

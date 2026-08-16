@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 36
+const val SCHEMA_VERSION = 39
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -115,6 +115,9 @@ data class ConfigEntity(
   val allowOdeToRecoveryCountAsHeals: Boolean = false,
 
   // PNG export background settings
+  val exportPngEnabled: Boolean = true,
+  // Comma-separated AppLocale codes for additional PNG exports. The current app language is always added.
+  val exportPngLanguages: String = "",
   val exportBackgroundSelection: String = "REOKY",
   val exportCustomBackgroundPath: String = "",
   val exportBackgroundColor: Int = 0xFF000000.toInt(),
@@ -261,6 +264,22 @@ data class PlayerCacheEntity(
   val lifetimeTotalGardenDefiance: Long = 0L,
   val lifetimeTotalPurges: Long = 0L,
   val lifetimeTotalSacDances: Long = 0L,
+  val lifetimeTotalDeepTranquility: Long = 0L,
+  val lifetimeTotalDeependDebuff: Long = 0L,
+  val lifetimeTotalThrowDagger: Long = 0L,
+  val lifetimeTotalStuns: Long = 0L,
+  val lifetimeTotalStaggers: Long = 0L,
+  val lifetimeTotalPetrification: Long = 0L,
+  val lifetimeTotalAbsorbLifeforce: Long = 0L,
+  val lifetimeTotalCorrosiveBarrage: Long = 0L,
+  val lifetimeTotalBlindedByCrows: Long = 0L,
+  val lifetimeTotalMistSunder: Long = 0L,
+  val lifetimeTotalRegularSunder: Long = 0L,
+  val lifetimeTotalImpaleImmunity: Long = 0L,
+  val lifetimeTotalProtectiveWings: Long = 0L,
+  val lifetimeTotalCourageousAction: Long = 0L,
+  val lifetimeTotalManaBarrier: Long = 0L,
+  val lifetimeTotalRevive: Long = 0L,
 )
 
 /*
@@ -315,6 +334,22 @@ data class PlayerSessionTotalsEntity(
   val totalGardenDefiance: Int = 0,
   val totalPurges: Int = 0,
   val totalSacDances: Int = 0,
+  val totalDeepTranquility: Int = 0,
+  val totalDeependDebuff: Int = 0,
+  val totalThrowDagger: Int = 0,
+  val totalStuns: Int = 0,
+  val totalStaggers: Int = 0,
+  val totalPetrification: Int = 0,
+  val totalAbsorbLifeforce: Int = 0,
+  val totalCorrosiveBarrage: Int = 0,
+  val totalBlindedByCrows: Int = 0,
+  val totalMistSunder: Int = 0,
+  val totalRegularSunder: Int = 0,
+  val totalImpaleImmunity: Int = 0,
+  val totalProtectiveWings: Int = 0,
+  val totalCourageousAction: Int = 0,
+  val totalManaBarrier: Int = 0,
+  val totalRevive: Int = 0,
 )
 
 // global enums below for consolidation

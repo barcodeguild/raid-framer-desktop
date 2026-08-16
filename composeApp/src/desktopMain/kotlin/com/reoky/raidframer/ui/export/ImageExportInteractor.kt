@@ -13,6 +13,7 @@ import com.reoky.raidframer.core.helpers.getDocumentsDirectory
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.locale.AppLocale
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.LifeMendQuality
@@ -20,6 +21,8 @@ import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.model.pvpPerformancePoints
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.export_no_data
 import raid_framer_desktop.composeapp.generated.resources.export_title_battle_summary
@@ -98,6 +101,22 @@ import org.jetbrains.skia.Codec
 import org.jetbrains.skia.Data
 import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.svg.SVGDOM
+import raid_framer_desktop.composeapp.generated.resources.summary_top_deep_tranquility
+import raid_framer_desktop.composeapp.generated.resources.summary_top_deepend_debuff
+import raid_framer_desktop.composeapp.generated.resources.summary_top_throw_dagger
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stuns
+import raid_framer_desktop.composeapp.generated.resources.summary_top_staggers
+import raid_framer_desktop.composeapp.generated.resources.summary_top_absorb_lifeforce
+import raid_framer_desktop.composeapp.generated.resources.summary_top_corrosive_barrage
+import raid_framer_desktop.composeapp.generated.resources.summary_top_blinded_by_crows
+import raid_framer_desktop.composeapp.generated.resources.summary_top_mist_sunder
+import raid_framer_desktop.composeapp.generated.resources.summary_top_regular_sunder
+import raid_framer_desktop.composeapp.generated.resources.summary_top_impales
+import raid_framer_desktop.composeapp.generated.resources.summary_top_protective_wings
+import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
+import raid_framer_desktop.composeapp.generated.resources.summary_top_mana_barrier
+import raid_framer_desktop.composeapp.generated.resources.summary_top_revive
+import raid_framer_desktop.composeapp.generated.resources.summary_top_petrification
 import raid_framer_desktop.composeapp.generated.resources.summary_top_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_garden_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_purges
@@ -107,7 +126,19 @@ import javax.imageio.ImageIO
 
 object ImageExportInteractor {
 
-  private const val IMAGE_WIDTH = 2600
+  data class ExportProgress(
+    val isExporting: Boolean = false,
+    val progress: Float = 0f,
+    val current: Int = 0,
+    val total: Int = 1,
+    val languageCode: String = "",
+    val item: String = "",
+  )
+
+  private val _progress = MutableStateFlow(ExportProgress())
+  val progress = _progress.asStateFlow()
+
+  private const val IMAGE_WIDTH = 4500
   // Keep the final PNG at the wallpaper's max width, but render content larger first.
   private const val EXPORT_RENDER_SCALE = 2
   private const val SVG_ICON_RENDER_SCALE = 4
@@ -118,6 +149,7 @@ object ImageExportInteractor {
   private const val COLUMN_GAP = 10
   private const val CARD_PADDING = 8
   private const val SUPER_COL_GAP = 10
+  private const val SUPER_COLUMN_COUNT = 5
 
   // Title card is now full-width; store its fixed height, so both layout functions agree.
   private const val TITLE_CARD_HEIGHT = 90
@@ -160,6 +192,22 @@ object ImageExportInteractor {
   private val GARDEN_DEFIANCE_COLOR = toAwtColor(RFColors.gardenDefianceBlue)
   private val PURGE_COLOR = toAwtColor(RFColors.purgeGreen)
   private val SAC_DANCE_COLOR = toAwtColor(RFColors.sacDancePurple)
+  private val DEEP_TRANQUILITY_COLOR = toAwtColor(RFColors.deepTranquilityTeal)
+  private val DEEPEND_DEBUFF_COLOR = toAwtColor(RFColors.deedendDebuffRed)
+  private val THROW_DAGGER_COLOR = toAwtColor(RFColors.throwDaggerAmber)
+  private val STUNS_COLOR = toAwtColor(RFColors.stunDeepRed)
+  private val STAGGERS_COLOR = toAwtColor(RFColors.staggerBrown)
+  private val PETRIFICATION_COLOR = toAwtColor(RFColors.petrificationGray)
+  private val ABSORB_LIFEFORCE_COLOR = toAwtColor(RFColors.absorbLifeforceMagenta)
+  private val CORROSIVE_BARRAGE_COLOR = toAwtColor(RFColors.corrosiveBarrageLime)
+  private val BLINDED_BY_CROWS_COLOR = toAwtColor(RFColors.blindedByCrowsDark)
+  private val MIST_SUNDER_COLOR = toAwtColor(RFColors.mistSunderCyan)
+  private val REGULAR_SUNDER_COLOR = toAwtColor(RFColors.regularSunderOrange)
+  private val IMPALE_IMMUNITY_COLOR = toAwtColor(RFColors.impaleImmunitySteel)
+  private val PROTECTIVE_WINGS_COLOR = toAwtColor(RFColors.protectiveWingsGold)
+  private val COURAGEOUS_ACTION_COLOR = toAwtColor(RFColors.courageousActionBright)
+  private val MANA_BARRIER_COLOR = toAwtColor(RFColors.manaBarrierBlue)
+  private val REVIVE_COLOR = toAwtColor(RFColors.reviveGhostWhite)
 
   /**
    * Maps a heal ratio (0.0 = 0% healed, 1.0 = 100% healed) to a color gradient:
@@ -201,6 +249,7 @@ object ImageExportInteractor {
 
   // ── Skill-tree icon cache (SVG → BufferedImage via Skiko) ─────────────────
   private val skillTreeImageCache = mutableMapOf<Pair<SkillTreeType?, Int>, BufferedImage?>()
+  private val wallpaperCache = mutableMapOf<String, BufferedImage?>()
 
   private fun applyHighQualityRenderingHints(g2d: Graphics2D) {
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -339,8 +388,24 @@ object ImageExportInteractor {
      val topDefiance: List<PlayerCard>,
      val topGardenDefiance: List<PlayerCard>,
      val topPurges: List<PlayerCard>,
-     val topSacDances: List<PlayerCard>,
-     val topLifeMenders: List<PlayerCard>,
+      val topSacDances: List<PlayerCard>,
+      val topLifeMenders: List<PlayerCard>,
+      val topDeepTranquility: List<PlayerCard>,
+      val topDeependDebuff: List<PlayerCard>,
+      val topThrowDagger: List<PlayerCard>,
+      val topStuns: List<PlayerCard>,
+      val topStaggers: List<PlayerCard>,
+      val topPetrification: List<PlayerCard>,
+      val topAbsorbLifeforce: List<PlayerCard>,
+      val topCorrosiveBarrage: List<PlayerCard>,
+      val topBlindedByCrows: List<PlayerCard>,
+      val topMistSunder: List<PlayerCard>,
+      val topRegularSunder: List<PlayerCard>,
+      val topImpaleImmunity: List<PlayerCard>,
+      val topProtectiveWings: List<PlayerCard>,
+      val topCourageousAction: List<PlayerCard>,
+      val topManaBarrier: List<PlayerCard>,
+      val topRevive: List<PlayerCard>,
     // New faction comparison data
     val factionTigerStrikeData: Map<String, Float>,
     val factionFreezeData: Map<String, Float>,
@@ -358,6 +423,18 @@ object ImageExportInteractor {
 
   data class SpellDamage(val spell: String, val total: Double)
   data class ItemUsage(val itemName: String, val count: Int)
+
+  data class ExportLanguage(val code: String, val locale: Locale, val nativeLabel: String)
+
+  private fun selectedExportLanguages(): List<ExportLanguage> {
+    val config = RFConfig.state.value
+    val current = AppLocale.entryFor(config.preferredLanguage)
+    val entries = buildList {
+      if (current.code.isNotBlank()) add(current)
+      addAll(AppLocale.validEntriesForCodes(config.exportPngLanguages))
+    }.distinctBy { it.code }
+    return entries.map { ExportLanguage(it.code, it.locale, it.nativeLabel) }
+  }
 
   suspend fun captureSnapshot(explicitDurationMs: Long? = null): ExportData {
     val config = RFConfig.state.value
@@ -464,6 +541,22 @@ object ImageExportInteractor {
       topPurges          = PlayerCacheInteractor.topPurges.value.take(25),
       topSacDances       = PlayerCacheInteractor.topSacDances.value.take(25),
       topLifeMenders     = PlayerCacheInteractor.topLifeMenders.value.take(25),
+      topDeepTranquility = PlayerCacheInteractor.topDeepTranquility.value.take(25),
+      topDeependDebuff = PlayerCacheInteractor.topDeependDebuff.value.take(25),
+      topThrowDagger = PlayerCacheInteractor.topThrowDagger.value.take(25),
+      topStuns = PlayerCacheInteractor.topStuns.value.take(25),
+      topStaggers = PlayerCacheInteractor.topStaggers.value.take(25),
+      topPetrification = PlayerCacheInteractor.topPetrification.value.take(25),
+      topAbsorbLifeforce = PlayerCacheInteractor.topAbsorbLifeforce.value.take(25),
+      topCorrosiveBarrage = PlayerCacheInteractor.topCorrosiveBarrage.value.take(25),
+      topBlindedByCrows = PlayerCacheInteractor.topBlindedByCrows.value.take(25),
+      topMistSunder = PlayerCacheInteractor.topMistSunder.value.take(25),
+      topRegularSunder = PlayerCacheInteractor.topRegularSunder.value.take(25),
+      topImpaleImmunity = PlayerCacheInteractor.topImpaleImmunity.value.take(25),
+      topProtectiveWings = PlayerCacheInteractor.topProtectiveWings.value.take(25),
+      topCourageousAction = PlayerCacheInteractor.topCourageousAction.value.take(25),
+      topManaBarrier = PlayerCacheInteractor.topManaBarrier.value.take(25),
+      topRevive = PlayerCacheInteractor.topRevive.value.take(25),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -481,23 +574,38 @@ object ImageExportInteractor {
   }
 
   suspend fun exportToPng(data: ExportData): File? {
+    val languages = selectedExportLanguages()
+    if (!RFConfig.state.value.exportPngEnabled || languages.isEmpty()) return null
+    _progress.value = ExportProgress(isExporting = true, current = 0, total = languages.size)
     return withContext(Dispatchers.IO) {
+      var firstOutput: File? = null
       try {
-        val imageHeight = calculateImageHeight(data)
-        val renderWidth = IMAGE_WIDTH * EXPORT_RENDER_SCALE
-        val renderHeight = imageHeight * EXPORT_RENDER_SCALE
-        val renderedImage = BufferedImage(renderWidth, renderHeight, BufferedImage.TYPE_INT_ARGB)
-        val g2d = renderedImage.createGraphics()
+        languages.forEachIndexed { index, language ->
+          val previousLocale = Locale.getDefault()
+          try {
+            // Compose resources and DateFormat use the JVM default locale. Change it only for
+            // this synchronous render, then restore it before another export or UI work runs.
+            Locale.setDefault(language.locale)
+            _progress.value = ExportProgress(true, 0f, index, languages.size, language.code, language.nativeLabel)
+            val localizedData = captureLocalizedData(data)
+            _progress.value = ExportProgress(true, 0.05f, index, languages.size, language.code, language.nativeLabel)
+            val imageHeight = calculateImageHeight(localizedData)
+            val renderWidth = IMAGE_WIDTH * EXPORT_RENDER_SCALE
+            val renderHeight = imageHeight * EXPORT_RENDER_SCALE
+            val renderedImage = BufferedImage(renderWidth, renderHeight, BufferedImage.TYPE_INT_ARGB)
+            val g2d = renderedImage.createGraphics()
 
-        applyHighQualityRenderingHints(g2d)
-        g2d.scale(EXPORT_RENDER_SCALE.toDouble(), EXPORT_RENDER_SCALE.toDouble())
+            applyHighQualityRenderingHints(g2d)
+            g2d.scale(EXPORT_RENDER_SCALE.toDouble(), EXPORT_RENDER_SCALE.toDouble())
 
-        drawWallpaperBackground(g2d, IMAGE_WIDTH, imageHeight)
-        drawMasonryLayout(g2d, data)
+            drawWallpaperBackground(g2d, IMAGE_WIDTH, imageHeight)
+            drawMasonryLayout(g2d, localizedData)
+            _progress.value = ExportProgress(true, 0.72f, index, languages.size, language.code, language.nativeLabel)
 
-        g2d.dispose()
+            g2d.dispose()
 
-        val image = downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
+            val image = downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
+            _progress.value = ExportProgress(true, 0.88f, index, languages.size, language.code, language.nativeLabel)
 
         val config = RFConfig.state.value
         val exportDir = if (config.lastSessionExportDir.isNotBlank()) {
@@ -510,16 +618,46 @@ object ImageExportInteractor {
           Paths.get(documentsDir, "RFExports", year, month)
         }
         Files.createDirectories(exportDir)
-        val outputFile = exportDir.resolve("${data.sessionTitle}.png").toFile()
+            val outputFile = exportDir.resolve("${safeFileName(data.sessionTitle)}_${language.code}.png").toFile()
 
-        ImageIO.write(image, "png", outputFile)
-        outputFile
-      } catch (e: Exception) {
-        e.printStackTrace()
-        null
+            ImageIO.write(image, "png", outputFile)
+            if (firstOutput == null) firstOutput = outputFile
+            _progress.value = ExportProgress(true, 1f, index + 1, languages.size, language.code, language.nativeLabel)
+          } catch (e: Exception) {
+            Log.error("ImageExport", "Failed to export ${language.code} PNG: ${e.message}")
+          } finally {
+            Locale.setDefault(previousLocale)
+          }
+        }
+        firstOutput
+      } finally {
+        _progress.value = ExportProgress()
       }
     }
   }
+
+  private suspend fun captureLocalizedData(data: ExportData): ExportData {
+    return data.copy(
+      sessionDate = DateFormat.getDateInstance(DateFormat.SHORT).format(Date()),
+      battleSummaryTitle = getString(Res.string.export_title_battle_summary),
+      noDataText = getString(Res.string.export_no_data),
+      exportHeaderOn = getString(Res.string.export_header_on),
+      exportHeaderOff = getString(Res.string.export_header_off),
+      exportHeaderOdeLabel = getString(Res.string.export_header_ode_label),
+      exportHeaderPveLabel = getString(Res.string.export_header_pve_label),
+      exportHeaderKillsLabel = getString(Res.string.export_header_kills_label),
+      exportHeaderMostDamage = getString(Res.string.export_header_most_damage),
+      exportHeaderKillingBlow = getString(Res.string.export_header_killing_blow),
+      combatDamageTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_damage else Res.string.export_combat_pvp_damage),
+      combatHealsTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_heals else Res.string.export_combat_pvp_heals),
+      combatCCTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_cc else Res.string.export_combat_pvp_cc),
+    )
+  }
+
+  private fun safeFileName(value: String): String = value
+    .replace(Regex("[\\\\/:*?\"<>|]"), "_")
+    .trim()
+    .ifBlank { "session" }
 
   /*
    * So the reason we downsample the image from a higher resolution is because of the icons and fonts being pixelated
@@ -529,7 +667,11 @@ object ImageExportInteractor {
   private fun downsampleImage(source: BufferedImage, width: Int, height: Int): BufferedImage {
     val scaled = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
     val sg = scaled.createGraphics()
-    applyHighQualityRenderingHints(sg)
+    // Bilinear is substantially cheaper than bicubic for this large full-image pass,
+    // while the 2x render still preserves smooth text, icons, and chart edges.
+    sg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
+    sg.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED)
+    sg.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED)
     sg.drawImage(source, 0, 0, width, height, null)
     sg.dispose()
     return scaled
@@ -543,21 +685,27 @@ object ImageExportInteractor {
   private fun drawWallpaperBackground(g2d: Graphics2D, width: Int, height: Int) {
     val config = RFConfig.state.value
     val fallbackUri = Res.getUri("drawable/reoky_wallpaper.png")
-    val wallpaper = try {
-      when (config.exportBackgroundSelection) {
-        "SOLID_COLOR" -> null
-        "CUSTOM" -> {
-          val file = File(config.exportCustomBackgroundPath)
-          if (!file.isFile) throw IllegalStateException("Custom background is missing")
-          ImageIO.read(file) ?: throw IllegalStateException("Custom background is unreadable")
+    val wallpaperKey = when (config.exportBackgroundSelection) {
+      "CUSTOM" -> "CUSTOM:${config.exportCustomBackgroundPath}"
+      else -> config.exportBackgroundSelection
+    }
+    val wallpaper = wallpaperCache.getOrPut(wallpaperKey) {
+      try {
+        when (config.exportBackgroundSelection) {
+          "SOLID_COLOR" -> null
+          "CUSTOM" -> {
+            val file = File(config.exportCustomBackgroundPath)
+            if (!file.isFile) throw IllegalStateException("Custom background is missing")
+            ImageIO.read(file) ?: throw IllegalStateException("Custom background is unreadable")
+          }
+          "SPAGUETTI" -> ImageIO.read(URI(Res.getUri("drawable/spaguetti_wallpaper.png")).toURL())
+          "SPACEA" -> ImageIO.read(URI(Res.getUri("drawable/spacea_wallpaper.png")).toURL())
+          "BROOKLYYN" -> ImageIO.read(URI(Res.getUri("drawable/brooklyyn_wallpaper.png")).toURL())
+          else -> ImageIO.read(URI(fallbackUri).toURL())
         }
-        "SPAGUETTI" -> ImageIO.read(URI(Res.getUri("drawable/spaguetti_wallpaper.png")).toURL())
-        "SPACEA" -> ImageIO.read(URI(Res.getUri("drawable/spacea_wallpaper.png")).toURL())
-        "BROOKLYYN" -> ImageIO.read(URI(Res.getUri("drawable/brooklyyn_wallpaper.png")).toURL())
-        else -> ImageIO.read(URI(fallbackUri).toURL())
+      } catch (_: Exception) {
+        ImageIO.read(URI(fallbackUri).toURL())
       }
-    } catch (_: Exception) {
-      ImageIO.read(URI(fallbackUri).toURL())
     }
 
     g2d.color = if (config.exportBackgroundSelection == "SOLID_COLOR") {
@@ -594,7 +742,7 @@ object ImageExportInteractor {
    * additionally holds the pie-chart and combat blocks.
    */
   private suspend fun computeColumnHeights(data: ExportData): List<Int> {
-    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * 2) / 3
+    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * (SUPER_COLUMN_COUNT - 1)) / SUPER_COLUMN_COUNT
 
     val pieChartBlock = makePieChartBlock(data, superColWidth)
     val combatBlock   = makeCombatBlock(data, superColWidth)
@@ -603,8 +751,9 @@ object ImageExportInteractor {
     val col0BaseHeight = titleOffset + pieChartBlock.height + 5 + combatBlock.height
 
     val tripletBlocks = getAllCategoryBlocks(data, superColWidth)
-    // Column 0 starts below title; columns 1 and 2 start at top (no title offset)
-    val colHeights    = mutableListOf(col0BaseHeight, 0, 0)
+    // Column 0 starts below title; remaining columns start at top (no title offset)
+    val colHeights    = MutableList(SUPER_COLUMN_COUNT) { 0 }
+    colHeights[0] = col0BaseHeight
 
     tripletBlocks.forEach { block ->
       val shortestCol = colHeights.indices.minByOrNull { colHeights[it] } ?: 0
@@ -699,15 +848,17 @@ object ImageExportInteractor {
    * a dynamic layout like masonry because each battle is going to be different have different-sized cards for each section.
    */
   private suspend fun drawMasonryLayout(g2d: Graphics2D, data: ExportData) {
-    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * 2) / 3
+    val superColWidth = (IMAGE_WIDTH - SUPER_COL_GAP * (SUPER_COLUMN_COUNT - 1)) / SUPER_COLUMN_COUNT
 
     // Title card fits within column 0 (above pie charts)
     val titleH      = drawTitleCard(g2d, data, COLUMN_GAP, 10, superColWidth)
     val titleBottom = 10 + titleH + 5
 
-    // Column 0 starts below the title; columns 1 and 2 start at the top
-    val columnY       = mutableListOf(titleBottom, 10, 10)
-    val columnHeights = mutableListOf(titleH, 0, 0)
+    // Column 0 starts below the title; remaining columns start at the top
+    val columnY       = MutableList(SUPER_COLUMN_COUNT) { 10 }
+    columnY[0] = titleBottom
+    val columnHeights = MutableList(SUPER_COLUMN_COUNT) { 0 }
+    columnHeights[0] = titleH
 
     val pieBlock = makePieChartBlock(data, superColWidth)
     pieBlock.draw(g2d, COLUMN_GAP, columnY[0], superColWidth)
@@ -723,7 +874,7 @@ object ImageExportInteractor {
     tripletBlocks.forEach { block ->
       val shortestCol = columnHeights.indices.minByOrNull { columnHeights[it] } ?: 0
       val xPos        = COLUMN_GAP + shortestCol * (superColWidth + SUPER_COL_GAP)
-      val drawWidth   = if (shortestCol == 2) IMAGE_WIDTH - xPos - COLUMN_GAP else superColWidth
+      val drawWidth   = if (shortestCol == SUPER_COLUMN_COUNT - 1) IMAGE_WIDTH - xPos - COLUMN_GAP else superColWidth
       block.draw(g2d, xPos, columnY[shortestCol], drawWidth)
       columnY[shortestCol]       += block.height + 5
       columnHeights[shortestCol] += block.height + 5
@@ -1156,46 +1307,22 @@ object ImageExportInteractor {
       }
     }
 
+    // 1. Silences, Charms, Distresses
     tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_haranya_spells_damage), "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsHaranya)),
-      Triple(getString(Res.string.summary_top_nuia_spells_damage),    "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsNuia)),
-      Triple(getString(Res.string.summary_top_pirate_spells_damage),  "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsPirate)),
+      Triple(getString(Res.string.summary_top_silences),  "\uD83D\uDD07", ColumnData.CardData(data.topSilences,  { it.sessionSilenceTotal.toString()  }, SILENCE_COLOR)),
+      Triple(getString(Res.string.summary_top_charms),    "\uD83D\uDC96", ColumnData.CardData(data.topCharms,    { it.sessionCharmTotal.toString()    }, CHARM_COLOR)),
+      Triple(getString(Res.string.summary_top_distresses), "\uD83D\uDE24", ColumnData.CardData(data.topDistresses, { it.sessionDistressTotal.toString() }, DISTRESS_COLOR)),
     )))
 
-    tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_debuffs), "\uD83D\uDD25", ColumnData.CardData(data.topDebuffs, { it.sessionDebuffTotal.toString() }, HARANYA_COLOR)),
-      Triple(getString(Res.string.summary_top_songs),   "\u2764", ColumnData.CardData(data.topSongs,   { it.sessionSongsTotal.toString()  }, NUIA_COLOR)),
-      Triple(getString(Res.string.summary_top_buffs),   "\u26A1", ColumnData.CardData(data.topBuffs,   { it.sessionBuffTotal.toString()   }, PIRATE_COLOR)),
-    )))
-
-    tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_sac_dances), "\u2665", ColumnData.CardData(data.topSacDances, { it.sessionSacDanceTotal.toString() }, SAC_DANCE_COLOR)),
-      Triple(getString(Res.string.summary_top_life_mends), "\u2764", ColumnData.CardData(
-        data.topLifeMenders,
-        { card ->
-          "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${qualityLabels[card.lifeMendQuality]})"
-        },
-        toAwtColor(RFColors.healsGreen),
-        { card -> toAwtColor(card.lifeMendQuality.color) },
-        showIcons = false
-      )),
-    )))
-
-    tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_ode_haranya), "\uD83C\uDFB5", ColumnData.CardData(data.topOdeHaranya, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
-      Triple(getString(Res.string.summary_top_ode_nuia),    "\uD83C\uDFB5", ColumnData.CardData(data.topOdeNuia,    { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
-      Triple(getString(Res.string.summary_top_ode_pirate),  "\uD83C\uDFB5", ColumnData.CardData(data.topOdePirate,  { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
-    )))
-
+    // 2. Top kills by faction
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_kills_haranya), "\u2694", ColumnData.CardData(data.topKillsHaranya, { it.sessionKillTotal.toString() }, KILLS_HARANYA_COLOR)),
       Triple(getString(Res.string.summary_top_kills_nuia),    "\u2694", ColumnData.CardData(data.topKillsNuia,    { it.sessionKillTotal.toString() }, KILLS_NUIA_COLOR)),
       Triple(getString(Res.string.summary_top_kills_pirate),  "\u2694", ColumnData.CardData(data.topKillsPirate,  { it.sessionKillTotal.toString() }, KILLS_PIRATE_COLOR)),
     )))
 
+    // 3. Heal Ratio / damage taken / heals received
     tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_damage_taken),     "\uD83D\uDD25", ColumnData.CardData(data.topDamageTaken,   { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation()   }, toAwtColor(RFColors.dpsOrange))),
-      Triple(getString(Res.string.summary_top_heals_received), "\uD83D\uDC89", ColumnData.CardData(data.topHealsReceived, { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
       Triple(getString(Res.string.summary_top_heal_ratio), "\uD83E\uDE78", ColumnData.CardData(
         data.topHealRatio.map { it.first },
         { card ->
@@ -1208,8 +1335,69 @@ object ImageExportInteractor {
           healRatioColor(ratio)
         }
       )),
+      Triple(getString(Res.string.summary_top_damage_taken), "\uD83D\uDD25", ColumnData.CardData(data.topDamageTaken,   { it.sessionDamageTakenTotal.toLong().humanReadableAbbreviation()   }, toAwtColor(RFColors.dpsOrange))),
+      Triple(getString(Res.string.summary_top_heals_received), "\uD83D\uDC89", ColumnData.CardData(data.topHealsReceived, { it.sessionHealsReceivedTotal.toLong().humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
     )))
 
+    // 4. Spell damage breakdown
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_haranya_spells_damage), "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsHaranya)),
+      Triple(getString(Res.string.summary_top_nuia_spells_damage),    "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsNuia)),
+      Triple(getString(Res.string.summary_top_pirate_spells_damage),  "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsPirate)),
+    )))
+
+    // 5. Top performance
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_haranya_performance), "\uD83C\uDFC6", ColumnData.CardData(data.topPerformanceHaranya, { it.pvpPerformancePoints().toString() }, HARANYA_COLOR)),
+      Triple(getString(Res.string.summary_top_nuia_performance),    "\uD83C\uDFC6", ColumnData.CardData(data.topPerformanceNuia,    { it.pvpPerformancePoints().toString() }, NUIA_COLOR)),
+      Triple(getString(Res.string.summary_top_pirate_performance),  "\uD83C\uDFC6", ColumnData.CardData(data.topPerformancePirate,  { it.pvpPerformancePoints().toString() }, PIRATE_COLOR)),
+    )))
+
+    // 6. Debuffs / Songs / Buffs
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_debuffs), "\uD83D\uDD25", ColumnData.CardData(data.topDebuffs, { it.sessionDebuffTotal.toString() }, HARANYA_COLOR)),
+      Triple(getString(Res.string.summary_top_songs),   "\u2764", ColumnData.CardData(data.topSongs,   { it.sessionSongsTotal.toString()  }, NUIA_COLOR)),
+      Triple(getString(Res.string.summary_top_buffs),   "\u26A1", ColumnData.CardData(data.topBuffs,   { it.sessionBuffTotal.toString()   }, PIRATE_COLOR)),
+    )))
+
+    // 7. Dances: Sac Dances, Deep Tranquility, Deepend Debuff
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_sac_dances), "\u2665", ColumnData.CardData(data.topSacDances, { it.sessionSacDanceTotal.toString() }, SAC_DANCE_COLOR)),
+      Triple(getString(Res.string.summary_top_deep_tranquility), "\u2602", ColumnData.CardData(data.topDeepTranquility, { it.sessionDeepTranquilityTotal.toString() }, DEEP_TRANQUILITY_COLOR)),
+      Triple(getString(Res.string.summary_top_deepend_debuff), "\u2B07", ColumnData.CardData(data.topDeependDebuff, { it.sessionDeependDebuffTotal.toString() }, DEEPEND_DEBUFF_COLOR)),
+    )))
+
+    // 8. Shield Strip / Weapon Disables / Potion Disables
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_shield_strip), "\u2694", ColumnData.CardData(data.topShieldStrip, { it.sessionShieldStripTotal.toString() }, SHIELD_STRIP_COLOR)),
+      Triple(getString(Res.string.summary_top_weapon_disables), "\u2620", ColumnData.CardData(data.topWeaponDisables, { it.sessionWeaponDisablesTotal.toString() }, WEAPON_DISABLES_COLOR)),
+      Triple(getString(Res.string.summary_top_potion_disables), "\u2697", ColumnData.CardData(data.topPotionDisables, { it.sessionPotionDisablesTotal.toString() }, POTION_DISABLES_COLOR)),
+    )))
+
+    // 9. Absorb, Corrosives, and Crows
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_absorb_lifeforce), "\uD83E\uDE78", ColumnData.CardData(data.topAbsorbLifeforce, { it.sessionAbsorbLifeforceTotal.toString() }, ABSORB_LIFEFORCE_COLOR)),
+      Triple(getString(Res.string.summary_top_corrosive_barrage), "\u2622", ColumnData.CardData(data.topCorrosiveBarrage, { it.sessionCorrosiveBarrageTotal.toString() }, CORROSIVE_BARRAGE_COLOR)),
+      Triple(getString(Res.string.summary_top_blinded_by_crows), "\uD83E\uDD85", ColumnData.CardData(data.topBlindedByCrows, { it.sessionBlindedByCrowsTotal.toString() }, BLINDED_BY_CROWS_COLOR)),
+    )))
+
+    // 10. Provokes, Petrification, Freezes
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_provokes), "\u2757", ColumnData.CardData(data.topProvoked, { it.sessionProvokedTotal.toString() }, PROVOKED_COLOR)),
+      Triple(getString(Res.string.summary_top_petrification), "\u26CF", ColumnData.CardData(data.topPetrification, { it.sessionPetrificationTotal.toString() }, PETRIFICATION_COLOR)),
+      Triple(getString(Res.string.summary_top_freezes), "\u2744", ColumnData.CardData(data.topFreezes, { it.sessionFreezeTotal.toString() }, FREEZE_COLOR)),
+    )))
+
+    // --- Remaining sections ---
+
+    // Ode
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_ode_haranya), "\uD83C\uDFB5", ColumnData.CardData(data.topOdeHaranya, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
+      Triple(getString(Res.string.summary_top_ode_nuia),    "\uD83C\uDFB5", ColumnData.CardData(data.topOdeNuia,    { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
+      Triple(getString(Res.string.summary_top_ode_pirate),  "\uD83C\uDFB5", ColumnData.CardData(data.topOdePirate,  { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
+    )))
+
+    // Items, Utility, Builds
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_haranya_item_uses), "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesHaranya)),
       Triple(getString(Res.string.summary_top_nuia_item_uses),    "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesNuia)),
@@ -1222,56 +1410,67 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_most_item_usages),     "\u2699", ColumnData.CardData(data.topItemSkillCasters, { it.sessionItemSkillTotal.toString() }, ITEM_SKILL_COLOR)),
     )))
 
+    // Special Heals: Mana Barrier, Revive, Life Mends
     tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_haranya_builds), "\u2694", ColumnData.BuildData(data.buildCountsHaranya)),
-      Triple(getString(Res.string.summary_nuia_builds),    "\u2694", ColumnData.BuildData(data.buildCountsNuia)),
-      Triple(getString(Res.string.summary_pirate_builds),  "\u2694", ColumnData.BuildData(data.buildCountsPirate)),
+      Triple(getString(Res.string.summary_top_mana_barrier), "\uD83D\uDEE1", ColumnData.CardData(data.topManaBarrier, { it.sessionManaBarrierTotal.toString() }, MANA_BARRIER_COLOR)),
+      Triple(getString(Res.string.summary_top_revive), "\u2618", ColumnData.CardData(data.topRevive, { it.sessionReviveTotal.toString() }, REVIVE_COLOR)),
+      Triple(getString(Res.string.summary_top_life_mends), "\u2764", ColumnData.CardData(
+        data.topLifeMenders,
+        { card ->
+          "${card.lifeMendTotal} (${card.lifeMendAverage.toLong().humanReadableAbbreviation()} - ${qualityLabels[card.lifeMendQuality]})"
+        },
+        toAwtColor(RFColors.healsGreen),
+        { card -> toAwtColor(card.lifeMendQuality.color) },
+        showIcons = false
+      )),
     )))
 
-    tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_haranya_performance), "\uD83C\uDFC6", ColumnData.CardData(data.topPerformanceHaranya, { it.pvpPerformancePoints().toString() }, HARANYA_COLOR)),
-      Triple(getString(Res.string.summary_top_nuia_performance),    "\uD83C\uDFC6", ColumnData.CardData(data.topPerformanceNuia,    { it.pvpPerformancePoints().toString() }, NUIA_COLOR)),
-      Triple(getString(Res.string.summary_top_pirate_performance),  "\uD83C\uDFC6", ColumnData.CardData(data.topPerformancePirate,  { it.pvpPerformancePoints().toString() }, PIRATE_COLOR)),
-    )))
-
-    tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_silences),  "\uD83D\uDD07", ColumnData.CardData(data.topSilences,  { it.sessionSilenceTotal.toString()  }, SILENCE_COLOR)),
-      Triple(getString(Res.string.summary_top_charms),    "\uD83D\uDC96", ColumnData.CardData(data.topCharms,    { it.sessionCharmTotal.toString()    }, CHARM_COLOR)),
-      Triple(getString(Res.string.summary_top_distresses), "\uD83D\uDE24", ColumnData.CardData(data.topDistresses, { it.sessionDistressTotal.toString() }, DISTRESS_COLOR)),
-    )))
-
-    // Trips, Bubbles, Bracings
+    // CC Debuffs: Trips, Bubbles, Bracings
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_trips), "\u2193", ColumnData.CardData(data.topTrips, { it.sessionTripsTotal.toString() }, TRIPS_COLOR)),
       Triple(getString(Res.string.summary_top_bubbles), "\u25CF", ColumnData.CardData(data.topBubbles, { it.sessionBubblesTotal.toString() }, BUBBLES_COLOR)),
       Triple(getString(Res.string.summary_top_bracings), "\u27A1", ColumnData.CardData(data.topBracings, { it.sessionBracingsTotal.toString() }, BRACINGS_COLOR)),
     )))
 
-    // Shield Strip, Weapon Disables, Potion Disables
-    tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_shield_strip), "\u2694", ColumnData.CardData(data.topShieldStrip, { it.sessionShieldStripTotal.toString() }, SHIELD_STRIP_COLOR)),
-      Triple(getString(Res.string.summary_top_weapon_disables), "\u2620", ColumnData.CardData(data.topWeaponDisables, { it.sessionWeaponDisablesTotal.toString() }, WEAPON_DISABLES_COLOR)),
-      Triple(getString(Res.string.summary_top_potion_disables), "\u2697", ColumnData.CardData(data.topPotionDisables, { it.sessionPotionDisablesTotal.toString() }, POTION_DISABLES_COLOR)),
-    )))
-
-    // BD Glider, Crystal Wings, Glider Disables
+    // Glider Debuffs: BD Glider, Crystal Wings, Glider Disables
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_bd_glider), "\u2708", ColumnData.CardData(data.topBdGlider, { it.sessionBdGliderTotal.toString() }, BD_GLIDER_COLOR)),
       Triple(getString(Res.string.summary_top_crystal_wings), "\u2708", ColumnData.CardData(data.topCrystalWings, { it.sessionCrystalWingsTotal.toString() }, CRYSTAL_WINGS_COLOR)),
       Triple(getString(Res.string.summary_top_glider_disables), "\u2708", ColumnData.CardData(data.topGliderDisables, { it.sessionGliderDisablesTotal.toString() }, GLIDER_DISABLES_COLOR)),
     )))
 
-    // Provokes, Tiger Strikes, Freezes
+    // Debuffs Continued: Throw Dagger, Stuns, Staggers
     tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_provokes), "\u2757", ColumnData.CardData(data.topProvoked, { it.sessionProvokedTotal.toString() }, PROVOKED_COLOR)),
-      Triple(getString(Res.string.summary_top_tiger_strikes), "\u26A1", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
-      Triple(getString(Res.string.summary_top_freezes), "\u2744", ColumnData.CardData(data.topFreezes, { it.sessionFreezeTotal.toString() }, FREEZE_COLOR)),
+      Triple(getString(Res.string.summary_top_throw_dagger), "\uD83D\uDDE1", ColumnData.CardData(data.topThrowDagger, { it.sessionThrowDaggerTotal.toString() }, THROW_DAGGER_COLOR)),
+      Triple(getString(Res.string.summary_top_stuns), "\u26A0", ColumnData.CardData(data.topStuns, { it.sessionStunsTotal.toString() }, STUNS_COLOR)),
+      Triple(getString(Res.string.summary_top_staggers), "\u2195", ColumnData.CardData(data.topStaggers, { it.sessionStaggersTotal.toString() }, STAGGERS_COLOR)),
     )))
 
+    // Special Buffs: Defiance, Divine Blessing, Purges
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_defiance), "\u2694", ColumnData.CardData(data.topDefiance, { it.sessionDefianceTotal.toString() }, DEFIANCE_COLOR)),
       Triple(getString(Res.string.summary_top_garden_defiance), "\u2600", ColumnData.CardData(data.topGardenDefiance, { it.sessionGardenDefianceTotal.toString() }, GARDEN_DEFIANCE_COLOR)),
       Triple(getString(Res.string.summary_top_purges), "\u2728", ColumnData.CardData(data.topPurges, { it.sessionPurgeTotal.toString() }, PURGE_COLOR)),
+    )))
+
+    // Special Buffs Continued: Impale Immunity, Protective Wings, Courageous Action
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_impales), "\uD83D\uDEE1", ColumnData.CardData(data.topImpaleImmunity, { it.sessionImpaleImmunityTotal.toString() }, IMPALE_IMMUNITY_COLOR)),
+      Triple(getString(Res.string.summary_top_protective_wings), "\uD83E\uDD85", ColumnData.CardData(data.topProtectiveWings, { it.sessionProtectiveWingsTotal.toString() }, PROTECTIVE_WINGS_COLOR)),
+      Triple(getString(Res.string.summary_top_courageous_action), "\u2728", ColumnData.CardData(data.topCourageousAction, { it.sessionCourageousActionTotal.toString() }, COURAGEOUS_ACTION_COLOR)),
+    )))
+
+    // Special Melee: Tiger Strikes, Mist Sunder, Regular Sunder
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_tiger_strikes), "\u26A1", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
+      Triple(getString(Res.string.summary_top_mist_sunder), "\u26CF", ColumnData.CardData(data.topMistSunder, { it.sessionMistSunderTotal.toString() }, MIST_SUNDER_COLOR)),
+      Triple(getString(Res.string.summary_top_regular_sunder), "\u26CF", ColumnData.CardData(data.topRegularSunder, { it.sessionRegularSunderTotal.toString() }, REGULAR_SUNDER_COLOR)),
+    )))
+
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_haranya_builds), "\u2694", ColumnData.BuildData(data.buildCountsHaranya)),
+      Triple(getString(Res.string.summary_nuia_builds),    "\u2694", ColumnData.BuildData(data.buildCountsNuia)),
+      Triple(getString(Res.string.summary_pirate_builds),  "\u2694", ColumnData.BuildData(data.buildCountsPirate)),
     )))
 
     return tripletBlocks
@@ -1282,11 +1481,11 @@ object ImageExportInteractor {
   private var cachedEmojiFont: Font? = null
 
   private fun createFont(style: Int, size: Float): Font {
-    val language = RFConfig.state.value.preferredLanguage
+    val language = Locale.getDefault().language
     val baseFont = cachedFont
       ?.takeIf { cachedFontLanguage == language }
       ?.deriveFont(size) ?: run {
-      val font = if (AppLocale.entryFor(RFConfig.state.value.preferredLanguage).code == "cn") {
+      val font = if (language == "zh") {
         listOf("Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Dialog")
           .firstNotNullOfOrNull { name ->
             runCatching { Font(name, Font.PLAIN, size.toInt()) }
@@ -1294,11 +1493,11 @@ object ImageExportInteractor {
               ?.takeIf { candidate -> candidate.canDisplay('中') }
           }
           ?: Font("Dialog", Font.PLAIN, size.toInt())
-      } else {
+      } else if (language == "ko") {
         try {
           val uri = Res.getUri("font/arkorean_regular.ttf")
           val koreanFont = Font.createFont(Font.TRUETYPE_FONT, URI(uri).toURL().openStream())
-          if (koreanFont.canDisplay('ç') && koreanFont.canDisplay('õ') && koreanFont.canDisplay('ü')) {
+          if (koreanFont.canDisplay('한')) {
             koreanFont
           } else {
             Font("Dialog", Font.PLAIN, size.toInt())
@@ -1306,6 +1505,8 @@ object ImageExportInteractor {
         } catch (_: Exception) {
           Font("Dialog", Font.PLAIN, size.toInt())
         }
+      } else {
+        Font("Dialog", Font.PLAIN, size.toInt())
       }
       cachedFont = font
       cachedFontLanguage = language

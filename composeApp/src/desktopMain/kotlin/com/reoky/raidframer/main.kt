@@ -23,6 +23,8 @@ import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import com.reoky.raidframer.core.interactor.OverlayInteractor
 import com.reoky.raidframer.core.interactor.PetAccumulatorInteractor
+import com.reoky.raidframer.core.interactor.ProtectiveWingsAttributorInteractor
+import com.reoky.raidframer.core.interactor.AreaEffectAttributorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.ui.OverlayContainer
@@ -93,6 +95,8 @@ fun main(args: Array<String>) {
     OverlayInteractor.start(delay = 50L)
     DeathAccumulatorInteractor.start()
     PetAccumulatorInteractor.start()
+    AreaEffectAttributorInteractor.start(delay = 1000L)
+    ProtectiveWingsAttributorInteractor.start()
     CombatLogInteractor.start(delay = 3000L)
     SeedTableInteractor.start(delay = 2000L)
     BattleGraphInteractor.start()
@@ -265,8 +269,10 @@ suspend fun quitAfterSessionStop() {
   if (CombatLogInteractor.isRecording.value) {
     Log.info(TAG, "Session active — stopping recording and awaiting export before quit...")
     PlayerCacheInteractor.stopSession()
-    CombatLogInteractor.awaitExport()
-    PlayerCacheInteractor.awaitArchive()
   }
+  // The session may already have been stopped from the combat/settings controls.
+  // Always await any jobs started by that stop before terminating the process.
+  CombatLogInteractor.awaitExport()
+  PlayerCacheInteractor.awaitArchive()
   quit()
 }

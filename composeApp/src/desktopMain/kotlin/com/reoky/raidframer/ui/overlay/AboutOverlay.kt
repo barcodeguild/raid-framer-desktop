@@ -21,6 +21,7 @@ import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CloseButton
+import com.reoky.raidframer.ui.component.TitleBarComponent
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -31,10 +32,12 @@ import raid_framer_desktop.composeapp.generated.resources.about_community_dedica
 import raid_framer_desktop.composeapp.generated.resources.about_dev_dedication
 import raid_framer_desktop.composeapp.generated.resources.about_dedication_text
 import raid_framer_desktop.composeapp.generated.resources.about_go_to_settings_button
+import raid_framer_desktop.composeapp.generated.resources.about_help_button
 import raid_framer_desktop.composeapp.generated.resources.about_package_label
 import raid_framer_desktop.composeapp.generated.resources.about_read_settings_instruction
 import raid_framer_desktop.composeapp.generated.resources.about_source_label
 import raid_framer_desktop.composeapp.generated.resources.about_special_thanks
+import raid_framer_desktop.composeapp.generated.resources.help_button
 import raid_framer_desktop.composeapp.generated.resources.about_staff_dedication
 import raid_framer_desktop.composeapp.generated.resources.about_thanks_label
 import raid_framer_desktop.composeapp.generated.resources.about_thanks_location
@@ -58,16 +61,17 @@ fun PreviewAboutOverlay() {
 @Composable
 fun AboutOverlay(wm: WindowManager? = null) {
   Box(modifier = Modifier.fillMaxSize()) {
-
-     CloseButton(
-       onClose = { wm?.closeWindow(OverlayType.ABOUT) },
-       modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)
-     )
-
     // content area
     Column(
       modifier = Modifier.fillMaxSize().padding(12.dp)
     ) {
+
+      TitleBarComponent(
+        title = stringResource(Res.string.about_app_title),
+        onClose = { wm?.closeWindow(OverlayType.ABOUT) },
+        actionLabel = stringResource(Res.string.help_button),
+        onAction = { wm?.openWindow(OverlayType.HELP) }
+      )
 
       // Header Logo and Version
       Row {
@@ -81,14 +85,14 @@ fun AboutOverlay(wm: WindowManager? = null) {
         }
         Column(modifier = Modifier.weight(0.67f)) {
           Spacer(modifier = Modifier.height(8.dp))
-          Text(
+             Text(
             text = stringResource(Res.string.about_app_title),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
-          )
+             )
           Spacer(modifier = Modifier.height(8.dp))
           Row {
             Text(

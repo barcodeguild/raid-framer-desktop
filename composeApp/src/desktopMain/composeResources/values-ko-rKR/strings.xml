@@ -5,6 +5,23 @@
     <string name="graphs_no_recent_data">최근 데이터 없음</string>
     <string name="graphs_player_metric_format">%1$s의 %2$s</string>
     <string name="graphs_one_minute">1분</string>
+    <string name="help_button">? 도움말</string>
+    <string name="help_title">Raid Framer 도움말</string>
+    <string name="help_before_installing_title">설치 전</string>
+    <string name="help_before_installing_body">Raid Framer를 설치하기 전에 ArcheRage를 설정하세요:\n1. ESC를 누르고 옵션 -&gt; 게임 정보로 이동합니다.\n2. "전투 메시지 활성화"를 켭니다.\n3. 메시지 범위를 SELF에서 ALL로 변경합니다.\n4. 메시지 거리를 100미터로 설정합니다.\n5. 계속하기 전에 ArcheRage를 완전히 종료합니다.\n\nArcheRage는 창 모드로 실행할 때 Raid Framer가 가장 잘 작동합니다.</string>
+    <string name="help_install_title">Raid Framer 설치</string>
+    <string name="help_install_body">1. MSI 설치 프로그램을 다운로드하고 더블클릭하여 실행합니다.\n2. 설치가 끝나면 Windows 시작 메뉴에서 Raid Framer를 한 번 실행합니다. 처음 실행할 때 Raid Framer가 Lua 애드온을 ArcheRage/Addon 폴더에 복사합니다.\n3. Raid Framer를 한 번 이상 연 후 ArcheRage를 실행합니다.</string>
+    <string name="help_recording_title">PvP 전투 녹화</string>
+    <string name="help_recording_body">PvP 전투를 녹화하려면 Windows 시작 메뉴에서 Raid Framer를 실행하세요. 게임 내 애드온에서 + 버튼을 눌러 새 세션을 시작합니다. 세션이 활성화된 동안 전투 데이터가 표시됩니다.</string>
+    <string name="help_troubleshooting_title">문제 해결</string>
+    <string name="help_troubleshooting_addon_line">캐릭터 선택 화면에서 렌치(도구) 메뉴를 열고 애드온 목록에 "raidframer"가 표시되는지 확인하세요. 기본적으로 체크되어 있어야 합니다.</string>
+    <string name="help_troubleshooting_body">전투 데이터가 표시되지 않으면 다음을 확인하세요:\n• ESC -&gt; 옵션 -&gt; 게임 정보에서 "전투 메시지 활성화"가 켜져 있는지 확인합니다.\n• 메시지 범위가 SELF가 아닌 ALL인지 확인합니다.\n• 메시지 거리가 100미터인지 확인합니다.\n• 애드온에서 + 버튼을 눌러 세션을 시작했는지 확인합니다.\n• Raid Framer 설치 후 ArcheRage를 완전히 다시 시작했는지 확인합니다.\n• 설치 후 Raid Framer 데스크톱 앱을 한 번 이상 실행했는지 확인합니다.</string>
+    <string name="help_updating_title">기존 RF2 설치 업데이트</string>
+    <string name="help_updating_body">RF2가 이미 설치되어 있다면 기존 Raid Framer를 실행할 때 업데이트가 있으면 업데이트 옵션이 표시됩니다. 일반적으로 MSI를 다시 수동으로 다운로드할 필요가 없습니다.</string>
+    <string name="help_resetting_title">Raid Framer 초기화</string>
+    <string name="help_resetting_body">다른 방법이 모두 실패하면 Raid Framer를 종료하고 다음 폴더를 삭제하여 로컬 설정과 데이터베이스를 초기화하세요:\nC:\\Users\\&lt;Windows사용자이름&gt;\\.RaidFramer\\\n&lt;Windows사용자이름&gt;을 자신의 Windows 계정 이름으로 바꾸세요. 이 폴더를 삭제하면 저장된 로컬 설정과 데이터베이스가 제거됩니다.</string>
+    <string name="help_performance_title">성능 및 FPS</string>
+    <string name="help_performance_body">주변에 플레이어가 많으면 100미터 메시지 거리가 성능을 저하시킬 수 있습니다. 거리 슬라이더를 낮추면 성능 저하를 줄일 수 있지만 기록되는 이벤트의 최대 거리도 줄어듭니다. 성능 문제가 계속되면 ALL 대신 SELF, PARTY, RAID 또는 GUILD처럼 더 좁은 메시지 범위를 선택하세요.</string>
 
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Lua 애드온은 게임에서 전투 데이터를 가져옵니다. 타겟 기반 디버프 추적, 공격대 관리, 게임 내 시각/청각 효과 등 네이티브 기능만을 가능하게 합니다. lua 애드온을 게임에서 제거하면 기능이 의도대로 작동하지 않습니다.</string>
@@ -439,10 +456,42 @@
     <string name="player_card_stat_garden_defiance">반신의 가르침</string>
     <string name="player_card_stat_purges">정화</string>
     <string name="player_card_stat_sac_dances">희생의 춤</string>
+    <string name="player_card_stat_deep_tranquility">깊은 고요</string>
+    <string name="player_card_stat_deepend_debuff">깊어진 약화</string>
+    <string name="player_card_stat_throw_dagger">비수 던지기</string>
+    <string name="player_card_stat_stuns">기절</string>
+    <string name="player_card_stat_staggers">경직</string>
+    <string name="player_card_stat_petrification">석화</string>
+    <string name="player_card_stat_absorb_lifeforce">생명력 흡수</string>
+    <string name="player_card_stat_corrosive_barrage">부식</string>
+    <string name="player_card_stat_blinded_by_crows">까마귀의 방해</string>
+    <string name="player_card_stat_mist_sunder">대지 가르기: 안개</string>
+    <string name="player_card_stat_regular_sunder">대지 가르기</string>
+    <string name="player_card_stat_impales">지옥의 창</string>
+    <string name="player_card_stat_protective_wings">보호의 날개</string>
+    <string name="player_card_stat_courageous_action">각성</string>
+    <string name="player_card_stat_mana_barrier">활력 보호막</string>
+    <string name="player_card_stat_revive">부활</string>
     <string name="summary_top_defiance">패기 상위</string>
     <string name="summary_top_garden_defiance">반신의 가르침 상위</string>
     <string name="summary_top_purges">정화 상위</string>
     <string name="summary_top_sac_dances">희생의 춤 상위</string>
+    <string name="summary_top_deep_tranquility">깊은 고요 상위</string>
+    <string name="summary_top_deepend_debuff">깊어진 약화 상위</string>
+    <string name="summary_top_throw_dagger">비수 던지기 상위</string>
+    <string name="summary_top_stuns">기절 상위</string>
+    <string name="summary_top_staggers">경직 상위</string>
+    <string name="summary_top_absorb_lifeforce">생명력 흡수 상위</string>
+    <string name="summary_top_corrosive_barrage">부식 상위</string>
+    <string name="summary_top_blinded_by_crows">까마귀의 방해 상위</string>
+    <string name="summary_top_mist_sunder">대지 가르기: 안개 상위</string>
+    <string name="summary_top_regular_sunder">대지 가르기 상위</string>
+    <string name="summary_top_impales">지옥의 창 상위</string>
+    <string name="summary_top_protective_wings">보호의 날개 상위</string>
+    <string name="summary_top_courageous_action">각성 상위</string>
+    <string name="summary_top_mana_barrier">활력 보호막 상위</string>
+    <string name="summary_top_revive">부활 상위</string>
+    <string name="summary_top_petrification">석화 상위</string>
     <string name="summary_tab_spells">스킬</string>
     <string name="summary_tab_buffs">버프</string>
     <string name="summary_tab_ode">치무</string>
@@ -453,6 +502,12 @@
     <string name="summary_tab_specs">직업</string>
     <string name="summary_tab_performance">성과</string>
     <string name="summary_tab_life_mend">모두 치유: 생명</string>
+    <string name="summary_tab_debuffs_continued">약화 Continued</string>
+    <string name="summary_tab_debuffs_extended">약화 Extended</string>
+    <string name="summary_tab_special_buffs_continued">특수 버프 Continued</string>
+    <string name="summary_tab_special_heals">특수 회복</string>
+    <string name="summary_tab_special_melee">특수 근접</string>
+    <string name="summary_tab_special_dances">특수 춤</string>
     <string name="summary_top_life_mends">모두 치유: 생명 순위</string>
     <string name="life_mend_quality_none">데이터 없음</string>
     <string name="life_mend_quality_hurting">공격대에 해로움</string>
@@ -576,7 +631,8 @@
     <string name="settings_export_directory_label">내보내기 디렉토리:</string>
     <string name="settings_export_size_label">사용된 공간:</string>
     <string name="settings_export_open_folder">폴더 열기</string>
-    <string name="settings_export_include_raw_json">내보낼 때 원시 JSON 형식 로그 포함. (디스크 공간 사용)</string>
+    <string name="settings_export_include_raw_json">원시 JSON 로그 내보내기</string>
+    <string name="settings_export_storage_estimate">PNG 내보내기는 보통 파일당 10-15MB이며, 원시 JSON 로그는 세션당 100-250MB를 사용할 수 있습니다.</string>
     <string name="settings_export_directory_not_found">디렉토리를 찾을 수 없음</string>
 
     <!-- About / Update Strings -->
@@ -1149,5 +1205,14 @@
     <string name="time_ago_months_one">%1$d개월 전</string>
     <string name="time_ago_months_other">%1$d개월 전</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
+
+    <!-- Export Progress -->
+    <string name="settings_export_png">세션 요약을 PNG로 내보내기</string>
+    <string name="settings_export_languages_label">PNG 내보내기 언어</string>
+    <string name="settings_export_languages_description">현재 언어는 항상 내보냅니다. 추가 PNG 파일을 만들 언어를 선택하세요.</string>
+    <string name="settings_export_spell_language_notice">주문 이름은 항상 게임 클라이언트에서 사용하는 언어로 표시됩니다.</string>
+    <string name="settings_export_language_current">현재 언어</string>
+    <string name="combat_export_saving_session">세션 저장 중 %1$d/%2$d</string>
+    <string name="combat_export_saving_language">%1$s 내보내기 저장 중 %2$d/%3$d</string>
 
 </resources>

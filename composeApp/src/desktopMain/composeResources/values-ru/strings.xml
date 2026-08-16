@@ -5,6 +5,23 @@
     <string name="graphs_no_recent_data">Нет недавних данных</string>
     <string name="graphs_player_metric_format">%2$s %1$s</string>
     <string name="graphs_one_minute">1 минута</string>
+    <string name="help_button">? Справка</string>
+    <string name="help_title">Справка Raid Framer</string>
+    <string name="help_before_installing_title">Перед установкой</string>
+    <string name="help_before_installing_body">Настройте ArcheRage перед установкой Raid Framer:\n1. Нажмите ESC и откройте Опции -&gt; Игровая информация.\n2. Включите «Включить боевые сообщения».\n3. Измените диапазон сообщений с SELF на ALL.\n4. Установите дальность сообщений 100 метров.\n5. Полностью закройте ArcheRage перед продолжением.\n\nRaid Framer лучше всего работает, когда ArcheRage запущен в оконном режиме.</string>
+    <string name="help_install_title">Установка Raid Framer</string>
+    <string name="help_install_body">1. Скачайте установщик MSI и дважды щёлкните по нему.\n2. После установки один раз запустите Raid Framer через меню «Пуск» Windows. При первом запуске Raid Framer скопирует Lua-аддон в папку ArcheRage/Addon.\n3. После первого запуска Raid Framer запустите ArcheRage.</string>
+    <string name="help_recording_title">Запись PvP-сражения</string>
+    <string name="help_recording_body">Чтобы записать PvP-сражение, запустите Raid Framer через меню «Пуск» Windows. В игровом аддоне нажмите кнопку +, чтобы начать новую сессию. Боевые данные будут отображаться, пока сессия активна.</string>
+    <string name="help_troubleshooting_title">Устранение неполадок</string>
+    <string name="help_troubleshooting_addon_line">На экране выбора персонажа откройте меню инструментов с ключом и убедитесь, что «raidframer» отображается в списке аддонов. По умолчанию он должен быть отмечен.</string>
+    <string name="help_troubleshooting_body">Если боевые данные не появляются, проверьте:\n• ESC -&gt; Опции -&gt; Игровая информация: включены боевые сообщения.\n• Диапазон сообщений установлен на ALL, а не SELF.\n• Дальность сообщений установлена на 100 метров.\n• Вы нажали кнопку + в аддоне, чтобы начать сессию.\n• Вы полностью перезапустили ArcheRage после установки Raid Framer.\n• Вы хотя бы один раз открыли настольное приложение Raid Framer после установки.</string>
+    <string name="help_updating_title">Обновление существующей установки RF2</string>
+    <string name="help_updating_body">Если RF2 уже установлен, запуск существующей установки Raid Framer должен предложить обновление, когда оно доступно. Обычно повторно скачивать MSI вручную не нужно.</string>
+    <string name="help_resetting_title">Сброс Raid Framer</string>
+    <string name="help_resetting_body">Если ничего не помогает, закройте Raid Framer и удалите эту папку, чтобы сбросить локальные настройки и базу данных:\nC:\\Users\\&lt;ИмяПользователяWindows&gt;\\.RaidFramer\\\nЗамените &lt;ИмяПользователяWindows&gt; именем своей учётной записи Windows. Удаление папки удалит сохранённые локальные настройки и базу данных.</string>
+    <string name="help_performance_title">Производительность и FPS</string>
+    <string name="help_performance_body">Дальность сообщений 100 метров может снизить производительность, если рядом находится много игроков. Уменьшение дальности может снизить нагрузку, но также уменьшит максимальную дальность записываемых событий. Если производительность всё ещё низкая, выберите более узкий диапазон SELF, PARTY, RAID или GUILD вместо ALL.</string>
 
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Lua-аддон получает данные о бое из игры. Именно он позволяет нативные функции, такие как отслеживание дебаффов по цели, управление рейдом и визуальные/звуковые эффекты в игре. Если вы удалите lua-аддон из игры, функции не будут работать как положено.</string>
@@ -439,10 +456,42 @@
     <string name="player_card_stat_garden_defiance">Божественное благословение</string>
     <string name="player_card_stat_purges">Очищения</string>
     <string name="player_card_stat_sac_dances">Танец жертвоприношения</string>
+    <string name="player_card_stat_deep_tranquility">Глубокое спокойствие</string>
+    <string name="player_card_stat_deepend_debuff">Глубокое ослабление</string>
+    <string name="player_card_stat_throw_dagger">Бросок кинжала</string>
+    <string name="player_card_stat_stuns">Оглушения</string>
+    <string name="player_card_stat_staggers">Дёргания</string>
+    <string name="player_card_stat_petrification">Окаменение</string>
+    <string name="player_card_stat_absorb_lifeforce">Поглощение жизненной силы</string>
+    <string name="player_card_stat_corrosive_barrage">Коррозия</string>
+    <string name="player_card_stat_blinded_by_crows">Ослепление воронами</string>
+    <string name="player_card_stat_mist_sunder">Разрубание тумана</string>
+    <string name="player_card_stat_regular_sunder">Обычное разрубание</string>
+    <string name="player_card_stat_impales">Проколы</string>
+    <string name="player_card_stat_protective_wings">Защитные крылья</string>
+    <string name="player_card_stat_courageous_action">Мужественное действие</string>
+    <string name="player_card_stat_mana_barrier">Мановый барьер</string>
+    <string name="player_card_stat_revive">Воскрешение</string>
     <string name="summary_top_defiance">Топ неповиновения</string>
     <string name="summary_top_garden_defiance">Топ божественного благословения</string>
     <string name="summary_top_purges">Топ очищений</string>
     <string name="summary_top_sac_dances">Топ жертвенных танцев</string>
+    <string name="summary_top_deep_tranquility">Топ глубокого покоя</string>
+    <string name="summary_top_deepend_debuff">Топ глубокого ослабления</string>
+    <string name="summary_top_throw_dagger">Топ броска кинжала</string>
+    <string name="summary_top_stuns">Топ оглушений</string>
+    <string name="summary_top_staggers">Топ дёрганий</string>
+    <string name="summary_top_absorb_lifeforce">Топ поглощения жизненной силы</string>
+    <string name="summary_top_corrosive_barrage">Топ коррозийного обстрела</string>
+    <string name="summary_top_blinded_by_crows">Топ ослепления воронами</string>
+    <string name="summary_top_mist_sunder">Топ разрубания тумана</string>
+    <string name="summary_top_regular_sunder">Топ обычного разрубания</string>
+    <string name="summary_top_impales">Топ проколы</string>
+    <string name="summary_top_protective_wings">Топ защитных крыльев</string>
+    <string name="summary_top_courageous_action">Топ мужественного действия</string>
+    <string name="summary_top_mana_barrier">Топ манового барьера</string>
+    <string name="summary_top_revive">Топ воскрешения</string>
+    <string name="summary_top_petrification">Топ окаменения</string>
     <string name="summary_tab_spells">Заклинания</string>
     <string name="summary_tab_buffs">Баффы</string>
     <string name="summary_tab_ode">Ода</string>
@@ -453,6 +502,12 @@
     <string name="summary_tab_specs">Спеки</string>
     <string name="summary_tab_performance">Эффективность</string>
     <string name="summary_tab_life_mend">Исцеление жизни</string>
+    <string name="summary_tab_debuffs_continued">Аффекты Continued</string>
+    <string name="summary_tab_debuffs_extended">Аффекты Extended</string>
+    <string name="summary_tab_special_buffs_continued">Особые баффы Continued</string>
+    <string name="summary_tab_special_heals">Особые исцеления</string>
+    <string name="summary_tab_special_melee">Особый ближний бой</string>
+    <string name="summary_tab_special_dances">Особые танцы</string>
     <string name="summary_top_life_mends">Топ исцелений жизни</string>
     <string name="life_mend_quality_none">Нет данных</string>
     <string name="life_mend_quality_hurting">Вредит рейду</string>
@@ -576,7 +631,8 @@
     <string name="settings_export_directory_label">Каталог экспорта:</string>
     <string name="settings_export_size_label">Использовано места:</string>
     <string name="settings_export_open_folder">Открыть папку</string>
-    <string name="settings_export_include_raw_json">Включать необработанные логи в формате JSON при экспорте. (Использует место на диске)</string>
+    <string name="settings_export_include_raw_json">Экспортировать необработанные логи JSON</string>
+    <string name="settings_export_storage_estimate">Экспорт PNG обычно занимает 10-15 МБ на файл; необработанные логи JSON могут занимать 100-250 МБ на сессию.</string>
     <string name="settings_export_directory_not_found">Каталог не найден</string>
 
     <!-- About / Update Strings -->
@@ -1095,5 +1151,14 @@
     <string name="time_ago_months_one">%1$d месяц назад</string>
     <string name="time_ago_months_other">%1$d месяцев назад</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
+
+    <!-- Export Progress -->
+    <string name="settings_export_png">Экспортировать сводку сессии в PNG</string>
+    <string name="settings_export_languages_label">Языки экспорта PNG</string>
+    <string name="settings_export_languages_description">Ваш текущий язык экспортируется всегда. Выберите дополнительные языки для создания PNG-файлов.</string>
+    <string name="settings_export_spell_language_notice">Названия заклинаний всегда отображаются на языке игрового клиента.</string>
+    <string name="settings_export_language_current">текущий язык</string>
+    <string name="combat_export_saving_session">Сохранение сессии %1$d/%2$d</string>
+    <string name="combat_export_saving_language">Сохранение экспорта на языке %1$s %2$d/%3$d</string>
 
 </resources>

@@ -200,7 +200,8 @@ object CompanionInteractor : Interactor() {
                 spell = event.spellName,
                 spellId = event.spellId
               ).normalize<CastingEvent>()
-              Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} began casting ${event.spellName} (id:${event.spellId}) on ${combatEvent.target}.")
+              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} began casting ${combatEvent.spell} (id:${combatEvent.spellId}) on ${combatEvent.target} (${combatEvent.cid}).")
+              ProtectiveWingsAttributorInteractor.onCast(combatEvent)
               PlayerCacheInteractor.postEvent(combatEvent)
             }
 
@@ -227,7 +228,8 @@ object CompanionInteractor : Interactor() {
                 critical = event.f13,
                 spellId = 0
               ).normalize<DamageEvent>()
-              Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} (${event.cid}) damaged ${combatEvent.target} for ${abs(event.amount)} using ${event.spell}.")
+              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} damaged ${combatEvent.target} (${combatEvent.cid}) for ${combatEvent.damage} using ${combatEvent.spell}.")
+              AreaEffectAttributorInteractor.onDamageEvent(combatEvent)
               PlayerCacheInteractor.postEvent(combatEvent)
             }
 
@@ -242,7 +244,7 @@ object CompanionInteractor : Interactor() {
                 critical = event.f10,
                 spellId = 0
               ).normalize<HealEvent>()
-              Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} healed ${combatEvent.target} for ${event.amount} using ${event.spell}.")
+              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} healed ${combatEvent.target} (${combatEvent.cid}) for ${combatEvent.amount} using ${combatEvent.spell}.")
               PlayerCacheInteractor.postEvent(combatEvent)
             }
 
@@ -256,20 +258,29 @@ object CompanionInteractor : Interactor() {
                 buffId = event.buffId,
               ).normalize<BuffGainedEvent>()
               if (event.buffType == "DEBUFF") {
-                PlayerCacheInteractor.postEvent(
-                  DebuffGainedEvent(
-                    timestamp = event.timestamp,
-                    cid = event.cid,
-                    source = combatEvent.source,
-                    target = combatEvent.target,
-                    debuff = event.buffName,
-                    debuffId = event.buffId,
-                  )
+                val debuffEvent = DebuffGainedEvent(
+                  timestamp = event.timestamp,
+                  cid = event.cid,
+                  source = combatEvent.source,
+                  target = combatEvent.target,
+                  debuff = event.buffName,
+                  debuffId = event.buffId,
                 )
-                Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} applied debuff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target}.")
+                if (AreaEffectAttributorInteractor.isAreaEffectAura(debuffEvent)) {
+                  AreaEffectAttributorInteractor.onAuraEvent(debuffEvent)
+                } else {
+                  PlayerCacheInteractor.postEvent(debuffEvent)
+                }
+                Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} applied debuff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target} with CID ${combatEvent.cid}.")
               } else {
-                PlayerCacheInteractor.postEvent(combatEvent)
-                Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} applied buff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target}.")
+                if (ProtectiveWingsAttributorInteractor.isProtectiveWingsBuff(combatEvent)) {
+                  ProtectiveWingsAttributorInteractor.onAura(combatEvent)
+                } else if (AreaEffectAttributorInteractor.isAreaEffectAura(combatEvent)) {
+                  AreaEffectAttributorInteractor.onAuraEvent(combatEvent)
+                } else {
+                  PlayerCacheInteractor.postEvent(combatEvent)
+                }
+                Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} applied buff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target} with CID ${combatEvent.cid}.")
               }
             }
             is CombatEventPayload.BuffEndedPayload -> {
@@ -282,6 +293,7 @@ object CompanionInteractor : Interactor() {
                 buffId = event.buffId
               ).normalize<BuffEndedEvent>()
               PlayerCacheInteractor.postEvent(combatEvent)
+              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target}'s (${combatEvent.cid}) (${combatEvent.buff}:${combatEvent.buffId}) de/buff applied by ${combatEvent.source} was removed.")
             }
             is CombatEventPayload.MeleeDamagePayload -> {
               val combatEvent = DamageEvent(
@@ -294,7 +306,7 @@ object CompanionInteractor : Interactor() {
                 critical = event.f10,
                 spellId = 0
               ).normalize<DamageEvent>()
-              Log.info(TAG, "At ${event.timestamp} ${combatEvent.source} melee damaged ${combatEvent.target} for ${abs(event.amount)}.")
+              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} melee damaged ${combatEvent.target} for ${combatEvent.damage} damage.")
               PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.MeleeMissedPayload -> {
@@ -308,7 +320,7 @@ object CompanionInteractor : Interactor() {
                 critical = false,
                 spellId = 0
               ).normalize<DamageEvent>()
-              Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s melee attack (miss).")
+              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s melee attack (miss).")
               PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.SpellMissedPayload -> {
@@ -342,7 +354,7 @@ object CompanionInteractor : Interactor() {
                 critical = event.f13,
                 spellId = 0
               ).normalize<DamageEvent>()
-              Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} suffered ${abs(event.amount)} damage to their ${event.pool} because of ${combatEvent.source}'s ${event.spell} spell.")
+              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target} suffered ${combatEvent.damage} damage to their ${event.pool} because of ${combatEvent.source}'s ${combatEvent.spell} spell.")
               PlayerCacheInteractor.postEvent(combatEvent)
             }
           }

@@ -24,6 +24,7 @@ import com.reoky.raidframer.ui.overlay.NewSessionOverlay
 import com.reoky.raidframer.ui.overlay.PokemonOverlay
 import com.reoky.raidframer.ui.overlay.RaidOverlay
 import com.reoky.raidframer.ui.overlay.SettingsOverlay
+import com.reoky.raidframer.ui.overlay.HelpOverlay
 import com.reoky.raidframer.ui.overlay.PlayerCardOverlay
 import com.reoky.raidframer.ui.overlay.TrackerOverlay
 import com.reoky.raidframer.ui.overlay.BattleGraphOverlay
@@ -31,6 +32,7 @@ import com.reoky.raidframer.ui.overlay.ItemUseOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.awt.GraphicsEnvironment
 import java.awt.event.ComponentAdapter
 
 @Composable
@@ -71,6 +73,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.SUMMARY -> SummaryOverlay(wm)
           OverlayType.MINI -> MiniOverlay(wm)
           OverlayType.SETTINGS -> SettingsOverlay(wm)
+          OverlayType.HELP -> HelpOverlay(wm)
           OverlayType.COMPANION -> CompanionOverlay(wm)
           OverlayType.POKEMON -> PokemonOverlay(wm)
           OverlayType.TRACKER -> TrackerOverlay(wm)
@@ -134,13 +137,14 @@ fun notifyWindowManagerStateChanged(
   window: ComposeWindow
 ) {
   try {
+    val correctedY = moveDownIfAboveVisibleMonitor(window)
     val pos = window.locationOnScreen
     val size = window.size
     if (size.width > 0 && size.height > 0) {
       windowManager.updateWindowState(type) {
         copy(
           lastPositionXDp = pos.x.toFloat(),
-          lastPositionYDp = pos.y.toFloat(),
+          lastPositionYDp = correctedY?.toFloat() ?: pos.y.toFloat(),
           lastWidthDp = size.width.toFloat(),
           lastHeightDp = size.height.toFloat()
         )
@@ -151,4 +155,26 @@ fun notifyWindowManagerStateChanged(
     // window isn't open yet
     // println("Could not get window position/size for $type: ${e.message}")
   }
+}
+
+/**
+ * Correct windows that are above the top of the monitor they are actually on.
+ * A negative Y is valid when a secondary monitor is arranged above the primary one,
+ * so the monitor is selected using the window center rather than the primary display.
+ */
+private fun moveDownIfAboveVisibleMonitor(window: ComposeWindow): Int? {
+  val bounds = window.bounds
+  if (bounds.width <= 0 || bounds.height <= 0) return null
+
+  val center = java.awt.Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+  val monitor = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+    .map { it.defaultConfiguration.bounds }
+    .firstOrNull { it.contains(center) }
+    ?: return null
+
+  if (bounds.y >= monitor.y) return null
+
+  val correctedY = monitor.y + 100
+  window.setLocation(bounds.x, correctedY)
+  return correctedY
 }

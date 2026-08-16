@@ -163,6 +163,22 @@ import raid_framer_desktop.composeapp.generated.resources.sky_emp_glider
 import raid_framer_desktop.composeapp.generated.resources.soul_neck
 import raid_framer_desktop.composeapp.generated.resources.twt_glider
 import raid_framer_desktop.composeapp.generated.resources.bd_glider
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_deep_tranquility
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_deepend_debuff
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_throw_dagger
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_stuns
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_staggers
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_petrification
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_absorb_lifeforce
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_corrosive_barrage
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_blinded_by_crows
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mist_sunder
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_regular_sunder
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_impales
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_protective_wings
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_courageous_action
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mana_barrier
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_revive
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_defiance
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_garden_defiance
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_purges
@@ -657,6 +673,22 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_garden_defiance), cache.lifetimeTotalGardenDefiance, RFColors.gardenDefianceBlue)
                   StatRow(stringResource(Res.string.player_card_stat_purges), cache.lifetimeTotalPurges, RFColors.purgeGreen)
                   StatRow(stringResource(Res.string.player_card_stat_sac_dances), cache.lifetimeTotalSacDances, RFColors.sacDancePurple)
+                  StatRow(stringResource(Res.string.player_card_stat_deep_tranquility), cache.lifetimeTotalDeepTranquility, RFColors.deepTranquilityTeal)
+                  StatRow(stringResource(Res.string.player_card_stat_deepend_debuff), cache.lifetimeTotalDeependDebuff, RFColors.deedendDebuffRed)
+                  StatRow(stringResource(Res.string.player_card_stat_throw_dagger), cache.lifetimeTotalThrowDagger, RFColors.throwDaggerAmber)
+                  StatRow(stringResource(Res.string.player_card_stat_stuns), cache.lifetimeTotalStuns, RFColors.stunDeepRed)
+                  StatRow(stringResource(Res.string.player_card_stat_staggers), cache.lifetimeTotalStaggers, RFColors.staggerBrown)
+                  StatRow(stringResource(Res.string.player_card_stat_petrification), cache.lifetimeTotalPetrification, RFColors.petrificationGray)
+                  StatRow(stringResource(Res.string.player_card_stat_absorb_lifeforce), cache.lifetimeTotalAbsorbLifeforce, RFColors.absorbLifeforceMagenta)
+                  StatRow(stringResource(Res.string.player_card_stat_corrosive_barrage), cache.lifetimeTotalCorrosiveBarrage, RFColors.corrosiveBarrageLime)
+                  StatRow(stringResource(Res.string.player_card_stat_blinded_by_crows), cache.lifetimeTotalBlindedByCrows, RFColors.blindedByCrowsDark)
+                  StatRow(stringResource(Res.string.player_card_stat_mist_sunder), cache.lifetimeTotalMistSunder, RFColors.mistSunderCyan)
+                  StatRow(stringResource(Res.string.player_card_stat_regular_sunder), cache.lifetimeTotalRegularSunder, RFColors.regularSunderOrange)
+                  StatRow(stringResource(Res.string.player_card_stat_impales), cache.lifetimeTotalImpaleImmunity, RFColors.impaleImmunitySteel)
+                  StatRow(stringResource(Res.string.player_card_stat_protective_wings), cache.lifetimeTotalProtectiveWings, RFColors.protectiveWingsGold)
+                  StatRow(stringResource(Res.string.player_card_stat_courageous_action), cache.lifetimeTotalCourageousAction, RFColors.courageousActionBright)
+                  StatRow(stringResource(Res.string.player_card_stat_mana_barrier), cache.lifetimeTotalManaBarrier, RFColors.manaBarrierBlue)
+                  StatRow(stringResource(Res.string.player_card_stat_revive), cache.lifetimeTotalRevive, RFColors.reviveGhostWhite)
                   StatRow(stringResource(Res.string.player_card_stat_glider), cache.lifetimeTotalGliderUses, RFColors.gliderBlue)
                   StatRow(stringResource(Res.string.player_card_stat_items), cache.lifetimeTotalItemSkillsUsed, RFColors.itemSkillYellow)
                   StatRow(stringResource(Res.string.player_card_stat_potions), cache.lifetimeTotalPotionUsages, RFColors.potionTeal)

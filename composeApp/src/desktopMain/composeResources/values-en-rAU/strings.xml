@@ -5,6 +5,23 @@
     <string name="graphs_no_recent_data">No Recent Data</string>
     <string name="graphs_player_metric_format">%1$s's %2$s</string>
     <string name="graphs_one_minute">1 Minute</string>
+    <string name="help_button">? Help</string>
+    <string name="help_title">Raid Framer Help</string>
+    <string name="help_before_installing_title">Before Installing</string>
+    <string name="help_before_installing_body">Configure ArcheRage before installing Raid Framer:\n1. Press ESC and open Options -&gt; Game Info.\n2. Enable "Enable Combat Messages".\n3. Change the message range from SELF to ALL.\n4. Set the message distance to 100 meters.\n5. Close ArcheRage completely before continuing.\n\nRaid Framer works best when ArcheRage is running in windowed mode.</string>
+    <string name="help_install_title">Install Raid Framer</string>
+    <string name="help_install_body">1. Download the MSI installer and double-click it to run.\n2. When installation finishes, launch Raid Framer once from the Windows Start Menu. On first launch, Raid Framer copies its Lua addon into your ArcheRage/Addon folder.\n3. After Raid Framer has opened at least once, launch ArcheRage.</string>
+    <string name="help_recording_title">Recording a PvP Battle</string>
+    <string name="help_recording_body">Whenever you want to record a PvP battle, launch Raid Framer from the Windows Start Menu. In the in-game addon, press the + button to start a new session. Combat data will appear while a session is active.</string>
+    <string name="help_troubleshooting_title">Troubleshooting</string>
+    <string name="help_troubleshooting_addon_line">On the character select screen, open the wrench (tools) menu and confirm that "raidframer" appears in the addon list. It should be checked by default.</string>
+    <string name="help_troubleshooting_body">If no combat data appears, check:\n• ESC -&gt; Options -&gt; Game Info: Enable Combat Messages is enabled.\n• The message range is ALL, not SELF.\n• The message distance is 100 meters.\n• You pressed the + button in the addon to start a session.\n• You completely restarted ArcheRage after installing Raid Framer.\n• You opened the Raid Framer desktop app at least once after installation.</string>
+    <string name="help_updating_title">Updating an Existing RF2 Installation</string>
+    <string name="help_updating_body">If RF2 is already installed, launching your existing Raid Framer installation should offer an update when one is available. You normally do not need to download the MSI manually again.</string>
+    <string name="help_resetting_title">Resetting Raid Framer</string>
+    <string name="help_resetting_body">If everything else fails, close Raid Framer and delete this folder to reset its local settings and database:\nC:\\Users\\&lt;YourWindowsUsername&gt;\\.RaidFramer\\\nReplace &lt;YourWindowsUsername&gt; with your Windows account name. Deleting this folder removes Raid Framer's saved local settings and database, so the app will start fresh next time it is opened.</string>
+    <string name="help_performance_title">Performance and FPS</string>
+    <string name="help_performance_body">A 100-meter message distance can reduce performance when many players are nearby. Lowering the distance slider can reduce the hit, but also reduces the maximum distance of recorded events. If performance is still poor, choose a narrower message range such as SELF, PARTY, RAID, or GUILD instead of ALL to limit the events the game sends.</string>
 
     <!-- Companion Addon Settings Strings -->
     <string name="companion_description">The Lua Addon sources combat data from the game. It's what allows for native-only functionality like target-based debuff tracking, raid management, and in-game visual/audible effects. If you remove the lua addon from the game features won't work as intended.</string>
@@ -435,10 +452,42 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="player_card_stat_garden_defiance">Divine Blessing</string>
     <string name="player_card_stat_purges">Purges</string>
     <string name="player_card_stat_sac_dances">Dance of Sacrifice</string>
+    <string name="player_card_stat_deep_tranquility">Deep Tranquility</string>
+    <string name="player_card_stat_deepend_debuff">Deepend</string>
+    <string name="player_card_stat_throw_dagger">Throw Dagger</string>
+    <string name="player_card_stat_stuns">Stuns</string>
+    <string name="player_card_stat_staggers">Staggers</string>
+    <string name="player_card_stat_petrification">Petrification</string>
+    <string name="player_card_stat_absorb_lifeforce">Absorb Lifeforce</string>
+    <string name="player_card_stat_corrosive_barrage">Corrosive Barrage</string>
+    <string name="player_card_stat_blinded_by_crows">Blinded by Crows</string>
+    <string name="player_card_stat_mist_sunder">Mist Sunder</string>
+    <string name="player_card_stat_regular_sunder">Regular Sunder</string>
+    <string name="player_card_stat_impales">Impales</string>
+    <string name="player_card_stat_protective_wings">Protective Wings</string>
+    <string name="player_card_stat_courageous_action">Courageous Action</string>
+    <string name="player_card_stat_mana_barrier">Mana Barrier</string>
+    <string name="player_card_stat_revive">Revive</string>
     <string name="summary_top_defiance">Top Defiance</string>
     <string name="summary_top_garden_defiance">Top Divine Blessing</string>
     <string name="summary_top_purges">Top Purges</string>
     <string name="summary_top_sac_dances">Top Sacrifice Dances</string>
+    <string name="summary_top_deep_tranquility">Top Deep Tranquility</string>
+    <string name="summary_top_deepend_debuff">Top Deepend</string>
+    <string name="summary_top_throw_dagger">Top Throw Dagger</string>
+    <string name="summary_top_stuns">Top Stuns</string>
+    <string name="summary_top_staggers">Top Staggers</string>
+    <string name="summary_top_absorb_lifeforce">Top Absorb Lifeforce</string>
+    <string name="summary_top_corrosive_barrage">Top Corrosive Barrage</string>
+    <string name="summary_top_blinded_by_crows">Top Blinded by Crows</string>
+    <string name="summary_top_mist_sunder">Top Mist Sunder</string>
+    <string name="summary_top_regular_sunder">Top Regular Sunder</string>
+    <string name="summary_top_impales">Top Impales</string>
+    <string name="summary_top_protective_wings">Top Protective Wings</string>
+    <string name="summary_top_courageous_action">Top Courageous Action</string>
+    <string name="summary_top_mana_barrier">Top Mana Barrier</string>
+    <string name="summary_top_revive">Top Revive</string>
+    <string name="summary_top_petrification">Top Petrification</string>
     <string name="summary_tab_spells">Spells</string>
     <string name="summary_tab_buffs">Buffs</string>
     <string name="summary_tab_ode">Ode</string>
@@ -449,6 +498,12 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_tab_specs">Specs</string>
     <string name="summary_tab_performance">Performance</string>
     <string name="summary_tab_life_mend">Life Mend</string>
+    <string name="summary_tab_debuffs_continued">Debuffs Continued</string>
+    <string name="summary_tab_debuffs_extended">Debuffs Extended</string>
+    <string name="summary_tab_special_buffs_continued">Special Buffs Continued</string>
+    <string name="summary_tab_special_heals">Special Heals</string>
+    <string name="summary_tab_special_melee">Special Melee</string>
+    <string name="summary_tab_special_dances">Special Dances</string>
     <string name="summary_top_life_mends">Top Life Mends</string>
     <string name="life_mend_quality_none">No Data</string>
     <string name="life_mend_quality_hurting">Hurting Raid</string>
@@ -576,7 +631,13 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="settings_export_directory_label">Export Directory:</string>
     <string name="settings_export_size_label">Space Used:</string>
     <string name="settings_export_open_folder">Open Folder</string>
-    <string name="settings_export_include_raw_json">Include raw JSON formatted logs when exporting. (Uses disk space)</string>
+    <string name="settings_export_include_raw_json">Export raw JSON logs</string>
+    <string name="settings_export_storage_estimate">PNG exports are typically 10-15 MB each; raw JSON logs may use 100-250 MB per session.</string>
+    <string name="settings_export_png">Export session summary to PNG</string>
+    <string name="settings_export_languages_label">PNG Export Languages</string>
+    <string name="settings_export_languages_description">Your current language is always exported. Select additional languages to create more PNG files. Spell names remain in the game client language.</string>
+    <string name="settings_export_spell_language_notice">Spell names are always displayed in the language used by the game client.</string>
+    <string name="settings_export_language_current">current language</string>
     <string name="settings_export_directory_not_found">Directory not found</string>
 
     <!-- About / Update Strings -->
@@ -1095,5 +1156,9 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="time_ago_months_one">%1$d month ago</string>
     <string name="time_ago_months_other">%1$d months ago</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
+
+    <!-- Export Progress -->
+    <string name="combat_export_saving_session">Saving session %1$d/%2$d</string>
+    <string name="combat_export_saving_language">Saving %1$s export %2$d/%3$d</string>
 
 </resources>

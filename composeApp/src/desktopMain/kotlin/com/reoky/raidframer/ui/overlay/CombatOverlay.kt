@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
@@ -48,6 +49,8 @@ import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.quitAfterSessionStop
 import com.reoky.raidframer.ui.dialog.updateDialog
+import com.reoky.raidframer.ui.export.ImageExportInteractor
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
@@ -67,6 +70,8 @@ import raid_framer_desktop.composeapp.generated.resources.combat_update_tooltip
 import raid_framer_desktop.composeapp.generated.resources.combat_stop_and_save
 import raid_framer_desktop.composeapp.generated.resources.combat_abort_and_discard
 import raid_framer_desktop.composeapp.generated.resources.combat_save_and_exit_tooltip
+import raid_framer_desktop.composeapp.generated.resources.combat_export_saving_session
+import raid_framer_desktop.composeapp.generated.resources.combat_export_saving_language
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_summary
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_title
 
@@ -86,6 +91,7 @@ fun PreviewCombatOverlay() {
 fun CombatOverlay(wm: WindowManager? = null) {
 
   val scope = rememberCoroutineScope()
+  val exportProgress by ImageExportInteractor.progress.collectAsState()
 
   // Update dialog — shown once on startup if an update is available
   val shouldShowUpdateDialog = remember { mutableStateOf(false) }
@@ -270,6 +276,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
     Column(
       modifier = Modifier
         .fillMaxSize()
+        .then(if (exportProgress.isExporting) Modifier.alpha(0f) else Modifier)
     ) {
       if (anyColumnVisibleGlobal) {
         Box(
@@ -671,6 +678,47 @@ fun CombatOverlay(wm: WindowManager? = null) {
               Text(text = stringResource(Res.string.combat_open_settings), color = Color.Black)
             }
           }
+        }
+      }
+    }
+    // Export progress — vertically centered in the full overlay
+    if (exportProgress.isExporting) {
+      Surface(
+        modifier = Modifier
+          .align(Alignment.Center)
+          .fillMaxWidth()
+          .padding(horizontal = 48.dp),
+        shape = RoundedCornerShape(6.dp),
+        color = Color.Black.copy(alpha = 0.65f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+      ) {
+        Column(
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          Text(
+            text = if (exportProgress.languageCode.isBlank()) {
+              stringResource(Res.string.combat_export_saving_session, exportProgress.current, exportProgress.total)
+            } else {
+              stringResource(
+                Res.string.combat_export_saving_language,
+                exportProgress.item.ifBlank { exportProgress.languageCode },
+                exportProgress.current,
+                exportProgress.total,
+                ""
+              )
+            },
+            color = Color.White,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+          )
+          Spacer(modifier = Modifier.height(8.dp))
+          LinearProgressIndicator(
+            progress = exportProgress.progress,
+            modifier = Modifier.fillMaxWidth().height(3.dp),
+            color = RFColors.AccentRed,
+            backgroundColor = RFColors.CardBorder
+          )
         }
       }
     }

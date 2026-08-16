@@ -73,6 +73,9 @@ fun initialize(): AppDatabase {
    .addMigrations(MIGRATION_33_34) // 08/04/26 added defiance, garden defiance, purge, and sacrifice dance totals
     .addMigrations(MIGRATION_34_35) // added PNG export background settings
     .addMigrations(MIGRATION_35_36) // added item use overlay toggle and combat overlay spec icons toggle
+    .addMigrations(MIGRATION_36_37) // added Deep Tranquility buff tracking (buff id 29951)
+   .addMigrations(MIGRATION_37_38) // added new debuff/buff/spell tracking columns (08/13/26)
+   .addMigrations(MIGRATION_38_39) // added PNG export toggle and export language selections
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

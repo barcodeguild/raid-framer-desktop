@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
-import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -77,6 +76,11 @@ object PlayerCacheInteractor : Interactor() {
   private val petCards = mutableStateMapOf<String, PetCard>()
   // Life Mend caster tracking: target → caster (updated on SPELL_AURA_APPLIED/REMOVED for buff 25875)
   private val lifeMendCasterMap = mutableMapOf<String, String>()
+  // Leech steal detection: source → timestamp of last Leech cast (spellId 10104)
+  // Used to filter out buffs stolen via Leech that would otherwise be misattributed as Life Mend casts.
+  private const val LEECH_SPELL_ID = 10104
+  private const val LEECH_WINDOW_MS = 2000L
+  private val recentLeechCasts = mutableMapOf<String, Long>()
   private val mutex = Mutex() // to protect critical sections during player card updates from other threads
   private var archiveJob: Job? = null
   private var preSessionCacheSnapshot: MutableMap<String, PlayerCacheEntity?> = mutableMapOf()
@@ -197,10 +201,11 @@ object PlayerCacheInteractor : Interactor() {
                   val lastAmount = casterCard.lifeMendHealAmounts.lastOrNull()
                   if (lastAmount != buff.tooltip.healAmount) {
                     cards[caster] = casterCard.updateLifeMendStats(buff.tooltip.healAmount)
-                  }
-                }
-              }
-            }
+        }
+      }
+    }
+
+  }
           }
         }
       }
@@ -384,7 +389,7 @@ object PlayerCacheInteractor : Interactor() {
         } else {
           petCards[key]?.let { card ->
             petCards[key] = card.copy(
-              recentCids = cid?.let { (card.recentCids + it).distinct().takeLast(50) } ?: card.recentCids,
+              recentCids = cid?.let { (listOf(it) + card.recentCids).distinct().take(50) } ?: card.recentCids,
               lastEvent = System.currentTimeMillis(),
               petTypes = card.petTypes + petType
             )
@@ -395,6 +400,11 @@ object PlayerCacheInteractor : Interactor() {
       }
     }
     PetAccumulatorInteractor.onPetRegistered()
+  }
+
+  fun createPetCardFromWhitelistedSpell(owner: String, petName: String, petType: String = "Unknown Pet") {
+    if (owner.isBlank() || petName.isBlank()) return
+    createOrUpdatePetCard(petName = petName, owner = owner, petType = petType)
   }
 
   fun startNewSession(sessionType: String, allowPvE: Boolean) {
@@ -438,6 +448,7 @@ object PlayerCacheInteractor : Interactor() {
         petCards.clear()
         raids.clear()
         lifeMendCasterMap.clear()
+        recentLeechCasts.clear()
       }
       CombatLogInteractor.startRecording()
       Log.info(TAG, "Started new recording session: type=$sessionType, allowPvE=$allowPvE")
@@ -574,6 +585,22 @@ object PlayerCacheInteractor : Interactor() {
            ,totalGardenDefiance = card.sessionGardenDefianceTotal
            ,totalPurges = card.sessionPurgeTotal
            ,totalSacDances = card.sessionSacDanceTotal
+           ,totalDeepTranquility = card.sessionDeepTranquilityTotal
+           ,totalDeependDebuff = card.sessionDeependDebuffTotal
+           ,totalThrowDagger = card.sessionThrowDaggerTotal
+           ,totalStuns = card.sessionStunsTotal
+           ,totalStaggers = card.sessionStaggersTotal
+           ,totalPetrification = card.sessionPetrificationTotal
+           ,totalAbsorbLifeforce = card.sessionAbsorbLifeforceTotal
+           ,totalCorrosiveBarrage = card.sessionCorrosiveBarrageTotal
+           ,totalBlindedByCrows = card.sessionBlindedByCrowsTotal
+           ,totalMistSunder = card.sessionMistSunderTotal
+           ,totalRegularSunder = card.sessionRegularSunderTotal
+           ,totalImpaleImmunity = card.sessionImpaleImmunityTotal
+           ,totalProtectiveWings = card.sessionProtectiveWingsTotal
+           ,totalCourageousAction = card.sessionCourageousActionTotal
+           ,totalManaBarrier = card.sessionManaBarrierTotal
+           ,totalRevive = card.sessionReviveTotal
         )
         RFDao.playerSessionDao.insert(entity)
         written++
@@ -620,6 +647,22 @@ object PlayerCacheInteractor : Interactor() {
          || card.sessionGardenDefianceTotal != 0
          || card.sessionPurgeTotal != 0
          || card.sessionSacDanceTotal != 0
+         || card.sessionDeepTranquilityTotal != 0
+         || card.sessionDeependDebuffTotal != 0
+         || card.sessionThrowDaggerTotal != 0
+         || card.sessionStunsTotal != 0
+         || card.sessionStaggersTotal != 0
+         || card.sessionPetrificationTotal != 0
+         || card.sessionAbsorbLifeforceTotal != 0
+         || card.sessionCorrosiveBarrageTotal != 0
+         || card.sessionBlindedByCrowsTotal != 0
+         || card.sessionMistSunderTotal != 0
+         || card.sessionRegularSunderTotal != 0
+         || card.sessionImpaleImmunityTotal != 0
+         || card.sessionProtectiveWingsTotal != 0
+         || card.sessionCourageousActionTotal != 0
+         || card.sessionManaBarrierTotal != 0
+         || card.sessionReviveTotal != 0
   }
 
   /**
@@ -677,7 +720,23 @@ object PlayerCacheInteractor : Interactor() {
        totalDefiance = sessions.sumOf { it.totalDefiance },
        totalGardenDefiance = sessions.sumOf { it.totalGardenDefiance },
        totalPurges = sessions.sumOf { it.totalPurges },
-       totalSacDances = sessions.sumOf { it.totalSacDances }
+       totalSacDances = sessions.sumOf { it.totalSacDances },
+       totalDeepTranquility = sessions.sumOf { it.totalDeepTranquility },
+       totalDeependDebuff = sessions.sumOf { it.totalDeependDebuff },
+       totalThrowDagger = sessions.sumOf { it.totalThrowDagger },
+       totalStuns = sessions.sumOf { it.totalStuns },
+       totalStaggers = sessions.sumOf { it.totalStaggers },
+       totalPetrification = sessions.sumOf { it.totalPetrification },
+       totalAbsorbLifeforce = sessions.sumOf { it.totalAbsorbLifeforce },
+       totalCorrosiveBarrage = sessions.sumOf { it.totalCorrosiveBarrage },
+       totalBlindedByCrows = sessions.sumOf { it.totalBlindedByCrows },
+       totalMistSunder = sessions.sumOf { it.totalMistSunder },
+       totalRegularSunder = sessions.sumOf { it.totalRegularSunder },
+       totalImpaleImmunity = sessions.sumOf { it.totalImpaleImmunity },
+       totalProtectiveWings = sessions.sumOf { it.totalProtectiveWings },
+       totalCourageousAction = sessions.sumOf { it.totalCourageousAction },
+       totalManaBarrier = sessions.sumOf { it.totalManaBarrier },
+       totalRevive = sessions.sumOf { it.totalRevive }
     )
   }
 
@@ -688,6 +747,15 @@ object PlayerCacheInteractor : Interactor() {
 
   fun getCard(name: String): PlayerCard? {
     return cards[name]
+  }
+
+  /**
+   * Reverse-lookup: given a CID, find the player name whose card contains that CID.
+   * CIDs are ephemeral identifiers assigned per login session; this finds the player
+   * who most recently used the given CID.
+   */
+  fun getPlayerNameByCid(cid: String): String? {
+    return cards.values.find { cid in it.recentCids }?.name
   }
 
   // gets a list of player cards matching a filter predicate
@@ -824,6 +892,10 @@ object PlayerCacheInteractor : Interactor() {
         }
       }
     }
+
+    // Clean up stale Leech cast entries (older than 10 seconds)
+    val now = System.currentTimeMillis()
+    recentLeechCasts.entries.removeIf { now - it.value > 10_000L }
   }
 
   ///////////////////////////
@@ -878,24 +950,27 @@ object PlayerCacheInteractor : Interactor() {
   private fun postDamage(event: DamageEvent) {
     val cleanSource = event.source.replace("\\s*\\([^)]*\\)$".toRegex(), "").trim()
     val eventSourceIsPet = getPetEntriesByName(cleanSource).isNotEmpty()
-    val isWhitelistedSkill = petSkillWhitelist.any { it.id == event.spellId } ||
-        petSkillWhitelist.any { skill -> skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) } }
-    if (eventSourceIsPet || isWhitelistedSkill) {
+    val isWhitelistedSkill = isWhitelistedPetSkill(event.spellId, event.spell)
+    // Pet attribution is spell-whitelist driven. A registered pet may emit
+    // ordinary game abilities, but those abilities must not enter pet totals.
+    if (isWhitelistedSkill) {
       PetAccumulatorInteractor.postEvent(event)
       return
     }
-    // Diagnostic: if source looks like a pet (non-player NPC with spellId=0 from IPC) but no pet card exists,
-    // this damage will be counted as player damage. This is the likely cause of 0-damage on pet cards.
-    if (event.spellId == 0 && !isRealPlayer(cleanSource)) {
-      Log.info(TAG, "Possible unattributed pet damage: '$cleanSource' (source='${event.source}') dealt ${event.damage} with '${event.spell}' - no pet card found, routing to player cache. Pet cards: ${petCards.keys.toList()}")
-    }
     postDamageInternal(event)
+  }
+
+  private fun isWhitelistedPetSkill(spellId: Int, spellName: String): Boolean {
+    return petSkillWhitelist.any { skill ->
+      !skill.isPetInitiator &&
+        (skill.id == spellId || skill.possibleNames.any { it.equals(spellName, ignoreCase = true) })
+    }
   }
 
   private fun postDamageInternal(event: DamageEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid, playerName = event.source)
+        createCardIfNoneExists(cid = null, playerName = event.source)
         createCardIfNoneExists(cid = event.cid, playerName = event.target)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postDamageEvent(event)
@@ -911,7 +986,7 @@ object PlayerCacheInteractor : Interactor() {
   private fun postHeal(event: HealEvent) {
     scope.launch {
       mutex.withLock {
-        createCardIfNoneExists(cid = event.cid, event.source)
+        createCardIfNoneExists(cid = null, event.source)
         createCardIfNoneExists(cid = event.cid, event.target)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postHealEvent(event)
@@ -925,11 +1000,19 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   private fun postCasting(event: CastingEvent) {
+    if (isWhitelistedPetSkill(event.spellId, event.spell)) {
+      // A cast-start event is still subject to the pet spell whitelist. Generic
+      // abilities such as Melee Attack must not become pet attribution signals.
+      return
+    }
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid = event.cid, event.source)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postCastingEvent(event)
+        }
+        if (event.spellId == LEECH_SPELL_ID) {
+          recentLeechCasts[event.source] = event.timestamp
         }
       }
     }
@@ -938,9 +1021,8 @@ object PlayerCacheInteractor : Interactor() {
   private fun postSuccessfulCast(event: SuccessfulCastEvent) {
     val cleanSource = event.source.replace("\\s*\\([^)]*\\)$".toRegex(), "").trim()
     val eventSourceIsPet = getPetEntriesByName(cleanSource).isNotEmpty()
-    val isWhitelistedSkill = petSkillWhitelist.any { it.id == event.spellId } ||
-        petSkillWhitelist.any { skill -> skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) } }
-    if (eventSourceIsPet || isWhitelistedSkill) {
+    val isWhitelistedSkill = isWhitelistedPetSkill(event.spellId, event.spell)
+    if (isWhitelistedSkill) {
       PetAccumulatorInteractor.postEvent(event)
       return
     }
@@ -953,6 +1035,9 @@ object PlayerCacheInteractor : Interactor() {
         createCardIfNoneExists(cid = event.cid, event.source)
         cards[event.source]?.let { card ->
           cards[event.source] = card.postSuccessfulCastEvent(event)
+        }
+        if (event.spellId == LEECH_SPELL_ID) {
+          recentLeechCasts[event.source] = event.timestamp
         }
       }
     }
@@ -982,8 +1067,16 @@ object PlayerCacheInteractor : Interactor() {
             )
             // track Life Mend casts on the healer's card
             if (event.buffId == LIFE_MEND_BUFF_ID) {
-              cards[source] = cards[source]!!.postLifeMendApplied(event.target)
-              lifeMendCasterMap[event.target] = source
+              // Filter out Life Mend buffs stolen via Leech: if the source recently cast Leech
+              // and the buff appeared on themselves (source == target), it's a steal, not a cast.
+              val isLeechSteal = event.source == event.target &&
+                  (recentLeechCasts[event.source]?.let { event.timestamp - it <= LEECH_WINDOW_MS } == true)
+              if (!isLeechSteal) {
+                cards[source] = cards[source]!!.postLifeMendApplied(event.target)
+                lifeMendCasterMap[event.target] = source
+              } else {
+                Log.debug(TAG, "Filtered Leech-stolen Life Mend from $source")
+              }
             }
           }
         }
@@ -1163,9 +1256,9 @@ object PlayerCacheInteractor : Interactor() {
               skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) }
           )
         }
-        val isDragonBreath = petSkill?.id in DRAGON_BREATH_RIDER_SPELL_IDS
-        val isDrakeBreath = petSkill?.id == DRAKE_BREATH_RIDER_SPELL_ID
-        val isGuidedMissilesRider = petSkill?.id == GUIDED_MISSILES_RIDER_SPELL_ID
+        val isDragonBreath = petSkill?.id in DRAGON_BREATH_RIDER_SPELL_IDS || event.spell.contains("Dragon's Breath", true)
+        val isDrakeBreath = petSkill?.id == DRAKE_BREATH_RIDER_SPELL_ID || event.spell.contains("Thunderbreath", true)
+        val isGuidedMissilesRider = petSkill?.id == GUIDED_MISSILES_RIDER_SPELL_ID || event.spell.contains("Guided Missiles", true)
 
         val castEvent = RiderCastEvent(
           timestamp = event.timestamp,
@@ -1558,6 +1651,70 @@ object PlayerCacheInteractor : Interactor() {
 
   val topSacDances: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
     .map { it.filter { card -> card.isRealPlayer && card.sessionSacDanceTotal > 0 }.sortedByDescending { card -> card.sessionSacDanceTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topDeepTranquility: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionDeepTranquilityTotal > 0 }.sortedByDescending { card -> card.sessionDeepTranquilityTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topDeependDebuff: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionDeependDebuffTotal > 0 }.sortedByDescending { card -> card.sessionDeependDebuffTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topThrowDagger: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionThrowDaggerTotal > 0 }.sortedByDescending { card -> card.sessionThrowDaggerTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topStuns: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionStunsTotal > 0 }.sortedByDescending { card -> card.sessionStunsTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topStaggers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionStaggersTotal > 0 }.sortedByDescending { card -> card.sessionStaggersTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topPetrification: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionPetrificationTotal > 0 }.sortedByDescending { card -> card.sessionPetrificationTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topAbsorbLifeforce: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionAbsorbLifeforceTotal > 0 }.sortedByDescending { card -> card.sessionAbsorbLifeforceTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topCorrosiveBarrage: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionCorrosiveBarrageTotal > 0 }.sortedByDescending { card -> card.sessionCorrosiveBarrageTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topBlindedByCrows: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionBlindedByCrowsTotal > 0 }.sortedByDescending { card -> card.sessionBlindedByCrowsTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topMistSunder: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionMistSunderTotal > 0 }.sortedByDescending { card -> card.sessionMistSunderTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topRegularSunder: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionRegularSunderTotal > 0 }.sortedByDescending { card -> card.sessionRegularSunderTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topImpaleImmunity: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionImpaleImmunityTotal > 0 }.sortedByDescending { card -> card.sessionImpaleImmunityTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topProtectiveWings: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionProtectiveWingsTotal > 0 }.sortedByDescending { card -> card.sessionProtectiveWingsTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topCourageousAction: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionCourageousActionTotal > 0 }.sortedByDescending { card -> card.sessionCourageousActionTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topManaBarrier: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionManaBarrierTotal > 0 }.sortedByDescending { card -> card.sessionManaBarrierTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topRevive: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionReviveTotal > 0 }.sortedByDescending { card -> card.sessionReviveTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
@@ -2077,7 +2234,7 @@ object PlayerCacheInteractor : Interactor() {
   var activePets: StateFlow<List<PetCard>> = snapshotFlow { petCards.values.toList() }
     .sample(250L)
     .map { pets ->
-      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 || it.sessionBreathCasts.isNotEmpty() || it.sessionRocketCasts.isNotEmpty() }
+      pets.filter { it.sessionDamageTotal > 0 || it.sessionDebuffTotal > 0 || it.sessionBreathCasts.isNotEmpty() || it.sessionRocketCasts.isNotEmpty() || it.recentDamageEvents.isNotEmpty() }
         .sortedByDescending { it.sessionDamageTotal }
         .take(50)
     }
