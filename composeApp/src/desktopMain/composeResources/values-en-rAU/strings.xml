@@ -460,7 +460,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="player_card_stat_petrification">Petrification</string>
     <string name="player_card_stat_absorb_lifeforce">Absorb Lifeforce</string>
     <string name="player_card_stat_corrosive_barrage">Corrosive Barrage</string>
-    <string name="player_card_stat_blinded_by_crows">Blinded by Crows</string>
+    <string name="player_card_stat_blinded_by_crows">Crows</string>
     <string name="player_card_stat_mist_sunder">Mist Sunder</string>
     <string name="player_card_stat_regular_sunder">Regular Sunder</string>
     <string name="player_card_stat_impales">Impales</string>
@@ -479,7 +479,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_top_staggers">Top Staggers</string>
     <string name="summary_top_absorb_lifeforce">Top Absorb Lifeforce</string>
     <string name="summary_top_corrosive_barrage">Top Corrosive Barrage</string>
-    <string name="summary_top_blinded_by_crows">Top Blinded by Crows</string>
+    <string name="summary_top_blinded_by_crows">Top Crows</string>
     <string name="summary_top_mist_sunder">Top Mist Sunder</string>
     <string name="summary_top_regular_sunder">Top Regular Sunder</string>
     <string name="summary_top_impales">Top Impales</string>
