@@ -967,6 +967,20 @@ object PlayerCacheInteractor : Interactor() {
     }
   }
 
+  /**
+   * Matches only rider/initiator spells on the pet whitelist.
+   * Used for cast routing where we need rider spells to reach PetAccumulatorInteractor
+   * for CastWindow/PendingRiderCast attribution. Non-initiator spells must NOT be
+   * routed here or they create duplicate breath entries.
+   */
+  private fun isPetInitiatorSkill(spellId: Int, spellName: String): Boolean {
+    return petSkillWhitelist.any { skill ->
+      skill.isPetInitiator && (
+        skill.id == spellId || skill.possibleNames.any { it.equals(spellName, ignoreCase = true) }
+      )
+    }
+  }
+
   private fun postDamageInternal(event: DamageEvent) {
     scope.launch {
       mutex.withLock {
@@ -1021,7 +1035,10 @@ object PlayerCacheInteractor : Interactor() {
   private fun postSuccessfulCast(event: SuccessfulCastEvent) {
     val cleanSource = event.source.replace("\\s*\\([^)]*\\)$".toRegex(), "").trim()
     val eventSourceIsPet = getPetEntriesByName(cleanSource).isNotEmpty()
-    val isWhitelistedSkill = isWhitelistedPetSkill(event.spellId, event.spell)
+    // Only route rider/initiator spells to PetAccumulatorInteractor for CastWindow attribution.
+    // Non-initiator spells (like the direct breath damage skills) must go through
+    // postSuccessfulCastInternal to avoid creating duplicate breath entries.
+    val isWhitelistedSkill = isPetInitiatorSkill(event.spellId, event.spell)
     if (isWhitelistedSkill) {
       PetAccumulatorInteractor.postEvent(event)
       return
@@ -1256,9 +1273,9 @@ object PlayerCacheInteractor : Interactor() {
               skill.possibleNames.any { it.equals(event.spell, ignoreCase = true) }
           )
         }
-        val isDragonBreath = petSkill?.id in DRAGON_BREATH_RIDER_SPELL_IDS || event.spell.contains("Dragon's Breath", true)
-        val isDrakeBreath = petSkill?.id == DRAKE_BREATH_RIDER_SPELL_ID || event.spell.contains("Thunderbreath", true)
-        val isGuidedMissilesRider = petSkill?.id == GUIDED_MISSILES_RIDER_SPELL_ID || event.spell.contains("Guided Missiles", true)
+        val isDragonBreath = petSkill?.id in DRAGON_BREATH_RIDER_SPELL_IDS
+        val isDrakeBreath = petSkill?.id == DRAKE_BREATH_RIDER_SPELL_ID
+        val isGuidedMissilesRider = petSkill?.id == GUIDED_MISSILES_RIDER_SPELL_ID
 
         val castEvent = RiderCastEvent(
           timestamp = event.timestamp,

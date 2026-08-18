@@ -57,6 +57,33 @@ val petSkillWhitelist = listOf(
     allowedPetTypes = setOf("Black Dragon", "검은 용"),
     relatedDamageIds = setOf(22608, 22609, 22618)
   ),
+  // Red Dragon's Breath - direct breath damage from the dragon (IPC spellId=0, matched by name)
+  Skill(
+    id = 38196,
+    name = "Red Dragon's Breath",
+    castTime = 0.0,
+    cooldown = 0.0,
+    possibleNames = listOf("Red Dragon's Breath", "붉은 용의 숨결", "Огненное дыхание"),
+    allowedPetTypes = setOf("Red Dragon", "붉은 용")
+  ),
+  // Green Dragon's Breath - direct breath damage from the dragon
+  Skill(
+    id = 38698,
+    name = "Green Dragon's Breath",
+    castTime = 0.0,
+    cooldown = 0.0,
+    possibleNames = listOf("Green Dragon's Breath", "녹색 용의 숨결", "Ядовитое дыхание"),
+    allowedPetTypes = setOf("Green Dragon", "녹색 용")
+  ),
+  // Black Dragon's Breath - direct breath damage from the dragon
+  Skill(
+    id = 38700,
+    name = "Black Dragon's Breath",
+    castTime = 0.0,
+    cooldown = 0.0,
+    possibleNames = listOf("Black Dragon's Breath", "검은 용의 숨결", "Дыхание тьмы"),
+    allowedPetTypes = setOf("Black Dragon", "검은 용")
+  ),
   // Clinging Flame - dragon breath DoT damage
   Skill(
     id = 22608,
