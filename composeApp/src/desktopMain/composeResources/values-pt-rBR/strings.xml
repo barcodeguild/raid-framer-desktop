@@ -1161,4 +1161,42 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="combat_export_saving_session">Salvando sessão %1$d/%2$d</string>
     <string name="combat_export_saving_language">Salvando exportação em %1$s %2$d/%3$d</string>
 
+    <!-- Performance Settings -->
+    <string name="settings_performance_title">Desempenho</string>
+    <string name="settings_performance_description">Controle quais funcionalidades estão ativas para melhorar o FPS em grandes batalhas. Desativar funcionalidades reduz a quantidade de dados processados por evento de combate.</string>
+    <string name="settings_performance_tip_label">Dica:</string>
+    <string name="settings_performance_tip_text">Você também pode ajustar o alcance de detecção de eventos diretamente no jogo via ESC \u2192 Opções \u2192 Informações do Jogo. Os controles deslizantes de Informações de Combate e Distância permitem filtrar por SELF, PARTY, RAID, GUILD ou ALL, e ajustar o alcance de detecção (0\u2013100m). Esses filtros no jogo afetam os dados que fluem para o addon e podem ser preferíveis a desativar funcionalidades aqui. Essas configurações não podem ser controladas pelo aplicativo.</string>
+    <string name="settings_performance_companion_enabled">Desativar Companheiro Lua</string>
+    <string name="settings_performance_companion_enabled_desc">Para todo o processamento de eventos no addon Lua. O addon permanece carregado e será retomado quando reativado.</string>
+    <string name="settings_performance_impact_maximum">Máximo</string>
+    <string name="settings_performance_raid_buff_scanning">Verificação de Buffs da Raid</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Verifica todos os membros da raid em busca de buffs ativos, distância e pontuação de equipamento a cada segundo. Necessário para detecção de Life Mend e verificador de buffs da raid. Desativado automaticamente quando o rastreamento da lista de raid está desligado.</string>
+    <string name="settings_performance_impact_heavy">Alto</string>
+    <string name="settings_performance_buff_debuff_tracking">Rastreamento de Buffs/Debuffs</string>
+    <string name="settings_performance_buff_debuff_tracking_desc">Rastreia eventos SPELL_AURA_APPLIED e SPELL_AURA_REMOVED. Desativar limita o rastreamento apenas a dano e cura.</string>
+    <string name="settings_performance_raid_roster_tracking">Lista de Raid e Presença</string>
+    <string name="settings_performance_raid_roster_tracking_desc">Rastreia entradas, saídas, mudanças de função e formação de co-raid.</string>
+    <string name="settings_performance_impact_medium">Médio</string>
+    <string name="settings_performance_duel_tracking">Rastreamento de Duelos</string>
+    <string name="settings_performance_duel_tracking_desc">Rastreia eventos de início e fim de duelo.</string>
+    <string name="settings_performance_impact_very_light">Muito Leve</string>
+    <string name="settings_performance_target_changed_tracking">Detecção de Mudança de Alvo</string>
+    <string name="settings_performance_target_changed_tracking_desc">Detecta quando você mira em outro jogador e lê sua facção, pontuação de equipamento e guilda.</string>
+    <string name="settings_performance_battle_graph">Gráfico de Batalha e Rastreamento de Arestas</string>
+    <string name="settings_performance_battle_graph_desc">Calcula mapas de adjacência por jogador para a visualização interativa do gráfico de batalha.</string>
+    <string name="settings_performance_event_history_depth">Profundidade do Histórico de Eventos</string>
+    <string name="settings_performance_event_history_depth_desc">Máximo de eventos armazenados por cartão de jogador na linha do tempo. Valores menores usam menos memória.</string>
+    <string name="settings_performance_event_history_estimate">~%1$s eventos por jogador \u00D7 %2$d rastreados \u2248 ~%3$s total</string>
+    <string name="settings_performance_distance_help">? Distância</string>
+    <string name="settings_performance_impact_label">Impacto:</string>
+    <string name="combat_ranking_disabled">Esta classificação está desativada</string>
+    <string name="combat_ranking_disabled_hint">Opções de desempenho nas Configurações</string>
+    <string name="combat_companion_disabled">O Companheiro Lua está desativado</string>
+    <string name="combat_companion_disabled_hint">Ativar em Configurações \u2192 Desempenho</string>
+    <string name="companion_disabled_banner">O Companheiro Lua está desativado pelas configurações de desempenho. Todo rastreamento de eventos está pausado.</string>
+    <string name="performance_buff_scanning_disabled_banner">A verificação de buffs da raid está desativada nas configurações de desempenho. A detecção de Life Mend e o rastreamento de buffs da raid não funcionarão.</string>
+    <string name="performance_buff_debuff_tracking_disabled_banner">O rastreamento de buffs e debuffs está desativado nas configurações de desempenho. As classificações de buffs, debuffs, encantos, silenciamentos, angústias e músicas não serão atualizadas.</string>
+    <string name="performance_distance_help_title">Distância e Filtragem de Informações</string>
+    <string name="performance_distance_help_body">As configurações de combate no jogo (ESC \u2192 Opções \u2192 Informações do Jogo) controlam quais dados fluem para o addon.\n\nCheckbox \u201CMostrar Mensagens de Combate\u201D: Alterna a exibição visual de hits de dano/cura no jogo, mas NÃO afeta o fluxo de dados para o addon. Você pode deixar ligado ou desligado.\n\nFiltro de Informações (SELF / PARTY / RAID / GUILD / ALL): ISSO afeta o fluxo de dados. Alterar o filtro limita quais eventos de combate o addon recebe.\n\nControle Deslizante de Distância: ISSO afeta o fluxo de dados. Reduzir o alcance limita a distância de detecção de eventos de combate.\n\nExemplos:\n\u2022 SELF \u2014 Apenas eventos do seu próprio personagem. O controle deslizante de distância fica automaticamente cinza, pois não é relevante.\n\u2022 PARTY \u2014 Seu grupo de 5. No ArcheAge, todos na sua coluna de raid são considerados seu \u201Cparty.\u201D Por exemplo, feitiços como Onda Sônica que \u201Cremovem efeitos negativos de todos os membros do party\u201D afetam sua coluna de 5, não a raid inteira.\n\u2022 RAID \u2014 Todos os party na raid (todas as colunas).\n\u2022 GUILD \u2014 Apenas jogadores com sua tag de guilda. Uma segunda tag de guilda não aparecerá, pois é tecnicamente uma guilda diferente.\n\nAjustar esses filtros no jogo pode ser preferível a desativar funcionalidades no aplicativo, pois fornecem controle mais refinado sobre quais dados são processados.</string>
+
 </resources>

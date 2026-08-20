@@ -572,6 +572,11 @@ object PetAccumulatorInteractor : Interactor() {
           damageSpellName.contains("Раскаленная лава", ignoreCase = true)
       if (isDragonBreath && isClingingFlame) return true
 
+      val isDragonBreathDmg = damageSpellName.contains("Dragon's Breath", ignoreCase = true) ||
+          damageSpellName.contains("용의 숨결", ignoreCase = true) ||
+          damageSpellName.contains("дыхание", ignoreCase = true)
+      if (isDragonBreath && isDragonBreathDmg) return true
+
       val isDrakeBreath = castSkill.name.contains("Thunderbreath", ignoreCase = true) ||
           castSkill.name.contains("천둥의 숨결", ignoreCase = true)
       val isThunderDmg = damageSpellName.contains("Thunderbreath", ignoreCase = true) ||

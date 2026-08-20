@@ -49,6 +49,9 @@ import com.reoky.raidframer.core.definitions.manaBarrierBuffIds
 import com.reoky.raidframer.core.definitions.reviveSpellIds
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
+// Performance: configurable event history depth from settings
+private val eventHistoryDepth: Int get() = RFConfig.state.value.performanceEventHistoryDepth.coerceIn(50, 5000)
+
 /**
  * Determine if the PlayerCard should be upgraded to a real player based on heuristics. (oh eek!)
  * The upgrade is permanent and cannot be undone. Also, the actual flag is changed outside this method
@@ -74,18 +77,22 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalDamage = (card.cache?.lifetimeTotalDamage ?: 0L) + event.damage
     ),
-    recentDamageEvents = (this.recentDamageEvents + event).takeLast(500),
+    recentDamageEvents = (this.recentDamageEvents + event).takeLast(eventHistoryDepth),
     sessionSpellDamageMap = run {
       val spellKey = event.spell.ifBlank { "Unknown" }
       this.sessionSpellDamageMap + (spellKey to ((this.sessionSpellDamageMap[spellKey] ?: 0L) + event.damage))
     },
     sessionDamageTotal = this.sessionDamageTotal + event.damage,
-    sessionDamageToPlayer = this.sessionDamageToPlayer + (event.target to ((this.sessionDamageToPlayer[event.target] ?: 0L) + event.damage)),
-    sessionDamageToPlayerBySpell = run {
-      val spellKey = event.spell.ifBlank { "Unknown" }
-      val targetMap = this.sessionDamageToPlayerBySpell[event.target] ?: emptyMap()
-      this.sessionDamageToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey] ?: 0L) + event.damage))))
-    }
+    sessionDamageToPlayer = if (RFConfig.state.value.performanceBattleGraphEnabled) {
+      this.sessionDamageToPlayer + (event.target to ((this.sessionDamageToPlayer[event.target] ?: 0L) + event.damage))
+    } else this.sessionDamageToPlayer,
+    sessionDamageToPlayerBySpell = if (RFConfig.state.value.performanceBattleGraphEnabled) {
+      run {
+        val spellKey = event.spell.ifBlank { "Unknown" }
+        val targetMap = this.sessionDamageToPlayerBySpell[event.target] ?: emptyMap()
+        this.sessionDamageToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey] ?: 0L) + event.damage))))
+      }
+    } else this.sessionDamageToPlayerBySpell
   )
 }
 
@@ -103,7 +110,7 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
       lastSeen = event.timestamp,
       lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount
     ),
-    recentHealEvents = (this.recentHealEvents + event).takeLast(500),
+    recentHealEvents = (this.recentHealEvents + event).takeLast(eventHistoryDepth),
     sessionHealTotal = if (isOde && !allowOdeAsHeal) this.sessionHealTotal else this.sessionHealTotal + event.amount,
     sessionOdeHealsTotal = if (isOde) this.sessionOdeHealsTotal + event.amount else this.sessionOdeHealsTotal,
     sessionSpellHealMap = run {
@@ -114,12 +121,16 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
         this.sessionSpellHealMap + (spellKey to ((this.sessionSpellHealMap[spellKey] ?: 0L) + event.amount))
       }
     },
-    sessionHealToPlayer = if (isOde && !allowOdeAsHeal) {
+    sessionHealToPlayer = if (!RFConfig.state.value.performanceBattleGraphEnabled) {
+      this.sessionHealToPlayer
+    } else if (isOde && !allowOdeAsHeal) {
       this.sessionHealToPlayer
     } else {
       this.sessionHealToPlayer + (event.target to ((this.sessionHealToPlayer[event.target] ?: 0L) + event.amount))
     },
-    sessionHealToPlayerBySpell = if (isOde && !allowOdeAsHeal) {
+    sessionHealToPlayerBySpell = if (!RFConfig.state.value.performanceBattleGraphEnabled) {
+      this.sessionHealToPlayerBySpell
+    } else if (isOde && !allowOdeAsHeal) {
       this.sessionHealToPlayerBySpell
     } else {
       run {
@@ -144,7 +155,9 @@ fun PlayerCard.postDamageTakenEvent(event: DamageEvent): PlayerCard {
       lifetimeTotalDamageTaken = cache.lifetimeTotalDamageTaken + event.damage
     ),
     sessionDamageTakenTotal = this.sessionDamageTakenTotal + event.damage,
-    sessionDamageFromPlayer = this.sessionDamageFromPlayer + (event.source to ((this.sessionDamageFromPlayer[event.source] ?: 0L) + event.damage))
+    sessionDamageFromPlayer = if (RFConfig.state.value.performanceBattleGraphEnabled) {
+      this.sessionDamageFromPlayer + (event.source to ((this.sessionDamageFromPlayer[event.source] ?: 0L) + event.damage))
+    } else this.sessionDamageFromPlayer
   )
 }
 
@@ -163,7 +176,9 @@ fun PlayerCard.postHealsReceivedEvent(event: HealEvent): PlayerCard {
       lifetimeTotalHealsReceived = cache.lifetimeTotalHealsReceived + event.amount
     ),
     sessionHealsReceivedTotal = if (isOde && !allowOdeAsHeal) this.sessionHealsReceivedTotal else this.sessionHealsReceivedTotal + event.amount,
-    sessionHealFromPlayer = if (isOde && !allowOdeAsHeal) {
+    sessionHealFromPlayer = if (!RFConfig.state.value.performanceBattleGraphEnabled) {
+      this.sessionHealFromPlayer
+    } else if (isOde && !allowOdeAsHeal) {
       this.sessionHealFromPlayer
     } else {
       this.sessionHealFromPlayer + (event.source to ((this.sessionHealFromPlayer[event.source] ?: 0L) + event.amount))
@@ -180,7 +195,7 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
     cache = cache?.copy(
       lastSeen = event.timestamp
     ),
-    recentCastEvents = (this.recentCastEvents + event).takeLast(200) // optional to takeLast(n)
+    recentCastEvents = (this.recentCastEvents + event).takeLast(eventHistoryDepth)
   )
 }
 
@@ -206,7 +221,7 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
     sessionCharmTotal = if (isMarasNineTails) card.sessionCharmTotal + 1 else card.sessionCharmTotal,
     sessionGardenDefianceTotal = if (isGardenDefiance) card.sessionGardenDefianceTotal + 1 else card.sessionGardenDefianceTotal,
     sessionReviveTotal = if (isRevive) card.sessionReviveTotal + 1 else card.sessionReviveTotal,
-    recentCastSuccessfulCastEvents = (card.recentCastSuccessfulCastEvents + event).takeLast(200)
+    recentCastSuccessfulCastEvents = (card.recentCastSuccessfulCastEvents + event).takeLast(eventHistoryDepth)
   )
 }
 
@@ -221,7 +236,7 @@ fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
     cache = card.cache?.copy(
       lastSeen = event.timestamp,
     ),
-    recentBuffGainedEvents = (this.recentBuffGainedEvents + event).takeLast(200) // optional to takeLast(n)
+    recentBuffGainedEvents = (this.recentBuffGainedEvents + event).takeLast(eventHistoryDepth)
   )
 }
 
@@ -232,7 +247,7 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
-    recentBuffEndedEvents = (this.recentBuffEndedEvents + event).takeLast(200) // optional to takeLast(n)
+    recentBuffEndedEvents = (this.recentBuffEndedEvents + event).takeLast(eventHistoryDepth)
   )
 }
 
@@ -246,8 +261,8 @@ fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
-    recentDebuffGainedEvents = (this.recentDebuffGainedEvents + event).takeLast(200), // optional to takeLast(n)
-    sessionCCFromPlayer = if (isCC) {
+    recentDebuffGainedEvents = (this.recentDebuffGainedEvents + event).takeLast(eventHistoryDepth),
+    sessionCCFromPlayer = if (isCC && RFConfig.state.value.performanceBattleGraphEnabled) {
       this.sessionCCFromPlayer + (event.source to ((this.sessionCCFromPlayer[event.source] ?: 0) + 1))
     } else {
       this.sessionCCFromPlayer
@@ -262,7 +277,7 @@ fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
-    recentDebuffEndedEvents = (this.recentDebuffEndedEvents + event).takeLast(200), // optional to takeLast(n)
+    recentDebuffEndedEvents = (this.recentDebuffEndedEvents + event).takeLast(eventHistoryDepth),
   )
 }
 
@@ -336,7 +351,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       lifetimeTotalDeependDebuff = if (isDeependDebuff) (card.cache?.lifetimeTotalDeependDebuff ?: 0L) + 1 else (card.cache?.lifetimeTotalDeependDebuff ?: 0L),
       lifetimeTotalImpaleImmunity = if (isImpale) (card.cache?.lifetimeTotalImpaleImmunity ?: 0L) + 1 else (card.cache?.lifetimeTotalImpaleImmunity ?: 0L),
     ),
-    recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(500), // optional to takeLast(n)
+    recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(eventHistoryDepth),
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
     sessionCharmTotal = if (isCharm) sessionCharmTotal + 1 else sessionCharmTotal,
     sessionSongsTotal = if (isSongs) this.sessionSongsTotal + 1 else this.sessionSongsTotal,
@@ -371,12 +386,12 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     } else {
       this.sessionSpellCCMap
     },
-    sessionCCToPlayer = if (isCC) {
+    sessionCCToPlayer = if (isCC && RFConfig.state.value.performanceBattleGraphEnabled) {
       this.sessionCCToPlayer + (event.target to ((this.sessionCCToPlayer[event.target] ?: 0) + 1))
     } else {
       this.sessionCCToPlayer
     },
-    sessionCCToPlayerBySpell = if (isCC) {
+    sessionCCToPlayerBySpell = if (isCC && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionCCToPlayerBySpell[event.target] ?: emptyMap()
       this.sessionCCToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
@@ -385,12 +400,16 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     },
 
     // --- ALL debuffs adjacency (not just CC) ---
-    sessionDebuffToPlayer = this.sessionDebuffToPlayer + (event.target to ((this.sessionDebuffToPlayer[event.target] ?: 0) + 1)),
-    sessionDebuffToPlayerBySpell = run {
-      val debuffKey = event.debuff.ifBlank { "Unknown" }
-      val targetMap = this.sessionDebuffToPlayerBySpell[event.target] ?: emptyMap()
-      this.sessionDebuffToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
-    },
+    sessionDebuffToPlayer = if (RFConfig.state.value.performanceBattleGraphEnabled) {
+      this.sessionDebuffToPlayer + (event.target to ((this.sessionDebuffToPlayer[event.target] ?: 0) + 1))
+    } else this.sessionDebuffToPlayer,
+    sessionDebuffToPlayerBySpell = if (RFConfig.state.value.performanceBattleGraphEnabled) {
+      run {
+        val debuffKey = event.debuff.ifBlank { "Unknown" }
+        val targetMap = this.sessionDebuffToPlayerBySpell[event.target] ?: emptyMap()
+        this.sessionDebuffToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+      }
+    } else this.sessionDebuffToPlayerBySpell,
     sessionSpellDebuffMap = run {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       // Filter out blacklisted debuffs from the dropdown map
@@ -402,12 +421,12 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     },
 
     // --- Charm adjacency ---
-    sessionCharmToPlayer = if (isCharm) {
+    sessionCharmToPlayer = if (isCharm && RFConfig.state.value.performanceBattleGraphEnabled) {
       this.sessionCharmToPlayer + (event.target to ((this.sessionCharmToPlayer[event.target] ?: 0) + 1))
     } else {
       this.sessionCharmToPlayer
     },
-    sessionCharmToPlayerBySpell = if (isCharm) {
+    sessionCharmToPlayerBySpell = if (isCharm && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionCharmToPlayerBySpell[event.target] ?: emptyMap()
       this.sessionCharmToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
@@ -416,12 +435,12 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     },
 
     // --- Distress adjacency ---
-    sessionDistressToPlayer = if (isDistress) {
+    sessionDistressToPlayer = if (isDistress && RFConfig.state.value.performanceBattleGraphEnabled) {
       this.sessionDistressToPlayer + (event.target to ((this.sessionDistressToPlayer[event.target] ?: 0) + 1))
     } else {
       this.sessionDistressToPlayer
     },
-    sessionDistressToPlayerBySpell = if (isDistress) {
+    sessionDistressToPlayerBySpell = if (isDistress && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionDistressToPlayerBySpell[event.target] ?: emptyMap()
       this.sessionDistressToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
@@ -430,12 +449,12 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     },
 
     // --- Silence adjacency ---
-    sessionSilenceToPlayer = if (isSilence) {
+    sessionSilenceToPlayer = if (isSilence && RFConfig.state.value.performanceBattleGraphEnabled) {
       this.sessionSilenceToPlayer + (event.target to ((this.sessionSilenceToPlayer[event.target] ?: 0) + 1))
     } else {
       this.sessionSilenceToPlayer
     },
-    sessionSilenceToPlayerBySpell = if (isSilence) {
+    sessionSilenceToPlayerBySpell = if (isSilence && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionSilenceToPlayerBySpell[event.target] ?: emptyMap()
       this.sessionSilenceToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
@@ -481,7 +500,7 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
       lifetimeTotalCourageousAction = if (isCourageousAction) (card.cache?.lifetimeTotalCourageousAction ?: 0L) + 1 else (card.cache?.lifetimeTotalCourageousAction ?: 0L),
       lifetimeTotalManaBarrier = if (isManaBarrier) (card.cache?.lifetimeTotalManaBarrier ?: 0L) + 1 else (card.cache?.lifetimeTotalManaBarrier ?: 0L),
     ),
-    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(500), // optional to takeLast(n)
+    recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(eventHistoryDepth),
     sessionBuffTotal = this.sessionBuffTotal + 1,
     sessionDefianceTotal = if (isDefiance) card.sessionDefianceTotal + 1 else card.sessionDefianceTotal,
     sessionSacDanceTotal = if (isSacDance) card.sessionSacDanceTotal + 1 else card.sessionSacDanceTotal,
@@ -495,12 +514,14 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
     sessionBracingsTotal = if (isBracingImmunity) sessionBracingsTotal + 1 else sessionBracingsTotal,
     sessionCCTotal = if (isBracingImmunity) card.sessionCCTotal + 1 else card.sessionCCTotal,
     // --- Buff adjacency ---
-    sessionBuffToPlayer = this.sessionBuffToPlayer + (event.target to ((this.sessionBuffToPlayer[event.target] ?: 0) + 1)),
-    sessionBuffToPlayerBySpell = run {
+    sessionBuffToPlayer = if (RFConfig.state.value.performanceBattleGraphEnabled) {
+      this.sessionBuffToPlayer + (event.target to ((this.sessionBuffToPlayer[event.target] ?: 0) + 1))
+    } else this.sessionBuffToPlayer,
+    sessionBuffToPlayerBySpell = if (RFConfig.state.value.performanceBattleGraphEnabled) {
       val buffKey = event.buff.ifBlank { "Unknown" }
       val targetMap = this.sessionBuffToPlayerBySpell[event.target] ?: emptyMap()
       this.sessionBuffToPlayerBySpell + (event.target to (targetMap + (buffKey to ((targetMap[buffKey] ?: 0) + 1))))
-    },
+    } else this.sessionBuffToPlayerBySpell,
     sessionSpellBuffMap = run {
       val buffKey = event.buff.ifBlank { "Unknown" }
       // Filter out blacklisted buffs from the dropdown map
@@ -532,15 +553,19 @@ fun PlayerCard.postKillEvent(
     // Increment kill score
     sessionKillTotal = this.sessionKillTotal + 1,
     // --- Kill adjacency ---
-    sessionKillsToPlayer = this.sessionKillsToPlayer + (victimName to ((this.sessionKillsToPlayer[victimName] ?: 0) + 1)),
-    sessionKillsToPlayerBySpell = run {
-      val targetMap = this.sessionKillsToPlayerBySpell[victimName] ?: emptyMap()
-      val merged = targetMap.toMutableMap()
-      preDeathSpells.forEach { (spell, damage) ->
-        merged[spell] = (merged[spell] ?: 0L) + damage
+    sessionKillsToPlayer = if (RFConfig.state.value.performanceBattleGraphEnabled) {
+      this.sessionKillsToPlayer + (victimName to ((this.sessionKillsToPlayer[victimName] ?: 0) + 1))
+    } else this.sessionKillsToPlayer,
+    sessionKillsToPlayerBySpell = if (RFConfig.state.value.performanceBattleGraphEnabled) {
+      run {
+        val targetMap = this.sessionKillsToPlayerBySpell[victimName] ?: emptyMap()
+        val merged = targetMap.toMutableMap()
+        preDeathSpells.forEach { (spell, damage) ->
+          merged[spell] = (merged[spell] ?: 0L) + damage
+        }
+        this.sessionKillsToPlayerBySpell + (victimName to merged)
       }
-      this.sessionKillsToPlayerBySpell + (victimName to merged)
-    }
+    } else this.sessionKillsToPlayerBySpell
   )
 }
 

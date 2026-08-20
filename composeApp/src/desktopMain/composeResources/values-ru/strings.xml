@@ -1161,4 +1161,42 @@
     <string name="combat_export_saving_session">Сохранение сессии %1$d/%2$d</string>
     <string name="combat_export_saving_language">Сохранение экспорта на языке %1$s %2$d/%3$d</string>
 
+    <!-- Performance Settings -->
+    <string name="settings_performance_title">Производительность</string>
+    <string name="settings_performance_description">Управляйте активными функциями для повышения FPS в крупных сражениях. Отключение функций уменьшает объём данных, обрабатываемых за событие боя.</string>
+    <string name="settings_performance_tip_label">Совет:</string>
+    <string name="settings_performance_tip_text">Вы также можете настроить диапазон обнаружения событий непосредственно в игре через ESC \u2192 Опции \u2192 Игровая информация. Ползунки Боевой информации и Дальности позволяют фильтровать по СЕБЕ, ГРУППЕ, РЕЙДУ, ГИЛЬДИИ или ВСЕМ и настраивать дальность обнаружения (0\u2013100м). Эти внутриигровые фильтры влияют на поток данных в аддон и могут быть предпочтительнее отключения функций здесь. Эти настройки не управляются из приложения.</string>
+    <string name="settings_performance_companion_enabled">Отключить Lua-компаньон</string>
+    <string name="settings_performance_companion_enabled_desc">Останавливает всю обработку событий в Lua-аддоне. Аддон остаётся загруженным и возобновит работу при повторном включении.</string>
+    <string name="settings_performance_impact_maximum">Максимальное</string>
+    <string name="settings_performance_raid_buff_scanning">Сканирование баффов рейда</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Каждую секунду сканирует всех участников рейда на наличие активных баффов, расстояния и очков снаряжения. Необходимо для обнаружения лечения жизнью и проверки баффов рейда. Автоматически отключается при выключении отслеживания состава рейда.</string>
+    <string name="settings_performance_impact_heavy">Высокое</string>
+    <string name="settings_performance_buff_debuff_tracking">Отслеживание баффов/дебаффов</string>
+    <string name="settings_performance_buff_debuff_tracking_desc">Отслеживает события SPELL_AURA_APPLIED и SPELL_AURA_REMOVED. Отключение ограничивает отслеживание только уроном и лечением.</string>
+    <string name="settings_performance_raid_roster_tracking">Список рейда и посещаемость</string>
+    <string name="settings_performance_raid_roster_tracking_desc">Отслеживает вступления, выходы, смену ролей и формирование со-рейда.</string>
+    <string name="settings_performance_impact_medium">Среднее</string>
+    <string name="settings_performance_duel_tracking">Отслеживание дуэлей</string>
+    <string name="settings_performance_duel_tracking_desc">Отслеживает события начала и окончания дуэли.</string>
+    <string name="settings_performance_impact_very_light">Очень лёгкое</string>
+    <string name="settings_performance_target_changed_tracking">Определение смены цели</string>
+    <string name="settings_performance_target_changed_tracking_desc">Определяет, когда вы нацеливаетесь на другого игрока, и считывает его фракцию, очки снаряжения и гильдию.</string>
+    <string name="settings_performance_battle_graph">Боевой график и отслеживание связей</string>
+    <string name="settings_performance_battle_graph_desc">Вычисляет карты смежности для каждого игрока для интерактивной визуализации боевого графика.</string>
+    <string name="settings_performance_event_history_depth">Глубина истории событий</string>
+    <string name="settings_performance_event_history_depth_desc">Максимальное количество событий, хранимых для карточки игрока в таймлайне. Меньшие значения используют меньше памяти.</string>
+    <string name="settings_performance_event_history_estimate">~%1$s событий на игрока \u00D7 %2$d отслеживается \u2248 ~%1$s всего</string>
+    <string name="settings_performance_distance_help">? Дальность</string>
+    <string name="settings_performance_impact_label">Влияние:</string>
+    <string name="combat_ranking_disabled">Этот рейтинг отключён</string>
+    <string name="combat_ranking_disabled_hint">Параметры производительности в настройках</string>
+    <string name="combat_companion_disabled">Lua-компаньон отключён</string>
+    <string name="combat_companion_disabled_hint">Включить в Настройки \u2192 Производительность</string>
+    <string name="companion_disabled_banner">Lua-компаньон отключён через настройки производительности. Все отслеживание событий приостановлено.</string>
+    <string name="performance_buff_scanning_disabled_banner">Сканирование баффов рейда отключено в настройках производительности. Обнаружение лечения жизнью и отслеживание баффов рейда не будут работать.</string>
+    <string name="performance_buff_debuff_tracking_disabled_banner">Отслеживание баффов и дебаффов отключено в настройках производительности. Рейтинги баффов, дебаффов, очарований, немоты, бессилия и песен не будут обновляться.</string>
+    <string name="performance_distance_help_title">Дальность и фильтрация информации</string>
+    <string name="performance_distance_help_body">Внутриигровые настройки боя (ESC \u2192 Опции \u2192 Игровая информация) управляют потоком данных в аддон.\n\nЧекбокс \u201CПоказывать боевые сообщения\u201D: Переключает визуальное отображение хитсплотов урона/лечения в игре, НО НЕ влияет на поток данных в аддон. Вы можете включить или выключить.\n\nФильтр информации (СЕБЯ / ГРУППА / РЕЙД / ГИЛЬДИЯ / ВСЁ): ЭТО влияет на поток данных. Изменение фильтра ограничивает боевые события, получаемые аддоном.\n\nПолзунок дальности: ЭТО влияет на поток данных. Уменьшение диапазона ограничивает дальность обнаружения боевых событий.\n\nПримеры:\n\u2022 СЕБЯ \u2014 Только события вашего персонажа. Ползунок дальности автоматически серый, так как неактуален.\n\u2022 ГРУППА \u2014 Ваша группа из 5. В ArcheAge все в вашей колонке рейда считаются вашей \u201Cгруппой.\u201D Например, заклинания типа Звуковой волны, которые \u201Cснимают негативные эффекты со всех членов группы\u201D, затрагивают вашу колонку из 5, а не весь рейд.\n\u2022 РЕЙД \u2014 Все группы в рейде (все колонки).\n\u2022 ГИЛЬДИЯ \u2014 Только игроки, соответствующие вашей метке гильдии. Вторая метка гильдии не отображается, так как технически это другая гильдия.\n\nНастройка этих внутриигровых фильтров может быть предпочтительнее отключения функций в приложении, так как они обеспечивают более точный контроль над обрабатываемыми данными.</string>
+
 </resources>

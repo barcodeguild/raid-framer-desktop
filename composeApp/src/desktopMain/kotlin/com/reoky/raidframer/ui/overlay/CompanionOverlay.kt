@@ -6,17 +6,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.CheckBoxComponent
@@ -33,6 +40,7 @@ import raid_framer_desktop.composeapp.generated.resources.companion_toggle_displ
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_mark_sac_dancers
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_display_silenced
 import raid_framer_desktop.composeapp.generated.resources.companion_toggle_raid_status
+import raid_framer_desktop.composeapp.generated.resources.companion_disabled_banner
 import raid_framer_desktop.composeapp.generated.resources.kotlin
 import raid_framer_desktop.composeapp.generated.resources.lua
 
@@ -50,10 +58,31 @@ fun CompanionOverlay() {
 
 @Composable
 fun CompanionOverlay(wm: WindowManager? = null) {
+  val config by RFConfig.state.collectAsState()
+
   Box(modifier = Modifier.fillMaxSize()) {
     Column {
         TitleBarComponent("Lua Companion Management", onClose = { wm?.closeWindow(OverlayType.COMPANION) })
         Spacer(modifier = Modifier.height(8.dp))
+
+      // Disabled banner
+      if (!config.performanceCompanionEnabled) {
+        Surface(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+          shape = RoundedCornerShape(6.dp),
+          color = RFColors.AccentRed.copy(alpha = 0.15f),
+          border = BorderStroke(1.dp, RFColors.AccentRed)
+        ) {
+          Text(
+            text = stringResource(Res.string.companion_disabled_banner),
+            color = Color.White,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(12.dp)
+          )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+      }
 
       // lua + kotlin row
       Row {

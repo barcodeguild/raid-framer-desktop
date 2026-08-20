@@ -124,6 +124,10 @@ object CompanionInteractor : Interactor() {
    */
   private suspend fun handleInboundIPCMessage(rawJson: String) {
     try {
+      // Performance: when companion is disabled, silently drop all inbound messages.
+      // IPC file is still read (lines consumed) in interact() to prevent unbounded growth.
+      if (!RFConfig.state.value.performanceCompanionEnabled) return
+
       when (val message = AppJson.decodeFromString<IPCMessagePayload>(rawJson)) {
         is IPCMessagePayload.SelfUpdate -> {
           val playerName = message.payload

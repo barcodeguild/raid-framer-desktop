@@ -127,7 +127,14 @@ object InstallationInteractor : Interactor() {
       "mark_sac_dancers" to config.companionMarkSacDancers.toString(),
       "mark_charmed_targets" to config.companionMarkCharmedTargets.toString(),
       "mark_silenced_targets" to config.companionMarkSilencedTargets.toString(),
-      "mark_distressed_targets" to config.companionMarkDistressedTargets.toString()
+      "mark_distressed_targets" to config.companionMarkDistressedTargets.toString(),
+      // Performance settings (synced to Lua addon)
+      "performance_companion_enabled" to config.performanceCompanionEnabled.toString(),
+      "performance_raid_buff_scanning" to config.performanceRaidBuffScanning.toString(),
+      "performance_buff_debuff_tracking" to config.performanceBuffDebuffTracking.toString(),
+      "performance_raid_roster_tracking" to config.performanceRaidRosterTracking.toString(),
+      "performance_duel_tracking" to config.performanceDuelTracking.toString(),
+      "performance_target_changed_tracking" to config.performanceTargetChangedTracking.toString()
     )
 
     // write config in ini format to settings.conf in the addon directory

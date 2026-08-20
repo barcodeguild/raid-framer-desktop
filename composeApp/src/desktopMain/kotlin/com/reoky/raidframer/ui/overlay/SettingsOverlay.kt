@@ -84,6 +84,7 @@ private fun SettingsSection(
   description: String? = null,
   modifier: Modifier = Modifier,
   borderColor: Color = RFColors.CardBorder,
+  action: @Composable (() -> Unit)? = null,
   content: @Composable ColumnScope.() -> Unit
 ) {
   Surface(
@@ -99,13 +100,20 @@ private fun SettingsSection(
         .border(1.dp, borderColor, RoundedCornerShape(10.dp))
         .padding(16.dp)
     ) {
-      Text(
-        text = title,
-        color = RFColors.AccentRed,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Bold,
-        letterSpacing = 0.5.sp
-      )
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(
+          text = title,
+          color = RFColors.AccentRed,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          letterSpacing = 0.5.sp
+        )
+        action?.invoke()
+      }
       if (description != null) {
         Spacer(modifier = Modifier.height(4.dp))
         Text(
@@ -292,6 +300,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       OverlayFeaturesPanel(wm)
 
       CombatOverlaySettingsPanel()
+
+      PerformanceSettingsPanel(wm)
 
        ExportSettingsPanel(wm)
        ExportBackgroundSettingsPanel(wm)
@@ -720,6 +730,326 @@ private fun CombatOverlaySettingsPanel() {
   }
 }
 
+@Composable
+private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
+  val config by RFConfig.state.collectAsState()
+  val dragLock = LocalDragLock.current
+  var showDistanceHelp by remember { mutableStateOf(false) }
+
+  SettingsSection(
+    title = stringResource(Res.string.settings_performance_title),
+    description = stringResource(Res.string.settings_performance_description),
+    action = {
+      Text(
+        text = stringResource(Res.string.settings_performance_distance_help),
+        color = RFColors.AccentRed,
+        fontSize = 11.sp,
+        modifier = Modifier.clickable { showDistanceHelp = true }
+      )
+    }
+  ) {
+    // Tip text with "Tip" label in slightly brighter color
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+      Text(
+        text = stringResource(Res.string.settings_performance_tip_label),
+        color = RFColors.TextPrimary,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Bold
+      )
+      Spacer(modifier = Modifier.width(4.dp))
+      Text(
+        text = stringResource(Res.string.settings_performance_tip_text),
+        color = RFColors.TextSecondary,
+        fontSize = 12.sp,
+        lineHeight = 16.sp
+      )
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    // Master toggle: Disable Lua Companion
+    PerformanceOption(
+      checked = !config.performanceCompanionEnabled,
+      onCheckedChange = { isChecked ->
+        RFConfig.update { it.copy(performanceCompanionEnabled = !isChecked) }
+      },
+      label = stringResource(Res.string.settings_performance_companion_enabled),
+      description = stringResource(Res.string.settings_performance_companion_enabled_desc),
+      impactLabel = stringResource(Res.string.settings_performance_impact_maximum),
+      impactColor = RFColors.AccentRed
+    )
+
+    Divider(color = RFColors.CardBorder, modifier = Modifier.padding(vertical = 8.dp))
+
+    // Raid Buff Scanning
+    PerformanceOption(
+      checked = config.performanceRaidBuffScanning,
+      onCheckedChange = { isChecked ->
+        RFConfig.update { it.copy(performanceRaidBuffScanning = isChecked) }
+      },
+      label = stringResource(Res.string.settings_performance_raid_buff_scanning),
+      description = stringResource(Res.string.settings_performance_raid_buff_scanning_desc),
+      impactLabel = stringResource(Res.string.settings_performance_impact_heavy),
+      impactColor = RFColors.AccentRed,
+      enabled = config.performanceCompanionEnabled && config.performanceRaidRosterTracking
+    )
+
+    // Buffs / Debuffs Tracking
+    PerformanceOption(
+      checked = config.performanceBuffDebuffTracking,
+      onCheckedChange = { isChecked ->
+        RFConfig.update { it.copy(performanceBuffDebuffTracking = isChecked) }
+      },
+      label = stringResource(Res.string.settings_performance_buff_debuff_tracking),
+      description = stringResource(Res.string.settings_performance_buff_debuff_tracking_desc),
+      impactLabel = stringResource(Res.string.settings_performance_impact_heavy),
+      impactColor = RFColors.AccentRed,
+      enabled = config.performanceCompanionEnabled
+    )
+
+    // Raid Roster & Attendance
+    PerformanceOption(
+      checked = config.performanceRaidRosterTracking,
+      onCheckedChange = { isChecked ->
+        RFConfig.update {
+          it.copy(
+            performanceRaidRosterTracking = isChecked,
+            // Also disable buff scanning when roster tracking is disabled
+            performanceRaidBuffScanning = if (!isChecked) false else it.performanceRaidBuffScanning
+          )
+        }
+      },
+      label = stringResource(Res.string.settings_performance_raid_roster_tracking),
+      description = stringResource(Res.string.settings_performance_raid_roster_tracking_desc),
+      impactLabel = stringResource(Res.string.settings_performance_impact_medium),
+      impactColor = RFColors.UpdateGold,
+      enabled = config.performanceCompanionEnabled
+    )
+
+    // Player Duel Tracking
+    PerformanceOption(
+      checked = config.performanceDuelTracking,
+      onCheckedChange = { isChecked ->
+        RFConfig.update { it.copy(performanceDuelTracking = isChecked) }
+      },
+      label = stringResource(Res.string.settings_performance_duel_tracking),
+      description = stringResource(Res.string.settings_performance_duel_tracking_desc),
+      impactLabel = stringResource(Res.string.settings_performance_impact_very_light),
+      impactColor = RFColors.UpdateGreen,
+      enabled = config.performanceCompanionEnabled
+    )
+
+    // Target Changed Detection
+    PerformanceOption(
+      checked = config.performanceTargetChangedTracking,
+      onCheckedChange = { isChecked ->
+        RFConfig.update { it.copy(performanceTargetChangedTracking = isChecked) }
+      },
+      label = stringResource(Res.string.settings_performance_target_changed_tracking),
+      description = stringResource(Res.string.settings_performance_target_changed_tracking_desc),
+      impactLabel = stringResource(Res.string.settings_performance_impact_very_light),
+      impactColor = RFColors.UpdateGreen,
+      enabled = config.performanceCompanionEnabled
+    )
+
+    // Battle Graph & Edge Tracking (greyed out when companion disabled)
+    PerformanceOption(
+      checked = config.performanceBattleGraphEnabled,
+      onCheckedChange = { isChecked ->
+        RFConfig.update { it.copy(performanceBattleGraphEnabled = isChecked) }
+      },
+      label = stringResource(Res.string.settings_performance_battle_graph),
+      description = stringResource(Res.string.settings_performance_battle_graph_desc),
+      impactLabel = stringResource(Res.string.settings_performance_impact_medium),
+      impactColor = RFColors.UpdateGold,
+      enabled = config.performanceCompanionEnabled
+    )
+
+    Divider(color = RFColors.CardBorder, modifier = Modifier.padding(vertical = 8.dp))
+
+    // Event History Depth slider
+    Column(modifier = Modifier.fillMaxWidth()) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(
+          text = stringResource(Res.string.settings_performance_event_history_depth),
+          color = RFColors.TextPrimary,
+          fontSize = 14.sp
+        )
+        Text(
+          text = config.performanceEventHistoryDepth.toString(),
+          color = eventHistoryDepthColor(config.performanceEventHistoryDepth),
+          fontSize = 14.sp,
+          fontWeight = FontWeight.Bold
+        )
+      }
+      Text(
+        text = stringResource(Res.string.settings_performance_event_history_depth_desc),
+        color = RFColors.TextSecondary,
+        fontSize = 12.sp
+      )
+      Spacer(modifier = Modifier.height(4.dp))
+      DragLockedSlider(
+        value = (config.performanceEventHistoryDepth - 50).toFloat() / (5000 - 50).toFloat(),
+        onValueChange = { value ->
+          val depth = (50 + value * (5000 - 50)).toInt().coerceIn(50, 5000)
+          RFConfig.update { it.copy(performanceEventHistoryDepth = depth) }
+        },
+        modifier = Modifier.fillMaxWidth()
+      )
+      // Live estimate of event count and memory usage
+      val playerCount = PlayerCacheInteractor.trackedPlayerCount
+      val depth = config.performanceEventHistoryDepth
+      val totalEvents = depth.toLong() * 10 * playerCount // ~10 event lists per player
+      val estimatedBytes = totalEvents * 200L // ~200 bytes per event object
+      val memoryStr = when {
+        estimatedBytes < 1024 -> "${estimatedBytes}B"
+        estimatedBytes < 1024 * 1024 -> "${estimatedBytes / 1024}KB"
+        else -> String.format("%.1fMB", estimatedBytes / (1024.0 * 1024.0))
+      }
+      Text(
+        text = stringResource(Res.string.settings_performance_event_history_estimate, depth.toString(), playerCount, memoryStr),
+        color = RFColors.TextTertiary,
+        fontSize = 10.sp,
+        modifier = Modifier.padding(top = 2.dp)
+      )
+    }
+  }
+
+  // Distance help dialog
+  if (showDistanceHelp) {
+    PerformanceDistanceHelpDialog(onDismiss = { showDistanceHelp = false })
+  }
+}
+
+/**
+ * Returns a color for the event history depth value.
+ * Green at ~500, orange at ~1500, red at ~3000+.
+ * Uses the gear score color palette from ColorsHelper.
+ */
+private fun eventHistoryDepthColor(depth: Int): Color {
+  return when {
+    depth < 500 -> RFColors.gearBlue       // safe
+    depth < 1000 -> RFColors.gearGreen     // fine
+    depth < 1500 -> RFColors.gearYellow    // moderate
+    depth < 2500 -> RFColors.gearOrange    // heavy
+    else -> RFColors.gearRed               // expensive
+  }
+}
+
+@Composable
+private fun PerformanceOption(
+  checked: Boolean,
+  onCheckedChange: (Boolean) -> Unit,
+  label: String,
+  description: String,
+  impactLabel: String,
+  impactColor: Color,
+  enabled: Boolean = true
+) {
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(vertical = 2.dp),
+    verticalAlignment = Alignment.Top
+  ) {
+    Checkbox(
+      checked = checked,
+      onCheckedChange = if (enabled) onCheckedChange else null,
+      colors = CheckboxDefaults.colors(
+        checkmarkColor = Color.White,
+        checkedColor = if (enabled) RFColors.AccentRed else RFColors.TextTertiary,
+        uncheckedColor = RFColors.TextTertiary
+      ),
+      modifier = Modifier.size(32.dp)
+    )
+    Spacer(modifier = Modifier.width(4.dp))
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = label,
+        color = if (enabled) RFColors.TextPrimary else RFColors.TextTertiary,
+        fontSize = 14.sp
+      )
+      Text(
+        text = description,
+        color = if (enabled) RFColors.TextSecondary else RFColors.TextTertiary,
+        fontSize = 11.sp,
+        lineHeight = 14.sp
+      )
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+          text = stringResource(Res.string.settings_performance_impact_label),
+          color = RFColors.TextTertiary,
+          fontSize = 10.sp
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+          text = impactLabel,
+          color = impactColor,
+          fontSize = 10.sp,
+          fontWeight = FontWeight.Bold
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun PerformanceDistanceHelpDialog(onDismiss: () -> Unit) {
+  Dialog(onDismissRequest = onDismiss) {
+    Surface(
+      shape = RoundedCornerShape(10.dp),
+      color = RFColors.CardBackground,
+      elevation = 8.dp,
+      modifier = Modifier.widthIn(max = 520.dp)
+    ) {
+      Column(
+        modifier = Modifier
+          .padding(16.dp)
+          .verticalScroll(rememberScrollState())
+      ) {
+        Text(
+          text = stringResource(Res.string.performance_distance_help_title),
+          color = RFColors.AccentRed,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Game settings screenshot
+        Image(
+          painter = painterResource(Res.drawable.game_settings_distance_info),
+          contentDescription = "ArcheAge game settings showing combat info and distance filters",
+          modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(6.dp))
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+          text = stringResource(Res.string.performance_distance_help_body),
+          color = RFColors.TextPrimary,
+          fontSize = 13.sp,
+          lineHeight = 19.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+          Button(
+            onClick = onDismiss,
+            colors = ButtonDefaults.buttonColors(RFColors.AccentRed)
+          ) {
+            Text(stringResource(Res.string.general_ok), color = Color.White)
+          }
+        }
+      }
+    }
+  }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CategoryDropdown(
@@ -852,11 +1182,11 @@ private fun ExportSettingsPanel(wm: WindowManager?) {
 
     Spacer(modifier = Modifier.height(12.dp))
 
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+      ) {
       Box(modifier = Modifier.weight(1f)) {
         CompactSettingsCheckbox(
           checked = config.exportPngEnabled,

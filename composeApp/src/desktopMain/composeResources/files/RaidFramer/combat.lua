@@ -18,12 +18,15 @@ end
 
 -- duel event handlers - notify desktop app (we may treat combat events during duels differently later)
 function RF.Combat.handleDuelStarted()
+  if not RF.Config.PERFORMANCE_DUEL_TRACKING then return end
   RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_STARTED, os.time())
 end
 function RF.Combat.handleDuelEnded()
+  if not RF.Config.PERFORMANCE_DUEL_TRACKING then return end
   RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.DUEL_ENDED, os.time())
 end
 function RF.Combat.handleTargetChanged(...)
+  if not RF.Config.PERFORMANCE_TARGET_CHANGED_TRACKING then return end
   local targetId = X2Unit:GetUnitId("target")
   if not targetId then
     return
@@ -98,7 +101,14 @@ end
 -- main combat event handler
 function RF.Combat.handleCombatMessage(...)
   RF.IPC.interact() -- Rate limited write of queued messages and also triggers read of incoming messages on a cooldown
-  RF.Raid.ScanBuffs() -- periodic scan of buffs, distance and gearScore (rate limited internally)
+
+  -- Performance: master toggle guard — skip all event processing when companion is disabled
+  -- IPC.interact() still runs above so the addon can receive CONFIG_UPDATE and re-enable itself
+  if not RF.Config.PERFORMANCE_COMPANION_ENABLED then return end
+
+  if RF.Config.PERFORMANCE_RAID_BUFF_SCANNING then
+    RF.Raid.ScanBuffs() -- periodic scan of buffs, distance and gearScore (rate limited internally)
+  end
 
   local combatEvent = { ... }
   local meta = RF.Parser.ParseCombatEventMetadata(combatEvent)
@@ -173,6 +183,7 @@ function RF.Combat.handleCombatMessage(...)
 
   -- BUFFS APPLIED/REMOVED
   if (meta.type == "SPELL_AURA_APPLIED" or meta.type == "SPELL_AURA_REMOVED") then
+    if not RF.Config.PERFORMANCE_BUFF_DEBUFF_TRACKING then return end
     local buff = RF.Parser.ParseBuffEvent(combatEvent)
     RF.IPC.EnqueueWriteMessage(RF.IPC.MESSAGE_TYPES.COMBAT_EVENT, RF.JSON.json_encode(buff))
     RF.Combat.postEventsForBuff(buff)
@@ -247,6 +258,8 @@ end
 
 -- basically just local stuff that we want to do when certain buffs are applied/removed
 function RF.Combat.postEventsForBuff(buff)
+  -- Performance: fully guarded by buff/debuff tracking toggle
+  if not RF.Config.PERFORMANCE_BUFF_DEBUFF_TRACKING then return end
   local charmedDebuffIds = { 771, 13916, 15995, 21432, 21434, 21162 } -- charms
   local silencedDebuffIds = { 245, 257, 266, 1098 , 1177, 2115, 2116, 2743, 3868, 3928, 4039, 5525, 6147, 6366, 6893, 6981, 7040, 7400, 14730, 15721, 15937, 16100, 16989, 21161, 21987, 22013, 22239, 22520, 22538, 23358, 23469, 23523, 23524, 23815, 24168, 25234, 25718, 26965, 27145, 27345, 27681, 28595, 28646, 28676, 28682, 28683, 29667, 29668, 29926, 29987, 30935, 31862 } -- some of these are applied by mobs / every way to get silenced in the game beside aoe zone effects and the drowned souls of the gulf or whatever
   local distressedDebuffIds = { 828, 6896, 14284, 15175, 24925 } -- distress debuffs from various skills

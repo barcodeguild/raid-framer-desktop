@@ -142,7 +142,7 @@ data class DebuffsDefinition(
     Debuff(ids = listOf(24391, 23198, 27124, 23061), name = "Petrification", consideredCC = true), // can't move or cast
     Debuff(ids = listOf(9000769), name = "Knockdown", consideredCC = true), // can't move or cast
     Debuff(ids = listOf(523, 23959, 28251), name = "Sleep", consideredCC = true), // can't move or cast
-    Debuff(ids = listOf(156, 2277, 24375, 29304), name = "Fear", consideredCC = true), // can't cast, move uncontrollably
+    Debuff(ids = listOf(156, 2277, 24375, 29304, 23261), name = "Fear", consideredCC = true), // can't cast, move uncontrollably
     Debuff(ids = listOf(502, 24060), name = "Provoked", consideredCC = true), // can't target others
     Debuff(ids = listOf(21401, 2286), name = "Bubble Trap", consideredCC = true), // can't move or cast
     // Debuff(ids = listOf(114, 2275), name = "Lassitude", consideredCC = true), // inflicts sleep (523) so no need for duplicate

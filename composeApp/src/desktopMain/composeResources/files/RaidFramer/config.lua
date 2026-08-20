@@ -20,6 +20,14 @@ RF.Config.MARK_CHARMED_TARGETS = true
 RF.Config.MARK_SILENCED_TARGETS = true
 RF.Config.MARK_DISTRESSED_TARGETS = true
 
+-- Performance settings (managed by desktop app)
+RF.Config.PERFORMANCE_COMPANION_ENABLED = true
+RF.Config.PERFORMANCE_RAID_BUFF_SCANNING = true
+RF.Config.PERFORMANCE_BUFF_DEBUFF_TRACKING = true
+RF.Config.PERFORMANCE_RAID_ROSTER_TRACKING = true
+RF.Config.PERFORMANCE_DUEL_TRACKING = true
+RF.Config.PERFORMANCE_TARGET_CHANGED_TRACKING = true
+
 -- loads the configuration from the settings.conf file
  function RF.Config.LoadConfig()
    local file = io.open(RF.Config.CONFIG_FILE, "r")
@@ -54,8 +62,15 @@ RF.Config.MARK_DISTRESSED_TARGETS = true
          elseif key == "mark_sac_dancers" then RF.Config.MARK_SAC_DANCERS = value
          elseif key == "mark_charmed_targets" then RF.Config.MARK_CHARMED_TARGETS = value
          elseif key == "mark_silenced_targets" then RF.Config.MARK_SILENCED_TARGETS = value
-         elseif key == "mark_distressed_targets" then RF.Config.MARK_DISTRESSED_TARGETS = value
-         end
+          elseif key == "mark_distressed_targets" then RF.Config.MARK_DISTRESSED_TARGETS = value
+          -- Performance settings
+          elseif key == "performance_companion_enabled" then RF.Config.PERFORMANCE_COMPANION_ENABLED = value
+          elseif key == "performance_raid_buff_scanning" then RF.Config.PERFORMANCE_RAID_BUFF_SCANNING = value
+          elseif key == "performance_buff_debuff_tracking" then RF.Config.PERFORMANCE_BUFF_DEBUFF_TRACKING = value
+          elseif key == "performance_raid_roster_tracking" then RF.Config.PERFORMANCE_RAID_ROSTER_TRACKING = value
+          elseif key == "performance_duel_tracking" then RF.Config.PERFORMANCE_DUEL_TRACKING = value
+          elseif key == "performance_target_changed_tracking" then RF.Config.PERFORMANCE_TARGET_CHANGED_TRACKING = value
+          end
        end
      end
    end

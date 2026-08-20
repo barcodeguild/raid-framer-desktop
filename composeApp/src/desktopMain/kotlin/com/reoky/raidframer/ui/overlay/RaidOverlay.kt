@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.ui.component.PerformanceDisabledBanner
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
@@ -863,6 +864,10 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
   }
   Box(Modifier.fillMaxSize()) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+      // Performance banner when buff scanning is disabled
+      if (!RFConfig.state.collectAsState().value.performanceRaidBuffScanning) {
+        PerformanceDisabledBanner(stringResource(Res.string.performance_buff_scanning_disabled_banner))
+      }
       BoxWithConstraints(Modifier.fillMaxWidth()) {
       if (maxWidth >= 760.dp) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {

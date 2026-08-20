@@ -1217,4 +1217,49 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="combat_export_saving_session">Saving session %1$d/%2$d</string>
     <string name="combat_export_saving_language">Saving %1$s export %2$d/%3$d</string>
 
+    <!-- Performance Settings -->
+    <string name="settings_performance_title">Performance</string>
+    <string name="settings_performance_description">Control which features are active to improve FPS in large-scale battles. Disabling features reduces the amount of data processed per combat event.</string>
+    <string name="settings_performance_tip_label">Tip:</string>
+    <string name="settings_performance_tip_text">You can also adjust event detection range directly in-game via ESC \u2192 Options \u2192 Game Info. The Combat Info and Distance sliders let you filter by SELF, PARTY, RAID, GUILD, or ALL, and adjust detection range (0\u2013100m). These in-game filters affect data flowing into the addon and may be preferable to disabling features here. These settings cannot be controlled from the app.</string>
+    <string name="settings_performance_companion_enabled">Disable Lua Companion</string>
+    <string name="settings_performance_companion_enabled_desc">Stops all event processing in the Lua addon. The addon remains loaded and will resume when re-enabled.</string>
+    <string name="settings_performance_impact_maximum">Maximum</string>
+    <string name="settings_performance_raid_buff_scanning">Raid Buff Scanning</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Scans all raid members for active buffs, distance, and gear score every second. Required for Life Mend detection and the raid buff checker. Automatically disabled when Raid Roster tracking is off.</string>
+    <string name="settings_performance_impact_heavy">Heavy</string>
+    <string name="settings_performance_buff_debuff_tracking">Buffs / Debuffs Tracking</string>
+    <string name="settings_performance_buff_debuff_tracking_desc">Tracks SPELL_AURA_APPLIED and SPELL_AURA_REMOVED events. Disabling this limits tracking to damage and heals only.</string>
+    <string name="settings_performance_raid_roster_tracking">Raid Roster &amp; Attendance</string>
+    <string name="settings_performance_raid_roster_tracking_desc">Tracks raid joins, leaves, role changes, and co-raid formation.</string>
+    <string name="settings_performance_impact_medium">Medium</string>
+    <string name="settings_performance_duel_tracking">Player Duel Tracking</string>
+    <string name="settings_performance_duel_tracking_desc">Tracks duel start and end events.</string>
+    <string name="settings_performance_impact_very_light">Very Light</string>
+    <string name="settings_performance_target_changed_tracking">Target Changed Detection</string>
+    <string name="settings_performance_target_changed_tracking_desc">Detects when you target another player and reads their faction, gear score, and guild.</string>
+    <string name="settings_performance_battle_graph">Battle Graph &amp; Edge Tracking</string>
+    <string name="settings_performance_battle_graph_desc">Computes per-player adjacency maps for the interactive battle graph visualization.</string>
+    <string name="settings_performance_event_history_depth">Event History Depth</string>
+    <string name="settings_performance_event_history_depth_desc">Maximum events stored per player card for the event timeline. Lower values use less memory.</string>
+    <string name="settings_performance_event_history_estimate">~%1$s events per player \u00D7 %2$d tracked \u2248 ~%3$s total</string>
+    <string name="settings_performance_distance_help">? Distance</string>
+    <string name="settings_performance_impact_label">Impact:</string>
+
+    <!-- Performance: Disabled ranking messages -->
+    <string name="combat_ranking_disabled">This ranking is disabled</string>
+    <string name="combat_ranking_disabled_hint">Performance options in Settings</string>
+    <string name="combat_companion_disabled">Lua Companion is disabled</string>
+    <string name="combat_companion_disabled_hint">Enable in Settings → Performance</string>
+
+    <!-- Companion Overlay: Disabled banner -->
+    <string name="companion_disabled_banner">Lua Companion is disabled via Performance settings. All event tracking is paused.</string>
+
+    <!-- Performance disabled banners for overlays -->
+    <string name="performance_buff_scanning_disabled_banner">Raid buff scanning is disabled in Performance settings. Life Mend detection and raid buff tracking will not work.</string>
+    <string name="performance_buff_debuff_tracking_disabled_banner">Buffs and debuffs tracking is disabled in Performance settings. Rankings for buffs, debuffs, charms, silences, distresses, and songs will not update.</string>
+
+    <!-- Distance Filtering Help Dialog -->
+    <string name="performance_distance_help_title">Distance &amp; Info Filtering</string>
+    <string name="performance_distance_help_body">The in-game combat settings (ESC \u2192 Options \u2192 Game Info) control what data flows into the addon.\n\n\u201CShow Combat Messages\u201D checkbox: Toggles damage/heal hitsplats in the game visually, but does NOT affect data flow to the addon. You can have them on or off.\n\nInfo Filter (SELF / PARTY / RAID / GUILD / ALL): This DOES affect data flow. Changing the filter limits which combat events the addon receives.\n\nDistance Slider: This DOES affect data flow. Reducing the range limits how far away combat events are detected.\n\nExamples:\n\u2022 SELF \u2014 Only your own character\u2019s events. The distance slider is automatically greyed out since it\u2019s not relevant.\n\u2022 PARTY \u2014 Your group of 5. In ArcheAge, everyone in your raid column is considered your \u201Cparty.\u201D For example, spells like Sonic Wave that \u201Cremove negative effects from all party members\u201D affect your column of 5, not the entire raid.\n\u2022 RAID \u2014 All parties in the raid (all columns).\n\u2022 GUILD \u2014 Only players matching your guild tag. A second guild tag won\u2019t appear since it\u2019s technically a different guild.\n\nAdjusting these in-game filters may be preferable to disabling features in the app, as they provide finer control over what data is processed.</string>
 </resources>
