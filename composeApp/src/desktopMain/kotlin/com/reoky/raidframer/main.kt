@@ -31,6 +31,7 @@ import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.SystemTrayComponent
+import com.reoky.raidframer.core.locale.AppLocale
 import com.sun.jna.platform.win32.Kernel32
 import com.sun.jna.platform.win32.WinError
 import com.sun.jna.platform.win32.WinNT.HANDLE
@@ -72,17 +73,15 @@ fun main(args: Array<String>) {
       exitProcess(1)
     }
 
+    RFConfig.init(RFDao.configDao)
+    RFConfig.initSync()
+
     // Apply language preference before Compose starts (must be before first composition)
     try {
-      kotlinx.coroutines.runBlocking {
-        val lang = RFDao.configDao.getConfig()?.preferredLanguage.orEmpty()
-        com.reoky.raidframer.core.locale.AppLocale.apply(lang)
-      }
+      AppLocale.apply(RFConfig.state.value.preferredLanguage.orEmpty())
     } catch (e: Exception) {
       println("Could not load language preference: ${e.message}")
     }
-
-    RFConfig.init(RFDao.configDao)
 
     // Start core of the app
     LoggingInteractor.initialize() // prunes old logs

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.runBlocking
 
 class ConfigRepository(
   private val dao: ConfigDao,
@@ -22,6 +23,23 @@ class ConfigRepository(
 
   private val loadDone = CompletableDeferred<Unit>()
   private val writeMutex = Mutex()
+
+  /**
+   * Synchronously loads the config from the database on the calling thread.
+   * Must be called once before the first async access to [state] (e.g. during
+   * app startup before Compose composition). After this call the [state] flow
+   * is immediately usable and [loadDone] is already completed.
+   *
+   * The background coroutine launched in [init] will still run but will find
+   * [loadDone] already completed and [state] already set, so it becomes a no-op.
+   */
+  fun initSync() {
+    val loaded = runBlocking {
+      dao.getConfig() ?: ConfigEntity().also { dao.insert(it) }
+    }
+    _state.value = loaded
+    loadDone.complete(Unit)
+  }
 
   init {
     scope.launch {

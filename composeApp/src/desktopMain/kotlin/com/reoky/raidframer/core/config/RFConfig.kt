@@ -21,6 +21,16 @@ object RFConfig {
   }
 
   /**
+   * Synchronously loads config from the database on the calling thread.
+   * Call after [init] and before any code that reads [state] on the main thread
+   * (e.g. applying the language preference before Compose composition).
+   */
+  fun initSync() {
+    check(::repo.isInitialized) { ERMMAGEHRD }
+    repo.initSync()
+  }
+
+  /**
    * Current config state as a StateFlow.
    * Example: val config by RFConfig.state.collectAsState()
    * Example Two: RFConfig.state.collect { config -> ... }
