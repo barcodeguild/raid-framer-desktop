@@ -1215,4 +1215,42 @@
     <string name="combat_export_saving_session">正在保存会话 %1$d/%2$d</string>
     <string name="combat_export_saving_language">正在保存 %1$s 导出 %2$d/%3$d</string>
 
+    <!-- Performance Settings -->
+    <string name="settings_performance_title">性能</string>
+    <string name="settings_performance_description">控制哪些功能处于激活状态以提高大规模战斗中的FPS。禁用功能可以减少每个战斗事件处理的数据量。</string>
+    <string name="settings_performance_tip_label">提示：</string>
+    <string name="settings_performance_tip_text">您也可以直接在游戏中通过 ESC \u2192 选项 \u2192 游戏信息来调整事件检测范围。战斗信息和距离滑块允许您按自身、队伍、团队、公会或全部进行筛选，并调整检测范围（0\u2013100米）。这些游戏内过滤器会影响流入插件的数据，可能比在此处禁用功能更可取。这些设置无法从应用程序控制。</string>
+    <string name="settings_performance_companion_enabled">禁用 Lua 伴侣</string>
+    <string name="settings_performance_companion_enabled_desc">停止Lua插件中的所有事件处理。插件保持加载状态，重新启用后将恢复。</string>
+    <string name="settings_performance_impact_maximum">最大</string>
+    <string name="settings_performance_raid_buff_scanning">团队增益扫描</string>
+    <string name="settings_performance_raid_buff_scanning_desc">每秒扫描所有团队成员的活跃增益、距离和装备分数。生命治愈检测和团队增益检查器需要此功能。当团队名册追踪关闭时自动禁用。</string>
+    <string name="settings_performance_impact_heavy">较大</string>
+    <string name="settings_performance_buff_debuff_tracking">增益/减益追踪</string>
+    <string name="settings_performance_buff_debuff_tracking_desc">追踪 SPELL_AURA_APPLIED 和 SPELL_AURA_REMOVED 事件。禁用后仅限追踪伤害和治疗。</string>
+    <string name="settings_performance_raid_roster_tracking">团队名册与出勤</string>
+    <string name="settings_performance_raid_roster_tracking_desc">追踪团队加入、离开、角色变更和联合团队组建。</string>
+    <string name="settings_performance_impact_medium">中等</string>
+    <string name="settings_performance_duel_tracking">玩家决斗追踪</string>
+    <string name="settings_performance_duel_tracking_desc">追踪决斗开始和结束事件。</string>
+    <string name="settings_performance_impact_very_light">非常轻</string>
+    <string name="settings_performance_target_changed_tracking">目标切换检测</string>
+    <string name="settings_performance_target_changed_tracking_desc">检测您瞄准另一个玩家时读取其阵营、装备分数和公会。</string>
+    <string name="settings_performance_battle_graph">战斗图表与连线追踪</string>
+    <string name="settings_performance_battle_graph_desc">为交互式战斗图表可视化计算每个玩家的邻接图。</string>
+    <string name="settings_performance_event_history_depth">事件历史深度</string>
+    <string name="settings_performance_event_history_depth_desc">每个玩家卡片用于事件时间线的最大存储事件数。较低的值使用更少的内存。</string>
+    <string name="settings_performance_event_history_estimate">~%1$s 每玩家事件 \u00D7 %2$d 已追踪 \u2248 ~%3$s 总计</string>
+    <string name="settings_performance_distance_help">? 距离</string>
+    <string name="settings_performance_impact_label">影响：</string>
+    <string name="combat_ranking_disabled">此排名已禁用</string>
+    <string name="combat_ranking_disabled_hint">设置中的性能选项</string>
+    <string name="combat_companion_disabled">Lua 伴侣已禁用</string>
+    <string name="combat_companion_disabled_hint">在设置 \u2192 性能中启用</string>
+    <string name="companion_disabled_banner">Lua 伴侣已通过性能设置禁用。所有事件追踪已暂停。</string>
+    <string name="performance_buff_scanning_disabled_banner">团队增益扫描已在性能设置中禁用。生命治愈检测和团队增益追踪将无法工作。</string>
+    <string name="performance_buff_debuff_tracking_disabled_banner">增益和减益追踪已在性能设置中禁用。增益、减益、魅惑、沉默、苦恼和歌曲的排名将不会更新。</string>
+    <string name="performance_distance_help_title">距离与信息过滤</string>
+    <string name="performance_distance_help_body">游戏内战斗设置（ESC \u2192 选项 \u2192 游戏信息）控制流入插件的数据。\n\n\u201C显示战斗消息\u201D复选框：切换游戏中的伤害/治疗命中效果的视觉显示，但不会影响流向插件的数据。您可以选择开启或关闭。\n\n信息过滤器（自身 / 队伍 / 团队 / 公会 / 全部）：这会影响数据流。更改过滤器会限制插件接收的战斗事件。\n\n距离滑块：这会影响数据流。降低范围会限制战斗事件的检测距离。\n\n示例：\n\u2022 自身 \u2014 仅您自己角色的事件。距离滑块自动灰显，因为不相关。\n\u2022 队伍 \u2014 您的5人小组。在ArcheAge中，团队中同一列的所有人都被视为您的\u201C队伍。\u201D例如，像声波冲击这样\u201C移除所有队伍成员负面效果\u201D的技能会影响您列的5人，而不是整个团队。\n\u2022 团队 \u2014 团队中的所有小队（所有列）。\n\u2022 公会 \u2014 仅匹配您公会标签的玩家。第二个公会标签不会显示，因为技术上是不同的公会。\n\n在游戏内调整这些过滤器可能比在应用中禁用功能更可取，因为它们提供更精细的数据处理控制。</string>
+
 </resources>

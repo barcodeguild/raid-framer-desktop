@@ -1215,4 +1215,42 @@
     <string name="combat_export_saving_session">세션 저장 중 %1$d/%2$d</string>
     <string name="combat_export_saving_language">%1$s 내보내기 저장 중 %2$d/%3$d</string>
 
+    <!-- Performance Settings -->
+    <string name="settings_performance_title">성능</string>
+    <string name="settings_performance_description">대규모 전투에서 FPS를 향상시키기 위해 활성화된 기능을 제어합니다. 기능을 비활성화하면 전투 이벤트당 처리되는 데이터량이 줄어듭니다.</string>
+    <string name="settings_performance_tip_label">팁:</string>
+    <string name="settings_performance_tip_text">ESC \u2192 옵션 \u2192 게임 정보에서 직접 이벤트 감지 범위를 조정할 수도 있습니다. 전투 정보와 거리 슬라이더를 사용하여 SELF, PARTY, RAID, GUILD 또는 ALL로 필터링하고 감지 범위(0\u2013100m)를 조정할 수 있습니다. 이러한 인게임 필터는 애드온으로 흐르는 데이터에 영향을 미치며, 여기서 기능을 비활성화하는 것보다 바람직할 수 있습니다. 이 설정은 앱에서 제어할 수 없습니다.</string>
+    <string name="settings_performance_companion_enabled">Lua 동반자 비활성화</string>
+    <string name="settings_performance_companion_enabled_desc">Lua 애드온의 모든 이벤트 처리를 중지합니다. 애드온은 로드된 상태로 유지되며 다시 활성화하면 재개됩니다.</string>
+    <string name="settings_performance_impact_maximum">최대</string>
+    <string name="settings_performance_raid_buff_scanning">공격대 버프 스캔</string>
+    <string name="settings_performance_raid_buff_scanning_desc">매초 모든 공격대원의 활성 버프, 거리 및 장비 점수를 스캔합니다. 생명 치유 감지와 공격대 버프 확인에 필요합니다. 공격대 명단 추적이 꺼지면 자동으로 비활성화됩니다.</string>
+    <string name="settings_performance_impact_heavy">높음</string>
+    <string name="settings_performance_buff_debuff_tracking">버프/디버프 추적</string>
+    <string name="settings_performance_buff_debuff_tracking_desc">SPELL_AURA_APPLIED 및 SPELL_AURA_REMOVED 이벤트를 추적합니다. 이 기능을 비활성화하면 피해와 치유만 추적됩니다.</string>
+    <string name="settings_performance_raid_roster_tracking">공격대 명단 및 출석</string>
+    <string name="settings_performance_raid_roster_tracking_desc">공격대 참가, 탈퇴, 역할 변경 및 공동 공격대 형성을 추적합니다.</string>
+    <string name="settings_performance_impact_medium">보통</string>
+    <string name="settings_performance_duel_tracking">플레이어 듀얼 추적</string>
+    <string name="settings_performance_duel_tracking_desc">듀얼 시작 및 종료 이벤트를 추적합니다.</string>
+    <string name="settings_performance_impact_very_light">매우 가벼움</string>
+    <string name="settings_performance_target_changed_tracking">대상 변경 감지</string>
+    <string name="settings_performance_target_changed_tracking_desc">다른 플레이어를 대상으로 설정할 때 진영, 장비 점수 및 길드를 읽습니다.</string>
+    <string name="settings_performance_battle_graph">전투 그래프 및 간선 추적</string>
+    <string name="settings_performance_battle_graph_desc">인터랙티브 전투 그래프 시각화를 위한 플레이어별 인접 맵을 계산합니다.</string>
+    <string name="settings_performance_event_history_depth">이벤트 기록 깊이</string>
+    <string name="settings_performance_event_history_depth_desc">이벤트 타임라인을 위한 플레이어 카드당 최대 저장 이벤트 수. 낮은 값은 적은 메모리를 사용합니다.</string>
+    <string name="settings_performance_event_history_estimate">~%1$s 플레이어당 이벤트 \u00D7 %2$d 추적됨 \u2248 ~%3$s 합계</string>
+    <string name="settings_performance_distance_help">? 거리</string>
+    <string name="settings_performance_impact_label">영향:</string>
+    <string name="combat_ranking_disabled">이 순위는 비활성화되었습니다</string>
+    <string name="combat_ranking_disabled_hint">설정의 성능 옵션</string>
+    <string name="combat_companion_disabled">Lua 동반자가 비활성화되었습니다</string>
+    <string name="combat_companion_disabled_hint">설정 \u2192 성능에서 활성화</string>
+    <string name="companion_disabled_banner">Lua 동반자가 성능 설정을 통해 비활성화되었습니다. 모든 이벤트 추적이 일시 중지되었습니다.</string>
+    <string name="performance_buff_scanning_disabled_banner">공격대 버프 스캔이 성능 설정에서 비활성화되었습니다. 생명 치유 감지 및 공격대 버프 추적이 작동하지 않습니다.</string>
+    <string name="performance_buff_debuff_tracking_disabled_banner">버프 및 디버프 추적이 성능 설정에서 비활성화되었습니다. 버프, 디버프, 매혹, 침묵, 강위축 및 노래 순위가 업데이트되지 않습니다.</string>
+    <string name="performance_distance_help_title">거리 및 정보 필터링</string>
+    <string name="performance_distance_help_body">인게임 전투 설정(ESC \u2192 옵션 \u2192 게임 정보)은 애드온으로 흐르는 데이터를 제어합니다.\n\n\u201C전투 메시지 표시\u201D 체크박스: 게임에서 피해/치유 히트스플랫의 시각적 표시를 전환하지만, 애드온으로의 데이터 흐름에는 영향을 미치지 않습니다. 켜거나 끌 수 있습니다.\n\n정보 필터(SELF / PARTY / RAID / GUILD / ALL): 이것이 데이터 흐름에 영향을 미칩니다. 필터를 변경하면 애드온이 받는 전투 이벤트가 제한됩니다.\n\n거리 슬라이더: 이것이 데이터 흐름에 영향을 미칩니다. 범위를 줄이면 전투 이벤트 감지 거리가 제한됩니다.\n\n예시:\n\u2022 SELF \u2014 본인 캐릭터의 이벤트만. 거리 슬라이더는 관련이 없어 자동으로 비활성화됩니다.\n\u2022 PARTY \u2014 5명 파티. ArcheAge에서는 공격대 열의 모든 사람이 \u201C파티\u201D로 간주됩니다. 예를 들어, \u201C모든 파티원에게서 부정적 효과를 제거\u201D하는 소닉 웨이브 같은 스킬은 전체 공격대가 아닌 5명 열에 영향을 미칩니다.\n\u2022 RAID \u2014 공격대의 모든 파티(모든 열).\n\u2022 GUILD \u2014 길드 태그가 일치하는 플레이어만. 두 번째 길드 태그는 기술적으로 다른 길드이므로 표시되지 않습니다.\n\n이 인게임 필터를 조정하는 것은 앱에서 기능을 비활성화하는 것보다 바람직할 수 있으며, 어떤 데이터가 처리되는지 더 세밀한 제어를 제공합니다.</string>
+
 </resources>

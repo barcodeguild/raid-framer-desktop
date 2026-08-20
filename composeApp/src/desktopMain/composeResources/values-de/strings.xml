@@ -1161,4 +1161,42 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="combat_export_saving_session">Sitzung wird gespeichert %1$d/%2$d</string>
     <string name="combat_export_saving_language">%1$s-Export wird gespeichert %2$d/%3$d</string>
 
+    <!-- Performance Settings -->
+    <string name="settings_performance_title">Leistung</string>
+    <string name="settings_performance_description">Steuern Sie, welche Funktionen aktiv sind, um die FPS in groß angelegten Schlachten zu verbessern. Das Deaktivieren von Funktionen reduziert die Menge der pro Kampfereignis verarbeiteten Daten.</string>
+    <string name="settings_performance_tip_label">Tipp:</string>
+    <string name="settings_performance_tip_text">Sie können den Ereigniserkennungsbereich auch direkt im Spiel über ESC \u2192 Optionen \u2192 Spielinfo anpassen. Die Regler für Kampfinformationen und Entfernung ermöglichen die Filterung nach SELF, PARTY, RAID, GUILD oder ALL und die Anpassung des Erkennungsbereichs (0\u2013100m). Diese Spielinternen Filter beeinflussen die Daten, die in das Addon fließen, und können dem Deaktivieren von Funktionen hier vorzuziehen sein. Diese Einstellungen können nicht aus der App gesteuert werden.</string>
+    <string name="settings_performance_companion_enabled">Lua-Begleiter deaktivieren</string>
+    <string name="settings_performance_companion_enabled_desc">Stoppt die gesamte Ereignisverarbeitung im Lua-Addon. Das Addon bleibt geladen und wird bei erneuter Aktivierung fortgesetzt.</string>
+    <string name="settings_performance_impact_maximum">Maximal</string>
+    <string name="settings_performance_raid_buff_scanning">Raid-Buff-Scannung</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Scannt alle Raid-Mitglieder jede Sekunde auf aktive Buffs, Entfernung und Ausrüstungswert. Erforderlich für Life-Mend-Erkennung und den Raid-Buff-Checker. Wird automatisch deaktiviert, wenn das Raid-Roster-Tracking deaktiviert ist.</string>
+    <string name="settings_performance_impact_heavy">Hoch</string>
+    <string name="settings_performance_buff_debuff_tracking">Buffs/Debuffs-Tracking</string>
+    <string name="settings_performance_buff_debuff_tracking_desc">Verfolgt SPELL_AURA_APPLIED- und SPELL_AURA_REMOVED-Ereignisse. Das Deaktivieren begrenzt das Tracking auf Schaden und Heilung.</string>
+    <string name="settings_performance_raid_roster_tracking">Raid-Roster &amp; Anwesenheit</string>
+    <string name="settings_performance_raid_roster_tracking_desc">Verfolgt Raid-Beitritte, Austritte, Rollenänderungen und Co-Raid-Bildung.</string>
+    <string name="settings_performance_impact_medium">Mittel</string>
+    <string name="settings_performance_duel_tracking">Duel-Tracking</string>
+    <string name="settings_performance_duel_tracking_desc">Verfolgt Duel-Start- und -Endereignisse.</string>
+    <string name="settings_performance_impact_very_light">Sehr leicht</string>
+    <string name="settings_performance_target_changed_tracking">Zielwechsel-Erkennung</string>
+    <string name="settings_performance_target_changed_tracking_desc">Erkennt, wenn Sie ein anderes Ziel anvisieren, und liest deren Fraktion, Ausrüstungswert und Gilde.</string>
+    <string name="settings_performance_battle_graph">Kampfgrafik &amp; Kanten-Tracking</string>
+    <string name="settings_performance_battle_graph_desc">Berechnet pro Spieler Adjazenzkarten für die interaktive Kampfgrafik-Visualisierung.</string>
+    <string name="settings_performance_event_history_depth">Ereignisverlaufstiefe</string>
+    <string name="settings_performance_event_history_depth_desc">Maximale Ereignisse pro Spielerkarte für die Ereigniszeitachse. Niedrigere Werte verwenden weniger Speicher.</string>
+    <string name="settings_performance_event_history_estimate">~%1$s Ereignisse pro Spieler \u00D7 %2$d verfolgt \u2248 ~%3$s gesamt</string>
+    <string name="settings_performance_distance_help">? Entfernung</string>
+    <string name="settings_performance_impact_label">Auswirkung:</string>
+    <string name="combat_ranking_disabled">Diese Rangliste ist deaktiviert</string>
+    <string name="combat_ranking_disabled_hint">Leistungsoptionen in den Einstellungen</string>
+    <string name="combat_companion_disabled">Lua-Begleiter ist deaktiviert</string>
+    <string name="combat_companion_disabled_hint">Aktivieren in Einstellungen \u2192 Leistung</string>
+    <string name="companion_disabled_banner">Lua-Begleiter ist über die Leistungseinstellungen deaktiviert. Das gesamte Ereignis-Tracking ist pausiert.</string>
+    <string name="performance_buff_scanning_disabled_banner">Raid-Buff-Scannung ist in den Leistungseinstellungen deaktiviert. Life-Mend-Erkennung und Raid-Buff-Tracking funktionieren nicht.</string>
+    <string name="performance_buff_debuff_tracking_disabled_banner">Buffs- und Debuffs-Tracking ist in den Leistungseinstellungen deaktiviert. Ranglisten für Buffs, Debuffs, Verzauberungen, Stille, Bedrängnisse und Lieder werden nicht aktualisiert.</string>
+    <string name="performance_distance_help_title">Entfernung &amp; Informationsfilterung</string>
+    <string name="performance_distance_help_body">Die Spielinternen Kampfeinstellungen (ESC \u2192 Optionen \u2192 Spielinfo) steuern, welche Daten in das Addon fließen.\n\n\u201CKampfmeldungen anzeigen\u201D-Checkbox: Schaltet die visuelle Anzeige von Schadens/Heilung-Hitsplats im Spiel um, beeinflusst ABER NICHT den Datenfluss zum Addon. Sie können sie ein- oder ausschalten.\n\nInformationsfilter (SELF / PARTY / RAID / GUILD / ALL): DIES beeinflusst den Datenfluss. Das Ändern des Filters begrenzt, welche Kampfereignisse das Addon empfängt.\n\nEntfernungsregler: DIES beeinflusst den Datenfluss. Die Reduzierung des Bereichs begrenzt, wie weit entfernt Kampfereignisse erkannt werden.\n\nBeispiele:\n\u2022 SELF \u2014 Nur die Ereignisse Ihres eigenen Charakters. Der Entfernungsregler wird automatisch ausgegraut, da er nicht relevant ist.\n\u2022 PARTY \u2014 Ihre Gruppe von 5. In ArcheAge wird jeder in Ihrer Raid-Säule als Ihre \u201Cparty\u201D betrachtet. Zum Beispiel betreffen Zaubersprüche wie Schallwelle, die \u201Cnegative Effekte von allen Gruppenmitgliedern entfernen\u201D, Ihre Säule von 5, nicht den gesamten Raid.\n\u2022 RAID \u2014 Alle Partys im Raid (alle Säulen).\n\u2022 GUILD \u2014 Nur Spieler, die mit Ihrem Guildenamen übereinstimmen. Ein zweiter Guildenamen wird nicht angezeigt, da es sich technisch um eine andere Gilde handelt.\n\nDas Anpassen dieser Spielinternen Filter kann dem Deaktivieren von Funktionen in der App vorzuziehen sein, da sie feinere Kontrolle darüber bieten, welche Daten verarbeitet werden.</string>
+
 </resources>
