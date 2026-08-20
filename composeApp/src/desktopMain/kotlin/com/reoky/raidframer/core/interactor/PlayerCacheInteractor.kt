@@ -73,6 +73,7 @@ object PlayerCacheInteractor : Interactor() {
   private val _raidDeparturesFlow = MutableStateFlow<Map<Int, Set<String>>>(emptyMap())
   val raidDeparturesFlow: StateFlow<Map<Int, Set<String>>> = _raidDeparturesFlow.asStateFlow()
   private val cards = mutableStateMapOf<String, PlayerCard>()
+  val trackedPlayerCount: Int get() = cards.size
   private val petCards = mutableStateMapOf<String, PetCard>()
   // Life Mend caster tracking: target → caster (updated on SPELL_AURA_APPLIED/REMOVED for buff 25875)
   private val lifeMendCasterMap = mutableMapOf<String, String>()

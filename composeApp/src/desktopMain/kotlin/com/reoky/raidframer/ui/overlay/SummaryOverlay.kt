@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.ui.component.PerformanceDisabledBanner
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
@@ -38,6 +39,7 @@ import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.RaidComparisonPieChart
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.performance_buff_debuff_tracking_disabled_banner
 import raid_framer_desktop.composeapp.generated.resources.summary_battle_summary_title_format
 import raid_framer_desktop.composeapp.generated.resources.summary_charms_by_faction
 import raid_framer_desktop.composeapp.generated.resources.summary_distresses_by_faction
@@ -373,6 +375,13 @@ fun SummaryOverlay(wm: WindowManager? = null) {
       }
     }
 
+    // Performance banner when buff/debuff tracking is disabled (only on buff/debuff relevant tabs)
+    val config by RFConfig.state.collectAsState()
+    val buffDebuffTabs = setOf(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14)
+    if (!config.performanceBuffDebuffTracking && selectedTabIndex in buffDebuffTabs) {
+      PerformanceDisabledBanner(stringResource(Res.string.performance_buff_debuff_tracking_disabled_banner))
+    }
+
     // Tab Content
     Box(
       modifier = Modifier
@@ -544,7 +553,7 @@ private fun FactionChartsTab(
 
   LazyColumn(
     modifier = Modifier.fillMaxSize(),
-    contentPadding = PaddingValues(vertical = 8.dp),
+    contentPadding = PaddingValues(bottom = 8.dp),
     verticalArrangement = Arrangement.spacedBy(8.dp)
   ) {
     // Row 1: Silences, Charms, Distresses

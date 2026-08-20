@@ -424,3 +424,17 @@ val MIGRATION_38_39 = object : Migration(38, 39) {
     connection.prepare("ALTER TABLE config ADD COLUMN exportPngLanguages TEXT NOT NULL DEFAULT ''").use { it.step() }
   }
 }
+
+// Added performance settings for granular control over event tracking and resource usage.
+val MIGRATION_39_40 = object : Migration(39, 40) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceCompanionEnabled INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceRaidBuffScanning INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceBuffDebuffTracking INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceRaidRosterTracking INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceDuelTracking INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceTargetChangedTracking INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceBattleGraphEnabled INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceEventHistoryDepth INTEGER NOT NULL DEFAULT 500").use { it.step() }
+  }
+}

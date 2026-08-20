@@ -84,6 +84,12 @@ object BattleGraphInteractor : Interactor() {
   private val rebuildThrottleMs = 3_000L
 
   override suspend fun interact() {
+    // Performance: skip all graph computation when battle graph is disabled
+    if (!RFConfig.state.value.performanceBattleGraphEnabled) {
+      _graphData.value = BattleGraphData()
+      return
+    }
+
     combine(
       PlayerCacheInteractor.topDamage,
       PlayerCacheInteractor.topHeals,
@@ -199,6 +205,7 @@ object BattleGraphInteractor : Interactor() {
   }
 
   private fun rebuildGraphFromCurrentState() {
+    if (!RFConfig.state.value.performanceBattleGraphEnabled) return
     scope.launch {
       val damages = PlayerCacheInteractor.topDamage.value
       val heals = PlayerCacheInteractor.topHeals.value

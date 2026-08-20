@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 39
+const val SCHEMA_VERSION = 40
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -127,7 +127,17 @@ data class ConfigEntity(
   val itemUseOverlayEnabled: Boolean = false,
 
   // Combat overlay spec icons toggle
-  val combatShowSpecIcons: Boolean = true
+  val combatShowSpecIcons: Boolean = true,
+
+  // Performance settings
+  val performanceCompanionEnabled: Boolean = true,
+  val performanceRaidBuffScanning: Boolean = true,
+  val performanceBuffDebuffTracking: Boolean = true,
+  val performanceRaidRosterTracking: Boolean = true,
+  val performanceDuelTracking: Boolean = true,
+  val performanceTargetChangedTracking: Boolean = true,
+  val performanceBattleGraphEnabled: Boolean = true,
+  val performanceEventHistoryDepth: Int = 500
 )
 
 /*

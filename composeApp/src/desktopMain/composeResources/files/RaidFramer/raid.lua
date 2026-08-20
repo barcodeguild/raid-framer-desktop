@@ -111,6 +111,7 @@ function RF.Raid.Prepare()
 end
 
 function RF.Raid.handleTeamRoleChanged(...)
+  if not RF.Config.PERFORMANCE_RAID_ROSTER_TRACKING then return end
   --RF.Debug.dumpTable({...})
 end
 
@@ -131,6 +132,7 @@ end
 -- handler for when we detect changes to the raid roster
 -- note that there's a lot of raid refreshes that aren't actual changes (so filter accordingly)
 function RF.Raid.handleTeamMembersChanged(reason, ...)
+  if not RF.Config.PERFORMANCE_RAID_ROSTER_TRACKING then return end
 
   -- GUARD: reason is not refresh (don't waste api calls/processing on non-changes)
   if reason == RF.TEAM_CHANGE_REASONS.REFRESHED then
@@ -386,10 +388,12 @@ end
 
 -- these are updated when the event fires -or- when we detect players in the second raid
 function RF.Raid.handleCoraidEstablished()
+  if not RF.Config.PERFORMANCE_RAID_ROSTER_TRACKING then return end
   RF.Raid.hasCoRaid = true
   RF:Log("[Raid] Joint raid established")
 end
 function RF.Raid.handleCoraidBroken()
+  if not RF.Config.PERFORMANCE_RAID_ROSTER_TRACKING then return end
   RF.Raid.hasCoRaid = false
   -- Clear the second raid slots to prevent stale data
   for i = 51, 100 do

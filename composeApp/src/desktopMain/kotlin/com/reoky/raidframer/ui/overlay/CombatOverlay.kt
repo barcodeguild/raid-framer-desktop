@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -74,6 +75,10 @@ import raid_framer_desktop.composeapp.generated.resources.combat_export_saving_s
 import raid_framer_desktop.composeapp.generated.resources.combat_export_saving_language
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_summary
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_title
+import raid_framer_desktop.composeapp.generated.resources.combat_companion_disabled
+import raid_framer_desktop.composeapp.generated.resources.combat_companion_disabled_hint
+import raid_framer_desktop.composeapp.generated.resources.combat_ranking_disabled
+import raid_framer_desktop.composeapp.generated.resources.combat_ranking_disabled_hint
 
 @Preview
 @Composable
@@ -359,10 +364,17 @@ fun CombatOverlay(wm: WindowManager? = null) {
             Box {
               val summaryInteractionSource = remember { MutableInteractionSource() }
               val isSummaryHovered by summaryInteractionSource.collectIsHoveredAsState()
-              IconButton(onClick = { showViewPopup = !showViewPopup }, modifier = Modifier.size(32.dp)) {
+              IconButton(onClick = {
+                if (config.performanceBattleGraphEnabled) {
+                  showViewPopup = !showViewPopup
+                } else {
+                  // When battle graph is disabled, open Summary directly
+                  wm?.openWindow(OverlayType.SUMMARY)
+                }
+              }, modifier = Modifier.size(32.dp)) {
                 Text(text = "\uf200", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (isSummaryHovered || showViewPopup) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = summaryInteractionSource))
               }
-              if (showViewPopup) {
+              if (showViewPopup && config.performanceBattleGraphEnabled) {
                 Popup(
                   alignment = Alignment.TopEnd,
                   offset = IntOffset(0, 36)
@@ -499,6 +511,29 @@ fun CombatOverlay(wm: WindowManager? = null) {
         }
 
         // Body columns row below header ~ columns fill full width and extend to edges
+        // Performance: show companion disabled message when companion is disabled
+        if (!config.performanceCompanionEnabled) {
+          Box(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            contentAlignment = Alignment.Center
+          ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+              Text(
+                text = stringResource(Res.string.combat_companion_disabled),
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+              )
+              Spacer(modifier = Modifier.height(8.dp))
+              Text(
+                text = stringResource(Res.string.combat_companion_disabled_hint),
+                color = RFColors.AccentRed,
+                fontSize = 13.sp,
+                modifier = Modifier.clickable { wm?.openWindow(OverlayType.SETTINGS) }
+              )
+            }
+          }
+        } else {
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
           Row(modifier = Modifier.fillMaxSize()) {
             if (config.combatShowDamageColumn) {
@@ -606,62 +641,90 @@ fun CombatOverlay(wm: WindowManager? = null) {
             customCategories.forEach { (category, flow) ->
               val sortedList by flow.collectAsState()
               val listState = customListStates[category.name] ?: return@forEach
+
+              // Performance: check if this category depends on disabled tracking
+              val buffDebuffCategories = setOf(
+                CombatRankingCategory.BUFFS, CombatRankingCategory.SONGS,
+                CombatRankingCategory.DEBUFFS, CombatRankingCategory.CHARMS,
+                CombatRankingCategory.SILENCES, CombatRankingCategory.DISTRESSES
+              )
+              val isDisabledByPerformance = !config.performanceBuffDebuffTracking && category in buffDebuffCategories
+
               Column(
                 modifier = Modifier
                   .weight(1f)
                   .fillMaxHeight(),
                 horizontalAlignment = Alignment.CenterHorizontally
               ) {
-                LazyColumn(
-                  contentPadding = PaddingValues(0.dp),
-                  state = listState,
-                  modifier = Modifier
-                    .padding(start = 12.dp, bottom = 6.dp)
-                    .fillMaxWidth()
-                ) {
-                  itemsIndexed(sortedList, key = { _, card -> card.name }) { index, card ->
-                    PlayerRankingRow(
-                      index = index,
-                      card = card,
-                      valueText = when (category) {
-                        CombatRankingCategory.CHARMS -> card.sessionCharmTotal.toString()
-                        CombatRankingCategory.SILENCES -> card.sessionSilenceTotal.toString()
-                        CombatRankingCategory.DISTRESSES -> card.sessionDistressTotal.toString()
-                        CombatRankingCategory.DEBUFFS -> card.sessionDebuffTotal.toString()
-                        CombatRankingCategory.SONGS -> card.sessionSongsTotal.toString()
-                        CombatRankingCategory.BUFFS -> card.sessionBuffTotal.toString()
-                        CombatRankingCategory.POTIONS -> card.sessionPotionTotal.toString()
-                        CombatRankingCategory.GLIDERS -> card.sessionGliderTotal.toString()
-                        CombatRankingCategory.ITEMS -> card.sessionItemSkillTotal.toString()
-                        CombatRankingCategory.TIGER_STRIKES -> card.sessionTigerStrikeTotal.toString()
-                        CombatRankingCategory.FREEZES -> card.sessionFreezeTotal.toString()
-                        CombatRankingCategory.KILLS -> card.sessionKillTotal.toString()
-                        CombatRankingCategory.TRIPS -> card.sessionTripsTotal.toString()
-                        CombatRankingCategory.BUBBLES -> card.sessionBubblesTotal.toString()
-                        CombatRankingCategory.BRACINGS -> card.sessionBracingsTotal.toString()
-                        CombatRankingCategory.SHIELD_STRIP -> card.sessionShieldStripTotal.toString()
-                        CombatRankingCategory.WEAPON_DISABLES -> card.sessionWeaponDisablesTotal.toString()
-                        CombatRankingCategory.POTION_DISABLES -> card.sessionPotionDisablesTotal.toString()
-                        CombatRankingCategory.BD_GLIDER -> card.sessionBdGliderTotal.toString()
-                        CombatRankingCategory.CRYSTAL_WINGS -> card.sessionCrystalWingsTotal.toString()
-                        CombatRankingCategory.GLIDER_DISABLES -> card.sessionGliderDisablesTotal.toString()
-                        CombatRankingCategory.PROVOKED -> card.sessionProvokedTotal.toString()
-                      },
-                      valueColor = category.valueColor,
-                      isRetribution = card.isBuildingAggression,
-                      flashingColor = flashingColorState.value,
-                      isOwnCharacter = card.name == config.playerName,
-                      onClick = {
-                        AppState.selectPlayer(card.name)
-                        wm?.openWindow(OverlayType.PLAYER_CARD)
-                      }
-                    )
+                if (isDisabledByPerformance) {
+                  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                      Text(
+                        text = stringResource(Res.string.combat_ranking_disabled),
+                        color = RFColors.TextTertiary,
+                        fontSize = 12.sp
+                      )
+                      Text(
+                        text = stringResource(Res.string.combat_ranking_disabled_hint),
+                        color = RFColors.AccentRed,
+                        fontSize = 11.sp,
+                        modifier = Modifier.clickable { wm?.openWindow(OverlayType.SETTINGS) }
+                      )
+                    }
+                  }
+                } else {
+                  LazyColumn(
+                    contentPadding = PaddingValues(0.dp),
+                    state = listState,
+                    modifier = Modifier
+                      .padding(start = 12.dp, bottom = 6.dp)
+                      .fillMaxWidth()
+                  ) {
+                    itemsIndexed(sortedList, key = { _, card -> card.name }) { index, card ->
+                      PlayerRankingRow(
+                        index = index,
+                        card = card,
+                        valueText = when (category) {
+                          CombatRankingCategory.CHARMS -> card.sessionCharmTotal.toString()
+                          CombatRankingCategory.SILENCES -> card.sessionSilenceTotal.toString()
+                          CombatRankingCategory.DISTRESSES -> card.sessionDistressTotal.toString()
+                          CombatRankingCategory.DEBUFFS -> card.sessionDebuffTotal.toString()
+                          CombatRankingCategory.SONGS -> card.sessionSongsTotal.toString()
+                          CombatRankingCategory.BUFFS -> card.sessionBuffTotal.toString()
+                          CombatRankingCategory.POTIONS -> card.sessionPotionTotal.toString()
+                          CombatRankingCategory.GLIDERS -> card.sessionGliderTotal.toString()
+                          CombatRankingCategory.ITEMS -> card.sessionItemSkillTotal.toString()
+                          CombatRankingCategory.TIGER_STRIKES -> card.sessionTigerStrikeTotal.toString()
+                          CombatRankingCategory.FREEZES -> card.sessionFreezeTotal.toString()
+                          CombatRankingCategory.KILLS -> card.sessionKillTotal.toString()
+                          CombatRankingCategory.TRIPS -> card.sessionTripsTotal.toString()
+                          CombatRankingCategory.BUBBLES -> card.sessionBubblesTotal.toString()
+                          CombatRankingCategory.BRACINGS -> card.sessionBracingsTotal.toString()
+                          CombatRankingCategory.SHIELD_STRIP -> card.sessionShieldStripTotal.toString()
+                          CombatRankingCategory.WEAPON_DISABLES -> card.sessionWeaponDisablesTotal.toString()
+                          CombatRankingCategory.POTION_DISABLES -> card.sessionPotionDisablesTotal.toString()
+                          CombatRankingCategory.BD_GLIDER -> card.sessionBdGliderTotal.toString()
+                          CombatRankingCategory.CRYSTAL_WINGS -> card.sessionCrystalWingsTotal.toString()
+                          CombatRankingCategory.GLIDER_DISABLES -> card.sessionGliderDisablesTotal.toString()
+                          CombatRankingCategory.PROVOKED -> card.sessionProvokedTotal.toString()
+                        },
+                        valueColor = category.valueColor,
+                        isRetribution = card.isBuildingAggression,
+                        flashingColor = flashingColorState.value,
+                        isOwnCharacter = card.name == config.playerName,
+                        onClick = {
+                          AppState.selectPlayer(card.name)
+                          wm?.openWindow(OverlayType.PLAYER_CARD)
+                        }
+                      )
+                    }
                   }
                 }
               }
             }
           }
         }
+        } // end companion enabled else
       } else {
         // If all columns are hidden, show a friendly message directing user to settings cause that's hilarious
         Box(
