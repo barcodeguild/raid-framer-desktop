@@ -636,7 +636,15 @@ private fun LanguageDropdown(currentCode: String) {
         DropdownMenuItem(
           text = { Text(text = entry.nativeLabel, color = RFColors.TextPrimary) },
           onClick = {
-            RFConfig.update { it.copy(preferredLanguage = entry.code) }
+            RFConfig.update { current ->
+              val cleanedLanguages = current.exportPngLanguages.split(',')
+                .filter { it.isNotBlank() && it != entry.code }
+                .joinToString(",")
+              current.copy(
+                preferredLanguage = entry.code,
+                exportPngLanguages = cleanedLanguages
+              )
+            }
             expanded = false
           },
           contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp)
@@ -1234,11 +1242,12 @@ private fun ExportSettingsPanel(wm: WindowManager?) {
       modifier = Modifier.padding(bottom = 6.dp)
     )
     val currentLanguage = config.preferredLanguage
+    val resolvedDefaultCode = if (currentLanguage.isBlank()) AppLocale.resolveSystemDefault().code else null
     val additionalLanguages = remember(config.exportPngLanguages) {
       config.exportPngLanguages.split(',').filter { it.isNotBlank() }.toSet()
     }
     AppLocale.ENTRIES.forEach { entry ->
-      val isCurrent = entry.code == currentLanguage
+      val isCurrent = entry.code == currentLanguage || (resolvedDefaultCode != null && entry.code == resolvedDefaultCode)
       SettingsCheckbox(
         checked = isCurrent || entry.code in additionalLanguages,
         onCheckedChange = { checked ->

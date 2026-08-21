@@ -22,6 +22,9 @@ object AppLocale {
 
   val SYSTEM_DEFAULT = Entry("", Locale.ROOT, "System Default")
 
+  /** Captured once at startup — the JVM's original locale before any apply() calls. */
+  private val originalLocale: Locale = Locale.getDefault()
+
   val ENTRIES: List<Entry> = listOf(
     Entry("en", Locale.forLanguageTag("en"), "English"),
     Entry("au", Locale.forLanguageTag("en-AU"), "Australian"),
@@ -34,10 +37,14 @@ object AppLocale {
 
   /**
    * Apply the language preference by setting the JVM default locale.
-   * No-op when [code] is blank (use system locale).
+   * Restores the original system locale when [code] is blank.
    */
   fun apply(code: String) {
-    if (code.isBlank()) return
+    if (code.isBlank()) {
+      Locale.setDefault(originalLocale)
+      println("Restored system default locale: ${originalLocale.toLanguageTag()}")
+      return
+    }
     val entry = ENTRIES.firstOrNull { it.code == code }
     if (entry == null) {
       println("Ignoring unknown language preference: $code")
@@ -57,4 +64,15 @@ object AppLocale {
     .filter { it.isNotEmpty() }
     .distinct()
     .mapNotNull { code -> ENTRIES.firstOrNull { it.code == code } }
+
+  /**
+   * Resolve the system default language to the best matching supported entry.
+   * Tries exact locale match first, then language-only match, then falls back to English.
+   */
+  fun resolveSystemDefault(): Entry {
+    val sys = originalLocale
+    return ENTRIES.firstOrNull { it.locale == sys }
+      ?: ENTRIES.firstOrNull { it.locale.language == sys.language }
+      ?: ENTRIES.first { it.code == "en" }
+  }
 }

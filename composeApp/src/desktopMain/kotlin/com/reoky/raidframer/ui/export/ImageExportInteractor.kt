@@ -430,7 +430,12 @@ object ImageExportInteractor {
     val config = RFConfig.state.value
     val current = AppLocale.entryFor(config.preferredLanguage)
     val entries = buildList {
-      if (current.code.isNotBlank()) add(current)
+      if (current.code.isNotBlank()) {
+        add(current)
+      } else {
+        // System Default — resolve to a supported language, falling back to English
+        add(AppLocale.resolveSystemDefault())
+      }
       addAll(AppLocale.validEntriesForCodes(config.exportPngLanguages))
     }.distinctBy { it.code }
     return entries.map { ExportLanguage(it.code, it.locale, it.nativeLabel) }
