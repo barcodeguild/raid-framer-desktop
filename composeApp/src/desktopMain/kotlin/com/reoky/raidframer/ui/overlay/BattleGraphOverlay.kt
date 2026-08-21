@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.togglePlayerCard
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.blacklistedDebuffNames
 import com.reoky.raidframer.core.definitions.blacklistedBuffNames
@@ -167,8 +168,7 @@ fun BattleGraphOverlay(wm: WindowManager?) {
           mode = selectedMode,
           techAnalysis = if (showTechAnalysis || showMvpOnly) techAnalysis else null,
           onOpenPlayerCard = { playerName ->
-            AppState.selectPlayer(playerName)
-            wm?.openWindow(OverlayType.PLAYER_CARD)
+            togglePlayerCard(wm, playerName)
           },
           onFilterByName = { name ->
             searchQuery = name

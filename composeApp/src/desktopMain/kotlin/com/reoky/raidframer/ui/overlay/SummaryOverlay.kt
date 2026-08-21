@@ -24,6 +24,7 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.ui.component.PerformanceDisabledBanner
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.togglePlayerCard
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.definitions.SpecType
@@ -722,8 +723,7 @@ private fun CCDebuffsTab(
       valueColor = RFColors.tripsAmber,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u25CF",
@@ -733,8 +733,7 @@ private fun CCDebuffsTab(
       valueColor = RFColors.bubblesCyan,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u27A1",
@@ -744,8 +743,7 @@ private fun CCDebuffsTab(
       valueColor = RFColors.bracingsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -768,8 +766,7 @@ private fun UtilityDebuffsTab(
       valueColor = RFColors.shieldStripOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2620",
@@ -779,8 +776,7 @@ private fun UtilityDebuffsTab(
       valueColor = RFColors.weaponDisablesRed,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2697",
@@ -790,8 +786,7 @@ private fun UtilityDebuffsTab(
       valueColor = RFColors.potionDisablesPurple,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -814,8 +809,7 @@ private fun GliderDebuffsTab(
       valueColor = RFColors.bdGliderTeal,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2708",
@@ -825,8 +819,7 @@ private fun GliderDebuffsTab(
       valueColor = RFColors.crystalWingsBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2708",
@@ -836,8 +829,7 @@ private fun GliderDebuffsTab(
       valueColor = RFColors.gliderDisablesPink,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -860,8 +852,7 @@ private fun SpecialDebuffsTab(
       valueColor = RFColors.provokesDeepPurple,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u26CF",
@@ -871,8 +862,7 @@ private fun SpecialDebuffsTab(
       valueColor = RFColors.petrificationGray,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2744",
@@ -882,8 +872,7 @@ private fun SpecialDebuffsTab(
       valueColor = RFColors.freezeIceBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -906,8 +895,7 @@ private fun KeyDebuffsTab(
       valueColor = RFColors.factionHaranya,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uf004",
@@ -917,8 +905,7 @@ private fun KeyDebuffsTab(
       valueColor = RFColors.factionNuia,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uf0c1",
@@ -928,8 +915,7 @@ private fun KeyDebuffsTab(
       valueColor = RFColors.factionPirate,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -950,8 +936,7 @@ private fun SpecialBuffsTab(
       valueColor = RFColors.defianceGold,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2600",
@@ -961,8 +946,7 @@ private fun SpecialBuffsTab(
       valueColor = RFColors.gardenDefianceBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2728",
@@ -972,8 +956,7 @@ private fun SpecialBuffsTab(
       valueColor = RFColors.purgeGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -994,8 +977,7 @@ private fun DebuffsContinuedTab(
       valueColor = RFColors.throwDaggerAmber,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u26A0",
@@ -1005,8 +987,7 @@ private fun DebuffsContinuedTab(
       valueColor = RFColors.stunDeepRed,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2195",
@@ -1016,8 +997,7 @@ private fun DebuffsContinuedTab(
       valueColor = RFColors.staggerBrown,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1038,8 +1018,7 @@ private fun DebuffsExtendedTab(
       valueColor = RFColors.absorbLifeforceMagenta,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2622",
@@ -1049,8 +1028,7 @@ private fun DebuffsExtendedTab(
       valueColor = RFColors.corrosiveBarrageLime,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uD83E\uDD85",
@@ -1060,8 +1038,7 @@ private fun DebuffsExtendedTab(
       valueColor = RFColors.blindedByCrowsDark,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1082,8 +1059,7 @@ private fun SpecialBuffsContinuedTab(
       valueColor = RFColors.impaleImmunitySteel,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uD83E\uDD85",
@@ -1093,8 +1069,7 @@ private fun SpecialBuffsContinuedTab(
       valueColor = RFColors.protectiveWingsGold,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2728",
@@ -1104,8 +1079,7 @@ private fun SpecialBuffsContinuedTab(
       valueColor = RFColors.courageousActionBright,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1127,8 +1101,7 @@ private fun SpecialHealsTab(
       valueColor = RFColors.manaBarrierBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2618",
@@ -1138,8 +1111,7 @@ private fun SpecialHealsTab(
       valueColor = RFColors.reviveGhostWhite,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uD83D\uDC89",
@@ -1153,8 +1125,7 @@ private fun SpecialHealsTab(
       modifier = Modifier.weight(1f),
       colorExtractor = { it.lifeMendQuality.color }
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1175,8 +1146,7 @@ private fun SpecialMeleeTab(
       valueColor = RFColors.techNoTigerStrikes,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u26CF",
@@ -1186,8 +1156,7 @@ private fun SpecialMeleeTab(
       valueColor = RFColors.mistSunderCyan,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u26CF",
@@ -1197,8 +1166,7 @@ private fun SpecialMeleeTab(
       valueColor = RFColors.regularSunderOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1219,8 +1187,7 @@ private fun SpecialDancesTab(
       valueColor = RFColors.sacDancePurple,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2602",
@@ -1230,8 +1197,7 @@ private fun SpecialDancesTab(
       valueColor = RFColors.deepTranquilityTeal,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2B07",
@@ -1241,8 +1207,7 @@ private fun SpecialDancesTab(
       valueColor = RFColors.deedendDebuffRed,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1304,8 +1269,7 @@ private fun BuffsDebuffsTab(
       valueColor = RFColors.factionHaranya,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1316,8 +1280,7 @@ private fun BuffsDebuffsTab(
       valueColor = RFColors.factionNuia,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1328,8 +1291,7 @@ private fun BuffsDebuffsTab(
       valueColor = RFColors.factionPirate,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1352,8 +1314,7 @@ private fun OdeTab(
       valueColor = RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1364,8 +1325,7 @@ private fun OdeTab(
       valueColor =  RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1376,8 +1336,7 @@ private fun OdeTab(
       valueColor =  RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1400,8 +1359,7 @@ private fun KillsDeathsTab(
       valueColor = RFColors.killsHaranyaGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1412,8 +1370,7 @@ private fun KillsDeathsTab(
       valueColor = RFColors.killsNuiaOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1424,8 +1381,7 @@ private fun KillsDeathsTab(
       valueColor = RFColors.killsPirateRed,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1460,8 +1416,7 @@ private fun DamageTakenHealsReceived(
       valueColor = RFColors.dpsOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1472,8 +1427,7 @@ private fun DamageTakenHealsReceived(
       valueColor = RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1491,8 +1445,7 @@ private fun DamageTakenHealsReceived(
         healRatioColor(ratio)
       }
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1553,8 +1506,7 @@ private fun UtilityItemsTab(
       valueColor = RFColors.potionTeal,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1565,8 +1517,7 @@ private fun UtilityItemsTab(
       valueColor = RFColors.gliderBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1577,8 +1528,7 @@ private fun UtilityItemsTab(
       valueColor = RFColors.itemSkillYellow,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1928,8 +1878,7 @@ private fun PerformanceTab(
       valueColor = RFColors.factionHaranya,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1940,8 +1889,7 @@ private fun PerformanceTab(
       valueColor = RFColors.factionNuia,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1952,8 +1900,7 @@ private fun PerformanceTab(
       valueColor = RFColors.factionPirate,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }

@@ -6,8 +6,12 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
+import com.reoky.raidframer.ui.OverlayType
+import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.time_ago_just_now
@@ -251,5 +255,21 @@ fun annotatedStringForHeal(event: HealEvent): AnnotatedString {
     withStyle(style = SpanStyle(color = Color.Magenta)) {
       append("(${event.timestamp.toLocalTimeString()})")
     }
+  }
+}
+
+/**
+ * Toggles the player card overlay: closes it if the same player is already selected and the card is open,
+ * otherwise opens it with the given player (and optional metric type).
+ */
+fun togglePlayerCard(wm: WindowManager?, playerName: String, metricType: GraphMetricType? = null) {
+  val isAlreadyOpen = wm?.isVisible(OverlayType.PLAYER_CARD)?.value == true
+  val isSamePlayer = AppState.selectedPlayer.value == playerName
+  if (isAlreadyOpen && isSamePlayer) {
+    wm?.closeWindow(OverlayType.PLAYER_CARD)
+  } else {
+    AppState.selectPlayer(playerName)
+    if (metricType != null) AppState.selectMetricType(metricType)
+    wm?.openWindow(OverlayType.PLAYER_CARD)
   }
 }

@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.FontsHelper
+import com.reoky.raidframer.core.helpers.togglePlayerCard
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.ui.OverlayType
@@ -559,11 +560,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                       isRetribution = card.isBuildingAggression,
                       flashingColor = flashingColorState.value,
                       isOwnCharacter = card.name == config.playerName,
-                      onClick = {
-                        AppState.selectPlayer(card.name)
-                        AppState.selectMetricType(GraphMetricType.DAMAGE)
-                        wm?.openWindow(OverlayType.PLAYER_CARD)
-                      }
+                      onClick = { togglePlayerCard(wm, card.name, GraphMetricType.DAMAGE) }
                     )
                   }
                 }
@@ -593,11 +590,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                       isRetribution = card.isBuildingAggression,
                       flashingColor = flashingColorState.value,
                       isOwnCharacter = card.name == config.playerName,
-                      onClick = {
-                        AppState.selectPlayer(card.name)
-                        AppState.selectMetricType(GraphMetricType.HEALING)
-                        wm?.openWindow(OverlayType.PLAYER_CARD)
-                      }
+                      onClick = { togglePlayerCard(wm, card.name, GraphMetricType.HEALING) }
                     )
                   }
                 }
@@ -627,11 +620,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                       isRetribution = card.isBuildingAggression,
                       flashingColor = flashingColorState.value,
                       isOwnCharacter = card.name == config.playerName,
-                      onClick = {
-                        AppState.selectPlayer(card.name)
-                        AppState.selectMetricType(GraphMetricType.CC)
-                        wm?.openWindow(OverlayType.PLAYER_CARD)
-                      }
+                      onClick = { togglePlayerCard(wm, card.name, GraphMetricType.CC) }
                     )
                   }
                 }
@@ -712,10 +701,7 @@ fun CombatOverlay(wm: WindowManager? = null) {
                         isRetribution = card.isBuildingAggression,
                         flashingColor = flashingColorState.value,
                         isOwnCharacter = card.name == config.playerName,
-                        onClick = {
-                          AppState.selectPlayer(card.name)
-                          wm?.openWindow(OverlayType.PLAYER_CARD)
-                        }
+                        onClick = { togglePlayerCard(wm, card.name) }
                       )
                     }
                   }
