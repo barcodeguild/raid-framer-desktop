@@ -32,7 +32,7 @@ RF.Raid.INTERESTING_BUFF_IDS = {
   [21800] = true, [21805] = true, [21810] = true, [21815] = true, [21823] = true,
   -- Feast table, ribs, and lower-level meatballs
   [21791] = true, [21792] = true, [21793] = true, [21794] = true,
-  [685] = true, [689] = true, [693] = true, [6970] = true,
+  [685] = true, [689] = true, [693] = true, [697] = true,
   [680] = true, [686] = true, [690] = true, [694] = true,
   -- Longing: regular and enhanced
   [20552] = true, [32381] = true, [32382] = true, [21795] = true, [26581] = true, [26582] = true,
