@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -86,6 +87,14 @@ object PlayerCacheInteractor : Interactor() {
   private var archiveJob: Job? = null
   private var preSessionCacheSnapshot: MutableMap<String, PlayerCacheEntity?> = mutableMapOf()
   private var lastMemoryCensusAt = 0L
+
+  // Keep one sampled card-list snapshot for all derived UI pumps. This preserves
+  // eager availability while avoiding one Compose snapshot collector per pump.
+  private val cardSnapshots = snapshotFlow { cards.values.toList() }
+    .sample(250L)
+    .shareIn(scope, SharingStarted.Eagerly, replay = 1)
+    .sample(250L)
+    .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
   init {
     scope.launch {
@@ -1528,7 +1537,7 @@ object PlayerCacheInteractor : Interactor() {
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), cards[name])
   }
 
-  var topDamage: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topDamage: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionDamageTotal > 0 }.sortedByDescending { it.sessionDamageTotal }
         .take(100)
@@ -1536,21 +1545,21 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  var topHeals: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topHeals: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionHealTotal > 0 }.sortedByDescending { it.sessionHealTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  var topCC: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topCC: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionCCTotal > 0 }.sortedByDescending { it.sessionCCTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  var topBuffs: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topBuffs: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionBuffTotal > 0 }.sortedByDescending { it.sessionBuffTotal }
         .take(100)
@@ -1558,7 +1567,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  var topLifeMenders: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topLifeMenders: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.lifeMendTotal > 0 && it.lifeMendHealAmounts.isNotEmpty() }
         .sortedByDescending { it.lifeMendTotal }
@@ -1567,7 +1576,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  var topDebuff: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topDebuff: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionDebuffTotal > 0 }.sortedByDescending { it.sessionDebuffTotal }
         .take(100)
@@ -1575,14 +1584,14 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  var topCharms: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topCharms: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionCharmTotal > 0 }.sortedByDescending { it.sessionCharmTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topSilences: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topSilences: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionSilenceTotal > 0 }.sortedByDescending { it.sessionSilenceTotal }
         .take(100)
@@ -1590,7 +1599,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topSongs: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topSongs: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionSongsTotal > 0 }.sortedByDescending { it.sessionSongsTotal }
         .take(100)
@@ -1598,7 +1607,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topDistresses: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topDistresses: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionDistressTotal > 0 }.sortedByDescending { it.sessionDistressTotal }
         .take(100)
@@ -1606,7 +1615,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topTigerStrikes: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topTigerStrikes: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionTigerStrikeTotal > 0 }.sortedByDescending { it.sessionTigerStrikeTotal }
         .take(100)
@@ -1614,7 +1623,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topFreezes: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topFreezes: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionFreezeTotal > 0 }.sortedByDescending { it.sessionFreezeTotal }
         .take(100)
@@ -1622,7 +1631,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topTrips: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topTrips: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionTripsTotal > 0 }.sortedByDescending { it.sessionTripsTotal }
         .take(100)
@@ -1630,7 +1639,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topBubbles: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topBubbles: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionBubblesTotal > 0 }.sortedByDescending { it.sessionBubblesTotal }
         .take(100)
@@ -1638,7 +1647,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topBracings: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topBracings: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionBracingsTotal > 0 }.sortedByDescending { it.sessionBracingsTotal }
         .take(100)
@@ -1646,7 +1655,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topShieldStrip: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topShieldStrip: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionShieldStripTotal > 0 }.sortedByDescending { it.sessionShieldStripTotal }
         .take(100)
@@ -1654,7 +1663,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topWeaponDisables: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topWeaponDisables: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionWeaponDisablesTotal > 0 }.sortedByDescending { it.sessionWeaponDisablesTotal }
         .take(100)
@@ -1662,7 +1671,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topPotionDisables: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topPotionDisables: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionPotionDisablesTotal > 0 }.sortedByDescending { it.sessionPotionDisablesTotal }
         .take(100)
@@ -1670,7 +1679,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topBdGlider: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topBdGlider: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionBdGliderTotal > 0 }.sortedByDescending { it.sessionBdGliderTotal }
         .take(100)
@@ -1678,7 +1687,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topCrystalWings: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topCrystalWings: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionCrystalWingsTotal > 0 }.sortedByDescending { it.sessionCrystalWingsTotal }
         .take(100)
@@ -1686,7 +1695,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topGliderDisables: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topGliderDisables: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionGliderDisablesTotal > 0 }.sortedByDescending { it.sessionGliderDisablesTotal }
         .take(100)
@@ -1694,7 +1703,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topProvoked: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topProvoked: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionProvokedTotal > 0 }.sortedByDescending { it.sessionProvokedTotal }
         .take(100)
@@ -1702,87 +1711,87 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topDefiance: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topDefiance: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionDefianceTotal > 0 }.sortedByDescending { card -> card.sessionDefianceTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topGardenDefiance: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topGardenDefiance: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionGardenDefianceTotal > 0 }.sortedByDescending { card -> card.sessionGardenDefianceTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topPurges: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topPurges: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionPurgeTotal > 0 }.sortedByDescending { card -> card.sessionPurgeTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topSacDances: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topSacDances: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionSacDanceTotal > 0 }.sortedByDescending { card -> card.sessionSacDanceTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topDeepTranquility: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topDeepTranquility: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionDeepTranquilityTotal > 0 }.sortedByDescending { card -> card.sessionDeepTranquilityTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topDeependDebuff: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topDeependDebuff: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionDeependDebuffTotal > 0 }.sortedByDescending { card -> card.sessionDeependDebuffTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topThrowDagger: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topThrowDagger: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionThrowDaggerTotal > 0 }.sortedByDescending { card -> card.sessionThrowDaggerTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topStuns: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topStuns: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionStunsTotal > 0 }.sortedByDescending { card -> card.sessionStunsTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topStaggers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topStaggers: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionStaggersTotal > 0 }.sortedByDescending { card -> card.sessionStaggersTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topPetrification: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topPetrification: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionPetrificationTotal > 0 }.sortedByDescending { card -> card.sessionPetrificationTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topAbsorbLifeforce: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topAbsorbLifeforce: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionAbsorbLifeforceTotal > 0 }.sortedByDescending { card -> card.sessionAbsorbLifeforceTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topCorrosiveBarrage: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topCorrosiveBarrage: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionCorrosiveBarrageTotal > 0 }.sortedByDescending { card -> card.sessionCorrosiveBarrageTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topBlindedByCrows: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topBlindedByCrows: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionBlindedByCrowsTotal > 0 }.sortedByDescending { card -> card.sessionBlindedByCrowsTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topMistSunder: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topMistSunder: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionMistSunderTotal > 0 }.sortedByDescending { card -> card.sessionMistSunderTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topRegularSunder: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topRegularSunder: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionRegularSunderTotal > 0 }.sortedByDescending { card -> card.sessionRegularSunderTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topImpaleImmunity: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topImpaleImmunity: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionImpaleImmunityTotal > 0 }.sortedByDescending { card -> card.sessionImpaleImmunityTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topProtectiveWings: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topProtectiveWings: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionProtectiveWingsTotal > 0 }.sortedByDescending { card -> card.sessionProtectiveWingsTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topCourageousAction: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topCourageousAction: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionCourageousActionTotal > 0 }.sortedByDescending { card -> card.sessionCourageousActionTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topManaBarrier: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topManaBarrier: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionManaBarrierTotal > 0 }.sortedByDescending { card -> card.sessionManaBarrierTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topRevive: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topRevive: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionReviveTotal > 0 }.sortedByDescending { card -> card.sessionReviveTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  var topGliderGamers: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topGliderGamers: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionGliderTotal > 0 }.sortedByDescending { it.sessionGliderTotal }
         .take(100)
@@ -1790,7 +1799,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  var topPotters: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topPotters: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionPotionTotal > 0 }.sortedByDescending { it.sessionPotionTotal }
         .take(100)
@@ -1798,7 +1807,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  var topItemSkillCasters: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  var topItemSkillCasters: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionItemSkillTotal > 0 }.sortedByDescending { it.sessionItemSkillTotal }
         .take(100)
@@ -1806,14 +1815,14 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topKills: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topKills: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 }.sortedByDescending { it.sessionKillTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topKillsKB: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topKillsKB: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionKillTotalKB > 0 }
         .sortedByDescending { it.sessionKillTotalKB }
@@ -1822,7 +1831,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topHealsOde: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topHealsOde: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 }
         .sortedByDescending { it.sessionOdeHealsTotal }
@@ -1831,7 +1840,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topKillsLifetime: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topKillsLifetime: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && (it.cache?.lifetimeTotalKills ?: 0L) > 0L }
         .sortedByDescending { it.cache?.lifetimeTotalKills ?: 0L }
@@ -1840,14 +1849,14 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topDeaths: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topDeaths: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionDeathTotal > 0 }.sortedByDescending { it.sessionDeathTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topDamageTaken: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topDamageTaken: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionDamageTakenTotal > 0 }
         .sortedByDescending { it.sessionDamageTakenTotal }
@@ -1856,7 +1865,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topHealsReceived: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topHealsReceived: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionHealsReceivedTotal > 0 }
         .sortedByDescending { it.sessionHealsReceivedTotal }
@@ -1913,73 +1922,73 @@ object PlayerCacheInteractor : Interactor() {
   // Faction Comparisons //
   /////////////////////////
 
-  val topDamageSpellsHaranya: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
+  val topDamageSpellsHaranya: StateFlow<List<SpellDamage>> = cardSnapshots
     .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.HARANYA) }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topDamageSpellsNuia: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
+  val topDamageSpellsNuia: StateFlow<List<SpellDamage>> = cardSnapshots
     .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.NUIA) }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topDamageSpellsPirate: StateFlow<List<SpellDamage>> = snapshotFlow { cards.values.toList() }
+  val topDamageSpellsPirate: StateFlow<List<SpellDamage>> = cardSnapshots
     .map { cardList -> aggregateDamageBySpellForFaction(cardList, Faction.PIRATE) }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topItemUsesHaranya: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
+  val topItemUsesHaranya: StateFlow<List<ItemUsage>> = cardSnapshots
     .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.HARANYA) }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topItemUsesNuia: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
+  val topItemUsesNuia: StateFlow<List<ItemUsage>> = cardSnapshots
     .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.NUIA) }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topItemUsesPirate: StateFlow<List<ItemUsage>> = snapshotFlow { cards.values.toList() }
+  val topItemUsesPirate: StateFlow<List<ItemUsage>> = cardSnapshots
     .map { cardList -> aggregateItemUsesByFaction(cardList, Faction.PIRATE) }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   // top kills haranya, nuia, and pirate
-  val topKillsHaranya: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topKillsHaranya: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 && it.lastKnownFaction == Faction.HARANYA.value }
         .sortedByDescending { it.sessionKillTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
-  val topKillsNuia: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topKillsNuia: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 && it.lastKnownFaction == Faction.NUIA.value }
         .sortedByDescending { it.sessionKillTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
-  val topKillsPirate: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topKillsPirate: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionKillTotal > 0 && it.lastKnownFaction == Faction.PIRATE.value }.sortedByDescending { it.sessionKillTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topOdeHaranya: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topOdeHaranya: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 && it.lastKnownFaction == Faction.HARANYA.value }
         .sortedByDescending { it.sessionOdeHealsTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
-  val topOdeNuia: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topOdeNuia: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 && it.lastKnownFaction == Faction.NUIA.value }
         .sortedByDescending { it.sessionOdeHealsTotal }
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
-  val topOdePirate: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topOdePirate: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionOdeHealsTotal > 0 && it.lastKnownFaction == Faction.PIRATE.value }
         .sortedByDescending { it.sessionOdeHealsTotal }
@@ -1993,7 +2002,7 @@ object PlayerCacheInteractor : Interactor() {
    */
 
   // three-way compare
-  val factionCharmComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionCharmComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionCharmTotal })
       mapOf(
@@ -2005,7 +2014,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionSilenceComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionSilenceComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionSilenceTotal })
       mapOf(
@@ -2017,7 +2026,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionDistressComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionDistressComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionDistressTotal })
       mapOf(
@@ -2029,7 +2038,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionTigerStrikeComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionTigerStrikeComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionTigerStrikeTotal })
       mapOf(
@@ -2041,7 +2050,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionFreezeComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionFreezeComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionFreezeTotal })
       mapOf(
@@ -2053,7 +2062,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionTripsComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionTripsComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionTripsTotal })
       mapOf(
@@ -2065,7 +2074,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionBubblesComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionBubblesComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionBubblesTotal })
       mapOf(
@@ -2077,7 +2086,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionBracingsComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionBracingsComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionBracingsTotal })
       mapOf(
@@ -2089,7 +2098,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionShieldStripComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionShieldStripComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionShieldStripTotal })
       mapOf(
@@ -2101,7 +2110,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionWeaponDisablesComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionWeaponDisablesComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionWeaponDisablesTotal })
       mapOf(
@@ -2113,7 +2122,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionPotionDisablesComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionPotionDisablesComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionPotionDisablesTotal })
       mapOf(
@@ -2125,7 +2134,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionBdGliderComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionBdGliderComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionBdGliderTotal })
       mapOf(
@@ -2137,7 +2146,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionCrystalWingsComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionCrystalWingsComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionCrystalWingsTotal })
       mapOf(
@@ -2149,7 +2158,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionGliderDisablesComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionGliderDisablesComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionGliderDisablesTotal })
       mapOf(
@@ -2161,7 +2170,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionProvokedComparisonAll: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionProvokedComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionProvokedTotal })
       mapOf(
@@ -2174,7 +2183,7 @@ object PlayerCacheInteractor : Interactor() {
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
   // PvP performance score pumps (one per faction)
-  val topPerformanceHaranya: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topPerformanceHaranya: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cardList ->
       cardList
         .filter { it.isRealPlayer && it.lastKnownFaction == Faction.HARANYA.value && it.pvpPerformancePoints() > 0 }
@@ -2184,7 +2193,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topPerformanceNuia: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topPerformanceNuia: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cardList ->
       cardList
         .filter { it.isRealPlayer && it.lastKnownFaction == Faction.NUIA.value && it.pvpPerformancePoints() > 0 }
@@ -2194,7 +2203,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val topPerformancePirate: StateFlow<List<PlayerCard>> = snapshotFlow { cards.values.toList() }
+  val topPerformancePirate: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cardList ->
       cardList
         .filter { it.isRealPlayer && it.lastKnownFaction == Faction.PIRATE.value && it.pvpPerformancePoints() > 0 }
@@ -2204,7 +2213,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  val buildCountsHaranya: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
+  val buildCountsHaranya: StateFlow<Map<String, Int>> = cardSnapshots
     .map {
       it
         .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.HARANYA && it.hasPvPParticipation() }
@@ -2214,7 +2223,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val buildCountsNuia: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
+  val buildCountsNuia: StateFlow<Map<String, Int>> = cardSnapshots
     .map {
       it
         .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.NUIA && it.hasPvPParticipation() }
@@ -2224,7 +2233,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val buildCountsPirate: StateFlow<Map<String, Int>> = snapshotFlow { cards.values.toList() }
+  val buildCountsPirate: StateFlow<Map<String, Int>> = cardSnapshots
     .map {
       it
         .filter { it.isRealPlayer && Faction.fromString(it.lastKnownFaction) == Faction.PIRATE && it.hasPvPParticipation() }
@@ -2236,7 +2245,7 @@ object PlayerCacheInteractor : Interactor() {
 
 
   // two-way compare (maybe deprecated later)
-  val factionCharmComparison: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionCharmComparison: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionCharmTotal })
       val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
@@ -2247,7 +2256,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionSilenceComparison: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionSilenceComparison: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionSilenceTotal })
       val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
@@ -2258,7 +2267,7 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-  val factionDistressComparison: StateFlow<Map<String, Float>> = snapshotFlow { cards.values.toList() }
+  val factionDistressComparison: StateFlow<Map<String, Float>> = cardSnapshots
     .map {
       val totals = aggregateSessionLongByFaction({ it.sessionDistressTotal })
       val playerFaction = Faction.fromString(RFConfig.state.value.playerFaction)
