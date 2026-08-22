@@ -1241,6 +1241,10 @@
     <string name="settings_performance_event_history_depth">事件历史深度</string>
     <string name="settings_performance_event_history_depth_desc">每个玩家卡片用于事件时间线的最大存储事件数。较低的值使用更少的内存。</string>
     <string name="settings_performance_event_history_estimate">~%1$s 每玩家事件 \u00D7 %2$d 已追踪 \u2248 ~%3$s 总计</string>
+    <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
+    <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
+    <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB / %2$dMB heap</string>
     <string name="settings_performance_distance_help">? 距离</string>
     <string name="settings_performance_impact_label">影响：</string>
     <string name="combat_ranking_disabled">此排名已禁用</string>

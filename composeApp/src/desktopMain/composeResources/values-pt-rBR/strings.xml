@@ -1187,6 +1187,10 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="settings_performance_event_history_depth">Profundidade do Histórico de Eventos</string>
     <string name="settings_performance_event_history_depth_desc">Máximo de eventos armazenados por cartão de jogador na linha do tempo. Valores menores usam menos memória.</string>
     <string name="settings_performance_event_history_estimate">~%1$s eventos por jogador \u00D7 %2$d rastreados \u2248 ~%3$s total</string>
+    <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
+    <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
+    <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB / %2$dMB heap</string>
     <string name="settings_performance_distance_help">? Distância</string>
     <string name="settings_performance_impact_label">Impacto:</string>
     <string name="combat_ranking_disabled">Esta classificação está desativada</string>

@@ -438,3 +438,10 @@ val MIGRATION_39_40 = object : Migration(39, 40) {
     connection.prepare("ALTER TABLE config ADD COLUMN performanceEventHistoryDepth INTEGER NOT NULL DEFAULT 500").use { it.step() }
   }
 }
+
+// Added battle graph spell depth setting to cap per-target spell breakdowns for memory optimization.
+val MIGRATION_40_41 = object : Migration(40, 41) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceBattleGraphSpellDepth INTEGER NOT NULL DEFAULT 30").use { it.step() }
+  }
+}

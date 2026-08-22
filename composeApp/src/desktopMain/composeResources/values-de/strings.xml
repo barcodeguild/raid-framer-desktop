@@ -1187,6 +1187,10 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="settings_performance_event_history_depth">Ereignisverlaufstiefe</string>
     <string name="settings_performance_event_history_depth_desc">Maximale Ereignisse pro Spielerkarte für die Ereigniszeitachse. Niedrigere Werte verwenden weniger Speicher.</string>
     <string name="settings_performance_event_history_estimate">~%1$s Ereignisse pro Spieler \u00D7 %2$d verfolgt \u2248 ~%3$s gesamt</string>
+    <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
+    <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
+    <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB / %2$dMB heap</string>
     <string name="settings_performance_distance_help">? Entfernung</string>
     <string name="settings_performance_impact_label">Auswirkung:</string>
     <string name="combat_ranking_disabled">Diese Rangliste ist deaktiviert</string>

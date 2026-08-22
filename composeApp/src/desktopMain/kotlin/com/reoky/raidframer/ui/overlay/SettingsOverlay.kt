@@ -48,6 +48,7 @@ import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableStatus
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.ui.component.graphs.MemoryGraphComponent
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.messageBox
@@ -900,9 +901,17 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
         fontSize = 12.sp
       )
       Spacer(modifier = Modifier.height(4.dp))
+      // Use local float state during drag to prevent integer truncation jitter
+      var eventDepthFloat by remember {
+        mutableStateOf((config.performanceEventHistoryDepth - 50).toFloat() / (5000 - 50).toFloat())
+      }
+      LaunchedEffect(config.performanceEventHistoryDepth) {
+        eventDepthFloat = (config.performanceEventHistoryDepth - 50).toFloat() / (5000 - 50).toFloat()
+      }
       DragLockedSlider(
-        value = (config.performanceEventHistoryDepth - 50).toFloat() / (5000 - 50).toFloat(),
+        value = eventDepthFloat,
         onValueChange = { value ->
+          eventDepthFloat = value
           val depth = (50 + value * (5000 - 50)).toInt().coerceIn(50, 5000)
           RFConfig.update { it.copy(performanceEventHistoryDepth = depth) }
         },
@@ -912,7 +921,10 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
       val playerCount = PlayerCacheInteractor.trackedPlayerCount
       val depth = config.performanceEventHistoryDepth
       val totalEvents = depth.toLong() * 10 * playerCount // ~10 event lists per player
-      val estimatedBytes = totalEvents * 200L // ~200 bytes per event object
+      val eventListBytes = totalEvents * 200L // ~200 bytes per event object
+      // Flat adjacency maps: 9 types × playerCount² / 2 (avg half players are targets) × 80 bytes
+      val flatAdjBytes = 9L * playerCount.toLong() * (playerCount.toLong() / 2) * 80L
+      val estimatedBytes = eventListBytes + flatAdjBytes
       val memoryStr = when {
         estimatedBytes < 1024 -> "${estimatedBytes}B"
         estimatedBytes < 1024 * 1024 -> "${estimatedBytes / 1024}KB"
@@ -925,6 +937,75 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
         modifier = Modifier.padding(top = 2.dp)
       )
     }
+
+    // Battle Graph Spell Depth slider
+    Column(modifier = Modifier.fillMaxWidth()) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(
+          text = stringResource(Res.string.settings_performance_battle_graph_spell_depth),
+          color = RFColors.TextPrimary,
+          fontSize = 14.sp
+        )
+        Text(
+          text = config.performanceBattleGraphSpellDepth.toString(),
+          color = battleGraphSpellDepthColor(config.performanceBattleGraphSpellDepth),
+          fontSize = 14.sp,
+          fontWeight = FontWeight.Bold
+        )
+      }
+      Text(
+        text = stringResource(Res.string.settings_performance_battle_graph_spell_depth_desc),
+        color = RFColors.TextSecondary,
+        fontSize = 12.sp
+      )
+      Spacer(modifier = Modifier.height(4.dp))
+      // Use local float state during drag to prevent integer truncation jitter
+      var bgSpellDepthFloat by remember {
+        mutableStateOf((config.performanceBattleGraphSpellDepth - 10).toFloat() / (200 - 10).toFloat())
+      }
+      LaunchedEffect(config.performanceBattleGraphSpellDepth) {
+        bgSpellDepthFloat = (config.performanceBattleGraphSpellDepth - 10).toFloat() / (200 - 10).toFloat()
+      }
+      DragLockedSlider(
+        value = bgSpellDepthFloat,
+        onValueChange = { value ->
+          bgSpellDepthFloat = value
+          val depth = (10 + value * (200 - 10)).toInt().coerceIn(10, 200)
+          RFConfig.update { it.copy(performanceBattleGraphSpellDepth = depth) }
+        },
+        modifier = Modifier.fillMaxWidth()
+      )
+      // Live estimate of battle graph spell breakdown memory
+      val bgDepth = config.performanceBattleGraphSpellDepth
+      val bgPlayerCount = PlayerCacheInteractor.trackedPlayerCount
+      // 9 BySpell map types × bgDepth targets × 10 spells × ~80 bytes per entry
+      val bgBytes = 9L * bgDepth * 10L * 80L * bgPlayerCount
+      // Flat adjacency maps: 9 types × playerCount² / 2 (avg half players are targets) × 80 bytes
+      val flatBytes = 9L * bgPlayerCount.toLong() * (bgPlayerCount.toLong() / 2) * 80L
+      val totalBgBytes = bgBytes + flatBytes
+      val bgMemoryStr = when {
+        totalBgBytes < 1024 -> "${totalBgBytes}B"
+        totalBgBytes < 1024 * 1024 -> "${totalBgBytes / 1024}KB"
+        else -> String.format("%.1fMB", totalBgBytes / (1024.0 * 1024.0))
+      }
+      Text(
+        text = stringResource(Res.string.settings_performance_battle_graph_estimate, bgDepth, bgPlayerCount, bgMemoryStr),
+        color = RFColors.TextTertiary,
+        fontSize = 10.sp,
+        modifier = Modifier.padding(top = 2.dp)
+      )
+    }
+
+    Divider(color = RFColors.CardBorder, modifier = Modifier.padding(vertical = 8.dp))
+
+    // Live Process Memory graph
+    MemoryGraphComponent(
+      modifier = Modifier.fillMaxWidth()
+    )
   }
 
   // Distance help dialog
@@ -944,6 +1025,20 @@ private fun eventHistoryDepthColor(depth: Int): Color {
     depth < 1000 -> RFColors.gearGreen     // fine
     depth < 1500 -> RFColors.gearYellow    // moderate
     depth < 2500 -> RFColors.gearOrange    // heavy
+    else -> RFColors.gearRed               // expensive
+  }
+}
+
+/**
+ * Returns a color for the battle graph spell depth value.
+ * Green at ~30, yellow at ~80, red at ~150+.
+ */
+private fun battleGraphSpellDepthColor(depth: Int): Color {
+  return when {
+    depth <= 30 -> RFColors.gearGreen      // optimal
+    depth <= 50 -> RFColors.gearBlue       // fine
+    depth <= 80 -> RFColors.gearYellow     // moderate
+    depth <= 150 -> RFColors.gearOrange    // heavy
     else -> RFColors.gearRed               // expensive
   }
 }

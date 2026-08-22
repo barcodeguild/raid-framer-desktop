@@ -1241,6 +1241,10 @@
     <string name="settings_performance_event_history_depth">이벤트 기록 깊이</string>
     <string name="settings_performance_event_history_depth_desc">이벤트 타임라인을 위한 플레이어 카드당 최대 저장 이벤트 수. 낮은 값은 적은 메모리를 사용합니다.</string>
     <string name="settings_performance_event_history_estimate">~%1$s 플레이어당 이벤트 \u00D7 %2$d 추적됨 \u2248 ~%3$s 합계</string>
+    <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
+    <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
+    <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB / %2$dMB heap</string>
     <string name="settings_performance_distance_help">? 거리</string>
     <string name="settings_performance_impact_label">영향:</string>
     <string name="combat_ranking_disabled">이 순위는 비활성화되었습니다</string>
