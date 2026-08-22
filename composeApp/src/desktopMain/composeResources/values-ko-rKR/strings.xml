@@ -1215,6 +1215,10 @@
     <string name="combat_export_saving_session">세션 저장 중 %1$d/%2$d</string>
     <string name="combat_export_saving_language">%1$s 내보내기 저장 중 %2$d/%3$d</string>
 
+    <!-- RAM Usage -->
+    <string name="settings_ram_usage_title">RAM 사용량</string>
+    <string name="settings_ram_usage_description">실시간 JVM 힙 메모리 사용량 그래프.</string>
+
     <!-- Performance Settings -->
     <string name="settings_performance_title">성능</string>
     <string name="settings_performance_description">대규모 전투에서 FPS를 향상시키기 위해 활성화된 기능을 제어합니다. 기능을 비활성화하면 전투 이벤트당 처리되는 데이터량이 줄어듭니다.</string>
@@ -1244,7 +1248,7 @@
     <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
     <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
     <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
-    <string name="settings_performance_app_memory">App Memory: ~%1$dMB / %2$dMB heap</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB</string>
     <string name="settings_performance_distance_help">? 거리</string>
     <string name="settings_performance_impact_label">영향:</string>
     <string name="combat_ranking_disabled">이 순위는 비활성화되었습니다</string>

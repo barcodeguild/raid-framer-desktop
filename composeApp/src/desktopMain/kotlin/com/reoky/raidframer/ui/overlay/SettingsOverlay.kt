@@ -304,6 +304,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
       PerformanceSettingsPanel(wm)
 
+      RamUsagePanel()
+
        ExportSettingsPanel(wm)
        ExportBackgroundSettingsPanel(wm)
 
@@ -1000,17 +1002,37 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
       )
     }
 
-    Divider(color = RFColors.CardBorder, modifier = Modifier.padding(vertical = 8.dp))
-
-    // Live Process Memory graph
-    MemoryGraphComponent(
-      modifier = Modifier.fillMaxWidth()
-    )
   }
 
   // Distance help dialog
   if (showDistanceHelp) {
     PerformanceDistanceHelpDialog(onDismiss = { showDistanceHelp = false })
+  }
+}
+
+@Composable
+private fun RamUsagePanel() {
+  SettingsSection(
+    title = stringResource(Res.string.settings_ram_usage_title),
+    description = stringResource(Res.string.settings_ram_usage_description)
+  ) {
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 4.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+      MemoryGraphComponent(
+        modifier = Modifier.fillMaxWidth(),
+        title = "JVM heap"
+      )
+      Divider(color = RFColors.CardBorder, modifier = Modifier.padding(vertical = 8.dp))
+      MemoryGraphComponent(
+        modifier = Modifier.fillMaxWidth(),
+        title = "Process memory",
+        processMemory = true
+      )
+    }
   }
 }
 

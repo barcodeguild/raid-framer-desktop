@@ -1161,6 +1161,10 @@
     <string name="combat_export_saving_session">Сохранение сессии %1$d/%2$d</string>
     <string name="combat_export_saving_language">Сохранение экспорта на языке %1$s %2$d/%3$d</string>
 
+    <!-- RAM Usage -->
+    <string name="settings_ram_usage_title">Использование ОЗУ</string>
+    <string name="settings_ram_usage_description">График использования кучи JVM в реальном времени.</string>
+
     <!-- Performance Settings -->
     <string name="settings_performance_title">Производительность</string>
     <string name="settings_performance_description">Управляйте активными функциями для повышения FPS в крупных сражениях. Отключение функций уменьшает объём данных, обрабатываемых за событие боя.</string>
@@ -1190,7 +1194,7 @@
     <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
     <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
     <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
-    <string name="settings_performance_app_memory">App Memory: ~%1$dMB / %2$dMB heap</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB</string>
     <string name="settings_performance_distance_help">? Дальность</string>
     <string name="settings_performance_impact_label">Влияние:</string>
     <string name="combat_ranking_disabled">Этот рейтинг отключён</string>

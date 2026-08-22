@@ -1215,6 +1215,10 @@
     <string name="combat_export_saving_session">正在保存会话 %1$d/%2$d</string>
     <string name="combat_export_saving_language">正在保存 %1$s 导出 %2$d/%3$d</string>
 
+    <!-- RAM Usage -->
+    <string name="settings_ram_usage_title">内存使用</string>
+    <string name="settings_ram_usage_description">实时 JVM 堆内存使用图。</string>
+
     <!-- Performance Settings -->
     <string name="settings_performance_title">性能</string>
     <string name="settings_performance_description">控制哪些功能处于激活状态以提高大规模战斗中的FPS。禁用功能可以减少每个战斗事件处理的数据量。</string>
@@ -1244,7 +1248,7 @@
     <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
     <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
     <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
-    <string name="settings_performance_app_memory">App Memory: ~%1$dMB / %2$dMB heap</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB</string>
     <string name="settings_performance_distance_help">? 距离</string>
     <string name="settings_performance_impact_label">影响：</string>
     <string name="combat_ranking_disabled">此排名已禁用</string>

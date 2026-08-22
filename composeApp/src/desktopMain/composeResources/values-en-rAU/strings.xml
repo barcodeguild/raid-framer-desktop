@@ -1161,6 +1161,10 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="combat_export_saving_session">Saving session %1$d/%2$d</string>
     <string name="combat_export_saving_language">Saving %1$s export %2$d/%3$d</string>
 
+    <!-- RAM Usage -->
+    <string name="settings_ram_usage_title">RAM Usage</string>
+    <string name="settings_ram_usage_description">Live JVM heap memory usage graph.</string>
+
     <!-- Performance Settings -->
     <string name="settings_performance_title">Performance</string>
     <string name="settings_performance_description">Control which features are active to improve FPS in large-scale battles. Disabling features reduces the amount of data processed per combat event.</string>
@@ -1190,7 +1194,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
     <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
     <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
-    <string name="settings_performance_app_memory">App Memory: ~%1$dMB / %2$dMB heap</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB</string>
     <string name="settings_performance_distance_help">? Distance</string>
     <string name="settings_performance_impact_label">Impact:</string>
     <string name="combat_ranking_disabled">This ranking is disabled</string>
