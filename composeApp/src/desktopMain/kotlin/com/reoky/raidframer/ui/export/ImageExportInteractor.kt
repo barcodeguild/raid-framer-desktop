@@ -95,6 +95,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Codec
@@ -248,8 +249,19 @@ object ImageExportInteractor {
   }
 
   // ── Skill-tree icon cache (SVG → BufferedImage via Skiko) ─────────────────
-  private val skillTreeImageCache = mutableMapOf<Pair<SkillTreeType?, Int>, BufferedImage?>()
-  private val wallpaperCache = mutableMapOf<String, BufferedImage?>()
+  private val skillTreeImageCache = ConcurrentHashMap<Pair<SkillTreeType?, Int>, BufferedImage?>()
+  private val wallpaperCache = ConcurrentHashMap<String, BufferedImage?>()
+  private var logoCache: BufferedImage? = null
+
+  fun clearImageCaches() {
+    skillTreeImageCache.values.forEach { it?.flush() }
+    wallpaperCache.values.forEach { it?.flush() }
+    logoCache?.flush()
+    skillTreeImageCache.clear()
+    wallpaperCache.clear()
+    logoCache = null
+    Log.info("ImageExport", "Cleared image caches after export")
+  }
 
   private fun applyHighQualityRenderingHints(g2d: Graphics2D) {
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -595,21 +607,9 @@ object ImageExportInteractor {
             val localizedData = captureLocalizedData(data)
             _progress.value = ExportProgress(true, 0.05f, index, languages.size, language.code, language.nativeLabel)
             val imageHeight = calculateImageHeight(localizedData)
-            val renderWidth = IMAGE_WIDTH * EXPORT_RENDER_SCALE
-            val renderHeight = imageHeight * EXPORT_RENDER_SCALE
-            val renderedImage = BufferedImage(renderWidth, renderHeight, BufferedImage.TYPE_INT_ARGB)
-            val g2d = renderedImage.createGraphics()
-
-            applyHighQualityRenderingHints(g2d)
-            g2d.scale(EXPORT_RENDER_SCALE.toDouble(), EXPORT_RENDER_SCALE.toDouble())
-
-            drawWallpaperBackground(g2d, IMAGE_WIDTH, imageHeight)
-            drawMasonryLayout(g2d, localizedData)
-            _progress.value = ExportProgress(true, 0.72f, index, languages.size, language.code, language.nativeLabel)
-
-            g2d.dispose()
-
-            val image = downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
+            val image = renderExportImage(localizedData, imageHeight) { fraction ->
+              _progress.value = ExportProgress(true, fraction, index, languages.size, language.code, language.nativeLabel)
+            }
             _progress.value = ExportProgress(true, 0.88f, index, languages.size, language.code, language.nativeLabel)
 
         val config = RFConfig.state.value
@@ -625,7 +625,11 @@ object ImageExportInteractor {
         Files.createDirectories(exportDir)
             val outputFile = exportDir.resolve("${safeFileName(data.sessionTitle)}_${language.code}.png").toFile()
 
-            ImageIO.write(image, "png", outputFile)
+            try {
+              ImageIO.write(image, "png", outputFile)
+            } finally {
+              image.flush()
+            }
             if (firstOutput == null) firstOutput = outputFile
             _progress.value = ExportProgress(true, 1f, index + 1, languages.size, language.code, language.nativeLabel)
           } catch (e: Exception) {
@@ -637,7 +641,29 @@ object ImageExportInteractor {
         firstOutput
       } finally {
         _progress.value = ExportProgress()
+        clearImageCaches()
       }
+    }
+  }
+
+  private suspend fun renderExportImage(data: ExportData, imageHeight: Int, progress: (Float) -> Unit): BufferedImage {
+    val renderWidth = IMAGE_WIDTH * EXPORT_RENDER_SCALE
+    val renderHeight = imageHeight * EXPORT_RENDER_SCALE
+    val renderedImage = BufferedImage(renderWidth, renderHeight, BufferedImage.TYPE_INT_ARGB)
+    try {
+      val g2d = renderedImage.createGraphics()
+      try {
+        applyHighQualityRenderingHints(g2d)
+        g2d.scale(EXPORT_RENDER_SCALE.toDouble(), EXPORT_RENDER_SCALE.toDouble())
+        drawWallpaperBackground(g2d, IMAGE_WIDTH, imageHeight)
+        drawMasonryLayout(g2d, data)
+      } finally {
+        g2d.dispose()
+      }
+      progress(0.72f)
+      return downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
+    } finally {
+      renderedImage.flush()
     }
   }
 
@@ -890,8 +916,6 @@ object ImageExportInteractor {
    * Title card — now drawn full-width so there is no wasted space on the right.
    * The session metadata is sourced from ExportData which was salted with
    */
-  private var logoCache: BufferedImage? = null
-
   private fun loadLogo(): BufferedImage? {
     return logoCache ?: run {
       try {
