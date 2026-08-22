@@ -85,6 +85,7 @@ object PlayerCacheInteractor : Interactor() {
   private val mutex = Mutex() // to protect critical sections during player card updates from other threads
   private var archiveJob: Job? = null
   private var preSessionCacheSnapshot: MutableMap<String, PlayerCacheEntity?> = mutableMapOf()
+  private var lastMemoryCensusAt = 0L
 
   init {
     scope.launch {
@@ -102,7 +103,8 @@ object PlayerCacheInteractor : Interactor() {
   // and we want to perform calculations without holding a lock. Ok friends!?
   override suspend fun interact() {
     val snapshot = cards.values.toList()
-    if (snapshot.isNotEmpty()) {
+    val now = System.currentTimeMillis()
+    if (snapshot.isNotEmpty() && now - lastMemoryCensusAt >= 300_000L) {
       val recentEvents = snapshot.sumOf {
         it.recentCastSuccessfulCastEvents.size + it.recentCastEvents.size +
           it.recentDamageEvents.size + it.recentHealEvents.size +
@@ -119,7 +121,8 @@ object PlayerCacheInteractor : Interactor() {
           it.sessionCCToPlayerBySpell.values.sumOf { map -> map.size } +
           it.sessionKillsToPlayer.size + it.sessionKillsToPlayerBySpell.values.sumOf { map -> map.size }
       }
-      Log.debug(TAG, "Session memory counts: cards=${snapshot.size} pets=${petCards.size} recentEvents=$recentEvents adjacencyEntries=$adjacencyEntries graphPlayers=${GraphDataInteractor.getPlayerNames().size}")
+      Log.info(TAG, "Session retention status: cards=${snapshot.size} pets=${petCards.size} recentEvents=$recentEvents adjacencyEntries=$adjacencyEntries graphPlayers=${GraphDataInteractor.getPlayerNames().size}")
+      lastMemoryCensusAt = now
     }
     snapshot.forEach { card ->
       val name = card.name
@@ -471,6 +474,7 @@ object PlayerCacheInteractor : Interactor() {
         recentLeechCasts.clear()
       }
       GraphDataInteractor.clearForSession()
+      logSessionMemoryCensus("new session")
       CombatLogInteractor.startRecording()
       Log.info(TAG, "Started new recording session: type=$sessionType, allowPvE=$allowPvE")
     }
@@ -523,6 +527,7 @@ object PlayerCacheInteractor : Interactor() {
         raids.clear()
       }
       GraphDataInteractor.clearForSession()
+      logSessionMemoryCensus("aborted session")
       preSessionCacheSnapshot = mutableMapOf()
     }
 
@@ -540,6 +545,27 @@ object PlayerCacheInteractor : Interactor() {
 
   suspend fun awaitArchive() {
     archiveJob?.join()
+  }
+
+  private fun logSessionMemoryCensus(reason: String) {
+    val snapshot = cards.values.toList()
+    val recentEvents = snapshot.sumOf {
+      it.recentCastSuccessfulCastEvents.size + it.recentCastEvents.size +
+        it.recentDamageEvents.size + it.recentHealEvents.size +
+        it.recentBuffGainedEvents.size + it.recentBuffEndedEvents.size +
+        it.recentDebuffGainedEvents.size + it.recentDebuffEndedEvents.size +
+        it.recentBuffAppliedEvents.size + it.recentDebuffAppliedEvents.size
+    }
+    val adjacencyEntries = snapshot.sumOf {
+      it.sessionDamageToPlayer.size + it.sessionDamageFromPlayer.size +
+        it.sessionHealToPlayer.size + it.sessionHealFromPlayer.size +
+        it.sessionCCToPlayer.size + it.sessionCCFromPlayer.size +
+        it.sessionDamageToPlayerBySpell.values.sumOf { map -> map.size } +
+        it.sessionHealToPlayerBySpell.values.sumOf { map -> map.size } +
+        it.sessionCCToPlayerBySpell.values.sumOf { map -> map.size } +
+        it.sessionKillsToPlayer.size + it.sessionKillsToPlayerBySpell.values.sumOf { map -> map.size }
+    }
+    Log.info(TAG, "Session reset completed ($reason): cards=${snapshot.size} pets=${petCards.size} recentEvents=$recentEvents adjacencyEntries=$adjacencyEntries graphPlayers=${GraphDataInteractor.getPlayerNames().size}")
   }
 
   /**

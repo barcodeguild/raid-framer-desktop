@@ -36,6 +36,10 @@ private const val SAMPLE_COUNT = 60
 private const val SAMPLE_INTERVAL_MS = 2000L
 private const val BYTES_PER_MB = 1024L * 1024L
 private const val TAG = "MemoryGraph"
+private const val PROCESS_MEMORY_ERROR_LOG_INTERVAL_MS = 60_000L
+
+private var lastProcessMemoryErrorLogAt = 0L
+private var processMemoryAvailabilityLogged = false
 
 private data class MemorySample(val heapMB: Int, val processMB: Int?)
 
@@ -76,7 +80,10 @@ private fun getHeapUsedMB(): Int {
  */
 private fun getProcessMemoryMB(): Int? {
   if (!System.getProperty("os.name", "").contains("Windows", ignoreCase = true)) {
-    Log.warn(TAG, "Process memory query skipped: unsupported OS '${System.getProperty("os.name")}'")
+    if (!processMemoryAvailabilityLogged) {
+      Log.info(TAG, "Process memory monitoring unavailable on OS '${System.getProperty("os.name")}'")
+      processMemoryAvailabilityLogged = true
+    }
     return null
   }
 
@@ -95,23 +102,34 @@ private fun getProcessMemoryMB(): Int? {
     )
     val lastError = Kernel32.INSTANCE.GetLastError()
     if (!success) {
-      Log.warn(TAG, "GetProcessMemoryInfo failed: success=false lastError=$lastError")
+      val now = System.currentTimeMillis()
+      if (now - lastProcessMemoryErrorLogAt >= PROCESS_MEMORY_ERROR_LOG_INTERVAL_MS) {
+        Log.warn(TAG, "Process memory query failed: lastError=$lastError")
+        lastProcessMemoryErrorLogAt = now
+      }
       return@runCatching null
     }
 
     val workingSetBytes = counters.getLong(PROCESS_MEMORY_WORKING_SET_OFFSET)
     if (workingSetBytes <= 0L) {
-      Log.warn(TAG, "GetProcessMemoryInfo returned invalid working set: $workingSetBytes bytes")
+      Log.warn(TAG, "Process memory query returned an invalid working set")
       return@runCatching null
     }
 
     val memoryMB = (workingSetBytes / BYTES_PER_MB)
       .coerceIn(0L, Int.MAX_VALUE.toLong())
       .toInt()
-    Log.debug(TAG, "Process memory query succeeded: workingSetBytes=$workingSetBytes processMB=$memoryMB")
+    if (!processMemoryAvailabilityLogged) {
+      Log.info(TAG, "Process memory monitoring is available")
+      processMemoryAvailabilityLogged = true
+    }
     memoryMB
   }.onFailure { error ->
-    Log.error(TAG, "Process memory query threw ${error.javaClass.name}: ${error.message}")
+    val now = System.currentTimeMillis()
+    if (now - lastProcessMemoryErrorLogAt >= PROCESS_MEMORY_ERROR_LOG_INTERVAL_MS) {
+      Log.error(TAG, "Process memory query failed with ${error.javaClass.simpleName}: ${error.message}")
+      lastProcessMemoryErrorLogAt = now
+    }
   }.getOrNull()
 }
 
@@ -152,7 +170,6 @@ fun MemoryGraphComponent(
           Log.warn(TAG, "Skipping unavailable process-memory sample; retaining previous chart data")
         }
         currentSample = sample
-        Log.debug(TAG, "Recorded memory sample: heapMB=${sample.heapMB} processMB=${sample.processMB ?: "unavailable"}")
         delay(SAMPLE_INTERVAL_MS)
       }
     } finally {
