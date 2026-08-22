@@ -24,7 +24,9 @@ private data class PlayerGraphData(
 object GraphDataInteractor : Interactor() {
 
   private const val BUCKET_SIZE_MS = 1000L
-  private const val MAX_AGE_MS = 24 * 60 * 60 * 1000L
+  // This graph is session-scoped. Keeping a full day of one-second buckets for
+  // every player is disproportionate during large raids.
+  private const val MAX_AGE_MS = 2 * 60 * 60 * 1000L
 
   private val playerData = ConcurrentHashMap<String, PlayerGraphData>()
   private val mutex = Mutex()
@@ -115,6 +117,10 @@ object GraphDataInteractor : Interactor() {
         data.buckets.entries.removeAll { it.key < cutoff }
       }
       playerData.entries.removeAll { it.value.buckets.isEmpty() }
+      if (playerData.isNotEmpty()) {
+        val bucketCount = playerData.values.sumOf { it.buckets.size }
+        Log.debug("GraphData", "Pruned graph data: players=${playerData.size} buckets=$bucketCount cutoff=$cutoff")
+      }
     }
   }
 
@@ -124,5 +130,9 @@ object GraphDataInteractor : Interactor() {
         playerData.clear()
       }
     }
+  }
+
+  fun clearForSession() {
+    clear()
   }
 }

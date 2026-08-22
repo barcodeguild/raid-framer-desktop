@@ -102,6 +102,25 @@ object PlayerCacheInteractor : Interactor() {
   // and we want to perform calculations without holding a lock. Ok friends!?
   override suspend fun interact() {
     val snapshot = cards.values.toList()
+    if (snapshot.isNotEmpty()) {
+      val recentEvents = snapshot.sumOf {
+        it.recentCastSuccessfulCastEvents.size + it.recentCastEvents.size +
+          it.recentDamageEvents.size + it.recentHealEvents.size +
+          it.recentBuffGainedEvents.size + it.recentBuffEndedEvents.size +
+          it.recentDebuffGainedEvents.size + it.recentDebuffEndedEvents.size +
+          it.recentBuffAppliedEvents.size + it.recentDebuffAppliedEvents.size
+      }
+      val adjacencyEntries = snapshot.sumOf {
+        it.sessionDamageToPlayer.size + it.sessionDamageFromPlayer.size +
+          it.sessionHealToPlayer.size + it.sessionHealFromPlayer.size +
+          it.sessionCCToPlayer.size + it.sessionCCFromPlayer.size +
+          it.sessionDamageToPlayerBySpell.values.sumOf { map -> map.size } +
+          it.sessionHealToPlayerBySpell.values.sumOf { map -> map.size } +
+          it.sessionCCToPlayerBySpell.values.sumOf { map -> map.size } +
+          it.sessionKillsToPlayer.size + it.sessionKillsToPlayerBySpell.values.sumOf { map -> map.size }
+      }
+      Log.debug(TAG, "Session memory counts: cards=${snapshot.size} pets=${petCards.size} recentEvents=$recentEvents adjacencyEntries=$adjacencyEntries graphPlayers=${GraphDataInteractor.getPlayerNames().size}")
+    }
     snapshot.forEach { card ->
       val name = card.name
       if (!card.isRealPlayer && card.shouldUpgradeToPlayer()) {
@@ -451,6 +470,7 @@ object PlayerCacheInteractor : Interactor() {
         lifeMendCasterMap.clear()
         recentLeechCasts.clear()
       }
+      GraphDataInteractor.clearForSession()
       CombatLogInteractor.startRecording()
       Log.info(TAG, "Started new recording session: type=$sessionType, allowPvE=$allowPvE")
     }
@@ -502,6 +522,7 @@ object PlayerCacheInteractor : Interactor() {
         petCards.clear()
         raids.clear()
       }
+      GraphDataInteractor.clearForSession()
       preSessionCacheSnapshot = mutableMapOf()
     }
 
