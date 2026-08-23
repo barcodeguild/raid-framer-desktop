@@ -75,7 +75,7 @@ val RAID_BUFF_DEFINITIONS = listOf(
   RaidBuffDefinition(RaidBuffKey.CHOCOLATE, setOf(8000726, 9001956, 8000779, 8000794, 8000795, 8000796), "raid_buff_chocolate", RaidBuffSection.LOOT),
   RaidBuffDefinition(RaidBuffKey.LOOT_CAKE, setOf(23492, 23491), "raid_buff_loot_cake", RaidBuffSection.LOOT),
   RaidBuffDefinition(RaidBuffKey.SHORTBREAD_COOKIE, setOf(22292), "raid_buff_shortbread_cookie", RaidBuffSection.LOOT),
-  RaidBuffDefinition(RaidBuffKey.GOLDEN_TAFFY, setOf(23094, 23093, 24157, 31322), "raid_buff_golden_taffy", RaidBuffSection.LOOT),
+  RaidBuffDefinition(RaidBuffKey.GOLDEN_TAFFY, setOf(23094, 23093, 31322), "raid_buff_golden_taffy", RaidBuffSection.LOOT),
   RaidBuffDefinition(RaidBuffKey.EGG_OF_FORTUNE, setOf(8002787), "raid_buff_egg_of_fortune", RaidBuffSection.LOOT)
 )
 

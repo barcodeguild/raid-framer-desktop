@@ -57,7 +57,7 @@ RF.Raid.INTERESTING_BUFF_IDS = {
   [8000681] = true, [8000803] = true, [9001658] = true,
   [8000726] = true, [9001956] = true, [8000779] = true, [8000794] = true, [8000795] = true, [8000796] = true,
   [23492] = true, [23491] = true, [22292] = true,
-  [23094] = true, [23093] = true, [24157] = true, [31322] = true, [8002787] = true,
+  [23094] = true, [23093] = true, [31322] = true, [8002787] = true,
 }
 
 -- enum of strings different team member change reasons we can filter by to avoid unnecessary processing
