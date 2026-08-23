@@ -258,8 +258,8 @@
     <string name="pet_cast_overflow_format">+%1$d ещё</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">Драконье дыхание, Рисо, боевые питомцы и другие существа</string>
-    <string name="pokemon_no_companions">Активные спутники пока не обнаружены...</string>
+    <string name="pokemon_title">Драконье дыхание</string>
+    <string name="pokemon_no_companions">Драконье дыхание или управляемые ракеты Рисоподии пока не обнаружены...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">Неизвестно: %1$s</string>

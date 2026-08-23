@@ -258,8 +258,8 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="pet_cast_overflow_format">+%1$d mais</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">Baforadas de Dragão, Risos, Mascotes de Batalha e Outras Criaturas</string>
-    <string name="pokemon_no_companions">Nenhum companheiro ativo detectado ainda...</string>
+    <string name="pokemon_title">Baforadas de Dragão</string>
+    <string name="pokemon_no_companions">Baforadas de Dragão ou mísiles guiadas de Risopodia ainda não detectadas...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">Desconhecido: %1$s</string>

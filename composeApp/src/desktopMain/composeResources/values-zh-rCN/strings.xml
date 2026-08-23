@@ -258,8 +258,8 @@
     <string name="pet_cast_overflow_format">+%1$d 更多</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">龙息、瑞索、战斗宠物及其他生物</string>
-    <string name="pokemon_no_companions">尚未检测到活动的宠物...</string>
+    <string name="pokemon_title">龙息</string>
+    <string name="pokemon_no_companions">尚未检测到龙息或瑞索皮亚导弹...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">未知：%1$s</string>

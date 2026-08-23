@@ -258,8 +258,8 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="pet_cast_overflow_format">+%1$d weitere</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">Drachen-Atem, Risos, Kampftiere und andere Kreaturen</string>
-    <string name="pokemon_no_companions">Noch keine aktiven Begleiter erkannt...</string>
+    <string name="pokemon_title">Drachen-Atem</string>
+    <string name="pokemon_no_companions">Noch keine Drachen-Atem oder Risopodia-Lenkwaffen erkannt...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">Unbekannt: %1$s</string>

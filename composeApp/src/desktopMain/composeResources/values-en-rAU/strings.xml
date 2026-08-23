@@ -258,8 +258,8 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="pet_cast_overflow_format">+%1$d more</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">Dragon Breaths, Risos, Battle Pets and Other Creatures</string>
-    <string name="pokemon_no_companions">No active companions detected, yet...</string>
+    <string name="pokemon_title">Dragon Breaths</string>
+    <string name="pokemon_no_companions">No Dragon breaths or Risopodia guided missiles detected yet...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">Unknown: %1$s</string>

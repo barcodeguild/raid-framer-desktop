@@ -258,8 +258,8 @@
     <string name="pet_cast_overflow_format">+%1$d개 더</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">드래곤 브레스, 콩벌레, 전투 펫 및 기타 소환수</string>
-    <string name="pokemon_no_companions">아직 활성화된 소환수가 감지되지 않았습니다...</string>
+    <string name="pokemon_title">드래곤 브레스</string>
+    <string name="pokemon_no_companions">아직 드래곤 브레스나 리소포디아 유도 미사일이 감지되지 않았습니다...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">알 수 없음: %1$s</string>
