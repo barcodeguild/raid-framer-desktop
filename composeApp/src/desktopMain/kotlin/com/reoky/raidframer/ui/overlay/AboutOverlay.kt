@@ -61,17 +61,17 @@ fun PreviewAboutOverlay() {
 @Composable
 fun AboutOverlay(wm: WindowManager? = null) {
   Box(modifier = Modifier.fillMaxSize()) {
-    // content area
-    Column(
-      modifier = Modifier.fillMaxSize().padding(12.dp)
-    ) {
 
-      TitleBarComponent(
-        title = stringResource(Res.string.about_app_title),
-        onClose = { wm?.closeWindow(OverlayType.ABOUT) },
-        actionLabel = stringResource(Res.string.help_button),
-        onAction = { wm?.openWindow(OverlayType.HELP) }
-      )
+    TitleBarComponent(
+      title = null,
+      onClose = { wm?.closeWindow(OverlayType.ABOUT) },
+      actionLabel = null,
+      onAction = {},
+      transparent = true
+    )
+
+    // content area
+    Column(modifier = Modifier.fillMaxSize()) {
 
       // Header Logo and Version
       Row {

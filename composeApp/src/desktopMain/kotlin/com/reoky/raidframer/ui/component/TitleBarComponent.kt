@@ -24,10 +24,11 @@ import androidx.compose.material.TextButton
 
 @Composable
 fun TitleBarComponent(
-  title: String,
+  title: String?,
   onClose: () -> Unit,
   actionLabel: String? = null,
   onAction: (() -> Unit)? = null,
+  transparent: Boolean = false,
   height: Dp = 46.dp,
   modifier: Modifier = Modifier
 ) {
@@ -35,8 +36,8 @@ fun TitleBarComponent(
     modifier = modifier
       .fillMaxWidth()
       .height(height)
-      .background(Color.Black.copy(alpha = 0.35f))
-      .drawBehind {
+      .then(if (!transparent) Modifier.background(Color.Black.copy(alpha = 0.35f)) else Modifier)
+      .then(if (!transparent) Modifier.drawBehind {
         // subtle diagonal grippable texture
         val step = 12f
         var offsetX = -size.height
@@ -72,16 +73,19 @@ fun TitleBarComponent(
           start = Offset(0f, yDark),
           end = Offset(size.width - 0, yDark)
         )
-      }
+      } else Modifier)
   ) {
-    Text(
-      text = title,
-      color = Color.White,
-      modifier = Modifier.align(Alignment.Center),
-      style = TextStyle(
-        fontFamily = FontsHelper.arKorean()
+
+    if (title != null) {
+      Text(
+        text = title,
+        color = Color.White,
+        modifier = Modifier.align(Alignment.Center),
+        style = TextStyle(
+          fontFamily = FontsHelper.arKorean()
+        )
       )
-    )
+    }
 
     if (actionLabel != null && onAction != null) {
       TextButton(
