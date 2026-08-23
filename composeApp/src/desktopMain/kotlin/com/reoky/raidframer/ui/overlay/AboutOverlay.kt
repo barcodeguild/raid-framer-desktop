@@ -14,7 +14,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.style.TextOverflow
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppGlobals
@@ -34,7 +34,7 @@ import raid_framer_desktop.composeapp.generated.resources.about_dedication_text
 import raid_framer_desktop.composeapp.generated.resources.about_go_to_settings_button
 import raid_framer_desktop.composeapp.generated.resources.about_help_button
 import raid_framer_desktop.composeapp.generated.resources.about_package_label
-import raid_framer_desktop.composeapp.generated.resources.about_read_settings_instruction
+
 import raid_framer_desktop.composeapp.generated.resources.about_source_label
 import raid_framer_desktop.composeapp.generated.resources.about_special_thanks
 import raid_framer_desktop.composeapp.generated.resources.help_button
@@ -149,20 +149,19 @@ fun AboutOverlay(wm: WindowManager? = null) {
           }
           Row(
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
           ) {
-            Text(
-              text = stringResource(Res.string.about_read_settings_instruction),
-              modifier = Modifier
-                .weight(1f)
-                .padding(2.dp),
-              textAlign = TextAlign.Start,
-              fontSize = 16.sp,
-              color = Color.White,
-              maxLines = 1,
-              overflow = TextOverflow.Visible
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+              onClick = {
+                wm?.closeWindow(OverlayType.ABOUT)
+                wm?.openWindow(OverlayType.HELP)
+              },
+              colors = ButtonDefaults.buttonColors(Color.White),
+              modifier = Modifier.padding(bottom = 8.dp, end = 8.dp)
+            ) {
+              Text(text = stringResource(Res.string.about_help_button), color = Color.Black)
+            }
             Button(
               onClick = { wm?.openWindow(OverlayType.SETTINGS) },
               colors = ButtonDefaults.buttonColors(Color.White),
