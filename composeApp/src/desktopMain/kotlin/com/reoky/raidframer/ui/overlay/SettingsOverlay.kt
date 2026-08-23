@@ -539,6 +539,12 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       label = stringResource(Res.string.settings_tabbed_detection)
     )
 
+    SettingsCheckbox(
+      checked = config.combatOverlayAsTooltipEnabled,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatOverlayAsTooltipEnabled = isChecked) } },
+      label = stringResource(Res.string.settings_combat_overlay_tooltip)
+    )
+
 //    SettingsCheckbox(
 //      checked = config.gameScheduleHotkeyEnabled,
 //      onCheckedChange = { isChecked -> RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) } },

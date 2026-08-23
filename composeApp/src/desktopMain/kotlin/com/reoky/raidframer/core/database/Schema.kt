@@ -14,7 +14,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 41
+const val SCHEMA_VERSION = 42
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -138,7 +138,10 @@ data class ConfigEntity(
   val performanceTargetChangedTracking: Boolean = true,
   val performanceBattleGraphEnabled: Boolean = true,
   val performanceEventHistoryDepth: Int = 500,
-  val performanceBattleGraphSpellDepth: Int = 30
+  val performanceBattleGraphSpellDepth: Int = 30,
+
+  // Combat overlay as a multi-monitor tool-tip instead of a game overlay
+  val combatOverlayAsTooltipEnabled: Boolean = false
 )
 
 /*

@@ -47,6 +47,7 @@ import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.helpers.UpdateHelper
 import org.jetbrains.compose.resources.stringResource
 import com.reoky.raidframer.ui.component.PlayerRankingRow
+import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.quitAfterSessionStop
@@ -69,6 +70,7 @@ import raid_framer_desktop.composeapp.generated.resources.combat_no_columns_mess
 import raid_framer_desktop.composeapp.generated.resources.combat_open_settings
 import raid_framer_desktop.composeapp.generated.resources.combat_press_plus_to_record
 import raid_framer_desktop.composeapp.generated.resources.combat_update_tooltip
+import raid_framer_desktop.composeapp.generated.resources.settings_combat_overlay_title
 import raid_framer_desktop.composeapp.generated.resources.combat_stop_and_save
 import raid_framer_desktop.composeapp.generated.resources.combat_abort_and_discard
 import raid_framer_desktop.composeapp.generated.resources.combat_save_and_exit_tooltip
@@ -284,6 +286,14 @@ fun CombatOverlay(wm: WindowManager? = null) {
         .fillMaxSize()
         .then(if (exportProgress.isExporting) Modifier.alpha(0f) else Modifier)
     ) {
+      // In tool-tip mode, add a title-bar (like settings) whose ✕ performs the same save & exit.
+      if (config.combatOverlayAsTooltipEnabled) {
+        TitleBarComponent(
+          title = stringResource(Res.string.settings_combat_overlay_title),
+          onClose = { scope.launch { quitAfterSessionStop() } }
+        )
+      }
+
       if (anyColumnVisibleGlobal) {
         Box(
           modifier = Modifier

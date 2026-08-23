@@ -128,6 +128,7 @@ You should still complete the uninstallation of the main application by uninstal
     <string name="settings_item_use_overlay">Enable Item Use Overlay. Shows recent item uses in a kill-feed style. [EXPERIMENTAL / PROTOTYPE]</string>
     <string name="settings_split_chat">Enable OSRS-style split-chat window overlay. (Coming Soon)</string>
     <string name="settings_tabbed_detection">Automatically hide game overlay's while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).</string>
+    <string name="settings_combat_overlay_tooltip">Make Combat Overlay a Multi-Monitor Tool-Tip instead of a Game Overlay. (Shows as a draggable, always-visible tool-tip with a title-bar.)</string>
     <string name="settings_allow_pve_damage">Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)</string>
     <string name="settings_game_schedule_hotkey">Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay. (Coming Soon)</string>
     <string name="settings_use_sadly">I'd prefer to use Sadly.io for in-game schedule data. (Coming Soon)</string>

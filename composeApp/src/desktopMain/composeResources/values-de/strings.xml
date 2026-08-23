@@ -126,6 +126,7 @@ Sie sollten immer noch die Deinstallation der Hauptanwendung abschließen, indem
     <string name="settings_item_use_overlay">Gegenstandsverwendungs-Overlay aktivieren. Zeigt letzte Gegenstandsverwendungen im Kill-Feed-Stil. [EXPERIMENTELL / PROTOTYP]</string>
     <string name="settings_split_chat">OSRS-artiges Split-Chat-Fenster-Overlay aktivieren. (Demnächst)</string>
     <string name="settings_tabbed_detection">Spiel-Overlays automatisch ausblenden, während aus dem Spiel herausgetabbt. Gilt nicht für Tooltips (die mit Titelleiste).</string>
+    <string name="settings_combat_overlay_tooltip">Kampf-Overlay stattdessen als Multi-Monitor-Tooltip statt als Spiel-Overlay darstellen. (Als verschiebbarer, stets sichtbarer Tooltip mit Titelleiste angezeigt.)</string>
     <string name="settings_allow_pve_damage">PvE-Schaden zu DPS/Kill-Zählern zählen lassen. (Nützlich für Einzelspieler, die ihre Schadensausgabe gegen PvE-Ziele sehen möchten)</string>
     <string name="settings_game_schedule_hotkey">[TAB HALTEN] aktivieren, um die offizielle In-Game-Eventplan-Website als Overlay anzuzeigen. (Demnächst)</string>
     <string name="settings_use_sadly">Ich würde lieber Sadly.io für In-Game-Eventplandaten verwenden. (Demnächst)</string>

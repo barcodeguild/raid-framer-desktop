@@ -445,3 +445,10 @@ val MIGRATION_40_41 = object : Migration(40, 41) {
     connection.prepare("ALTER TABLE config ADD COLUMN performanceBattleGraphSpellDepth INTEGER NOT NULL DEFAULT 30").use { it.step() }
   }
 }
+
+// Added combatOverlayAsTooltipEnabled to ConfigEntity (08/23/26)
+val MIGRATION_41_42 = object : Migration(41, 42) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN combatOverlayAsTooltipEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}

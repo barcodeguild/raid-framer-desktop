@@ -126,6 +126,7 @@ Você ainda deve completar a desinstalação do aplicativo principal desinstalan
     <string name="settings_item_use_overlay">Ativar Overlay de Uso de Itens. Mostra usos recentes de itens em estilo kill-feed. [EXPERIMENTAL / PROTOTÓTIPO]</string>
     <string name="settings_split_chat">Ativar overlay de janela split-chat estilo OSRS. (Em Breve)</string>
     <string name="settings_tabbed_detection">Ocultar automaticamente overlays do jogo enquanto estiver fora do jogo em abas. Não se aplica a dicas de ferramenta (aquelas com barra de título).</string>
+    <string name="settings_combat_overlay_tooltip">Fazer do Combat Overlay uma tool-tip multimonitor em vez de um overlay de jogo. (Mostra como uma tool-tip arrastável, sempre visível, com barra de título.)</string>
     <string name="settings_allow_pve_damage">Permitir que Dano PvE seja contado para DPS/Contadores de Kills. (Útil para jogadores solo que querem ver sua saída de dano contra alvos PvE)</string>
     <string name="settings_game_schedule_hotkey">Ativar [SEGURAR TAB] para trazer o site oficial de programação de eventos no jogo como overlay. (Em Breve)</string>
     <string name="settings_use_sadly">Prefiro usar Sadly.io para dados de programação no jogo. (Em Breve)</string>

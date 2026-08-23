@@ -126,7 +126,18 @@ fun OverlayWindow(
     // shift-click mouse listener to allow dragging the window around (tooltips always draggable without shift)
     val dragLocked = remember { mutableStateOf(false) }
 
-    val mouseListener = createMouseListener(windowState, windowType) { dragLocked.value }
+    // A tool-tip is always draggable without shift. Whether the Combat overlay drags freely is
+    // decided live from config, so toggling tool-tip mode off immediately restores the normal
+    // (no-free-drag) overlay behavior without needing a restart.
+    val isTooltipWindow: () -> Boolean = {
+      if (overlayType == OverlayType.COMBAT) {
+        RFConfig.state.value.combatOverlayAsTooltipEnabled
+      } else {
+        windowType == OverlayWindowType.TOOLTIP
+      }
+    }
+
+    val mouseListener = createMouseListener(windowState, isTooltipWindow) { dragLocked.value }
     composeWindow.addMouseListener(mouseListener)
     composeWindow.addMouseMotionListener(mouseListener)
 
@@ -180,7 +191,7 @@ fun OverlayWindow(
  */
 fun createMouseListener(
   windowState: WindowState,
-  overlayWindowType: OverlayWindowType,
+  isTooltip: () -> Boolean,
   isDragLocked: () -> Boolean = { false } // activate this when friends are interacting with a dragable/slideable control
 ): MouseAdapter {
   return object : MouseAdapter() {
@@ -191,7 +202,7 @@ fun createMouseListener(
     override fun mousePressed(e: MouseEvent) {
       isDragAllowed = false
       if (isDragLocked()) return
-      if (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP) {
+      if (e.isShiftDown || isTooltip()) {
         // Define a margin for resizing (e.g. 10 pixels)
         val resizeMargin = 10
         val width = e.component.width
@@ -211,7 +222,7 @@ fun createMouseListener(
     }
 
     override fun mouseDragged(e: MouseEvent) {
-      if (isDragAllowed && !isDragLocked() && (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP)) {
+      if (isDragAllowed && !isDragLocked() && (e.isShiftDown || isTooltip())) {
         val newPositionX = e.locationOnScreen.x - cornerOffset.x
         val newPositionY = e.locationOnScreen.y - cornerOffset.y
         windowState.position = WindowPosition(newPositionX.dp, newPositionY.dp)

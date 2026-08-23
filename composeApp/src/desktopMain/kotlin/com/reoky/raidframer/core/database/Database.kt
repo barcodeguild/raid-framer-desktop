@@ -78,6 +78,7 @@ fun initialize(): AppDatabase {
    .addMigrations(MIGRATION_38_39) // added PNG export toggle and export language selections
    .addMigrations(MIGRATION_39_40) // added performance settings for event tracking control
    .addMigrations(MIGRATION_40_41) // added battle graph spell depth for memory optimization
+   .addMigrations(MIGRATION_41_42) // added combat overlay tooltip mode toggle
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

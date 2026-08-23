@@ -126,6 +126,7 @@
     <string name="settings_item_use_overlay">아이템 사용 오버레이 활성화. 최근 아이템 사용을 킬 피드 스타일로 표시합니다. [실험적 / 프로토타입]</string>
     <string name="settings_split_chat">OSRS 스타일 분할 채팅 창 오버레이 활성화. (곧 출시)</string>
     <string name="settings_tabbed_detection">게임에서 탭으로 나갔을 때 게임 오버레이 자동 숨기기. 툴팁(제목 표시줄 있는 것)에는 적용되지 않습니다.</string>
+    <string name="settings_combat_overlay_tooltip">전투 오버레이를 게임 오버레이 대신 멀티 모니터 툴팁으로 표시. (드래그 가능하고 항상 표시되는 제목 표시줄이 있는 툴팁으로 표시됩니다.)</string>
     <string name="settings_allow_pve_damage">PvE 피해가 DPS/킬 카운터에 포함되도록 허용. (PvE 대상에 대한 피해량을 보고 싶은 솔로 플레이어에게 유용)</string>
     <string name="settings_game_schedule_hotkey">[TAB 길게 누르기]로 공식 인게임 이벤트 일정 웹사이트를 오버레이로 표시. (곧 출시)</string>
     <string name="settings_use_sadly">인게임 일정 데이터에 Sadly.io 사용 선호. (곧 출시)</string>

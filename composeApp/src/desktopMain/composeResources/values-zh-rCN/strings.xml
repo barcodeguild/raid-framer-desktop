@@ -126,6 +126,7 @@
     <string name="settings_item_use_overlay">启用物品使用覆盖层。以击杀信息风格显示最近的物品使用。[实验性/原型]</string>
     <string name="settings_split_chat">启用OSRS风格的分割聊天窗口覆盖。(即将推出)</string>
     <string name="settings_tabbed_detection">在标签页切换出游戏时自动隐藏游戏覆盖。不适用于工具提示(那些有标题栏的)。</string>
+    <string name="settings_combat_overlay_tooltip">将战斗覆盖作为多显示器工具提示,而非游戏覆盖。 (显示为可拖动、始终可见的带标题栏工具提示。)</string>
     <string name="settings_allow_pve_damage">允许PvE伤害计入DPS/击杀计数器。(对于想要查看对PvE目标伤害输出的单人玩家很有用)</string>
     <string name="settings_game_schedule_hotkey">启用[按住TAB]以将官方游戏内活动时间表网站作为覆盖层显示。(即将推出)</string>
     <string name="settings_use_sadly">我更愿意使用Sadly.io获取游戏内时间表数据。(即将推出)</string>
