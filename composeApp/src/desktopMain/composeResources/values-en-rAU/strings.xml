@@ -1207,4 +1207,15 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="performance_distance_help_title">Distance &amp; Info Filtering</string>
     <string name="performance_distance_help_body">The in-game combat settings (ESC \u2192 Options \u2192 Game Info) control what data flows into the addon.\n\n\u201CShow Combat Messages\u201D checkbox: Toggles damage/heal hitsplats in the game visually, but does NOT affect data flow to the addon. You can have them on or off.\n\nInfo Filter (SELF / PARTY / RAID / GUILD / ALL): This DOES affect data flow. Changing the filter limits which combat events the addon receives.\n\nDistance Slider: This DOES affect data flow. Reducing the range limits how far away combat events are detected.\n\nExamples:\n\u2022 SELF \u2014 Only your own character\u2019s events. The distance slider is automatically greyed out since it\u2019s not relevant.\n\u2022 PARTY \u2014 Your group of 5. In ArcheAge, everyone in your raid column is considered your \u201Cparty.\u201D For example, spells like Sonic Wave that \u201Cremove negative effects from all party members\u201D affect your column of 5, not the entire raid.\n\u2022 RAID \u2014 All parties in the raid (all columns).\n\u2022 GUILD \u2014 Only players matching your guild tag. A second guild tag won\u2019t appear since it\u2019s technically a different guild.\n\nAdjusting these in-game filters may be preferable to disabling features in the app, as they provide finer control over what data is processed.</string>
 
+    <!-- Tray Menu Labels -->
+    <string name="tray_dragon_breaths">Dragon Breaths</string>
+    <string name="tray_raid_management">Raid Management</string>
+    <string name="tray_battle_summary">Battle Summary</string>
+    <string name="tray_battle_graph">Battle Graph</string>
+    <string name="tray_new_session">New Session</string>
+    <string name="tray_save_session">Save Session</string>
+    <string name="tray_abort_session">Abort Session</string>
+    <string name="tray_lua_options">Lua Options</string>
+    <string name="tray_close">Close</string>
+
 </resources>

@@ -1261,4 +1261,15 @@
     <string name="performance_distance_help_title">距离与信息过滤</string>
     <string name="performance_distance_help_body">游戏内战斗设置（ESC \u2192 选项 \u2192 游戏信息）控制流入插件的数据。\n\n\u201C显示战斗消息\u201D复选框：切换游戏中的伤害/治疗命中效果的视觉显示，但不会影响流向插件的数据。您可以选择开启或关闭。\n\n信息过滤器（自身 / 队伍 / 团队 / 公会 / 全部）：这会影响数据流。更改过滤器会限制插件接收的战斗事件。\n\n距离滑块：这会影响数据流。降低范围会限制战斗事件的检测距离。\n\n示例：\n\u2022 自身 \u2014 仅您自己角色的事件。距离滑块自动灰显，因为不相关。\n\u2022 队伍 \u2014 您的5人小组。在ArcheAge中，团队中同一列的所有人都被视为您的\u201C队伍。\u201D例如，像声波冲击这样\u201C移除所有队伍成员负面效果\u201D的技能会影响您列的5人，而不是整个团队。\n\u2022 团队 \u2014 团队中的所有小队（所有列）。\n\u2022 公会 \u2014 仅匹配您公会标签的玩家。第二个公会标签不会显示，因为技术上是不同的公会。\n\n在游戏内调整这些过滤器可能比在应用中禁用功能更可取，因为它们提供更精细的数据处理控制。</string>
 
+    <!-- Tray Menu Labels -->
+    <string name="tray_dragon_breaths">龙息</string>
+    <string name="tray_raid_management">团队管理</string>
+    <string name="tray_battle_summary">战斗摘要</string>
+    <string name="tray_battle_graph">战斗图表</string>
+    <string name="tray_new_session">新建会话</string>
+    <string name="tray_save_session">保存会话</string>
+    <string name="tray_abort_session">中止会话</string>
+    <string name="tray_lua_options">Lua 选项</string>
+    <string name="tray_close">关闭</string>
+
 </resources>

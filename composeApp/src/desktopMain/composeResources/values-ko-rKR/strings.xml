@@ -1261,4 +1261,15 @@
     <string name="performance_distance_help_title">거리 및 정보 필터링</string>
     <string name="performance_distance_help_body">인게임 전투 설정(ESC \u2192 옵션 \u2192 게임 정보)은 애드온으로 흐르는 데이터를 제어합니다.\n\n\u201C전투 메시지 표시\u201D 체크박스: 게임에서 피해/치유 히트스플랫의 시각적 표시를 전환하지만, 애드온으로의 데이터 흐름에는 영향을 미치지 않습니다. 켜거나 끌 수 있습니다.\n\n정보 필터(SELF / PARTY / RAID / GUILD / ALL): 이것이 데이터 흐름에 영향을 미칩니다. 필터를 변경하면 애드온이 받는 전투 이벤트가 제한됩니다.\n\n거리 슬라이더: 이것이 데이터 흐름에 영향을 미칩니다. 범위를 줄이면 전투 이벤트 감지 거리가 제한됩니다.\n\n예시:\n\u2022 SELF \u2014 본인 캐릭터의 이벤트만. 거리 슬라이더는 관련이 없어 자동으로 비활성화됩니다.\n\u2022 PARTY \u2014 5명 파티. ArcheAge에서는 공격대 열의 모든 사람이 \u201C파티\u201D로 간주됩니다. 예를 들어, \u201C모든 파티원에게서 부정적 효과를 제거\u201D하는 소닉 웨이브 같은 스킬은 전체 공격대가 아닌 5명 열에 영향을 미칩니다.\n\u2022 RAID \u2014 공격대의 모든 파티(모든 열).\n\u2022 GUILD \u2014 길드 태그가 일치하는 플레이어만. 두 번째 길드 태그는 기술적으로 다른 길드이므로 표시되지 않습니다.\n\n이 인게임 필터를 조정하는 것은 앱에서 기능을 비활성화하는 것보다 바람직할 수 있으며, 어떤 데이터가 처리되는지 더 세밀한 제어를 제공합니다.</string>
 
+    <!-- Tray Menu Labels -->
+    <string name="tray_dragon_breaths">드래곤 브레스</string>
+    <string name="tray_raid_management">레이드 관리</string>
+    <string name="tray_battle_summary">전투 요약</string>
+    <string name="tray_battle_graph">전투 그래프</string>
+    <string name="tray_new_session">새 세션</string>
+    <string name="tray_save_session">세션 저장</string>
+    <string name="tray_abort_session">세션 중단</string>
+    <string name="tray_lua_options">루아 옵션</string>
+    <string name="tray_close">닫기</string>
+
 </resources>

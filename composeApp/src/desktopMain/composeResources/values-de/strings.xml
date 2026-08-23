@@ -1207,4 +1207,15 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="performance_distance_help_title">Entfernung &amp; Informationsfilterung</string>
     <string name="performance_distance_help_body">Die Spielinternen Kampfeinstellungen (ESC \u2192 Optionen \u2192 Spielinfo) steuern, welche Daten in das Addon fließen.\n\n\u201CKampfmeldungen anzeigen\u201D-Checkbox: Schaltet die visuelle Anzeige von Schadens/Heilung-Hitsplats im Spiel um, beeinflusst ABER NICHT den Datenfluss zum Addon. Sie können sie ein- oder ausschalten.\n\nInformationsfilter (SELF / PARTY / RAID / GUILD / ALL): DIES beeinflusst den Datenfluss. Das Ändern des Filters begrenzt, welche Kampfereignisse das Addon empfängt.\n\nEntfernungsregler: DIES beeinflusst den Datenfluss. Die Reduzierung des Bereichs begrenzt, wie weit entfernt Kampfereignisse erkannt werden.\n\nBeispiele:\n\u2022 SELF \u2014 Nur die Ereignisse Ihres eigenen Charakters. Der Entfernungsregler wird automatisch ausgegraut, da er nicht relevant ist.\n\u2022 PARTY \u2014 Ihre Gruppe von 5. In ArcheAge wird jeder in Ihrer Raid-Säule als Ihre \u201Cparty\u201D betrachtet. Zum Beispiel betreffen Zaubersprüche wie Schallwelle, die \u201Cnegative Effekte von allen Gruppenmitgliedern entfernen\u201D, Ihre Säule von 5, nicht den gesamten Raid.\n\u2022 RAID \u2014 Alle Partys im Raid (alle Säulen).\n\u2022 GUILD \u2014 Nur Spieler, die mit Ihrem Guildenamen übereinstimmen. Ein zweiter Guildenamen wird nicht angezeigt, da es sich technisch um eine andere Gilde handelt.\n\nDas Anpassen dieser Spielinternen Filter kann dem Deaktivieren von Funktionen in der App vorzuziehen sein, da sie feinere Kontrolle darüber bieten, welche Daten verarbeitet werden.</string>
 
+    <!-- Tray Menu Labels -->
+    <string name="tray_dragon_breaths">Drachenatem</string>
+    <string name="tray_raid_management">Raid-Verwaltung</string>
+    <string name="tray_battle_summary">Kampfzusammenfassung</string>
+    <string name="tray_battle_graph">Kampfgrafik</string>
+    <string name="tray_new_session">Neue Sitzung</string>
+    <string name="tray_save_session">Sitzung speichern</string>
+    <string name="tray_abort_session">Sitzung abbrechen</string>
+    <string name="tray_lua_options">Lua-Optionen</string>
+    <string name="tray_close">Schließen</string>
+
 </resources>

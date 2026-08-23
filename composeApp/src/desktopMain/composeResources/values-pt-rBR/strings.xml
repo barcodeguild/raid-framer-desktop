@@ -1207,4 +1207,15 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="performance_distance_help_title">Distância e Filtragem de Informações</string>
     <string name="performance_distance_help_body">As configurações de combate no jogo (ESC \u2192 Opções \u2192 Informações do Jogo) controlam quais dados fluem para o addon.\n\nCheckbox \u201CMostrar Mensagens de Combate\u201D: Alterna a exibição visual de hits de dano/cura no jogo, mas NÃO afeta o fluxo de dados para o addon. Você pode deixar ligado ou desligado.\n\nFiltro de Informações (SELF / PARTY / RAID / GUILD / ALL): ISSO afeta o fluxo de dados. Alterar o filtro limita quais eventos de combate o addon recebe.\n\nControle Deslizante de Distância: ISSO afeta o fluxo de dados. Reduzir o alcance limita a distância de detecção de eventos de combate.\n\nExemplos:\n\u2022 SELF \u2014 Apenas eventos do seu próprio personagem. O controle deslizante de distância fica automaticamente cinza, pois não é relevante.\n\u2022 PARTY \u2014 Seu grupo de 5. No ArcheAge, todos na sua coluna de raid são considerados seu \u201Cparty.\u201D Por exemplo, feitiços como Onda Sônica que \u201Cremovem efeitos negativos de todos os membros do party\u201D afetam sua coluna de 5, não a raid inteira.\n\u2022 RAID \u2014 Todos os party na raid (todas as colunas).\n\u2022 GUILD \u2014 Apenas jogadores com sua tag de guilda. Uma segunda tag de guilda não aparecerá, pois é tecnicamente uma guilda diferente.\n\nAjustar esses filtros no jogo pode ser preferível a desativar funcionalidades no aplicativo, pois fornecem controle mais refinado sobre quais dados são processados.</string>
 
+    <!-- Tray Menu Labels -->
+    <string name="tray_dragon_breaths">Sopros de Dragão</string>
+    <string name="tray_raid_management">Gerenciamento de Raid</string>
+    <string name="tray_battle_summary">Resumo da Batalha</string>
+    <string name="tray_battle_graph">Gráfico de Batalha</string>
+    <string name="tray_new_session">Nova Sessão</string>
+    <string name="tray_save_session">Salvar Sessão</string>
+    <string name="tray_abort_session">Cancelar Sessão</string>
+    <string name="tray_lua_options">Opções Lua</string>
+    <string name="tray_close">Fechar</string>
+
 </resources>
