@@ -723,7 +723,7 @@
     <string name="raid_buff_orange_goblet">要求橙色光荣之盏</string>
     <string name="raid_buff_allow_meatballs">允许肉丸</string>
     <string name="raid_buff_require_enhanced">要求强化审判的渴望</string>
-    <string name="raid_buff_loot_section">+50% 战利品增益</string>
+    <string name="raid_buff_loot_section">需要战利品增益</string>
     <string name="raid_buff_at_least_one_loot">至少一个 +50% 增益</string>
     <string name="raid_buff_two_loot">两个或更多 +50% 增益</string>
     <string name="raid_buff_selected_player">选中的玩家</string>

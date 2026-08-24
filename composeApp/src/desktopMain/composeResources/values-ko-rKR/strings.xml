@@ -724,7 +724,7 @@
     <string name="raid_buff_orange_goblet">주황색 영광의 잔 필요</string>
     <string name="raid_buff_allow_meatballs">미트볼 허용</string>
     <string name="raid_buff_require_enhanced">강화된 심판의 갈망 필요</string>
-    <string name="raid_buff_loot_section">+50% 전리품 버프</string>
+    <string name="raid_buff_loot_section">전리품 버프 요구</string>
     <string name="raid_buff_at_least_one_loot">+50% 버프 하나 이상</string>
     <string name="raid_buff_two_loot">+50% 버프 두 개 이상</string>
     <string name="raid_buff_selected_player">선택한 플레이어</string>

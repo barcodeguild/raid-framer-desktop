@@ -757,7 +757,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_orange_goblet">Require Orange Goblet</string>
     <string name="raid_buff_allow_meatballs">Allow Meatballs</string>
     <string name="raid_buff_require_enhanced">Require Enhanced Longing</string>
-    <string name="raid_buff_loot_section">+50% Loot Buffs</string>
+    <string name="raid_buff_loot_section">Require Loot Buffs</string>
     <string name="raid_buff_at_least_one_loot">At Least One +50% Buff</string>
     <string name="raid_buff_two_loot">Two or More +50% Buffs</string>
     <string name="raid_buff_check_loot">Check for loot buffs?</string>
