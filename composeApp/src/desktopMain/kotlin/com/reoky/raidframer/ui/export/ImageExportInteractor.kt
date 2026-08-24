@@ -212,7 +212,7 @@ object ImageExportInteractor {
   private val COURAGEOUS_ACTION_COLOR = toAwtColor(RFColors.courageousActionBright)
   private val MANA_BARRIER_COLOR = toAwtColor(RFColors.manaBarrierBlue)
   private val REVIVE_COLOR = toAwtColor(RFColors.reviveGhostWhite)
-  private val LOOT_BUFF_COLOR = toAwtColor(RFColors.buffsBlue)
+  private val LOOT_BUFF_COLOR = toAwtColor(RFColors.lootBuffColor)
 
   /**
    * Maps a heal ratio (0.0 = 0% healed, 1.0 = 100% healed) to a color gradient:

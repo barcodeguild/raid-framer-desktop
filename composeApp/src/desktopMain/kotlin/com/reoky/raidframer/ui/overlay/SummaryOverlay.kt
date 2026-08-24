@@ -1934,7 +1934,7 @@ private fun LootBuffTab(
       title = stringResource(Res.string.summary_top_loot_peak),
       cards = topLootPeak,
       valueExtractor = { "${it.sessionPeakLootBuffAmount}%" },
-      valueColor = RFColors.buffsBlue,
+      valueColor = RFColors.lootBuffColor,
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1945,7 +1945,7 @@ private fun LootBuffTab(
       title = stringResource(Res.string.summary_worst_loot_peak),
       cards = worstLootPeak,
       valueExtractor = { "${it.sessionPeakLootBuffAmount}%" },
-      valueColor = RFColors.buffsBlue,
+      valueColor = RFColors.lootBuffColor,
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1956,7 +1956,7 @@ private fun LootBuffTab(
       title = stringResource(Res.string.summary_top_buff_count),
       cards = topBuffCount,
       valueExtractor = { it.sessionCurrentBuffCount.toString() },
-      valueColor = RFColors.buffsBlue,
+      valueColor = RFColors.lootBuffColor,
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)

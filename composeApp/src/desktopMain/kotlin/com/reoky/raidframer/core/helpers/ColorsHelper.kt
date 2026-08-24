@@ -45,6 +45,8 @@ object RFColors {
   val killsRed = Color(0xFFDC143C)       // Crimson — kills graph mode
   val buffsBlue = Color(0xFFFFCA28)      // Gold — buffs graph mode (same as itemSkillYellow)
   val debuffsPurple = Color(0xFFAB47BC)  // Purple — debuffs graph mode (same as silencePurple)
+  // Loot buff accent — purple for royalty. Used in the raid loot breakdown and rankings.
+  val lootBuffColor = Color(0xFFAB47BC)
 
   // Faction colors
   val factionHaranya = Color(0xFFAB47BC)

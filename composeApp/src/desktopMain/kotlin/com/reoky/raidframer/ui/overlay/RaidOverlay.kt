@@ -62,6 +62,7 @@ import com.reoky.raidframer.core.definitions.matchedDefinitions
 import com.reoky.raidframer.core.definitions.missingKeys
 import com.reoky.raidframer.core.model.hasPvPParticipation
 import com.reoky.raidframer.core.model.RaidBuffGracePeriod
+import com.reoky.raidframer.core.model.RaidBuffObservation
 import com.reoky.raidframer.core.definitions.SKILL_TREE_DISPLAY_ORDER
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.META_CC_SPECS
@@ -878,7 +879,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
           Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
             BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
-            LootBuffRankList(allMembers, Modifier.fillMaxWidth())
+            LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
           }
           BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp))
         }
@@ -887,7 +888,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
           BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
           BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.fillMaxWidth())
           BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
-          LootBuffRankList(allMembers, Modifier.fillMaxWidth())
+          LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
         }
       }
       }
@@ -945,7 +946,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
               .joinToString(", ")
               .ifBlank { stringResource(Res.string.raid_buff_none_found) }
             Text(missingBuffText, color = RFColors.TextSecondary, fontSize = 11.sp)
-            Text(stringResource(Res.string.raid_buff_loot_buffs), color = Color(0xFFFFCA28), fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+            Text(stringResource(Res.string.raid_buff_loot_buffs), color = RFColors.lootBuffColor, fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
             // Per-loot-buff breakdown: name + %, descending, with a mini progress bar so
             // the raid lead can see at a glance how heavily a player loot buffed.
             val playerLootBuffs = resolvedPlayer.buffs
@@ -972,11 +973,11 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
                         .fillMaxHeight()
                         .fillMaxWidth(fraction)
                         .clip(RoundedCornerShape(3.dp))
-                        .background(Color(0xFFFFCA28))
+                        .background(RFColors.lootBuffColor)
                     )
                   }
                   Spacer(modifier = Modifier.width(6.dp))
-                  Text("${lootBuff.lootPercent}%", color = Color(0xFFFFCA28), fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(38.dp))
+                  Text("${lootBuff.lootPercent}%", color = RFColors.lootBuffColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(38.dp))
                 }
               }
             }
@@ -1075,7 +1076,7 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
       )
       Text(
         text = "$lootSliderValue%",
-        color = if (lootEnabled) Color(0xFFFFCA28) else Color.White.copy(alpha = 0.5f),
+        color = if (lootEnabled) RFColors.lootBuffColor else Color.White.copy(alpha = 0.5f),
         fontSize = 11.sp,
         textAlign = TextAlign.End,
         modifier = Modifier.width(42.dp)
@@ -1103,14 +1104,16 @@ private fun BuffCopyPane(notBuffed: String, buffed: String, modifier: Modifier) 
 }
 
 @Composable
-private fun LootBuffRankList(members: List<RaidFramePayload>, modifier: Modifier) {
-  // Scrollable, max-height list of players sorted by their current summed loot buff %,
-  // most → least. Uses the buff color (gold) from ColorsHelper.
+private fun LootBuffRankList(members: List<RaidFramePayload>, observations: Map<RaidFramePayload, RaidBuffObservation>, modifier: Modifier) {
+  // Scrollable, max-height breakdown of players sorted by their current summed loot buff %,
+  // most → least. Uses the grace-period cached snapshots so players who loot buffed recently
+  // (but are now out-of-range / empty) still appear. Rows flow across multiple columns so
+  // more players are visible at once. Uses the buff color (gold) from ColorsHelper.
   val ranked = members
-    .filter { it.playerName.isNotBlank() }
-    .map { it ->
-      val amount = lootBuffAmountForIds(it.buffs.map { buff -> buff.buff_id }.toSet())
-      it to amount
+    .map { member ->
+      val snapshot = observations[member]?.snapshot
+      val amount = if (snapshot != null) lootBuffAmountForIds(snapshot.buffIds) else 0
+      member to amount
     }
     .filter { it.second > 0 }
     .sortedByDescending { it.second }
@@ -1120,39 +1123,60 @@ private fun LootBuffRankList(members: List<RaidFramePayload>, modifier: Modifier
       Text(stringResource(Res.string.raid_buff_none_found), color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
     } else {
       val maxAmount = ranked.first().second.coerceAtLeast(1)
-      Column(
-        Modifier.fillMaxWidth().heightIn(max = 220.dp).verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+      BoxWithConstraints(
+        Modifier.fillMaxWidth().heightIn(max = 220.dp).verticalScroll(rememberScrollState())
       ) {
-        ranked.take(100).forEach { (member, amount) ->
-          Row(
-            Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 1.dp),
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Text(member.playerName, color = Color.White, fontSize = 11.sp, maxLines = 1, modifier = Modifier.weight(1f))
-            // Mini bar — visual comparison of this player's loot % against the raid max.
-            val fraction = (amount.toFloat() / maxAmount).coerceIn(0f, 1f)
-            Box(
-              modifier = Modifier
-                .width(56.dp)
-                .height(6.dp)
-                .clip(RoundedCornerShape(3.dp))
-                .background(Color.White.copy(alpha = 0.1f))
-            ) {
-              Box(
-                modifier = Modifier
-                  .fillMaxHeight()
-                  .fillMaxWidth(fraction)
-                  .clip(RoundedCornerShape(3.dp))
-                  .background(Color(0xFFFFCA28))
-              )
+        // Two columns when there's room; otherwise a single column.
+        val columns = if (maxWidth >= 520.dp) 2 else 1
+        val chunkSize = if (ranked.size % columns == 0) ranked.size / columns else (ranked.size / columns) + 1
+        if (columns == 2) {
+          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            ranked.take(100).chunked(chunkSize).forEach { chunk ->
+              Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                chunk.forEach { (member, amount) ->
+                  LootBuffRow(member.playerName, amount, maxAmount)
+                }
+              }
             }
-            Spacer(modifier = Modifier.width(6.dp))
-            Text("$amount%", color = Color(0xFFFFCA28), fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(42.dp))
+          }
+        } else {
+          Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            ranked.take(100).forEach { (member, amount) ->
+              LootBuffRow(member.playerName, amount, maxAmount)
+            }
           }
         }
       }
     }
+  }
+}
+
+@Composable
+private fun LootBuffRow(name: String, amount: Int, maxAmount: Int) {
+  Row(
+    Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 1.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Text(name, color = Color.White, fontSize = 11.sp, maxLines = 1, modifier = Modifier.weight(1f))
+    // Mini bar — visual comparison of this player's loot % against the raid max.
+    val fraction = (amount.toFloat() / maxAmount).coerceIn(0f, 1f)
+    Box(
+      modifier = Modifier
+        .width(56.dp)
+        .height(6.dp)
+        .clip(RoundedCornerShape(3.dp))
+        .background(Color.White.copy(alpha = 0.1f))
+    ) {
+      Box(
+        modifier = Modifier
+          .fillMaxHeight()
+          .fillMaxWidth(fraction)
+          .clip(RoundedCornerShape(3.dp))
+          .background(RFColors.lootBuffColor)
+      )
+    }
+    Spacer(modifier = Modifier.width(6.dp))
+    Text("$amount%", color = RFColors.lootBuffColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(42.dp))
   }
 }
 
