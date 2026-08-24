@@ -2,6 +2,7 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -833,18 +834,20 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
   var gracePeriod by BuffsTabState.gracePeriod
   val allMembers = (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
   val observations = allMembers.associateWith { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod) }
-  val notBuffed = allMembers.filter { member ->
-    val observation = observations.getValue(member)
-    observation.snapshot == null || !requirements.matches(member.copy(buffs = observation.snapshot.buffIds.map { id ->
-      BuffPayload(buff_id = id)
-    }))
-  }.joinToString(", ") { it.playerName }
   val buffed = allMembers.filter { member ->
-    val observation = observations.getValue(member)
-    observation.snapshot != null && requirements.matches(member.copy(buffs = observation.snapshot.buffIds.map { id ->
+    val snapshot = observations.getValue(member).snapshot
+    snapshot != null && requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
       BuffPayload(buff_id = id)
     }))
   }.joinToString(", ") { it.playerName }
+  val notBuffed = allMembers.filter { member ->
+    val snapshot = observations.getValue(member).snapshot
+    snapshot != null && !requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
+      BuffPayload(buff_id = id)
+    }))
+  }.joinToString(", ") { it.playerName }
+  val notScannable = allMembers.filter { observations.getValue(it).snapshot == null }
+    .joinToString(", ") { it.playerName }
   val localizedBuffLabels = RAID_BUFF_DEFINITIONS.associate { definition ->
     definition.key to when (definition.key) {
       RaidBuffKey.GOBLET -> stringResource(Res.string.raid_buff_goblet)
@@ -884,7 +887,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
           Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
-            BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
+BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
             LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
           }
           BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp))
@@ -893,7 +896,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
           BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
           BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.fillMaxWidth())
-          BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
+          BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
           LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
         }
       }
@@ -1010,11 +1013,11 @@ private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<Li
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_main_raid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot?.buffIds?.isNotEmpty() == true })
+        RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
       }
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_coraid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot?.buffIds?.isNotEmpty() == true })
+        RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
       }
     }
   }
@@ -1092,8 +1095,13 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
 }
 
 @Composable
-private fun BuffCopyPane(notBuffed: String, buffed: String, modifier: Modifier) {
+private fun BuffCopyPane(notBuffed: String, buffed: String, notScannable: String, modifier: Modifier) {
+  var notScannableExpanded by remember { mutableStateOf(false) }
   Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+      Text(stringResource(Res.string.raid_buff_categories_help_title), color = Color.White, fontWeight = FontWeight.Bold)
+      BuffCategoriesHelp()
+    }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       Text(stringResource(Res.string.raid_copy_not_buffed_title), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
       Text(stringResource(Res.string.raid_copy_buffed_title), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
@@ -1106,6 +1114,74 @@ private fun BuffCopyPane(notBuffed: String, buffed: String, modifier: Modifier) 
       Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notBuffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_not_buffed), color = Color.Black) }
       Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(buffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_buffed), color = Color.Black) }
     }
+    // Collapsible "Not Scannable" section — players we have no in-grace observation for.
+    // Collapses to a single header row to avoid taking up screen real estate.
+    Row(Modifier.fillMaxWidth().clickable { notScannableExpanded = !notScannableExpanded }, horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+      Text(stringResource(Res.string.raid_copy_not_scannable_title), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+      Text(if (notScannableExpanded) "\u25B2" else "\u25BC", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+    }
+    if (notScannableExpanded) {
+      Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SelectableTextField(value = notScannable, modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp, max = 150.dp), minHeight = 0.dp)
+        Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notScannable), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.fillMaxWidth()) { Text(stringResource(Res.string.raid_copy_not_scannable), color = Color.Black) }
+      }
+    }
+  }
+}
+
+@Composable
+private fun BuffCategoriesHelp() {
+  var showHelp by remember { mutableStateOf(false) }
+  Box {
+    IconButton(onClick = { showHelp = !showHelp }, modifier = Modifier.size(24.dp)) {
+      Text("?", color = RFColors.TextSecondary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    }
+    if (showHelp) {
+      Popup {
+        Surface(
+          color = RFColors.PopupBackground.copy(alpha = 0.98f),
+          shape = RoundedCornerShape(8.dp),
+          border = BorderStroke(1.dp, RFColors.CardBorder),
+          elevation = 6.dp
+        ) {
+          Column(
+            Modifier.padding(10.dp).widthIn(max = 360.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Text(
+                stringResource(Res.string.raid_buff_categories_help_title),
+                color = RFColors.TextPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
+              )
+              IconButton(
+                onClick = { showHelp = false },
+                modifier = Modifier.size(24.dp)
+              ) {
+                Text("X", color = RFColors.TextSecondary, fontSize = 11.sp)
+              }
+            }
+            Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+            BuffCategoryHelpRow(stringResource(Res.string.raid_copy_buffed_title), stringResource(Res.string.raid_buff_categories_buffed))
+            BuffCategoryHelpRow(stringResource(Res.string.raid_copy_not_buffed_title), stringResource(Res.string.raid_buff_categories_not_buffed))
+            BuffCategoryHelpRow(stringResource(Res.string.raid_copy_not_scannable_title), stringResource(Res.string.raid_buff_categories_not_scannable))
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun BuffCategoryHelpRow(title: String, explanation: String) {
+  Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+    Text(explanation, color = RFColors.TextSecondary, fontSize = 10.sp, lineHeight = 13.sp)
   }
 }
 

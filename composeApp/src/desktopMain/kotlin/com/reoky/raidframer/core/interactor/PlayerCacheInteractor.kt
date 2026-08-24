@@ -70,6 +70,10 @@ object PlayerCacheInteractor : Interactor() {
   private val raidDepartures = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidBuffHistory = mutableMapOf<String, RaidBuffSnapshot>()
   private const val RAID_BUFF_HISTORY_RETENTION_MS = 6L * 60L * 60L * 1000L
+  // Distance (meters) beyond which a raid member is considered out of range and cannot be
+  // reliably scanned. An empty buff scan from beyond this range is not evidence the player
+  // lacks buffs — it just means the app couldn't see them.
+  private const val OUT_OF_RANGE_DISTANCE = 115
   private var lastRaidBuffHistoryCleanupAt = 0L
   private val _raidDeparturesFlow = MutableStateFlow<Map<Int, Set<String>>>(emptyMap())
   val raidDeparturesFlow: StateFlow<Map<Int, Set<String>>> = _raidDeparturesFlow.asStateFlow()
@@ -288,12 +292,13 @@ object PlayerCacheInteractor : Interactor() {
   private fun recordRaidBuffSnapshot(member: RaidFramePayload) {
     val now = System.currentTimeMillis()
     val buffIds = member.buffs.map { it.buff_id }.toSet()
-    val previous = raidBuffHistory[member.playerName]
-    // Empty out-of-range scans are not evidence that the player's buffs expired.
+    // Only a non-empty buff read is always a valid confirmation of the player's state.
     if (buffIds.isNotEmpty()) {
       raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, buffIds, member.distance)
-    } else if (previous == null) {
-      // Retain an initial empty observation so unknown players can still age out naturally.
+    } else if (member.buffScanTimestamp > 0L && member.distance >= 0 && member.distance <= OUT_OF_RANGE_DISTANCE) {
+      // An in-range scan that returned no buffs is a real confirmation the player is unbuffed.
+      // An empty scan from an out-of-range / unknown-distance / never-zone player is NOT
+      // confirmation — the app couldn't see their buffs, so they must remain "not scannable."
       raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, emptySet(), member.distance)
     }
     if (now - lastRaidBuffHistoryCleanupAt >= 60_000L) {

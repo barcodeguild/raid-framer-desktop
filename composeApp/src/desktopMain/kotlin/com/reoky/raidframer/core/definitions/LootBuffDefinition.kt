@@ -153,6 +153,7 @@ val LOOT_BUFF_DEFINITIONS = listOf(
   LootBuffDefinition(30772, "Enhanced Amarendra IV's Intense Blessing", 5, 86400),
   LootBuffDefinition(30773, "Enhanced Amarendra IV's Steadfast Blessing", 5, 86400),
   LootBuffDefinition(31439, "Lucky Quicksilver Tonic", 10, 3600),
+  LootBuffDefinition(8000009, "Lucky Quicksilver Tonic", 10, 3600),
   LootBuffDefinition(8000011, "Patron", 100, null),
   LootBuffDefinition(8000185, "Soul Sworn", 1, null),
   LootBuffDefinition(8000187, "Homecoming Warrior", 20, null),

@@ -765,6 +765,12 @@
     <string name="raid_copy_not_buffed_title">未获得增益</string>
     <string name="raid_copy_buffed">复制已获得增益玩家</string>
     <string name="raid_copy_buffed_title">已获得增益</string>
+    <string name="raid_copy_not_scannable">复制无法扫描玩家</string>
+    <string name="raid_copy_not_scannable_title">无法扫描</string>
+    <string name="raid_buff_categories_help_title">增益状态</string>
+    <string name="raid_buff_categories_buffed">应用最近扫描过且拥有全部所需增益的玩家。已准备就绪。</string>
+    <string name="raid_buff_categories_not_buffed">应用最近扫描过但缺少至少一个所需增益，或未达到战利品门槛的玩家。请让他们补充增益。</string>
+    <string name="raid_buff_categories_not_scannable">应用无法获得最新扫描的玩家（超出范围或位于不同区域）。他们可能有增益也可能没有——尚未确认。</string>
     <string name="raid_haranya_faction">哈拉尼亚阵营(%d)</string>
     <string name="raid_nuian_faction">努伊安阵营(%d)</string>
     <string name="raid_pirate_faction">海盗阵营(%d)</string>
