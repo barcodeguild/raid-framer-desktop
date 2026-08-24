@@ -150,6 +150,12 @@ fun RaidOverlay(wm: WindowManager? = null) {
     delay(1500L.milliseconds)
     raidWasDetected = true
   }
+  // Every time the Raid overlay opens, ask the Lua companion to re-emit the current raid
+  // roster over IPC. The Lua side replies to a TEST_PING with a fresh FRAMES_UPDATE, which
+  // repopulates the roster even when no combat events are firing in game.
+  LaunchedEffect(Unit) {
+    CompanionInteractor.sendMessage(IPCMessagePayload.TestPing())
+  }
   Box(modifier = Modifier.fillMaxSize().background(Color(0xCC121212))) {
     if (mainRaid.value.isEmpty() && coRaid.value.isEmpty() && !raidWasDetected) {
       Column(
@@ -1124,13 +1130,14 @@ private fun LootBuffRankList(members: List<RaidFramePayload>, observations: Map<
     } else {
       val maxAmount = ranked.first().second.coerceAtLeast(1)
       BoxWithConstraints(
-        Modifier.fillMaxWidth().heightIn(max = 220.dp).verticalScroll(rememberScrollState())
+        Modifier.fillMaxWidth().heightIn(max = 224.dp).verticalScroll(rememberScrollState())
       ) {
         // Two columns when there's room; otherwise a single column.
         val columns = if (maxWidth >= 520.dp) 2 else 1
         val chunkSize = if (ranked.size % columns == 0) ranked.size / columns else (ranked.size / columns) + 1
+        // Bottom padding so the last row's text doesn't clip against the scroll container.
         if (columns == 2) {
-          Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+          Row(Modifier.fillMaxWidth().padding(bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ranked.take(100).chunked(chunkSize).forEach { chunk ->
               Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 chunk.forEach { (member, amount) ->
@@ -1140,7 +1147,7 @@ private fun LootBuffRankList(members: List<RaidFramePayload>, observations: Map<
             }
           }
         } else {
-          Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+          Column(Modifier.fillMaxWidth().padding(bottom = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             ranked.take(100).forEach { (member, amount) ->
               LootBuffRow(member.playerName, amount, maxAmount)
             }

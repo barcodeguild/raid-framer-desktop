@@ -121,16 +121,41 @@ object PlayerCacheInteractor : Interactor() {
           it.recentDebuffGainedEvents.size + it.recentDebuffEndedEvents.size +
           it.recentBuffAppliedEvents.size + it.recentDebuffAppliedEvents.size
       }
+      // Flat per-target adjacency maps + nested per-target/per-spell maps + dropdown spell maps.
       val adjacencyEntries = snapshot.sumOf {
         it.sessionDamageToPlayer.size + it.sessionDamageFromPlayer.size +
           it.sessionHealToPlayer.size + it.sessionHealFromPlayer.size +
           it.sessionCCToPlayer.size + it.sessionCCFromPlayer.size +
+          it.sessionDebuffToPlayer.size + it.sessionBuffToPlayer.size +
+          it.sessionCharmToPlayer.size + it.sessionDistressToPlayer.size +
+          it.sessionSilenceToPlayer.size + it.sessionKillsToPlayer.size +
           it.sessionDamageToPlayerBySpell.values.sumOf { map -> map.size } +
           it.sessionHealToPlayerBySpell.values.sumOf { map -> map.size } +
           it.sessionCCToPlayerBySpell.values.sumOf { map -> map.size } +
-          it.sessionKillsToPlayer.size + it.sessionKillsToPlayerBySpell.values.sumOf { map -> map.size }
+          it.sessionDebuffToPlayerBySpell.values.sumOf { map -> map.size } +
+          it.sessionBuffToPlayerBySpell.values.sumOf { map -> map.size } +
+          it.sessionCharmToPlayerBySpell.values.sumOf { map -> map.size } +
+          it.sessionDistressToPlayerBySpell.values.sumOf { map -> map.size } +
+          it.sessionSilenceToPlayerBySpell.values.sumOf { map -> map.size } +
+          it.sessionKillsToPlayerBySpell.values.sumOf { map -> map.size } +
+          it.sessionSpellBuffMap.size + it.sessionSpellDebuffMap.size
       }
-      Log.info(TAG, "Session retention status: cards=${snapshot.size} pets=${petCards.size} recentEvents=$recentEvents adjacencyEntries=$adjacencyEntries graphPlayers=${GraphDataInteractor.getPlayerNames().size}")
+      // Per-player spell damage/heal/CC breakdown maps (never capped) + recent kill/item maps.
+      val spellMapEntries = snapshot.sumOf {
+        it.sessionSpellDamageMap.size + it.sessionSpellHealMap.size + it.sessionSpellCCMap.size
+      }
+      val killMapEntries = snapshot.sumOf {
+        it.recentKills.size + it.recentKilledBys.size +
+          it.recentKillsKB.size + it.recentKilledByKB.size + it.recentSkillItemUsages.size
+      }
+      // Pet cards also retain recent events; count them separately.
+      val petEvents = petCards.values.sumOf {
+        it.recentDamageEvents.size + it.recentDebuffAppliedEvents.size
+      }
+      // Raid buff history: per-player buff-id snapshot sets retained for the grace/retention window.
+      val raidHistoryPlayers = raidBuffHistory.size
+      val raidHistoryBuffIds = raidBuffHistory.values.sumOf { it.buffIds.size }
+      Log.info(TAG, "Session retention status: cards=${snapshot.size} pets=${petCards.size} petEvents=$petEvents recentEvents=$recentEvents adjacencyEntries=$adjacencyEntries spellMaps=$spellMapEntries killMaps=$killMapEntries raidHistory=$raidHistoryPlayers raidHistoryBuffIds=$raidHistoryBuffIds graphPlayers=${GraphDataInteractor.getPlayerNames().size}")
       lastMemoryCensusAt = now
     }
     snapshot.forEach { card ->
