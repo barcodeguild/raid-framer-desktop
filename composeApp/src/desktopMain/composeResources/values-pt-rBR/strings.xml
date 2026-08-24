@@ -1175,7 +1175,7 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="settings_performance_companion_enabled_desc">Para todo o processamento de eventos no addon Lua. O addon permanece carregado e será retomado quando reativado.</string>
     <string name="settings_performance_impact_maximum">Máximo</string>
     <string name="settings_performance_raid_buff_scanning">Verificação de Buffs da Raid</string>
-    <string name="settings_performance_raid_buff_scanning_desc">Verifica todos os membros da raid em busca de buffs ativos, distância e pontuação de equipamento a cada segundo. Necessário para detecção de Life Mend e verificador de buffs da raid. Desativado automaticamente quando o rastreamento da lista de raid está desligado.</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Verifica todos os membros da raid em busca de buffs ativos, distância e pontuação de equipamento cada 5 segundos. Necessário para detecção de Life Mend e verificador de buffs da raid. Desativado automaticamente quando o rastreamento da lista de raid está desligado.</string>
     <string name="settings_performance_impact_heavy">Alto</string>
     <string name="settings_performance_buff_debuff_tracking">Rastreamento de Buffs/Debuffs</string>
     <string name="settings_performance_buff_debuff_tracking_desc">Rastreia eventos SPELL_AURA_APPLIED e SPELL_AURA_REMOVED. Desativar limita o rastreamento apenas a dano e cura.</string>

@@ -1175,7 +1175,7 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="settings_performance_companion_enabled_desc">Stoppt die gesamte Ereignisverarbeitung im Lua-Addon. Das Addon bleibt geladen und wird bei erneuter Aktivierung fortgesetzt.</string>
     <string name="settings_performance_impact_maximum">Maximal</string>
     <string name="settings_performance_raid_buff_scanning">Raid-Buff-Scannung</string>
-    <string name="settings_performance_raid_buff_scanning_desc">Scannt alle Raid-Mitglieder jede Sekunde auf aktive Buffs, Entfernung und Ausrüstungswert. Erforderlich für Life-Mend-Erkennung und den Raid-Buff-Checker. Wird automatisch deaktiviert, wenn das Raid-Roster-Tracking deaktiviert ist.</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Scannt alle Raid-Mitglieder alle 5 Sekunden auf aktive Buffs, Entfernung und Ausrüstungswert. Erforderlich für Life-Mend-Erkennung und den Raid-Buff-Checker. Wird automatisch deaktiviert, wenn das Raid-Roster-Tracking deaktiviert ist.</string>
     <string name="settings_performance_impact_heavy">Hoch</string>
     <string name="settings_performance_buff_debuff_tracking">Buffs/Debuffs-Tracking</string>
     <string name="settings_performance_buff_debuff_tracking_desc">Verfolgt SPELL_AURA_APPLIED- und SPELL_AURA_REMOVED-Ereignisse. Das Deaktivieren begrenzt das Tracking auf Schaden und Heilung.</string>

@@ -2,6 +2,7 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +20,7 @@ import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.Surface
+import com.reoky.raidframer.ui.component.DragLockedSlider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,6 +54,8 @@ import com.reoky.raidframer.core.definitions.RaidBuffKey
 import com.reoky.raidframer.core.definitions.RaidBuffRequirements
 import com.reoky.raidframer.core.definitions.RAID_BUFF_DEFINITIONS
 import com.reoky.raidframer.core.definitions.RaidBuffSection
+import com.reoky.raidframer.core.definitions.lootBuffById
+import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
 import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.matchesResolved
 import com.reoky.raidframer.core.definitions.matchedDefinitions
@@ -803,13 +807,13 @@ private val BUFF_PRESETS = listOf(
   BuffPreset("Full Buffed", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER), requireEnhancedLonging = true)),
   BuffPreset("Full-Buff BD PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER, RaidBuffKey.FACTION_WAR_TIME, RaidBuffKey.MONSTER_HUNTERS_DREAM), requireEnhancedLonging = true)),
   BuffPreset("Full-Buff Kraken PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER, RaidBuffKey.DAHUTAS_BUBBLE), requireEnhancedLonging = true)),
-  BuffPreset("Uncontested Boss Kill", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.FACTION_WAR_TIME), lootThreshold = 2))
+  BuffPreset("Uncontested Boss Kill", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.FACTION_WAR_TIME), lootThreshold = 100))
 )
 
 private object BuffsTabState {
   var requirements = mutableStateOf(RaidBuffRequirements())
   var selectedPreset = mutableStateOf(BUFF_PRESETS.first())
-  var gracePeriod = mutableStateOf(RaidBuffGracePeriod.IMMEDIATE)
+  var gracePeriod = mutableStateOf(RaidBuffGracePeriod.FIFTEEN_MINUTES)
 }
 
 @Composable
@@ -874,6 +878,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
           Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
             BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
+            LootBuffRankList(allMembers, Modifier.fillMaxWidth())
           }
           BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp))
         }
@@ -882,6 +887,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
           BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
           BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.fillMaxWidth())
           BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
+          LootBuffRankList(allMembers, Modifier.fillMaxWidth())
         }
       }
       }
@@ -939,6 +945,41 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
               .joinToString(", ")
               .ifBlank { stringResource(Res.string.raid_buff_none_found) }
             Text(missingBuffText, color = RFColors.TextSecondary, fontSize = 11.sp)
+            Text(stringResource(Res.string.raid_buff_loot_buffs), color = Color(0xFFFFCA28), fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+            // Per-loot-buff breakdown: name + %, descending, with a mini progress bar so
+            // the raid lead can see at a glance how heavily a player loot buffed.
+            val playerLootBuffs = resolvedPlayer.buffs
+              .mapNotNull { buff -> lootBuffById(buff.buff_id) }
+              .filter { it.lootPercent > 0 }
+              .sortedByDescending { it.lootPercent }
+            if (playerLootBuffs.isEmpty()) {
+              Text(stringResource(Res.string.raid_buff_none_found), color = RFColors.TextSecondary, fontSize = 11.sp)
+            } else {
+              val maxLootAmount = playerLootBuffs.first().lootPercent.coerceAtLeast(1)
+              playerLootBuffs.forEach { lootBuff ->
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                  Text(lootBuff.name, color = RFColors.TextSecondary, fontSize = 11.sp, maxLines = 1, modifier = Modifier.weight(1f))
+                  val fraction = (lootBuff.lootPercent.toFloat() / maxLootAmount).coerceIn(0f, 1f)
+                  Box(
+                    modifier = Modifier
+                      .width(44.dp)
+                      .height(6.dp)
+                      .clip(RoundedCornerShape(3.dp))
+                      .background(Color.White.copy(alpha = 0.1f))
+                  ) {
+                    Box(
+                      modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(fraction)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color(0xFFFFCA28))
+                    )
+                  }
+                  Spacer(modifier = Modifier.width(6.dp))
+                  Text("${lootBuff.lootPercent}%", color = Color(0xFFFFCA28), fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(38.dp))
+                }
+              }
+            }
             Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
             Text(observationText, color = RFColors.TextTertiary, fontSize = 9.sp, modifier = Modifier.padding(top = 2.dp))
           }
@@ -1008,8 +1049,38 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
       }
     }
     Text(stringResource(Res.string.raid_buff_loot_section), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
-    ControlledCheckbox(stringResource(Res.string.raid_buff_at_least_one_loot), requirements.lootThreshold == 1) { onRequirements(requirements.copy(lootThreshold = if (it) 1 else 0)) }
-    ControlledCheckbox(stringResource(Res.string.raid_buff_two_loot), requirements.lootThreshold == 2) { onRequirements(requirements.copy(lootThreshold = if (it) 2 else 0)) }
+    // "Check for loot buffs?" + a 0-500% threshold slider. When enabled, a player is
+    // considered loot-buffed when the sum of all their loot-buff amounts is >= this value.
+    var lootSliderValue by remember { mutableStateOf(requirements.lootThreshold) }
+    val lootEnabled = requirements.lootThreshold > 0
+    ControlledCheckbox(stringResource(Res.string.raid_buff_check_loot), lootEnabled) { checked ->
+      onRequirements(requirements.copy(lootThreshold = if (checked) lootSliderValue.coerceAtLeast(1) else 0))
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      Text(stringResource(Res.string.raid_buff_loot_threshold_label), color = Color.White, fontSize = 11.sp)
+      DragLockedSlider(
+        value = lootSliderValue.toFloat(),
+        onValueChange = {
+          lootSliderValue = it.toInt()
+          // Dragging above 0% checks the "Check for loot buffs?" box; dragging to 0% unchecks it.
+          val next = it.toInt()
+          if (next > 0) {
+            onRequirements(requirements.copy(lootThreshold = next))
+          } else {
+            onRequirements(requirements.copy(lootThreshold = 0))
+          }
+        },
+        modifier = Modifier.weight(1f).height(28.dp),
+        valueRange = 0f..500f
+      )
+      Text(
+        text = "$lootSliderValue%",
+        color = if (lootEnabled) Color(0xFFFFCA28) else Color.White.copy(alpha = 0.5f),
+        fontSize = 11.sp,
+        textAlign = TextAlign.End,
+        modifier = Modifier.width(42.dp)
+      )
+    }
   }
 }
 
@@ -1027,6 +1098,60 @@ private fun BuffCopyPane(notBuffed: String, buffed: String, modifier: Modifier) 
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notBuffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_not_buffed), color = Color.Black) }
       Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(buffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_buffed), color = Color.Black) }
+    }
+  }
+}
+
+@Composable
+private fun LootBuffRankList(members: List<RaidFramePayload>, modifier: Modifier) {
+  // Scrollable, max-height list of players sorted by their current summed loot buff %,
+  // most → least. Uses the buff color (gold) from ColorsHelper.
+  val ranked = members
+    .filter { it.playerName.isNotBlank() }
+    .map { it ->
+      val amount = lootBuffAmountForIds(it.buffs.map { buff -> buff.buff_id }.toSet())
+      it to amount
+    }
+    .filter { it.second > 0 }
+    .sortedByDescending { it.second }
+  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Text(stringResource(Res.string.raid_loot_breakdown_title), color = Color.White, fontWeight = FontWeight.Bold)
+    if (ranked.isEmpty()) {
+      Text(stringResource(Res.string.raid_buff_none_found), color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
+    } else {
+      val maxAmount = ranked.first().second.coerceAtLeast(1)
+      Column(
+        Modifier.fillMaxWidth().heightIn(max = 220.dp).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+      ) {
+        ranked.take(100).forEach { (member, amount) ->
+          Row(
+            Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 1.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(member.playerName, color = Color.White, fontSize = 11.sp, maxLines = 1, modifier = Modifier.weight(1f))
+            // Mini bar — visual comparison of this player's loot % against the raid max.
+            val fraction = (amount.toFloat() / maxAmount).coerceIn(0f, 1f)
+            Box(
+              modifier = Modifier
+                .width(56.dp)
+                .height(6.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(Color.White.copy(alpha = 0.1f))
+            ) {
+              Box(
+                modifier = Modifier
+                  .fillMaxHeight()
+                  .fillMaxWidth(fraction)
+                  .clip(RoundedCornerShape(3.dp))
+                  .background(Color(0xFFFFCA28))
+              )
+            }
+            Spacer(modifier = Modifier.width(6.dp))
+            Text("$amount%", color = Color(0xFFFFCA28), fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(42.dp))
+          }
+        }
+      }
     }
   }
 }

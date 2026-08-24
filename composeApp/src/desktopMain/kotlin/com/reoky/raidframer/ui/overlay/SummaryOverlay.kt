@@ -97,6 +97,10 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_provokes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_tiger_strikes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_freezes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_loot_peak
+import raid_framer_desktop.composeapp.generated.resources.summary_worst_loot_peak
+import raid_framer_desktop.composeapp.generated.resources.summary_top_buff_count
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_loot
 import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
 import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
 import raid_framer_desktop.composeapp.generated.resources.summary_top_debuffs
@@ -232,6 +236,11 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val topManaBarrier by PlayerCacheInteractor.topManaBarrier.collectAsState()
   val topRevive by PlayerCacheInteractor.topRevive.collectAsState()
 
+  // Loot buff rankings (raid-wide)
+  val topLootPeak by PlayerCacheInteractor.topLootPeak.collectAsState()
+  val worstLootPeak by PlayerCacheInteractor.worstLootPeak.collectAsState()
+  val topBuffCount by PlayerCacheInteractor.topBuffCount.collectAsState()
+
   // New faction comparison flows
   val factionTigerStrikeData by PlayerCacheInteractor.factionTigerStrikeComparisonAll.collectAsState()
   val factionFreezeData by PlayerCacheInteractor.factionFreezeComparisonAll.collectAsState()
@@ -271,7 +280,8 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     stringResource(Res.string.summary_tab_items),
     stringResource(Res.string.summary_tab_utility),
     stringResource(Res.string.summary_tab_specs),
-    stringResource(Res.string.summary_tab_performance)
+    stringResource(Res.string.summary_tab_performance),
+    stringResource(Res.string.summary_tab_loot)
   )
 
   val scope = rememberCoroutineScope()
@@ -523,6 +533,12 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           topPerformanceHaranya = topPerformanceHaranya,
           topPerformanceNuia = topPerformanceNuia,
           topPerformancePirate = topPerformancePirate,
+          wm = wm
+        )
+        22 -> LootBuffTab(
+          topLootPeak = topLootPeak,
+          worstLootPeak = worstLootPeak,
+          topBuffCount = topBuffCount,
           wm = wm
         )
       }
@@ -1898,6 +1914,49 @@ private fun PerformanceTab(
       cards = topPerformancePirate,
       valueExtractor = { it.pvpPerformancePoints().toString() },
       valueColor = RFColors.factionPirate,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+  }
+}
+
+@Composable
+private fun LootBuffTab(
+  topLootPeak: List<PlayerCard>,
+  worstLootPeak: List<PlayerCard>,
+  topBuffCount: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\uD83C\uDFC6",
+      title = stringResource(Res.string.summary_top_loot_peak),
+      cards = topLootPeak,
+      valueExtractor = { "${it.sessionPeakLootBuffAmount}%" },
+      valueColor = RFColors.buffsBlue,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+
+    StatColumn(
+      icon = "\uD83D\uDD0C",
+      title = stringResource(Res.string.summary_worst_loot_peak),
+      cards = worstLootPeak,
+      valueExtractor = { "${it.sessionPeakLootBuffAmount}%" },
+      valueColor = RFColors.buffsBlue,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+
+    StatColumn(
+      icon = "\u26A1",
+      title = stringResource(Res.string.summary_top_buff_count),
+      cards = topBuffCount,
+      valueExtractor = { it.sessionCurrentBuffCount.toString() },
+      valueColor = RFColors.buffsBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)

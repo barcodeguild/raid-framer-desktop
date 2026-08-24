@@ -733,6 +733,7 @@
     <string name="raid_buff_none_found">未找到已追踪增益</string>
     <string name="raid_buff_has_buffs">已有增益</string>
     <string name="raid_buff_missing_buffs">缺少增益</string>
+    <string name="raid_buff_loot_buffs">战利品增益</string>
     <string name="raid_buff_last_observed">上次观察：%1$s</string>
     <string name="raid_buff_current_scan">当前扫描</string>
     <string name="raid_buff_grace_period">宽限期</string>
@@ -1229,7 +1230,7 @@
     <string name="settings_performance_companion_enabled_desc">停止Lua插件中的所有事件处理。插件保持加载状态，重新启用后将恢复。</string>
     <string name="settings_performance_impact_maximum">最大</string>
     <string name="settings_performance_raid_buff_scanning">团队增益扫描</string>
-    <string name="settings_performance_raid_buff_scanning_desc">每秒扫描所有团队成员的活跃增益、距离和装备分数。生命治愈检测和团队增益检查器需要此功能。当团队名册追踪关闭时自动禁用。</string>
+    <string name="settings_performance_raid_buff_scanning_desc">每5秒扫描所有团队成员的活跃增益、距离和装备分数。生命治愈检测和团队增益检查器需要此功能。当团队名册追踪关闭时自动禁用。</string>
     <string name="settings_performance_impact_heavy">较大</string>
     <string name="settings_performance_buff_debuff_tracking">增益/减益追踪</string>
     <string name="settings_performance_buff_debuff_tracking_desc">追踪 SPELL_AURA_APPLIED 和 SPELL_AURA_REMOVED 事件。禁用后仅限追踪伤害和治疗。</string>

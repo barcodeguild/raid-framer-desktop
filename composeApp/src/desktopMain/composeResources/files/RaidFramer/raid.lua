@@ -16,7 +16,8 @@ RF.Raid.isPrepared = false
 RF.Raid.hasCoRaid = false
 
 -- buff scan rate limiting (called from combat loop, not from roster events)
-RF.Raid.BUFF_SCAN_INTERVAL = 1 -- seconds between buff/distance/gearScore scans
+-- Note: this is intentionally 5 seconds to keep CPU usage down inside the game process.
+RF.Raid.BUFF_SCAN_INTERVAL = 5 -- seconds between buff/distance/gearScore scans
 RF.Raid.LastBuffScan = 0
 
 -- whitelist of buff IDs to include in FRAMES_UPDATE (all others are skipped to reduce IPC payload)
@@ -52,12 +53,83 @@ RF.Raid.INTERESTING_BUFF_IDS = {
   [30766] = true, [9002340] = true, [30760] = true, [9002339] = true, [30770] = true, [30771] = true,
   [30768] = true, [30765] = true, [9002342] = true, [9002341] = true,
   [23717] = true, [32025] = true, -- Strength of the Faction / War Time
-  -- Loot buffs (+50% and higher)
+  -- Loot buffs (comprehensive whitelist). These are matched by the Kotlin loot-buff
+  -- definitions so the app can sum their loot-drop percentages per player. Loot buffs
+  -- only signal their presence (we skip their tooltips to save CPU inside the game).
   [23215] = true, [9002077] = true, [22516] = true, [22941] = true, [22929] = true, [31422] = true,
   [8000681] = true, [8000803] = true, [9001658] = true,
   [8000726] = true, [9001956] = true, [8000779] = true, [8000794] = true, [8000795] = true, [8000796] = true,
   [23492] = true, [23491] = true, [22292] = true,
   [23094] = true, [23093] = true, [31322] = true, [8002787] = true,
+  -- Comprehensive loot-buff metadata table (buff IDs from the ArcheRage wiki)
+  [8000792] = true, [8000793] = true, [23493] = true, [23095] = true,
+  [8000731] = true, [13834] = true, [22678] = true, [11075] = true, [11074] = true, [23097] = true,
+  [25791] = true, [25861] = true, [20195] = true, [24362] = true, [29609] = true, [29913] = true,
+  [30062] = true, [21009] = true, [21008] = true, [3142] = true, [31424] = true, [31425] = true,
+  [31426] = true, [31427] = true, [8000473] = true, [8000623] = true, [9001428] = true, [6442] = true,
+  [6769] = true, [6918] = true, [7149] = true, [7150] = true, [7151] = true, [7152] = true, [7153] = true,
+  [15779] = true, [15780] = true, [15781] = true, [15782] = true, [15783] = true, [15784] = true,
+  [15789] = true, [15790] = true, [15791] = true, [15792] = true, [15793] = true, [15794] = true,
+  [16248] = true, [16249] = true, [16250] = true, [16270] = true, [7480] = true, [8246] = true,
+  [8247] = true, [16394] = true, [16935] = true, [8338] = true, [8341] = true, [11225] = true,
+  [14783] = true, [14796] = true, [14825] = true, [14826] = true, [14827] = true, [14828] = true,
+  [15394] = true, [15481] = true, [17940] = true, [22209] = true, [22696] = true, [22714] = true,
+  [23139] = true, [23140] = true, [23141] = true, [23142] = true, [23143] = true, [23144] = true,
+  [23448] = true, [25109] = true, [25330] = true, [25340] = true, [20072] = true, [20073] = true,
+  [20074] = true, [20075] = true, [20076] = true, [28063] = true, [28064] = true, [28065] = true,
+  [28066] = true, [28618] = true, [28619] = true, [28622] = true, [28658] = true, [21284] = true,
+  [21285] = true, [21286] = true, [21287] = true, [21288] = true, [21303] = true, [21450] = true,
+  [21486] = true, [21577] = true, [21715] = true, [30770] = true, [30771] = true, [30772] = true,
+  [30773] = true, [31439] = true, [8000011] = true, [8000185] = true, [8000187] = true,
+  [8000188] = true, [8000218] = true, [8000221] = true, [8000225] = true, [8000233] = true,
+  [8000290] = true, [8000291] = true, [8000356] = true, [8000362] = true, [8000363] = true,
+  [8000364] = true, [8000365] = true, [8000382] = true, [8000385] = true, [8000439] = true,
+  [8000469] = true, [8000481] = true, [8000483] = true, [8000627] = true, [8000669] = true,
+  [8000671] = true, [8000752] = true, [8000753] = true, [8000190] = true, [8000195] = true,
+  [8000196] = true, [8000197] = true, [8000815] = true, [9000001] = true, [9000069] = true,
+  [9000070] = true, [9000071] = true, [9000113] = true, [9000265] = true, [9000518] = true,
+  [9000568] = true, [9000569] = true, [9000722] = true, [9000723] = true, [9000724] = true,
+  [9000955] = true, [9001338] = true, [9001366] = true, [9001664] = true, [9001825] = true,
+  [9001918] = true, [9002014] = true, [9002146] = true, [9002147] = true, [9002264] = true,
+  [9002356] = true,
+}
+
+-- Loot buff IDs. These only need to signal presence; we skip their tooltips to save CPU.
+RF.Raid.LOOT_BUFF_IDS = {
+  [23215] = true, [9002077] = true, [22516] = true, [22941] = true, [22929] = true, [31422] = true,
+  [8000681] = true, [8000803] = true, [9001658] = true, [8000726] = true, [9001956] = true,
+  [8000779] = true, [8000792] = true, [8000793] = true, [8000794] = true, [8000795] = true,
+  [8000796] = true, [23492] = true, [23491] = true, [23493] = true, [22292] = true, [23095] = true,
+  [23094] = true, [23093] = true, [31322] = true, [8000731] = true, [8002787] = true,
+  [13834] = true, [22678] = true, [11075] = true, [11074] = true, [23097] = true, [25791] = true,
+  [25861] = true, [20195] = true, [23717] = true, [24362] = true, [29609] = true, [29913] = true,
+  [30062] = true, [21009] = true, [21008] = true, [3142] = true, [31424] = true, [31425] = true,
+  [31426] = true, [31427] = true, [8000473] = true, [8000623] = true, [9001428] = true, [6442] = true,
+  [6769] = true, [6918] = true, [7149] = true, [7150] = true, [7151] = true, [7152] = true,
+  [7153] = true, [15779] = true, [15780] = true, [15781] = true, [15782] = true, [15783] = true,
+  [15784] = true, [15789] = true, [15790] = true, [15791] = true, [15792] = true, [15793] = true,
+  [15794] = true, [16248] = true, [16249] = true, [16250] = true, [16270] = true, [7480] = true,
+  [8246] = true, [8247] = true, [16394] = true, [16935] = true, [8338] = true, [8341] = true,
+  [11225] = true, [14783] = true, [14796] = true, [14825] = true, [14826] = true, [14827] = true,
+  [14828] = true, [15394] = true, [15481] = true, [17940] = true, [22209] = true, [22696] = true,
+  [22714] = true, [23139] = true, [23140] = true, [23141] = true, [23142] = true, [23143] = true,
+  [23144] = true, [23448] = true, [25109] = true, [25330] = true, [25340] = true, [20072] = true,
+  [20073] = true, [20074] = true, [20075] = true, [20076] = true, [28063] = true, [28064] = true,
+  [28065] = true, [28066] = true, [28618] = true, [28619] = true, [28622] = true, [28658] = true,
+  [21284] = true, [21285] = true, [21286] = true, [21287] = true, [21288] = true, [21303] = true,
+  [21450] = true, [21486] = true, [21577] = true, [21715] = true, [30770] = true, [30771] = true,
+  [30772] = true, [30773] = true, [31439] = true, [8000011] = true, [8000185] = true,
+  [8000187] = true, [8000188] = true, [8000218] = true, [8000221] = true, [8000225] = true,
+  [8000233] = true, [8000290] = true, [8000291] = true, [8000356] = true, [8000362] = true,
+  [8000363] = true, [8000364] = true, [8000365] = true, [8000382] = true, [8000385] = true,
+  [8000439] = true, [8000469] = true, [8000481] = true, [8000483] = true, [8000627] = true,
+  [8000669] = true, [8000671] = true, [8000752] = true, [8000753] = true, [8000190] = true,
+  [8000195] = true, [8000196] = true, [8000197] = true, [8000815] = true, [9000001] = true,
+  [9000069] = true, [9000070] = true, [9000071] = true, [9000113] = true, [9000265] = true,
+  [9000518] = true, [9000568] = true, [9000569] = true, [9000722] = true, [9000723] = true,
+  [9000724] = true, [9000955] = true, [9001338] = true, [9001366] = true, [9001664] = true,
+  [9001825] = true, [9001918] = true, [9002014] = true, [9002146] = true, [9002147] = true,
+  [9002264] = true, [9002356] = true,
 }
 
 -- enum of strings different team member change reasons we can filter by to avoid unnecessary processing
@@ -95,6 +167,7 @@ function RF.Raid.NewRaidMember(slot)
     distance = -1,               -- meters, -1 = unknown
     lastUpdated = os.time(), -- used to track staleness of data at the higher layers
     buffs = {},                  -- list of buff objects (each with nested tooltip)
+    buffCount = 0,               -- total active buff count (X2Unit:UnitBuffCount)
   }
 end
 
@@ -263,24 +336,29 @@ function scanForCoRaid()
 end
 
 -- scans buffs for a single unit, returns only buffs whose ID is in INTERESTING_BUFF_IDS
+-- and (as a second return value) the unit's total buff count for the "too many buffs" ranking.
 function RF.Raid.ScanUnitBuffs(unitId)
   local buffCount = X2Unit:UnitBuffCount(unitId)
-  if not buffCount or buffCount <= 0 then return {} end
+  if not buffCount or buffCount <= 0 then return {}, 0 end
   local buffs = {}
   for buffId = 1, buffCount do
     local rawBuff = X2Unit:UnitBuff(unitId, buffId)
     if rawBuff then
       local buff = RF.Parser.ParseUnitBuff(rawBuff)
       if RF.Raid.INTERESTING_BUFF_IDS[buff.buff_id] then
-        local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
-        if rawTooltip then
-          buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
+        -- Loot buffs only signal their presence. We intentionally skip fetching their
+        -- tooltip here because we don't need it and it costs CPU inside the game process.
+        if not RF.Raid.LOOT_BUFF_IDS[buff.buff_id] then
+          local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
+          if rawTooltip then
+            buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
+          end
         end
         buffs[#buffs + 1] = buff
       end
     end
   end
-  return buffs
+  return buffs, buffCount
 end
 
 -- periodic scan of buffs, distance and gearScore for all occupied roster slots
@@ -306,7 +384,7 @@ function RF.Raid.ScanBuffs()
           local unitId = string.format("team%02d", position)
           member.playerName = raidMember
           member.role = X2Team:GetRole(0, position)
-           member.buffs = RF.Raid.ScanUnitBuffs(unitId)
+           member.buffs, member.buffCount = RF.Raid.ScanUnitBuffs(unitId)
            member.buffScanTimestamp = os.time()
           local dist = X2Unit:UnitDistance(unitId)
           if type(dist) == "table" then
@@ -333,7 +411,7 @@ function RF.Raid.ScanBuffs()
           local unitId = string.format("team_01_%02d", position)
           member.playerName = raidMember
           member.role = X2Team:GetRole(1, position)
-           member.buffs = RF.Raid.ScanUnitBuffs(unitId)
+           member.buffs, member.buffCount = RF.Raid.ScanUnitBuffs(unitId)
            member.buffScanTimestamp = os.time()
           local dist = X2Unit:UnitDistance(unitId)
           if type(dist) == "table" then
@@ -357,7 +435,7 @@ function RF.Raid.ScanBuffs()
           local unitId = string.format("team_02_%02d", position)
           memberTwo.playerName = raidTwoMember
           memberTwo.role = X2Team:GetRole(2, position)
-           memberTwo.buffs = RF.Raid.ScanUnitBuffs(unitId)
+           memberTwo.buffs, memberTwo.buffCount = RF.Raid.ScanUnitBuffs(unitId)
            memberTwo.buffScanTimestamp = os.time()
           local dist = X2Unit:UnitDistance(unitId)
           if type(dist) == "table" then

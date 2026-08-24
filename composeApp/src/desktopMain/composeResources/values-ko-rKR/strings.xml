@@ -734,6 +734,7 @@
     <string name="raid_buff_none_found">추적 중인 버프 없음</string>
     <string name="raid_buff_has_buffs">보유 버프</string>
     <string name="raid_buff_missing_buffs">없는 버프</string>
+    <string name="raid_buff_loot_buffs">전리품 버프</string>
     <string name="raid_buff_last_observed">마지막 관찰: %1$s</string>
     <string name="raid_buff_current_scan">현재 스캔</string>
     <string name="raid_buff_grace_period">유예 기간</string>
@@ -1229,7 +1230,7 @@
     <string name="settings_performance_companion_enabled_desc">Lua 애드온의 모든 이벤트 처리를 중지합니다. 애드온은 로드된 상태로 유지되며 다시 활성화하면 재개됩니다.</string>
     <string name="settings_performance_impact_maximum">최대</string>
     <string name="settings_performance_raid_buff_scanning">공격대 버프 스캔</string>
-    <string name="settings_performance_raid_buff_scanning_desc">매초 모든 공격대원의 활성 버프, 거리 및 장비 점수를 스캔합니다. 생명 치유 감지와 공격대 버프 확인에 필요합니다. 공격대 명단 추적이 꺼지면 자동으로 비활성화됩니다.</string>
+    <string name="settings_performance_raid_buff_scanning_desc">5초마다 모든 공격대원의 활성 버프, 거리 및 장비 점수를 스캔합니다. 생명 치유 감지와 공격대 버프 확인에 필요합니다. 공격대 명단 추적이 꺼지면 자동으로 비활성화됩니다.</string>
     <string name="settings_performance_impact_heavy">높음</string>
     <string name="settings_performance_buff_debuff_tracking">버프/디버프 추적</string>
     <string name="settings_performance_buff_debuff_tracking_desc">SPELL_AURA_APPLIED 및 SPELL_AURA_REMOVED 이벤트를 추적합니다. 이 기능을 비활성화하면 피해와 치유만 추적됩니다.</string>

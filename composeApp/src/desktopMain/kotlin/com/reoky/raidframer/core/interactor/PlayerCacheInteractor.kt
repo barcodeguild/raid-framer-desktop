@@ -239,6 +239,22 @@ object PlayerCacheInteractor : Interactor() {
 
   }
           }
+          // Sum the loot buffs a player currently has and track the session peak. An empty
+          // (out-of-range / failed) scan is intentionally ignored so we don't overwrite the
+          // last known loot buff total with nothing. The total active buff count is tracked
+          // separately whenever a fresh scan actually reports one.
+          if (member.buffs.isNotEmpty()) {
+            cards[member.playerName]?.let { card ->
+              cards[member.playerName] = card.updateLootBuffStats(
+                member.buffs.map { it.buff_id }.toSet(),
+                member.buffCount
+              )
+            }
+          } else if (member.buffCount > 0) {
+            cards[member.playerName]?.let { card ->
+              cards[member.playerName] = card.copy(sessionCurrentBuffCount = member.buffCount)
+            }
+          }
         }
       }
     }
@@ -1790,6 +1806,36 @@ object PlayerCacheInteractor : Interactor() {
   val topRevive: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionReviveTotal > 0 }.sortedByDescending { card -> card.sessionReviveTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  // Loot buff rankings (raid-wide, not faction-based). Best peak = highest summed loot
+  // buff %, worst peak = lowest summed % among players who actually loot buffed, and
+  // top buff count = most simultaneous buffs (the "too many?" signal).
+  val topLootPeak: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionPeakLootBuffAmount > 0 }
+        .sortedByDescending { it.sessionPeakLootBuffAmount }
+        .take(25)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val worstLootPeak: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionPeakLootBuffAmount > 0 }
+        .sortedBy { it.sessionPeakLootBuffAmount }
+        .take(25)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topBuffCount: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionCurrentBuffCount > 0 }
+        .sortedByDescending { it.sessionCurrentBuffCount }
+        .take(25)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   var topGliderGamers: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->

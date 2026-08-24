@@ -38,6 +38,9 @@ import raid_framer_desktop.composeapp.generated.resources.summary_most_item_usag
 import raid_framer_desktop.composeapp.generated.resources.summary_nuia_builds
 import raid_framer_desktop.composeapp.generated.resources.summary_pirate_builds
 import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_loot_peak
+import raid_framer_desktop.composeapp.generated.resources.summary_worst_loot_peak
+import raid_framer_desktop.composeapp.generated.resources.summary_top_buff_count
 import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
 import raid_framer_desktop.composeapp.generated.resources.summary_top_debuffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
@@ -209,6 +212,7 @@ object ImageExportInteractor {
   private val COURAGEOUS_ACTION_COLOR = toAwtColor(RFColors.courageousActionBright)
   private val MANA_BARRIER_COLOR = toAwtColor(RFColors.manaBarrierBlue)
   private val REVIVE_COLOR = toAwtColor(RFColors.reviveGhostWhite)
+  private val LOOT_BUFF_COLOR = toAwtColor(RFColors.buffsBlue)
 
   /**
    * Maps a heal ratio (0.0 = 0% healed, 1.0 = 100% healed) to a color gradient:
@@ -416,8 +420,12 @@ object ImageExportInteractor {
       val topImpaleImmunity: List<PlayerCard>,
       val topProtectiveWings: List<PlayerCard>,
       val topCourageousAction: List<PlayerCard>,
-      val topManaBarrier: List<PlayerCard>,
-      val topRevive: List<PlayerCard>,
+val topManaBarrier: List<PlayerCard>,
+    val topRevive: List<PlayerCard>,
+    // Loot buff rankings (raid-wide)
+    val topLootPeak: List<PlayerCard>,
+    val worstLootPeak: List<PlayerCard>,
+    val topBuffCount: List<PlayerCard>,
     // New faction comparison data
     val factionTigerStrikeData: Map<String, Float>,
     val factionFreezeData: Map<String, Float>,
@@ -574,6 +582,9 @@ object ImageExportInteractor {
       topCourageousAction = PlayerCacheInteractor.topCourageousAction.value.take(25),
       topManaBarrier = PlayerCacheInteractor.topManaBarrier.value.take(25),
       topRevive = PlayerCacheInteractor.topRevive.value.take(25),
+      topLootPeak = PlayerCacheInteractor.topLootPeak.value.take(25),
+      worstLootPeak = PlayerCacheInteractor.worstLootPeak.value.take(25),
+      topBuffCount = PlayerCacheInteractor.topBuffCount.value.take(25),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -1494,6 +1505,13 @@ object ImageExportInteractor {
       Triple(getString(Res.string.summary_top_tiger_strikes), "\u26A1", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
       Triple(getString(Res.string.summary_top_mist_sunder), "\u26CF", ColumnData.CardData(data.topMistSunder, { it.sessionMistSunderTotal.toString() }, MIST_SUNDER_COLOR)),
       Triple(getString(Res.string.summary_top_regular_sunder), "\u26CF", ColumnData.CardData(data.topRegularSunder, { it.sessionRegularSunderTotal.toString() }, REGULAR_SUNDER_COLOR)),
+    )))
+
+    // Loot buffs: best peak %, worst peak %, most simultaneous buffs (raid-wide)
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_loot_peak), "\uD83C\uDFC6", ColumnData.CardData(data.topLootPeak, { "${it.sessionPeakLootBuffAmount}%" }, LOOT_BUFF_COLOR)),
+      Triple(getString(Res.string.summary_worst_loot_peak), "\uD83D\uDD0C", ColumnData.CardData(data.worstLootPeak, { "${it.sessionPeakLootBuffAmount}%" }, LOOT_BUFF_COLOR)),
+      Triple(getString(Res.string.summary_top_buff_count), "\u26A1", ColumnData.CardData(data.topBuffCount, { it.sessionCurrentBuffCount.toString() }, LOOT_BUFF_COLOR)),
     )))
 
     tripletBlocks.add(makeTriplet(listOf(

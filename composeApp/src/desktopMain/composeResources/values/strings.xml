@@ -440,6 +440,10 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_top_debuffs">Top Debuffs</string>
     <string name="summary_top_songs">Top Songs</string>
     <string name="summary_top_buffs">Top Buffs</string>
+    <string name="summary_top_loot_peak">Top Peak Loot Buff %</string>
+    <string name="summary_worst_loot_peak">Worst Peak Loot Buff %</string>
+    <string name="summary_top_buff_count">Top # of Buffs (Too Many?)</string>
+    <string name="summary_tab_loot">Loot Buffs</string>
     <string name="summary_top_ode_haranya">Top Ode Haranya</string>
     <string name="summary_top_ode_nuia">Top Ode Nuia</string>
     <string name="summary_top_ode_pirate">Top Ode Pirate</string>
@@ -756,6 +760,9 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_loot_section">+50% Loot Buffs</string>
     <string name="raid_buff_at_least_one_loot">At Least One +50% Buff</string>
     <string name="raid_buff_two_loot">Two or More +50% Buffs</string>
+    <string name="raid_buff_check_loot">Check for loot buffs?</string>
+    <string name="raid_buff_loot_threshold_label">Threshold:</string>
+    <string name="raid_loot_breakdown_title">Loot Breakdown (Most → Least)</string>
     <string name="raid_buff_selected_player">Selected Player</string>
     <string name="raid_buff_no_player">Click a player to inspect buffs</string>
     <string name="raid_buff_passed">Requirements met</string>
@@ -763,6 +770,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_none_found">No tracked buffs found</string>
     <string name="raid_buff_has_buffs">Has Buffs</string>
     <string name="raid_buff_missing_buffs">Missing Buffs</string>
+    <string name="raid_buff_loot_buffs">Loot Buffs</string>
     <string name="raid_buff_last_observed">Last observed: %1$s</string>
     <string name="raid_buff_current_scan">Current scan</string>
     <string name="raid_buff_grace_period">Grace Period</string>
@@ -1231,7 +1239,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_performance_companion_enabled_desc">Stops all event processing in the Lua addon. The addon remains loaded and will resume when re-enabled.</string>
     <string name="settings_performance_impact_maximum">Maximum</string>
     <string name="settings_performance_raid_buff_scanning">Raid Buff Scanning</string>
-    <string name="settings_performance_raid_buff_scanning_desc">Scans all raid members for active buffs, distance, and gear score every second. Required for Life Mend detection and the raid buff checker. Automatically disabled when Raid Roster tracking is off.</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Scans all raid members for active buffs, distance, and gear score every 5 seconds. Required for Life Mend detection and the raid buff checker. Automatically disabled when Raid Roster tracking is off.</string>
     <string name="settings_performance_impact_heavy">Heavy</string>
     <string name="settings_performance_buff_debuff_tracking">Buffs / Debuffs Tracking</string>
     <string name="settings_performance_buff_debuff_tracking_desc">Tracks SPELL_AURA_APPLIED and SPELL_AURA_REMOVED events. Disabling this limits tracking to damage and heals only.</string>

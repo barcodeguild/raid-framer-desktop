@@ -47,6 +47,7 @@ import com.reoky.raidframer.core.definitions.protectiveWingsBuffIds
 import com.reoky.raidframer.core.definitions.courageousActionBuffIds
 import com.reoky.raidframer.core.definitions.manaBarrierBuffIds
 import com.reoky.raidframer.core.definitions.reviveSpellIds
+import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 // Performance: configurable event history depth from settings
@@ -745,6 +746,23 @@ fun PlayerCard.updateLifeMendStats(healAmount: Int): PlayerCard {
     lifeMendHealAmounts = newAmounts,
     lifeMendAverage = avg,
     lifeMendQuality = quality
+  )
+}
+
+/**
+ * Records a fresh loot-buff scan result. [buffIds] is the set of buff IDs currently on the
+ * player, and [buffCount] is the total number of active buffs (from X2Unit:UnitBuffCount).
+ *
+ * The combined loot percentage is the sum of every loot buff the player has. The current
+ * amount always overwrites the previous one, but only a genuinely new peak is recorded so a
+ * failed (empty) scan never clears the player's best loot buff showing.
+ */
+fun PlayerCard.updateLootBuffStats(buffIds: Set<Int>, buffCount: Int): PlayerCard {
+  val amount = lootBuffAmountForIds(buffIds)
+  return copy(
+    sessionCurrentLootBuffAmount = amount,
+    sessionPeakLootBuffAmount = maxOf(sessionPeakLootBuffAmount, amount),
+    sessionCurrentBuffCount = buffCount
   )
 }
 

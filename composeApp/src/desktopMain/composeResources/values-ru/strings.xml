@@ -1175,7 +1175,7 @@
     <string name="settings_performance_companion_enabled_desc">Останавливает всю обработку событий в Lua-аддоне. Аддон остаётся загруженным и возобновит работу при повторном включении.</string>
     <string name="settings_performance_impact_maximum">Максимальное</string>
     <string name="settings_performance_raid_buff_scanning">Сканирование баффов рейда</string>
-    <string name="settings_performance_raid_buff_scanning_desc">Каждую секунду сканирует всех участников рейда на наличие активных баффов, расстояния и очков снаряжения. Необходимо для обнаружения лечения жизнью и проверки баффов рейда. Автоматически отключается при выключении отслеживания состава рейда.</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Каждые 5 секунд сканирует всех участников рейда на наличие активных баффов, расстояния и очков снаряжения. Необходимо для обнаружения лечения жизнью и проверки баффов рейда. Автоматически отключается при выключении отслеживания состава рейда.</string>
     <string name="settings_performance_impact_heavy">Высокое</string>
     <string name="settings_performance_buff_debuff_tracking">Отслеживание баффов/дебаффов</string>
     <string name="settings_performance_buff_debuff_tracking_desc">Отслеживает события SPELL_AURA_APPLIED и SPELL_AURA_REMOVED. Отключение ограничивает отслеживание только уроном и лечением.</string>

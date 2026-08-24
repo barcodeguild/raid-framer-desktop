@@ -3,6 +3,7 @@ package com.reoky.raidframer.core.definitions
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.core.model.RaidBuffGracePeriod
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
 
 enum class RaidBuffKey {
   GOBLET,
@@ -96,6 +97,9 @@ data class RaidBuffRequirements(
   val requireOrangeGoblet: Boolean = false,
   val allowMeatballs: Boolean = false,
   val requireEnhancedLonging: Boolean = false,
+  // Combined loot-buff percentage threshold. 0 = "Check for loot buffs?" is disabled.
+  // When > 0, a player is only considered buffed if the sum of their loot-buff amounts
+  // is greater than or equal to this threshold (range 0-500).
   val lootThreshold: Int = 0
 )
 
@@ -104,8 +108,9 @@ fun RaidBuffRequirements.matches(member: RaidFramePayload): Boolean {
   val mainMatches = selected.filter { definitionsByKey[it]?.section == RaidBuffSection.MAIN }.all { key ->
     definitionsByKey.getValue(key).matches(ids, requireOrangeGoblet, allowMeatballs, requireEnhancedLonging)
   }
-  val lootCount = RAID_BUFF_DEFINITIONS.count { it.section == RaidBuffSection.LOOT && it.ids.any(ids::contains) }
-  return mainMatches && lootCount >= lootThreshold
+  val lootAmount = lootBuffAmountForIds(ids)
+  val lootOk = lootThreshold <= 0 || lootAmount >= lootThreshold
+  return mainMatches && lootOk
 }
 
 fun RaidBuffRequirements.matchesResolved(member: RaidFramePayload, gracePeriod: RaidBuffGracePeriod): Boolean {
@@ -133,8 +138,8 @@ fun RaidBuffRequirements.missingKeys(member: RaidFramePayload): List<RaidBuffKey
     val definition = definitionsByKey[key] ?: return@mapNotNull null
     if (definition.matches(ids, requireOrangeGoblet, allowMeatballs, requireEnhancedLonging)) null else key
   }.toMutableList()
-  val lootCount = RAID_BUFF_DEFINITIONS.count { it.section == RaidBuffSection.LOOT && it.ids.any(ids::contains) }
-  if (lootThreshold > lootCount) missing += RaidBuffKey.MOONLIGHT_JUICE
+  val lootAmount = lootBuffAmountForIds(ids)
+  if (lootThreshold > 0 && lootAmount < lootThreshold) missing += RaidBuffKey.MOONLIGHT_JUICE
   return missing
 }
 
