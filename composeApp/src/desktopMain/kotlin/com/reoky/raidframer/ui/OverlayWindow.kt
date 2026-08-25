@@ -460,10 +460,10 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
     OverlayType.RAID_CALLER -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.OVERLAY,
-      lastPositionXDp = 900f, // near the top and middle of the screen by default
-      lastPositionYDp = 90f,
-      lastWidthDp = 620f,
-      lastHeightDp = 210f,
+      lastPositionXDp = 1800f, // near the top/right by default
+      lastPositionYDp = 80f,
+      lastWidthDp = 400f,
+      lastHeightDp = 175f,
       isVisible = false
     )
   }
