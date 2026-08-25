@@ -44,6 +44,7 @@ import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
 import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.parseRaidBuffRequirements
+import com.reoky.raidframer.core.definitions.serialize
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.factionHighlightColor
@@ -95,6 +96,9 @@ import raid_framer_desktop.composeapp.generated.resources.raid_caller_recording
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_faction_haranya
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_faction_nuia
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_faction_pirate
+import raid_framer_desktop.composeapp.generated.resources.raid_caller_loot_threshold
+import raid_framer_desktop.composeapp.generated.resources.raid_caller_buff_mode
+import raid_framer_desktop.composeapp.generated.resources.raid_caller_buff_grace
 
 private const val REBIRTH_BUFF_ID = 2385
 private const val FLASH_DURATION_MS = 5_000L
@@ -225,7 +229,7 @@ private fun FactionDamageRow(
       Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
         val labelRes = faction.factionLabelRes()
         if (labelRes != null) {
-          Text(stringResource(labelRes), color = RFColors.TextSecondary, fontSize = 9.sp)
+          Text(stringResource(labelRes) + ":", color = RFColors.TextSecondary, fontSize = 9.sp)
         }
         FlashCount(count, flashUntil[faction] ?: 0L, now, faction.factionColor())
         Text("(${damage.humanReadableAbbreviation()})", color = RFColors.dpsOrange, fontSize = 9.sp)
@@ -242,7 +246,7 @@ private fun LabeledValue(
   labelColor: Color = RFColors.TextSecondary
 ) {
   Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-    Text(label, color = labelColor, fontSize = 9.sp)
+    Text(label, color = labelColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
     Text(value, color = valueColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
   }
 }
@@ -268,6 +272,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
     if (liveMembers.isNotEmpty()) lastKnownMembers = liveMembers
   }
   val allMembers = if (liveMembers.isNotEmpty()) liveMembers else lastKnownMembers
+  val memberNames = remember(allMembers) { allMembers.map { it.playerName }.toSet() }
 
   // Rebuild the rebirth cache whenever the raid scan produces fresher data.
   LaunchedEffect(allMembers) {
@@ -340,7 +345,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val lootThreshold = config.raidCallerLootBuffThreshold
   val gracePeriod = RaidBuffGracePeriod.entries.firstOrNull { it.name == config.raidCallerBuffGracePeriod }
     ?: RaidBuffGracePeriod.FIFTEEN_MINUTES
-  val lootSums = remember(allMembers, nowTick) {
+  val lootSums = remember(allMembers, gracePeriod) {
     allMembers.map { member ->
       val obs = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
       val ids = obs.snapshot?.buffIds ?: emptySet()
@@ -352,8 +357,8 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val lootTotal = lootSums.size.toFloat().coerceAtLeast(1f)
   val lootSlices = remember(lootBuffedCount, lootTotal) {
     listOf(
-      Slice(RFColors.lootBuffColor, lootBuffedCount / lootTotal),
-      Slice(RFColors.TextTertiary.copy(alpha = 0.35f), (lootSums.size - lootBuffedCount) / lootTotal)
+      Slice(RFColors.dpsOrange, lootBuffedCount / lootTotal),
+      Slice(RFColors.lootBuffColor, (lootSums.size - lootBuffedCount) / lootTotal)
     )
   }
 
@@ -361,7 +366,10 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val requirements = remember(config.raidCallerBuffRequirements) {
     parseRaidBuffRequirements(config.raidCallerBuffRequirements)
   }
-  val buffedMembers = remember(allMembers, requirements, gracePeriod, nowTick) {
+  val buffModeLabel = remember(requirements) {
+    BUFF_PRESETS.firstOrNull { it.requirements.serialize() == requirements.serialize() }?.label ?: "Custom"
+  }
+  val buffedMembers = remember(allMembers, requirements, gracePeriod) {
     allMembers.filter { member ->
       val obs = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
       val snapshot = obs.snapshot ?: return@filter false
@@ -382,7 +390,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
 
   // --- Has SoTF / War Time (Faction War Time buff) ---
   val soTfIds = setOf(23717, 32025)
-  val soTfCount = remember(allMembers, gracePeriod, nowTick) {
+  val soTfCount = remember(allMembers, gracePeriod) {
     allMembers.count { member ->
       val obs = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
       obs.snapshot?.buffIds?.any { it in soTfIds } == true
@@ -447,7 +455,9 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   }
 
   // --- Meta class breakdown (CC, Healer, Melee, Mage, Dancer, Ranged, Non-Meta) ---
-  val specs = remember(players) { players.mapNotNull { card -> SpecType.fromName(card.currentBuild) to card } }
+  val specs = remember(players, memberNames) {
+    players.filter { it.name in memberNames }.mapNotNull { card -> SpecType.fromName(card.currentBuild) to card }
+  }
   val metaCc = specs.count { it.first in META_CC_SPECS }
   val metaHealer = specs.count { it.first in META_HEALER_SPECS }
   val metaMelee = specs.count { it.first in META_MELEE_SPECS }
@@ -471,8 +481,8 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
     modifier = Modifier
       .fillMaxSize()
       .verticalScroll(rememberScrollState())
-      .padding(horizontal = 8.dp, vertical = 4.dp),
-    verticalArrangement = Arrangement.spacedBy(4.dp)
+      .padding(horizontal = 8.dp, vertical = 2.dp),
+    verticalArrangement = Arrangement.spacedBy(2.dp)
   ) {
     // Header row: title + raid counts + recording control pinned to the top-right.
     Row(
@@ -482,7 +492,8 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
       FlowRow(
         modifier = Modifier.weight(1f),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        itemVerticalAlignment = Alignment.CenterVertically
       ) {
         Text(
           stringResource(Res.string.raid_caller_title),
@@ -507,43 +518,58 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
       horizontalArrangement = Arrangement.spacedBy(10.dp),
       verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-      LabeledValue("${stringResource(Res.string.raid_caller_avg_gs)}:", "$avgGs", RFColors.callerAvgGs)
-      LabeledValue("${stringResource(Res.string.raid_caller_lowest_gs)}:", "$lowestGs", RFColors.callerLowestGs)
-      LabeledValue("${stringResource(Res.string.raid_caller_highest_gs)}:", "$highestGs", RFColors.callerHighestGs)
-      LabeledValue(
-        "${stringResource(Res.string.raid_caller_so_tf)}:",
-        "$soTfCount/${allMembers.size} ($soTfPct%)",
-        if (soTfCount > 0) RFColors.itemSkillYellow else RFColors.TextTertiary
-      )
+      LabeledValue("${stringResource(Res.string.raid_caller_avg_gs)}:", "$avgGs", RFColors.callerAvgGs, SectionTitleColor)
+      LabeledValue("${stringResource(Res.string.raid_caller_lowest_gs)}:", "$lowestGs", RFColors.callerLowestGs, SectionTitleColor)
+      LabeledValue("${stringResource(Res.string.raid_caller_highest_gs)}:", "$highestGs", RFColors.callerHighestGs, SectionTitleColor)
+      SectionTitle("${stringResource(Res.string.raid_caller_so_tf)}:")
+      Text("$soTfCount/${allMembers.size} ($soTfPct%)", color = RFColors.TextTertiary, fontSize = 9.sp)
     }
 
-    // Pie charts row
+    // Pie charts row + mode settings stack to the right.
     Row(
       modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(20.dp)
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      verticalAlignment = Alignment.CenterVertically
     ) {
-      MiniPieChart(
-        slices = rebirthSlices,
-        size = 56.dp,
-        centerTop = stringResource(Res.string.raid_caller_rebirth),
-        centerMiddle = "$rebirthCount/${allMembers.size}",
-        centerMiddleColor = if (rebirthAvg >= 120_000L) RFColors.traumaCritical else if (rebirthAvg >= 90_000L) RFColors.traumaHigh else if (rebirthAvg >= 45_000L) RFColors.traumaMedium else Color.White,
-        centerBottom = rebirthAvgText
-      )
-      MiniPieChart(
-        slices = lootSlices,
-        size = 56.dp,
-        centerTop = stringResource(Res.string.raid_caller_loot),
-        centerBottom = "$lootAvg%",
-        centerBottomColor = RFColors.lootBuffColor
-      )
-      MiniPieChart(
-        slices = minBuffedSlices,
-        size = 56.dp,
-        centerTop = stringResource(Res.string.raid_caller_min_buffed),
-        centerBottom = "$minBuffedCount/$minBuffedTotal",
-        centerBottomColor = RFColors.healsGreen
-      )
+      Row(
+        modifier = Modifier.weight(1f),
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+      ) {
+        MiniPieChart(
+          slices = rebirthSlices,
+          size = 56.dp,
+          centerTop = stringResource(Res.string.raid_caller_rebirth),
+          centerMiddle = "$rebirthCount/${allMembers.size}",
+          centerMiddleColor = if (rebirthAvg >= 120_000L) RFColors.traumaCritical else if (rebirthAvg >= 90_000L) RFColors.traumaHigh else if (rebirthAvg >= 45_000L) RFColors.traumaMedium else Color.White,
+          centerBottom = rebirthAvgText
+        )
+        MiniPieChart(
+          slices = lootSlices,
+          size = 56.dp,
+          centerTop = stringResource(Res.string.raid_caller_loot),
+          centerMiddle = "$lootBuffedCount/${lootSums.size}",
+          centerMiddleColor = Color.White,
+          centerBottom = "$lootAvg%",
+          centerBottomColor = RFColors.dpsOrange
+        )
+        MiniPieChart(
+          slices = minBuffedSlices,
+          size = 56.dp,
+          centerTop = stringResource(Res.string.raid_caller_min_buffed),
+          centerMiddle = "$minBuffedCount/$minBuffedTotal",
+          centerMiddleColor = Color.White,
+          centerBottom = "${(minBuffedCount / minBuffedTotalF * 100).toInt()}%",
+          centerBottomColor = RFColors.healsGreen
+        )
+      }
+      Column(
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalAlignment = Alignment.End
+      ) {
+        LabeledValue("${stringResource(Res.string.raid_caller_loot_threshold)}:", "$lootThreshold%", RFColors.dpsOrange, SectionTitleColor)
+        LabeledValue("${stringResource(Res.string.raid_caller_buff_mode)}:", buffModeLabel, RFColors.callerMetaMage, SectionTitleColor)
+        LabeledValue("${stringResource(Res.string.raid_caller_buff_grace)}:", gracePeriod.label(), RFColors.itemSkillYellow, SectionTitleColor)
+      }
     }
 
     // Dragon + Riso rows (flow so the faction groups wrap instead of clipping).
