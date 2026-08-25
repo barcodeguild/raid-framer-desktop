@@ -1280,4 +1280,33 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="settings_raid_caller_grace_period">Standard-Gnadenfrist</string>
     <string name="settings_raid_caller_sync_note">Diese Standardwerte bleiben mit dem Tab Raid-Overlay → Buffs synchron.</string>
     <string name="raid_buff_loot_baseline_note">Ungebuffte Spieler starten im Spiel bei 100%. Der Schwellenwert vergleicht mit dieser Basis.</string>
+    <string name="raid_caller_loot_threshold">Beuteschwelle</string>
+    <string name="raid_caller_buff_mode">Beute-Buff-Modus</string>
+    <string name="raid_caller_buff_grace">Buff-Gnadenfrist</string>
+
+    <!-- Editable Meta Specs Editor (08/25/26) -->
+    <string name="meta_specs_cc">CC</string>
+    <string name="meta_specs_melee">Nahkampf</string>
+    <string name="meta_specs_healer">Heiler</string>
+    <string name="meta_specs_mage">Magier</string>
+    <string name="meta_specs_dancer">Tänzer</string>
+    <string name="meta_specs_ranged">Fernkampf</string>
+    <string name="meta_specs_title">Meta-Specs</string>
+    <string name="meta_specs_description">Legen Sie fest, welche Specs die App als CC, Nahkampf, Heiler, Magier, Tänzer und Fernkampf behandelt. Benutzerdefinierte Specs erscheinen weiß und fett. Drücken Sie + in einer Kategorie, um eine Spec hinzuzufügen, und x auf einem Tag, um sie zu entfernen.</string>
+    <string name="meta_specs_stock">Standard</string>
+    <string name="meta_specs_custom">Benutzerdefiniert</string>
+    <string name="meta_specs_reset">Auf Standard zurücksetzen</string>
+    <string name="meta_specs_reset_confirm_title">Meta-Specs zurücksetzen?</string>
+    <string name="meta_specs_reset_confirm_text">Dies verwirft alle Anpassungen und stellt die integrierten Standard-Meta-Specs wieder her.</string>
+    <string name="meta_specs_accept">Übernehmen</string>
+    <string name="meta_specs_cancel">Abbrechen</string>
+    <string name="meta_specs_add">Spec hinzufügen</string>
+    <string name="meta_specs_remove">%1$s entfernen</string>
+    <string name="meta_specs_none">keine</string>
+    <string name="meta_specs_unknown_spec">Unbekannt / Unvollständig</string>
+    <string name="meta_specs_accept_disabled">Wählen Sie einen gültigen Spec-Typ, um Übernehmen zu aktivieren</string>
+    <string name="settings_meta_specs_button">Meta-Specs anpassen</string>
+    <string name="settings_meta_specs_state">Aktueller Meta-Spec-Status: %1$s</string>
+    <string name="settings_meta_specs_description">Überschreiben Sie, welche Specs in Komposition, Raid-Anführer und technischer Analyse als Meta behandelt werden. Benutzerdefinierte Specs werden weiß und fett angezeigt.</string>
+    <string name="meta_specs_edit_icon">Meta-Specs bearbeiten</string>
 </resources>

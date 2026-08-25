@@ -1280,4 +1280,33 @@
     <string name="settings_raid_caller_grace_period">Льготный период по умолчанию</string>
     <string name="settings_raid_caller_sync_note">Эти значения по умолчанию синхронизируются с вкладкой Рейд → Баффы.</string>
     <string name="raid_buff_loot_baseline_note">Игроки без баффа начинают с 100% в игре. Порог сравнивается с этой базой.</string>
+    <string name="raid_caller_loot_threshold">Порог добычи</string>
+    <string name="raid_caller_buff_mode">Режим баффа добычи</string>
+    <string name="raid_caller_buff_grace">Льготный период баффа</string>
+
+    <!-- Editable Meta Specs Editor (08/25/26) -->
+    <string name="meta_specs_cc">КК</string>
+    <string name="meta_specs_melee">Ближний бой</string>
+    <string name="meta_specs_healer">Хилер</string>
+    <string name="meta_specs_mage">Маг</string>
+    <string name="meta_specs_dancer">Танцор</string>
+    <string name="meta_specs_ranged">Дальний бой</string>
+    <string name="meta_specs_title">Мета-спеки</string>
+    <string name="meta_specs_description">Настройте, какие спеки приложение считает КК, ближним, хилом, магом, танцором и дальним. Пользовательские спеки отображаются белым и жирным. Нажмите + в категории, чтобы добавить спек, и x на теге, чтобы удалить его.</string>
+    <string name="meta_specs_stock">Стандарт</string>
+    <string name="meta_specs_custom">Пользовательские</string>
+    <string name="meta_specs_reset">Сбросить к стандарту</string>
+    <string name="meta_specs_reset_confirm_title">Сбросить мета-спеки?</string>
+    <string name="meta_specs_reset_confirm_text">Это отменит все изменения и восстановит встроенные стандартные мета-спеки.</string>
+    <string name="meta_specs_accept">Принять</string>
+    <string name="meta_specs_cancel">Отмена</string>
+    <string name="meta_specs_add">Добавить спек</string>
+    <string name="meta_specs_remove">Удалить %1$s</string>
+    <string name="meta_specs_none">нет</string>
+    <string name="meta_specs_unknown_spec">Неизвестно / Неполное</string>
+    <string name="meta_specs_accept_disabled">Выберите допустимый тип спека, чтобы включить Принять</string>
+    <string name="settings_meta_specs_button">Настроить мета-спеки</string>
+    <string name="settings_meta_specs_state">Текущее состояние мета-спеков: %1$s</string>
+    <string name="settings_meta_specs_description">Переопределите, какие спеки считаются метой в составе, рейд-коллере и техническом анализе. Пользовательские спеки показаны белым и жирным.</string>
+    <string name="meta_specs_edit_icon">Изменить мета-спеки</string>
 </resources>

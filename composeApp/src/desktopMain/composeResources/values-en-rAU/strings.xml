@@ -1279,4 +1279,33 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_raid_caller_grace_period">Default Grace Period</string>
     <string name="settings_raid_caller_sync_note">These defaults stay in sync with the Raid Overlay → Buffs tab.</string>
     <string name="raid_buff_loot_baseline_note">Unbuffed players start at 100% in-game. The threshold compares against this baseline.</string>
+    <string name="raid_caller_loot_threshold">Loot Threshold</string>
+    <string name="raid_caller_buff_mode">Loot Buff Mode</string>
+    <string name="raid_caller_buff_grace">Buff Grace</string>
+
+    <!-- Editable Meta Specs Editor (08/25/26) -->
+    <string name="meta_specs_cc">CC</string>
+    <string name="meta_specs_melee">Melee</string>
+    <string name="meta_specs_healer">Healer</string>
+    <string name="meta_specs_mage">Mage</string>
+    <string name="meta_specs_dancer">Dancer</string>
+    <string name="meta_specs_ranged">Ranged</string>
+    <string name="meta_specs_title">Meta Specs</string>
+    <string name="meta_specs_description">Customize which specs the app treats as CC, melee, healer, mage, dancer, and ranged. Custom specs appear white and bold. Press + on a category to add a spec, x on a tag to remove it.</string>
+    <string name="meta_specs_stock">Stock</string>
+    <string name="meta_specs_custom">Custom</string>
+    <string name="meta_specs_reset">Reset to Stock</string>
+    <string name="meta_specs_reset_confirm_title">Reset Meta Specs?</string>
+    <string name="meta_specs_reset_confirm_text">This will discard all customizations and restore the built-in stock meta specs.</string>
+    <string name="meta_specs_accept">Accept</string>
+    <string name="meta_specs_cancel">Cancel</string>
+    <string name="meta_specs_add">Add spec</string>
+    <string name="meta_specs_remove">Remove %1$s</string>
+    <string name="meta_specs_none">none</string>
+    <string name="meta_specs_unknown_spec">Unknown / Incomplete</string>
+    <string name="meta_specs_accept_disabled">Pick a valid spec type to enable Accept</string>
+    <string name="settings_meta_specs_button">Customize Meta Specs</string>
+    <string name="settings_meta_specs_state">Current Meta Spec State: %1$s</string>
+    <string name="settings_meta_specs_description">Override which specs are treated as meta in the composition, raid caller, and technical analysis. Custom specs are shown white and bold.</string>
+    <string name="meta_specs_edit_icon">Edit meta specs</string>
 </resources>

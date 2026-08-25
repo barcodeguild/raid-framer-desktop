@@ -1280,4 +1280,33 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="settings_raid_caller_grace_period">Período de Carência Padrão</string>
     <string name="settings_raid_caller_sync_note">Esses padrões permanecem sincronizados com a aba Raide → Buffs.</string>
     <string name="raid_buff_loot_baseline_note">Jogadores sem buff começam com 100% no jogo. O limite compara com essa base.</string>
+    <string name="raid_caller_loot_threshold">Limite de Saque</string>
+    <string name="raid_caller_buff_mode">Modo de Buff de Saque</string>
+    <string name="raid_caller_buff_grace">Período de Carência de Buff</string>
+
+    <!-- Editable Meta Specs Editor (08/25/26) -->
+    <string name="meta_specs_cc">CC</string>
+    <string name="meta_specs_melee">Corpo a corpo</string>
+    <string name="meta_specs_healer">Curandeiro</string>
+    <string name="meta_specs_mage">Mago</string>
+    <string name="meta_specs_dancer">Dançarino</string>
+    <string name="meta_specs_ranged">Distância</string>
+    <string name="meta_specs_title">Meta Specs</string>
+    <string name="meta_specs_description">Personalize quais especificações o app trata como CC, corpo a corpo, curandeiro, mago, dançarino e distância. Specs personalizadas aparecem em branco e em negrito. Pressione + em uma categoria para adicionar uma spec e x em um marcador para removê-la.</string>
+    <string name="meta_specs_stock">Padrão</string>
+    <string name="meta_specs_custom">Personalizado</string>
+    <string name="meta_specs_reset">Redefinir para Padrão</string>
+    <string name="meta_specs_reset_confirm_title">Redefinir Meta Specs?</string>
+    <string name="meta_specs_reset_confirm_text">Isso descartará todas as personalizações e restaurará as meta specs padrão integradas.</string>
+    <string name="meta_specs_accept">Aceitar</string>
+    <string name="meta_specs_cancel">Cancelar</string>
+    <string name="meta_specs_add">Adicionar spec</string>
+    <string name="meta_specs_remove">Remover %1$s</string>
+    <string name="meta_specs_none">nenhuma</string>
+    <string name="meta_specs_unknown_spec">Desconhecido / Incompleto</string>
+    <string name="meta_specs_accept_disabled">Escolha um tipo de spec válido para habilitar Aceitar</string>
+    <string name="settings_meta_specs_button">Personalizar Meta Specs</string>
+    <string name="settings_meta_specs_state">Estado Atual das Meta Specs: %1$s</string>
+    <string name="settings_meta_specs_description">Substitua quais especificações são tratadas como meta na composição, chamador de raide e análise técnica. Specs personalizadas são mostradas em branco e em negrito.</string>
+    <string name="meta_specs_edit_icon">Editar meta specs</string>
 </resources>

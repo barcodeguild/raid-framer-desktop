@@ -1341,4 +1341,33 @@
     <string name="settings_raid_caller_grace_period">기본 유예 기간</string>
     <string name="settings_raid_caller_sync_note">이 기본값은 레이드 오버레이 → 버프 탭과 동기화됩니다.</string>
     <string name="raid_buff_loot_baseline_note">버프가 없는 플레이어는 게임에서 100%로 시작합니다. 임계값은 이 기준과 비교됩니다.</string>
+    <string name="raid_caller_loot_threshold">전리품 임계값</string>
+    <string name="raid_caller_buff_mode">전리품 버프 모드</string>
+    <string name="raid_caller_buff_grace">버프 유예 기간</string>
+
+    <!-- Editable Meta Specs Editor (08/25/26) -->
+    <string name="meta_specs_cc">CC</string>
+    <string name="meta_specs_melee">근접</string>
+    <string name="meta_specs_healer">힐러</string>
+    <string name="meta_specs_mage">메이지</string>
+    <string name="meta_specs_dancer">댄서</string>
+    <string name="meta_specs_ranged">원거리</string>
+    <string name="meta_specs_title">메타 스펙</string>
+    <string name="meta_specs_description">앱이 CC, 근접, 힐러, 메이지, 댄서, 원거리로 취급할 스펙을 사용자 지정합니다. 사용자 지정 스펙은 흰색 굵은 글씨로 표시됩니다. 카테고리에서 +를 눌러 스펙을 추가하고 태그에서 x를 눌러 제거하세요.</string>
+    <string name="meta_specs_stock">기본</string>
+    <string name="meta_specs_custom">사용자 지정</string>
+    <string name="meta_specs_reset">기본값으로 재설정</string>
+    <string name="meta_specs_reset_confirm_title">메타 스펙을 재설정하시겠습니까?</string>
+    <string name="meta_specs_reset_confirm_text">모든 사용자 지정을 버리고 내장된 기본 메타 스펙을 복원합니다.</string>
+    <string name="meta_specs_accept">확인</string>
+    <string name="meta_specs_cancel">취소</string>
+    <string name="meta_specs_add">스펙 추가</string>
+    <string name="meta_specs_remove">%1$s 제거</string>
+    <string name="meta_specs_none">없음</string>
+    <string name="meta_specs_unknown_spec">알 수 없음 / 불완전</string>
+    <string name="meta_specs_accept_disabled">확인을 활성화하려면 유효한 스펙 유형을 선택하세요</string>
+    <string name="settings_meta_specs_button">메타 스펙 사용자 지정</string>
+    <string name="settings_meta_specs_state">현재 메타 스펙 상태: %1$s</string>
+    <string name="settings_meta_specs_description">구성, 레이드 콜러 및 기술 분석에서 메타로 취급할 스펙을 재정의합니다. 사용자 지정 스펙은 흰색 굵은 글씨로 표시됩니다.</string>
+    <string name="meta_specs_edit_icon">메타 스펙 편집</string>
 </resources>
