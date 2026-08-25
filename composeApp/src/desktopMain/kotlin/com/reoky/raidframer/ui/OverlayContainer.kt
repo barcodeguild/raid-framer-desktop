@@ -30,6 +30,7 @@ import com.reoky.raidframer.ui.overlay.TrackerOverlay
 import com.reoky.raidframer.ui.overlay.BattleGraphOverlay
 import com.reoky.raidframer.ui.overlay.ItemUseOverlay
 import com.reoky.raidframer.ui.overlay.RaidCallerOverlay
+import com.reoky.raidframer.ui.overlay.MetaSpecsOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -92,6 +93,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.BATTLE_GRAPH -> BattleGraphOverlay(wm)
           OverlayType.ITEM_USE -> ItemUseOverlay()
           OverlayType.RAID_CALLER -> RaidCallerOverlay(wm)
+          OverlayType.META_SPECS -> MetaSpecsOverlay(wm)
           else -> {}
         }
 

@@ -80,6 +80,7 @@ fun initialize(): AppDatabase {
    .addMigrations(MIGRATION_40_41) // added battle graph spell depth for memory optimization
    .addMigrations(MIGRATION_41_42) // added combat overlay tooltip mode toggle
    .addMigrations(MIGRATION_42_43) // added raid caller overlay settings (08/24/26)
+   .addMigrations(MIGRATION_43_44) // added editable meta specs (08/25/26)
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

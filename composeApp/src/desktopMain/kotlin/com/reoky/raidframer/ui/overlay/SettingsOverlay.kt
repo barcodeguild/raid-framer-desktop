@@ -53,6 +53,7 @@ import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.RaidBuffGracePeriod
 import com.reoky.raidframer.core.definitions.serialize
+import com.reoky.raidframer.core.definitions.MetaSpecsRepo
 import com.reoky.raidframer.ui.overlay.BUFF_PRESETS
 import com.reoky.raidframer.ui.overlay.label
 import com.reoky.raidframer.ui.component.graphs.MemoryGraphComponent
@@ -64,6 +65,7 @@ import com.reoky.raidframer.core.helpers.UpdateStatus
 import com.reoky.raidframer.core.helpers.UpdateDownloaderHelper
 import com.reoky.raidframer.core.helpers.DownloadStatus
 import com.reoky.raidframer.core.helpers.rememberSectionPulse
+import com.reoky.raidframer.core.helpers.openMetaSpecs
 import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
@@ -592,6 +594,30 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null, generalBorderColor: 
     RaidCallerDefaultSettings(config)
 
     Spacer(modifier = Modifier.height(12.dp))
+
+    // Editable Meta Specs
+    Button(
+      onClick = { openMetaSpecs(wm) },
+      colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+      modifier = Modifier.fillMaxWidth()
+    ) {
+      Text(
+        text = stringResource(Res.string.settings_meta_specs_button),
+        color = Color.White,
+        fontWeight = FontWeight.SemiBold,
+        maxLines = 1
+      )
+    }
+    val metaSpecsCustom = config.customMetaSpecsJson.isNotBlank()
+    Text(
+      text = stringResource(
+        Res.string.settings_meta_specs_state,
+        stringResource(if (metaSpecsCustom) Res.string.meta_specs_custom else Res.string.meta_specs_stock)
+      ),
+      color = RFColors.TextTertiary,
+      fontSize = 11.sp,
+      modifier = Modifier.padding(bottom = 2.dp)
+    )
   }
 
     SettingsSection(

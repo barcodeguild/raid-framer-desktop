@@ -462,3 +462,10 @@ val MIGRATION_42_43 = object : Migration(42, 43) {
     connection.prepare("ALTER TABLE config ADD COLUMN raidCallerBuffGracePeriod TEXT NOT NULL DEFAULT 'FIFTEEN_MINUTES'").use { it.step() }
   }
 }
+
+// Added editable meta specs to ConfigEntity (08/25/26). Empty string = stock sets.
+val MIGRATION_43_44 = object : Migration(43, 44) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN customMetaSpecsJson TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}

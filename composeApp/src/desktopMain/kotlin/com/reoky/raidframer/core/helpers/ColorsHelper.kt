@@ -3,6 +3,7 @@ package com.reoky.raidframer.core.helpers
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerRole
 
@@ -163,6 +164,36 @@ object RFColors {
   val traumaMedium = Color(0xFFFF9800)          // orange — 45s-1m30s
   val traumaHigh = Color(0xFFFF6D00)            // orange-red — 1m30s-2m
   val traumaCritical = Color(0xFFFF1744)        // red — 2m+
+
+  // Editable Meta Specs editor (08/25/26)
+  val metaSpecCustom = Color.White                      // custom (non-stock) specs render white + bold
+  val metaSpecTagBg = Color(0xFF2A2A2A)                 // tag/chip background
+  val metaSpecTagBgCustom = Color(0xFF3A2A2A)           // slightly red-tinted bg for custom tags
+  val metaSpecTagBorder = Color(0xFF5A2020)             // muted red border
+  val metaSpecPlus = Color(0xFF66BB6A)                  // add (+) green
+  val metaSpecRemove = Color(0xFFE53935)                // remove (x) red
+  val metaSpecPickerAccent = Color(0xFFDC143C)          // picker highlight (matches AccentRed)
+
+  // "Well" background used for inset content surfaces (e.g. PlayerCard wells).
+  val WellColor = CardBackground.copy(alpha = 0.72f)
+}
+
+/** Per-skill-tree accent color, shared by the spec-type picker and composition rendering. */
+fun SkillTreeType.accentColor(): Color = when (this) {
+  SkillTreeType.ARCHERY -> RFColors.treeArchery
+  SkillTreeType.AURAMANCY -> RFColors.treeAuramancy
+  SkillTreeType.BATTLERAGE -> RFColors.treeBattlerage
+  SkillTreeType.DEFENSE -> RFColors.treeDefense
+  SkillTreeType.GUNSLINGER -> RFColors.treeGunslinger
+  SkillTreeType.MALEDICTION -> RFColors.treeMalediction
+  SkillTreeType.OCCULTISM -> RFColors.treeOccultism
+  SkillTreeType.SHADOWPLAY -> RFColors.treeShadowplay
+  SkillTreeType.SONGCRAFT -> RFColors.treeSongcraft
+  SkillTreeType.SORCERY -> RFColors.treeSorcery
+  SkillTreeType.SPELLDANCE -> RFColors.treeSpelldance
+  SkillTreeType.SWIFTBLADE -> RFColors.treeSwiftblade
+  SkillTreeType.VITALISM -> RFColors.treeVitalism
+  SkillTreeType.WITCHCRAFT -> RFColors.treeWitchcraft
 }
 
 enum class RFGraphColor(val color: Color) {

@@ -33,9 +33,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -68,12 +71,8 @@ import com.reoky.raidframer.core.model.RaidBuffGracePeriod
 import com.reoky.raidframer.core.model.RaidBuffObservation
 import com.reoky.raidframer.core.definitions.SKILL_TREE_DISPLAY_ORDER
 import com.reoky.raidframer.core.definitions.SkillTreeType
-import com.reoky.raidframer.core.definitions.META_CC_SPECS
-import com.reoky.raidframer.core.definitions.META_DANCER_SPECS
-import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
-import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
-import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
-import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
+import com.reoky.raidframer.core.definitions.MetaSpecs
+import com.reoky.raidframer.core.definitions.rememberMetaSpecs
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
@@ -82,6 +81,7 @@ import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.rememberSectionPulse
 import com.reoky.raidframer.core.helpers.timeAgo
 import com.reoky.raidframer.core.helpers.resolveLocalizedString
+import com.reoky.raidframer.core.helpers.openMetaSpecs
 import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.core.serialization.BuffPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
@@ -291,7 +291,8 @@ fun RaidOverlay(wm: WindowManager? = null) {
               playerFaction = playerFaction,
               raidDepartures = raidDepartures.value,
               requirePvPParticipation = requirePvPParticipation,
-              onRequirePvPParticipationChange = { requirePvPParticipation = it }
+              onRequirePvPParticipationChange = { requirePvPParticipation = it },
+              wm = wm
             )
           }
         }
@@ -308,7 +309,8 @@ private fun CompositionTab(
   playerFaction: Faction = Faction.UNKNOWN,
   raidDepartures: Map<Int, Set<String>> = emptyMap(),
   requirePvPParticipation: Boolean,
-  onRequirePvPParticipationChange: (Boolean) -> Unit
+  onRequirePvPParticipationChange: (Boolean) -> Unit,
+  wm: WindowManager? = null,
 ) {
   var requireGearOver15k by rememberSaveable { mutableStateOf(false) }
   var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
@@ -413,10 +415,10 @@ private fun CompositionTab(
           textColor = RFColors.TextPrimary
         )
      }
-      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_statistics)) { faction, players ->
+      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_statistics), onEditMetaSpecs = { openMetaSpecs(wm) }) { faction, players ->
        FactionStatistics(faction, players)
      }
-      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_meta_spec_breakdown)) { faction, players ->
+      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_meta_spec_breakdown), onEditMetaSpecs = { openMetaSpecs(wm) }) { faction, players ->
        MetaSpecBreakdown(faction, players)
      }
    }
@@ -426,6 +428,7 @@ private fun CompositionTab(
 private fun ResponsiveFactionSections(
   factions: List<Pair<String, List<PlayerCard>>>,
   title: String,
+  onEditMetaSpecs: () -> Unit = {},
   content: @Composable (String, List<PlayerCard>) -> Unit
 ) {
   val metaSpecBreakdownTitle = stringResource(Res.string.raid_composition_meta_spec_breakdown)
@@ -438,6 +441,15 @@ private fun ResponsiveFactionSections(
       Text(title, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
       if (title == metaSpecBreakdownTitle) {
         MetaSpecHelp()
+        Text(
+          text = "✎",
+          color = RFColors.TextSecondary,
+          fontSize = 14.sp,
+          modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .clickable { onEditMetaSpecs() }
+            .padding(horizontal = 0.dp)
+        )
       }
     }
     BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -493,12 +505,13 @@ private fun MetaSpecHelp() {
                 Text("X", color = RFColors.TextSecondary, fontSize = 11.sp)
               }
             }
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_cc), META_CC_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_melee), META_MELEE_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_healer), META_HEALER_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_mage), META_MAGE_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_dancer), META_DANCER_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_ranged), META_RANGED_SPEC)
+            val meta = rememberMetaSpecs()
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_cc), meta.cc, MetaSpecs.STOCK.cc)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_melee), meta.melee, MetaSpecs.STOCK.melee)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_healer), meta.healer, MetaSpecs.STOCK.healer)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_mage), meta.mage, MetaSpecs.STOCK.mage)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_dancer), meta.dancer, MetaSpecs.STOCK.dancer)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_ranged), meta.ranged, MetaSpecs.STOCK.ranged)
           }
         }
       }
@@ -507,13 +520,28 @@ private fun MetaSpecHelp() {
 }
 
 @Composable
-private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>) {
-  val localizedSpecs = specs.map { stringResource(it.localizedDisplayNameRes) }
+private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>, stock: Set<SpecType>) {
+  val annotatedSpecs = specs
+    .sortedBy { it.name }
+    .map { spec ->
+      val custom = spec !in stock
+      buildAnnotatedString {
+        if (custom) {
+          withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
+            append(stringResource(spec.localizedDisplayNameRes))
+          }
+        } else {
+          withStyle(SpanStyle(color = RFColors.TextSecondary)) {
+            append(stringResource(spec.localizedDisplayNameRes))
+          }
+        }
+      }
+    }
 
   Column {
     Text(label, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 10.sp)
     Text(
-      localizedSpecs.joinToString(", "),
+      annotatedSpecs.joinToString(separator = ", ") { it },
       color = RFColors.TextSecondary,
       fontSize = 10.sp,
       lineHeight = 12.sp
@@ -523,6 +551,7 @@ private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>) {
 
 @Composable
 private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
+      val meta = rememberMetaSpecs()
       val specs = players.mapNotNull { SpecType.fromName(it.currentBuild) }
       fun has(tree: SkillTreeType, spec: SpecType) = tree in spec.trees
       fun matching(predicate: (SpecType) -> Boolean) = players.filter { SpecType.fromName(it.currentBuild)?.let(predicate) == true }
@@ -563,7 +592,7 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
         addRow(stringResource(Res.string.raid_composition_dancer_comedian), matching { it == SpecType.COMEDIAN })
         addRow(stringResource(Res.string.raid_composition_dancer_seal_resolver), matching { it == SpecType.SEAL_RESOLVER })
         addRow(stringResource(Res.string.raid_composition_dancer_tough_dancer), matching { it == SpecType.TOUGH_DANCER })
-         addRow(stringResource(Res.string.raid_composition_dancer_other), matching { has(SkillTreeType.SPELLDANCE, it) && it !in META_DANCER_SPECS })
+         addRow(stringResource(Res.string.raid_composition_dancer_other), matching { has(SkillTreeType.SPELLDANCE, it) && it !in meta.dancer })
        val breakdownItems = listOf(
          row(stringResource(Res.string.raid_composition_shadowplay_vitalism), shadowplayVitalism.size, players.size),
          row(stringResource(Res.string.raid_composition_shadowplay_without_vitalism), shadowplayWithoutVitalism.size, players.size),
@@ -580,7 +609,7 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
          row(stringResource(Res.string.raid_composition_dancer_comedian), dancer.count { it == SpecType.COMEDIAN }, dancer.size),
          row(stringResource(Res.string.raid_composition_dancer_seal_resolver), dancer.count { it == SpecType.SEAL_RESOLVER }, dancer.size),
          row(stringResource(Res.string.raid_composition_dancer_tough_dancer), dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
-         row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in META_DANCER_SPECS }, dancer.size)
+         row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in meta.dancer }, dancer.size)
        )
         Surface(
           color = RFColors.CardBackground.copy(alpha = 0.78f),
@@ -602,14 +631,15 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
 
 @Composable
 private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
+  val meta = rememberMetaSpecs()
   val specs = players.mapNotNull { card -> SpecType.fromName(card.currentBuild)?.let { it to card } }
   val groups = listOf(
-    stringResource(Res.string.raid_composition_meta_cc) to META_CC_SPECS,
-    stringResource(Res.string.raid_composition_meta_melee) to META_MELEE_SPECS,
-    stringResource(Res.string.raid_composition_meta_healer) to META_HEALER_SPECS,
-    stringResource(Res.string.raid_composition_meta_mage) to META_MAGE_SPECS,
-    stringResource(Res.string.raid_composition_meta_dancer) to META_DANCER_SPECS,
-    stringResource(Res.string.raid_composition_meta_ranged) to META_RANGED_SPEC
+    stringResource(Res.string.raid_composition_meta_cc) to meta.cc,
+    stringResource(Res.string.raid_composition_meta_melee) to meta.melee,
+    stringResource(Res.string.raid_composition_meta_healer) to meta.healer,
+    stringResource(Res.string.raid_composition_meta_mage) to meta.mage,
+    stringResource(Res.string.raid_composition_meta_dancer) to meta.dancer,
+    stringResource(Res.string.raid_composition_meta_ranged) to meta.ranged
   )
   val known = groups.flatMap { it.second }.toSet()
   val other = specs.filter { it.first !in known }

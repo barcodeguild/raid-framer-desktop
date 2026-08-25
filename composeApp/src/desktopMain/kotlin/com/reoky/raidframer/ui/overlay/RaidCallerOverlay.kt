@@ -37,13 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.core.config.RFConfig
-import com.reoky.raidframer.core.definitions.META_CC_SPECS
-import com.reoky.raidframer.core.definitions.META_DANCER_SPECS
-import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
-import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
-import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
-import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
 import com.reoky.raidframer.core.definitions.SpecType
+import com.reoky.raidframer.core.definitions.rememberMetaSpecs
 import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
 import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.parseRaidBuffRequirements
@@ -54,6 +49,7 @@ import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.helpers.openRaidTab
 import com.reoky.raidframer.core.helpers.openSettingsGeneral
+import com.reoky.raidframer.core.helpers.openMetaSpecs
 import com.reoky.raidframer.core.helpers.openSummaryTab
 import com.reoky.raidframer.core.helpers.togglePokemon
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
@@ -503,13 +499,14 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val specs = remember(players, memberNames) {
     players.filter { it.name in memberNames }.mapNotNull { card -> SpecType.fromName(card.currentBuild) to card }
   }
-  val metaCc = specs.count { it.first in META_CC_SPECS }
-  val metaHealer = specs.count { it.first in META_HEALER_SPECS }
-  val metaMelee = specs.count { it.first in META_MELEE_SPECS }
-  val metaMage = specs.count { it.first in META_MAGE_SPECS }
-  val metaDancer = specs.count { it.first in META_DANCER_SPECS }
-  val metaRanged = specs.count { it.first in META_RANGED_SPEC }
-  val metaKnown = META_CC_SPECS + META_MELEE_SPECS + META_HEALER_SPECS + META_MAGE_SPECS + META_DANCER_SPECS + META_RANGED_SPEC
+  val meta = rememberMetaSpecs()
+  val metaCc = specs.count { it.first in meta.cc }
+  val metaHealer = specs.count { it.first in meta.healer }
+  val metaMelee = specs.count { it.first in meta.melee }
+  val metaMage = specs.count { it.first in meta.mage }
+  val metaDancer = specs.count { it.first in meta.dancer }
+  val metaRanged = specs.count { it.first in meta.ranged }
+  val metaKnown = meta.cc + meta.melee + meta.healer + meta.mage + meta.dancer + meta.ranged
   val metaNonMeta = specs.count { it.first !in metaKnown }
 
   // --- Recording duration ---
@@ -659,6 +656,19 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
       LabeledValue("${stringResource(Res.string.raid_caller_dancer)}:", metaDancer.toString(), RFColors.callerMetaDancer)
       LabeledValue("${stringResource(Res.string.raid_caller_ranged)}:", metaRanged.toString(), RFColors.callerMetaRanged)
       LabeledValue("${stringResource(Res.string.raid_caller_non_meta)}:", metaNonMeta.toString(), RFColors.callerMetaNonMeta)
+      val pencilInteraction = androidx.compose.foundation.interaction.MutableInteractionSource()
+      val pencilHovered by pencilInteraction.collectIsHoveredAsState()
+      Text(
+        text = "✎",
+        color = if (pencilHovered) Color.White else RFColors.TextSecondary,
+        fontSize = 11.sp,
+        modifier = Modifier
+          .offset(y = (-1).dp)
+          .hoverable(pencilInteraction)
+          .clip(RoundedCornerShape(4.dp))
+          .clickable(interactionSource = pencilInteraction, indication = null) { openMetaSpecs(wm) }
+          .padding(horizontal = 2.dp)
+      )
     }
   }
 }

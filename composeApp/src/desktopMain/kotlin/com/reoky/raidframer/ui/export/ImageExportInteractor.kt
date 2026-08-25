@@ -8,6 +8,7 @@ import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
+import com.reoky.raidframer.core.definitions.MetaSpecsRepo
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.getDocumentsDirectory
@@ -36,6 +37,8 @@ import raid_framer_desktop.composeapp.generated.resources.export_header_kills_la
 import raid_framer_desktop.composeapp.generated.resources.export_header_most_damage
 import raid_framer_desktop.composeapp.generated.resources.export_header_killing_blow
 import raid_framer_desktop.composeapp.generated.resources.export_header_coherence
+import raid_framer_desktop.composeapp.generated.resources.meta_specs_custom
+import raid_framer_desktop.composeapp.generated.resources.meta_specs_stock
 import raid_framer_desktop.composeapp.generated.resources.summary_haranya_builds
 import raid_framer_desktop.composeapp.generated.resources.summary_most_item_usages
 import raid_framer_desktop.composeapp.generated.resources.summary_nuia_builds
@@ -436,9 +439,11 @@ val topManaBarrier: List<PlayerCard>,
     val topCoherenceRender: List<PlayerCard>,
     val topCoherenceRaid: List<PlayerCard>,
     val topCoherenceClump: List<PlayerCard>,
-    val coherenceRecordingMs: Long,
+val coherenceRecordingMs: Long,
     val coherenceRecorderMs: Long,
     val coherenceHeaderLabel: String,
+    // Editable meta specs indicator (Stock / Custom), localized. Empty string hides the marker.
+    val metaSpecsLabel: String = "",
     // New faction comparison data
     val factionTigerStrikeData: Map<String, Float>,
     val factionFreezeData: Map<String, Float>,
@@ -503,6 +508,9 @@ val topManaBarrier: List<PlayerCard>,
       exportHeaderKillsLabel = getString(Res.string.export_header_kills_label),
       exportHeaderMostDamage = getString(Res.string.export_header_most_damage),
       exportHeaderKillingBlow = getString(Res.string.export_header_killing_blow),
+      metaSpecsLabel = getString(
+        if (MetaSpecsRepo.current.isStock) Res.string.meta_specs_stock else Res.string.meta_specs_custom
+      ),
       combatDamageTitle = getString(
         if (config.allowPVEDamage) Res.string.export_combat_pve_damage else Res.string.export_combat_pvp_damage
       ),
@@ -709,6 +717,9 @@ val topManaBarrier: List<PlayerCard>,
       exportHeaderKillsLabel = getString(Res.string.export_header_kills_label),
       exportHeaderMostDamage = getString(Res.string.export_header_most_damage),
       exportHeaderKillingBlow = getString(Res.string.export_header_killing_blow),
+      metaSpecsLabel = getString(
+        if (MetaSpecsRepo.current.isStock) Res.string.meta_specs_stock else Res.string.meta_specs_custom
+      ),
       combatDamageTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_damage else Res.string.export_combat_pvp_damage),
       combatHealsTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_heals else Res.string.export_combat_pvp_heals),
       combatCCTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_cc else Res.string.export_combat_pvp_cc),
@@ -1009,8 +1020,9 @@ val topManaBarrier: List<PlayerCard>,
     // }
     g2d.font  = subtitleFont
     g2d.color = toAwtColor(RFColors.TextSecondary)
+    val metaStr = if (data.metaSpecsLabel.isNotBlank()) "  |  ${data.metaSpecsLabel}" else ""
     g2d.drawString(
-      "${data.sessionTitle}  |  ${data.sessionDate}  |  ${AppGlobals.APP_VERSION}  |  $durationStr  |  ${data.exportHeaderOdeLabel}: $odeLabel  |  ${data.exportHeaderPveLabel}: $pveLabel$recorderCoherenceStr",
+      "${data.sessionTitle}  |  ${data.sessionDate}  |  ${AppGlobals.APP_VERSION}  |  $durationStr  |  ${data.exportHeaderOdeLabel}: $odeLabel  |  ${data.exportHeaderPveLabel}: $pveLabel$recorderCoherenceStr$metaStr",
       textStartX, y + 56
     )
 

@@ -1,11 +1,6 @@
 package com.reoky.raidframer.core.helpers
 
-import com.reoky.raidframer.core.definitions.META_CC_SPECS
-import com.reoky.raidframer.core.definitions.META_DANCER_SPECS
-import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
-import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
-import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
-import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
+import com.reoky.raidframer.core.definitions.MetaSpecsRepo
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.model.EdgeHeuristic
@@ -112,7 +107,7 @@ object TechnicalAnalysisHelper {
     nodeHeuristics: MutableList<NodeHeuristic>
   ) {
     val healers = cards.filter { card ->
-      card.isRealPlayer && SpecType.fromName(card.currentBuild) in META_HEALER_SPECS
+      card.isRealPlayer && SpecType.fromName(card.currentBuild) in MetaSpecsRepo.current.healer
     }
 
     // Heuristic - Circular healing loop (two friends healing each others)
@@ -144,9 +139,9 @@ object TechnicalAnalysisHelper {
 
         val targetCard = cardsByName[targetName] ?: return@forEach
         val targetSpec = SpecType.fromName(targetCard.currentBuild)
-        if (targetSpec in META_CC_SPECS) {
+        if (targetSpec in MetaSpecsRepo.current.cc) {
           edgeHeuristics.add(EdgeHeuristic(healer.name, targetName, Res.string.tech_heal_focus, RFColors.techHealFocus, category = CAT_HEALS))
-        } else if (targetSpec in META_DANCER_SPECS) {
+        } else if (targetSpec in MetaSpecsRepo.current.dancer) {
           edgeHeuristics.add(EdgeHeuristic(healer.name, targetName, Res.string.tech_heal_focus, RFColors.techHealFocus, category = CAT_HEALS))
         }
       }
@@ -154,7 +149,7 @@ object TechnicalAnalysisHelper {
 
     // Heuristic - tanks/dancers not receiving enough heals
     cards.filter { card ->
-      card.isRealPlayer && SpecType.fromName(card.currentBuild) in (META_CC_SPECS + META_DANCER_SPECS)
+      card.isRealPlayer && SpecType.fromName(card.currentBuild) in (MetaSpecsRepo.current.cc + MetaSpecsRepo.current.dancer)
     }.forEach { card ->
       if (card.sessionHealsReceivedTotal < card.sessionDamageTakenTotal * NEEDS_HEALS_THRESHOLD) {
         nodeHeuristics.add(NodeHeuristic(card.name, Res.string.tech_needs_heals, RFColors.techNeedsHeals, category = CAT_HEALS))
@@ -191,7 +186,7 @@ object TechnicalAnalysisHelper {
     edgeHeuristics: MutableList<EdgeHeuristic>,
     nodeHeuristics: MutableList<NodeHeuristic>
   ) {
-    val dpsSpecs = META_MAGE_SPECS + META_MELEE_SPECS + META_RANGED_SPEC
+    val dpsSpecs = MetaSpecsRepo.current.mage + MetaSpecsRepo.current.melee + MetaSpecsRepo.current.ranged
 
     cards.filter { card ->
       card.isRealPlayer && SpecType.fromName(card.currentBuild) in dpsSpecs
@@ -228,7 +223,7 @@ object TechnicalAnalysisHelper {
 
       // Heuristic - Spell Dominance - mage/ranged whose damage comes primarily from key spells
       val spec = SpecType.fromName(card.currentBuild)
-      if (spec != null && (spec in META_MAGE_SPECS || spec in META_RANGED_SPEC)) {
+      if (spec != null && (spec in MetaSpecsRepo.current.mage || spec in MetaSpecsRepo.current.ranged)) {
         val totalDmg = card.sessionDamageTotal
         if (totalDmg > 0) {
           val spellDmg = card.sessionSpellDamageMap.entries
@@ -305,7 +300,7 @@ object TechnicalAnalysisHelper {
 
     // Heuristic - CC Rival? - someone applying significant CC stacks to a CC tank (IE they are fighting back against cc with cc)
     val ccTanks = cards.filter { card ->
-      card.isRealPlayer && SpecType.fromName(card.currentBuild) in META_CC_SPECS
+      card.isRealPlayer && SpecType.fromName(card.currentBuild) in MetaSpecsRepo.current.cc
     }
     cards.filter { it.isRealPlayer }.forEach { source ->
       val totalCC = source.sessionCCTotal

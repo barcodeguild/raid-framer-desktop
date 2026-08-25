@@ -15,7 +15,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 43
+const val SCHEMA_VERSION = 44
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -153,6 +153,11 @@ data class ConfigEntity(
   val raidCallerBuffRequirements: String = "FEAST_RIBS,GOBLET,STATUE_BUFF,WAR_DRUM",
   // RaidBuffGracePeriod name. Synced with the RaidOverlay Buffs tab.
   val raidCallerBuffGracePeriod: String = RaidBuffGracePeriod.FIFTEEN_MINUTES.name,
+
+  // Editable meta specs (08/25/26). Empty string means the built-in "stock" sets are in use.
+  // Otherwise a JSON blob encoding the user's overrides for the six categories. See
+  // core/definitions/MetaSpecsDefinition.kt for the schema and parsing.
+  val customMetaSpecsJson: String = "",
 )
 
 /*

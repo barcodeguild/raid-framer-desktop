@@ -911,7 +911,7 @@ fun SpecType.isPvPFriendly(): Boolean {
 
 fun SpecType.isCCTank(): Boolean {
   if (trees.contains(SkillTreeType.WITCHCRAFT) && trees.contains(SkillTreeType.OCCULTISM)) return true
-  if (META_CC_SPECS.contains(this)) return true
+  if (MetaSpecsRepo.current.cc.contains(this)) return true
   return false
 }
 

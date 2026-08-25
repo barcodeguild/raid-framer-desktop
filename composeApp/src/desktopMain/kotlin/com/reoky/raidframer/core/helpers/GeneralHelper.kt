@@ -319,6 +319,13 @@ fun openSettingsGeneral(wm: WindowManager?) {
 }
 
 /**
+ * Opens the editable Meta Specs overlay.
+ */
+fun openMetaSpecs(wm: WindowManager?) {
+  wm?.openWindow(OverlayType.META_SPECS)
+}
+
+/**
  * Toggles the pet (Pokemon) overlay open/closed.
  */
 fun togglePokemon(wm: WindowManager?) {
