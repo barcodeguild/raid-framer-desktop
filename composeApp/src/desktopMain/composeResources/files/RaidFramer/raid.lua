@@ -133,6 +133,15 @@ RF.Raid.LOOT_BUFF_IDS = {
   [9002264] = true, [9002356] = true,
 }
 
+-- Buff IDs whose tooltip the desktop app actually consumes. Every other interesting buff is
+-- transmitted by buff_id alone (a presence signal), which lets us skip the expensive
+-- X2Unit:UnitBuffTooltip call + description regex for the vast majority of a player's buffs
+-- on the game's single thread. Keep this list in sync with the Kotlin side's tooltip readers.
+RF.Raid.TOOLTIP_BUFF_IDS = {
+  [25875] = true, -- Life Mend (tooltip.healAmount tracking)
+  [2385] = true,  -- Rebirth Trauma (tooltip.timeLeft for the raid caller overlay)
+}
+
 -- enum of strings different team member change reasons we can filter by to avoid unnecessary processing
 RF.TEAM_CHANGE_REASONS = {
   JOINED = "joined",
@@ -174,6 +183,24 @@ end
 
 function RF.Raid.GetRaidRoster()
   return RF.Raid.Roster
+end
+
+-- Returns a compact list of only the occupied raid slots (members with a player name).
+-- Skipping the ~half that are empty keeps the FRAMES_UPDATE payload and its JSON encoding
+-- cheap. Each entry retains its original 1-based `slot`, which the desktop app uses to
+-- rebuild the full positional roster before chunking into raids/parties.
+function RF.Raid.OccupiedRoster()
+  local roster = {}
+  for i = 1, 100 do
+    local member = RF.Raid.Roster[i]
+    if member and member.playerName and member.playerName ~= "" then
+      -- Stamp the current array index onto the slot so the desktop app's positional rebuild
+      -- is correct even if the member's slot field went stale after moving positions.
+      member.slot = i
+      roster[#roster + 1] = member
+    end
+  end
+  return roster
 end
 
 -- allocates and initializes raid member structures
@@ -270,10 +297,12 @@ function RF.Raid.handleTeamMembersChanged(reason, ...)
     end
   end
 
-  -- ipc export updated raid roster
+  -- ipc export updated raid roster (occupied slots only; immediate write so the buff scanner
+  -- always receives a fresh frame regardless of combat activity — the queue only flushes on
+  -- combat events, which could starve delivery while idle)
   RF.IPC.WriteMessage(
     RF.IPC.MESSAGE_TYPES.FRAMES_UPDATE,
-    RF.Raid.GetRaidRoster()
+    RF.Raid.OccupiedRoster()
   )
 
   if not RF.Config.SHOW_RAID_STATUS then
@@ -347,9 +376,11 @@ function RF.Raid.ScanUnitBuffs(unitId)
     if rawBuff then
       local buff = RF.Parser.ParseUnitBuff(rawBuff)
       if RF.Raid.INTERESTING_BUFF_IDS[buff.buff_id] then
-        -- Loot buffs only signal their presence. We intentionally skip fetching their
-        -- tooltip here because we don't need it and it costs CPU inside the game process.
-        if not RF.Raid.LOOT_BUFF_IDS[buff.buff_id] then
+        -- Only fetch the tooltip for the handful of buffs whose tooltip the desktop app
+        -- actually consumes (Life Mend healAmount, Rebirth timeLeft). Every other interesting
+        -- buff is transmitted by buff_id alone, avoiding an expensive UnitBuffTooltip call
+        -- plus the description regex for each of a player's buffs on the game's single thread.
+        if RF.Raid.TOOLTIP_BUFF_IDS[buff.buff_id] then
           local rawTooltip = X2Unit:UnitBuffTooltip(unitId, buffId)
           if rawTooltip then
             buff.tooltip = RF.Parser.ParseUnitBuffTooltip(rawTooltip)
@@ -456,10 +487,12 @@ function RF.Raid.ScanBuffs()
     end
   end
 
-  -- send updated roster to the app immediately
+  -- send updated roster to the app (occupied slots only; immediate write so the buff scanner
+  -- always receives a fresh frame — queue flushing only runs on combat events and could
+  -- starve delivery while idle). Payload is now small (no redundant tooltips, no empty slots).
   RF.IPC.WriteMessage(
     RF.IPC.MESSAGE_TYPES.FRAMES_UPDATE,
-    RF.Raid.GetRaidRoster()
+    RF.Raid.OccupiedRoster()
   )
 
   --RF:Log(string.format("[Raid] Buff scan: %d players scanned, %d with buffs", scanned, withBuffs))

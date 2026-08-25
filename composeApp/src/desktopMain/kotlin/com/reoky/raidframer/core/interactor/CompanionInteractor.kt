@@ -14,14 +14,17 @@ import com.reoky.raidframer.core.serialization.AppJson
 import com.reoky.raidframer.core.serialization.CombatEventPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.PlayerInfoPayload
+import com.reoky.raidframer.core.serialization.RaidFramePayload
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.exists
-import kotlin.io.path.readLines
 import kotlin.io.path.writeText
 import kotlin.math.abs
 
@@ -34,7 +37,7 @@ object CompanionInteractor : Interactor() {
 
   private var shouldNotifyCompanion: Boolean = false
   private var didATestPing: Boolean = false
-  private var lastProcessedLineCount: Int = 0  // Track lines processed
+  private var lastProcessedByteOffset: Long = 0L  // Byte offset into the out file already consumed
   private var ipcFilesInitialized: Boolean = false
 
   private fun initializeIpcFilesIfNeeded() {
@@ -67,6 +70,44 @@ object CompanionInteractor : Interactor() {
     }
   }
 
+  /**
+   * Reads only the lines appended to [path] since the last call and advances the read offset.
+   * Handles the Lua addon truncating the file (its 100MB reset) by resetting the offset.
+   * A trailing line without a trailing newline (read mid-write) is dropped rather than fed to
+   * the decoder, since it is incomplete; the writer completes it as a fresh line on its next
+   * write, so nothing is permanently lost.
+   */
+  private fun readAppendedLines(path: java.nio.file.Path): List<String> {
+    val channel = FileChannel.open(path, StandardOpenOption.READ)
+    try {
+      val size = channel.size()
+      if (size < lastProcessedByteOffset) {
+        lastProcessedByteOffset = 0L // file was truncated/reset
+      }
+      if (size <= lastProcessedByteOffset) return emptyList()
+
+      val remaining = (size - lastProcessedByteOffset).toInt()
+      val buffer = ByteBuffer.allocate(remaining)
+      channel.position(lastProcessedByteOffset)
+      while (buffer.hasRemaining()) {
+        val n = channel.read(buffer)
+        if (n <= 0) break
+      }
+      buffer.flip()
+
+      val text = StandardCharsets.UTF_8.decode(buffer).toString()
+      lastProcessedByteOffset = size
+
+      var lines = text.split('\n')
+      if (text.isNotEmpty() && !text.endsWith('\n') && lines.isNotEmpty()) {
+        lines = lines.dropLast(1) // incomplete trailing line (mid-write)
+      }
+      return lines.filter { it.isNotBlank() }
+    } finally {
+      channel.close()
+    }
+  }
+
   override suspend fun interact() {
     val gameDirectory = RFConfig.state.value.defaultArcheRageDirectory
     if (gameDirectory.isBlank()) return
@@ -80,26 +121,13 @@ object CompanionInteractor : Interactor() {
 
     if (outFile.exists()) {
       try {
-        val allLines = withContext(Dispatchers.IO) {
-          outFile.readLines()
+        // Incremental tail-read: only read the bytes appended since the last pass, so we never
+        // re-read (and re-allocate) the whole backlog of the out file on every tick.
+        val newLines = withContext(Dispatchers.IO) {
+          readAppendedLines(outFile)
         }
-
-        val totalLines = allLines.size
-
-        // If file was truncated (Lua's 100MB reset), reset our counter
-        if (totalLines < lastProcessedLineCount) {
-          lastProcessedLineCount = 0
-        }
-
-        // Only process new lines
-        if (totalLines > lastProcessedLineCount) {
-          allLines
-            .drop(lastProcessedLineCount)
-            .filter { it.isNotBlank() }
-            .forEach { line -> handleInboundIPCMessage(line) }
-
-          lastProcessedLineCount = totalLines
-        }} catch (e: Exception) {
+        newLines.forEach { line -> handleInboundIPCMessage(line) }
+      } catch (e: Exception) {
         Log.error(TAG, "Error reading IPC out file: ${e.message}")
       }
     }
@@ -175,26 +203,20 @@ object CompanionInteractor : Interactor() {
           }
         }
         is IPCMessagePayload.FramesUpdate -> { // Was "BatchUpdate"
-          // Accumulate coherence (time-in-range / raid recording time) from the full roster
-          // snapshot before it is chunked into raid parties for card reconciliation.
-          PlayerCacheInteractor.accumulateCoherence(message.payload)
-          val chunks = message.payload.chunked(50).take(2)
+          // The Lua addon now sends only occupied slots, each carrying its 1-based `slot`.
+          // Rebuild the full 100-slot positional array so the existing raid chunking (slot
+          // 1-50 -> raid 0, slot 51-100 -> raid 1, parties of 5) keeps working unchanged.
+          // Missing slots become empty frames. `accumulateCoherence` filters blank names.
+          val framesBySlot = message.payload.associateBy { it.slot }
+          val full = (1..100).map { framesBySlot[it] ?: RaidFramePayload(slot = it) }
+          PlayerCacheInteractor.accumulateCoherence(full)
+          val chunks = full.chunked(50).take(2)
           for ((index, chunk) in chunks.withIndex()) {
             PlayerCacheInteractor.updatePlayersForRaidById(index, chunk)
           }
-          // Log buff data for debugging
-          val playersWithBuffs = message.payload.count { it.playerName.isNotBlank() && it.buffs.isNotEmpty() }
-          val totalPlayers = message.payload.count { it.playerName.isNotBlank() }
+          val playersWithBuffs = full.count { it.playerName.isNotBlank() && it.buffs.isNotEmpty() }
+          val totalPlayers = full.count { it.playerName.isNotBlank() }
           Log.info(TAG, "FRAMES_UPDATE: $totalPlayers players, $playersWithBuffs with buffs")
-          for (player in message.payload) {
-            if (player.playerName.isBlank()) continue
-            if (player.buffs.isNotEmpty()) {
-              for (buff in player.buffs) {
-                val tooltip = buff.tooltip
-                //Log.info(TAG, "Raid buff: ${player.playerName} has ${tooltip.name} (id:${buff.buff_id}) stack:${tooltip.stack} timeLeft:${tooltip.timeLeft} mine:${tooltip.mine} category:${tooltip.category} desc:${tooltip.description.take(80)}")
-              }
-            }
-          }
         }
         is IPCMessagePayload.CombatEvent -> {
           when (val event = message.payload) {
