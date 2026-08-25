@@ -46,3 +46,17 @@ object AppState {
   }
 
 }
+
+/**
+ * Ephemeral state shared between the RaidOverlay Buffs tab and the Settings overlay so the
+ * "check for loot buffs?" toggle stays in sync while the app is running. Unlike the loot-buff
+ * threshold value (which is persisted in config), this enabled flag is intentionally NOT
+ * persisted — the checkbox resets to unchecked on the next app launch per the feature spec.
+ */
+object RaidCallerSync {
+  private val _lootBuffEnabled = MutableStateFlow(false)
+  val lootBuffEnabled = _lootBuffEnabled.asStateFlow()
+  fun setLootBuffEnabled(enabled: Boolean) {
+    _lootBuffEnabled.value = enabled
+  }
+}

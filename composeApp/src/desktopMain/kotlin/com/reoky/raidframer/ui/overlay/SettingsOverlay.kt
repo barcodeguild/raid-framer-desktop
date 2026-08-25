@@ -48,6 +48,10 @@ import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableStatus
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.RaidBuffGracePeriod
+import com.reoky.raidframer.core.definitions.serialize
+import com.reoky.raidframer.ui.overlay.BUFF_PRESETS
+import com.reoky.raidframer.ui.overlay.label
 import com.reoky.raidframer.ui.component.graphs.MemoryGraphComponent
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.AppState
@@ -545,26 +549,20 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       label = stringResource(Res.string.settings_combat_overlay_tooltip)
     )
 
-//    SettingsCheckbox(
-//      checked = config.gameScheduleHotkeyEnabled,
-//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) } },
-//      label = stringResource(Res.string.settings_game_schedule_hotkey),
-//      accent = false
-//    )
+    SettingsCheckbox(
+      checked = config.raidCallerOverlayEnabled,
+      onCheckedChange = { isChecked ->
+        CoroutineScope(Dispatchers.Main).launch {
+          RFConfig.update { it.copy(raidCallerOverlayEnabled = isChecked) }
+          if (isChecked) wm?.openWindow(OverlayType.RAID_CALLER) else wm?.closeWindow(OverlayType.RAID_CALLER)
+        }
+      },
+      label = stringResource(Res.string.settings_raid_caller_overlay)
+    )
 
-//    SettingsCheckbox(
-//      checked = config.useSadlyDotEyeOhhh,
-//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(useSadlyDotEyeOhhh = isChecked) } },
-//      label = stringResource(Res.string.settings_use_sadly),
-//      accent = false
-//    )
-
-//    SettingsCheckbox(
-//      checked = config.dragonBreathOverlayEnabled,
-//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(dragonBreathOverlayEnabled = isChecked) } },
-//      label = stringResource(Res.string.settings_dragon_breath_overlay),
-//      accent = false
-//    )
+    // Raid Caller defaults: minimum loot buff requirement, buff requirement preset, and grace period.
+    // All three are kept in sync with the RaidOverlay -> Buffs tab (both write to config).
+    RaidCallerDefaultSettings(config)
 
     Spacer(modifier = Modifier.height(12.dp))
   }
@@ -603,6 +601,175 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       color = config.windowColor,
       onColorChange = { color -> RFConfig.update { it.copy(windowColor = color) } }
     )
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RaidCallerDefaultSettings(config: ConfigEntity) {
+  val lootThreshold = config.raidCallerLootBuffThreshold.coerceIn(100, 600)
+
+  // Minimum loot buff requirement slider (100-600%, 100% = in-game baseline).
+  var lootSliderValue by remember { mutableStateOf(lootThreshold.toFloat()) }
+  LaunchedEffect(config.raidCallerLootBuffThreshold) { lootSliderValue = config.raidCallerLootBuffThreshold.toFloat().coerceIn(100f, 600f) }
+
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_loot_threshold, "$lootThreshold%"),
+    color = RFColors.TextSecondary,
+    fontSize = 13.sp,
+    fontWeight = FontWeight.Bold,
+    modifier = Modifier.padding(top = 6.dp)
+  )
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_loot_note),
+    color = RFColors.TextTertiary,
+    fontSize = 11.sp,
+    modifier = Modifier.padding(bottom = 2.dp)
+  )
+  DragLockedSlider(
+    value = lootSliderValue,
+    onValueChange = { value ->
+      lootSliderValue = value
+      val threshold = value.toInt().coerceIn(100, 600)
+      RFConfig.update { it.copy(raidCallerLootBuffThreshold = threshold) }
+    },
+    modifier = Modifier.fillMaxWidth(),
+    valueRange = 100f..600f
+  )
+
+  // Default minimum buff requirement dropdown (mirrors the RaidOverlay Buffs tab presets).
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_buff_requirement),
+    color = RFColors.TextSecondary,
+    fontSize = 13.sp,
+    fontWeight = FontWeight.Bold,
+    modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
+  )
+  BuffPresetDropdown(
+    currentRequirements = config.raidCallerBuffRequirements,
+    onSelected = { requirements ->
+      RFConfig.update { it.copy(raidCallerBuffRequirements = requirements.serialize()) }
+    }
+  )
+
+  // Default grace period dropdown.
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_grace_period),
+    color = RFColors.TextSecondary,
+    fontSize = 13.sp,
+    fontWeight = FontWeight.Bold,
+    modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
+  )
+  GracePeriodDropdown(
+    current = config.raidCallerBuffGracePeriod,
+    onSelected = { name -> RFConfig.update { it.copy(raidCallerBuffGracePeriod = name) } }
+  )
+
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_sync_note),
+    color = RFColors.TextTertiary,
+    fontSize = 10.sp,
+    lineHeight = 12.sp,
+    modifier = Modifier.padding(top = 6.dp)
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BuffPresetDropdown(currentRequirements: String, onSelected: (com.reoky.raidframer.core.definitions.RaidBuffRequirements) -> Unit) {
+  var expanded by remember { mutableStateOf(false) }
+  val selectedLabel = BUFF_PRESETS.firstOrNull { it.requirements.serialize() == currentRequirements }?.label
+    ?: stringResource(Res.string.category_none)
+
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = !expanded }
+  ) {
+    OutlinedTextField(
+      value = selectedLabel,
+      onValueChange = {},
+      readOnly = true,
+      modifier = Modifier
+        .fillMaxWidth()
+        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+      colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = RFColors.AccentRed,
+        unfocusedBorderColor = RFColors.CardBorder,
+        focusedTextColor = RFColors.TextPrimary,
+        unfocusedTextColor = RFColors.TextPrimary,
+        cursorColor = RFColors.AccentRed,
+        focusedLabelColor = RFColors.TextSecondary,
+        unfocusedLabelColor = RFColors.TextTertiary
+      ),
+      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+    )
+    ExposedDropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier.fillMaxWidth(),
+      containerColor = RFColors.CardBackground,
+      tonalElevation = 4.dp
+    ) {
+      BUFF_PRESETS.forEach { preset ->
+        DropdownMenuItem(
+          text = { Text(preset.label, color = RFColors.TextPrimary) },
+          onClick = {
+            onSelected(preset.requirements)
+            expanded = false
+          },
+          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+        )
+      }
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GracePeriodDropdown(current: String, onSelected: (String) -> Unit) {
+  var expanded by remember { mutableStateOf(false) }
+  val currentPeriod = RaidBuffGracePeriod.entries.firstOrNull { it.name == current } ?: RaidBuffGracePeriod.FIFTEEN_MINUTES
+
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = !expanded }
+  ) {
+    OutlinedTextField(
+      value = currentPeriod.label(),
+      onValueChange = {},
+      readOnly = true,
+      modifier = Modifier
+        .fillMaxWidth()
+        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+      colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = RFColors.AccentRed,
+        unfocusedBorderColor = RFColors.CardBorder,
+        focusedTextColor = RFColors.TextPrimary,
+        unfocusedTextColor = RFColors.TextPrimary,
+        cursorColor = RFColors.AccentRed,
+        focusedLabelColor = RFColors.TextSecondary,
+        unfocusedLabelColor = RFColors.TextTertiary
+      ),
+      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+    )
+    ExposedDropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier.fillMaxWidth(),
+      containerColor = RFColors.CardBackground,
+      tonalElevation = 4.dp
+    ) {
+      RaidBuffGracePeriod.entries.forEach { option ->
+        DropdownMenuItem(
+          text = { Text(option.label(), color = RFColors.TextPrimary) },
+          onClick = {
+            onSelected(option.name)
+            expanded = false
+          },
+          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+        )
+      }
+    }
   }
 }
 

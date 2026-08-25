@@ -29,6 +29,8 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.ui.component.PerformanceDisabledBanner
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.factionHighlightColor
+import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.helpers.togglePlayerCard
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.helpers.toHumanDuration
@@ -932,7 +934,7 @@ private fun KeyDebuffsTab(
       title = stringResource(Res.string.summary_top_silences),
       cards = topSilences,
       valueExtractor = { it.sessionSilenceTotal.toString() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -942,7 +944,7 @@ private fun KeyDebuffsTab(
       title = stringResource(Res.string.summary_top_charms),
       cards = topCharms,
       valueExtractor = { it.sessionCharmTotal.toString() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -952,7 +954,7 @@ private fun KeyDebuffsTab(
       title = stringResource(Res.string.summary_top_distresses),
       cards = topDistresses,
       valueExtractor = { it.sessionDistressTotal.toString() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1267,7 +1269,7 @@ private fun SpellDamageByFaction(
       title = stringResource(Res.string.summary_top_haranya_spells_damage),
       spells = topDamageSpellsHaranya,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) {}
 
@@ -1276,7 +1278,7 @@ private fun SpellDamageByFaction(
       title = stringResource(Res.string.summary_top_nuia_spells_damage),
       spells = topDamageSpellsNuia,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) {}
 
@@ -1285,7 +1287,7 @@ private fun SpellDamageByFaction(
       title = stringResource(Res.string.summary_top_pirate_spells_damage),
       spells = topDamageSpellsPirate,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) {}
   }
@@ -1306,7 +1308,7 @@ private fun BuffsDebuffsTab(
       title = stringResource(Res.string.summary_top_debuffs),
       cards = topDebuffs,
       valueExtractor = { it.sessionDebuffTotal.toString() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1317,7 +1319,7 @@ private fun BuffsDebuffsTab(
       title = stringResource(Res.string.summary_top_songs),
       cards = topSongs,
       valueExtractor = { it.sessionSongsTotal.toString() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1328,7 +1330,7 @@ private fun BuffsDebuffsTab(
       title = stringResource(Res.string.summary_top_buffs),
       cards = topBuffers,
       valueExtractor = { it.sessionBuffTotal.toString() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1654,7 +1656,7 @@ private fun UtilityItemsByFaction(
       title = stringResource(Res.string.summary_top_haranya_item_uses),
       items = topItemUsesHaranya,
       valueExtractor = { it.count.toString() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { item ->
       // optional click: select or open player/item details if desired
@@ -1665,7 +1667,7 @@ private fun UtilityItemsByFaction(
       title = stringResource(Res.string.summary_top_nuia_item_uses),
       items = topItemUsesNuia,
       valueExtractor = { it.count.toString() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { item -> }
 
@@ -1674,7 +1676,7 @@ private fun UtilityItemsByFaction(
       title = stringResource(Res.string.summary_top_pirate_item_uses),
       items = topItemUsesPirate,
       valueExtractor = { it.count.toString() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { item -> }
   }
@@ -1815,7 +1817,7 @@ private fun PlayerBuildsTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_haranya_builds),
       builds = buildCountsHaranya,
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { /* optional click */ }
 
@@ -1823,7 +1825,7 @@ private fun PlayerBuildsTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_nuia_builds),
       builds = buildCountsNuia,
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { }
 
@@ -1831,7 +1833,7 @@ private fun PlayerBuildsTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_pirate_builds),
       builds = buildCountsPirate,
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { }
   }
@@ -1915,7 +1917,7 @@ private fun PerformanceTab(
       title = stringResource(Res.string.summary_top_haranya_performance),
       cards = topPerformanceHaranya,
       valueExtractor = { it.pvpPerformancePoints().toString() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1926,7 +1928,7 @@ private fun PerformanceTab(
       title = stringResource(Res.string.summary_top_nuia_performance),
       cards = topPerformanceNuia,
       valueExtractor = { it.pvpPerformancePoints().toString() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1937,7 +1939,7 @@ private fun PerformanceTab(
       title = stringResource(Res.string.summary_top_pirate_performance),
       cards = topPerformancePirate,
       valueExtractor = { it.pvpPerformancePoints().toString() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)

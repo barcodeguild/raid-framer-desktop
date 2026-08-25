@@ -9,6 +9,7 @@ import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.getDocumentsDirectory
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
@@ -173,9 +174,9 @@ object ImageExportInteractor {
   }
 
   private val TEXT_PRIMARY        = toAwtColor(RFColors.TextPrimary)
-  private val HARANYA_COLOR       = toAwtColor(RFColors.factionHaranya)
-  private val NUIA_COLOR          = toAwtColor(RFColors.factionNuia)
-  private val PIRATE_COLOR        = toAwtColor(RFColors.factionPirate)
+  private val HARANYA_COLOR       = toAwtColor(factionHighlightColor(Faction.HARANYA))
+  private val NUIA_COLOR          = toAwtColor(factionHighlightColor(Faction.NUIA))
+  private val PIRATE_COLOR        = toAwtColor(factionHighlightColor(Faction.PIRATE))
   private val KILLS_HARANYA_COLOR = toAwtColor(RFColors.killsHaranyaGreen)
   private val KILLS_NUIA_COLOR    = toAwtColor(RFColors.killsNuiaOrange)
   private val KILLS_PIRATE_COLOR  = toAwtColor(RFColors.killsPirateRed)

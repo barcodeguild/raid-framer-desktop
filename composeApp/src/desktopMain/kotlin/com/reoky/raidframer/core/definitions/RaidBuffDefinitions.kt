@@ -146,3 +146,38 @@ fun RaidBuffRequirements.missingKeys(member: RaidFramePayload): List<RaidBuffKey
 fun RaidBuffDefinition.labelKey(): String = labelKey
 
 fun raidBuffDefinition(key: RaidBuffKey): RaidBuffDefinition = definitionsByKey.getValue(key)
+
+/**
+ * Serializes a [RaidBuffRequirements] to a compact string so it can be persisted in the
+ * config entity and kept in sync between the RaidOverlay Buffs tab and the Settings overlay.
+ *
+ * Format: `KEY,KEY,...` for selected keys, with special tokens appended for the flag toggles.
+ * e.g. `STATUE_BUFF,GOBLET|orange|enhanced`
+ */
+fun RaidBuffRequirements.serialize(): String {
+  val parts = mutableListOf<String>()
+  if (selected.isNotEmpty()) parts += selected.sorted().joinToString(",")
+  if (requireOrangeGoblet) parts += "orange"
+  if (allowMeatballs) parts += "meatballs"
+  if (requireEnhancedLonging) parts += "enhanced"
+  return parts.joinToString("|")
+}
+
+/**
+ * Parses a string produced by [RaidBuffRequirements.serialize]. Unknown / malformed input
+ * falls back to an empty [RaidBuffRequirements].
+ */
+fun parseRaidBuffRequirements(serialized: String): RaidBuffRequirements {
+  if (serialized.isBlank()) return RaidBuffRequirements()
+  val segments = serialized.split('|')
+  val selected = segments.firstOrNull()?.split(',')
+    ?.mapNotNull { name -> RaidBuffKey.entries.firstOrNull { it.name == name } }
+    ?.toSet() ?: emptySet()
+  val flags = segments.drop(1).toSet()
+  return RaidBuffRequirements(
+    selected = selected,
+    requireOrangeGoblet = "orange" in flags,
+    allowMeatballs = "meatballs" in flags,
+    requireEnhancedLonging = "enhanced" in flags
+  )
+}

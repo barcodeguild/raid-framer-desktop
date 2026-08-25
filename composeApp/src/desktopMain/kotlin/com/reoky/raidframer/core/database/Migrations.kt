@@ -452,3 +452,13 @@ val MIGRATION_41_42 = object : Migration(41, 42) {
     connection.prepare("ALTER TABLE config ADD COLUMN combatOverlayAsTooltipEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
   }
 }
+
+// Added Raid Caller / Leader overlay config to ConfigEntity (08/24/26)
+val MIGRATION_42_43 = object : Migration(42, 43) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerOverlayEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerLootBuffThreshold INTEGER NOT NULL DEFAULT 150").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerBuffRequirements TEXT NOT NULL DEFAULT 'FEAST_RIBS,GOBLET,STATUE_BUFF,WAR_DRUM'").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerBuffGracePeriod TEXT NOT NULL DEFAULT 'FIFTEEN_MINUTES'").use { it.step() }
+  }
+}

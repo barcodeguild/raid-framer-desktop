@@ -2473,6 +2473,13 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+  // Reactive snapshot of real (non-NPC) players, used by the Raid Caller overlay to render
+  // faction-based dragon/riso usage, meta class breakdown, and coherence averages.
+  val realPlayers: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { list -> list.filter { it.isRealPlayer } }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+
   fun getRankingFlow(category: CombatRankingCategory): StateFlow<List<PlayerCard>> {
     return when (category) {
       CombatRankingCategory.CHARMS -> topCharms

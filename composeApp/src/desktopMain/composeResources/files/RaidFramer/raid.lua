@@ -24,6 +24,7 @@ RF.Raid.LastBuffScan = 0
 -- add new buff IDs here as the Kotlin side needs to track them
 RF.Raid.INTERESTING_BUFF_IDS = {
   [25875] = true,  -- Life Mend (healAmount tracking)
+  [2385] = true,   -- Rebirth Trauma (timeLeft tracking for the raid caller overlay)
   -- Goblet: orange, blue, yellow, purple, pink, gray variants
   [24469] = true, [24470] = true, [24471] = true, [24472] = true, [24473] = true, [24474] = true,
   [21796] = true, [21801] = true, [21806] = true, [21811] = true, [21819] = true, [21846] = true,

@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.FactionStatus
+import com.reoky.raidframer.core.model.RaidBuffGracePeriod
 import com.reoky.raidframer.ui.OverlayWindowType
 import org.jetbrains.compose.resources.StringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -14,7 +15,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 42
+const val SCHEMA_VERSION = 43
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -141,7 +142,17 @@ data class ConfigEntity(
   val performanceBattleGraphSpellDepth: Int = 30,
 
   // Combat overlay as a multi-monitor tool-tip instead of a game overlay
-  val combatOverlayAsTooltipEnabled: Boolean = false
+  val combatOverlayAsTooltipEnabled: Boolean = false,
+
+  // Raid Caller / Leader overlay (08/24/26)
+  val raidCallerOverlayEnabled: Boolean = false,
+  // Default Minimum Loot Buff Requirement (100-600). Unbuffed players start at 100% in-game.
+  val raidCallerLootBuffThreshold: Int = 150,
+  // Serialized RaidBuffRequirements (selected buff keys + flags). Synced with the RaidOverlay Buffs tab.
+  // Defaults to "Light PvP": Goblet, Feast, Statue, and War Drum.
+  val raidCallerBuffRequirements: String = "FEAST_RIBS,GOBLET,STATUE_BUFF,WAR_DRUM",
+  // RaidBuffGracePeriod name. Synced with the RaidOverlay Buffs tab.
+  val raidCallerBuffGracePeriod: String = RaidBuffGracePeriod.FIFTEEN_MINUTES.name,
 )
 
 /*

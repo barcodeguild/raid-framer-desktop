@@ -61,6 +61,8 @@ import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.matchesResolved
 import com.reoky.raidframer.core.definitions.matchedDefinitions
 import com.reoky.raidframer.core.definitions.missingKeys
+import com.reoky.raidframer.core.definitions.parseRaidBuffRequirements
+import com.reoky.raidframer.core.definitions.serialize
 import com.reoky.raidframer.core.model.hasPvPParticipation
 import com.reoky.raidframer.core.model.RaidBuffGracePeriod
 import com.reoky.raidframer.core.model.RaidBuffObservation
@@ -75,6 +77,7 @@ import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.timeAgo
 import com.reoky.raidframer.core.helpers.resolveLocalizedString
@@ -328,9 +331,9 @@ private fun CompositionTab(
     return FactionComposition(label, filtered.size, counts, chartColor)
   }
   val charts = listOf(
-    chart(haranyaLabel, nearbyHaranya, RFColors.factionHaranya),
-    chart(nuiaLabel, nearbyNuia, RFColors.factionNuia),
-    chart(pirateLabel, nearbyPirate, RFColors.factionPirate)
+    chart(haranyaLabel, nearbyHaranya, factionHighlightColor(Faction.HARANYA)),
+    chart(nuiaLabel, nearbyNuia, factionHighlightColor(Faction.NUIA)),
+    chart(pirateLabel, nearbyPirate, factionHighlightColor(Faction.PIRATE))
   )
   val factionPlayers = listOf(
     charts[0].factionLabel to sourcePlayers(nearbyHaranya, Faction.HARANYA).filter(filter),
@@ -806,11 +809,11 @@ private fun AttendanceTab(
   }
 }
 
-private data class BuffPreset(val label: String, val requirements: RaidBuffRequirements)
+data class BuffPreset(val label: String, val requirements: RaidBuffRequirements)
 
-private val BUFF_PRESETS = listOf(
+val BUFF_PRESETS = listOf(
   BuffPreset("No Buffs", RaidBuffRequirements()),
-  BuffPreset("Light PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS))),
+  BuffPreset("Light PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.FEAST_RIBS))),
   BuffPreset("Serious PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING))),
   BuffPreset("Full Buffed", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER), requireEnhancedLonging = true)),
   BuffPreset("Full-Buff BD PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER, RaidBuffKey.FACTION_WAR_TIME, RaidBuffKey.MONSTER_HUNTERS_DREAM), requireEnhancedLonging = true)),
@@ -818,20 +821,33 @@ private val BUFF_PRESETS = listOf(
   BuffPreset("Uncontested Boss Kill", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.FACTION_WAR_TIME), lootThreshold = 100))
 )
 
-private object BuffsTabState {
-  var requirements = mutableStateOf(RaidBuffRequirements())
-  var selectedPreset = mutableStateOf(BUFF_PRESETS.first())
-  var gracePeriod = mutableStateOf(RaidBuffGracePeriod.FIFTEEN_MINUTES)
-}
-
 @Composable
 private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>) {
-  var requirements by BuffsTabState.requirements
+  val config by RFConfig.state.collectAsState()
+  val lootEnabled by com.reoky.raidframer.RaidCallerSync.lootBuffEnabled.collectAsState()
+  val lootThreshold = config.raidCallerLootBuffThreshold.coerceIn(100, 600)
+  val gracePeriod = RaidBuffGracePeriod.entries.firstOrNull { it.name == config.raidCallerBuffGracePeriod }
+    ?: RaidBuffGracePeriod.FIFTEEN_MINUTES
+  // Effective requirements used for matching: buff selection comes from config, and the loot
+  // threshold is only applied when the (in-memory) "check for loot buffs?" box is checked.
+  val baseRequirements = remember(config.raidCallerBuffRequirements) {
+    parseRaidBuffRequirements(config.raidCallerBuffRequirements)
+  }
+  val requirements = remember(baseRequirements, lootEnabled, lootThreshold) {
+    baseRequirements.copy(lootThreshold = if (lootEnabled) lootThreshold else 0)
+  }
+  fun persistRequirements(newReq: RaidBuffRequirements) {
+    // Persist the buff selection (ignoring loot threshold, which is derived from the in-memory box).
+    RFConfig.update { it.copy(raidCallerBuffRequirements = newReq.copy(lootThreshold = 0).serialize()) }
+    com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(newReq.lootThreshold > 0)
+    RFConfig.update { it.copy(raidCallerLootBuffThreshold = newReq.lootThreshold.coerceIn(100, 600)) }
+  }
   var selectedPlayer by remember { mutableStateOf<RaidFramePayload?>(null) }
   var selectedPlayerPopupOffset by remember { mutableStateOf(IntOffset.Zero) }
-  var selectedPreset by BuffsTabState.selectedPreset
+  val selectedPreset by remember(baseRequirements) {
+    mutableStateOf(BUFF_PRESETS.firstOrNull { it.requirements.serialize() == baseRequirements.serialize() } ?: BUFF_PRESETS.first())
+  }
   var presetExpanded by remember { mutableStateOf(false) }
-  var gracePeriod by BuffsTabState.gracePeriod
   val allMembers = (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
   val observations = allMembers.associateWith { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod) }
   val buffed = allMembers.filter { member ->
@@ -890,12 +906,12 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
 BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
             LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
           }
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp))
+          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp))
         }
       } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
           BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.fillMaxWidth())
+          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.fillMaxWidth())
           BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
           LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
         }
@@ -999,7 +1015,7 @@ BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
   }
 }
 
-private fun RaidBuffGracePeriod.label(): String = when (this) {
+fun RaidBuffGracePeriod.label(): String = when (this) {
   RaidBuffGracePeriod.IMMEDIATE -> "Immediate"
   RaidBuffGracePeriod.FIFTEEN_MINUTES -> "15 Minutes"
   RaidBuffGracePeriod.THIRTY_MINUTES -> "30 Minutes"
@@ -1024,7 +1040,7 @@ private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<Li
 }
 
 @Composable
-private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>, modifier: Modifier) {
+private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, lootThreshold: Int, onLootThreshold: (Int) -> Unit, lootEnabled: Boolean, onLootEnabled: (Boolean) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>, modifier: Modifier) {
   Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
     var graceExpanded by remember { mutableStateOf(false) }
     Row(
@@ -1059,29 +1075,24 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
       }
     }
     Text(stringResource(Res.string.raid_buff_loot_section), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
-    // "Check for loot buffs?" + a 0-500% threshold slider. When enabled, a player is
-    // considered loot-buffed when the sum of all their loot-buff amounts is >= this value.
-    var lootSliderValue by remember { mutableStateOf(requirements.lootThreshold) }
-    val lootEnabled = requirements.lootThreshold > 0
+    // "Check for loot buffs?" + a 100-600% threshold slider (100% is the in-game baseline).
+    // The enabled state is held in-memory only (not persisted), while the threshold value is
+    // persisted and kept in sync with the Raid Caller overlay settings.
+    var lootSliderValue by remember(requirements) { mutableStateOf(lootThreshold) }
+    LaunchedEffect(lootThreshold) { lootSliderValue = lootThreshold }
     ControlledCheckbox(stringResource(Res.string.raid_buff_check_loot), lootEnabled) { checked ->
-      onRequirements(requirements.copy(lootThreshold = if (checked) lootSliderValue.coerceAtLeast(1) else 0))
+      onLootEnabled(checked)
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
       Text(stringResource(Res.string.raid_buff_loot_threshold_label), color = Color.White, fontSize = 11.sp)
       DragLockedSlider(
         value = lootSliderValue.toFloat(),
         onValueChange = {
-          lootSliderValue = it.toInt()
-          // Dragging above 0% checks the "Check for loot buffs?" box; dragging to 0% unchecks it.
-          val next = it.toInt()
-          if (next > 0) {
-            onRequirements(requirements.copy(lootThreshold = next))
-          } else {
-            onRequirements(requirements.copy(lootThreshold = 0))
-          }
+          lootSliderValue = it.toInt().coerceIn(100, 600)
+          onLootThreshold(lootSliderValue)
         },
         modifier = Modifier.weight(1f).height(28.dp),
-        valueRange = 0f..500f
+        valueRange = 100f..600f
       )
       Text(
         text = "$lootSliderValue%",
@@ -1091,6 +1102,13 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
         modifier = Modifier.width(42.dp)
       )
     }
+    Text(
+      text = stringResource(Res.string.raid_buff_loot_baseline_note),
+      color = RFColors.TextTertiary,
+      fontSize = 10.sp,
+      lineHeight = 12.sp,
+      modifier = Modifier.padding(top = 2.dp)
+    )
   }
 }
 
