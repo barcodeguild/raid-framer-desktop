@@ -1,6 +1,7 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.ui.tooling.preview.Preview
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
@@ -26,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -60,6 +63,8 @@ import com.reoky.raidframer.core.helpers.UpdateHelper
 import com.reoky.raidframer.core.helpers.UpdateStatus
 import com.reoky.raidframer.core.helpers.UpdateDownloaderHelper
 import com.reoky.raidframer.core.helpers.DownloadStatus
+import com.reoky.raidframer.core.helpers.rememberSectionPulse
+import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -211,6 +216,26 @@ fun SettingsOverlay(wm: WindowManager? = null) {
     }
   }
 
+  // Flash + scroll to the General Settings section when requested (e.g. from the Raid Caller title).
+  var generalPulseActive by remember { mutableStateOf(false) }
+  var generalSettingsOffset by remember { mutableStateOf(0) }
+  var scrollToGeneral by remember { mutableStateOf(false) }
+  LaunchedEffect(OverlayNav.highlightSettingsGeneral.value) {
+    if (OverlayNav.highlightSettingsGeneral.value) {
+      OverlayNav.highlightSettingsGeneral.value = false
+      generalPulseActive = true
+      scrollToGeneral = true
+    }
+  }
+  LaunchedEffect(scrollToGeneral, generalSettingsOffset) {
+    if (scrollToGeneral && generalSettingsOffset > 0) {
+      kotlinx.coroutines.delay(500)
+      scrollState.animateScrollTo(generalSettingsOffset)
+      scrollToGeneral = false
+    }
+  }
+  val generalPulse = rememberSectionPulse(generalPulseActive)
+
   Box(
     modifier = Modifier
       .fillMaxSize()
@@ -302,7 +327,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         CrashRecoveryBanner()
       }
 
-      OverlayFeaturesPanel(wm)
+      OverlayFeaturesPanel(wm, generalPulse) { offset -> generalSettingsOffset = offset }
 
       CombatOverlaySettingsPanel()
 
@@ -499,14 +524,16 @@ private fun CharacterDisplayPanel() {
 }
 
 @Composable
-private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
+private fun OverlayFeaturesPanel(wm: WindowManager? = null, generalBorderColor: Color = RFColors.CardBorder, onGeneralOffset: (Int) -> Unit = {}) {
   val config by RFConfig.state.collectAsState()
   val dragLock = LocalDragLock.current
 
   // General Settings
   SettingsSection(
     title = stringResource(Res.string.settings_general_title),
-    description = stringResource(Res.string.settings_general_description)
+    description = stringResource(Res.string.settings_general_description),
+    borderColor = generalBorderColor,
+    modifier = Modifier.onGloballyPositioned { coordinates -> onGeneralOffset(coordinates.positionInParent().y.roundToInt()) }
   ) {
     SettingsCheckbox(
       checked = config.miniGraphEnabled,

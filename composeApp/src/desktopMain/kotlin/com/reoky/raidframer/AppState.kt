@@ -1,6 +1,7 @@
 package com.reoky.raidframer
 
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
+import com.reoky.raidframer.ui.overlay.RaidTab
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -59,4 +60,20 @@ object RaidCallerSync {
   fun setLootBuffEnabled(enabled: Boolean) {
     _lootBuffEnabled.value = enabled
   }
+}
+
+/**
+ * One-shot, cross-overlay navigation + highlight requests, fired from the Raid Caller overlay
+ * (or any other overlay) and consumed by the target overlay in a `LaunchedEffect`, which then
+ * clears the value so each request only fires once.
+ */
+object OverlayNav {
+  // Raid overlay: which tab to select on the next open.
+  val pendingRaidTab = MutableStateFlow<RaidTab?>(null)
+  // Raid overlay -> Buffs tab: flash the buff-selection pane to draw attention.
+  val highlightRaidBuffSelect = MutableStateFlow(false)
+  // Summary overlay: which dropdown index to select on the next open.
+  val pendingSummaryTabIndex = MutableStateFlow<Int?>(null)
+  // Settings overlay: scroll to + flash the General Settings section.
+  val highlightSettingsGeneral = MutableStateFlow(false)
 }

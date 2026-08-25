@@ -7,7 +7,9 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,6 +23,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -49,6 +52,10 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.openRaidTab
+import com.reoky.raidframer.core.helpers.openSettingsGeneral
+import com.reoky.raidframer.core.helpers.openSummaryTab
+import com.reoky.raidframer.core.helpers.togglePokemon
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
@@ -102,6 +109,8 @@ import raid_framer_desktop.composeapp.generated.resources.raid_caller_buff_grace
 
 private const val REBIRTH_BUFF_ID = 2385
 private const val FLASH_DURATION_MS = 5_000L
+// SummaryOverlay dropdown index for the "Coherence" tab (the last entry in its tab list).
+private const val SUMMARY_COHERENCE_TAB_INDEX = 23
 
 // Slightly-brighter section/title text so headers stand out against the faint-grey labels.
 private val SectionTitleColor = Color(0xFFD5D5D5)
@@ -205,8 +214,24 @@ private fun FlashCount(
 }
 
 @Composable
-private fun SectionTitle(text: String) {
-  Text(text, color = SectionTitleColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+private fun SectionTitle(text: String, onClick: (() -> Unit)? = null) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
+  val modifier = if (onClick != null) {
+    Modifier
+      .hoverable(interactionSource)
+      .clip(RoundedCornerShape(4.dp))
+      .clickable(interactionSource = interactionSource, indication = null) { onClick() }
+  } else {
+    Modifier
+  }
+  Text(
+    text,
+    color = if (onClick != null && isHovered) Color.White else SectionTitleColor,
+    fontSize = 9.sp,
+    fontWeight = FontWeight.Bold,
+    modifier = modifier
+  )
 }
 
 @Composable
@@ -243,10 +268,30 @@ private fun LabeledValue(
   label: String,
   value: String,
   valueColor: Color,
-  labelColor: Color = RFColors.TextSecondary
+  labelColor: Color = RFColors.TextSecondary,
+  onClick: (() -> Unit)? = null
 ) {
-  Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-    Text(label, color = labelColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
+  val rowModifier = if (onClick != null) {
+    Modifier
+      .hoverable(interactionSource)
+      .clip(RoundedCornerShape(4.dp))
+      .clickable(interactionSource = interactionSource, indication = null) { onClick() }
+  } else {
+    Modifier
+  }
+  Row(
+    rowModifier,
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(3.dp)
+  ) {
+    Text(
+      label,
+      color = if (onClick != null && isHovered) Color.White else labelColor,
+      fontSize = 9.sp,
+      fontWeight = FontWeight.Bold
+    )
     Text(value, color = valueColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
   }
 }
@@ -495,14 +540,20 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
         verticalArrangement = Arrangement.spacedBy(2.dp),
         itemVerticalAlignment = Alignment.CenterVertically
       ) {
+        val titleInteraction = remember { MutableInteractionSource() }
+        val titleHovered by titleInteraction.collectIsHoveredAsState()
         Text(
           stringResource(Res.string.raid_caller_title),
-          color = CallerTitleColor,
+          color = if (titleHovered) Color.White else CallerTitleColor,
           fontSize = 11.sp,
-          fontWeight = FontWeight.Bold
+          fontWeight = FontWeight.Bold,
+          modifier = Modifier
+            .hoverable(titleInteraction)
+            .clip(RoundedCornerShape(4.dp))
+            .clickable(interactionSource = titleInteraction, indication = null) { openSettingsGeneral(wm) }
         )
-        LabeledValue("${stringResource(Res.string.raid_caller_main_raid)}:", mainCount.toString(), RFColors.callerMainRaid, SectionTitleColor)
-        LabeledValue("${stringResource(Res.string.raid_caller_co_raid)}:", coCount.toString(), RFColors.callerCoRaid, SectionTitleColor)
+        LabeledValue("${stringResource(Res.string.raid_caller_main_raid)}:", mainCount.toString(), RFColors.callerMainRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.ATTENDANCE) })
+        LabeledValue("${stringResource(Res.string.raid_caller_co_raid)}:", coCount.toString(), RFColors.callerCoRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.ATTENDANCE) })
         if (isRecording) {
           LabeledValue("${stringResource(Res.string.raid_caller_recording)}:", formatMinutesSeconds(recordingMs), RFColors.AccentRed, SectionTitleColor)
         }
@@ -518,9 +569,9 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
       horizontalArrangement = Arrangement.spacedBy(10.dp),
       verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-      LabeledValue("${stringResource(Res.string.raid_caller_avg_gs)}:", "$avgGs", RFColors.callerAvgGs, SectionTitleColor)
-      LabeledValue("${stringResource(Res.string.raid_caller_lowest_gs)}:", "$lowestGs", RFColors.callerLowestGs, SectionTitleColor)
-      LabeledValue("${stringResource(Res.string.raid_caller_highest_gs)}:", "$highestGs", RFColors.callerHighestGs, SectionTitleColor)
+      LabeledValue("${stringResource(Res.string.raid_caller_avg_gs)}:", "$avgGs", RFColors.callerAvgGs, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.NEARBY_GEAR) })
+      LabeledValue("${stringResource(Res.string.raid_caller_lowest_gs)}:", "$lowestGs", RFColors.callerLowestGs, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.NEARBY_GEAR) })
+      LabeledValue("${stringResource(Res.string.raid_caller_highest_gs)}:", "$highestGs", RFColors.callerHighestGs, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.NEARBY_GEAR) })
       SectionTitle("${stringResource(Res.string.raid_caller_so_tf)}:")
       Text("$soTfCount/${allMembers.size} ($soTfPct%)", color = RFColors.TextTertiary, fontSize = 9.sp)
     }
@@ -566,19 +617,19 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
         verticalArrangement = Arrangement.spacedBy(2.dp),
         horizontalAlignment = Alignment.End
       ) {
-        LabeledValue("${stringResource(Res.string.raid_caller_loot_threshold)}:", "$lootThreshold%", RFColors.dpsOrange, SectionTitleColor)
-        LabeledValue("${stringResource(Res.string.raid_caller_buff_mode)}:", buffModeLabel, RFColors.callerMetaMage, SectionTitleColor)
-        LabeledValue("${stringResource(Res.string.raid_caller_buff_grace)}:", gracePeriod.label(), RFColors.itemSkillYellow, SectionTitleColor)
+        LabeledValue("${stringResource(Res.string.raid_caller_loot_threshold)}:", "$lootThreshold%", RFColors.dpsOrange, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.BUFFS, highlightBuffSelect = true) })
+        LabeledValue("${stringResource(Res.string.raid_caller_buff_mode)}:", buffModeLabel, RFColors.callerMetaMage, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.BUFFS, highlightBuffSelect = true) })
+        LabeledValue("${stringResource(Res.string.raid_caller_buff_grace)}:", gracePeriod.label(), RFColors.itemSkillYellow, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.BUFFS, highlightBuffSelect = true) })
       }
     }
 
     // Dragon + Riso rows (flow so the faction groups wrap instead of clipping).
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-      SectionTitle("${stringResource(Res.string.raid_caller_dragon)}:")
+      SectionTitle("${stringResource(Res.string.raid_caller_dragon)}:", onClick = { togglePokemon(wm) })
       FactionDamageRow(dragonCounts, dragonDamages, dragonFlash, nowTick, Modifier.weight(1f))
     }
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-      SectionTitle("${stringResource(Res.string.raid_caller_riso)}:")
+      SectionTitle("${stringResource(Res.string.raid_caller_riso)}:", onClick = { togglePokemon(wm) })
       FactionDamageRow(risoCounts, risoDamages, risoFlash, nowTick, Modifier.weight(1f))
     }
 
@@ -588,7 +639,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
       horizontalArrangement = Arrangement.spacedBy(10.dp),
       verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-      SectionTitle("${stringResource(Res.string.raid_caller_coherence)}:")
+      SectionTitle("${stringResource(Res.string.raid_caller_coherence)}:", onClick = { openSummaryTab(wm, SUMMARY_COHERENCE_TAB_INDEX) })
       LabeledValue("${stringResource(Res.string.raid_caller_render)}:", "${coherenceRender.toInt()}%", RFColors.callerCoherenceRender)
       LabeledValue("${stringResource(Res.string.raid_caller_raid)}:", "${coherenceRaid.toInt()}%", RFColors.callerCoherenceRaid)
       LabeledValue("${stringResource(Res.string.raid_caller_clump)}:", "${coherenceClump.toInt()}%", RFColors.callerCoherenceClump)
@@ -600,7 +651,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
       horizontalArrangement = Arrangement.spacedBy(10.dp),
       verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-      SectionTitle("${stringResource(Res.string.raid_caller_meta)}:")
+      SectionTitle("${stringResource(Res.string.raid_caller_meta)}:", onClick = { openRaidTab(wm, RaidTab.COMPOSITION) })
       LabeledValue("${stringResource(Res.string.raid_caller_cc)}:", metaCc.toString(), RFColors.ccCyan)
       LabeledValue("${stringResource(Res.string.raid_caller_healer)}:", metaHealer.toString(), RFColors.healsGreen)
       LabeledValue("${stringResource(Res.string.raid_caller_melee)}:", metaMelee.toString(), RFColors.callerMetaMelee)

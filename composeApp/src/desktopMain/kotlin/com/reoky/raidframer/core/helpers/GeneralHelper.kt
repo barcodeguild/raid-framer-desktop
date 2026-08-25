@@ -7,11 +7,13 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
+import com.reoky.raidframer.ui.overlay.RaidTab
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.time_ago_just_now
@@ -287,5 +289,42 @@ fun togglePlayerCard(wm: WindowManager?, playerName: String, metricType: GraphMe
     AppState.selectPlayer(playerName)
     if (metricType != null) AppState.selectMetricType(metricType)
     wm?.openWindow(OverlayType.PLAYER_CARD)
+  }
+}
+
+/**
+ * Opens the Raid overlay with the given [tab] selected. When [highlightBuffSelect] is true, the
+ * Buffs tab's buff-selection pane flashes to draw the user's attention to it.
+ */
+fun openRaidTab(wm: WindowManager?, tab: RaidTab, highlightBuffSelect: Boolean = false) {
+  OverlayNav.pendingRaidTab.value = tab
+  OverlayNav.highlightRaidBuffSelect.value = highlightBuffSelect
+  wm?.openWindow(OverlayType.RAID)
+}
+
+/**
+ * Opens the Summary overlay with the dropdown index (category) [index] selected.
+ */
+fun openSummaryTab(wm: WindowManager?, index: Int) {
+  OverlayNav.pendingSummaryTabIndex.value = index
+  wm?.openWindow(OverlayType.SUMMARY)
+}
+
+/**
+ * Opens the Settings overlay, scrolling to and flashing the General Settings section.
+ */
+fun openSettingsGeneral(wm: WindowManager?) {
+  OverlayNav.highlightSettingsGeneral.value = true
+  wm?.openWindow(OverlayType.SETTINGS)
+}
+
+/**
+ * Toggles the pet (Pokemon) overlay open/closed.
+ */
+fun togglePokemon(wm: WindowManager?) {
+  if (wm?.isVisible(OverlayType.POKEMON)?.value == true) {
+    wm.closeWindow(OverlayType.POKEMON)
+  } else {
+    wm?.openWindow(OverlayType.POKEMON)
   }
 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.ui.component.PerformanceDisabledBanner
 import com.reoky.raidframer.core.helpers.FontsHelper
@@ -277,6 +278,13 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val humanReadableDateString = DateFormat.getDateInstance(DateFormat.SHORT).format(System.currentTimeMillis())
 
   var selectedTabIndex by remember { mutableStateOf(0) }
+  // Consume any cross-overlay summary tab request (e.g. Coherence from the Raid Caller overlay).
+  LaunchedEffect(OverlayNav.pendingSummaryTabIndex.value) {
+    OverlayNav.pendingSummaryTabIndex.value?.let { requested ->
+      selectedTabIndex = requested
+      OverlayNav.pendingSummaryTabIndex.value = null
+    }
+  }
   val tabs = listOf(
     stringResource(Res.string.summary_tab_faction_charts),
     stringResource(Res.string.summary_tab_debuffs),

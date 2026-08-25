@@ -79,8 +79,10 @@ import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
+import com.reoky.raidframer.core.helpers.rememberSectionPulse
 import com.reoky.raidframer.core.helpers.timeAgo
 import com.reoky.raidframer.core.helpers.resolveLocalizedString
+import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.core.serialization.BuffPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
@@ -134,7 +136,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import kotlin.time.Duration.Companion.milliseconds
 
-private enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
+enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
 @Composable
 fun RaidOverlay(wm: WindowManager? = null) {
   val playerFaction = Faction.fromString(RFConfig.state.collectAsState().value.playerFaction)
@@ -145,6 +147,22 @@ fun RaidOverlay(wm: WindowManager? = null) {
   val nearbyPirate = PlayerCacheInteractor.nearbyPirateRaidParties.collectAsState()
   val raidDepartures = PlayerCacheInteractor.raidDeparturesFlow.collectAsState()
   var selectedTab by remember { mutableStateOf(RaidTab.ATTENDANCE) }
+  // Consume any cross-overlay tab request (e.g. from the Raid Caller overlay) and select it.
+  LaunchedEffect(OverlayNav.pendingRaidTab.value) {
+    OverlayNav.pendingRaidTab.value?.let { requested ->
+      selectedTab = requested
+      OverlayNav.pendingRaidTab.value = null
+    }
+  }
+  // Flash the buff-selection pane when a raid-caller setting points the user here.
+  var buffSelectPulseActive by remember { mutableStateOf(false) }
+  LaunchedEffect(OverlayNav.highlightRaidBuffSelect.value) {
+    if (OverlayNav.highlightRaidBuffSelect.value) {
+      buffSelectPulseActive = true
+      OverlayNav.highlightRaidBuffSelect.value = false
+    }
+  }
+  val buffSelectBorder = rememberSectionPulse(buffSelectPulseActive)
   var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
   var raidWasDetected by remember { mutableStateOf(false) }
   if (!raidWasDetected && (mainRaid.value.isNotEmpty() || coRaid.value.isNotEmpty())) {
@@ -250,7 +268,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
               requirePvPParticipation = requirePvPParticipation,
               onRequirePvPParticipationChange = { requirePvPParticipation = it }
             )
-            RaidTab.BUFFS -> BuffsTab(mainRaid.value, coRaid.value)
+            RaidTab.BUFFS -> BuffsTab(mainRaid.value, coRaid.value, buffSelectBorder)
             RaidTab.NEARBY -> NearbyTab(
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
@@ -822,7 +840,7 @@ val BUFF_PRESETS = listOf(
 )
 
 @Composable
-private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>) {
+private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>, buffSelectBorder: Color = Color.White.copy(alpha = 0.06f)) {
   val config by RFConfig.state.collectAsState()
   val lootEnabled by com.reoky.raidframer.RaidCallerSync.lootBuffEnabled.collectAsState()
   val lootThreshold = config.raidCallerLootBuffThreshold.coerceIn(100, 600)
@@ -906,12 +924,12 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
 BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
             LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
           }
-          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp))
+          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp), buffSelectBorder)
         }
       } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
           BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
-          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.fillMaxWidth())
+          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.fillMaxWidth(), buffSelectBorder)
           BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
           LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
         }
@@ -1040,8 +1058,8 @@ private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<Li
 }
 
 @Composable
-private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, lootThreshold: Int, onLootThreshold: (Int) -> Unit, lootEnabled: Boolean, onLootEnabled: (Boolean) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>, modifier: Modifier) {
-  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, lootThreshold: Int, onLootThreshold: (Int) -> Unit, lootEnabled: Boolean, onLootEnabled: (Boolean) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>, modifier: Modifier, borderColor: Color = Color.White.copy(alpha = 0.06f)) {
+  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, borderColor, RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
     var graceExpanded by remember { mutableStateOf(false) }
     Row(
       modifier = Modifier.fillMaxWidth(),
