@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -21,9 +22,11 @@ import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.ItemSpell
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
+import com.reoky.raidframer.core.helpers.rememberSectionPulse
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.OverlayHoverState
+import com.reoky.raidframer.OverlayNav
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -95,6 +98,16 @@ fun ItemUseOverlay() {
   // Use shared hover state from OverlayHoverState
   val isHovered by OverlayHoverState.isAnyOverlayHovered.collectAsState()
 
+  // Flash the overlay border when first enabled so the user can find it.
+  var itemUsePulseActive by remember { mutableStateOf(false) }
+  LaunchedEffect(OverlayNav.highlightItemUseOverlay.value) {
+    if (OverlayNav.highlightItemUseOverlay.value) {
+      itemUsePulseActive = true
+      OverlayNav.highlightItemUseOverlay.value = false
+    }
+  }
+  val itemUseBorder = rememberSectionPulse(itemUsePulseActive, restColor = Color.Transparent)
+
   val backgroundAlpha by animateFloatAsState(
     targetValue = if (isHovered) 0.42f else 0f,
     animationSpec = tween(durationMillis = 220)
@@ -103,6 +116,7 @@ fun ItemUseOverlay() {
   Box(
     modifier = Modifier
       .fillMaxSize()
+      .border(2.dp, itemUseBorder, RoundedCornerShape(4.dp))
       .background(Color.Black.copy(alpha = backgroundAlpha))
   ) {
     Column(

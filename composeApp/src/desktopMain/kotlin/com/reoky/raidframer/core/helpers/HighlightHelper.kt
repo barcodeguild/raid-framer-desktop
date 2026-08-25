@@ -15,15 +15,17 @@ import kotlin.math.sin
  * [durationSec] seconds. Mirrors the flash used to draw attention to the Check-for-Updates
  * section in SettingsOverlay, standardized here so any section in any overlay can reuse it.
  *
- * @param active when true the pulse runs; when false (or after [durationSec]) returns [RFColors.CardBorder].
+ * @param active when true the pulse runs; when false (or after [durationSec]) returns [restColor].
  * @param durationSec how long the highlight animation lasts.
  * @param highlightColor the base color to pulse.
+ * @param restColor the border color returned when the pulse is inactive (defaults to [RFColors.CardBorder]).
  */
 @Composable
 fun rememberSectionPulse(
   active: Boolean,
   durationSec: Float = 7f,
-  highlightColor: Color = RFColors.UpdateGold
+  highlightColor: Color = RFColors.UpdateGold,
+  restColor: Color = RFColors.CardBorder
 ): Color {
   var elapsed by remember(active) { mutableStateOf(0f) }
   LaunchedEffect(active) {
@@ -40,5 +42,5 @@ fun rememberSectionPulse(
     val cycle = (elapsed % 1.5f) / 1.5f
     val pulse = (sin(cycle * Math.PI.toFloat()) * 0.3f + 0.35f).coerceIn(0f, 1f)
     highlightColor.copy(alpha = pulse)
-  } else RFColors.CardBorder
+  } else restColor
 }

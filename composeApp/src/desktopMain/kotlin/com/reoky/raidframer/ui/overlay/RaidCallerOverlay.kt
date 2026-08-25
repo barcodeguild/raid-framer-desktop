@@ -7,6 +7,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -51,6 +52,7 @@ import com.reoky.raidframer.core.helpers.openRaidTab
 import com.reoky.raidframer.core.helpers.openSettingsGeneral
 import com.reoky.raidframer.core.helpers.openMetaSpecs
 import com.reoky.raidframer.core.helpers.openSummaryTab
+import com.reoky.raidframer.core.helpers.rememberSectionPulse
 import com.reoky.raidframer.core.helpers.togglePokemon
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
@@ -62,6 +64,7 @@ import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.OverlayNav
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -785,7 +788,17 @@ fun RaidCallerOverlay(wm: WindowManager? = null) {
 
   val inRaid = raidWasDetected
 
-  Box(modifier = Modifier.fillMaxSize()) {
+  // Flash the overlay border when first enabled so the user can find it.
+  var raidCallerPulseActive by remember { mutableStateOf(false) }
+  LaunchedEffect(OverlayNav.highlightRaidCallerOverlay.value) {
+    if (OverlayNav.highlightRaidCallerOverlay.value) {
+      raidCallerPulseActive = true
+      OverlayNav.highlightRaidCallerOverlay.value = false
+    }
+  }
+  val raidCallerBorder = rememberSectionPulse(raidCallerPulseActive, restColor = Color.Transparent)
+
+  Box(modifier = Modifier.fillMaxSize().border(2.dp, raidCallerBorder, RoundedCornerShape(4.dp))) {
     if (!inRaid) {
       // When not in a raid, show the positioning helper text (same pattern as ItemUseOverlay).
       Column(

@@ -76,4 +76,10 @@ object OverlayNav {
   val pendingSummaryTabIndex = MutableStateFlow<Int?>(null)
   // Settings overlay: scroll to + flash the General Settings section.
   val highlightSettingsGeneral = MutableStateFlow(false)
+  // Item Use overlay: flash the border when first enabled so the user can find it.
+  val highlightItemUseOverlay = MutableStateFlow(false)
+  // Raid Caller overlay: flash the border when first enabled so the user can find it.
+  val highlightRaidCallerOverlay = MutableStateFlow(false)
+  // Mini Graph overlay: flash the border when first enabled so the user can find it.
+  val highlightMiniGraphOverlay = MutableStateFlow(false)
 }

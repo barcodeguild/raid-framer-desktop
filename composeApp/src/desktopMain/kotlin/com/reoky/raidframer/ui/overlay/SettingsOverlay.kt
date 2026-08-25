@@ -542,7 +542,12 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null, generalBorderColor: 
       onCheckedChange = { isChecked ->
         CoroutineScope(Dispatchers.Main).launch {
           RFConfig.update { it.copy(miniGraphEnabled = isChecked) }
-          if (isChecked) wm?.openWindow(OverlayType.MINI) else wm?.closeWindow(OverlayType.MINI)
+          if (isChecked) {
+            wm?.openWindow(OverlayType.MINI)
+            OverlayNav.highlightMiniGraphOverlay.value = true
+          } else {
+            wm?.closeWindow(OverlayType.MINI)
+          }
         }
       },
       label = stringResource(Res.string.settings_mini_graph_description)
@@ -553,7 +558,12 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null, generalBorderColor: 
       onCheckedChange = { isChecked ->
         CoroutineScope(Dispatchers.Main).launch {
           RFConfig.update { it.copy(itemUseOverlayEnabled = isChecked) }
-          if (isChecked) wm?.openWindow(OverlayType.ITEM_USE) else wm?.closeWindow(OverlayType.ITEM_USE)
+          if (isChecked) {
+            wm?.openWindow(OverlayType.ITEM_USE)
+            OverlayNav.highlightItemUseOverlay.value = true
+          } else {
+            wm?.closeWindow(OverlayType.ITEM_USE)
+          }
         }
       },
       label = stringResource(Res.string.settings_item_use_overlay)
@@ -583,7 +593,12 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null, generalBorderColor: 
       onCheckedChange = { isChecked ->
         CoroutineScope(Dispatchers.Main).launch {
           RFConfig.update { it.copy(raidCallerOverlayEnabled = isChecked) }
-          if (isChecked) wm?.openWindow(OverlayType.RAID_CALLER) else wm?.closeWindow(OverlayType.RAID_CALLER)
+          if (isChecked) {
+            wm?.openWindow(OverlayType.RAID_CALLER)
+            OverlayNav.highlightRaidCallerOverlay.value = true
+          } else {
+            wm?.closeWindow(OverlayType.RAID_CALLER)
+          }
         }
       },
       label = stringResource(Res.string.settings_raid_caller_overlay)
