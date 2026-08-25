@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.reoky.raidframer.core.database.WindowStateDao
 import com.reoky.raidframer.core.interactor.Log
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -124,16 +125,28 @@ class WindowManager(
    */
   fun resetAllWindowPositions() {
     scope.launch {
-      // Close all windows first
+      // Remember which windows were open so we can restore them (a reset should only move
+      // windows, not change whether any specific overlay is open).
+      val wasVisible = OverlayType.entries.associateWith { type ->
+        visibilityStates[type]?.value == true
+      }
+
+      // Close all windows first so they actually dispose and can be re-created with the
+      // default geometry. Without the delay the visibility writes would coalesce into a
+      // single recomposition and the native windows would keep their stale positions.
       OverlayType.entries.forEach { type ->
         visibilityStates[type]?.value = false
       }
+
+      delay(50)
 
       // Reset each window to its default state
       OverlayType.entries.forEach { type ->
         val defaultState = defaultWindowStateForTypeFor(type)
         windowStates[type]?.value = defaultState
-        visibilityStates[type]?.value = defaultState.isVisible
+
+        // Restore whatever was open before the reset (default state doesn't drive visibility)
+        visibilityStates[type]?.value = wasVisible[type] == true
 
         // Persist to database
         dao?.insert(defaultState)
