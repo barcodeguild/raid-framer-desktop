@@ -523,12 +523,13 @@ private fun MetaSpecHelp() {
 private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>, stock: Set<SpecType>) {
   val annotatedSpecs = specs
     .sortedBy { it.name }
+    .sortedBy { it !in stock }
     .map { spec ->
       val custom = spec !in stock
       buildAnnotatedString {
         if (custom) {
-          withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
-            append(stringResource(spec.localizedDisplayNameRes))
+          withStyle(SpanStyle(color = RFColors.TestCaption, fontWeight = FontWeight.Bold)) {
+            append("+${stringResource(spec.localizedDisplayNameRes)}")
           }
         } else {
           withStyle(SpanStyle(color = RFColors.TextSecondary)) {
@@ -538,10 +539,29 @@ private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>, stock: Set<Spec
       }
     }
 
+  val combinedSpecs = buildAnnotatedString {
+    annotatedSpecs.forEachIndexed { index, spec ->
+      if (index > 0) append(", ")
+      append(spec)
+    }
+  }
+
+  val hasCustomSpecs = specs.any { it !in stock }
   Column {
-    Text(label, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Text(label, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+      if (hasCustomSpecs) {
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+          text = "(customized)",
+          color = RFColors.UpdateGreen,
+          fontSize = 9.sp,
+          fontWeight = FontWeight.Medium
+        )
+      }
+    }
     Text(
-      annotatedSpecs.joinToString(separator = ", ") { it },
+      combinedSpecs,
       color = RFColors.TextSecondary,
       fontSize = 10.sp,
       lineHeight = 12.sp

@@ -25,6 +25,7 @@ object RFColors {
 
   // Text colors
   val TextPrimary = Color(0xFFE0E0E0)
+  val TestCaption = Color(0xFFC0C0C0)
   val TextSecondary = Color(0xFFB0B0B0)
   val TextTertiary = Color(0xFF8B8B8B)
   val TextDisabled = Color(0xFF5A5A5A)

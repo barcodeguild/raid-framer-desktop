@@ -71,7 +71,7 @@ fun OverlayContainer(wm: WindowManager) {
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
         isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(effectiveWindowType == OverlayWindowType.TOOLTIP),
         isResizable = resizable,
-        isFocusable = type == OverlayType.NEW_SESSION || type == OverlayType.BATTLE_GRAPH,
+        isFocusable = type == OverlayType.NEW_SESSION || type == OverlayType.BATTLE_GRAPH || type == OverlayType.META_SPECS,
         transparentBackground = type == OverlayType.ITEM_USE,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->

@@ -663,11 +663,11 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
         color = if (pencilHovered) Color.White else RFColors.TextSecondary,
         fontSize = 11.sp,
         modifier = Modifier
-          .offset(y = (-1).dp)
+          .offset(x = (-2).dp, y = (-1).dp)
           .hoverable(pencilInteraction)
           .clip(RoundedCornerShape(4.dp))
           .clickable(interactionSource = pencilInteraction, indication = null) { openMetaSpecs(wm) }
-          .padding(horizontal = 2.dp)
+          .padding(horizontal = 0.dp)
       )
     }
   }

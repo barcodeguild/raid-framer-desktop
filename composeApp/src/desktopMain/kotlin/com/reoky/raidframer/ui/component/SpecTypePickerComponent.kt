@@ -52,6 +52,7 @@ import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.accentColor
 import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
+import com.reoky.raidframer.ui.LocalDragLock
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -100,6 +101,8 @@ fun SpecTypePickerComponent(
     trees = list
   }
 
+  val dragLock = LocalDragLock.current
+
   Column(
     modifier = modifier,
     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -112,8 +115,9 @@ fun SpecTypePickerComponent(
       labelFor = { spec -> stringResource(spec.localizedDisplayNameRes) },
       onSelected = { selectSpec(it) },
       itemColor = { RFColors.metaSpecPickerAccent },
-      leadingFaCode = "\uf71b", // Font Awesome "swords" (crossed swords) — represents a spec/build
-      modifier = Modifier.fillMaxWidth()
+      leadingFaCode = "\uf132", // Font Awesome "shield" — represents a shield/armor category
+      modifier = Modifier.fillMaxWidth(),
+      onExpandedChange = { expanded -> dragLock.value = expanded }
     )
 
     for (index in 0..2) {
@@ -126,7 +130,8 @@ fun SpecTypePickerComponent(
         onSelected = { changeTree(index, it) },
         iconFor = { tree -> skillTreeIconPainterFor(tree) },
         itemColor = { tree -> tree.accentColor() },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        onExpandedChange = { expanded -> dragLock.value = expanded }
       )
     }
 
@@ -196,6 +201,7 @@ private fun <T> SearchableDropdown(
   iconFor: @Composable ((T) -> Painter)? = null,
   leadingFaCode: String? = null,
   modifier: Modifier = Modifier,
+  onExpandedChange: (Boolean) -> Unit = {}
 ) {
   var expanded by remember { mutableStateOf(false) }
   var searchQuery by remember { mutableStateOf("") }
@@ -216,11 +222,15 @@ private fun <T> SearchableDropdown(
       highlightedIndex = 0
       focusRequester.requestFocus()
     }
+    onExpandedChange(expanded)
   }
 
   ExposedDropdownMenuBox(
     expanded = expanded,
-    onExpandedChange = { expanded = it },
+    onExpandedChange = { 
+      expanded = it
+      onExpandedChange(it)
+    },
     modifier = modifier
   ) {
     val shown = if (expanded) {
@@ -251,7 +261,8 @@ private fun <T> SearchableDropdown(
               Icon(
                 icon(currentValue),
                 null,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(18.dp),
+                tint = Color.Unspecified
               )
             }
           }
@@ -339,7 +350,8 @@ private fun <T> SearchableDropdown(
                   Icon(
                     icon(item),
                     null,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp),
+                    tint = Color.Unspecified
                   )
                 }
               }
