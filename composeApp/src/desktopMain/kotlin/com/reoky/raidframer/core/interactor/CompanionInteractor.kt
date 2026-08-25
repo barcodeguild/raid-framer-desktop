@@ -175,6 +175,9 @@ object CompanionInteractor : Interactor() {
           }
         }
         is IPCMessagePayload.FramesUpdate -> { // Was "BatchUpdate"
+          // Accumulate coherence (time-in-range / raid recording time) from the full roster
+          // snapshot before it is chunked into raid parties for card reconciliation.
+          PlayerCacheInteractor.accumulateCoherence(message.payload)
           val chunks = message.payload.chunked(50).take(2)
           for ((index, chunk) in chunks.withIndex()) {
             PlayerCacheInteractor.updatePlayersForRaidById(index, chunk)

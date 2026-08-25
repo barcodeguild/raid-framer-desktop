@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.Surface
+import androidx.compose.material.IconButton
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -26,6 +31,7 @@ import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.togglePlayerCard
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.toHumanDuration
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
@@ -146,6 +152,12 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_purges
 import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dances
 import raid_framer_desktop.composeapp.generated.resources.summary_top_silences
 import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_coherence
+import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_render
+import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_raid
+import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_clump
+import raid_framer_desktop.composeapp.generated.resources.coherence_help_title
+import raid_framer_desktop.composeapp.generated.resources.coherence_help_body
 import java.text.DateFormat
 
 @Preview
@@ -241,6 +253,11 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val worstLootPeak by PlayerCacheInteractor.worstLootPeak.collectAsState()
   val topBuffCount by PlayerCacheInteractor.topBuffCount.collectAsState()
 
+  // Coherence rankings (session time in range of the recorder)
+  val topCoherenceRender by PlayerCacheInteractor.topCoherenceRender.collectAsState()
+  val topCoherenceRaid by PlayerCacheInteractor.topCoherenceRaid.collectAsState()
+  val topCoherenceClump by PlayerCacheInteractor.topCoherenceClump.collectAsState()
+
   // New faction comparison flows
   val factionTigerStrikeData by PlayerCacheInteractor.factionTigerStrikeComparisonAll.collectAsState()
   val factionFreezeData by PlayerCacheInteractor.factionFreezeComparisonAll.collectAsState()
@@ -281,7 +298,8 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     stringResource(Res.string.summary_tab_utility),
     stringResource(Res.string.summary_tab_specs),
     stringResource(Res.string.summary_tab_performance),
-    stringResource(Res.string.summary_tab_loot)
+    stringResource(Res.string.summary_tab_loot),
+    stringResource(Res.string.summary_tab_coherence)
   )
 
   val scope = rememberCoroutineScope()
@@ -539,6 +557,12 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           topLootPeak = topLootPeak,
           worstLootPeak = worstLootPeak,
           topBuffCount = topBuffCount,
+          wm = wm
+        )
+        23 -> CoherenceTab(
+          topCoherenceRender = topCoherenceRender,
+          topCoherenceRaid = topCoherenceRaid,
+          topCoherenceClump = topCoherenceClump,
           wm = wm
         )
       }
@@ -1960,6 +1984,104 @@ private fun LootBuffTab(
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
+    }
+  }
+}
+
+@Composable
+private fun CoherenceTab(
+  topCoherenceRender: List<PlayerCard>,
+  topCoherenceRaid: List<PlayerCard>,
+  topCoherenceClump: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  // Raid-adjusted recording time (global denominator). Reading the state here keeps this
+  // snapshot view refreshing as recording time accrues.
+  val recordingMs = PlayerCacheInteractor.coherenceRecordingMsMs
+  fun fmt(card: PlayerCard, ms: Long): String {
+    val pct = if (recordingMs > 0L) ((ms * 100.0) / recordingMs).toInt() else 0
+    return "${ms.toHumanDuration()} (${pct}%)"
+  }
+  Box(modifier = Modifier.fillMaxSize()) {
+    Row(modifier = Modifier.fillMaxSize()) {
+      StatColumn(
+        icon = "\uf06e",
+        title = stringResource(Res.string.summary_top_coherence_render),
+        cards = topCoherenceRender,
+        valueExtractor = { fmt(it, it.sessionCoherenceRenderMs) },
+        valueColor = RFColors.gliderBlue,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uf547",
+        title = stringResource(Res.string.summary_top_coherence_raid),
+        cards = topCoherenceRaid,
+        valueExtractor = { fmt(it, it.sessionCoherenceRaidMs) },
+        valueColor = RFColors.purgeGreen,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uf0eb",
+        title = stringResource(Res.string.summary_top_coherence_clump),
+        cards = topCoherenceClump,
+        valueExtractor = { fmt(it, it.sessionCoherenceClumpMs) },
+        valueColor = RFColors.bubblesCyan,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+    }
+    CoherenceHelp(modifier = Modifier.align(Alignment.TopEnd))
+  }
+}
+
+@Composable
+private fun CoherenceHelp(modifier: Modifier = Modifier) {
+  var showHelp by remember { mutableStateOf(false) }
+  Box(modifier) {
+    IconButton(onClick = { showHelp = !showHelp }, modifier = Modifier.size(28.dp)) {
+      Text("?", color = RFColors.TextSecondary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    }
+    if (showHelp) {
+      Popup {
+        Surface(
+          color = RFColors.PopupBackground.copy(alpha = 0.98f),
+          shape = RoundedCornerShape(8.dp),
+          border = BorderStroke(1.dp, RFColors.CardBorder),
+          elevation = 6.dp
+        ) {
+          Column(
+            Modifier.padding(12.dp).widthIn(max = 420.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Text(
+                stringResource(Res.string.coherence_help_title),
+                color = RFColors.TextPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
+              )
+              IconButton(onClick = { showHelp = false }, modifier = Modifier.size(24.dp)) {
+                Text("X", color = RFColors.TextSecondary, fontSize = 11.sp)
+              }
+            }
+            Text(
+              text = stringResource(Res.string.coherence_help_body),
+              color = RFColors.TextSecondary,
+              fontSize = 11.sp,
+              lineHeight = 14.sp
+            )
+          }
+        }
+      }
     }
   }
 }

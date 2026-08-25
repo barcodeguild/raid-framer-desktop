@@ -121,6 +121,9 @@ Sie sollten immer noch die Deinstallation der Hauptanwendung abschließen, indem
     <string name="category_glider_disables">Gleiterdeaktivierung</string>
     <string name="category_provoked">Herausforderung</string>
     <string name="settings_combat_overlay_title">Kampf-Overlay</string>
+    <string name="category_coherence_render">Kohärenz (Render &lt;120m)</string>
+    <string name="category_coherence_raid">Kohärenz (Raid &lt;60m)</string>
+    <string name="category_coherence_clump">Kohärenz (Clump &lt;15m)</string>
     <string name="settings_combat_fade_controls">Symbolsteuerungen automatisch ausblenden, wenn der Cursor das Overlay verlässt.</string>
     <string name="settings_combat_show_spec_icons">Fertigkeitsbaum-Symbole in Spielerzeilen anzeigen</string>
     <string name="settings_item_use_overlay">Gegenstandsverwendungs-Overlay aktivieren. Zeigt letzte Gegenstandsverwendungen im Kill-Feed-Stil. [EXPERIMENTELL / PROTOTYP]</string>
@@ -511,6 +514,16 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_tab_special_dances">Special Dances</string>
     <string name="summary_top_life_mends">Top Lebensheilungen</string>
     <string name="life_mend_quality_none">Keine Daten</string>
+    <string name="summary_tab_coherence">Kohärenz</string>
+    <string name="summary_top_coherence_render">Kohärenz (Render &lt;120m)</string>
+    <string name="summary_top_coherence_raid">Kohärenz (Raid &lt;60m)</string>
+    <string name="summary_top_coherence_clump">Kohärenz (Clump &lt;15m)</string>
+    <string name="coherence_help_title">Kohärenz</string>
+    <string name="coherence_help_body">Kohärenz misst, wie lange jedes Raid-Mitglied in Reichweite des Aufzeichners (dir) bleibt. Ein Raid, das dicht beieinanderbleibt, kämpft effektiver; wenn die Spieler verstreut sind, hat das Raid Schwierigkeiten zu gewinnen.
+
+Die Zeit wird anhand der Raid-Roster-Distanzupdates bei den Schwellen 120m (Render), 60m (Raid) und 15m (Clump) gezählt. Der angezeigte Wert sind die Sekunden in Reichweite plus ein Prozentsatz der raid-angepassten Aufnahmezeit.
+
+Um Verzerrungen zu vermeiden, sollte der Aufzeichner versuchen, ständig in Reichweite des Raids zu bleiben. Die eigene In-Reichweite-Zeit des Aufzeichners erscheint auf exportierten Bildern, damit dein Raid beurteilen kann, wie vertrauenswürdig die Kohärenz-Rangliste ist.</string>
     <string name="life_mend_quality_hurting">Raid schädigend</string>
     <string name="life_mend_quality_poor">Schlechte Qualität</string>
     <string name="life_mend_quality_good">Gut</string>
@@ -626,6 +639,7 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="export_header_most_damage">Höchster Schaden</string>
     <string name="export_header_killing_blow">Tödlicher Schlag</string>
 
+    <string name="export_header_coherence">Aufzeichner In-Reichweite</string>
     <!-- Export Settings -->
     <string name="settings_export_title">Exporteinstellungen</string>
     <string name="settings_export_description">Export-Ausgabeverzeichnis und Optionen verwalten.</string>

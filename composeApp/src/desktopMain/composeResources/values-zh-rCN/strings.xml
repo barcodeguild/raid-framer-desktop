@@ -121,6 +121,9 @@
     <string name="category_glider_disables">滑翔翼无效</string>
     <string name="category_provoked">挑衅</string>
     <string name="settings_combat_overlay_title">战斗覆盖</string>
+    <string name="category_coherence_render">凝聚力（渲染 &lt;120米）</string>
+    <string name="category_coherence_raid">凝聚力（团队 &lt;60米）</string>
+    <string name="category_coherence_clump">凝聚力（聚集 &lt;15米）</string>
     <string name="settings_combat_fade_controls">当光标离开覆盖层时自动淡出图标控件。</string>
     <string name="settings_combat_show_spec_icons">在玩家行中显示技能树图标</string>
     <string name="settings_item_use_overlay">启用物品使用覆盖层。以击杀信息风格显示最近的物品使用。[实验性/原型]</string>
@@ -510,6 +513,16 @@
     <string name="summary_tab_special_dances">特殊舞蹈</string>
     <string name="summary_top_life_mends">生命治愈排行</string>
     <string name="life_mend_quality_none">无数据</string>
+    <string name="summary_tab_coherence">凝聚力</string>
+    <string name="summary_top_coherence_render">凝聚力（渲染 &lt;120米）</string>
+    <string name="summary_top_coherence_raid">凝聚力（团队 &lt;60米）</string>
+    <string name="summary_top_coherence_clump">凝聚力（聚集 &lt;15米）</string>
+    <string name="coherence_help_title">凝聚力</string>
+    <string name="coherence_help_body">凝聚力衡量每个团队成员在记录者（您）范围内停留的时间。聚集在一起的团队战斗更有效；当玩家分散在各处时，团队就很难获胜。
+
+时间根据团队名册距离更新，按 120米（渲染）、60米（团队）和 15米（聚集）阈值统计。显示的值是在范围内的秒数，外加团队调整记录时间的百分比。
+
+为减少偏差，记录者应尽量始终保持在团队范围内。记录者自己的范围内时间会出现在导出的图像上，以便您的团队判断凝聚力排名的可信度。</string>
     <string name="life_mend_quality_hurting">危害团队</string>
     <string name="life_mend_quality_poor">质量较差</string>
     <string name="life_mend_quality_good">良好</string>
@@ -625,6 +638,7 @@
     <string name="export_header_most_damage">造成伤害最高</string>
     <string name="export_header_killing_blow">致命一击</string>
 
+    <string name="export_header_coherence">记录者在范围内</string>
     <!-- Export Settings -->
     <string name="settings_export_title">导出设置</string>
     <string name="settings_export_description">管理导出输出目录和选项。</string>

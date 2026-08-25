@@ -121,6 +121,9 @@
     <string name="category_glider_disables">Обезвреживание планера</string>
     <string name="category_provoked">Провокация</string>
     <string name="settings_combat_overlay_title">Боевой оверлей</string>
+    <string name="category_coherence_render">Согласованность (Рендер &lt;120м)</string>
+    <string name="category_coherence_raid">Согласованность (Рейд &lt;60м)</string>
+    <string name="category_coherence_clump">Согласованность (Кучно &lt;15м)</string>
     <string name="settings_combat_fade_controls">Автоматически скрывать иконки управления, когда курсор покидает оверлей.</string>
     <string name="settings_combat_show_spec_icons">Показывать иконки деревьев навыков в строках игроков</string>
     <string name="settings_item_use_overlay">Включить оверлей использования предметов. Показывает недавние использования предметов в стиле ленты убийств. [ЭКСПЕРИМЕНТАЛЬНЫЙ / ПРОТОТИП]</string>
@@ -511,6 +514,16 @@
     <string name="summary_tab_special_dances">Особые танцы</string>
     <string name="summary_top_life_mends">Топ исцелений жизни</string>
     <string name="life_mend_quality_none">Нет данных</string>
+    <string name="summary_tab_coherence">Согласованность</string>
+    <string name="summary_top_coherence_render">Согласованность (Рендер &lt;120м)</string>
+    <string name="summary_top_coherence_raid">Согласованность (Рейд &lt;60м)</string>
+    <string name="summary_top_coherence_clump">Согласованность (Кучно &lt;15м)</string>
+    <string name="coherence_help_title">Согласованность</string>
+    <string name="coherence_help_body">Согласованность показывает, как долго каждый участник рейда находится в радиусе действия записывающего (вас). Рейд, который держится вместе, сражается эффективнее; когда игроки разбросаны, рейду трудно победить.
+
+Время учитывается по обновлениям дистанции состава рейда на порогах 120м (Рендер), 60м (Рейд) и 15м (Кучно). Показываемое значение — это секунды в радиусе плюс процент скорректированного времени записи рейда.
+
+Чтобы снизить искажения, записывающий должен стараться всё время оставаться в радиусе рейда. Его собственное время в радиусе отображается на экспортированных изображениях, чтобы ваш рейд мог судить о надёжности рейтинга согласованности.</string>
     <string name="life_mend_quality_hurting">Вредит рейду</string>
     <string name="life_mend_quality_poor">Низкое качество</string>
     <string name="life_mend_quality_good">Хорошо</string>
@@ -626,6 +639,7 @@
     <string name="export_header_most_damage">Наибольший урон</string>
     <string name="export_header_killing_blow">Убийственный удар</string>
 
+    <string name="export_header_coherence">Записывающий в радиусе</string>
     <!-- Export Settings -->
     <string name="settings_export_title">Настройки экспорта</string>
     <string name="settings_export_description">Управление выходным каталогом и параметрами экспорта.</string>

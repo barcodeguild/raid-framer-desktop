@@ -12,6 +12,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getDocumentsDirectory
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.toHumanDuration
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.locale.AppLocale
@@ -33,6 +34,7 @@ import raid_framer_desktop.composeapp.generated.resources.export_header_pve_labe
 import raid_framer_desktop.composeapp.generated.resources.export_header_kills_label
 import raid_framer_desktop.composeapp.generated.resources.export_header_most_damage
 import raid_framer_desktop.composeapp.generated.resources.export_header_killing_blow
+import raid_framer_desktop.composeapp.generated.resources.export_header_coherence
 import raid_framer_desktop.composeapp.generated.resources.summary_haranya_builds
 import raid_framer_desktop.composeapp.generated.resources.summary_most_item_usages
 import raid_framer_desktop.composeapp.generated.resources.summary_nuia_builds
@@ -115,6 +117,9 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_corrosive_
 import raid_framer_desktop.composeapp.generated.resources.summary_top_blinded_by_crows
 import raid_framer_desktop.composeapp.generated.resources.summary_top_mist_sunder
 import raid_framer_desktop.composeapp.generated.resources.summary_top_regular_sunder
+import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_render
+import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_raid
+import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_clump
 import raid_framer_desktop.composeapp.generated.resources.summary_top_impales
 import raid_framer_desktop.composeapp.generated.resources.summary_top_protective_wings
 import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
@@ -426,6 +431,13 @@ val topManaBarrier: List<PlayerCard>,
     val topLootPeak: List<PlayerCard>,
     val worstLootPeak: List<PlayerCard>,
     val topBuffCount: List<PlayerCard>,
+    // Coherence rankings + recorder bias metric
+    val topCoherenceRender: List<PlayerCard>,
+    val topCoherenceRaid: List<PlayerCard>,
+    val topCoherenceClump: List<PlayerCard>,
+    val coherenceRecordingMs: Long,
+    val coherenceRecorderMs: Long,
+    val coherenceHeaderLabel: String,
     // New faction comparison data
     val factionTigerStrikeData: Map<String, Float>,
     val factionFreezeData: Map<String, Float>,
@@ -585,6 +597,12 @@ val topManaBarrier: List<PlayerCard>,
       topLootPeak = PlayerCacheInteractor.topLootPeak.value.take(25),
       worstLootPeak = PlayerCacheInteractor.worstLootPeak.value.take(25),
       topBuffCount = PlayerCacheInteractor.topBuffCount.value.take(25),
+      topCoherenceRender = PlayerCacheInteractor.topCoherenceRender.value.take(25),
+      topCoherenceRaid = PlayerCacheInteractor.topCoherenceRaid.value.take(25),
+      topCoherenceClump = PlayerCacheInteractor.topCoherenceClump.value.take(25),
+      coherenceRecordingMs = PlayerCacheInteractor.coherenceRecordingMsMs,
+      coherenceRecorderMs = PlayerCacheInteractor.coherenceRecorderMsMs,
+      coherenceHeaderLabel = getString(Res.string.export_header_coherence),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -693,6 +711,7 @@ val topManaBarrier: List<PlayerCard>,
       combatDamageTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_damage else Res.string.export_combat_pvp_damage),
       combatHealsTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_heals else Res.string.export_combat_pvp_heals),
       combatCCTitle = getString(if (data.allowPvE) Res.string.export_combat_pve_cc else Res.string.export_combat_pvp_cc),
+      coherenceHeaderLabel = getString(Res.string.export_header_coherence),
     )
   }
 
@@ -976,6 +995,12 @@ val topManaBarrier: List<PlayerCard>,
     val durationStr = formatDuration(data.sessionDurationMs)
     val odeLabel = if (data.allowOdeToRecoveryCountAsHeals) data.exportHeaderOn else data.exportHeaderOff
     val pveLabel = if (data.allowPvE) data.exportHeaderOn else data.exportHeaderOff
+    // Recorder bias metric: time the recorder (user) stayed in range of at least half the raid.
+    val recorderCoherenceStr = if (data.coherenceRecordingMs > 0L) {
+      val mins = data.coherenceRecorderMs / 60000
+      val pct = (data.coherenceRecorderMs * 100.0 / data.coherenceRecordingMs).toInt()
+      "  |  ${data.coherenceHeaderLabel}: ${mins}m (${pct}%)"
+    } else ""
     // TODO: uncomment when kill counter mode selection is implemented
     // val killModeLabel = when (data.killCounterMode) {
     //   "KILLING_BLOW" -> data.exportHeaderKillingBlow
@@ -984,7 +1009,7 @@ val topManaBarrier: List<PlayerCard>,
     g2d.font  = subtitleFont
     g2d.color = toAwtColor(RFColors.TextSecondary)
     g2d.drawString(
-      "${data.sessionTitle}  |  ${data.sessionDate}  |  ${AppGlobals.APP_VERSION}  |  $durationStr  |  ${data.exportHeaderOdeLabel}: $odeLabel  |  ${data.exportHeaderPveLabel}: $pveLabel",
+      "${data.sessionTitle}  |  ${data.sessionDate}  |  ${AppGlobals.APP_VERSION}  |  $durationStr  |  ${data.exportHeaderOdeLabel}: $odeLabel  |  ${data.exportHeaderPveLabel}: $pveLabel$recorderCoherenceStr",
       textStartX, y + 56
     )
 
@@ -1505,6 +1530,28 @@ val topManaBarrier: List<PlayerCard>,
       Triple(getString(Res.string.summary_top_tiger_strikes), "\u26A1", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
       Triple(getString(Res.string.summary_top_mist_sunder), "\u26CF", ColumnData.CardData(data.topMistSunder, { it.sessionMistSunderTotal.toString() }, MIST_SUNDER_COLOR)),
       Triple(getString(Res.string.summary_top_regular_sunder), "\u26CF", ColumnData.CardData(data.topRegularSunder, { it.sessionRegularSunderTotal.toString() }, REGULAR_SUNDER_COLOR)),
+    )))
+
+    // Coherence: seconds in range of the recorder + % of raid-adjusted recording time
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_coherence_render), "\uD83D\uDD04", ColumnData.CardData(
+        data.topCoherenceRender,
+        { card -> "${card.sessionCoherenceRenderMs.toHumanDuration()} (${if (data.coherenceRecordingMs > 0L) card.sessionCoherenceRenderMs * 100 / data.coherenceRecordingMs else 0}%)" },
+        toAwtColor(RFColors.gliderBlue),
+        showIcons = false
+      )),
+      Triple(getString(Res.string.summary_top_coherence_raid), "\uD83D\uDD04", ColumnData.CardData(
+        data.topCoherenceRaid,
+        { card -> "${card.sessionCoherenceRaidMs.toHumanDuration()} (${if (data.coherenceRecordingMs > 0L) card.sessionCoherenceRaidMs * 100 / data.coherenceRecordingMs else 0}%)" },
+        toAwtColor(RFColors.purgeGreen),
+        showIcons = false
+      )),
+      Triple(getString(Res.string.summary_top_coherence_clump), "\uD83D\uDD04", ColumnData.CardData(
+        data.topCoherenceClump,
+        { card -> "${card.sessionCoherenceClumpMs.toHumanDuration()} (${if (data.coherenceRecordingMs > 0L) card.sessionCoherenceClumpMs * 100 / data.coherenceRecordingMs else 0}%)" },
+        toAwtColor(RFColors.bubblesCyan),
+        showIcons = false
+      )),
     )))
 
     // Loot buffs: best peak %, worst peak %, most simultaneous buffs (raid-wide)

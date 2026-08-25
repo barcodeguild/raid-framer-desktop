@@ -54,6 +54,22 @@ fun Long.humanReadableAbbreviation(): String {
 }
 
 /**
+ * Formats a duration in milliseconds as a compact human-readable string using the most sensible
+ * unit, e.g. "59s", "1min 2s", "10min 2s", "1h 2min". Seconds-only when under a minute.
+ */
+fun Long.toHumanDuration(): String {
+  val totalSeconds = this / 1000
+  val hours   = totalSeconds / 3600
+  val minutes = (totalSeconds % 3600) / 60
+  val seconds = totalSeconds % 60
+  return when {
+    hours > 0 -> "${hours}h ${minutes}min"
+    minutes > 0 -> "${minutes}min ${seconds}s"
+    else -> "${seconds}s"
+  }
+}
+
+/**
  * Find the Documents path. Blame Microsoft for having OneDrive mount the user's Documents inside of OneDrive
  */
 fun getDocumentsDirectory(): String? {

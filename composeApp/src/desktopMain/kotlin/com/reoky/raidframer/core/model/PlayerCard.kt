@@ -182,6 +182,12 @@ data class PlayerCard (
   val sessionReviveTotal: Int = 0,
   val sessionDeependDebuffTotal: Int = 0,
 
+  // Coherence: session time (milliseconds) spent with this player within each distance
+  // threshold of the recorder (the user). Held in memory for the session only; not persisted.
+  val sessionCoherenceRenderMs: Long = 0L, // within 120m render range
+  val sessionCoherenceRaidMs: Long = 0L,   // within 60m
+  val sessionCoherenceClumpMs: Long = 0L,  // within 15m
+
   // Loot buff tracking (held in memory for the session; not persisted as lifetime totals).
   // sessionCurrentLootBuffAmount = summed % of all loot buffs on the player right now.
   // sessionPeakLootBuffAmount     = highest summed % seen this session.

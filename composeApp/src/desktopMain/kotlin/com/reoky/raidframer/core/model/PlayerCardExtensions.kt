@@ -766,3 +766,17 @@ fun PlayerCard.updateLootBuffStats(buffIds: Set<Int>, buffCount: Int): PlayerCar
   )
 }
 
+/**
+ * Accumulates time-in-range for the coherence rankings. [renderMs], [raidMs] and [clumpMs]
+ * are the elapsed session milliseconds the player spent within the 120m / 60m / 30m thresholds.
+ * Called from the roster-distance tracker in PlayerCacheInteractor.
+ */
+fun PlayerCard.accumulateCoherence(renderMs: Long, raidMs: Long, clumpMs: Long): PlayerCard {
+  if (renderMs <= 0L && raidMs <= 0L && clumpMs <= 0L) return this
+  return copy(
+    sessionCoherenceRenderMs = sessionCoherenceRenderMs + renderMs,
+    sessionCoherenceRaidMs = sessionCoherenceRaidMs + raidMs,
+    sessionCoherenceClumpMs = sessionCoherenceClumpMs + clumpMs
+  )
+}
+

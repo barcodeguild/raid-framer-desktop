@@ -122,6 +122,9 @@ You should still complete the uninstallation of the main application by uninstal
     <string name="category_crystal_wings">Crystal Wings</string>
     <string name="category_glider_disables">Glider Disables</string>
     <string name="category_provoked">Provokes</string>
+    <string name="category_coherence_render">Coherence (Render &lt;120m)</string>
+    <string name="category_coherence_raid">Coherence (Raid &lt;60m)</string>
+    <string name="category_coherence_clump">Coherence (Clump &lt;15m)</string>
     <string name="settings_combat_overlay_title">Combat Overlay</string>
     <string name="settings_combat_fade_controls">Auto-fade icon controls when the cursor leaves the overlay.</string>
     <string name="settings_combat_show_spec_icons">Show skill-tree icons in player rows</string>
@@ -444,6 +447,16 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_worst_loot_peak">Worst Peak Loot Buff %</string>
     <string name="summary_top_buff_count">Top # of Buffs (Too Many?)</string>
     <string name="summary_tab_loot">Loot Buffs</string>
+    <string name="summary_tab_coherence">Coherence</string>
+    <string name="summary_top_coherence_render">Coherence (Render &lt;120m)</string>
+    <string name="summary_top_coherence_raid">Coherence (Raid &lt;60m)</string>
+    <string name="summary_top_coherence_clump">Coherence (Clump &lt;15m)</string>
+    <string name="coherence_help_title">Coherence</string>
+    <string name="coherence_help_body">Coherence measures how long each raid member spends within range of the recorder (you). A raid that stays clustered together is more effective at fighting; when players are all over the place the raid struggles to win.
+
+Time is counted from raid-roster distance updates at the 120m (Render), 60m (Raid) and 15m (Clump) thresholds. The value shown is the seconds in range, plus a percentage of the raid-adjusted recording time.
+
+To reduce bias, the recorder must try to stay in range of the raid at all times. The recorder's own in-range time appears on exported images so your raid can judge how trustworthy the coherence ranking is.</string>
     <string name="summary_top_ode_haranya">Top Ode Haranya</string>
     <string name="summary_top_ode_nuia">Top Ode Nuia</string>
     <string name="summary_top_ode_pirate">Top Ode Pirate</string>
@@ -658,6 +671,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="export_header_kills_label">Kills</string>
     <string name="export_header_most_damage">Most Damage</string>
     <string name="export_header_killing_blow">Killing Blow</string>
+    <string name="export_header_coherence">Recorder In-Range</string>
 
     <!-- Export Settings -->
     <string name="settings_export_title">Export Settings</string>

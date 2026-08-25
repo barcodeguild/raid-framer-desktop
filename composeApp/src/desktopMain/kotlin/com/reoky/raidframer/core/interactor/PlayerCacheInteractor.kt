@@ -1,5 +1,6 @@
 package com.reoky.raidframer.core.interactor
 
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshotFlow
 import com.reoky.raidframer.AppState
@@ -75,6 +76,27 @@ object PlayerCacheInteractor : Interactor() {
   // lacks buffs — it just means the app couldn't see them.
   private const val OUT_OF_RANGE_DISTANCE = 115
   private var lastRaidBuffHistoryCleanupAt = 0L
+
+  // --- Coherence tracking (time-in-range metric) ---
+  // Distances (meters) for the coherence thresholds. Distances are delivered from the recorder's
+  // (user's) perspective via X2Unit:UnitDistance, so these measure how tightly the raid clusters
+  // around the recorder.
+  private const val COHERENCE_RENDER_DISTANCE = 120
+  private const val COHERENCE_RAID_DISTANCE = 60
+  private const val COHERENCE_CLUMP_DISTANCE = 15
+  // A real raid (for the recording-time denominator) is 5+ players regardless of co-raid.
+  private const val COHERENCE_MIN_RAID_SIZE = 5
+  // Guard against the IPC delivering batched/gapped frames: only count elapsed time slices that
+  // look like live updates (1–60s). Larger gaps are treated as dead air, not recording time.
+  private const val COHERENCE_MAX_FRAME_DELTA_MS = 60_000L
+  // Raid-adjusted recording time (ms) — the global denominator for coherence percentages.
+  private val coherenceRecordingMs = mutableLongStateOf(0L)
+  // Time (ms) the recorder was within render range (120m) of at least half of the raid.
+  private val coherenceRecorderMs = mutableLongStateOf(0L)
+  private var lastCoherenceFrameAtMs = 0L
+
+  val coherenceRecordingMsMs: Long get() = coherenceRecordingMs.longValue
+  val coherenceRecorderMsMs: Long get() = coherenceRecorderMs.longValue
   private val _raidDeparturesFlow = MutableStateFlow<Map<Int, Set<String>>>(emptyMap())
   val raidDeparturesFlow: StateFlow<Map<Int, Set<String>>> = _raidDeparturesFlow.asStateFlow()
   private val cards = mutableStateMapOf<String, PlayerCard>()
@@ -284,6 +306,47 @@ object PlayerCacheInteractor : Interactor() {
               cards[member.playerName] = card.copy(sessionCurrentBuffCount = member.buffCount)
             }
           }
+        }
+      }
+    }
+  }
+
+  /**
+   * Accumulates coherence time from a full roster snapshot (all 100 slots from a FRAMES_UPDATE).
+   * Called by CompanionInteractor for each delivered roster frame.
+   *
+   * The elapsed wall-clock time since the last frame is treated as one time slice (approximate,
+   * since IPC timing is not guaranteed). Only slices within a live-update window (1–60s) are
+   * counted; larger gaps mean the watchdog/session was paused, so they are ignored. Recording
+   * time (the global denominator) only accrues while a real raid (5+ players) is present.
+   */
+  suspend fun accumulateCoherence(payload: List<RaidFramePayload>) {
+    val now = System.currentTimeMillis()
+    val prev = lastCoherenceFrameAtMs
+    lastCoherenceFrameAtMs = now
+    if (prev <= 0L) return
+    val delta = now - prev
+    if (delta <= 0L || delta > COHERENCE_MAX_FRAME_DELTA_MS) return
+
+    val members = payload.filter { it.playerName.isNotBlank() }
+    val raidSize = members.map { it.playerName }.distinct().size
+    if (raidSize < COHERENCE_MIN_RAID_SIZE) return
+
+    mutex.withLock {
+      coherenceRecordingMs.longValue += delta
+      val inRender = members.count { it.distance >= 0 && it.distance <= COHERENCE_RENDER_DISTANCE }
+      if (inRender * 2 >= raidSize) {
+        coherenceRecorderMs.longValue += delta
+      }
+      for (member in members) {
+        val d = member.distance
+        if (d < 0) continue
+        val card = cards[member.playerName] ?: continue
+        val render = if (d <= COHERENCE_RENDER_DISTANCE) delta else 0L
+        val raid = if (d <= COHERENCE_RAID_DISTANCE) delta else 0L
+        val clump = if (d <= COHERENCE_CLUMP_DISTANCE) delta else 0L
+        if (render > 0L || raid > 0L || clump > 0L) {
+          cards[member.playerName] = card.accumulateCoherence(render, raid, clump)
         }
       }
     }
@@ -527,6 +590,9 @@ object PlayerCacheInteractor : Interactor() {
         raids.clear()
         lifeMendCasterMap.clear()
         recentLeechCasts.clear()
+        lastCoherenceFrameAtMs = 0L
+        coherenceRecordingMs.longValue = 0L
+        coherenceRecorderMs.longValue = 0L
       }
       GraphDataInteractor.clearForSession()
       logSessionMemoryCensus("new session")
@@ -580,6 +646,9 @@ object PlayerCacheInteractor : Interactor() {
         cards.clear()
         petCards.clear()
         raids.clear()
+        lastCoherenceFrameAtMs = 0L
+        coherenceRecordingMs.longValue = 0L
+        coherenceRecorderMs.longValue = 0L
       }
       GraphDataInteractor.clearForSession()
       logSessionMemoryCensus("aborted session")
@@ -1837,6 +1906,19 @@ object PlayerCacheInteractor : Interactor() {
     .map { it.filter { card -> card.isRealPlayer && card.sessionReviveTotal > 0 }.sortedByDescending { card -> card.sessionReviveTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
+  // Coherence rankings (session time in range of the recorder, sorted by most time at each threshold)
+  val topCoherenceRender: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { it.filter { card -> card.isRealPlayer && card.sessionCoherenceRenderMs > 0L }.sortedByDescending { card -> card.sessionCoherenceRenderMs }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topCoherenceRaid: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { it.filter { card -> card.isRealPlayer && card.sessionCoherenceRaidMs > 0L }.sortedByDescending { card -> card.sessionCoherenceRaidMs }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topCoherenceClump: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { it.filter { card -> card.isRealPlayer && card.sessionCoherenceClumpMs > 0L }.sortedByDescending { card -> card.sessionCoherenceClumpMs }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
   // Loot buff rankings (raid-wide, not faction-based). Best peak = highest summed loot
   // buff %, worst peak = lowest summed % among players who actually loot buffed, and
   // top buff count = most simultaneous buffs (the "too many?" signal).
@@ -2415,6 +2497,9 @@ object PlayerCacheInteractor : Interactor() {
       CombatRankingCategory.GLIDER_DISABLES -> topGliderDisables
       CombatRankingCategory.PROVOKED -> topProvoked
       CombatRankingCategory.KILLS -> topKills
+      CombatRankingCategory.COHERENCE_RENDER -> topCoherenceRender
+      CombatRankingCategory.COHERENCE_RAID -> topCoherenceRaid
+      CombatRankingCategory.COHERENCE_CLUMP -> topCoherenceClump
     }
   }
 

@@ -121,6 +121,9 @@
     <string name="category_glider_disables">날틀 무력화</string>
     <string name="category_provoked">도발</string>
     <string name="settings_combat_overlay_title">전투 오버레이</string>
+    <string name="category_coherence_render">응집력 (렌더 &lt;120m)</string>
+    <string name="category_coherence_raid">응집력 (레이드 &lt;60m)</string>
+    <string name="category_coherence_clump">응집력 (밀집 &lt;15m)</string>
     <string name="settings_combat_fade_controls">커서가 오버레이를 벗어나면 아이콘 컨트롤 자동 페이드.</string>
     <string name="settings_combat_show_spec_icons">플레이어 행에 스킬 트리 아이콘 표시</string>
     <string name="settings_item_use_overlay">아이템 사용 오버레이 활성화. 최근 아이템 사용을 킬 피드 스타일로 표시합니다. [실험적 / 프로토타입]</string>
@@ -511,6 +514,16 @@
     <string name="summary_tab_special_dances">특수 춤</string>
     <string name="summary_top_life_mends">모두 치유: 생명 순위</string>
     <string name="life_mend_quality_none">데이터 없음</string>
+    <string name="summary_tab_coherence">응집력</string>
+    <string name="summary_top_coherence_render">응집력 (렌더 &lt;120m)</string>
+    <string name="summary_top_coherence_raid">응집력 (레이드 &lt;60m)</string>
+    <string name="summary_top_coherence_clump">응집력 (밀집 &lt;15m)</string>
+    <string name="coherence_help_title">응집력</string>
+    <string name="coherence_help_body">응집력은 각 레이드 멤버가 기록자(당신)의 범위 내에 머문 시간을 측정합니다. 뭉쳐 있는 레이드는 전투에서 더 효과적이며, 플레이어가 여기저기 흩어져 있으면 레이드가 이기기 어렵습니다.
+
+시간은 120m(렌더), 60m(레이드), 15m(밀집) 임계값에서 레이드 명단 거리 업데이트를 기준으로 집계됩니다. 표시되는 값은 범위 내 시간(초)과 레이드 조정 기록 시간의 백분율입니다.
+
+편향을 줄이기 위해 기록자는 항상 레이드 범위 내에 머무르도록 노력해야 합니다. 기록자 자신의 범위 내 시간은 내보낸 이미지에 표시되어 레이드가 응집력 순위의 신뢰도를 판단할 수 있습니다.</string>
     <string name="life_mend_quality_hurting">공격대에 해로움</string>
     <string name="life_mend_quality_poor">낮은 품질</string>
     <string name="life_mend_quality_good">좋음</string>
@@ -626,6 +639,7 @@
     <string name="export_header_most_damage">최대 피해</string>
     <string name="export_header_killing_blow">결정타</string>
 
+    <string name="export_header_coherence">기록자 범위 내</string>
     <!-- Export Settings -->
     <string name="settings_export_title">내보내기 설정</string>
     <string name="settings_export_description">내보내기 출력 디렉토리 및 옵션 관리.</string>

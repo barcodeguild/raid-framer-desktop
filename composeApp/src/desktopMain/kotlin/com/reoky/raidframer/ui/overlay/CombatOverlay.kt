@@ -44,6 +44,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.toHumanDuration
 import com.reoky.raidframer.core.helpers.UpdateHelper
 import org.jetbrains.compose.resources.stringResource
 import com.reoky.raidframer.ui.component.PlayerRankingRow
@@ -706,6 +707,9 @@ fun CombatOverlay(wm: WindowManager? = null) {
                           CombatRankingCategory.CRYSTAL_WINGS -> card.sessionCrystalWingsTotal.toString()
                           CombatRankingCategory.GLIDER_DISABLES -> card.sessionGliderDisablesTotal.toString()
                           CombatRankingCategory.PROVOKED -> card.sessionProvokedTotal.toString()
+                          CombatRankingCategory.COHERENCE_RENDER -> card.sessionCoherenceRenderMs.toHumanDuration()
+                          CombatRankingCategory.COHERENCE_RAID -> card.sessionCoherenceRaidMs.toHumanDuration()
+                          CombatRankingCategory.COHERENCE_CLUMP -> card.sessionCoherenceClumpMs.toHumanDuration()
                         },
                         valueColor = category.valueColor,
                         isRetribution = card.isBuildingAggression,

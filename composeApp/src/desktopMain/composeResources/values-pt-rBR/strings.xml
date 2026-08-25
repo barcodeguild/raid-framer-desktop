@@ -121,6 +121,9 @@ Você ainda deve completar a desinstalação do aplicativo principal desinstalan
     <string name="category_glider_disables">Desativação de Planador</string>
     <string name="category_provoked">Provocação</string>
     <string name="settings_combat_overlay_title">Overlay de Combate</string>
+    <string name="category_coherence_render">Coerência (Render &lt;120m)</string>
+    <string name="category_coherence_raid">Coerência (Raid &lt;60m)</string>
+    <string name="category_coherence_clump">Coerência (Agrupado &lt;15m)</string>
     <string name="settings_combat_fade_controls">Desvanecer controles de ícone automaticamente quando o cursor sair do overlay.</string>
     <string name="settings_combat_show_spec_icons">Mostrar ícones de árvore de habilidades nas linhas de jogadores</string>
     <string name="settings_item_use_overlay">Ativar Overlay de Uso de Itens. Mostra usos recentes de itens em estilo kill-feed. [EXPERIMENTAL / PROTOTÓTIPO]</string>
@@ -511,6 +514,16 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="summary_tab_special_dances">Danças Especiais</string>
     <string name="summary_top_life_mends">Top Cura de Vida</string>
     <string name="life_mend_quality_none">Sem dados</string>
+    <string name="summary_tab_coherence">Coerência</string>
+    <string name="summary_top_coherence_render">Coerência (Render &lt;120m)</string>
+    <string name="summary_top_coherence_raid">Coerência (Raid &lt;60m)</string>
+    <string name="summary_top_coherence_clump">Coerência (Agrupado &lt;15m)</string>
+    <string name="coherence_help_title">Coerência</string>
+    <string name="coherence_help_body">Coerência mede quanto tempo cada membro do raid permanece no alcance do gravador (você). Um raid que permanece agrupado é mais eficaz no combate; quando os jogadores estão espalhados, o raid luta para vencer.
+
+O tempo é contado a partir das atualizações de distância da lista do raid nos limites de 120m (Render), 60m (Raid) e 15m (Agrupado). O valor mostrado são os segundos no alcance, mais um percentual do tempo de gravação ajustado ao raid.
+
+Para reduzir o viés, o gravador deve tentar permanecer no alcance do raid o tempo todo. O próprio tempo no alcance do gravador aparece nas imagens exportadas para que seu raid possa julgar o quão confiável é a classificação de coerência.</string>
     <string name="life_mend_quality_hurting">Prejudicando o Raid</string>
     <string name="life_mend_quality_poor">Qualidade Ruim</string>
     <string name="life_mend_quality_good">Bom</string>
@@ -626,6 +639,7 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="export_header_most_damage">Maior Dano</string>
     <string name="export_header_killing_blow">Golpe Mortal</string>
 
+    <string name="export_header_coherence">Gravador em Alcance</string>
     <!-- Export Settings -->
     <string name="settings_export_title">Configurações de Exportação</string>
     <string name="settings_export_description">Gerenciar diretório de saída de exportação e opções.</string>
