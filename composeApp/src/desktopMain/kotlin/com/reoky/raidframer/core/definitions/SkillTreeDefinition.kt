@@ -386,19 +386,21 @@ import raid_framer_desktop.composeapp.generated.resources.spec_type_zephyr
  * Whitelist of preferred builds. This is mostly just opinionated. I'm going to put a badge next to players who are playing PvP specs.
  */
 val META_CC_SPECS = setOf<SpecType>(
-  SpecType.DREAMBREAKER, SpecType.DEFILER, SpecType.REVENANT, SpecType.NIGHTCLOAK, SpecType.SKULLKNIGHT
+  SpecType.DREAMBREAKER, SpecType.DEFILER, SpecType.REVENANT, SpecType.NIGHTCLOAK, SpecType.SKULLKNIGHT, SpecType.THAUMATURGE
 )
 val META_MELEE_SPECS = setOf<SpecType>(
-  SpecType.ABOLISHER,  SpecType.EXECUTIONER, SpecType.DEATHWISH, SpecType.CURSEBRAND, SpecType.BLOODREAVER, SpecType.BLADE_DANCER, SpecType.DOOMLORD, SpecType.HEXBLADE
+  SpecType.ABOLISHER,  SpecType.EXECUTIONER, SpecType.DEATHWISH, SpecType.CURSEBRAND, SpecType.BLOODREAVER, SpecType.BLADE_DANCER, SpecType.DOOMLORD, SpecType.HEXBLADE, SpecType.HEXBLADE,
+  SpecType.HERALD
 )
 val META_HEALER_SPECS = setOf<SpecType>(
-  SpecType.SOOTHSAYER, SpecType.CONFESSOR, SpecType.ASSASSIN, SpecType.DOOMBRINGER, SpecType.HIEROPHANT, SpecType.DEATH_WARDEN, SpecType.TEMPLAR
+  SpecType.SOOTHSAYER, SpecType.CONFESSOR, SpecType.ASSASSIN, SpecType.DOOMBRINGER, SpecType.HIEROPHANT, SpecType.DEATH_WARDEN, SpecType.TEMPLAR,
+  SpecType.ATHAME
 )
 val META_MAGE_SPECS = setOf<SpecType>(
-  SpecType.INSTIGATOR, SpecType.EQUALIZER, SpecType.REVENANT, SpecType.THAUMATURGE, SpecType.ARCANIST, SpecType.ENIGMATIST
+  SpecType.INSTIGATOR, SpecType.EQUALIZER, SpecType.REVENANT, SpecType.ARCANIST, SpecType.ENIGMATIST
 )
 val META_DANCER_SPECS = setOf<SpecType>(
-  SpecType.COMEDIAN, SpecType.SEAL_RESOLVER, SpecType.TOUGH_DANCER, SpecType.GLAMOROUS_SAVIOR
+  SpecType.COMEDIAN, SpecType.SEAL_RESOLVER, SpecType.TOUGH_DANCER
 )
 val META_RANGED_SPEC = setOf<SpecType>(
   SpecType.EBONSONG, SpecType.PRIMEVAL, SpecType.STONE_ARROW, SpecType.PRIVATEER, SpecType.LEADBITER, SpecType.TEMPEST, SpecType.DEATHTRIGGER
