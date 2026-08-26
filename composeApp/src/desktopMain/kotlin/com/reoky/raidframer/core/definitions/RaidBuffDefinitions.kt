@@ -3,7 +3,7 @@ package com.reoky.raidframer.core.definitions
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.core.model.RaidBuffGracePeriod
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
-import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
+import com.reoky.raidframer.core.definitions.lootBuffTotalForIds
 
 enum class RaidBuffKey {
   GOBLET,
@@ -108,7 +108,7 @@ fun RaidBuffRequirements.matches(member: RaidFramePayload): Boolean {
   val mainMatches = selected.filter { definitionsByKey[it]?.section == RaidBuffSection.MAIN }.all { key ->
     definitionsByKey.getValue(key).matches(ids, requireOrangeGoblet, allowMeatballs, requireEnhancedLonging)
   }
-  val lootAmount = lootBuffAmountForIds(ids)
+  val lootAmount = lootBuffTotalForIds(ids)
   val lootOk = lootThreshold <= 0 || lootAmount >= lootThreshold
   return mainMatches && lootOk
 }
@@ -138,7 +138,7 @@ fun RaidBuffRequirements.missingKeys(member: RaidFramePayload): List<RaidBuffKey
     val definition = definitionsByKey[key] ?: return@mapNotNull null
     if (definition.matches(ids, requireOrangeGoblet, allowMeatballs, requireEnhancedLonging)) null else key
   }.toMutableList()
-  val lootAmount = lootBuffAmountForIds(ids)
+  val lootAmount = lootBuffTotalForIds(ids)
   if (lootThreshold > 0 && lootAmount < lootThreshold) missing += RaidBuffKey.MOONLIGHT_JUICE
   return missing
 }

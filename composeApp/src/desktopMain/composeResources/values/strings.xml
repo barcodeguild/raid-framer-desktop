@@ -1349,7 +1349,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="raid_caller_idle">Not Recording</string>
     <string name="raid_caller_recording">Recording</string>
     <string name="raid_caller_loot_threshold">Loot Threshold</string>
-    <string name="raid_caller_buff_mode">Loot Buff Mode</string>
+    <string name="raid_caller_buff_mode">Buff Mode</string>
     <string name="raid_caller_buff_grace">Buff Grace</string>
 
     <!-- Raid Caller Settings -->

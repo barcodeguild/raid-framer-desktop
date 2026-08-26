@@ -739,6 +739,8 @@
     <string name="raid_buff_allow_meatballs">미트볼 허용</string>
     <string name="raid_buff_require_enhanced">강화된 심판의 갈망 필요</string>
     <string name="raid_buff_loot_section">전리품 버프 요구</string>
+    <string name="raid_buff_check_loot">전리품 버프를 확인하시겠습니까?</string>
+    <string name="raid_buff_loot_threshold_label">임계값:</string>
     <string name="raid_buff_at_least_one_loot">+50% 버프 하나 이상</string>
     <string name="raid_buff_two_loot">+50% 버프 두 개 이상</string>
     <string name="raid_buff_selected_player">선택한 플레이어</string>
@@ -1342,7 +1344,7 @@
     <string name="settings_raid_caller_sync_note">이 기본값은 레이드 오버레이 → 버프 탭과 동기화됩니다.</string>
     <string name="raid_buff_loot_baseline_note">버프가 없는 플레이어는 게임에서 100%로 시작합니다. 임계값은 이 기준과 비교됩니다.</string>
     <string name="raid_caller_loot_threshold">전리품 임계값</string>
-    <string name="raid_caller_buff_mode">전리품 버프 모드</string>
+    <string name="raid_caller_buff_mode">버프 모드</string>
     <string name="raid_caller_buff_grace">버프 유예 기간</string>
 
     <!-- Editable Meta Specs Editor (08/25/26) -->

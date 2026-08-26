@@ -59,7 +59,7 @@ import com.reoky.raidframer.core.definitions.RaidBuffRequirements
 import com.reoky.raidframer.core.definitions.RAID_BUFF_DEFINITIONS
 import com.reoky.raidframer.core.definitions.RaidBuffSection
 import com.reoky.raidframer.core.definitions.lootBuffById
-import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
+import com.reoky.raidframer.core.definitions.lootBuffTotalForIds
 import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.matchesResolved
 import com.reoky.raidframer.core.definitions.matchedDefinitions
@@ -1280,7 +1280,7 @@ private fun LootBuffRankList(members: List<RaidFramePayload>, observations: Map<
   val ranked = members
     .map { member ->
       val snapshot = observations[member]?.snapshot
-      val amount = if (snapshot != null) lootBuffAmountForIds(snapshot.buffIds) else 0
+      val amount = if (snapshot != null) lootBuffTotalForIds(snapshot.buffIds) else 0
       member to amount
     }
     .filter { it.second > 0 }

@@ -221,3 +221,9 @@ fun lootBuffById(buffId: Int): LootBuffDefinition? = lootBuffByIdMap[buffId]
 fun lootBuffAmountForIds(buffIds: Set<Int>): Int {
   return buffIds.sumOf { lootBuffByIdMap[it]?.lootPercent ?: 0 }
 }
+
+/**
+ * Returns the total in-game loot percentage. Every player starts at 100%, before any
+ * tracked loot buffs are applied.
+ */
+fun lootBuffTotalForIds(buffIds: Set<Int>): Int = 100 + lootBuffAmountForIds(buffIds)

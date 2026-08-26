@@ -738,6 +738,8 @@
     <string name="raid_buff_allow_meatballs">允许肉丸</string>
     <string name="raid_buff_require_enhanced">要求强化审判的渴望</string>
     <string name="raid_buff_loot_section">需要战利品增益</string>
+    <string name="raid_buff_check_loot">检查战利品增益？</string>
+    <string name="raid_buff_loot_threshold_label">阈值：</string>
     <string name="raid_buff_at_least_one_loot">至少一个 +50% 增益</string>
     <string name="raid_buff_two_loot">两个或更多 +50% 增益</string>
     <string name="raid_buff_selected_player">选中的玩家</string>
@@ -1342,7 +1344,7 @@
     <string name="settings_raid_caller_sync_note">这些默认值与团队覆盖层 → 增益选项卡保持同步。</string>
     <string name="raid_buff_loot_baseline_note">未增益玩家在游戏中从100%开始。阈值与此基线比较。</string>
     <string name="raid_caller_loot_threshold">战利品阈值</string>
-    <string name="raid_caller_buff_mode">战利品增益模式</string>
+    <string name="raid_caller_buff_mode">增益模式</string>
     <string name="raid_caller_buff_grace">增益宽限期</string>
 
     <!-- Editable Meta Specs Editor (08/25/26) -->

@@ -1280,8 +1280,11 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="settings_raid_caller_grace_period">Standard-Gnadenfrist</string>
     <string name="settings_raid_caller_sync_note">Diese Standardwerte bleiben mit dem Tab Raid-Overlay → Buffs synchron.</string>
     <string name="raid_buff_loot_baseline_note">Ungebuffte Spieler starten im Spiel bei 100%. Der Schwellenwert vergleicht mit dieser Basis.</string>
+    <string name="raid_buff_loot_section">Beute-Buffs erforderlich</string>
+    <string name="raid_buff_check_loot">Auf Beute-Buffs prüfen?</string>
+    <string name="raid_buff_loot_threshold_label">Schwelle:</string>
     <string name="raid_caller_loot_threshold">Beuteschwelle</string>
-    <string name="raid_caller_buff_mode">Beute-Buff-Modus</string>
+    <string name="raid_caller_buff_mode">Buff-Modus</string>
     <string name="raid_caller_buff_grace">Buff-Gnadenfrist</string>
 
     <!-- Editable Meta Specs Editor (08/25/26) -->

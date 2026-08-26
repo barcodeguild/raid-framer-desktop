@@ -40,7 +40,7 @@ import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.rememberMetaSpecs
-import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
+import com.reoky.raidframer.core.definitions.lootBuffTotalForIds
 import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.parseRaidBuffRequirements
 import com.reoky.raidframer.core.definitions.serialize
@@ -451,7 +451,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
     allMembers.map { member ->
       val obs = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
       val ids = obs.snapshot?.buffIds ?: emptySet()
-      100 + lootBuffAmountForIds(ids)
+       lootBuffTotalForIds(ids)
     }
   }
   val lootAvg = if (lootSums.isEmpty()) 0 else lootSums.sum() / lootSums.size

@@ -1279,8 +1279,11 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_raid_caller_grace_period">Default Grace Period</string>
     <string name="settings_raid_caller_sync_note">These defaults stay in sync with the Raid Overlay → Buffs tab.</string>
     <string name="raid_buff_loot_baseline_note">Unbuffed players start at 100% in-game. The threshold compares against this baseline.</string>
+    <string name="raid_buff_loot_section">Require Loot Buffs</string>
+    <string name="raid_buff_check_loot">Check for loot buffs?</string>
+    <string name="raid_buff_loot_threshold_label">Threshold:</string>
     <string name="raid_caller_loot_threshold">Loot Threshold</string>
-    <string name="raid_caller_buff_mode">Loot Buff Mode</string>
+    <string name="raid_caller_buff_mode">Buff Mode</string>
     <string name="raid_caller_buff_grace">Buff Grace</string>
 
     <!-- Editable Meta Specs Editor (08/25/26) -->
