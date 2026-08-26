@@ -572,9 +572,6 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="general_metric_type_healing_short">HEALS</string>
     <string name="general_no_data_available">No Data Available</string>
 
-    <!-- Help Strings -->
-    <string name="general_help_window_postions_reset">All window positions have been reset! Please remember: If you have alt-tab detection enabled, any overlays (those without a title bar) may not appear until you switch back to the game window.</string>
-
     <!-- Leadership Roles -->
     <string name="leadership_none">None</string>
     <string name="leadership_raid_lead">Raid Lead</string>

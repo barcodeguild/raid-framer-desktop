@@ -80,7 +80,6 @@ fun ApplicationScope.SystemTrayComponent(
   val aboutStr = stringResource(Res.string.general_about)
   val resetStr = stringResource(Res.string.app_tray_reset_positions)
   val exitStr = stringResource(Res.string.general_exit)
-  val helpStr = stringResource(Res.string.general_help_window_postions_reset)
   val dragonBreathsStr = stringResource(Res.string.tray_dragon_breaths)
   val raidManagementStr = stringResource(Res.string.tray_raid_management)
   val battleSummaryStr = stringResource(Res.string.tray_battle_summary)
@@ -213,7 +212,6 @@ fun ApplicationScope.SystemTrayComponent(
         TrayMenuItem(iconCode = "\uf0e2", text = resetStr) {
           menuVisible = false
           wm.resetAllWindowPositions()
-          messageBox(AppGlobals.APP_NAME, helpStr)
         }
         TrayMenuItem(iconCode = "\uf011", text = exitStr) {
           menuVisible = false
