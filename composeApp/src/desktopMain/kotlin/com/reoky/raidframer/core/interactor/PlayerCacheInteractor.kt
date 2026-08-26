@@ -1,3 +1,5 @@
+@file:OptIn(kotlinx.coroutines.FlowPreview::class)
+
 package com.reoky.raidframer.core.interactor
 
 import androidx.compose.runtime.mutableLongStateOf
@@ -5,9 +7,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshotFlow
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.calc.ArrangementMode
-import com.reoky.raidframer.core.calc.MetricRawSample
 import com.reoky.raidframer.core.calc.RaidOrganizer
-import com.reoky.raidframer.core.calc.RealtimeComputer
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.PlayerCacheEntity
@@ -64,8 +64,6 @@ object PlayerCacheInteractor : Interactor() {
   // Damage spell IDs that result from guided missiles
   private val GUIDED_MISSILES_DAMAGE_SPELL_IDS = setOf(46055) // Guided Missiles (non-rider damage)
 
-  // Mapping of all the players (and NPCs) sorted in no particular order
-  val realtimeComputer = RealtimeComputer(windowBuckets = 60, bucketMillis = 10_000L)
   private val raids = mutableStateMapOf<Int, List<Party>>()
   private val raidAttendance = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidDepartures = mutableStateMapOf<Int, MutableSet<String>>()
@@ -119,13 +117,7 @@ object PlayerCacheInteractor : Interactor() {
     .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
   init {
-    scope.launch {
-      refreshOwnSessionCount()
-      while (true) {
-        realtimeComputer.push(MetricRawSample(System.currentTimeMillis(), 5000.0))
-        delay(1000)
-      }
-    }
+    scope.launch { refreshOwnSessionCount() }
   }
 
   // The main interactor event loop
@@ -1245,7 +1237,7 @@ object PlayerCacheInteractor : Interactor() {
         }
 
         // credit the source because they are the buffer
-        event.source?.let { source ->
+        event.source.let { source ->
           createCardIfNoneExists(cid = event.cid, source)
           cards[source]?.let { card ->
             cards[source] = card.postBuffAppliedEvent(
@@ -1301,7 +1293,7 @@ object PlayerCacheInteractor : Interactor() {
         }
 
         // give credit to the source
-        event.source?.let { source ->
+        event.source.let { source ->
           GraphDataInteractor.postEvent(
             DebuffAppliedEvent(
               cid = event.cid,
@@ -1412,7 +1404,7 @@ object PlayerCacheInteractor : Interactor() {
         val updated = existing.copy(
           recentDamageEvents = (existing.recentDamageEvents + event).takeLast(100),
           sessionDamageTotal = existing.sessionDamageTotal + event.damage.toLong(),
-          recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
+          recentCids = event.cid.let { (existing.recentCids + it).distinct().takeLast(50) },
           lastEvent = event.timestamp,
           sessionBreathCasts = breathCasts,
           sessionRocketCasts = rocketCasts
@@ -1463,7 +1455,7 @@ object PlayerCacheInteractor : Interactor() {
         val updated = existing.copy(
           recentDebuffAppliedEvents = existing.recentDebuffAppliedEvents,
           recentDamageEvents = existing.recentDamageEvents,
-          recentCids = event.cid?.let { (existing.recentCids + it).distinct().takeLast(50) } ?: existing.recentCids,
+          recentCids = event.cid.let { (existing.recentCids + it).distinct().takeLast(50) },
           lastEvent = event.timestamp,
           sessionBreathCasts = if (!isDuplicateRider && (isDragonBreath == true || isDrakeBreath == true)) existing.sessionBreathCasts + castEvent else existing.sessionBreathCasts,
           sessionRocketCasts = if (!isDuplicateRider && isGuidedMissilesRider) existing.sessionRocketCasts + castEvent else existing.sessionRocketCasts
@@ -2515,9 +2507,13 @@ object PlayerCacheInteractor : Interactor() {
   }
 
   /* Raid Parties UI Subscriptions */
+  private val raidFlows = mutableMapOf<Int, StateFlow<List<Party>>>()
+
   fun getRaidById(raidId: Int): StateFlow<List<Party>> {
-    return snapshotFlow { raids[raidId] ?: listOf() }
-      .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    return raidFlows.getOrPut(raidId) {
+      snapshotFlow { raids[raidId] ?: emptyList() }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }
   }
 
 }
