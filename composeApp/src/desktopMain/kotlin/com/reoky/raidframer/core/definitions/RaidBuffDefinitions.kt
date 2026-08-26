@@ -3,6 +3,7 @@ package com.reoky.raidframer.core.definitions
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.core.model.RaidBuffGracePeriod
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
 
 enum class RaidBuffKey {
   GOBLET,
@@ -53,7 +54,7 @@ val RAID_BUFF_DEFINITIONS = listOf(
   // Gray: 21800 21805 21810 21815 21823
   RaidBuffDefinition(RaidBuffKey.GOBLET, setOf(24469, 24470, 24471, 24472, 24473, 24474, 21796, 21801, 21806, 21811, 21819, 21846, 21797, 21802, 21807, 21812, 21820, 21798, 21803, 21808, 21813, 21821, 21799, 21804, 21809, 21814, 21822, 21800, 21805, 21810, 21815, 21823), "raid_buff_goblet", orangeIds = setOf(24469, 24470, 24471, 24472, 24473, 24474)),
   // Feast / Ribs: Feast table (21791-21794) is best; Ribs (685 689 693 697); Meatballs (680 686 690 694) are lower-tier.
-  RaidBuffDefinition(RaidBuffKey.FEAST_RIBS, setOf(21791, 21792, 21793, 21794, 685, 689, 693, 697, 680, 686, 690, 694), "raid_buff_feast_ribs", meatballIds = setOf(680, 686, 690, 694)),
+  RaidBuffDefinition(RaidBuffKey.FEAST_RIBS, setOf(21791, 21792, 21793, 21794, 2305, 685, 689, 693, 697, 680, 686, 690, 694), "raid_buff_feast_ribs", meatballIds = setOf(680, 686, 690, 694)),
   // Longing (Book): Regular (20552 32381 32382 21795); Enhanced (26581 26582) - has "Require Enhanced Version" toggle.
   RaidBuffDefinition(RaidBuffKey.LONGING, setOf(20552, 32381, 32382, 21795, 26581, 26582), "raid_buff_longing", enhancedIds = setOf(26581, 26582)),
   RaidBuffDefinition(RaidBuffKey.WHISPER, setOf(9001811), "raid_buff_whisper"),
@@ -75,7 +76,7 @@ val RAID_BUFF_DEFINITIONS = listOf(
   RaidBuffDefinition(RaidBuffKey.CHOCOLATE, setOf(8000726, 9001956, 8000779, 8000794, 8000795, 8000796), "raid_buff_chocolate", RaidBuffSection.LOOT),
   RaidBuffDefinition(RaidBuffKey.LOOT_CAKE, setOf(23492, 23491), "raid_buff_loot_cake", RaidBuffSection.LOOT),
   RaidBuffDefinition(RaidBuffKey.SHORTBREAD_COOKIE, setOf(22292), "raid_buff_shortbread_cookie", RaidBuffSection.LOOT),
-  RaidBuffDefinition(RaidBuffKey.GOLDEN_TAFFY, setOf(23094, 23093, 24157, 31322), "raid_buff_golden_taffy", RaidBuffSection.LOOT),
+  RaidBuffDefinition(RaidBuffKey.GOLDEN_TAFFY, setOf(23094, 23093, 31322), "raid_buff_golden_taffy", RaidBuffSection.LOOT),
   RaidBuffDefinition(RaidBuffKey.EGG_OF_FORTUNE, setOf(8002787), "raid_buff_egg_of_fortune", RaidBuffSection.LOOT)
 )
 
@@ -96,6 +97,9 @@ data class RaidBuffRequirements(
   val requireOrangeGoblet: Boolean = false,
   val allowMeatballs: Boolean = false,
   val requireEnhancedLonging: Boolean = false,
+  // Combined loot-buff percentage threshold. 0 = "Check for loot buffs?" is disabled.
+  // When > 0, a player is only considered buffed if the sum of their loot-buff amounts
+  // is greater than or equal to this threshold (range 0-500).
   val lootThreshold: Int = 0
 )
 
@@ -104,8 +108,9 @@ fun RaidBuffRequirements.matches(member: RaidFramePayload): Boolean {
   val mainMatches = selected.filter { definitionsByKey[it]?.section == RaidBuffSection.MAIN }.all { key ->
     definitionsByKey.getValue(key).matches(ids, requireOrangeGoblet, allowMeatballs, requireEnhancedLonging)
   }
-  val lootCount = RAID_BUFF_DEFINITIONS.count { it.section == RaidBuffSection.LOOT && it.ids.any(ids::contains) }
-  return mainMatches && lootCount >= lootThreshold
+  val lootAmount = lootBuffAmountForIds(ids)
+  val lootOk = lootThreshold <= 0 || lootAmount >= lootThreshold
+  return mainMatches && lootOk
 }
 
 fun RaidBuffRequirements.matchesResolved(member: RaidFramePayload, gracePeriod: RaidBuffGracePeriod): Boolean {
@@ -133,11 +138,46 @@ fun RaidBuffRequirements.missingKeys(member: RaidFramePayload): List<RaidBuffKey
     val definition = definitionsByKey[key] ?: return@mapNotNull null
     if (definition.matches(ids, requireOrangeGoblet, allowMeatballs, requireEnhancedLonging)) null else key
   }.toMutableList()
-  val lootCount = RAID_BUFF_DEFINITIONS.count { it.section == RaidBuffSection.LOOT && it.ids.any(ids::contains) }
-  if (lootThreshold > lootCount) missing += RaidBuffKey.MOONLIGHT_JUICE
+  val lootAmount = lootBuffAmountForIds(ids)
+  if (lootThreshold > 0 && lootAmount < lootThreshold) missing += RaidBuffKey.MOONLIGHT_JUICE
   return missing
 }
 
 fun RaidBuffDefinition.labelKey(): String = labelKey
 
 fun raidBuffDefinition(key: RaidBuffKey): RaidBuffDefinition = definitionsByKey.getValue(key)
+
+/**
+ * Serializes a [RaidBuffRequirements] to a compact string so it can be persisted in the
+ * config entity and kept in sync between the RaidOverlay Buffs tab and the Settings overlay.
+ *
+ * Format: `KEY,KEY,...` for selected keys, with special tokens appended for the flag toggles.
+ * e.g. `STATUE_BUFF,GOBLET|orange|enhanced`
+ */
+fun RaidBuffRequirements.serialize(): String {
+  val parts = mutableListOf<String>()
+  if (selected.isNotEmpty()) parts += selected.sorted().joinToString(",")
+  if (requireOrangeGoblet) parts += "orange"
+  if (allowMeatballs) parts += "meatballs"
+  if (requireEnhancedLonging) parts += "enhanced"
+  return parts.joinToString("|")
+}
+
+/**
+ * Parses a string produced by [RaidBuffRequirements.serialize]. Unknown / malformed input
+ * falls back to an empty [RaidBuffRequirements].
+ */
+fun parseRaidBuffRequirements(serialized: String): RaidBuffRequirements {
+  if (serialized.isBlank()) return RaidBuffRequirements()
+  val segments = serialized.split('|')
+  val selected = segments.firstOrNull()?.split(',')
+    ?.mapNotNull { name -> RaidBuffKey.entries.firstOrNull { it.name == name } }
+    ?.toSet() ?: emptySet()
+  val flags = segments.drop(1).toSet()
+  return RaidBuffRequirements(
+    selected = selected,
+    requireOrangeGoblet = "orange" in flags,
+    allowMeatballs = "meatballs" in flags,
+    requireEnhancedLonging = "enhanced" in flags
+  )
+}

@@ -2,6 +2,8 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +21,7 @@ import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.Surface
+import com.reoky.raidframer.ui.component.DragLockedSlider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,9 +33,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -52,26 +58,31 @@ import com.reoky.raidframer.core.definitions.RaidBuffKey
 import com.reoky.raidframer.core.definitions.RaidBuffRequirements
 import com.reoky.raidframer.core.definitions.RAID_BUFF_DEFINITIONS
 import com.reoky.raidframer.core.definitions.RaidBuffSection
+import com.reoky.raidframer.core.definitions.lootBuffById
+import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
 import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.matchesResolved
 import com.reoky.raidframer.core.definitions.matchedDefinitions
 import com.reoky.raidframer.core.definitions.missingKeys
+import com.reoky.raidframer.core.definitions.parseRaidBuffRequirements
+import com.reoky.raidframer.core.definitions.serialize
 import com.reoky.raidframer.core.model.hasPvPParticipation
 import com.reoky.raidframer.core.model.RaidBuffGracePeriod
+import com.reoky.raidframer.core.model.RaidBuffObservation
 import com.reoky.raidframer.core.definitions.SKILL_TREE_DISPLAY_ORDER
 import com.reoky.raidframer.core.definitions.SkillTreeType
-import com.reoky.raidframer.core.definitions.META_CC_SPECS
-import com.reoky.raidframer.core.definitions.META_DANCER_SPECS
-import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
-import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
-import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
-import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
+import com.reoky.raidframer.core.definitions.MetaSpecs
+import com.reoky.raidframer.core.definitions.rememberMetaSpecs
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
+import com.reoky.raidframer.core.helpers.rememberSectionPulse
 import com.reoky.raidframer.core.helpers.timeAgo
 import com.reoky.raidframer.core.helpers.resolveLocalizedString
+import com.reoky.raidframer.core.helpers.openMetaSpecs
+import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.core.serialization.BuffPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
@@ -125,7 +136,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import kotlin.time.Duration.Companion.milliseconds
 
-private enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
+enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
 @Composable
 fun RaidOverlay(wm: WindowManager? = null) {
   val playerFaction = Faction.fromString(RFConfig.state.collectAsState().value.playerFaction)
@@ -136,6 +147,22 @@ fun RaidOverlay(wm: WindowManager? = null) {
   val nearbyPirate = PlayerCacheInteractor.nearbyPirateRaidParties.collectAsState()
   val raidDepartures = PlayerCacheInteractor.raidDeparturesFlow.collectAsState()
   var selectedTab by remember { mutableStateOf(RaidTab.ATTENDANCE) }
+  // Consume any cross-overlay tab request (e.g. from the Raid Caller overlay) and select it.
+  LaunchedEffect(OverlayNav.pendingRaidTab.value) {
+    OverlayNav.pendingRaidTab.value?.let { requested ->
+      selectedTab = requested
+      OverlayNav.pendingRaidTab.value = null
+    }
+  }
+  // Flash the buff-selection pane when a raid-caller setting points the user here.
+  var buffSelectPulseActive by remember { mutableStateOf(false) }
+  LaunchedEffect(OverlayNav.highlightRaidBuffSelect.value) {
+    if (OverlayNav.highlightRaidBuffSelect.value) {
+      buffSelectPulseActive = true
+      OverlayNav.highlightRaidBuffSelect.value = false
+    }
+  }
+  val buffSelectBorder = rememberSectionPulse(buffSelectPulseActive)
   var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
   var raidWasDetected by remember { mutableStateOf(false) }
   if (!raidWasDetected && (mainRaid.value.isNotEmpty() || coRaid.value.isNotEmpty())) {
@@ -144,6 +171,12 @@ fun RaidOverlay(wm: WindowManager? = null) {
   LaunchedEffect(Unit) {
     delay(1500L.milliseconds)
     raidWasDetected = true
+  }
+  // Every time the Raid overlay opens, ask the Lua companion to re-emit the current raid
+  // roster over IPC. The Lua side replies to a TEST_PING with a fresh FRAMES_UPDATE, which
+  // repopulates the roster even when no combat events are firing in game.
+  LaunchedEffect(Unit) {
+    CompanionInteractor.sendMessage(IPCMessagePayload.TestPing())
   }
   Box(modifier = Modifier.fillMaxSize().background(Color(0xCC121212))) {
     if (mainRaid.value.isEmpty() && coRaid.value.isEmpty() && !raidWasDetected) {
@@ -235,7 +268,7 @@ fun RaidOverlay(wm: WindowManager? = null) {
               requirePvPParticipation = requirePvPParticipation,
               onRequirePvPParticipationChange = { requirePvPParticipation = it }
             )
-            RaidTab.BUFFS -> BuffsTab(mainRaid.value, coRaid.value)
+            RaidTab.BUFFS -> BuffsTab(mainRaid.value, coRaid.value, buffSelectBorder)
             RaidTab.NEARBY -> NearbyTab(
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
@@ -258,7 +291,8 @@ fun RaidOverlay(wm: WindowManager? = null) {
               playerFaction = playerFaction,
               raidDepartures = raidDepartures.value,
               requirePvPParticipation = requirePvPParticipation,
-              onRequirePvPParticipationChange = { requirePvPParticipation = it }
+              onRequirePvPParticipationChange = { requirePvPParticipation = it },
+              wm = wm
             )
           }
         }
@@ -275,7 +309,8 @@ private fun CompositionTab(
   playerFaction: Faction = Faction.UNKNOWN,
   raidDepartures: Map<Int, Set<String>> = emptyMap(),
   requirePvPParticipation: Boolean,
-  onRequirePvPParticipationChange: (Boolean) -> Unit
+  onRequirePvPParticipationChange: (Boolean) -> Unit,
+  wm: WindowManager? = null,
 ) {
   var requireGearOver15k by rememberSaveable { mutableStateOf(false) }
   var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
@@ -316,9 +351,9 @@ private fun CompositionTab(
     return FactionComposition(label, filtered.size, counts, chartColor)
   }
   val charts = listOf(
-    chart(haranyaLabel, nearbyHaranya, RFColors.factionHaranya),
-    chart(nuiaLabel, nearbyNuia, RFColors.factionNuia),
-    chart(pirateLabel, nearbyPirate, RFColors.factionPirate)
+    chart(haranyaLabel, nearbyHaranya, factionHighlightColor(Faction.HARANYA)),
+    chart(nuiaLabel, nearbyNuia, factionHighlightColor(Faction.NUIA)),
+    chart(pirateLabel, nearbyPirate, factionHighlightColor(Faction.PIRATE))
   )
   val factionPlayers = listOf(
     charts[0].factionLabel to sourcePlayers(nearbyHaranya, Faction.HARANYA).filter(filter),
@@ -380,10 +415,10 @@ private fun CompositionTab(
           textColor = RFColors.TextPrimary
         )
      }
-      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_statistics)) { faction, players ->
+      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_statistics), onEditMetaSpecs = { openMetaSpecs(wm) }) { faction, players ->
        FactionStatistics(faction, players)
      }
-      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_meta_spec_breakdown)) { faction, players ->
+      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_meta_spec_breakdown), onEditMetaSpecs = { openMetaSpecs(wm) }) { faction, players ->
        MetaSpecBreakdown(faction, players)
      }
    }
@@ -393,6 +428,7 @@ private fun CompositionTab(
 private fun ResponsiveFactionSections(
   factions: List<Pair<String, List<PlayerCard>>>,
   title: String,
+  onEditMetaSpecs: () -> Unit = {},
   content: @Composable (String, List<PlayerCard>) -> Unit
 ) {
   val metaSpecBreakdownTitle = stringResource(Res.string.raid_composition_meta_spec_breakdown)
@@ -405,6 +441,15 @@ private fun ResponsiveFactionSections(
       Text(title, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
       if (title == metaSpecBreakdownTitle) {
         MetaSpecHelp()
+        Text(
+          text = "✎",
+          color = RFColors.TextSecondary,
+          fontSize = 14.sp,
+          modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .clickable { onEditMetaSpecs() }
+            .padding(horizontal = 0.dp)
+        )
       }
     }
     BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -460,12 +505,13 @@ private fun MetaSpecHelp() {
                 Text("X", color = RFColors.TextSecondary, fontSize = 11.sp)
               }
             }
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_cc), META_CC_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_melee), META_MELEE_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_healer), META_HEALER_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_mage), META_MAGE_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_dancer), META_DANCER_SPECS)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_ranged), META_RANGED_SPEC)
+            val meta = rememberMetaSpecs()
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_cc), meta.cc, MetaSpecs.STOCK.cc)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_melee), meta.melee, MetaSpecs.STOCK.melee)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_healer), meta.healer, MetaSpecs.STOCK.healer)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_mage), meta.mage, MetaSpecs.STOCK.mage)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_dancer), meta.dancer, MetaSpecs.STOCK.dancer)
+            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_ranged), meta.ranged, MetaSpecs.STOCK.ranged)
           }
         }
       }
@@ -474,13 +520,48 @@ private fun MetaSpecHelp() {
 }
 
 @Composable
-private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>) {
-  val localizedSpecs = specs.map { stringResource(it.localizedDisplayNameRes) }
+private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>, stock: Set<SpecType>) {
+  val annotatedSpecs = specs
+    .sortedBy { it.name }
+    .sortedBy { it !in stock }
+    .map { spec ->
+      val custom = spec !in stock
+      buildAnnotatedString {
+        if (custom) {
+          withStyle(SpanStyle(color = RFColors.TestCaption, fontWeight = FontWeight.Bold)) {
+            append("+${stringResource(spec.localizedDisplayNameRes)}")
+          }
+        } else {
+          withStyle(SpanStyle(color = RFColors.TextSecondary)) {
+            append(stringResource(spec.localizedDisplayNameRes))
+          }
+        }
+      }
+    }
 
+  val combinedSpecs = buildAnnotatedString {
+    annotatedSpecs.forEachIndexed { index, spec ->
+      if (index > 0) append(", ")
+      append(spec)
+    }
+  }
+
+  val hasCustomSpecs = specs.any { it !in stock }
   Column {
-    Text(label, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Text(label, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+      if (hasCustomSpecs) {
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+          text = "(customized)",
+          color = RFColors.UpdateGreen,
+          fontSize = 9.sp,
+          fontWeight = FontWeight.Medium
+        )
+      }
+    }
     Text(
-      localizedSpecs.joinToString(", "),
+      combinedSpecs,
       color = RFColors.TextSecondary,
       fontSize = 10.sp,
       lineHeight = 12.sp
@@ -490,6 +571,7 @@ private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>) {
 
 @Composable
 private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
+      val meta = rememberMetaSpecs()
       val specs = players.mapNotNull { SpecType.fromName(it.currentBuild) }
       fun has(tree: SkillTreeType, spec: SpecType) = tree in spec.trees
       fun matching(predicate: (SpecType) -> Boolean) = players.filter { SpecType.fromName(it.currentBuild)?.let(predicate) == true }
@@ -530,7 +612,7 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
         addRow(stringResource(Res.string.raid_composition_dancer_comedian), matching { it == SpecType.COMEDIAN })
         addRow(stringResource(Res.string.raid_composition_dancer_seal_resolver), matching { it == SpecType.SEAL_RESOLVER })
         addRow(stringResource(Res.string.raid_composition_dancer_tough_dancer), matching { it == SpecType.TOUGH_DANCER })
-         addRow(stringResource(Res.string.raid_composition_dancer_other), matching { has(SkillTreeType.SPELLDANCE, it) && it !in META_DANCER_SPECS })
+         addRow(stringResource(Res.string.raid_composition_dancer_other), matching { has(SkillTreeType.SPELLDANCE, it) && it !in meta.dancer })
        val breakdownItems = listOf(
          row(stringResource(Res.string.raid_composition_shadowplay_vitalism), shadowplayVitalism.size, players.size),
          row(stringResource(Res.string.raid_composition_shadowplay_without_vitalism), shadowplayWithoutVitalism.size, players.size),
@@ -547,7 +629,7 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
          row(stringResource(Res.string.raid_composition_dancer_comedian), dancer.count { it == SpecType.COMEDIAN }, dancer.size),
          row(stringResource(Res.string.raid_composition_dancer_seal_resolver), dancer.count { it == SpecType.SEAL_RESOLVER }, dancer.size),
          row(stringResource(Res.string.raid_composition_dancer_tough_dancer), dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
-         row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in META_DANCER_SPECS }, dancer.size)
+         row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in meta.dancer }, dancer.size)
        )
         Surface(
           color = RFColors.CardBackground.copy(alpha = 0.78f),
@@ -569,14 +651,15 @@ private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
 
 @Composable
 private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
+  val meta = rememberMetaSpecs()
   val specs = players.mapNotNull { card -> SpecType.fromName(card.currentBuild)?.let { it to card } }
   val groups = listOf(
-    stringResource(Res.string.raid_composition_meta_cc) to META_CC_SPECS,
-    stringResource(Res.string.raid_composition_meta_melee) to META_MELEE_SPECS,
-    stringResource(Res.string.raid_composition_meta_healer) to META_HEALER_SPECS,
-    stringResource(Res.string.raid_composition_meta_mage) to META_MAGE_SPECS,
-    stringResource(Res.string.raid_composition_meta_dancer) to META_DANCER_SPECS,
-    stringResource(Res.string.raid_composition_meta_ranged) to META_RANGED_SPEC
+    stringResource(Res.string.raid_composition_meta_cc) to meta.cc,
+    stringResource(Res.string.raid_composition_meta_melee) to meta.melee,
+    stringResource(Res.string.raid_composition_meta_healer) to meta.healer,
+    stringResource(Res.string.raid_composition_meta_mage) to meta.mage,
+    stringResource(Res.string.raid_composition_meta_dancer) to meta.dancer,
+    stringResource(Res.string.raid_composition_meta_ranged) to meta.ranged
   )
   val known = groups.flatMap { it.second }.toSet()
   val other = specs.filter { it.first !in known }
@@ -794,46 +877,61 @@ private fun AttendanceTab(
   }
 }
 
-private data class BuffPreset(val label: String, val requirements: RaidBuffRequirements)
+data class BuffPreset(val label: String, val requirements: RaidBuffRequirements)
 
-private val BUFF_PRESETS = listOf(
+val BUFF_PRESETS = listOf(
   BuffPreset("No Buffs", RaidBuffRequirements()),
-  BuffPreset("Light PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS))),
+  BuffPreset("Light PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.FEAST_RIBS))),
   BuffPreset("Serious PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING))),
   BuffPreset("Full Buffed", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER), requireEnhancedLonging = true)),
   BuffPreset("Full-Buff BD PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER, RaidBuffKey.FACTION_WAR_TIME, RaidBuffKey.MONSTER_HUNTERS_DREAM), requireEnhancedLonging = true)),
   BuffPreset("Full-Buff Kraken PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER, RaidBuffKey.DAHUTAS_BUBBLE), requireEnhancedLonging = true)),
-  BuffPreset("Uncontested Boss Kill", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.FACTION_WAR_TIME), lootThreshold = 2))
+  BuffPreset("Uncontested Boss Kill", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.FACTION_WAR_TIME), lootThreshold = 100))
 )
 
-private object BuffsTabState {
-  var requirements = mutableStateOf(RaidBuffRequirements())
-  var selectedPreset = mutableStateOf(BUFF_PRESETS.first())
-  var gracePeriod = mutableStateOf(RaidBuffGracePeriod.IMMEDIATE)
-}
-
 @Composable
-private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>) {
-  var requirements by BuffsTabState.requirements
+private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>, buffSelectBorder: Color = Color.White.copy(alpha = 0.06f)) {
+  val config by RFConfig.state.collectAsState()
+  val lootEnabled by com.reoky.raidframer.RaidCallerSync.lootBuffEnabled.collectAsState()
+  val lootThreshold = config.raidCallerLootBuffThreshold.coerceIn(100, 600)
+  val gracePeriod = RaidBuffGracePeriod.entries.firstOrNull { it.name == config.raidCallerBuffGracePeriod }
+    ?: RaidBuffGracePeriod.FIFTEEN_MINUTES
+  // Effective requirements used for matching: buff selection comes from config, and the loot
+  // threshold is only applied when the (in-memory) "check for loot buffs?" box is checked.
+  val baseRequirements = remember(config.raidCallerBuffRequirements) {
+    parseRaidBuffRequirements(config.raidCallerBuffRequirements)
+  }
+  val requirements = remember(baseRequirements, lootEnabled, lootThreshold) {
+    baseRequirements.copy(lootThreshold = if (lootEnabled) lootThreshold else 0)
+  }
+  fun persistRequirements(newReq: RaidBuffRequirements) {
+    // Persist the buff selection (ignoring loot threshold, which is derived from the in-memory box).
+    RFConfig.update { it.copy(raidCallerBuffRequirements = newReq.copy(lootThreshold = 0).serialize()) }
+    com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(newReq.lootThreshold > 0)
+    RFConfig.update { it.copy(raidCallerLootBuffThreshold = newReq.lootThreshold.coerceIn(100, 600)) }
+  }
   var selectedPlayer by remember { mutableStateOf<RaidFramePayload?>(null) }
   var selectedPlayerPopupOffset by remember { mutableStateOf(IntOffset.Zero) }
-  var selectedPreset by BuffsTabState.selectedPreset
+  val selectedPreset by remember(baseRequirements) {
+    mutableStateOf(BUFF_PRESETS.firstOrNull { it.requirements.serialize() == baseRequirements.serialize() } ?: BUFF_PRESETS.first())
+  }
   var presetExpanded by remember { mutableStateOf(false) }
-  var gracePeriod by BuffsTabState.gracePeriod
   val allMembers = (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
   val observations = allMembers.associateWith { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod) }
-  val notBuffed = allMembers.filter { member ->
-    val observation = observations.getValue(member)
-    observation.snapshot == null || !requirements.matches(member.copy(buffs = observation.snapshot.buffIds.map { id ->
-      BuffPayload(buff_id = id)
-    }))
-  }.joinToString(", ") { it.playerName }
   val buffed = allMembers.filter { member ->
-    val observation = observations.getValue(member)
-    observation.snapshot != null && requirements.matches(member.copy(buffs = observation.snapshot.buffIds.map { id ->
+    val snapshot = observations.getValue(member).snapshot
+    snapshot != null && requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
       BuffPayload(buff_id = id)
     }))
   }.joinToString(", ") { it.playerName }
+  val notBuffed = allMembers.filter { member ->
+    val snapshot = observations.getValue(member).snapshot
+    snapshot != null && !requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
+      BuffPayload(buff_id = id)
+    }))
+  }.joinToString(", ") { it.playerName }
+  val notScannable = allMembers.filter { observations.getValue(it).snapshot == null }
+    .joinToString(", ") { it.playerName }
   val localizedBuffLabels = RAID_BUFF_DEFINITIONS.associate { definition ->
     definition.key to when (definition.key) {
       RaidBuffKey.GOBLET -> stringResource(Res.string.raid_buff_goblet)
@@ -873,15 +971,17 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
           Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
-            BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
+BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
+            LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
           }
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp))
+          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp), buffSelectBorder)
         }
       } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
           BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
-          BuffControlsPane(requirements, { requirements = it }, selectedPreset, { selectedPreset = it; requirements = it.requirements }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gracePeriod = it }, localizedBuffLabels, Modifier.fillMaxWidth())
-          BuffCopyPane(notBuffed, buffed, Modifier.fillMaxWidth())
+          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.fillMaxWidth(), buffSelectBorder)
+          BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
+          LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
         }
       }
       }
@@ -939,6 +1039,41 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
               .joinToString(", ")
               .ifBlank { stringResource(Res.string.raid_buff_none_found) }
             Text(missingBuffText, color = RFColors.TextSecondary, fontSize = 11.sp)
+            Text(stringResource(Res.string.raid_buff_loot_buffs), color = RFColors.lootBuffColor, fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+            // Per-loot-buff breakdown: name + %, descending, with a mini progress bar so
+            // the raid lead can see at a glance how heavily a player loot buffed.
+            val playerLootBuffs = resolvedPlayer.buffs
+              .mapNotNull { buff -> lootBuffById(buff.buff_id) }
+              .filter { it.lootPercent > 0 }
+              .sortedByDescending { it.lootPercent }
+            if (playerLootBuffs.isEmpty()) {
+              Text(stringResource(Res.string.raid_buff_none_found), color = RFColors.TextSecondary, fontSize = 11.sp)
+            } else {
+              val maxLootAmount = playerLootBuffs.first().lootPercent.coerceAtLeast(1)
+              playerLootBuffs.forEach { lootBuff ->
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                  Text(lootBuff.name, color = RFColors.TextSecondary, fontSize = 11.sp, maxLines = 1, modifier = Modifier.weight(1f))
+                  val fraction = (lootBuff.lootPercent.toFloat() / maxLootAmount).coerceIn(0f, 1f)
+                  Box(
+                    modifier = Modifier
+                      .width(44.dp)
+                      .height(6.dp)
+                      .clip(RoundedCornerShape(3.dp))
+                      .background(Color.White.copy(alpha = 0.1f))
+                  ) {
+                    Box(
+                      modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(fraction)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(RFColors.lootBuffColor)
+                    )
+                  }
+                  Spacer(modifier = Modifier.width(6.dp))
+                  Text("${lootBuff.lootPercent}%", color = RFColors.lootBuffColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(38.dp))
+                }
+              }
+            }
             Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
             Text(observationText, color = RFColors.TextTertiary, fontSize = 9.sp, modifier = Modifier.padding(top = 2.dp))
           }
@@ -948,7 +1083,7 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
   }
 }
 
-private fun RaidBuffGracePeriod.label(): String = when (this) {
+fun RaidBuffGracePeriod.label(): String = when (this) {
   RaidBuffGracePeriod.IMMEDIATE -> "Immediate"
   RaidBuffGracePeriod.FIFTEEN_MINUTES -> "15 Minutes"
   RaidBuffGracePeriod.THIRTY_MINUTES -> "30 Minutes"
@@ -962,19 +1097,19 @@ private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<Li
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_main_raid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot?.buffIds?.isNotEmpty() == true })
+        RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
       }
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(stringResource(Res.string.raid_coraid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot?.buffIds?.isNotEmpty() == true })
+        RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
       }
     }
   }
 }
 
 @Composable
-private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>, modifier: Modifier) {
-  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, lootThreshold: Int, onLootThreshold: (Int) -> Unit, lootEnabled: Boolean, onLootEnabled: (Boolean) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>, modifier: Modifier, borderColor: Color = Color.White.copy(alpha = 0.06f)) {
+  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, borderColor, RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
     var graceExpanded by remember { mutableStateOf(false) }
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -1008,14 +1143,51 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
       }
     }
     Text(stringResource(Res.string.raid_buff_loot_section), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
-    ControlledCheckbox(stringResource(Res.string.raid_buff_at_least_one_loot), requirements.lootThreshold == 1) { onRequirements(requirements.copy(lootThreshold = if (it) 1 else 0)) }
-    ControlledCheckbox(stringResource(Res.string.raid_buff_two_loot), requirements.lootThreshold == 2) { onRequirements(requirements.copy(lootThreshold = if (it) 2 else 0)) }
+    // "Check for loot buffs?" + a 100-600% threshold slider (100% is the in-game baseline).
+    // The enabled state is held in-memory only (not persisted), while the threshold value is
+    // persisted and kept in sync with the Raid Caller overlay settings.
+    var lootSliderValue by remember(requirements) { mutableStateOf(lootThreshold) }
+    LaunchedEffect(lootThreshold) { lootSliderValue = lootThreshold }
+    ControlledCheckbox(stringResource(Res.string.raid_buff_check_loot), lootEnabled) { checked ->
+      onLootEnabled(checked)
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      Text(stringResource(Res.string.raid_buff_loot_threshold_label), color = Color.White, fontSize = 11.sp)
+      DragLockedSlider(
+        value = lootSliderValue.toFloat(),
+        onValueChange = {
+          lootSliderValue = it.toInt().coerceIn(100, 600)
+          onLootThreshold(lootSliderValue)
+        },
+        modifier = Modifier.weight(1f).height(28.dp),
+        valueRange = 100f..600f
+      )
+      Text(
+        text = "$lootSliderValue%",
+        color = if (lootEnabled) RFColors.lootBuffColor else Color.White.copy(alpha = 0.5f),
+        fontSize = 11.sp,
+        textAlign = TextAlign.End,
+        modifier = Modifier.width(42.dp)
+      )
+    }
+    Text(
+      text = stringResource(Res.string.raid_buff_loot_baseline_note),
+      color = RFColors.TextTertiary,
+      fontSize = 10.sp,
+      lineHeight = 12.sp,
+      modifier = Modifier.padding(top = 2.dp)
+    )
   }
 }
 
 @Composable
-private fun BuffCopyPane(notBuffed: String, buffed: String, modifier: Modifier) {
+private fun BuffCopyPane(notBuffed: String, buffed: String, notScannable: String, modifier: Modifier) {
+  var notScannableExpanded by remember { mutableStateOf(false) }
   Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+      Text(stringResource(Res.string.raid_buff_categories_help_title), color = Color.White, fontWeight = FontWeight.Bold)
+      BuffCategoriesHelp()
+    }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       Text(stringResource(Res.string.raid_copy_not_buffed_title), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
       Text(stringResource(Res.string.raid_copy_buffed_title), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
@@ -1028,6 +1200,152 @@ private fun BuffCopyPane(notBuffed: String, buffed: String, modifier: Modifier) 
       Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notBuffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_not_buffed), color = Color.Black) }
       Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(buffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_buffed), color = Color.Black) }
     }
+    // Collapsible "Not Scannable" section — players we have no in-grace observation for.
+    // Collapses to a single header row to avoid taking up screen real estate.
+    Row(Modifier.fillMaxWidth().clickable { notScannableExpanded = !notScannableExpanded }, horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+      Text(stringResource(Res.string.raid_copy_not_scannable_title), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+      Text(if (notScannableExpanded) "\u25B2" else "\u25BC", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+    }
+    if (notScannableExpanded) {
+      Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SelectableTextField(value = notScannable, modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp, max = 150.dp), minHeight = 0.dp)
+        Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notScannable), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.fillMaxWidth()) { Text(stringResource(Res.string.raid_copy_not_scannable), color = Color.Black) }
+      }
+    }
+  }
+}
+
+@Composable
+private fun BuffCategoriesHelp() {
+  var showHelp by remember { mutableStateOf(false) }
+  Box {
+    IconButton(onClick = { showHelp = !showHelp }, modifier = Modifier.size(24.dp)) {
+      Text("?", color = RFColors.TextSecondary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    }
+    if (showHelp) {
+      Popup {
+        Surface(
+          color = RFColors.PopupBackground.copy(alpha = 0.98f),
+          shape = RoundedCornerShape(8.dp),
+          border = BorderStroke(1.dp, RFColors.CardBorder),
+          elevation = 6.dp
+        ) {
+          Column(
+            Modifier.padding(10.dp).widthIn(max = 360.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Text(
+                stringResource(Res.string.raid_buff_categories_help_title),
+                color = RFColors.TextPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
+              )
+              IconButton(
+                onClick = { showHelp = false },
+                modifier = Modifier.size(24.dp)
+              ) {
+                Text("X", color = RFColors.TextSecondary, fontSize = 11.sp)
+              }
+            }
+            Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+            BuffCategoryHelpRow(stringResource(Res.string.raid_copy_buffed_title), stringResource(Res.string.raid_buff_categories_buffed))
+            BuffCategoryHelpRow(stringResource(Res.string.raid_copy_not_buffed_title), stringResource(Res.string.raid_buff_categories_not_buffed))
+            BuffCategoryHelpRow(stringResource(Res.string.raid_copy_not_scannable_title), stringResource(Res.string.raid_buff_categories_not_scannable))
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun BuffCategoryHelpRow(title: String, explanation: String) {
+  Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+    Text(explanation, color = RFColors.TextSecondary, fontSize = 10.sp, lineHeight = 13.sp)
+  }
+}
+
+@Composable
+private fun LootBuffRankList(members: List<RaidFramePayload>, observations: Map<RaidFramePayload, RaidBuffObservation>, modifier: Modifier) {
+  // Scrollable, max-height breakdown of players sorted by their current summed loot buff %,
+  // most → least. Uses the grace-period cached snapshots so players who loot buffed recently
+  // (but are now out-of-range / empty) still appear. Rows flow across multiple columns so
+  // more players are visible at once. Uses the buff color (gold) from ColorsHelper.
+  val ranked = members
+    .map { member ->
+      val snapshot = observations[member]?.snapshot
+      val amount = if (snapshot != null) lootBuffAmountForIds(snapshot.buffIds) else 0
+      member to amount
+    }
+    .filter { it.second > 0 }
+    .sortedByDescending { it.second }
+  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Text(stringResource(Res.string.raid_loot_breakdown_title), color = Color.White, fontWeight = FontWeight.Bold)
+    if (ranked.isEmpty()) {
+      Text(stringResource(Res.string.raid_buff_none_found), color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
+    } else {
+      val maxAmount = ranked.first().second.coerceAtLeast(1)
+      BoxWithConstraints(
+        Modifier.fillMaxWidth().heightIn(max = 224.dp).verticalScroll(rememberScrollState())
+      ) {
+        // Two columns when there's room; otherwise a single column.
+        val columns = if (maxWidth >= 520.dp) 2 else 1
+        val chunkSize = if (ranked.size % columns == 0) ranked.size / columns else (ranked.size / columns) + 1
+        // Bottom padding so the last row's text doesn't clip against the scroll container.
+        if (columns == 2) {
+          Row(Modifier.fillMaxWidth().padding(bottom = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            ranked.take(100).chunked(chunkSize).forEach { chunk ->
+              Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                chunk.forEach { (member, amount) ->
+                  LootBuffRow(member.playerName, amount, maxAmount)
+                }
+              }
+            }
+          }
+        } else {
+          Column(Modifier.fillMaxWidth().padding(bottom = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            ranked.take(100).forEach { (member, amount) ->
+              LootBuffRow(member.playerName, amount, maxAmount)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun LootBuffRow(name: String, amount: Int, maxAmount: Int) {
+  Row(
+    Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 1.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Text(name, color = Color.White, fontSize = 11.sp, maxLines = 1, modifier = Modifier.weight(1f))
+    // Mini bar — visual comparison of this player's loot % against the raid max.
+    val fraction = (amount.toFloat() / maxAmount).coerceIn(0f, 1f)
+    Box(
+      modifier = Modifier
+        .width(56.dp)
+        .height(6.dp)
+        .clip(RoundedCornerShape(3.dp))
+        .background(Color.White.copy(alpha = 0.1f))
+    ) {
+      Box(
+        modifier = Modifier
+          .fillMaxHeight()
+          .fillMaxWidth(fraction)
+          .clip(RoundedCornerShape(3.dp))
+          .background(RFColors.lootBuffColor)
+      )
+    }
+    Spacer(modifier = Modifier.width(6.dp))
+    Text("$amount%", color = RFColors.lootBuffColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(42.dp))
   }
 }
 

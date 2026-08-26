@@ -438,3 +438,34 @@ val MIGRATION_39_40 = object : Migration(39, 40) {
     connection.prepare("ALTER TABLE config ADD COLUMN performanceEventHistoryDepth INTEGER NOT NULL DEFAULT 500").use { it.step() }
   }
 }
+
+// Added battle graph spell depth setting to cap per-target spell breakdowns for memory optimization.
+val MIGRATION_40_41 = object : Migration(40, 41) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceBattleGraphSpellDepth INTEGER NOT NULL DEFAULT 30").use { it.step() }
+  }
+}
+
+// Added combatOverlayAsTooltipEnabled to ConfigEntity (08/23/26)
+val MIGRATION_41_42 = object : Migration(41, 42) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN combatOverlayAsTooltipEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
+  }
+}
+
+// Added Raid Caller / Leader overlay config to ConfigEntity (08/24/26)
+val MIGRATION_42_43 = object : Migration(42, 43) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerOverlayEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerLootBuffThreshold INTEGER NOT NULL DEFAULT 150").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerBuffRequirements TEXT NOT NULL DEFAULT 'FEAST_RIBS,GOBLET,STATUE_BUFF,WAR_DRUM'").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerBuffGracePeriod TEXT NOT NULL DEFAULT 'FIFTEEN_MINUTES'").use { it.step() }
+  }
+}
+
+// Added editable meta specs to ConfigEntity (08/25/26). Empty string = stock sets.
+val MIGRATION_43_44 = object : Migration(43, 44) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN customMetaSpecsJson TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}

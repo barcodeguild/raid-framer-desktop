@@ -47,10 +47,37 @@ import com.reoky.raidframer.core.definitions.protectiveWingsBuffIds
 import com.reoky.raidframer.core.definitions.courageousActionBuffIds
 import com.reoky.raidframer.core.definitions.manaBarrierBuffIds
 import com.reoky.raidframer.core.definitions.reviveSpellIds
+import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 // Performance: configurable event history depth from settings
 private val eventHistoryDepth: Int get() = RFConfig.state.value.performanceEventHistoryDepth.coerceIn(50, 5000)
+
+// Performance: configurable battle graph spell depth (max targets per player for BySpell maps)
+private val battleGraphSpellDepth: Int get() = RFConfig.state.value.performanceBattleGraphSpellDepth.coerceIn(10, 200)
+private const val MAX_SPELLS_PER_TARGET = 10
+
+/**
+ * Caps a nested target→(spell→value) map to keep only the top [maxTargets] targets
+ * by total value, and within each target, only the top [maxSpells] spells.
+ * This bounds memory from O(targets × spells) to O(maxTargets × maxSpells).
+ */
+private fun <T : Number> Map<String, Map<String, T>>.cappedBySpell(
+  maxTargets: Int,
+  maxSpells: Int
+): Map<String, Map<String, T>> {
+  if (size <= maxTargets && values.all { it.size <= maxSpells }) return this
+  return entries
+    .sortedByDescending { (_, spells) -> spells.values.sumOf { it.toLong() } }
+    .take(maxTargets)
+    .associate { (target, spells) ->
+      target to if (spells.size <= maxSpells) spells
+      else spells.entries
+        .sortedByDescending { it.value.toLong() }
+        .take(maxSpells)
+        .associate { it.key to it.value }
+    }
+}
 
 /**
  * Determine if the PlayerCard should be upgraded to a real player based on heuristics. (oh eek!)
@@ -90,7 +117,8 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
       run {
         val spellKey = event.spell.ifBlank { "Unknown" }
         val targetMap = this.sessionDamageToPlayerBySpell[event.target] ?: emptyMap()
-        this.sessionDamageToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey] ?: 0L) + event.damage))))
+        (this.sessionDamageToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey] ?: 0L) + event.damage)))))
+          .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
       }
     } else this.sessionDamageToPlayerBySpell
   )
@@ -136,7 +164,8 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
       run {
         val spellKey = event.spell.ifBlank { "Unknown" }
         val targetMap = this.sessionHealToPlayerBySpell[event.target] ?: emptyMap()
-        this.sessionHealToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey] ?: 0L) + event.amount))))
+        (this.sessionHealToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey] ?: 0L) + event.amount)))))
+          .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
       }
     }
   )
@@ -394,7 +423,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionCCToPlayerBySpell = if (isCC && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionCCToPlayerBySpell[event.target] ?: emptyMap()
-      this.sessionCCToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+      (this.sessionCCToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1)))))
+        .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
     } else {
       this.sessionCCToPlayerBySpell
     },
@@ -407,7 +437,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       run {
         val debuffKey = event.debuff.ifBlank { "Unknown" }
         val targetMap = this.sessionDebuffToPlayerBySpell[event.target] ?: emptyMap()
-        this.sessionDebuffToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+        (this.sessionDebuffToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1)))))
+          .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
       }
     } else this.sessionDebuffToPlayerBySpell,
     sessionSpellDebuffMap = run {
@@ -429,7 +460,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionCharmToPlayerBySpell = if (isCharm && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionCharmToPlayerBySpell[event.target] ?: emptyMap()
-      this.sessionCharmToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+      (this.sessionCharmToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1)))))
+        .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
     } else {
       this.sessionCharmToPlayerBySpell
     },
@@ -443,7 +475,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionDistressToPlayerBySpell = if (isDistress && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionDistressToPlayerBySpell[event.target] ?: emptyMap()
-      this.sessionDistressToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+      (this.sessionDistressToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1)))))
+        .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
     } else {
       this.sessionDistressToPlayerBySpell
     },
@@ -457,7 +490,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionSilenceToPlayerBySpell = if (isSilence && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionSilenceToPlayerBySpell[event.target] ?: emptyMap()
-      this.sessionSilenceToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1))))
+      (this.sessionSilenceToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1)))))
+        .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
     } else {
       this.sessionSilenceToPlayerBySpell
     },
@@ -520,7 +554,8 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
     sessionBuffToPlayerBySpell = if (RFConfig.state.value.performanceBattleGraphEnabled) {
       val buffKey = event.buff.ifBlank { "Unknown" }
       val targetMap = this.sessionBuffToPlayerBySpell[event.target] ?: emptyMap()
-      this.sessionBuffToPlayerBySpell + (event.target to (targetMap + (buffKey to ((targetMap[buffKey] ?: 0) + 1))))
+      (this.sessionBuffToPlayerBySpell + (event.target to (targetMap + (buffKey to ((targetMap[buffKey] ?: 0) + 1)))))
+        .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
     } else this.sessionBuffToPlayerBySpell,
     sessionSpellBuffMap = run {
       val buffKey = event.buff.ifBlank { "Unknown" }
@@ -548,8 +583,10 @@ fun PlayerCard.postKillEvent(
       lastSeen = timestamp,
       lifetimeTotalKills = cache.lifetimeTotalKills + 1
     ),
-    // Add to recent kills map
-    recentKills = this.recentKills + (timestamp to victimName),
+    // Add to recent kills map (capped to eventHistoryDepth)
+    recentKills = (this.recentKills + (timestamp to victimName))
+      .entries.sortedByDescending { it.key }.take(eventHistoryDepth)
+      .associate { it.key to it.value },
     // Increment kill score
     sessionKillTotal = this.sessionKillTotal + 1,
     // --- Kill adjacency ---
@@ -563,7 +600,8 @@ fun PlayerCard.postKillEvent(
         preDeathSpells.forEach { (spell, damage) ->
           merged[spell] = (merged[spell] ?: 0L) + damage
         }
-        this.sessionKillsToPlayerBySpell + (victimName to merged)
+        (this.sessionKillsToPlayerBySpell + (victimName to merged))
+          .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
       }
     } else this.sessionKillsToPlayerBySpell
   )
@@ -579,7 +617,9 @@ fun PlayerCard.postKillEventKB(timestamp: Long, victimName: String): PlayerCard 
       lastSeen = timestamp,
       lifetimeTotalKillsKB = cache.lifetimeTotalKillsKB + 1
     ),
-    recentKillsKB = this.recentKillsKB + (timestamp to victimName),
+    recentKillsKB = (this.recentKillsKB + (timestamp to victimName))
+      .entries.sortedByDescending { it.key }.take(eventHistoryDepth)
+      .associate { it.key to it.value },
     sessionKillTotalKB = this.sessionKillTotalKB + 1
   )
 }
@@ -593,13 +633,17 @@ fun PlayerCard.postDeathEvent(
   killerKillingBlow: String?
 ): PlayerCard {
   val updatedKilledBys = if (killerMostDamage != null) {
-    this.recentKilledBys + (timestamp to killerMostDamage)
+    (this.recentKilledBys + (timestamp to killerMostDamage))
+      .entries.sortedByDescending { it.key }.take(eventHistoryDepth)
+      .associate { it.key to it.value }
   } else {
     this.recentKilledBys
   }
 
   val updatedKilledBysKB = if (killerKillingBlow != null) {
-    this.recentKilledByKB + (timestamp to killerKillingBlow)
+    (this.recentKilledByKB + (timestamp to killerKillingBlow))
+      .entries.sortedByDescending { it.key }.take(eventHistoryDepth)
+      .associate { it.key to it.value }
   } else {
     this.recentKilledByKB
   }
@@ -702,6 +746,37 @@ fun PlayerCard.updateLifeMendStats(healAmount: Int): PlayerCard {
     lifeMendHealAmounts = newAmounts,
     lifeMendAverage = avg,
     lifeMendQuality = quality
+  )
+}
+
+/**
+ * Records a fresh loot-buff scan result. [buffIds] is the set of buff IDs currently on the
+ * player, and [buffCount] is the total number of active buffs (from X2Unit:UnitBuffCount).
+ *
+ * The combined loot percentage is the sum of every loot buff the player has. The current
+ * amount always overwrites the previous one, but only a genuinely new peak is recorded so a
+ * failed (empty) scan never clears the player's best loot buff showing.
+ */
+fun PlayerCard.updateLootBuffStats(buffIds: Set<Int>, buffCount: Int): PlayerCard {
+  val amount = lootBuffAmountForIds(buffIds)
+  return copy(
+    sessionCurrentLootBuffAmount = amount,
+    sessionPeakLootBuffAmount = maxOf(sessionPeakLootBuffAmount, amount),
+    sessionCurrentBuffCount = buffCount
+  )
+}
+
+/**
+ * Accumulates time-in-range for the coherence rankings. [renderMs], [raidMs] and [clumpMs]
+ * are the elapsed session milliseconds the player spent within the 120m / 60m / 30m thresholds.
+ * Called from the roster-distance tracker in PlayerCacheInteractor.
+ */
+fun PlayerCard.accumulateCoherence(renderMs: Long, raidMs: Long, clumpMs: Long): PlayerCard {
+  if (renderMs <= 0L && raidMs <= 0L && clumpMs <= 0L) return this
+  return copy(
+    sessionCoherenceRenderMs = sessionCoherenceRenderMs + renderMs,
+    sessionCoherenceRaidMs = sessionCoherenceRaidMs + raidMs,
+    sessionCoherenceClumpMs = sessionCoherenceClumpMs + clumpMs
   )
 }
 

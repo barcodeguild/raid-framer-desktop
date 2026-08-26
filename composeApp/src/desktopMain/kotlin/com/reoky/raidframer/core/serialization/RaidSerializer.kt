@@ -36,6 +36,9 @@ data class RaidFramePayload(
   val lastZone: String = "",
   val distance: Int = -1,
   val buffScanTimestamp: Long = 0L,
+  // Total number of buffs currently on the player (X2Unit:UnitBuffCount), used for the
+  // "Top # of Buffs (Too Many?)" ranking. Not the count of whitelisted buffs.
+  val buffCount: Int = 0,
   @Serializable(with = SecondsToMillisSerializer::class)
   val lastUpdated: Long = 0L,
   val buffs: List<BuffPayload> = emptyList()

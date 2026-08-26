@@ -122,12 +122,16 @@ You should still complete the uninstallation of the main application by uninstal
     <string name="category_crystal_wings">Crystal Wings</string>
     <string name="category_glider_disables">Glider Disables</string>
     <string name="category_provoked">Provokes</string>
+    <string name="category_coherence_render">Coherence (Render &lt;120m)</string>
+    <string name="category_coherence_raid">Coherence (Raid &lt;60m)</string>
+    <string name="category_coherence_clump">Coherence (Clump &lt;15m)</string>
     <string name="settings_combat_overlay_title">Combat Overlay</string>
     <string name="settings_combat_fade_controls">Auto-fade icon controls when the cursor leaves the overlay.</string>
     <string name="settings_combat_show_spec_icons">Show skill-tree icons in player rows</string>
     <string name="settings_item_use_overlay">Enable Item Use Overlay. Shows recent item uses in a kill-feed style. [EXPERIMENTAL / PROTOTYPE]</string>
     <string name="settings_split_chat">Enable OSRS-style split-chat window overlay. (Coming Soon)</string>
     <string name="settings_tabbed_detection">Automatically hide game overlay's while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).</string>
+    <string name="settings_combat_overlay_tooltip">Make Combat Overlay a Multi-Monitor Tool-Tip instead of a Game Overlay. (Shows as a draggable, always-visible tool-tip with a title-bar.)</string>
     <string name="settings_allow_pve_damage">Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)</string>
     <string name="settings_game_schedule_hotkey">Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay. (Coming Soon)</string>
     <string name="settings_use_sadly">I'd prefer to use Sadly.io for in-game schedule data. (Coming Soon)</string>
@@ -276,8 +280,8 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="pet_cast_overflow_format">+%1$d more</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">Dragon Breaths, Risos, Battle Pets and Other Creatures</string>
-    <string name="pokemon_no_companions">No active companions detected, yet...</string>
+    <string name="pokemon_title">Dragon Breaths</string>
+    <string name="pokemon_no_companions">No Dragon breaths or Risopodia guided missiles detected yet...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">Unknown: %1$s</string>
@@ -439,6 +443,20 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_top_debuffs">Top Debuffs</string>
     <string name="summary_top_songs">Top Songs</string>
     <string name="summary_top_buffs">Top Buffs</string>
+    <string name="summary_top_loot_peak">Top Peak Loot Buff %</string>
+    <string name="summary_worst_loot_peak">Worst Peak Loot Buff %</string>
+    <string name="summary_top_buff_count">Top # of Buffs (Too Many?)</string>
+    <string name="summary_tab_loot">Loot Buffs</string>
+    <string name="summary_tab_coherence">Coherence</string>
+    <string name="summary_top_coherence_render">Coherence (Render &lt;120m)</string>
+    <string name="summary_top_coherence_raid">Coherence (Raid &lt;60m)</string>
+    <string name="summary_top_coherence_clump">Coherence (Clump &lt;15m)</string>
+    <string name="coherence_help_title">Coherence</string>
+    <string name="coherence_help_body">Coherence measures how long each raid member spends within range of the recorder (you). A raid that stays clustered together is more effective at fighting; when players are all over the place the raid struggles to win.
+
+Time is counted from raid-roster distance updates at the 120m (Render), 60m (Raid) and 15m (Clump) thresholds. The value shown is the seconds in range, plus a percentage of the raid-adjusted recording time.
+
+To reduce bias, the recorder must try to stay in range of the raid at all times. The recorder's own in-range time appears on exported images so your raid can judge how trustworthy the coherence ranking is.</string>
     <string name="summary_top_ode_haranya">Top Ode Haranya</string>
     <string name="summary_top_ode_nuia">Top Ode Nuia</string>
     <string name="summary_top_ode_pirate">Top Ode Pirate</string>
@@ -554,9 +572,6 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="general_metric_type_healing_short">HEALS</string>
     <string name="general_no_data_available">No Data Available</string>
 
-    <!-- Help Strings -->
-    <string name="general_help_window_postions_reset">All window positions have been reset! Please remember: If you have alt-tab detection enabled, any overlays (those without a title bar) may not appear until you switch back to the game window.</string>
-
     <!-- Leadership Roles -->
     <string name="leadership_none">None</string>
     <string name="leadership_raid_lead">Raid Lead</string>
@@ -653,6 +668,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="export_header_kills_label">Kills</string>
     <string name="export_header_most_damage">Most Damage</string>
     <string name="export_header_killing_blow">Killing Blow</string>
+    <string name="export_header_coherence">Recorder In-Range</string>
 
     <!-- Export Settings -->
     <string name="settings_export_title">Export Settings</string>
@@ -752,9 +768,12 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_orange_goblet">Require Orange Goblet</string>
     <string name="raid_buff_allow_meatballs">Allow Meatballs</string>
     <string name="raid_buff_require_enhanced">Require Enhanced Longing</string>
-    <string name="raid_buff_loot_section">+50% Loot Buffs</string>
+    <string name="raid_buff_loot_section">Require Loot Buffs</string>
     <string name="raid_buff_at_least_one_loot">At Least One +50% Buff</string>
     <string name="raid_buff_two_loot">Two or More +50% Buffs</string>
+    <string name="raid_buff_check_loot">Check for loot buffs?</string>
+    <string name="raid_buff_loot_threshold_label">Threshold:</string>
+    <string name="raid_loot_breakdown_title">Loot Breakdown (Most → Least)</string>
     <string name="raid_buff_selected_player">Selected Player</string>
     <string name="raid_buff_no_player">Click a player to inspect buffs</string>
     <string name="raid_buff_passed">Requirements met</string>
@@ -762,6 +781,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_none_found">No tracked buffs found</string>
     <string name="raid_buff_has_buffs">Has Buffs</string>
     <string name="raid_buff_missing_buffs">Missing Buffs</string>
+    <string name="raid_buff_loot_buffs">Loot Buffs</string>
     <string name="raid_buff_last_observed">Last observed: %1$s</string>
     <string name="raid_buff_current_scan">Current scan</string>
     <string name="raid_buff_grace_period">Grace Period</string>
@@ -793,6 +813,12 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_copy_not_buffed_title">Not Buffed</string>
     <string name="raid_copy_buffed">Copy Buffed</string>
     <string name="raid_copy_buffed_title">Buffed</string>
+    <string name="raid_copy_not_scannable">Copy Not Scannable</string>
+    <string name="raid_copy_not_scannable_title">Not Scannable</string>
+    <string name="raid_buff_categories_help_title">Buff Status</string>
+    <string name="raid_buff_categories_buffed">Players the app recently scanned who have all the required buffs. They are ready to go.</string>
+    <string name="raid_buff_categories_not_buffed">Players the app recently scanned who are missing at least one required buff, or do not meet the loot threshold. Tell them to fix up.</string>
+    <string name="raid_buff_categories_not_scannable">Players the app could not get a fresh scan on (out of range or in a different zone). They may or may not be buffed. The app just has not confirmed them yet.</string>
     <string name="raid_haranya_faction">Haranya Faction (%d)</string>
     <string name="raid_nuian_faction">Nuian Faction (%d)</string>
     <string name="raid_pirate_faction">Pirate Faction (%d)</string>
@@ -1217,6 +1243,10 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="combat_export_saving_session">Saving session %1$d/%2$d</string>
     <string name="combat_export_saving_language">Saving %1$s export %2$d/%3$d</string>
 
+    <!-- RAM Usage -->
+    <string name="settings_ram_usage_title">RAM Usage</string>
+    <string name="settings_ram_usage_description">Live JVM heap memory usage graph.</string>
+
     <!-- Performance Settings -->
     <string name="settings_performance_title">Performance</string>
     <string name="settings_performance_description">Control which features are active to improve FPS in large-scale battles. Disabling features reduces the amount of data processed per combat event.</string>
@@ -1226,7 +1256,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_performance_companion_enabled_desc">Stops all event processing in the Lua addon. The addon remains loaded and will resume when re-enabled.</string>
     <string name="settings_performance_impact_maximum">Maximum</string>
     <string name="settings_performance_raid_buff_scanning">Raid Buff Scanning</string>
-    <string name="settings_performance_raid_buff_scanning_desc">Scans all raid members for active buffs, distance, and gear score every second. Required for Life Mend detection and the raid buff checker. Automatically disabled when Raid Roster tracking is off.</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Scans all raid members for active buffs, distance, and gear score every 5 seconds. Required for Life Mend detection and the raid buff checker. Automatically disabled when Raid Roster tracking is off.</string>
     <string name="settings_performance_impact_heavy">Heavy</string>
     <string name="settings_performance_buff_debuff_tracking">Buffs / Debuffs Tracking</string>
     <string name="settings_performance_buff_debuff_tracking_desc">Tracks SPELL_AURA_APPLIED and SPELL_AURA_REMOVED events. Disabling this limits tracking to damage and heals only.</string>
@@ -1243,6 +1273,10 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_performance_event_history_depth">Event History Depth</string>
     <string name="settings_performance_event_history_depth_desc">Maximum events stored per player card for the event timeline. Lower values use less memory.</string>
     <string name="settings_performance_event_history_estimate">~%1$s events per player \u00D7 %2$d tracked \u2248 ~%3$s total</string>
+    <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
+    <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
+    <string name="settings_performance_battle_graph_estimate">~%1$d targets \u00D7 10 spells \u00D7 9 maps \u00D7 %2$d players \u2248 ~%3$s for spell breakdowns</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB</string>
     <string name="settings_performance_distance_help">? Distance</string>
     <string name="settings_performance_impact_label">Impact:</string>
 
@@ -1262,4 +1296,96 @@ This will allow the app to use this seed table as a reference for player data.</
     <!-- Distance Filtering Help Dialog -->
     <string name="performance_distance_help_title">Distance &amp; Info Filtering</string>
     <string name="performance_distance_help_body">The in-game combat settings (ESC \u2192 Options \u2192 Game Info) control what data flows into the addon.\n\n\u201CShow Combat Messages\u201D checkbox: Toggles damage/heal hitsplats in the game visually, but does NOT affect data flow to the addon. You can have them on or off.\n\nInfo Filter (SELF / PARTY / RAID / GUILD / ALL): This DOES affect data flow. Changing the filter limits which combat events the addon receives.\n\nDistance Slider: This DOES affect data flow. Reducing the range limits how far away combat events are detected.\n\nExamples:\n\u2022 SELF \u2014 Only your own character\u2019s events. The distance slider is automatically greyed out since it\u2019s not relevant.\n\u2022 PARTY \u2014 Your group of 5. In ArcheAge, everyone in your raid column is considered your \u201Cparty.\u201D For example, spells like Sonic Wave that \u201Cremove negative effects from all party members\u201D affect your column of 5, not the entire raid.\n\u2022 RAID \u2014 All parties in the raid (all columns).\n\u2022 GUILD \u2014 Only players matching your guild tag. A second guild tag won\u2019t appear since it\u2019s technically a different guild.\n\nAdjusting these in-game filters may be preferable to disabling features in the app, as they provide finer control over what data is processed.</string>
+
+    <!-- Tray Menu Labels -->
+    <string name="tray_dragon_breaths">Dragon Breaths</string>
+    <string name="tray_raid_management">Raid Management</string>
+    <string name="tray_battle_summary">Battle Summary</string>
+    <string name="tray_battle_graph">Battle Graph</string>
+    <string name="tray_new_session">New Session</string>
+    <string name="tray_save_session">Save Session</string>
+    <string name="tray_abort_session">Abort Session</string>
+    <string name="tray_lua_options">Lua Options</string>
+    <string name="tray_close">Close</string>
+
+    <!-- Raid Caller / Leader Overlay -->
+    <string name="raid_caller_title">Raid Caller</string>
+    <string name="raid_caller_no_raid">Join a raid to see caller stats</string>
+    <string name="raid_caller_position_hint">Shift+Click+Drag to Position</string>
+    <string name="raid_caller_avg_gs">Avg GS</string>
+    <string name="raid_caller_lowest_gs">Lowest GS</string>
+    <string name="raid_caller_highest_gs">Highest GS</string>
+    <string name="raid_caller_rebirth">Rebirth</string>
+    <string name="raid_caller_minimal">Minimal</string>
+    <string name="raid_caller_none">None</string>
+    <string name="raid_caller_loot">Loot</string>
+    <string name="raid_caller_buffed">Buffed</string>
+    <string name="raid_caller_min_buffed">Min Buffed</string>
+    <string name="raid_caller_so_tf">SoTF</string>
+    <string name="raid_caller_war_time">War Time</string>
+    <string name="raid_caller_dragon">Dragon</string>
+    <string name="raid_caller_riso">Riso</string>
+    <string name="raid_caller_coherence">Coherence</string>
+    <string name="raid_caller_render">Render</string>
+    <string name="raid_caller_raid">Raid</string>
+    <string name="raid_caller_clump">Clump</string>
+    <string name="raid_caller_meta">Meta</string>
+    <string name="raid_caller_cc">CC</string>
+    <string name="raid_caller_healer">Healer</string>
+    <string name="raid_caller_melee">Melee</string>
+    <string name="raid_caller_mage">Mage</string>
+    <string name="raid_caller_dancer">Dancer</string>
+    <string name="raid_caller_ranged">Ranged</string>
+    <string name="raid_caller_non_meta">Non-Meta</string>
+    <string name="raid_caller_main_raid">Main Raid</string>
+    <string name="raid_caller_co_raid">Co-Raid</string>
+    <string name="raid_caller_faction_haranya">Haranya</string>
+    <string name="raid_caller_faction_nuia">Nuia</string>
+    <string name="raid_caller_faction_pirate">Pirate</string>
+    <string name="raid_caller_start_recording">Start Recording</string>
+    <string name="raid_caller_stop_recording">Stop</string>
+    <string name="raid_caller_save_stop">Save &amp; Stop</string>
+    <string name="raid_caller_abort_discard">Abort &amp; Discard</string>
+    <string name="raid_caller_idle">Not Recording</string>
+    <string name="raid_caller_recording">Recording</string>
+    <string name="raid_caller_loot_threshold">Loot Threshold</string>
+    <string name="raid_caller_buff_mode">Loot Buff Mode</string>
+    <string name="raid_caller_buff_grace">Buff Grace</string>
+
+    <!-- Raid Caller Settings -->
+    <string name="settings_raid_caller_overlay">Enable Raid Caller/Leader Overlay. Shows caller-relevant raid statistics in a compact format covering composition, buffs, loot, dragon/riso usage, coherence, and gear score.</string>
+    <string name="settings_raid_caller_loot_threshold">Default Minimum Loot Buff Requirement: %1$s</string>
+    <string name="settings_raid_caller_loot_note">Unbuffed players start at 100% in-game!</string>
+    <string name="settings_raid_caller_buff_requirement">Default Minimum Buff Requirement</string>
+    <string name="settings_raid_caller_grace_period">Default Grace Period</string>
+    <string name="settings_raid_caller_sync_note">These defaults stay in sync with the Raid Overlay → Buffs tab.</string>
+
+    <!-- Raid Buffs tab loot baseline note -->
+    <string name="raid_buff_loot_baseline_note">Unbuffed players start at 100% in-game. The threshold compares against this baseline.</string>
+
+    <!-- Editable Meta Specs Editor (08/25/26) -->
+    <string name="meta_specs_cc">CC</string>
+    <string name="meta_specs_melee">Melee</string>
+    <string name="meta_specs_healer">Healer</string>
+    <string name="meta_specs_mage">Mage</string>
+    <string name="meta_specs_dancer">Dancer</string>
+    <string name="meta_specs_ranged">Ranged</string>
+    <string name="meta_specs_title">Meta Specs</string>
+    <string name="meta_specs_description">Customize which specs the app treats as CC, melee, healer, mage, dancer, and ranged. Custom specs appear white and bold. Press + on a category to add a spec, x on a tag to remove it.</string>
+    <string name="meta_specs_stock">Stock</string>
+    <string name="meta_specs_custom">Custom</string>
+    <string name="meta_specs_reset">Reset to Stock</string>
+    <string name="meta_specs_reset_confirm_title">Reset Meta Specs?</string>
+    <string name="meta_specs_reset_confirm_text">This will discard all customizations and restore the built-in stock meta specs.</string>
+    <string name="meta_specs_accept">Accept</string>
+    <string name="meta_specs_cancel">Cancel</string>
+    <string name="meta_specs_add">Add spec</string>
+    <string name="meta_specs_remove">Remove %1$s</string>
+    <string name="meta_specs_none">none</string>
+    <string name="meta_specs_unknown_spec">Unknown / Incomplete</string>
+    <string name="meta_specs_accept_disabled">Pick a valid spec type to enable Accept</string>
+    <string name="settings_meta_specs_button">Customize Meta Specs</string>
+    <string name="settings_meta_specs_state">Current Meta Spec State: %1$s</string>
+    <string name="settings_meta_specs_description">Override which specs are treated as meta in the composition, raid caller, and technical analysis. Custom specs are shown white and bold.</string>
+    <string name="meta_specs_edit_icon">Edit meta specs</string>
 </resources>

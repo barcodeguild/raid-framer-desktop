@@ -6,8 +6,14 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import com.reoky.raidframer.AppState
+import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
+import com.reoky.raidframer.ui.OverlayType
+import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.graphs.GraphMetricType
+import com.reoky.raidframer.ui.overlay.RaidTab
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.time_ago_just_now
@@ -47,6 +53,22 @@ fun Long.humanReadableAbbreviation(): String {
   val idx = (exp - 1).coerceAtMost(suffixes.lastIndex)
   val scaled = this / 1000.0.pow(exp.toDouble())
   return String.format("%.1f%c", scaled, suffixes[idx])
+}
+
+/**
+ * Formats a duration in milliseconds as a compact human-readable string using the most sensible
+ * unit, e.g. "59s", "1min 2s", "10min 2s", "1h 2min". Seconds-only when under a minute.
+ */
+fun Long.toHumanDuration(): String {
+  val totalSeconds = this / 1000
+  val hours   = totalSeconds / 3600
+  val minutes = (totalSeconds % 3600) / 60
+  val seconds = totalSeconds % 60
+  return when {
+    hours > 0 -> "${hours}h ${minutes}min"
+    minutes > 0 -> "${minutes}min ${seconds}s"
+    else -> "${seconds}s"
+  }
 }
 
 /**
@@ -251,5 +273,65 @@ fun annotatedStringForHeal(event: HealEvent): AnnotatedString {
     withStyle(style = SpanStyle(color = Color.Magenta)) {
       append("(${event.timestamp.toLocalTimeString()})")
     }
+  }
+}
+
+/**
+ * Toggles the player card overlay: closes it if the same player is already selected and the card is open,
+ * otherwise opens it with the given player (and optional metric type).
+ */
+fun togglePlayerCard(wm: WindowManager?, playerName: String, metricType: GraphMetricType? = null) {
+  val isAlreadyOpen = wm?.isVisible(OverlayType.PLAYER_CARD)?.value == true
+  val isSamePlayer = AppState.selectedPlayer.value == playerName
+  if (isAlreadyOpen && isSamePlayer) {
+    wm?.closeWindow(OverlayType.PLAYER_CARD)
+  } else {
+    AppState.selectPlayer(playerName)
+    if (metricType != null) AppState.selectMetricType(metricType)
+    wm?.openWindow(OverlayType.PLAYER_CARD)
+  }
+}
+
+/**
+ * Opens the Raid overlay with the given [tab] selected. When [highlightBuffSelect] is true, the
+ * Buffs tab's buff-selection pane flashes to draw the user's attention to it.
+ */
+fun openRaidTab(wm: WindowManager?, tab: RaidTab, highlightBuffSelect: Boolean = false) {
+  OverlayNav.pendingRaidTab.value = tab
+  OverlayNav.highlightRaidBuffSelect.value = highlightBuffSelect
+  wm?.openWindow(OverlayType.RAID)
+}
+
+/**
+ * Opens the Summary overlay with the dropdown index (category) [index] selected.
+ */
+fun openSummaryTab(wm: WindowManager?, index: Int) {
+  OverlayNav.pendingSummaryTabIndex.value = index
+  wm?.openWindow(OverlayType.SUMMARY)
+}
+
+/**
+ * Opens the Settings overlay, scrolling to and flashing the General Settings section.
+ */
+fun openSettingsGeneral(wm: WindowManager?) {
+  OverlayNav.highlightSettingsGeneral.value = true
+  wm?.openWindow(OverlayType.SETTINGS)
+}
+
+/**
+ * Opens the editable Meta Specs overlay.
+ */
+fun openMetaSpecs(wm: WindowManager?) {
+  wm?.openWindow(OverlayType.META_SPECS)
+}
+
+/**
+ * Toggles the pet (Pokemon) overlay open/closed.
+ */
+fun togglePokemon(wm: WindowManager?) {
+  if (wm?.isVisible(OverlayType.POKEMON)?.value == true) {
+    wm.closeWindow(OverlayType.POKEMON)
+  } else {
+    wm?.openWindow(OverlayType.POKEMON)
   }
 }

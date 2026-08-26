@@ -3,6 +3,7 @@ package com.reoky.raidframer.core.helpers
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.PlayerRole
 
@@ -24,6 +25,7 @@ object RFColors {
 
   // Text colors
   val TextPrimary = Color(0xFFE0E0E0)
+  val TestCaption = Color(0xFFC0C0C0)
   val TextSecondary = Color(0xFFB0B0B0)
   val TextTertiary = Color(0xFF8B8B8B)
   val TextDisabled = Color(0xFF5A5A5A)
@@ -45,11 +47,8 @@ object RFColors {
   val killsRed = Color(0xFFDC143C)       // Crimson — kills graph mode
   val buffsBlue = Color(0xFFFFCA28)      // Gold — buffs graph mode (same as itemSkillYellow)
   val debuffsPurple = Color(0xFFAB47BC)  // Purple — debuffs graph mode (same as silencePurple)
-
-  // Faction colors
-  val factionHaranya = Color(0xFFAB47BC)
-  val factionNuia = Color(0xFFEC407A)
-  val factionPirate = Color(0xFF7E57C2)
+  // Loot buff accent — purple for royalty. Used in the raid loot breakdown and rankings.
+  val lootBuffColor = Color(0xFFAB47BC)
 
   // Composition skill-tree accents
   val treeArchery = Color(0xFFE6A23C)
@@ -145,6 +144,57 @@ object RFColors {
   val gearBlue = Color(0xFF03A9F4)
   val gearCyan = Color(0xFF00E5FF)
   val gearUnknown = Color(0xFF666666)
+
+  // Raid Caller / Leader overlay colors
+  val callerCoherenceRender = Color(0xFF29B6F6) // blue — Render (<120m)
+  val callerCoherenceRaid = Color(0xFF66BB6A)   // green — Raid (<60m)
+  val callerCoherenceClump = Color(0xFFFFCA28)  // gold — Clump (<15m)
+  val callerAvgGs = Color(0xFF7CFF8A)           // bright green — pops against the gear text
+  val callerLowestGs = Color(0xFFFFA726)        // orange
+  val callerHighestGs = Color(0xFF42A5F5)       // blue
+  val callerMainRaid = Color(0xFF36F1CC)        // teal
+  val callerCoRaid = Color(0xFFE56CAB)          // pink
+  val callerMetaMelee = Color(0xFFE85D5D)       // red
+  val callerMetaMage = Color(0xFFFF8A65)        // orange
+  val callerMetaDancer = Color(0xFFFF77B7)      // pink
+  val callerMetaRanged = Color(0xFF4B8DFF)      // blue
+  val callerMetaNonMeta = Color(0xFF9E9E9E)     // gray
+  // Rebirth Trauma pie chart bucket colors (gear-score breakdown gradient)
+  val traumaNone = Color(0xFF03A9F4)            // blue — Minimal/None
+  val traumaShort = Color(0xFF8BC34A)           // green — 15-45s
+  val traumaMedium = Color(0xFFFF9800)          // orange — 45s-1m30s
+  val traumaHigh = Color(0xFFFF6D00)            // orange-red — 1m30s-2m
+  val traumaCritical = Color(0xFFFF1744)        // red — 2m+
+
+  // Editable Meta Specs editor (08/25/26)
+  val metaSpecCustom = Color.White                      // custom (non-stock) specs render white + bold
+  val metaSpecTagBg = Color(0xFF2A2A2A)                 // tag/chip background
+  val metaSpecTagBgCustom = Color(0xFF3A2A2A)           // slightly red-tinted bg for custom tags
+  val metaSpecTagBorder = Color(0xFF5A2020)             // muted red border
+  val metaSpecPlus = Color(0xFF66BB6A)                  // add (+) green
+  val metaSpecRemove = Color(0xFFE53935)                // remove (x) red
+  val metaSpecPickerAccent = Color(0xFFDC143C)          // picker highlight (matches AccentRed)
+
+  // "Well" background used for inset content surfaces (e.g. PlayerCard wells).
+  val WellColor = CardBackground.copy(alpha = 0.72f)
+}
+
+/** Per-skill-tree accent color, shared by the spec-type picker and composition rendering. */
+fun SkillTreeType.accentColor(): Color = when (this) {
+  SkillTreeType.ARCHERY -> RFColors.treeArchery
+  SkillTreeType.AURAMANCY -> RFColors.treeAuramancy
+  SkillTreeType.BATTLERAGE -> RFColors.treeBattlerage
+  SkillTreeType.DEFENSE -> RFColors.treeDefense
+  SkillTreeType.GUNSLINGER -> RFColors.treeGunslinger
+  SkillTreeType.MALEDICTION -> RFColors.treeMalediction
+  SkillTreeType.OCCULTISM -> RFColors.treeOccultism
+  SkillTreeType.SHADOWPLAY -> RFColors.treeShadowplay
+  SkillTreeType.SONGCRAFT -> RFColors.treeSongcraft
+  SkillTreeType.SORCERY -> RFColors.treeSorcery
+  SkillTreeType.SPELLDANCE -> RFColors.treeSpelldance
+  SkillTreeType.SWIFTBLADE -> RFColors.treeSwiftblade
+  SkillTreeType.VITALISM -> RFColors.treeVitalism
+  SkillTreeType.WITCHCRAFT -> RFColors.treeWitchcraft
 }
 
 enum class RFGraphColor(val color: Color) {
@@ -197,6 +247,23 @@ fun Faction.getFactionHighlightColor(faction: Faction): Color {
     }
     Faction.UNKNOWN -> Color.Transparent
   }
+}
+
+/**
+ * Returns the highlight color for [target] from the perspective of the current player's faction
+ * (as configured in RFConfig). Falls back to a per-faction accent when the perspective is unknown
+ * so faction-colored legends/charts keep their visual variety instead of all turning grey.
+ */
+fun factionHighlightColor(target: Faction): Color {
+  val perspective = Faction.fromString(RFConfig.state.value.playerFaction)
+  return perspective.getFactionHighlightColor(target)
+    .takeUnless { it == Color.Transparent }
+    ?: when (target) {
+      Faction.HARANYA -> Color(0xFFAB47BC)
+      Faction.NUIA -> Color(0xFFEC407A)
+      Faction.PIRATE -> Color(0xFF7E57C2)
+      Faction.UNKNOWN -> RFColors.TextPrimary
+    }
 }
 
 /**

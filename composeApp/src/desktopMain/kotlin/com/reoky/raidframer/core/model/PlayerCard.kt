@@ -182,6 +182,20 @@ data class PlayerCard (
   val sessionReviveTotal: Int = 0,
   val sessionDeependDebuffTotal: Int = 0,
 
+  // Coherence: session time (milliseconds) spent with this player within each distance
+  // threshold of the recorder (the user). Held in memory for the session only; not persisted.
+  val sessionCoherenceRenderMs: Long = 0L, // within 120m render range
+  val sessionCoherenceRaidMs: Long = 0L,   // within 60m
+  val sessionCoherenceClumpMs: Long = 0L,  // within 15m
+
+  // Loot buff tracking (held in memory for the session; not persisted as lifetime totals).
+  // sessionCurrentLootBuffAmount = summed % of all loot buffs on the player right now.
+  // sessionPeakLootBuffAmount     = highest summed % seen this session.
+  // sessionCurrentBuffCount       = total number of buffs currently on the player (via UnitBuffCount).
+  val sessionCurrentLootBuffAmount: Int = 0,
+  val sessionPeakLootBuffAmount: Int = 0,
+  val sessionCurrentBuffCount: Int = 0,
+
   // Life Mend tracking (buff 25875) — healer performance metric
   val lifeMendTotal: Int = 0,                              // total Life Mends cast this session
   val lifeMendHealAmounts: List<Int> = listOf(),           // recent heal amounts (capped at 25)

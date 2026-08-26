@@ -121,11 +121,15 @@ Você ainda deve completar a desinstalação do aplicativo principal desinstalan
     <string name="category_glider_disables">Desativação de Planador</string>
     <string name="category_provoked">Provocação</string>
     <string name="settings_combat_overlay_title">Overlay de Combate</string>
+    <string name="category_coherence_render">Coerência (Render &lt;120m)</string>
+    <string name="category_coherence_raid">Coerência (Raid &lt;60m)</string>
+    <string name="category_coherence_clump">Coerência (Agrupado &lt;15m)</string>
     <string name="settings_combat_fade_controls">Desvanecer controles de ícone automaticamente quando o cursor sair do overlay.</string>
     <string name="settings_combat_show_spec_icons">Mostrar ícones de árvore de habilidades nas linhas de jogadores</string>
     <string name="settings_item_use_overlay">Ativar Overlay de Uso de Itens. Mostra usos recentes de itens em estilo kill-feed. [EXPERIMENTAL / PROTOTÓTIPO]</string>
     <string name="settings_split_chat">Ativar overlay de janela split-chat estilo OSRS. (Em Breve)</string>
     <string name="settings_tabbed_detection">Ocultar automaticamente overlays do jogo enquanto estiver fora do jogo em abas. Não se aplica a dicas de ferramenta (aquelas com barra de título).</string>
+    <string name="settings_combat_overlay_tooltip">Fazer do Combat Overlay uma tool-tip multimonitor em vez de um overlay de jogo. (Mostra como uma tool-tip arrastável, sempre visível, com barra de título.)</string>
     <string name="settings_allow_pve_damage">Permitir que Dano PvE seja contado para DPS/Contadores de Kills. (Útil para jogadores solo que querem ver sua saída de dano contra alvos PvE)</string>
     <string name="settings_game_schedule_hotkey">Ativar [SEGURAR TAB] para trazer o site oficial de programação de eventos no jogo como overlay. (Em Breve)</string>
     <string name="settings_use_sadly">Prefiro usar Sadly.io para dados de programação no jogo. (Em Breve)</string>
@@ -258,8 +262,8 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="pet_cast_overflow_format">+%1$d mais</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">Baforadas de Dragão, Risos, Mascotes de Batalha e Outras Criaturas</string>
-    <string name="pokemon_no_companions">Nenhum companheiro ativo detectado ainda...</string>
+    <string name="pokemon_title">Baforadas de Dragão</string>
+    <string name="pokemon_no_companions">Baforadas de Dragão ou mísiles guiadas de Risopodia ainda não detectadas...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">Desconhecido: %1$s</string>
@@ -510,6 +514,16 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="summary_tab_special_dances">Danças Especiais</string>
     <string name="summary_top_life_mends">Top Cura de Vida</string>
     <string name="life_mend_quality_none">Sem dados</string>
+    <string name="summary_tab_coherence">Coerência</string>
+    <string name="summary_top_coherence_render">Coerência (Render &lt;120m)</string>
+    <string name="summary_top_coherence_raid">Coerência (Raid &lt;60m)</string>
+    <string name="summary_top_coherence_clump">Coerência (Agrupado &lt;15m)</string>
+    <string name="coherence_help_title">Coerência</string>
+    <string name="coherence_help_body">Coerência mede quanto tempo cada membro do raid permanece no alcance do gravador (você). Um raid que permanece agrupado é mais eficaz no combate; quando os jogadores estão espalhados, o raid luta para vencer.
+
+O tempo é contado a partir das atualizações de distância da lista do raid nos limites de 120m (Render), 60m (Raid) e 15m (Agrupado). O valor mostrado são os segundos no alcance, mais um percentual do tempo de gravação ajustado ao raid.
+
+Para reduzir o viés, o gravador deve tentar permanecer no alcance do raid o tempo todo. O próprio tempo no alcance do gravador aparece nas imagens exportadas para que seu raid possa julgar o quão confiável é a classificação de coerência.</string>
     <string name="life_mend_quality_hurting">Prejudicando o Raid</string>
     <string name="life_mend_quality_poor">Qualidade Ruim</string>
     <string name="life_mend_quality_good">Bom</string>
@@ -625,6 +639,7 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="export_header_most_damage">Maior Dano</string>
     <string name="export_header_killing_blow">Golpe Mortal</string>
 
+    <string name="export_header_coherence">Gravador em Alcance</string>
     <!-- Export Settings -->
     <string name="settings_export_title">Configurações de Exportação</string>
     <string name="settings_export_description">Gerenciar diretório de saída de exportação e opções.</string>
@@ -1161,6 +1176,10 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="combat_export_saving_session">Salvando sessão %1$d/%2$d</string>
     <string name="combat_export_saving_language">Salvando exportação em %1$s %2$d/%3$d</string>
 
+    <!-- RAM Usage -->
+    <string name="settings_ram_usage_title">Uso de RAM</string>
+    <string name="settings_ram_usage_description">Gráfico de uso de memória heap JVM em tempo real.</string>
+
     <!-- Performance Settings -->
     <string name="settings_performance_title">Desempenho</string>
     <string name="settings_performance_description">Controle quais funcionalidades estão ativas para melhorar o FPS em grandes batalhas. Desativar funcionalidades reduz a quantidade de dados processados por evento de combate.</string>
@@ -1170,7 +1189,7 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="settings_performance_companion_enabled_desc">Para todo o processamento de eventos no addon Lua. O addon permanece carregado e será retomado quando reativado.</string>
     <string name="settings_performance_impact_maximum">Máximo</string>
     <string name="settings_performance_raid_buff_scanning">Verificação de Buffs da Raid</string>
-    <string name="settings_performance_raid_buff_scanning_desc">Verifica todos os membros da raid em busca de buffs ativos, distância e pontuação de equipamento a cada segundo. Necessário para detecção de Life Mend e verificador de buffs da raid. Desativado automaticamente quando o rastreamento da lista de raid está desligado.</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Verifica todos os membros da raid em busca de buffs ativos, distância e pontuação de equipamento cada 5 segundos. Necessário para detecção de Life Mend e verificador de buffs da raid. Desativado automaticamente quando o rastreamento da lista de raid está desligado.</string>
     <string name="settings_performance_impact_heavy">Alto</string>
     <string name="settings_performance_buff_debuff_tracking">Rastreamento de Buffs/Debuffs</string>
     <string name="settings_performance_buff_debuff_tracking_desc">Rastreia eventos SPELL_AURA_APPLIED e SPELL_AURA_REMOVED. Desativar limita o rastreamento apenas a dano e cura.</string>
@@ -1187,6 +1206,10 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="settings_performance_event_history_depth">Profundidade do Histórico de Eventos</string>
     <string name="settings_performance_event_history_depth_desc">Máximo de eventos armazenados por cartão de jogador na linha do tempo. Valores menores usam menos memória.</string>
     <string name="settings_performance_event_history_estimate">~%1$s eventos por jogador \u00D7 %2$d rastreados \u2248 ~%3$s total</string>
+    <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
+    <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
+    <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB</string>
     <string name="settings_performance_distance_help">? Distância</string>
     <string name="settings_performance_impact_label">Impacto:</string>
     <string name="combat_ranking_disabled">Esta classificação está desativada</string>
@@ -1199,4 +1222,91 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="performance_distance_help_title">Distância e Filtragem de Informações</string>
     <string name="performance_distance_help_body">As configurações de combate no jogo (ESC \u2192 Opções \u2192 Informações do Jogo) controlam quais dados fluem para o addon.\n\nCheckbox \u201CMostrar Mensagens de Combate\u201D: Alterna a exibição visual de hits de dano/cura no jogo, mas NÃO afeta o fluxo de dados para o addon. Você pode deixar ligado ou desligado.\n\nFiltro de Informações (SELF / PARTY / RAID / GUILD / ALL): ISSO afeta o fluxo de dados. Alterar o filtro limita quais eventos de combate o addon recebe.\n\nControle Deslizante de Distância: ISSO afeta o fluxo de dados. Reduzir o alcance limita a distância de detecção de eventos de combate.\n\nExemplos:\n\u2022 SELF \u2014 Apenas eventos do seu próprio personagem. O controle deslizante de distância fica automaticamente cinza, pois não é relevante.\n\u2022 PARTY \u2014 Seu grupo de 5. No ArcheAge, todos na sua coluna de raid são considerados seu \u201Cparty.\u201D Por exemplo, feitiços como Onda Sônica que \u201Cremovem efeitos negativos de todos os membros do party\u201D afetam sua coluna de 5, não a raid inteira.\n\u2022 RAID \u2014 Todos os party na raid (todas as colunas).\n\u2022 GUILD \u2014 Apenas jogadores com sua tag de guilda. Uma segunda tag de guilda não aparecerá, pois é tecnicamente uma guilda diferente.\n\nAjustar esses filtros no jogo pode ser preferível a desativar funcionalidades no aplicativo, pois fornecem controle mais refinado sobre quais dados são processados.</string>
 
+    <!-- Tray Menu Labels -->
+    <string name="tray_dragon_breaths">Sopros de Dragão</string>
+    <string name="tray_raid_management">Gerenciamento de Raid</string>
+    <string name="tray_battle_summary">Resumo da Batalha</string>
+    <string name="tray_battle_graph">Gráfico de Batalha</string>
+    <string name="tray_new_session">Nova Sessão</string>
+    <string name="tray_save_session">Salvar Sessão</string>
+    <string name="tray_abort_session">Cancelar Sessão</string>
+    <string name="tray_lua_options">Opções Lua</string>
+    <string name="tray_close">Fechar</string>
+
+<!-- Raid Caller / Leader Overlay -->
+    <string name="raid_caller_title">Chamador de Raide</string>
+    <string name="raid_caller_no_raid">Entre em uma raide para ver as estatísticas do chamador</string>
+    <string name="raid_caller_position_hint">Shift+Clique+Arraste para posicionar</string>
+    <string name="raid_caller_avg_gs">GS Médio</string>
+    <string name="raid_caller_lowest_gs">GS Mínimo</string>
+    <string name="raid_caller_highest_gs">GS Máximo</string>
+    <string name="raid_caller_rebirth">Renascimento</string>
+    <string name="raid_caller_minimal">Mínimo</string>
+    <string name="raid_caller_none">Nenhum</string>
+    <string name="raid_caller_loot">Saque</string>
+    <string name="raid_caller_buffed">Buffado</string>
+    <string name="raid_caller_min_buffed">Min. Buffado</string>
+    <string name="raid_caller_so_tf">SoTF</string>
+    <string name="raid_caller_war_time">Tempo de Guerra</string>
+    <string name="raid_caller_dragon">Dragão</string>
+    <string name="raid_caller_riso">Riso</string>
+    <string name="raid_caller_coherence">Coerência</string>
+    <string name="raid_caller_render">Render</string>
+    <string name="raid_caller_raid">Raide</string>
+    <string name="raid_caller_clump">Agrupamento</string>
+    <string name="raid_caller_meta">Meta</string>
+    <string name="raid_caller_cc">CC</string>
+    <string name="raid_caller_healer">Curador</string>
+    <string name="raid_caller_melee">Corpo a corpo</string>
+    <string name="raid_caller_mage">Mago</string>
+    <string name="raid_caller_dancer">Dançarino</string>
+    <string name="raid_caller_ranged">Distância</string>
+    <string name="raid_caller_non_meta">Não-Meta</string>
+    <string name="raid_caller_main_raid">Raide Principal</string>
+    <string name="raid_caller_co_raid">Co-Raide</string>
+    <string name="raid_caller_faction_haranya">Haranya</string>
+    <string name="raid_caller_faction_nuia">Nuia</string>
+    <string name="raid_caller_faction_pirate">Pirata</string>
+    <string name="raid_caller_start_recording">Iniciar Gravação</string>
+    <string name="raid_caller_stop_recording">Parar</string>
+    <string name="raid_caller_save_stop">Salvar &amp; Parar</string>
+    <string name="raid_caller_abort_discard">Cancelar &amp; Descartar</string>
+    <string name="raid_caller_idle">Não Gravando</string>
+    <string name="raid_caller_recording">Gravando</string>
+    <string name="settings_raid_caller_overlay">Ativar o Overlay de Chamador/Líder de Raide. Mostra estatísticas de raide relevantes ao chamador em formato compacto, cobrindo composição, buffs, saque, uso de dragão/riso, coerência e equipamento.</string>
+    <string name="settings_raid_caller_loot_threshold">Requisito Mínimo de Buff de Saque Padrão: %1$s</string>
+    <string name="settings_raid_caller_loot_note">Jogadores sem buff começam com 100% no jogo!</string>
+    <string name="settings_raid_caller_buff_requirement">Requisito Mínimo de Buff Padrão</string>
+    <string name="settings_raid_caller_grace_period">Período de Carência Padrão</string>
+    <string name="settings_raid_caller_sync_note">Esses padrões permanecem sincronizados com a aba Raide → Buffs.</string>
+    <string name="raid_buff_loot_baseline_note">Jogadores sem buff começam com 100% no jogo. O limite compara com essa base.</string>
+    <string name="raid_caller_loot_threshold">Limite de Saque</string>
+    <string name="raid_caller_buff_mode">Modo de Buff de Saque</string>
+    <string name="raid_caller_buff_grace">Período de Carência de Buff</string>
+
+    <!-- Editable Meta Specs Editor (08/25/26) -->
+    <string name="meta_specs_cc">CC</string>
+    <string name="meta_specs_melee">Corpo a corpo</string>
+    <string name="meta_specs_healer">Curandeiro</string>
+    <string name="meta_specs_mage">Mago</string>
+    <string name="meta_specs_dancer">Dançarino</string>
+    <string name="meta_specs_ranged">Distância</string>
+    <string name="meta_specs_title">Meta Specs</string>
+    <string name="meta_specs_description">Personalize quais especificações o app trata como CC, corpo a corpo, curandeiro, mago, dançarino e distância. Specs personalizadas aparecem em branco e em negrito. Pressione + em uma categoria para adicionar uma spec e x em um marcador para removê-la.</string>
+    <string name="meta_specs_stock">Padrão</string>
+    <string name="meta_specs_custom">Personalizado</string>
+    <string name="meta_specs_reset">Redefinir para Padrão</string>
+    <string name="meta_specs_reset_confirm_title">Redefinir Meta Specs?</string>
+    <string name="meta_specs_reset_confirm_text">Isso descartará todas as personalizações e restaurará as meta specs padrão integradas.</string>
+    <string name="meta_specs_accept">Aceitar</string>
+    <string name="meta_specs_cancel">Cancelar</string>
+    <string name="meta_specs_add">Adicionar spec</string>
+    <string name="meta_specs_remove">Remover %1$s</string>
+    <string name="meta_specs_none">nenhuma</string>
+    <string name="meta_specs_unknown_spec">Desconhecido / Incompleto</string>
+    <string name="meta_specs_accept_disabled">Escolha um tipo de spec válido para habilitar Aceitar</string>
+    <string name="settings_meta_specs_button">Personalizar Meta Specs</string>
+    <string name="settings_meta_specs_state">Estado Atual das Meta Specs: %1$s</string>
+    <string name="settings_meta_specs_description">Substitua quais especificações são tratadas como meta na composição, chamador de raide e análise técnica. Specs personalizadas são mostradas em branco e em negrito.</string>
+    <string name="meta_specs_edit_icon">Editar meta specs</string>
 </resources>

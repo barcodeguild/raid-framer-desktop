@@ -121,11 +121,15 @@
     <string name="category_glider_disables">Обезвреживание планера</string>
     <string name="category_provoked">Провокация</string>
     <string name="settings_combat_overlay_title">Боевой оверлей</string>
+    <string name="category_coherence_render">Согласованность (Рендер &lt;120м)</string>
+    <string name="category_coherence_raid">Согласованность (Рейд &lt;60м)</string>
+    <string name="category_coherence_clump">Согласованность (Кучно &lt;15м)</string>
     <string name="settings_combat_fade_controls">Автоматически скрывать иконки управления, когда курсор покидает оверлей.</string>
     <string name="settings_combat_show_spec_icons">Показывать иконки деревьев навыков в строках игроков</string>
     <string name="settings_item_use_overlay">Включить оверлей использования предметов. Показывает недавние использования предметов в стиле ленты убийств. [ЭКСПЕРИМЕНТАЛЬНЫЙ / ПРОТОТИП]</string>
     <string name="settings_split_chat">Включить оверлей окна раздельного чата в стиле OSRS. (Скоро)</string>
     <string name="settings_tabbed_detection">Автоматически скрывать игровые оверлеи при переключении вкладок из игры. Не применяется к подсказкам (те, у которых есть заголовок).</string>
+    <string name="settings_combat_overlay_tooltip">Сделать боевой оверлей многоэкранной подсказкой вместо игрового оверлея. (Отображается как перетаскиваемая, всегда видимая подсказка с заголовком.)</string>
     <string name="settings_allow_pve_damage">Разрешить PvE урон засчитываться в счетчики DPS/убийств. (Полезно для одиночных игроков, которые хотят видеть свой урон по PvE целям)</string>
     <string name="settings_game_schedule_hotkey">Включить [УДЕРЖИВАТЬ TAB] для отображения официального веб-сайта расписания внутриигровых событий в качестве оверлея. (Скоро)</string>
     <string name="settings_use_sadly">Я предпочитаю использовать Sadly.io для данных о расписании внутриигровых событий. (Скоро)</string>
@@ -258,8 +262,8 @@
     <string name="pet_cast_overflow_format">+%1$d ещё</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">Драконье дыхание, Рисо, боевые питомцы и другие существа</string>
-    <string name="pokemon_no_companions">Активные спутники пока не обнаружены...</string>
+    <string name="pokemon_title">Драконье дыхание</string>
+    <string name="pokemon_no_companions">Драконье дыхание или управляемые ракеты Рисоподии пока не обнаружены...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">Неизвестно: %1$s</string>
@@ -510,6 +514,16 @@
     <string name="summary_tab_special_dances">Особые танцы</string>
     <string name="summary_top_life_mends">Топ исцелений жизни</string>
     <string name="life_mend_quality_none">Нет данных</string>
+    <string name="summary_tab_coherence">Согласованность</string>
+    <string name="summary_top_coherence_render">Согласованность (Рендер &lt;120м)</string>
+    <string name="summary_top_coherence_raid">Согласованность (Рейд &lt;60м)</string>
+    <string name="summary_top_coherence_clump">Согласованность (Кучно &lt;15м)</string>
+    <string name="coherence_help_title">Согласованность</string>
+    <string name="coherence_help_body">Согласованность показывает, как долго каждый участник рейда находится в радиусе действия записывающего (вас). Рейд, который держится вместе, сражается эффективнее; когда игроки разбросаны, рейду трудно победить.
+
+Время учитывается по обновлениям дистанции состава рейда на порогах 120м (Рендер), 60м (Рейд) и 15м (Кучно). Показываемое значение — это секунды в радиусе плюс процент скорректированного времени записи рейда.
+
+Чтобы снизить искажения, записывающий должен стараться всё время оставаться в радиусе рейда. Его собственное время в радиусе отображается на экспортированных изображениях, чтобы ваш рейд мог судить о надёжности рейтинга согласованности.</string>
     <string name="life_mend_quality_hurting">Вредит рейду</string>
     <string name="life_mend_quality_poor">Низкое качество</string>
     <string name="life_mend_quality_good">Хорошо</string>
@@ -625,6 +639,7 @@
     <string name="export_header_most_damage">Наибольший урон</string>
     <string name="export_header_killing_blow">Убийственный удар</string>
 
+    <string name="export_header_coherence">Записывающий в радиусе</string>
     <!-- Export Settings -->
     <string name="settings_export_title">Настройки экспорта</string>
     <string name="settings_export_description">Управление выходным каталогом и параметрами экспорта.</string>
@@ -1161,6 +1176,10 @@
     <string name="combat_export_saving_session">Сохранение сессии %1$d/%2$d</string>
     <string name="combat_export_saving_language">Сохранение экспорта на языке %1$s %2$d/%3$d</string>
 
+    <!-- RAM Usage -->
+    <string name="settings_ram_usage_title">Использование ОЗУ</string>
+    <string name="settings_ram_usage_description">График использования кучи JVM в реальном времени.</string>
+
     <!-- Performance Settings -->
     <string name="settings_performance_title">Производительность</string>
     <string name="settings_performance_description">Управляйте активными функциями для повышения FPS в крупных сражениях. Отключение функций уменьшает объём данных, обрабатываемых за событие боя.</string>
@@ -1170,7 +1189,7 @@
     <string name="settings_performance_companion_enabled_desc">Останавливает всю обработку событий в Lua-аддоне. Аддон остаётся загруженным и возобновит работу при повторном включении.</string>
     <string name="settings_performance_impact_maximum">Максимальное</string>
     <string name="settings_performance_raid_buff_scanning">Сканирование баффов рейда</string>
-    <string name="settings_performance_raid_buff_scanning_desc">Каждую секунду сканирует всех участников рейда на наличие активных баффов, расстояния и очков снаряжения. Необходимо для обнаружения лечения жизнью и проверки баффов рейда. Автоматически отключается при выключении отслеживания состава рейда.</string>
+    <string name="settings_performance_raid_buff_scanning_desc">Каждые 5 секунд сканирует всех участников рейда на наличие активных баффов, расстояния и очков снаряжения. Необходимо для обнаружения лечения жизнью и проверки баффов рейда. Автоматически отключается при выключении отслеживания состава рейда.</string>
     <string name="settings_performance_impact_heavy">Высокое</string>
     <string name="settings_performance_buff_debuff_tracking">Отслеживание баффов/дебаффов</string>
     <string name="settings_performance_buff_debuff_tracking_desc">Отслеживает события SPELL_AURA_APPLIED и SPELL_AURA_REMOVED. Отключение ограничивает отслеживание только уроном и лечением.</string>
@@ -1187,6 +1206,10 @@
     <string name="settings_performance_event_history_depth">Глубина истории событий</string>
     <string name="settings_performance_event_history_depth_desc">Максимальное количество событий, хранимых для карточки игрока в таймлайне. Меньшие значения используют меньше памяти.</string>
     <string name="settings_performance_event_history_estimate">~%1$s событий на игрока \u00D7 %2$d отслеживается \u2248 ~%1$s всего</string>
+    <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
+    <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
+    <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB</string>
     <string name="settings_performance_distance_help">? Дальность</string>
     <string name="settings_performance_impact_label">Влияние:</string>
     <string name="combat_ranking_disabled">Этот рейтинг отключён</string>
@@ -1199,4 +1222,91 @@
     <string name="performance_distance_help_title">Дальность и фильтрация информации</string>
     <string name="performance_distance_help_body">Внутриигровые настройки боя (ESC \u2192 Опции \u2192 Игровая информация) управляют потоком данных в аддон.\n\nЧекбокс \u201CПоказывать боевые сообщения\u201D: Переключает визуальное отображение хитсплотов урона/лечения в игре, НО НЕ влияет на поток данных в аддон. Вы можете включить или выключить.\n\nФильтр информации (СЕБЯ / ГРУППА / РЕЙД / ГИЛЬДИЯ / ВСЁ): ЭТО влияет на поток данных. Изменение фильтра ограничивает боевые события, получаемые аддоном.\n\nПолзунок дальности: ЭТО влияет на поток данных. Уменьшение диапазона ограничивает дальность обнаружения боевых событий.\n\nПримеры:\n\u2022 СЕБЯ \u2014 Только события вашего персонажа. Ползунок дальности автоматически серый, так как неактуален.\n\u2022 ГРУППА \u2014 Ваша группа из 5. В ArcheAge все в вашей колонке рейда считаются вашей \u201Cгруппой.\u201D Например, заклинания типа Звуковой волны, которые \u201Cснимают негативные эффекты со всех членов группы\u201D, затрагивают вашу колонку из 5, а не весь рейд.\n\u2022 РЕЙД \u2014 Все группы в рейде (все колонки).\n\u2022 ГИЛЬДИЯ \u2014 Только игроки, соответствующие вашей метке гильдии. Вторая метка гильдии не отображается, так как технически это другая гильдия.\n\nНастройка этих внутриигровых фильтров может быть предпочтительнее отключения функций в приложении, так как они обеспечивают более точный контроль над обрабатываемыми данными.</string>
 
+    <!-- Tray Menu Labels -->
+    <string name="tray_dragon_breaths">Дыхание дракона</string>
+    <string name="tray_raid_management">Управление рейдом</string>
+    <string name="tray_battle_summary">Итоги боя</string>
+    <string name="tray_battle_graph">График боя</string>
+    <string name="tray_new_session">Новая сессия</string>
+    <string name="tray_save_session">Сохранить сессию</string>
+    <string name="tray_abort_session">Прервать сессию</string>
+    <string name="tray_lua_options">Настройки Lua</string>
+    <string name="tray_close">Закрыть</string>
+
+<!-- Raid Caller / Leader Overlay -->
+    <string name="raid_caller_title">Рейд-лидер</string>
+    <string name="raid_caller_no_raid">Вступите в рейд, чтобы увидеть статистику лидера</string>
+    <string name="raid_caller_position_hint">Shift+Клик+Перетаскивание для позиционирования</string>
+    <string name="raid_caller_avg_gs">Ср. GS</string>
+    <string name="raid_caller_lowest_gs">Мин. GS</string>
+    <string name="raid_caller_highest_gs">Макс. GS</string>
+    <string name="raid_caller_rebirth">Травма перерождения</string>
+    <string name="raid_caller_minimal">Минимально</string>
+    <string name="raid_caller_none">Нет</string>
+    <string name="raid_caller_loot">Добыча</string>
+    <string name="raid_caller_buffed">Бафф</string>
+    <string name="raid_caller_min_buffed">Мин. бафф</string>
+    <string name="raid_caller_so_tf">SoTF</string>
+    <string name="raid_caller_war_time">Военное время</string>
+    <string name="raid_caller_dragon">Дракон</string>
+    <string name="raid_caller_riso">Ризо</string>
+    <string name="raid_caller_coherence">Когерентность</string>
+    <string name="raid_caller_render">Рендер</string>
+    <string name="raid_caller_raid">Рейд</string>
+    <string name="raid_caller_clump">Кластер</string>
+    <string name="raid_caller_meta">Мета</string>
+    <string name="raid_caller_cc">КК</string>
+    <string name="raid_caller_healer">Хилер</string>
+    <string name="raid_caller_melee">Ближний</string>
+    <string name="raid_caller_mage">Маг</string>
+    <string name="raid_caller_dancer">Танцор</string>
+    <string name="raid_caller_ranged">Дальний</string>
+    <string name="raid_caller_non_meta">Не-мета</string>
+    <string name="raid_caller_main_raid">Основной рейд</string>
+    <string name="raid_caller_co_raid">Ко-рейд</string>
+    <string name="raid_caller_faction_haranya">Харанья</string>
+    <string name="raid_caller_faction_nuia">Нуиа</string>
+    <string name="raid_caller_faction_pirate">Пират</string>
+    <string name="raid_caller_start_recording">Начать запись</string>
+    <string name="raid_caller_stop_recording">Стоп</string>
+    <string name="raid_caller_save_stop">Сохранить и остановить</string>
+    <string name="raid_caller_abort_discard">Прервать и отбросить</string>
+    <string name="raid_caller_idle">Не записывается</string>
+    <string name="raid_caller_recording">Запись</string>
+    <string name="settings_raid_caller_overlay">Включить оверлей рейд-лидера. Показывает релевантную для лидера статистику рейда в компактном формате: состав, баффы, добыча, использование дракона/ризо, когерентность и экипировка.</string>
+    <string name="settings_raid_caller_loot_threshold">Минимальный бафф добычи по умолчанию: %1$s</string>
+    <string name="settings_raid_caller_loot_note">Игроки без баффа начинают с 100% в игре!</string>
+    <string name="settings_raid_caller_buff_requirement">Минимальный бафф по умолчанию</string>
+    <string name="settings_raid_caller_grace_period">Льготный период по умолчанию</string>
+    <string name="settings_raid_caller_sync_note">Эти значения по умолчанию синхронизируются с вкладкой Рейд → Баффы.</string>
+    <string name="raid_buff_loot_baseline_note">Игроки без баффа начинают с 100% в игре. Порог сравнивается с этой базой.</string>
+    <string name="raid_caller_loot_threshold">Порог добычи</string>
+    <string name="raid_caller_buff_mode">Режим баффа добычи</string>
+    <string name="raid_caller_buff_grace">Льготный период баффа</string>
+
+    <!-- Editable Meta Specs Editor (08/25/26) -->
+    <string name="meta_specs_cc">КК</string>
+    <string name="meta_specs_melee">Ближний бой</string>
+    <string name="meta_specs_healer">Хилер</string>
+    <string name="meta_specs_mage">Маг</string>
+    <string name="meta_specs_dancer">Танцор</string>
+    <string name="meta_specs_ranged">Дальний бой</string>
+    <string name="meta_specs_title">Мета-спеки</string>
+    <string name="meta_specs_description">Настройте, какие спеки приложение считает КК, ближним, хилом, магом, танцором и дальним. Пользовательские спеки отображаются белым и жирным. Нажмите + в категории, чтобы добавить спек, и x на теге, чтобы удалить его.</string>
+    <string name="meta_specs_stock">Стандарт</string>
+    <string name="meta_specs_custom">Пользовательские</string>
+    <string name="meta_specs_reset">Сбросить к стандарту</string>
+    <string name="meta_specs_reset_confirm_title">Сбросить мета-спеки?</string>
+    <string name="meta_specs_reset_confirm_text">Это отменит все изменения и восстановит встроенные стандартные мета-спеки.</string>
+    <string name="meta_specs_accept">Принять</string>
+    <string name="meta_specs_cancel">Отмена</string>
+    <string name="meta_specs_add">Добавить спек</string>
+    <string name="meta_specs_remove">Удалить %1$s</string>
+    <string name="meta_specs_none">нет</string>
+    <string name="meta_specs_unknown_spec">Неизвестно / Неполное</string>
+    <string name="meta_specs_accept_disabled">Выберите допустимый тип спека, чтобы включить Принять</string>
+    <string name="settings_meta_specs_button">Настроить мета-спеки</string>
+    <string name="settings_meta_specs_state">Текущее состояние мета-спеков: %1$s</string>
+    <string name="settings_meta_specs_description">Переопределите, какие спеки считаются метой в составе, рейд-коллере и техническом анализе. Пользовательские спеки показаны белым и жирным.</string>
+    <string name="meta_specs_edit_icon">Изменить мета-спеки</string>
 </resources>

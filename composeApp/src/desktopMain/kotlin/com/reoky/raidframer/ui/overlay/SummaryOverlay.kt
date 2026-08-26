@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.Surface
+import androidx.compose.material.IconButton
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -20,11 +25,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.ui.component.PerformanceDisabledBanner
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.factionHighlightColor
+import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.helpers.togglePlayerCard
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.toHumanDuration
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
@@ -96,6 +106,10 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_provokes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_tiger_strikes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_freezes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
+import raid_framer_desktop.composeapp.generated.resources.summary_top_loot_peak
+import raid_framer_desktop.composeapp.generated.resources.summary_worst_loot_peak
+import raid_framer_desktop.composeapp.generated.resources.summary_top_buff_count
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_loot
 import raid_framer_desktop.composeapp.generated.resources.summary_top_charms
 import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_taken
 import raid_framer_desktop.composeapp.generated.resources.summary_top_debuffs
@@ -141,6 +155,12 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_purges
 import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dances
 import raid_framer_desktop.composeapp.generated.resources.summary_top_silences
 import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_coherence
+import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_render
+import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_raid
+import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_clump
+import raid_framer_desktop.composeapp.generated.resources.coherence_help_title
+import raid_framer_desktop.composeapp.generated.resources.coherence_help_body
 import java.text.DateFormat
 
 @Preview
@@ -231,6 +251,16 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val topManaBarrier by PlayerCacheInteractor.topManaBarrier.collectAsState()
   val topRevive by PlayerCacheInteractor.topRevive.collectAsState()
 
+  // Loot buff rankings (raid-wide)
+  val topLootPeak by PlayerCacheInteractor.topLootPeak.collectAsState()
+  val worstLootPeak by PlayerCacheInteractor.worstLootPeak.collectAsState()
+  val topBuffCount by PlayerCacheInteractor.topBuffCount.collectAsState()
+
+  // Coherence rankings (session time in range of the recorder)
+  val topCoherenceRender by PlayerCacheInteractor.topCoherenceRender.collectAsState()
+  val topCoherenceRaid by PlayerCacheInteractor.topCoherenceRaid.collectAsState()
+  val topCoherenceClump by PlayerCacheInteractor.topCoherenceClump.collectAsState()
+
   // New faction comparison flows
   val factionTigerStrikeData by PlayerCacheInteractor.factionTigerStrikeComparisonAll.collectAsState()
   val factionFreezeData by PlayerCacheInteractor.factionFreezeComparisonAll.collectAsState()
@@ -248,6 +278,13 @@ fun SummaryOverlay(wm: WindowManager? = null) {
   val humanReadableDateString = DateFormat.getDateInstance(DateFormat.SHORT).format(System.currentTimeMillis())
 
   var selectedTabIndex by remember { mutableStateOf(0) }
+  // Consume any cross-overlay summary tab request (e.g. Coherence from the Raid Caller overlay).
+  LaunchedEffect(OverlayNav.pendingSummaryTabIndex.value) {
+    OverlayNav.pendingSummaryTabIndex.value?.let { requested ->
+      selectedTabIndex = requested
+      OverlayNav.pendingSummaryTabIndex.value = null
+    }
+  }
   val tabs = listOf(
     stringResource(Res.string.summary_tab_faction_charts),
     stringResource(Res.string.summary_tab_debuffs),
@@ -270,7 +307,9 @@ fun SummaryOverlay(wm: WindowManager? = null) {
     stringResource(Res.string.summary_tab_items),
     stringResource(Res.string.summary_tab_utility),
     stringResource(Res.string.summary_tab_specs),
-    stringResource(Res.string.summary_tab_performance)
+    stringResource(Res.string.summary_tab_performance),
+    stringResource(Res.string.summary_tab_loot),
+    stringResource(Res.string.summary_tab_coherence)
   )
 
   val scope = rememberCoroutineScope()
@@ -524,6 +563,18 @@ fun SummaryOverlay(wm: WindowManager? = null) {
           topPerformancePirate = topPerformancePirate,
           wm = wm
         )
+        22 -> LootBuffTab(
+          topLootPeak = topLootPeak,
+          worstLootPeak = worstLootPeak,
+          topBuffCount = topBuffCount,
+          wm = wm
+        )
+        23 -> CoherenceTab(
+          topCoherenceRender = topCoherenceRender,
+          topCoherenceRaid = topCoherenceRaid,
+          topCoherenceClump = topCoherenceClump,
+          wm = wm
+        )
       }
     }
   }
@@ -722,8 +773,7 @@ private fun CCDebuffsTab(
       valueColor = RFColors.tripsAmber,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u25CF",
@@ -733,8 +783,7 @@ private fun CCDebuffsTab(
       valueColor = RFColors.bubblesCyan,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u27A1",
@@ -744,8 +793,7 @@ private fun CCDebuffsTab(
       valueColor = RFColors.bracingsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -768,8 +816,7 @@ private fun UtilityDebuffsTab(
       valueColor = RFColors.shieldStripOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2620",
@@ -779,8 +826,7 @@ private fun UtilityDebuffsTab(
       valueColor = RFColors.weaponDisablesRed,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2697",
@@ -790,8 +836,7 @@ private fun UtilityDebuffsTab(
       valueColor = RFColors.potionDisablesPurple,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -814,8 +859,7 @@ private fun GliderDebuffsTab(
       valueColor = RFColors.bdGliderTeal,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2708",
@@ -825,8 +869,7 @@ private fun GliderDebuffsTab(
       valueColor = RFColors.crystalWingsBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2708",
@@ -836,8 +879,7 @@ private fun GliderDebuffsTab(
       valueColor = RFColors.gliderDisablesPink,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -860,8 +902,7 @@ private fun SpecialDebuffsTab(
       valueColor = RFColors.provokesDeepPurple,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u26CF",
@@ -871,8 +912,7 @@ private fun SpecialDebuffsTab(
       valueColor = RFColors.petrificationGray,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2744",
@@ -882,8 +922,7 @@ private fun SpecialDebuffsTab(
       valueColor = RFColors.freezeIceBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -903,33 +942,30 @@ private fun KeyDebuffsTab(
       title = stringResource(Res.string.summary_top_silences),
       cards = topSilences,
       valueExtractor = { it.sessionSilenceTotal.toString() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uf004",
       title = stringResource(Res.string.summary_top_charms),
       cards = topCharms,
       valueExtractor = { it.sessionCharmTotal.toString() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uf0c1",
       title = stringResource(Res.string.summary_top_distresses),
       cards = topDistresses,
       valueExtractor = { it.sessionDistressTotal.toString() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -950,8 +986,7 @@ private fun SpecialBuffsTab(
       valueColor = RFColors.defianceGold,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2600",
@@ -961,8 +996,7 @@ private fun SpecialBuffsTab(
       valueColor = RFColors.gardenDefianceBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2728",
@@ -972,8 +1006,7 @@ private fun SpecialBuffsTab(
       valueColor = RFColors.purgeGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -994,8 +1027,7 @@ private fun DebuffsContinuedTab(
       valueColor = RFColors.throwDaggerAmber,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u26A0",
@@ -1005,8 +1037,7 @@ private fun DebuffsContinuedTab(
       valueColor = RFColors.stunDeepRed,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2195",
@@ -1016,8 +1047,7 @@ private fun DebuffsContinuedTab(
       valueColor = RFColors.staggerBrown,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1038,8 +1068,7 @@ private fun DebuffsExtendedTab(
       valueColor = RFColors.absorbLifeforceMagenta,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2622",
@@ -1049,8 +1078,7 @@ private fun DebuffsExtendedTab(
       valueColor = RFColors.corrosiveBarrageLime,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uD83E\uDD85",
@@ -1060,8 +1088,7 @@ private fun DebuffsExtendedTab(
       valueColor = RFColors.blindedByCrowsDark,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1082,8 +1109,7 @@ private fun SpecialBuffsContinuedTab(
       valueColor = RFColors.impaleImmunitySteel,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uD83E\uDD85",
@@ -1093,8 +1119,7 @@ private fun SpecialBuffsContinuedTab(
       valueColor = RFColors.protectiveWingsGold,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2728",
@@ -1104,8 +1129,7 @@ private fun SpecialBuffsContinuedTab(
       valueColor = RFColors.courageousActionBright,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1127,8 +1151,7 @@ private fun SpecialHealsTab(
       valueColor = RFColors.manaBarrierBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2618",
@@ -1138,8 +1161,7 @@ private fun SpecialHealsTab(
       valueColor = RFColors.reviveGhostWhite,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\uD83D\uDC89",
@@ -1153,8 +1175,7 @@ private fun SpecialHealsTab(
       modifier = Modifier.weight(1f),
       colorExtractor = { it.lifeMendQuality.color }
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1175,8 +1196,7 @@ private fun SpecialMeleeTab(
       valueColor = RFColors.techNoTigerStrikes,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u26CF",
@@ -1186,8 +1206,7 @@ private fun SpecialMeleeTab(
       valueColor = RFColors.mistSunderCyan,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u26CF",
@@ -1197,8 +1216,7 @@ private fun SpecialMeleeTab(
       valueColor = RFColors.regularSunderOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1219,8 +1237,7 @@ private fun SpecialDancesTab(
       valueColor = RFColors.sacDancePurple,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2602",
@@ -1230,8 +1247,7 @@ private fun SpecialDancesTab(
       valueColor = RFColors.deepTranquilityTeal,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
     StatColumn(
       icon = "\u2B07",
@@ -1241,8 +1257,7 @@ private fun SpecialDancesTab(
       valueColor = RFColors.deedendDebuffRed,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1262,7 +1277,7 @@ private fun SpellDamageByFaction(
       title = stringResource(Res.string.summary_top_haranya_spells_damage),
       spells = topDamageSpellsHaranya,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) {}
 
@@ -1271,7 +1286,7 @@ private fun SpellDamageByFaction(
       title = stringResource(Res.string.summary_top_nuia_spells_damage),
       spells = topDamageSpellsNuia,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) {}
 
@@ -1280,7 +1295,7 @@ private fun SpellDamageByFaction(
       title = stringResource(Res.string.summary_top_pirate_spells_damage),
       spells = topDamageSpellsPirate,
       valueExtractor = { it.total.toLong().humanReadableAbbreviation() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) {}
   }
@@ -1301,11 +1316,10 @@ private fun BuffsDebuffsTab(
       title = stringResource(Res.string.summary_top_debuffs),
       cards = topDebuffs,
       valueExtractor = { it.sessionDebuffTotal.toString() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1313,11 +1327,10 @@ private fun BuffsDebuffsTab(
       title = stringResource(Res.string.summary_top_songs),
       cards = topSongs,
       valueExtractor = { it.sessionSongsTotal.toString() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1325,11 +1338,10 @@ private fun BuffsDebuffsTab(
       title = stringResource(Res.string.summary_top_buffs),
       cards = topBuffers,
       valueExtractor = { it.sessionBuffTotal.toString() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1352,8 +1364,7 @@ private fun OdeTab(
       valueColor = RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1364,8 +1375,7 @@ private fun OdeTab(
       valueColor =  RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1376,8 +1386,7 @@ private fun OdeTab(
       valueColor =  RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1400,8 +1409,7 @@ private fun KillsDeathsTab(
       valueColor = RFColors.killsHaranyaGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1412,8 +1420,7 @@ private fun KillsDeathsTab(
       valueColor = RFColors.killsNuiaOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1424,8 +1431,7 @@ private fun KillsDeathsTab(
       valueColor = RFColors.killsPirateRed,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1460,8 +1466,7 @@ private fun DamageTakenHealsReceived(
       valueColor = RFColors.dpsOrange,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1472,8 +1477,7 @@ private fun DamageTakenHealsReceived(
       valueColor = RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1491,8 +1495,7 @@ private fun DamageTakenHealsReceived(
         healRatioColor(ratio)
       }
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1553,8 +1556,7 @@ private fun UtilityItemsTab(
       valueColor = RFColors.potionTeal,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1565,8 +1567,7 @@ private fun UtilityItemsTab(
       valueColor = RFColors.gliderBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1577,8 +1578,7 @@ private fun UtilityItemsTab(
       valueColor = RFColors.itemSkillYellow,
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
   }
 }
@@ -1664,7 +1664,7 @@ private fun UtilityItemsByFaction(
       title = stringResource(Res.string.summary_top_haranya_item_uses),
       items = topItemUsesHaranya,
       valueExtractor = { it.count.toString() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { item ->
       // optional click: select or open player/item details if desired
@@ -1675,7 +1675,7 @@ private fun UtilityItemsByFaction(
       title = stringResource(Res.string.summary_top_nuia_item_uses),
       items = topItemUsesNuia,
       valueExtractor = { it.count.toString() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { item -> }
 
@@ -1684,7 +1684,7 @@ private fun UtilityItemsByFaction(
       title = stringResource(Res.string.summary_top_pirate_item_uses),
       items = topItemUsesPirate,
       valueExtractor = { it.count.toString() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { item -> }
   }
@@ -1825,7 +1825,7 @@ private fun PlayerBuildsTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_haranya_builds),
       builds = buildCountsHaranya,
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { /* optional click */ }
 
@@ -1833,7 +1833,7 @@ private fun PlayerBuildsTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_nuia_builds),
       builds = buildCountsNuia,
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { }
 
@@ -1841,7 +1841,7 @@ private fun PlayerBuildsTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_pirate_builds),
       builds = buildCountsPirate,
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { }
   }
@@ -1925,11 +1925,10 @@ private fun PerformanceTab(
       title = stringResource(Res.string.summary_top_haranya_performance),
       cards = topPerformanceHaranya,
       valueExtractor = { it.pvpPerformancePoints().toString() },
-      valueColor = RFColors.factionHaranya,
+      valueColor = factionHighlightColor(Faction.HARANYA),
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1937,11 +1936,10 @@ private fun PerformanceTab(
       title = stringResource(Res.string.summary_top_nuia_performance),
       cards = topPerformanceNuia,
       valueExtractor = { it.pvpPerformancePoints().toString() },
-      valueColor = RFColors.factionNuia,
+      valueColor = factionHighlightColor(Faction.NUIA),
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
     }
 
     StatColumn(
@@ -1949,11 +1947,151 @@ private fun PerformanceTab(
       title = stringResource(Res.string.summary_top_pirate_performance),
       cards = topPerformancePirate,
       valueExtractor = { it.pvpPerformancePoints().toString() },
-      valueColor = RFColors.factionPirate,
+      valueColor = factionHighlightColor(Faction.PIRATE),
       modifier = Modifier.weight(1f)
     ) { card ->
-      AppState.selectPlayer(card.name)
-      wm?.openWindow(OverlayType.PLAYER_CARD)
+      togglePlayerCard(wm, card.name)
+    }
+  }
+}
+
+@Composable
+private fun LootBuffTab(
+  topLootPeak: List<PlayerCard>,
+  worstLootPeak: List<PlayerCard>,
+  topBuffCount: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\uD83C\uDFC6",
+      title = stringResource(Res.string.summary_top_loot_peak),
+      cards = topLootPeak,
+      valueExtractor = { "${it.sessionPeakLootBuffAmount}%" },
+      valueColor = RFColors.lootBuffColor,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+
+    StatColumn(
+      icon = "\uD83D\uDD0C",
+      title = stringResource(Res.string.summary_worst_loot_peak),
+      cards = worstLootPeak,
+      valueExtractor = { "${it.sessionPeakLootBuffAmount}%" },
+      valueColor = RFColors.lootBuffColor,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+
+    StatColumn(
+      icon = "\u26A1",
+      title = stringResource(Res.string.summary_top_buff_count),
+      cards = topBuffCount,
+      valueExtractor = { it.sessionCurrentBuffCount.toString() },
+      valueColor = RFColors.lootBuffColor,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+  }
+}
+
+@Composable
+private fun CoherenceTab(
+  topCoherenceRender: List<PlayerCard>,
+  topCoherenceRaid: List<PlayerCard>,
+  topCoherenceClump: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  // Raid-adjusted recording time (global denominator). Reading the state here keeps this
+  // snapshot view refreshing as recording time accrues.
+  val recordingMs = PlayerCacheInteractor.coherenceRecordingMsMs
+  fun fmt(card: PlayerCard, ms: Long): String {
+    val pct = if (recordingMs > 0L) ((ms * 100.0) / recordingMs).toInt() else 0
+    return "${ms.toHumanDuration()} (${pct}%)"
+  }
+  Box(modifier = Modifier.fillMaxSize()) {
+    Row(modifier = Modifier.fillMaxSize()) {
+      StatColumn(
+        icon = "\uf06e",
+        title = stringResource(Res.string.summary_top_coherence_render),
+        cards = topCoherenceRender,
+        valueExtractor = { fmt(it, it.sessionCoherenceRenderMs) },
+        valueColor = RFColors.gliderBlue,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uf547",
+        title = stringResource(Res.string.summary_top_coherence_raid),
+        cards = topCoherenceRaid,
+        valueExtractor = { fmt(it, it.sessionCoherenceRaidMs) },
+        valueColor = RFColors.purgeGreen,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uf0eb",
+        title = stringResource(Res.string.summary_top_coherence_clump),
+        cards = topCoherenceClump,
+        valueExtractor = { fmt(it, it.sessionCoherenceClumpMs) },
+        valueColor = RFColors.bubblesCyan,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+    }
+    CoherenceHelp(modifier = Modifier.align(Alignment.TopEnd))
+  }
+}
+
+@Composable
+private fun CoherenceHelp(modifier: Modifier = Modifier) {
+  var showHelp by remember { mutableStateOf(false) }
+  Box(modifier) {
+    IconButton(onClick = { showHelp = !showHelp }, modifier = Modifier.size(28.dp)) {
+      Text("?", color = RFColors.TextSecondary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    }
+    if (showHelp) {
+      Popup {
+        Surface(
+          color = RFColors.PopupBackground.copy(alpha = 0.98f),
+          shape = RoundedCornerShape(8.dp),
+          border = BorderStroke(1.dp, RFColors.CardBorder),
+          elevation = 6.dp
+        ) {
+          Column(
+            Modifier.padding(12.dp).widthIn(max = 420.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Text(
+                stringResource(Res.string.coherence_help_title),
+                color = RFColors.TextPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
+              )
+              IconButton(onClick = { showHelp = false }, modifier = Modifier.size(24.dp)) {
+                Text("X", color = RFColors.TextSecondary, fontSize = 11.sp)
+              }
+            }
+            Text(
+              text = stringResource(Res.string.coherence_help_body),
+              color = RFColors.TextSecondary,
+              fontSize = 11.sp,
+              lineHeight = 14.sp
+            )
+          }
+        }
+      }
     }
   }
 }

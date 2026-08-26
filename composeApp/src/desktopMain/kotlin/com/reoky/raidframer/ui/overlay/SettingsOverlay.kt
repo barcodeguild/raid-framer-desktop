@@ -1,6 +1,7 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.ui.tooling.preview.Preview
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
@@ -26,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -48,6 +51,12 @@ import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableStatus
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.Faction
+import com.reoky.raidframer.core.model.RaidBuffGracePeriod
+import com.reoky.raidframer.core.definitions.serialize
+import com.reoky.raidframer.core.definitions.MetaSpecsRepo
+import com.reoky.raidframer.ui.overlay.BUFF_PRESETS
+import com.reoky.raidframer.ui.overlay.label
+import com.reoky.raidframer.ui.component.graphs.MemoryGraphComponent
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.messageBox
@@ -55,6 +64,9 @@ import com.reoky.raidframer.core.helpers.UpdateHelper
 import com.reoky.raidframer.core.helpers.UpdateStatus
 import com.reoky.raidframer.core.helpers.UpdateDownloaderHelper
 import com.reoky.raidframer.core.helpers.DownloadStatus
+import com.reoky.raidframer.core.helpers.rememberSectionPulse
+import com.reoky.raidframer.core.helpers.openMetaSpecs
+import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -206,6 +218,26 @@ fun SettingsOverlay(wm: WindowManager? = null) {
     }
   }
 
+  // Flash + scroll to the General Settings section when requested (e.g. from the Raid Caller title).
+  var generalPulseActive by remember { mutableStateOf(false) }
+  var generalSettingsOffset by remember { mutableStateOf(0) }
+  var scrollToGeneral by remember { mutableStateOf(false) }
+  LaunchedEffect(OverlayNav.highlightSettingsGeneral.value) {
+    if (OverlayNav.highlightSettingsGeneral.value) {
+      OverlayNav.highlightSettingsGeneral.value = false
+      generalPulseActive = true
+      scrollToGeneral = true
+    }
+  }
+  LaunchedEffect(scrollToGeneral, generalSettingsOffset) {
+    if (scrollToGeneral && generalSettingsOffset > 0) {
+      kotlinx.coroutines.delay(500)
+      scrollState.animateScrollTo(generalSettingsOffset)
+      scrollToGeneral = false
+    }
+  }
+  val generalPulse = rememberSectionPulse(generalPulseActive)
+
   Box(
     modifier = Modifier
       .fillMaxSize()
@@ -297,11 +329,13 @@ fun SettingsOverlay(wm: WindowManager? = null) {
         CrashRecoveryBanner()
       }
 
-      OverlayFeaturesPanel(wm)
+      OverlayFeaturesPanel(wm, generalPulse) { offset -> generalSettingsOffset = offset }
 
       CombatOverlaySettingsPanel()
 
       PerformanceSettingsPanel(wm)
+
+      RamUsagePanel()
 
        ExportSettingsPanel(wm)
        ExportBackgroundSettingsPanel(wm)
@@ -492,21 +526,28 @@ private fun CharacterDisplayPanel() {
 }
 
 @Composable
-private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
+private fun OverlayFeaturesPanel(wm: WindowManager? = null, generalBorderColor: Color = RFColors.CardBorder, onGeneralOffset: (Int) -> Unit = {}) {
   val config by RFConfig.state.collectAsState()
   val dragLock = LocalDragLock.current
 
   // General Settings
   SettingsSection(
     title = stringResource(Res.string.settings_general_title),
-    description = stringResource(Res.string.settings_general_description)
+    description = stringResource(Res.string.settings_general_description),
+    borderColor = generalBorderColor,
+    modifier = Modifier.onGloballyPositioned { coordinates -> onGeneralOffset(coordinates.positionInParent().y.roundToInt()) }
   ) {
     SettingsCheckbox(
       checked = config.miniGraphEnabled,
       onCheckedChange = { isChecked ->
         CoroutineScope(Dispatchers.Main).launch {
           RFConfig.update { it.copy(miniGraphEnabled = isChecked) }
-          if (isChecked) wm?.openWindow(OverlayType.MINI) else wm?.closeWindow(OverlayType.MINI)
+          if (isChecked) {
+            wm?.openWindow(OverlayType.MINI)
+            OverlayNav.highlightMiniGraphOverlay.value = true
+          } else {
+            wm?.closeWindow(OverlayType.MINI)
+          }
         }
       },
       label = stringResource(Res.string.settings_mini_graph_description)
@@ -517,7 +558,12 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       onCheckedChange = { isChecked ->
         CoroutineScope(Dispatchers.Main).launch {
           RFConfig.update { it.copy(itemUseOverlayEnabled = isChecked) }
-          if (isChecked) wm?.openWindow(OverlayType.ITEM_USE) else wm?.closeWindow(OverlayType.ITEM_USE)
+          if (isChecked) {
+            wm?.openWindow(OverlayType.ITEM_USE)
+            OverlayNav.highlightItemUseOverlay.value = true
+          } else {
+            wm?.closeWindow(OverlayType.ITEM_USE)
+          }
         }
       },
       label = stringResource(Res.string.settings_item_use_overlay)
@@ -536,28 +582,57 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       label = stringResource(Res.string.settings_tabbed_detection)
     )
 
-//    SettingsCheckbox(
-//      checked = config.gameScheduleHotkeyEnabled,
-//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(gameScheduleHotkeyEnabled = isChecked) } },
-//      label = stringResource(Res.string.settings_game_schedule_hotkey),
-//      accent = false
-//    )
+    SettingsCheckbox(
+      checked = config.combatOverlayAsTooltipEnabled,
+      onCheckedChange = { isChecked -> RFConfig.update { it.copy(combatOverlayAsTooltipEnabled = isChecked) } },
+      label = stringResource(Res.string.settings_combat_overlay_tooltip)
+    )
 
-//    SettingsCheckbox(
-//      checked = config.useSadlyDotEyeOhhh,
-//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(useSadlyDotEyeOhhh = isChecked) } },
-//      label = stringResource(Res.string.settings_use_sadly),
-//      accent = false
-//    )
+    SettingsCheckbox(
+      checked = config.raidCallerOverlayEnabled,
+      onCheckedChange = { isChecked ->
+        CoroutineScope(Dispatchers.Main).launch {
+          RFConfig.update { it.copy(raidCallerOverlayEnabled = isChecked) }
+          if (isChecked) {
+            wm?.openWindow(OverlayType.RAID_CALLER)
+            OverlayNav.highlightRaidCallerOverlay.value = true
+          } else {
+            wm?.closeWindow(OverlayType.RAID_CALLER)
+          }
+        }
+      },
+      label = stringResource(Res.string.settings_raid_caller_overlay)
+    )
 
-//    SettingsCheckbox(
-//      checked = config.dragonBreathOverlayEnabled,
-//      onCheckedChange = { isChecked -> RFConfig.update { it.copy(dragonBreathOverlayEnabled = isChecked) } },
-//      label = stringResource(Res.string.settings_dragon_breath_overlay),
-//      accent = false
-//    )
+    // Raid Caller defaults: minimum loot buff requirement, buff requirement preset, and grace period.
+    // All three are kept in sync with the RaidOverlay -> Buffs tab (both write to config).
+    RaidCallerDefaultSettings(config)
 
     Spacer(modifier = Modifier.height(12.dp))
+
+    // Editable Meta Specs
+    Button(
+      onClick = { openMetaSpecs(wm) },
+      colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+      modifier = Modifier.fillMaxWidth()
+    ) {
+      Text(
+        text = stringResource(Res.string.settings_meta_specs_button),
+        color = Color.White,
+        fontWeight = FontWeight.SemiBold,
+        maxLines = 1
+      )
+    }
+    val metaSpecsCustom = config.customMetaSpecsJson.isNotBlank()
+    Text(
+      text = stringResource(
+        Res.string.settings_meta_specs_state,
+        stringResource(if (metaSpecsCustom) Res.string.meta_specs_custom else Res.string.meta_specs_stock)
+      ),
+      color = RFColors.TextTertiary,
+      fontSize = 11.sp,
+      modifier = Modifier.padding(bottom = 2.dp)
+    )
   }
 
     SettingsSection(
@@ -594,6 +669,175 @@ private fun OverlayFeaturesPanel(wm: WindowManager? = null) {
       color = config.windowColor,
       onColorChange = { color -> RFConfig.update { it.copy(windowColor = color) } }
     )
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RaidCallerDefaultSettings(config: ConfigEntity) {
+  val lootThreshold = config.raidCallerLootBuffThreshold.coerceIn(100, 600)
+
+  // Minimum loot buff requirement slider (100-600%, 100% = in-game baseline).
+  var lootSliderValue by remember { mutableStateOf(lootThreshold.toFloat()) }
+  LaunchedEffect(config.raidCallerLootBuffThreshold) { lootSliderValue = config.raidCallerLootBuffThreshold.toFloat().coerceIn(100f, 600f) }
+
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_loot_threshold, "$lootThreshold%"),
+    color = RFColors.TextSecondary,
+    fontSize = 13.sp,
+    fontWeight = FontWeight.Bold,
+    modifier = Modifier.padding(top = 6.dp)
+  )
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_loot_note),
+    color = RFColors.TextTertiary,
+    fontSize = 11.sp,
+    modifier = Modifier.padding(bottom = 2.dp)
+  )
+  DragLockedSlider(
+    value = lootSliderValue,
+    onValueChange = { value ->
+      lootSliderValue = value
+      val threshold = value.toInt().coerceIn(100, 600)
+      RFConfig.update { it.copy(raidCallerLootBuffThreshold = threshold) }
+    },
+    modifier = Modifier.fillMaxWidth(),
+    valueRange = 100f..600f
+  )
+
+  // Default minimum buff requirement dropdown (mirrors the RaidOverlay Buffs tab presets).
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_buff_requirement),
+    color = RFColors.TextSecondary,
+    fontSize = 13.sp,
+    fontWeight = FontWeight.Bold,
+    modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
+  )
+  BuffPresetDropdown(
+    currentRequirements = config.raidCallerBuffRequirements,
+    onSelected = { requirements ->
+      RFConfig.update { it.copy(raidCallerBuffRequirements = requirements.serialize()) }
+    }
+  )
+
+  // Default grace period dropdown.
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_grace_period),
+    color = RFColors.TextSecondary,
+    fontSize = 13.sp,
+    fontWeight = FontWeight.Bold,
+    modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
+  )
+  GracePeriodDropdown(
+    current = config.raidCallerBuffGracePeriod,
+    onSelected = { name -> RFConfig.update { it.copy(raidCallerBuffGracePeriod = name) } }
+  )
+
+  Text(
+    text = stringResource(Res.string.settings_raid_caller_sync_note),
+    color = RFColors.TextTertiary,
+    fontSize = 10.sp,
+    lineHeight = 12.sp,
+    modifier = Modifier.padding(top = 6.dp)
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BuffPresetDropdown(currentRequirements: String, onSelected: (com.reoky.raidframer.core.definitions.RaidBuffRequirements) -> Unit) {
+  var expanded by remember { mutableStateOf(false) }
+  val selectedLabel = BUFF_PRESETS.firstOrNull { it.requirements.serialize() == currentRequirements }?.label
+    ?: stringResource(Res.string.category_none)
+
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = !expanded }
+  ) {
+    OutlinedTextField(
+      value = selectedLabel,
+      onValueChange = {},
+      readOnly = true,
+      modifier = Modifier
+        .fillMaxWidth()
+        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+      colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = RFColors.AccentRed,
+        unfocusedBorderColor = RFColors.CardBorder,
+        focusedTextColor = RFColors.TextPrimary,
+        unfocusedTextColor = RFColors.TextPrimary,
+        cursorColor = RFColors.AccentRed,
+        focusedLabelColor = RFColors.TextSecondary,
+        unfocusedLabelColor = RFColors.TextTertiary
+      ),
+      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+    )
+    ExposedDropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier.fillMaxWidth(),
+      containerColor = RFColors.CardBackground,
+      tonalElevation = 4.dp
+    ) {
+      BUFF_PRESETS.forEach { preset ->
+        DropdownMenuItem(
+          text = { Text(preset.label, color = RFColors.TextPrimary) },
+          onClick = {
+            onSelected(preset.requirements)
+            expanded = false
+          },
+          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+        )
+      }
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GracePeriodDropdown(current: String, onSelected: (String) -> Unit) {
+  var expanded by remember { mutableStateOf(false) }
+  val currentPeriod = RaidBuffGracePeriod.entries.firstOrNull { it.name == current } ?: RaidBuffGracePeriod.FIFTEEN_MINUTES
+
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = { expanded = !expanded }
+  ) {
+    OutlinedTextField(
+      value = currentPeriod.label(),
+      onValueChange = {},
+      readOnly = true,
+      modifier = Modifier
+        .fillMaxWidth()
+        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+      colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = RFColors.AccentRed,
+        unfocusedBorderColor = RFColors.CardBorder,
+        focusedTextColor = RFColors.TextPrimary,
+        unfocusedTextColor = RFColors.TextPrimary,
+        cursorColor = RFColors.AccentRed,
+        focusedLabelColor = RFColors.TextSecondary,
+        unfocusedLabelColor = RFColors.TextTertiary
+      ),
+      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+    )
+    ExposedDropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = false },
+      modifier = Modifier.fillMaxWidth(),
+      containerColor = RFColors.CardBackground,
+      tonalElevation = 4.dp
+    ) {
+      RaidBuffGracePeriod.entries.forEach { option ->
+        DropdownMenuItem(
+          text = { Text(option.label(), color = RFColors.TextPrimary) },
+          onClick = {
+            onSelected(option.name)
+            expanded = false
+          },
+          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+        )
+      }
+    }
   }
 }
 
@@ -900,9 +1144,17 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
         fontSize = 12.sp
       )
       Spacer(modifier = Modifier.height(4.dp))
+      // Use local float state during drag to prevent integer truncation jitter
+      var eventDepthFloat by remember {
+        mutableStateOf((config.performanceEventHistoryDepth - 50).toFloat() / (5000 - 50).toFloat())
+      }
+      LaunchedEffect(config.performanceEventHistoryDepth) {
+        eventDepthFloat = (config.performanceEventHistoryDepth - 50).toFloat() / (5000 - 50).toFloat()
+      }
       DragLockedSlider(
-        value = (config.performanceEventHistoryDepth - 50).toFloat() / (5000 - 50).toFloat(),
+        value = eventDepthFloat,
         onValueChange = { value ->
+          eventDepthFloat = value
           val depth = (50 + value * (5000 - 50)).toInt().coerceIn(50, 5000)
           RFConfig.update { it.copy(performanceEventHistoryDepth = depth) }
         },
@@ -912,7 +1164,10 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
       val playerCount = PlayerCacheInteractor.trackedPlayerCount
       val depth = config.performanceEventHistoryDepth
       val totalEvents = depth.toLong() * 10 * playerCount // ~10 event lists per player
-      val estimatedBytes = totalEvents * 200L // ~200 bytes per event object
+      val eventListBytes = totalEvents * 200L // ~200 bytes per event object
+      // Flat adjacency maps: 9 types × playerCount² / 2 (avg half players are targets) × 80 bytes
+      val flatAdjBytes = 9L * playerCount.toLong() * (playerCount.toLong() / 2) * 80L
+      val estimatedBytes = eventListBytes + flatAdjBytes
       val memoryStr = when {
         estimatedBytes < 1024 -> "${estimatedBytes}B"
         estimatedBytes < 1024 * 1024 -> "${estimatedBytes / 1024}KB"
@@ -925,11 +1180,100 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
         modifier = Modifier.padding(top = 2.dp)
       )
     }
+
+    // Battle Graph Spell Depth slider
+    Column(modifier = Modifier.fillMaxWidth()) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(
+          text = stringResource(Res.string.settings_performance_battle_graph_spell_depth),
+          color = RFColors.TextPrimary,
+          fontSize = 14.sp
+        )
+        Text(
+          text = config.performanceBattleGraphSpellDepth.toString(),
+          color = battleGraphSpellDepthColor(config.performanceBattleGraphSpellDepth),
+          fontSize = 14.sp,
+          fontWeight = FontWeight.Bold
+        )
+      }
+      Text(
+        text = stringResource(Res.string.settings_performance_battle_graph_spell_depth_desc),
+        color = RFColors.TextSecondary,
+        fontSize = 12.sp
+      )
+      Spacer(modifier = Modifier.height(4.dp))
+      // Use local float state during drag to prevent integer truncation jitter
+      var bgSpellDepthFloat by remember {
+        mutableStateOf((config.performanceBattleGraphSpellDepth - 10).toFloat() / (200 - 10).toFloat())
+      }
+      LaunchedEffect(config.performanceBattleGraphSpellDepth) {
+        bgSpellDepthFloat = (config.performanceBattleGraphSpellDepth - 10).toFloat() / (200 - 10).toFloat()
+      }
+      DragLockedSlider(
+        value = bgSpellDepthFloat,
+        onValueChange = { value ->
+          bgSpellDepthFloat = value
+          val depth = (10 + value * (200 - 10)).toInt().coerceIn(10, 200)
+          RFConfig.update { it.copy(performanceBattleGraphSpellDepth = depth) }
+        },
+        modifier = Modifier.fillMaxWidth()
+      )
+      // Live estimate of battle graph spell breakdown memory
+      val bgDepth = config.performanceBattleGraphSpellDepth
+      val bgPlayerCount = PlayerCacheInteractor.trackedPlayerCount
+      // 9 BySpell map types × bgDepth targets × 10 spells × ~80 bytes per entry
+      val bgBytes = 9L * bgDepth * 10L * 80L * bgPlayerCount
+      // Flat adjacency maps: 9 types × playerCount² / 2 (avg half players are targets) × 80 bytes
+      val flatBytes = 9L * bgPlayerCount.toLong() * (bgPlayerCount.toLong() / 2) * 80L
+      val totalBgBytes = bgBytes + flatBytes
+      val bgMemoryStr = when {
+        totalBgBytes < 1024 -> "${totalBgBytes}B"
+        totalBgBytes < 1024 * 1024 -> "${totalBgBytes / 1024}KB"
+        else -> String.format("%.1fMB", totalBgBytes / (1024.0 * 1024.0))
+      }
+      Text(
+        text = stringResource(Res.string.settings_performance_battle_graph_estimate, bgDepth, bgPlayerCount, bgMemoryStr),
+        color = RFColors.TextTertiary,
+        fontSize = 10.sp,
+        modifier = Modifier.padding(top = 2.dp)
+      )
+    }
+
   }
 
   // Distance help dialog
   if (showDistanceHelp) {
     PerformanceDistanceHelpDialog(onDismiss = { showDistanceHelp = false })
+  }
+}
+
+@Composable
+private fun RamUsagePanel() {
+  SettingsSection(
+    title = stringResource(Res.string.settings_ram_usage_title),
+    description = stringResource(Res.string.settings_ram_usage_description)
+  ) {
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 4.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+      MemoryGraphComponent(
+        modifier = Modifier.fillMaxWidth(),
+        title = "JVM heap"
+      )
+      Divider(color = RFColors.CardBorder, modifier = Modifier.padding(vertical = 8.dp))
+      MemoryGraphComponent(
+        modifier = Modifier.fillMaxWidth(),
+        title = "Process memory",
+        processMemory = true
+      )
+    }
   }
 }
 
@@ -944,6 +1288,20 @@ private fun eventHistoryDepthColor(depth: Int): Color {
     depth < 1000 -> RFColors.gearGreen     // fine
     depth < 1500 -> RFColors.gearYellow    // moderate
     depth < 2500 -> RFColors.gearOrange    // heavy
+    else -> RFColors.gearRed               // expensive
+  }
+}
+
+/**
+ * Returns a color for the battle graph spell depth value.
+ * Green at ~30, yellow at ~80, red at ~150+.
+ */
+private fun battleGraphSpellDepthColor(depth: Int): Color {
+  return when {
+    depth <= 30 -> RFColors.gearGreen      // optimal
+    depth <= 50 -> RFColors.gearBlue       // fine
+    depth <= 80 -> RFColors.gearYellow     // moderate
+    depth <= 150 -> RFColors.gearOrange    // heavy
     else -> RFColors.gearRed               // expensive
   }
 }

@@ -29,6 +29,8 @@ import com.reoky.raidframer.ui.overlay.PlayerCardOverlay
 import com.reoky.raidframer.ui.overlay.TrackerOverlay
 import com.reoky.raidframer.ui.overlay.BattleGraphOverlay
 import com.reoky.raidframer.ui.overlay.ItemUseOverlay
+import com.reoky.raidframer.ui.overlay.RaidCallerOverlay
+import com.reoky.raidframer.ui.overlay.MetaSpecsOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -52,16 +54,24 @@ fun OverlayContainer(wm: WindowManager) {
       val everythingVisible by AppState.isEverythingVisible.collectAsState()
       val resizable = remember { mutableStateOf(true) }
 
+      // When the combat tool-tip mode is enabled, treat the Combat window as a tool-tip so it
+      // stays visible when tabbed-out, is draggable without shift, and renders like other tool-tips.
+      val effectiveWindowType = if (type == OverlayType.COMBAT && config.combatOverlayAsTooltipEnabled) {
+        OverlayWindowType.TOOLTIP
+      } else {
+        state.windowType
+      }
+
       OverlayWindow(
         title = type.name,
         overlayType = type,
         initialPosition = WindowPosition(Dp(state.lastPositionXDp), Dp(state.lastPositionYDp)),
         initialSize = DpSize(Dp(state.lastWidthDp), Dp(state.lastHeightDp)),
-        windowType = state.windowType,
+        windowType = effectiveWindowType,
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
-        isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(state.windowType == OverlayWindowType.TOOLTIP),
+        isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(effectiveWindowType == OverlayWindowType.TOOLTIP),
         isResizable = resizable,
-        isFocusable = type == OverlayType.NEW_SESSION || type == OverlayType.BATTLE_GRAPH,
+        isFocusable = type == OverlayType.NEW_SESSION || type == OverlayType.BATTLE_GRAPH || type == OverlayType.META_SPECS,
         transparentBackground = type == OverlayType.ITEM_USE,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->
@@ -82,6 +92,8 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.PLAYER_CARD -> PlayerCardOverlay(wm)
           OverlayType.BATTLE_GRAPH -> BattleGraphOverlay(wm)
           OverlayType.ITEM_USE -> ItemUseOverlay()
+          OverlayType.RAID_CALLER -> RaidCallerOverlay(wm)
+          OverlayType.META_SPECS -> MetaSpecsOverlay(wm)
           else -> {}
         }
 

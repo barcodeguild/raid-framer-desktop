@@ -26,6 +26,9 @@ import raid_framer_desktop.composeapp.generated.resources.category_bd_glider
 import raid_framer_desktop.composeapp.generated.resources.category_crystal_wings
 import raid_framer_desktop.composeapp.generated.resources.category_glider_disables
 import raid_framer_desktop.composeapp.generated.resources.category_provoked
+import raid_framer_desktop.composeapp.generated.resources.category_coherence_render
+import raid_framer_desktop.composeapp.generated.resources.category_coherence_raid
+import raid_framer_desktop.composeapp.generated.resources.category_coherence_clump
 
 enum class CombatRankingCategory(
   val displayNameRes: StringResource,
@@ -141,6 +144,21 @@ enum class CombatRankingCategory(
     displayNameRes = Res.string.category_provoked,
     valueColor = RFColors.provokesDeepPurple,
     icon = "\uf559"
+  ),
+  COHERENCE_RENDER(
+    displayNameRes = Res.string.category_coherence_render,
+    valueColor = RFColors.gliderBlue,
+    icon = "\uf06e"
+  ),
+  COHERENCE_RAID(
+    displayNameRes = Res.string.category_coherence_raid,
+    valueColor = RFColors.purgeGreen,
+    icon = "\uf547"
+  ),
+  COHERENCE_CLUMP(
+    displayNameRes = Res.string.category_coherence_clump,
+    valueColor = RFColors.bubblesCyan,
+    icon = "\uf0eb"
   );
 
   companion object {

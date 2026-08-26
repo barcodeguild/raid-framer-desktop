@@ -121,11 +121,15 @@
     <string name="category_glider_disables">滑翔翼无效</string>
     <string name="category_provoked">挑衅</string>
     <string name="settings_combat_overlay_title">战斗覆盖</string>
+    <string name="category_coherence_render">凝聚力（渲染 &lt;120米）</string>
+    <string name="category_coherence_raid">凝聚力（团队 &lt;60米）</string>
+    <string name="category_coherence_clump">凝聚力（聚集 &lt;15米）</string>
     <string name="settings_combat_fade_controls">当光标离开覆盖层时自动淡出图标控件。</string>
     <string name="settings_combat_show_spec_icons">在玩家行中显示技能树图标</string>
     <string name="settings_item_use_overlay">启用物品使用覆盖层。以击杀信息风格显示最近的物品使用。[实验性/原型]</string>
     <string name="settings_split_chat">启用OSRS风格的分割聊天窗口覆盖。(即将推出)</string>
     <string name="settings_tabbed_detection">在标签页切换出游戏时自动隐藏游戏覆盖。不适用于工具提示(那些有标题栏的)。</string>
+    <string name="settings_combat_overlay_tooltip">将战斗覆盖作为多显示器工具提示,而非游戏覆盖。 (显示为可拖动、始终可见的带标题栏工具提示。)</string>
     <string name="settings_allow_pve_damage">允许PvE伤害计入DPS/击杀计数器。(对于想要查看对PvE目标伤害输出的单人玩家很有用)</string>
     <string name="settings_game_schedule_hotkey">启用[按住TAB]以将官方游戏内活动时间表网站作为覆盖层显示。(即将推出)</string>
     <string name="settings_use_sadly">我更愿意使用Sadly.io获取游戏内时间表数据。(即将推出)</string>
@@ -258,8 +262,8 @@
     <string name="pet_cast_overflow_format">+%1$d 更多</string>
 
     <!-- Pokemon / Companions Overlay -->
-    <string name="pokemon_title">龙息、瑞索、战斗宠物及其他生物</string>
-    <string name="pokemon_no_companions">尚未检测到活动的宠物...</string>
+    <string name="pokemon_title">龙息</string>
+    <string name="pokemon_no_companions">尚未检测到龙息或瑞索皮亚导弹...</string>
 
     <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">未知：%1$s</string>
@@ -509,6 +513,16 @@
     <string name="summary_tab_special_dances">特殊舞蹈</string>
     <string name="summary_top_life_mends">生命治愈排行</string>
     <string name="life_mend_quality_none">无数据</string>
+    <string name="summary_tab_coherence">凝聚力</string>
+    <string name="summary_top_coherence_render">凝聚力（渲染 &lt;120米）</string>
+    <string name="summary_top_coherence_raid">凝聚力（团队 &lt;60米）</string>
+    <string name="summary_top_coherence_clump">凝聚力（聚集 &lt;15米）</string>
+    <string name="coherence_help_title">凝聚力</string>
+    <string name="coherence_help_body">凝聚力衡量每个团队成员在记录者（您）范围内停留的时间。聚集在一起的团队战斗更有效；当玩家分散在各处时，团队就很难获胜。
+
+时间根据团队名册距离更新，按 120米（渲染）、60米（团队）和 15米（聚集）阈值统计。显示的值是在范围内的秒数，外加团队调整记录时间的百分比。
+
+为减少偏差，记录者应尽量始终保持在团队范围内。记录者自己的范围内时间会出现在导出的图像上，以便您的团队判断凝聚力排名的可信度。</string>
     <string name="life_mend_quality_hurting">危害团队</string>
     <string name="life_mend_quality_poor">质量较差</string>
     <string name="life_mend_quality_good">良好</string>
@@ -624,6 +638,7 @@
     <string name="export_header_most_damage">造成伤害最高</string>
     <string name="export_header_killing_blow">致命一击</string>
 
+    <string name="export_header_coherence">记录者在范围内</string>
     <!-- Export Settings -->
     <string name="settings_export_title">导出设置</string>
     <string name="settings_export_description">管理导出输出目录和选项。</string>
@@ -722,7 +737,7 @@
     <string name="raid_buff_orange_goblet">要求橙色光荣之盏</string>
     <string name="raid_buff_allow_meatballs">允许肉丸</string>
     <string name="raid_buff_require_enhanced">要求强化审判的渴望</string>
-    <string name="raid_buff_loot_section">+50% 战利品增益</string>
+    <string name="raid_buff_loot_section">需要战利品增益</string>
     <string name="raid_buff_at_least_one_loot">至少一个 +50% 增益</string>
     <string name="raid_buff_two_loot">两个或更多 +50% 增益</string>
     <string name="raid_buff_selected_player">选中的玩家</string>
@@ -732,6 +747,7 @@
     <string name="raid_buff_none_found">未找到已追踪增益</string>
     <string name="raid_buff_has_buffs">已有增益</string>
     <string name="raid_buff_missing_buffs">缺少增益</string>
+    <string name="raid_buff_loot_buffs">战利品增益</string>
     <string name="raid_buff_last_observed">上次观察：%1$s</string>
     <string name="raid_buff_current_scan">当前扫描</string>
     <string name="raid_buff_grace_period">宽限期</string>
@@ -763,6 +779,12 @@
     <string name="raid_copy_not_buffed_title">未获得增益</string>
     <string name="raid_copy_buffed">复制已获得增益玩家</string>
     <string name="raid_copy_buffed_title">已获得增益</string>
+    <string name="raid_copy_not_scannable">复制无法扫描玩家</string>
+    <string name="raid_copy_not_scannable_title">无法扫描</string>
+    <string name="raid_buff_categories_help_title">增益状态</string>
+    <string name="raid_buff_categories_buffed">应用最近扫描过且拥有全部所需增益的玩家。已准备就绪。</string>
+    <string name="raid_buff_categories_not_buffed">应用最近扫描过但缺少至少一个所需增益，或未达到战利品门槛的玩家。请让他们补充增益。</string>
+    <string name="raid_buff_categories_not_scannable">应用无法获得最新扫描的玩家（超出范围或位于不同区域）。他们可能有增益也可能没有——尚未确认。</string>
     <string name="raid_haranya_faction">哈拉尼亚阵营(%d)</string>
     <string name="raid_nuian_faction">努伊安阵营(%d)</string>
     <string name="raid_pirate_faction">海盗阵营(%d)</string>
@@ -1215,6 +1237,10 @@
     <string name="combat_export_saving_session">正在保存会话 %1$d/%2$d</string>
     <string name="combat_export_saving_language">正在保存 %1$s 导出 %2$d/%3$d</string>
 
+    <!-- RAM Usage -->
+    <string name="settings_ram_usage_title">内存使用</string>
+    <string name="settings_ram_usage_description">实时 JVM 堆内存使用图。</string>
+
     <!-- Performance Settings -->
     <string name="settings_performance_title">性能</string>
     <string name="settings_performance_description">控制哪些功能处于激活状态以提高大规模战斗中的FPS。禁用功能可以减少每个战斗事件处理的数据量。</string>
@@ -1224,7 +1250,7 @@
     <string name="settings_performance_companion_enabled_desc">停止Lua插件中的所有事件处理。插件保持加载状态，重新启用后将恢复。</string>
     <string name="settings_performance_impact_maximum">最大</string>
     <string name="settings_performance_raid_buff_scanning">团队增益扫描</string>
-    <string name="settings_performance_raid_buff_scanning_desc">每秒扫描所有团队成员的活跃增益、距离和装备分数。生命治愈检测和团队增益检查器需要此功能。当团队名册追踪关闭时自动禁用。</string>
+    <string name="settings_performance_raid_buff_scanning_desc">每5秒扫描所有团队成员的活跃增益、距离和装备分数。生命治愈检测和团队增益检查器需要此功能。当团队名册追踪关闭时自动禁用。</string>
     <string name="settings_performance_impact_heavy">较大</string>
     <string name="settings_performance_buff_debuff_tracking">增益/减益追踪</string>
     <string name="settings_performance_buff_debuff_tracking_desc">追踪 SPELL_AURA_APPLIED 和 SPELL_AURA_REMOVED 事件。禁用后仅限追踪伤害和治疗。</string>
@@ -1241,6 +1267,10 @@
     <string name="settings_performance_event_history_depth">事件历史深度</string>
     <string name="settings_performance_event_history_depth_desc">每个玩家卡片用于事件时间线的最大存储事件数。较低的值使用更少的内存。</string>
     <string name="settings_performance_event_history_estimate">~%1$s 每玩家事件 \u00D7 %2$d 已追踪 \u2248 ~%3$s 总计</string>
+    <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
+    <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
+    <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
+    <string name="settings_performance_app_memory">App Memory: ~%1$dMB</string>
     <string name="settings_performance_distance_help">? 距离</string>
     <string name="settings_performance_impact_label">影响：</string>
     <string name="combat_ranking_disabled">此排名已禁用</string>
@@ -1253,4 +1283,91 @@
     <string name="performance_distance_help_title">距离与信息过滤</string>
     <string name="performance_distance_help_body">游戏内战斗设置（ESC \u2192 选项 \u2192 游戏信息）控制流入插件的数据。\n\n\u201C显示战斗消息\u201D复选框：切换游戏中的伤害/治疗命中效果的视觉显示，但不会影响流向插件的数据。您可以选择开启或关闭。\n\n信息过滤器（自身 / 队伍 / 团队 / 公会 / 全部）：这会影响数据流。更改过滤器会限制插件接收的战斗事件。\n\n距离滑块：这会影响数据流。降低范围会限制战斗事件的检测距离。\n\n示例：\n\u2022 自身 \u2014 仅您自己角色的事件。距离滑块自动灰显，因为不相关。\n\u2022 队伍 \u2014 您的5人小组。在ArcheAge中，团队中同一列的所有人都被视为您的\u201C队伍。\u201D例如，像声波冲击这样\u201C移除所有队伍成员负面效果\u201D的技能会影响您列的5人，而不是整个团队。\n\u2022 团队 \u2014 团队中的所有小队（所有列）。\n\u2022 公会 \u2014 仅匹配您公会标签的玩家。第二个公会标签不会显示，因为技术上是不同的公会。\n\n在游戏内调整这些过滤器可能比在应用中禁用功能更可取，因为它们提供更精细的数据处理控制。</string>
 
+    <!-- Tray Menu Labels -->
+    <string name="tray_dragon_breaths">龙息</string>
+    <string name="tray_raid_management">团队管理</string>
+    <string name="tray_battle_summary">战斗摘要</string>
+    <string name="tray_battle_graph">战斗图表</string>
+    <string name="tray_new_session">新建会话</string>
+    <string name="tray_save_session">保存会话</string>
+    <string name="tray_abort_session">中止会话</string>
+    <string name="tray_lua_options">Lua 选项</string>
+    <string name="tray_close">关闭</string>
+
+<!-- Raid Caller / Leader Overlay -->
+    <string name="raid_caller_title">团队指挥</string>
+    <string name="raid_caller_no_raid">加入团队以查看指挥统计信息</string>
+    <string name="raid_caller_position_hint">Shift+点击+拖动以定位</string>
+    <string name="raid_caller_avg_gs">平均GS</string>
+    <string name="raid_caller_lowest_gs">最低GS</string>
+    <string name="raid_caller_highest_gs">最高GS</string>
+    <string name="raid_caller_rebirth">重生创伤</string>
+    <string name="raid_caller_minimal">最小</string>
+    <string name="raid_caller_none">无</string>
+    <string name="raid_caller_loot">战利品</string>
+    <string name="raid_caller_buffed">已增益</string>
+    <string name="raid_caller_min_buffed">最小增益</string>
+    <string name="raid_caller_so_tf">SoTF</string>
+    <string name="raid_caller_war_time">战争时间</string>
+    <string name="raid_caller_dragon">龙</string>
+    <string name="raid_caller_riso">Riso</string>
+    <string name="raid_caller_coherence">凝聚力</string>
+    <string name="raid_caller_render">渲染</string>
+    <string name="raid_caller_raid">团队</string>
+    <string name="raid_caller_clump">聚团</string>
+    <string name="raid_caller_meta">主流</string>
+    <string name="raid_caller_cc">控制</string>
+    <string name="raid_caller_healer">治疗</string>
+    <string name="raid_caller_melee">近战</string>
+    <string name="raid_caller_mage">法师</string>
+    <string name="raid_caller_dancer">舞者</string>
+    <string name="raid_caller_ranged">远程</string>
+    <string name="raid_caller_non_meta">非主流</string>
+    <string name="raid_caller_main_raid">主团队</string>
+    <string name="raid_caller_co_raid">副团队</string>
+    <string name="raid_caller_faction_haranya">哈里亚</string>
+    <string name="raid_caller_faction_nuia">努伊亚</string>
+    <string name="raid_caller_faction_pirate">海盗</string>
+    <string name="raid_caller_start_recording">开始录制</string>
+    <string name="raid_caller_stop_recording">停止</string>
+    <string name="raid_caller_save_stop">保存并停止</string>
+    <string name="raid_caller_abort_discard">中止并丢弃</string>
+    <string name="raid_caller_idle">未录制</string>
+    <string name="raid_caller_recording">录制中</string>
+    <string name="settings_raid_caller_overlay">启用团队指挥/领队覆盖层。以紧凑格式显示与指挥相关的团队统计信息，涵盖阵容、增益、战利品、龙/Riso使用、凝聚力和装备评分。</string>
+    <string name="settings_raid_caller_loot_threshold">默认最低战利品增益要求：%1$s</string>
+    <string name="settings_raid_caller_loot_note">未增益玩家在游戏中从100%开始！</string>
+    <string name="settings_raid_caller_buff_requirement">默认最低增益要求</string>
+    <string name="settings_raid_caller_grace_period">默认宽限期</string>
+    <string name="settings_raid_caller_sync_note">这些默认值与团队覆盖层 → 增益选项卡保持同步。</string>
+    <string name="raid_buff_loot_baseline_note">未增益玩家在游戏中从100%开始。阈值与此基线比较。</string>
+    <string name="raid_caller_loot_threshold">战利品阈值</string>
+    <string name="raid_caller_buff_mode">战利品增益模式</string>
+    <string name="raid_caller_buff_grace">增益宽限期</string>
+
+    <!-- Editable Meta Specs Editor (08/25/26) -->
+    <string name="meta_specs_cc">控制</string>
+    <string name="meta_specs_melee">近战</string>
+    <string name="meta_specs_healer">治疗</string>
+    <string name="meta_specs_mage">法师</string>
+    <string name="meta_specs_dancer">舞者</string>
+    <string name="meta_specs_ranged">远程</string>
+    <string name="meta_specs_title">元配置</string>
+    <string name="meta_specs_description">自定义应用将哪些配置视为控制、近战、治疗、法师、舞者和远程。自定义配置以白色加粗显示。在类别上按 + 添加配置，在标签上按 x 移除。</string>
+    <string name="meta_specs_stock">默认</string>
+    <string name="meta_specs_custom">自定义</string>
+    <string name="meta_specs_reset">重置为默认</string>
+    <string name="meta_specs_reset_confirm_title">重置元配置？</string>
+    <string name="meta_specs_reset_confirm_text">这将丢弃所有自定义设置并恢复内置的默认元配置。</string>
+    <string name="meta_specs_accept">接受</string>
+    <string name="meta_specs_cancel">取消</string>
+    <string name="meta_specs_add">添加配置</string>
+    <string name="meta_specs_remove">移除 %1$s</string>
+    <string name="meta_specs_none">无</string>
+    <string name="meta_specs_unknown_spec">未知 / 不完整</string>
+    <string name="meta_specs_accept_disabled">选择有效的配置类型以启用接受</string>
+    <string name="settings_meta_specs_button">自定义元配置</string>
+    <string name="settings_meta_specs_state">当前元配置状态：%1$s</string>
+    <string name="settings_meta_specs_description">覆盖哪些配置在阵容、团队指挥和技术分析中被视为元配置。自定义配置以白色加粗显示。</string>
+    <string name="meta_specs_edit_icon">编辑元配置</string>
 </resources>

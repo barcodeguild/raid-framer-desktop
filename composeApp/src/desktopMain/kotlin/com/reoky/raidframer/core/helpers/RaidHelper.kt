@@ -1,11 +1,6 @@
 package com.reoky.raidframer.core.helpers
 
-import com.reoky.raidframer.core.definitions.META_CC_SPECS
-import com.reoky.raidframer.core.definitions.META_DANCER_SPECS
-import com.reoky.raidframer.core.definitions.META_HEALER_SPECS
-import com.reoky.raidframer.core.definitions.META_MAGE_SPECS
-import com.reoky.raidframer.core.definitions.META_MELEE_SPECS
-import com.reoky.raidframer.core.definitions.META_RANGED_SPEC
+import com.reoky.raidframer.core.definitions.MetaSpecsRepo
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.model.PlayerRole
 
@@ -14,11 +9,12 @@ import com.reoky.raidframer.core.model.PlayerRole
  * This is going to be kind of rough and ready at first.
  */
 fun SpecType.guessPlayerRole(): PlayerRole {
-  if (this in META_DANCER_SPECS) return PlayerRole.PURPLE
-  if (this in META_CC_SPECS) return PlayerRole.GREEN // always green for cc specs / tanks
-  if (this in META_MELEE_SPECS) return PlayerRole.GREEN // melee dps are green if their gear is above 17k
-  if (this in META_HEALER_SPECS) return PlayerRole.PINK
-  if (this in META_MAGE_SPECS) return PlayerRole.RED
-  if (this in META_RANGED_SPEC) return PlayerRole.BLUE
+  val meta = MetaSpecsRepo.current
+  if (this in meta.dancer) return PlayerRole.PURPLE
+  if (this in meta.cc) return PlayerRole.GREEN // always green for cc specs / tanks
+  if (this in meta.melee) return PlayerRole.GREEN // melee dps are green if their gear is above 17k
+  if (this in meta.healer) return PlayerRole.PINK
+  if (this in meta.mage) return PlayerRole.RED
+  if (this in meta.ranged) return PlayerRole.BLUE
   return PlayerRole.BLUE
 }

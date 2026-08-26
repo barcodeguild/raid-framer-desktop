@@ -1,7 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 val APP_NAME = "Raid Framer"
-val APP_VERSION = "2.3.4"
+val APP_VERSION = "2.3.6"
 val PACKAGE_ID = "com.reoky.raidframer"
 
 plugins {
@@ -97,7 +97,13 @@ compose.desktop {
       }
       jvmArgs(
         "--add-opens=java.desktop/java.awt=ALL-UNNAMED",
-        "--add-opens=java.desktop/sun.awt.windows=ALL-UNNAMED"
+        "--add-opens=java.desktop/sun.awt.windows=ALL-UNNAMED",
+        // Eagerly return committed heap to the OS after GC so the process working set
+        // doesn't stay ratcheted up after a battle. Requires a serial/parallel collector
+        // (G1, the JDK default, ignores these ratio flags), so we force parallel GC here.
+        "-XX:+UseParallelGC",
+        "-XX:MinHeapFreeRatio=10",
+        "-XX:MaxHeapFreeRatio=20"
       )
     }
   }

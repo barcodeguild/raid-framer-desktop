@@ -108,17 +108,26 @@ fun OverlayWindow(
       }
     }
 
-    // Re-assert topmost when the window gains focus/activation
-    LaunchedEffect(window) {
+    // Re-assert topmost when the window gains focus/activation. Register these
+    // listeners once and remove them with the Compose window lifecycle.
+    DisposableEffect(window, windowType) {
+      var adapter: WindowAdapter? = null
       if (windowType == OverlayWindowType.OVERLAY) {
         getHWND(window)?.let { hwnd ->
-          val adapter = object : WindowAdapter() {
+          val listener = object : WindowAdapter() {
             override fun windowActivated(e: WindowEvent?) {
               bringToTopmost(hwnd)
             }
           }
-          window.addWindowFocusListener(adapter)
-          window.addWindowListener(adapter)
+          adapter = listener
+          window.addWindowFocusListener(listener)
+          window.addWindowListener(listener)
+        }
+      }
+      onDispose {
+        adapter?.let {
+          window.removeWindowFocusListener(it)
+          window.removeWindowListener(it)
         }
       }
     }
@@ -126,9 +135,26 @@ fun OverlayWindow(
     // shift-click mouse listener to allow dragging the window around (tooltips always draggable without shift)
     val dragLocked = remember { mutableStateOf(false) }
 
-    val mouseListener = createMouseListener(windowState, windowType) { dragLocked.value }
-    composeWindow.addMouseListener(mouseListener)
-    composeWindow.addMouseMotionListener(mouseListener)
+    // A tool-tip is always draggable without shift. Whether the Combat overlay drags freely is
+    // decided live from config, so toggling tool-tip mode off immediately restores the normal
+    // (no-free-drag) overlay behavior without needing a restart.
+    val isTooltipWindow: () -> Boolean = {
+      if (overlayType == OverlayType.COMBAT) {
+        RFConfig.state.value.combatOverlayAsTooltipEnabled
+      } else {
+        windowType == OverlayWindowType.TOOLTIP
+      }
+    }
+
+    DisposableEffect(composeWindow) {
+      val mouseListener = createMouseListener(windowState, isTooltipWindow) { dragLocked.value }
+      composeWindow.addMouseListener(mouseListener)
+      composeWindow.addMouseMotionListener(mouseListener)
+      onDispose {
+        composeWindow.removeMouseListener(mouseListener)
+        composeWindow.removeMouseMotionListener(mouseListener)
+      }
+    }
 
     CompositionLocalProvider(LocalDragLock provides dragLocked) {
       val windowColor = Color(config.windowColor).copy(alpha = config.windowOpacity)
@@ -180,7 +206,7 @@ fun OverlayWindow(
  */
 fun createMouseListener(
   windowState: WindowState,
-  overlayWindowType: OverlayWindowType,
+  isTooltip: () -> Boolean,
   isDragLocked: () -> Boolean = { false } // activate this when friends are interacting with a dragable/slideable control
 ): MouseAdapter {
   return object : MouseAdapter() {
@@ -191,7 +217,7 @@ fun createMouseListener(
     override fun mousePressed(e: MouseEvent) {
       isDragAllowed = false
       if (isDragLocked()) return
-      if (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP) {
+      if (e.isShiftDown || isTooltip()) {
         // Define a margin for resizing (e.g. 10 pixels)
         val resizeMargin = 10
         val width = e.component.width
@@ -211,7 +237,7 @@ fun createMouseListener(
     }
 
     override fun mouseDragged(e: MouseEvent) {
-      if (isDragAllowed && !isDragLocked() && (e.isShiftDown || overlayWindowType == OverlayWindowType.TOOLTIP)) {
+      if (isDragAllowed && !isDragLocked() && (e.isShiftDown || isTooltip())) {
         val newPositionX = e.locationOnScreen.x - cornerOffset.x
         val newPositionY = e.locationOnScreen.y - cornerOffset.y
         windowState.position = WindowPosition(newPositionX.dp, newPositionY.dp)
@@ -256,7 +282,7 @@ class OverlayWindowShape(
 }
 
 enum class OverlayType {
-  COMBAT, SETTINGS, SUMMARY, NEW_SESSION, INSTALL, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, HELP, AGGRO, PLAYER_CARD, FILTERS, DUMMY, BATTLE_GRAPH, ITEM_USE
+  COMBAT, SETTINGS, SUMMARY, NEW_SESSION, INSTALL, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, HELP, AGGRO, PLAYER_CARD, FILTERS, DUMMY, BATTLE_GRAPH, ITEM_USE, RAID_CALLER, META_SPECS
 }
 
 enum class OverlayWindowType {
@@ -443,6 +469,26 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 100f,
       lastWidthDp = 400f,
       lastHeightDp = 300f,
+      isVisible = false
+    )
+
+    OverlayType.RAID_CALLER -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.OVERLAY,
+      lastPositionXDp = 1800f, // near the top/right by default
+      lastPositionYDp = 80f,
+      lastWidthDp = 420f,
+      lastHeightDp = 175f,
+      isVisible = false
+    )
+
+    OverlayType.META_SPECS -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP, // opaque tool-tip like Settings
+      lastPositionXDp = 1066f,
+      lastPositionYDp = 303f,
+      lastWidthDp = 560f,
+      lastHeightDp = 760f,
       isVisible = false
     )
   }
