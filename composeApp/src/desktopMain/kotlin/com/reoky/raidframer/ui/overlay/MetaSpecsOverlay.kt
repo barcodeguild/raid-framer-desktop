@@ -101,14 +101,17 @@ fun MetaSpecsOverlay(wm: WindowManager? = null) {
       .background(Color(0xFF121212))
   ) {
     Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .verticalScroll(rememberScrollState())
+      modifier = Modifier.fillMaxSize()
     ) {
-      TitleBarComponent(
-        title = stringResource(Res.string.meta_specs_title),
-        onClose = { cancel() }
-      )
+      Column(
+        modifier = Modifier
+          .weight(1f)
+          .verticalScroll(rememberScrollState())
+      ) {
+        TitleBarComponent(
+          title = stringResource(Res.string.meta_specs_title),
+          onClose = { cancel() }
+        )
 
       // Stock / Custom status line
       Row(
@@ -153,7 +156,8 @@ fun MetaSpecsOverlay(wm: WindowManager? = null) {
         )
       }
 
-      Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+      }
 
       Row(
         modifier = Modifier.fillMaxWidth().padding(16.dp),

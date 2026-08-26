@@ -138,19 +138,20 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
     modifier = Modifier
       .fillMaxSize()
       .background(Color(0xFF121212))
-      .verticalScroll(scrollState)
   ) {
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
       TitleBarComponent(
         title = stringResource(Res.string.new_session_title),
         onClose = { wm?.closeWindow(OverlayType.NEW_SESSION) }
       )
 
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(12.dp)
-      ) {
+      Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+          modifier = Modifier
+            .weight(1f)
+            .verticalScroll(scrollState)
+            .padding(12.dp)
+        ) {
         Surface(
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(10.dp),
@@ -368,9 +369,10 @@ fun NewSessionOverlay(wm: WindowManager? = null) {
         }
 
         Spacer(modifier = Modifier.height(12.dp))
+        }
 
         Row(
-          modifier = Modifier.fillMaxWidth(),
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
           horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
           Button(
