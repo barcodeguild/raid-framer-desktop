@@ -71,10 +71,6 @@ object PlayerCacheInteractor : Interactor() {
   private val raidDepartures = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidBuffHistory = mutableMapOf<String, RaidBuffSnapshot>()
   private const val RAID_BUFF_HISTORY_RETENTION_MS = 6L * 60L * 60L * 1000L
-  // Distance (meters) beyond which a raid member is considered out of range and cannot be
-  // reliably scanned. An empty buff scan from beyond this range is not evidence the player
-  // lacks buffs — it just means the app couldn't see them.
-  private const val OUT_OF_RANGE_DISTANCE = 115
   private var lastRaidBuffHistoryCleanupAt = 0L
 
   // --- Coherence tracking (time-in-range metric) ---
@@ -358,11 +354,19 @@ object PlayerCacheInteractor : Interactor() {
     // Only a non-empty buff read is always a valid confirmation of the player's state.
     if (buffIds.isNotEmpty()) {
       raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, buffIds, member.distance)
-    } else if (member.buffScanTimestamp > 0L && member.distance >= 0 && member.distance <= OUT_OF_RANGE_DISTANCE) {
-      // An in-range scan that returned no buffs is a real confirmation the player is unbuffed.
-      // An empty scan from an out-of-range / unknown-distance / never-zone player is NOT
-      // confirmation — the app couldn't see their buffs, so they must remain "not scannable."
-      raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, emptySet(), member.distance)
+    } else {
+      // An empty scan means the addon could NOT see the player's buffs. A raid member can be
+      // within the game's "unit in range" radius yet far past the much shorter buff-scan range,
+      // so the game reports zero buffs even though the player is still buffed. We must NOT let
+      // that empty result erase a player's known-buffed state, or the grace period never gets to
+      // keep them as buffed while they walk out of buff-scan range. Only record "unbuffed" when
+      // there is no fresher buffed record to preserve.
+      val existing = raidBuffHistory[member.playerName]
+      val hasFreshBuffed = existing != null && existing.buffIds.isNotEmpty() &&
+        now - existing.observedAt <= RAID_BUFF_HISTORY_RETENTION_MS
+      if (!hasFreshBuffed) {
+        raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, emptySet(), member.distance)
+      }
     }
     if (now - lastRaidBuffHistoryCleanupAt >= 60_000L) {
       val cutoff = now - RAID_BUFF_HISTORY_RETENTION_MS

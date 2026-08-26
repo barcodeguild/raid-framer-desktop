@@ -1,10 +1,10 @@
 package com.reoky.raidframer.ui.overlay
 
-import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateColor
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
@@ -118,6 +118,43 @@ private val CallerTitleColor = Color(0xFFE8E8E8)
 /** Compact pie-slice representation: color to normalized fraction. */
 private data class Slice(val color: Color, val fraction: Float)
 
+private val traumaBands = listOf(
+  RFColors.gearBlue,
+  RFColors.gearGreen,
+  RFColors.gearYellow,
+  RFColors.gearOrange,
+  RFColors.gearRed
+)
+
+private fun traumaTextColor(count: Int, total: Int): Color {
+  if (count <= 0 || total <= 0) return Color.White
+  val ratio = count.toFloat() / total
+  val stops = listOf(Color.White, RFColors.gearBlue, RFColors.gearGreen, RFColors.gearYellow, RFColors.gearOrange, RFColors.gearRed)
+  val position = (ratio * (stops.lastIndex)).coerceIn(0f, stops.lastIndex.toFloat())
+  val lower = position.toInt()
+  return if (lower == stops.lastIndex) stops.last() else androidx.compose.ui.graphics.lerp(stops[lower], stops[lower + 1], position - lower)
+}
+
+private fun traumaRingSlices(count: Int, total: Int): List<Slice> {
+  if (total <= 0) return listOf(Slice(RFColors.gearBlue, 1f))
+  val ratio = (count.toFloat() / total).coerceIn(0f, 1f)
+  if (ratio <= 0f) return listOf(Slice(RFColors.gearBlue, 1f))
+
+  // Red is truthful: its arc is exactly the fraction of the raid with trauma.
+  // The other colors form a compact severity trail beside it, while untouched
+  // circumference remains blue. This keeps one afflicted player mostly blue.
+  val redFraction = ratio
+  val trailFraction = minOf(ratio * 0.8f, 1f - redFraction)
+  val blueFraction = 1f - redFraction - trailFraction
+  return listOf(
+    Slice(RFColors.gearRed, redFraction),
+    Slice(RFColors.gearOrange, trailFraction * 0.28f),
+    Slice(RFColors.gearYellow, trailFraction * 0.18f),
+    Slice(RFColors.gearGreen, trailFraction * 0.22f),
+    Slice(RFColors.gearBlue, blueFraction + trailFraction * 0.32f)
+  ).filter { it.fraction > 0f }
+}
+
 private fun Faction.factionLabelRes() = when (this) {
   Faction.HARANYA -> Res.string.raid_caller_faction_haranya
   Faction.NUIA -> Res.string.raid_caller_faction_nuia
@@ -148,7 +185,8 @@ private fun MiniPieChart(
   centerTopColor: Color = SectionTitleColor,
   centerBottomColor: Color = Color.White,
   centerMiddle: String? = null,
-  centerMiddleColor: Color = RFColors.TextSecondary
+  centerMiddleColor: Color = RFColors.TextSecondary,
+  centerMiddleContent: (@Composable () -> Unit)? = null
 ) {
   Box(
     modifier = Modifier.size(size),
@@ -162,6 +200,7 @@ private fun MiniPieChart(
       val stroke = Stroke(width = size.toPx() * 0.07f, cap = StrokeCap.Butt)
       val inset = stroke.width / 2
       val radius = (size.toPx() / 2) - inset
+      // Canvas angles advance clockwise; -90 degrees is 12 o'clock.
       val start = -90f
       var sweep = 0f
       slices.forEach { slice ->
@@ -180,11 +219,33 @@ private fun MiniPieChart(
     }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
       Text(centerTop, color = centerTopColor, fontSize = 7.sp, maxLines = 1)
-      if (centerMiddle != null) {
-        Text(centerMiddle, color = centerMiddleColor, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+      if (centerMiddleContent != null) {
+        centerMiddleContent()
+      } else if (centerMiddle != null) {
+        Text(centerMiddle, color = centerMiddleColor, fontSize = 8.sp, fontWeight = FontWeight.Bold, maxLines = 1)
       }
+      Spacer(modifier = Modifier.height(2.dp))
       Text(centerBottom, color = centerBottomColor, fontSize = 8.sp, maxLines = 1)
     }
+  }
+}
+
+@Composable
+private fun TraumaCount(
+  text: String,
+  color: Color,
+  critical: Boolean
+) {
+  if (critical) {
+    val transition = rememberInfiniteTransition()
+    val pulseColor by transition.animateColor(
+      initialValue = color,
+      targetValue = RFColors.gearRed.copy(alpha = 0.45f),
+      animationSpec = infiniteRepeatable(tween(1_600, easing = LinearEasing), repeatMode = androidx.compose.animation.core.RepeatMode.Reverse)
+    )
+    Text(text, color = pulseColor, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+  } else {
+    Text(text, color = color, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1)
   }
 }
 
@@ -306,6 +367,8 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
 
   // Emulate a smooth count-down for Rebirth Trauma between the ~5s scan intervals.
   var rebirthCache by remember { mutableStateOf<Map<String, Pair<Long, Long>>>(emptyMap()) } // name -> (scanTsMs, timeLeftMs)
+  val gracePeriod = RaidBuffGracePeriod.entries.firstOrNull { it.name == config.raidCallerBuffGracePeriod }
+    ?: RaidBuffGracePeriod.FIFTEEN_MINUTES
   val liveMembers = remember(mainRaid, coRaid) {
     (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
   }
@@ -318,20 +381,30 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val allMembers = if (liveMembers.isNotEmpty()) liveMembers else lastKnownMembers
   val memberNames = remember(allMembers) { allMembers.map { it.playerName }.toSet() }
 
-  // Rebuild the rebirth cache whenever the raid scan produces fresher data.
-  LaunchedEffect(allMembers) {
+  // Rebuild the rebirth cache whenever the raid scan produces fresher data. Presence is
+  // resolved through the same grace-aware observation used by the other buffs, so a player
+  // who walks out of buff-scan range keeps counting down from their last known time-left
+  // (and stays counted) for the grace window instead of disappearing from the ring.
+  LaunchedEffect(allMembers, gracePeriod) {
     val updated = rebirthCache.toMutableMap()
     allMembers.forEach { member ->
       val scanTs = member.buffScanTimestamp.takeIf { it > 0L }?.times(1000L) ?: return@forEach
-      val rebirth = member.buffs.firstOrNull { it.buff_id == REBIRTH_BUFF_ID }
-      if (rebirth == null) {
+      val obs = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
+      val hasRebirth = obs.snapshot?.buffIds?.contains(REBIRTH_BUFF_ID) == true
+      if (!hasRebirth) {
         updated.remove(member.playerName)
-      } else {
+        return@forEach
+      }
+      // Only a fresh in-range scan carries a real time-left to re-arm the count-down.
+      val fresh = member.buffs.firstOrNull { it.buff_id == REBIRTH_BUFF_ID }
+      if (fresh != null) {
         val cached = updated[member.playerName]
         if (cached == null || scanTs > cached.first) {
-          updated[member.playerName] = scanTs to rebirth.tooltip.timeLeft.toLong()
+          updated[member.playerName] = scanTs to fresh.tooltip.timeLeft.toLong()
         }
       }
+      // Grace hit (no fresh tooltip): keep the existing entry untouched so the timer keeps
+      // counting down from the last known value. Nothing to do here.
     }
     rebirthCache = updated
   }
@@ -356,27 +429,11 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val highestGs = knownGs.maxOrNull() ?: 0
 
   // --- Rebirth trauma pie + average ---
-  // The ring shows the ratio of raid members WITH rebirth; the average is computed only
-  // across members who actually have rebirth (not diluted by unbuffed members as zeroes).
   val rebirthCount = rebirthEstimates.size
-  val noneCount = (allMembers.size - rebirthCount).coerceAtLeast(0)
-  val shortCount = rebirthEstimates.values.count { it in 15_000L until 45_000L }
-  val mediumCount = rebirthEstimates.values.count { it in 45_000L until 90_000L }
-  val highCount = rebirthEstimates.values.count { it in 90_000L until 120_000L }
-  val criticalCount = rebirthEstimates.values.count { it >= 120_000L }
-  // Remember the slices keyed on the band counts so the donut only redraws when a member
-  // crosses a threshold (or enters/exits rebirth), not on every second's tick — this avoids
-  // the continuous Canvas redraw that presented as flicker.
   val totalForRebirth = allMembers.size.toFloat().coerceAtLeast(1f)
-  val rebirthSlices = remember(rebirthCount, noneCount, shortCount, mediumCount, highCount, criticalCount) {
-    listOf(
-      Slice(RFColors.traumaNone, noneCount / totalForRebirth),
-      Slice(RFColors.traumaShort, shortCount / totalForRebirth),
-      Slice(RFColors.traumaMedium, mediumCount / totalForRebirth),
-      Slice(RFColors.traumaHigh, highCount / totalForRebirth),
-      Slice(RFColors.traumaCritical, criticalCount / totalForRebirth)
-    )
-  }
+  val traumaColor = traumaTextColor(rebirthCount, allMembers.size)
+  val traumaCritical = allMembers.isNotEmpty() && rebirthCount.toFloat() / allMembers.size > 0.5f
+  val rebirthSlices = remember(rebirthCount, allMembers.size) { traumaRingSlices(rebirthCount, allMembers.size) }
   // Average rebirth time across ONLY members who currently have rebirth.
   val rebirthAvg = if (rebirthEstimates.isEmpty()) 0L else rebirthEstimates.values.sum() / rebirthEstimates.size
   val rebirthAvgText = when {
@@ -387,8 +444,6 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
 
   // --- Loot buffs (threshold from config, 100% in-game baseline) ---
   val lootThreshold = config.raidCallerLootBuffThreshold
-  val gracePeriod = RaidBuffGracePeriod.entries.firstOrNull { it.name == config.raidCallerBuffGracePeriod }
-    ?: RaidBuffGracePeriod.FIFTEEN_MINUTES
   val lootSums = remember(allMembers, gracePeriod) {
     allMembers.map { member ->
       val obs = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
@@ -590,8 +645,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
           slices = rebirthSlices,
           size = 56.dp,
           centerTop = stringResource(Res.string.raid_caller_rebirth),
-          centerMiddle = "$rebirthCount/${allMembers.size}",
-          centerMiddleColor = if (rebirthAvg >= 120_000L) RFColors.traumaCritical else if (rebirthAvg >= 90_000L) RFColors.traumaHigh else if (rebirthAvg >= 45_000L) RFColors.traumaMedium else Color.White,
+          centerMiddleContent = { TraumaCount("$rebirthCount/${allMembers.size}", traumaColor, traumaCritical) },
           centerBottom = rebirthAvgText
         )
         MiniPieChart(
