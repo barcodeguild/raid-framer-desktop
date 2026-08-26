@@ -108,17 +108,26 @@ fun OverlayWindow(
       }
     }
 
-    // Re-assert topmost when the window gains focus/activation
-    LaunchedEffect(window) {
+    // Re-assert topmost when the window gains focus/activation. Register these
+    // listeners once and remove them with the Compose window lifecycle.
+    DisposableEffect(window, windowType) {
+      var adapter: WindowAdapter? = null
       if (windowType == OverlayWindowType.OVERLAY) {
         getHWND(window)?.let { hwnd ->
-          val adapter = object : WindowAdapter() {
+          val listener = object : WindowAdapter() {
             override fun windowActivated(e: WindowEvent?) {
               bringToTopmost(hwnd)
             }
           }
-          window.addWindowFocusListener(adapter)
-          window.addWindowListener(adapter)
+          adapter = listener
+          window.addWindowFocusListener(listener)
+          window.addWindowListener(listener)
+        }
+      }
+      onDispose {
+        adapter?.let {
+          window.removeWindowFocusListener(it)
+          window.removeWindowListener(it)
         }
       }
     }
@@ -137,9 +146,15 @@ fun OverlayWindow(
       }
     }
 
-    val mouseListener = createMouseListener(windowState, isTooltipWindow) { dragLocked.value }
-    composeWindow.addMouseListener(mouseListener)
-    composeWindow.addMouseMotionListener(mouseListener)
+    DisposableEffect(composeWindow) {
+      val mouseListener = createMouseListener(windowState, isTooltipWindow) { dragLocked.value }
+      composeWindow.addMouseListener(mouseListener)
+      composeWindow.addMouseMotionListener(mouseListener)
+      onDispose {
+        composeWindow.removeMouseListener(mouseListener)
+        composeWindow.removeMouseMotionListener(mouseListener)
+      }
+    }
 
     CompositionLocalProvider(LocalDragLock provides dragLocked) {
       val windowColor = Color(config.windowColor).copy(alpha = config.windowOpacity)
