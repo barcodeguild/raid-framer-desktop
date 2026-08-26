@@ -13,7 +13,8 @@ import kotlin.text.orEmpty
 
 @Database(
   entities = [WindowStateEntity::class, ConfigEntity::class, PlayerCacheEntity::class, PlayerSessionTotalsEntity::class],
-  version = SCHEMA_VERSION
+  version = SCHEMA_VERSION,
+  exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
   abstract fun getWindowStateDao(): WindowStateDao
