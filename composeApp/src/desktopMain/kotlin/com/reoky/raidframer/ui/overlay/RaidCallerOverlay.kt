@@ -414,7 +414,10 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
     val estimates = mutableMapOf<String, Long>()
     rebirthCache.forEach { (name, pair) ->
       val (scanTs, timeLeft) = pair
-      estimates[name] = (timeLeft - (nowTick - scanTs)).coerceAtLeast(0L)
+      val remaining = timeLeft - (nowTick - scanTs)
+      // Once the last known duration expires, the observation is no longer
+      // actionable. Do not keep counting an out-of-range player as afflicted.
+      if (remaining > 0L) estimates[name] = remaining
     }
     estimates
   }
