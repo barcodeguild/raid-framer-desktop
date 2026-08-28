@@ -7,6 +7,7 @@ RF.TAG = "Raid Framer 2.3.7"
 
 RF.PLAYER_NAME = ""
 RF.FACTION = ""
+local raidEventsEnabled = false
 
 ADDON:ImportAPI(API_TYPE.CHAT.id)
 ADDON:ImportAPI(API_TYPE.UNIT.id)
@@ -63,6 +64,7 @@ function RF:Init()
   end
 
   RF.IPC.DORMANT = true
+  raidEventsEnabled = true
 
   -- get player name : tell desktop app which character the user is playing
   RF.PLAYER_NAME = X2Unit:UnitName("player")
@@ -78,22 +80,57 @@ end
 function RF:Shutdown()
   if not self.initialized then return end
   self.initialized = false
+  raidEventsEnabled = false
   self:Log("Hehe bye!")
   deregisterForEvents()
 end
 
 -- Attach handlers to the game for various events we care about
+-- Keep stable references for APIs that identify handlers by Lua function identity.
+local eventHandlers = {
+  teamMembersChanged = function(...)
+    if raidEventsEnabled then RF.Raid.handleTeamMembersChanged(...) end
+  end,
+  teamRoleChanged = function(...)
+    if raidEventsEnabled then RF.Raid.handleTeamRoleChanged(...) end
+  end,
+  targetChanged = function(...)
+    if raidEventsEnabled then RF.Combat.handleTargetChanged(...) end
+  end,
+  combatMessage = function(...)
+    if raidEventsEnabled then RF.Combat.handleCombatMessage(...) end
+  end,
+  unitDead = function(...)
+    if raidEventsEnabled then RF.Combat.handleUnitDead(...) end
+  end,
+  duelStarted = function(...)
+    if raidEventsEnabled then RF.Combat.handleDuelStarted(...) end
+  end,
+  duelEnded = function(...)
+    if raidEventsEnabled then RF.Combat.handleDuelEnded(...) end
+  end,
+  chatJoinedChannel = function(...)
+    if raidEventsEnabled then RF.Chat.handleChatChannelJoined(...) end
+  end,
+  teamJointed = function(...)
+    if raidEventsEnabled then RF.Raid.handleCoraidEstablished(...) end
+  end,
+  teamJointBroken = function(...)
+    if raidEventsEnabled then RF.Raid.handleCoraidBroken(...) end
+  end,
+}
+
 function registerForEvents()
-  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED, RF.Raid.handleTeamMembersChanged)
-  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_ROLE_CHANGED, RF.Raid.handleTeamRoleChanged)
-  UIParent:SetEventHandler(UIEVENT_TYPE.TARGET_CHANGED, RF.Combat.handleTargetChanged)
-  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, RF.Combat.handleCombatMessage)
-  UIParent:SetEventHandler(UIEVENT_TYPE.UNIT_DEAD_NOTICE, RF.Combat.handleUnitDead)
-  UIParent:SetEventHandler(UIEVENT_TYPE.STARTED_DUEL, RF.Combat.handleDuelStarted)
-  UIParent:SetEventHandler(UIEVENT_TYPE.ENDED_DUEL, RF.Combat.handleDuelEnded)
-  UIParent:SetEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL, RF.Chat.handleChatChannelJoined)
-  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINTED, RF.Raid.handleCoraidEstablished)
-  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, RF.Raid.handleCoraidBroken)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED, eventHandlers.teamMembersChanged)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_ROLE_CHANGED, eventHandlers.teamRoleChanged)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TARGET_CHANGED, eventHandlers.targetChanged)
+  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, eventHandlers.combatMessage)
+  UIParent:SetEventHandler(UIEVENT_TYPE.UNIT_DEAD_NOTICE, eventHandlers.unitDead)
+  UIParent:SetEventHandler(UIEVENT_TYPE.STARTED_DUEL, eventHandlers.duelStarted)
+  UIParent:SetEventHandler(UIEVENT_TYPE.ENDED_DUEL, eventHandlers.duelEnded)
+  UIParent:SetEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL, eventHandlers.chatJoinedChannel)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINTED, eventHandlers.teamJointed)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, eventHandlers.teamJointBroken)
 end
 
 function registerForIPCEvents()
@@ -102,26 +139,8 @@ end
 
 -- Do the opposite of registerForEvents as part of the tear-down pattern
 function deregisterForEvents()
-  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED, nil)
-  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_ROLE_CHANGED, nil)
-  UIParent:SetEventHandler(UIEVENT_TYPE.TARGET_CHANGED, nil)
-  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, nil)
-  UIParent:SetEventHandler(UIEVENT_TYPE.UNIT_DEAD_NOTICE, nil)
-  UIParent:SetEventHandler(UIEVENT_TYPE.STARTED_DUEL, nil)
-  UIParent:SetEventHandler(UIEVENT_TYPE.ENDED_DUEL, nil)
-  UIParent:SetEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL, nil)
-  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINTED, nil)
-  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, nil)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED, RF.Raid.handleTeamMembersChanged)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TEAM_ROLE_CHANGED, RF.Raid.handleTeamRoleChanged)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TARGET_CHANGED, RF.Combat.handleTargetChanged)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.COMBAT_MSG, RF.Combat.handleCombatMessage)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.UNIT_DEAD_NOTICE, RF.Combat.handleUnitDead)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.STARTED_DUEL, RF.Combat.handleDuelStarted)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.ENDED_DUEL, RF.Combat.handleDuelEnded)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL, RF.Chat.handleChatChannelJoined)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TEAM_JOINTED, RF.Raid.handleCoraidEstablished)
---   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, RF.Raid.handleCoraidBroken)
+  -- Keep the stable wrappers registered. ArcheAge clients can crash while
+  -- releasing native event registrations; disabling dispatch is sufficient.
 end
 
 -------------------------
