@@ -52,7 +52,7 @@ object CompanionInteractor : Interactor() {
           val outFile = addonDirectory.resolve(IPC_OUT_FILENAME)
           try {
             if (inFile.exists()) {
-              inFile.writeText("") // truncate/blank the file; don't delete
+              inFile.writeText("") // discard commands queued while the game was closed
             }
             if (outFile.exists()) {
               outFile.writeText("")
@@ -114,6 +114,9 @@ object CompanionInteractor : Interactor() {
 
     initializeIpcFilesIfNeeded()
 
+    // Keep the Lua companion awake only while this app is actively running.
+    sendMessage(IPCMessagePayload.Keepalive())
+
     val addonDirectory = Paths.get(gameDirectory, ADDON_RELATIVE_PATH)
     if (!addonDirectory.exists()) return
 
@@ -154,8 +157,6 @@ object CompanionInteractor : Interactor() {
     try {
       // Performance: when companion is disabled, silently drop all inbound messages.
       // IPC file is still read (lines consumed) in interact() to prevent unbounded growth.
-      if (!RFConfig.state.value.performanceCompanionEnabled) return
-
       when (val message = AppJson.decodeFromString<IPCMessagePayload>(rawJson)) {
         is IPCMessagePayload.SelfUpdate -> {
           val playerName = message.payload

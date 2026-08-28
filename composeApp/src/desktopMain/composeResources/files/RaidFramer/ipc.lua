@@ -21,6 +21,9 @@ RF.IPC.MESSAGE_WRITE_QUEUE_TAIL = 0
 -- Persistent output file handle to avoid repeated open/close
 RF.IPC.OUT_FH = nil
 RF.IPC.SHUTDOWN_REQUESTED = false
+RF.IPC.DORMANT = true
+RF.IPC.LAST_KEEPALIVE = 0
+RF.IPC.KEEPALIVE_TIMEOUT = 15
 
 RF.IPC.MESSAGE_TYPES = {
   COMBAT_EVENT = "COMBAT_EVENT", -- see game monitor branch (not used yet)
@@ -37,7 +40,8 @@ RF.IPC.MESSAGE_TYPES = {
   AOE_SPLAT = "AOE_SPLAT", -- hoping maybe Queen Sparkles will open the animation api someday (not used yet but I want to draw sick animations on the ground for charms and stuff!)
   TEST_PING = "TEST_PING", -- companion replies with a "pong" payload (used for the lua companion indicator LED)
   CONFIG_UPDATE = "CONFIG_UPDATE", -- app notifies addon that config has changed, prompts a reload from disk
-  SHUTDOWN = "SHUTDOWN" -- app requests addon to shut down and release file locks for clean uninstall
+  SHUTDOWN = "SHUTDOWN", -- app requests addon to shut down and release file locks for clean uninstall
+  KEEPALIVE = "KEEPALIVE" -- app heartbeat; absence puts the companion into dormant mode
 }
 
 -- Helper: open persistent output file handle (append mode). Returns file handle or nil.
@@ -68,7 +72,7 @@ function RF.IPC.interact()
   -- GUARD: Don't process if shutdown has been requested
   if RF.IPC.SHUTDOWN_REQUESTED then return end
 
-  -- GUARD: Should we write right now? (rate limit)
+  -- IPC polling remains active while dormant so a later app heartbeat can wake us.
   local now = os.time()
   if now - RF.IPC.LAST_INTERACT_TIME < RF.IPC.BATCH_COOLDOWN then
     return
@@ -79,6 +83,16 @@ function RF.IPC.interact()
 
   -- First check if there's anything to read
   RF.IPC.ReadMessages()
+
+  -- A keepalive may have arrived in this pass, so only time out after reading input.
+  if RF.IPC.LAST_KEEPALIVE > 0 and now - RF.IPC.LAST_KEEPALIVE > RF.IPC.KEEPALIVE_TIMEOUT then
+    if not RF.IPC.DORMANT then
+      RF.IPC.DORMANT = true
+      RF.Config.PERFORMANCE_COMPANION_ENABLED = false
+      deregisterForEvents()
+      if RF.Config.SHOW_DEBUG_INFO then RF:Log("Companion asleep: desktop app heartbeat timed out.") end
+    end
+  end
 
   -- GUARD: Anything to write? (use head/tail math rather than # which doesn't work with nil holes)
   local head = RF.IPC.MESSAGE_WRITE_QUEUE_HEAD
@@ -293,6 +307,21 @@ function RF.IPC.HandleRawMessage(rawMessage)
   elseif message.type == RF.IPC.MESSAGE_TYPES.CONFIG_UPDATE then
     RF:Log("Addon configuration updated via the desktop app.")
     RF.Config.LoadConfig()
+  elseif message.type == RF.IPC.MESSAGE_TYPES.KEEPALIVE then
+    local now = os.time()
+    local sentAt = tonumber(message.timestamp) or 0
+    -- Do not let a heartbeat queued while the game was closed wake the addon.
+    if sentAt <= 0 or now - sentAt > RF.IPC.KEEPALIVE_TIMEOUT then
+      return
+    end
+
+    RF.IPC.LAST_KEEPALIVE = now
+    if RF.IPC.DORMANT then
+      RF.IPC.DORMANT = false
+      RF.Config.PERFORMANCE_COMPANION_ENABLED = true
+      registerForEvents()
+      if RF.Config.SHOW_DEBUG_INFO then RF:Log("Companion awake: desktop app heartbeat received.") end
+    end
   elseif message.type == RF.IPC.MESSAGE_TYPES.SHUTDOWN then
     RF.IPC.SHUTDOWN_REQUESTED = true
     RF:Log("Shutdown requested by desktop app. Releasing file locks...")

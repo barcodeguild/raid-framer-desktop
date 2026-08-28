@@ -62,6 +62,8 @@ function RF:Init()
     return
   end
 
+  RF.IPC.DORMANT = true
+
   -- get player name : tell desktop app which character the user is playing
   RF.PLAYER_NAME = X2Unit:UnitName("player")
   RF.IPC.WriteMessage(RF.IPC.MESSAGE_TYPES.SELF_UPDATE, RF.PLAYER_NAME)
@@ -69,7 +71,8 @@ function RF:Init()
   self:Log("Good news, " .. RF.PLAYER_NAME .. "! If you can read this message, then the " .. RF.TAG .. " Lua component is working!")
   self:Log("Please be sure to launch the desktop app to access the multi-monitor game overlay.")
 
-  registerForEvents()
+  -- IPC polling must remain available while dormant so the desktop app can wake us.
+  registerForIPCEvents()
 end
 
 function RF:Shutdown()
@@ -93,18 +96,32 @@ function registerForEvents()
   UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, RF.Raid.handleCoraidBroken)
 end
 
+function registerForIPCEvents()
+  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, RF.IPC.interact)
+end
+
 -- Do the opposite of registerForEvents as part of the tear-down pattern
 function deregisterForEvents()
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED)
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.TEAM_ROLE_CHANGED)
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.TARGET_CHANGED)
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.COMBAT_MSG)
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.UNIT_DEAD_NOTICE)
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.STARTED_DUEL)
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.ENDED_DUEL)
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL)
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.TEAM_JOINTED)
-  UIParent:RemoveEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED, nil)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_ROLE_CHANGED, nil)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TARGET_CHANGED, nil)
+  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, nil)
+  UIParent:SetEventHandler(UIEVENT_TYPE.UNIT_DEAD_NOTICE, nil)
+  UIParent:SetEventHandler(UIEVENT_TYPE.STARTED_DUEL, nil)
+  UIParent:SetEventHandler(UIEVENT_TYPE.ENDED_DUEL, nil)
+  UIParent:SetEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL, nil)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINTED, nil)
+  UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, nil)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TEAM_MEMBERS_CHANGED, RF.Raid.handleTeamMembersChanged)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TEAM_ROLE_CHANGED, RF.Raid.handleTeamRoleChanged)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TARGET_CHANGED, RF.Combat.handleTargetChanged)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.COMBAT_MSG, RF.Combat.handleCombatMessage)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.UNIT_DEAD_NOTICE, RF.Combat.handleUnitDead)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.STARTED_DUEL, RF.Combat.handleDuelStarted)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.ENDED_DUEL, RF.Combat.handleDuelEnded)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL, RF.Chat.handleChatChannelJoined)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TEAM_JOINTED, RF.Raid.handleCoraidEstablished)
+--   UIParent:ReleaseEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, RF.Raid.handleCoraidBroken)
 end
 
 -------------------------

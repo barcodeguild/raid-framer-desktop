@@ -124,6 +124,14 @@ sealed class IPCMessagePayload {
   ) : IPCMessagePayload()
 
   @Serializable
+  @SerialName("KEEPALIVE")
+  data class Keepalive(
+    override val version: Int = 1,
+    @Serializable(with = SecondsToMillisSerializer::class)
+    override val timestamp: Long = System.currentTimeMillis()
+  ) : IPCMessagePayload()
+
+  @Serializable
   @SerialName("CONFIG_UPDATE")
   data class ConfigUpdate(
     override val version: Int = 1,
