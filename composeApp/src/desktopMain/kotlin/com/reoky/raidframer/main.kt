@@ -1,6 +1,7 @@
 package com.reoky.raidframer
 
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -155,9 +156,9 @@ fun main(args: Array<String>) {
         Log.info(TAG, "Searching for combat log path...")
         GameMonitorInteractor.locateArcheRageDirectory()
       }
-      LaunchedEffect(GameMonitorInteractor.isSearching) {
-        val automaticLogPath = GameMonitorInteractor.possiblePaths.value.firstOrNull()
-        automaticLogPath?.let { path ->
+      val possiblePaths by GameMonitorInteractor.possiblePaths.collectAsState()
+      LaunchedEffect(possiblePaths) {
+        possiblePaths.firstOrNull()?.let { path ->
           Log.info(TAG, "Automatically choosing the combat log file here: $path")
           GameMonitorInteractor.chooseCombatLog(path)
           GameMonitorInteractor.setOptions(GameMonitorInteractor.MonitorModes.MONITOR, 0L, Long.MAX_VALUE)
