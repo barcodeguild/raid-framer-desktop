@@ -4,6 +4,7 @@ import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.interactor.Interactor
 import com.reoky.raidframer.core.interactor.Log
+import com.reoky.raidframer.core.helpers.getRaidFramerDirectory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +27,7 @@ object SeedTableInteractor : Interactor() {
   private var loaded = false
 
   private fun getAppDirectory(): String {
-    return "${System.getProperty("user.home")}/.RaidFramer"
+    return getRaidFramerDirectory()?.toString() ?: ".RaidFramer"
   }
 
   private fun getSeedTableFile(): File {

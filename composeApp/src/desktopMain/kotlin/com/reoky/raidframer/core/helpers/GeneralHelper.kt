@@ -31,7 +31,10 @@ import java.awt.Desktop
 import java.io.File
 import java.net.URI
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import java.nio.file.StandardOpenOption
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -91,6 +94,43 @@ fun getDocumentsDirectory(): String? {
 fun getExportDirectory(): String? {
   val documentsDir = getDocumentsDirectory() ?: return null
   return Paths.get(documentsDir, "RFExports").toString()
+}
+
+/** Root directory for application-owned files that should not live beside the installed app. */
+fun getRaidFramerDirectory(): Path? {
+  val home = System.getProperty("user.home") ?: return null
+  return Paths.get(home, ".RaidFramer")
+}
+
+/** Root directory for locally persisted Pocket journal entries. */
+fun getPocketJournalDirectory(createdAt: Long, entryId: String): Path? {
+  val root = getRaidFramerDirectory() ?: return null
+  val date = Instant.ofEpochMilli(createdAt)
+    .atZone(ZoneId.systemDefault())
+    .toLocalDate()
+  return root.resolve("journals")
+    .resolve(date.year.toString())
+    .resolve("%02d".format(date.monthValue))
+    .resolve(entryId)
+}
+
+/** Creates an application directory and returns it, or null when the user home is unavailable. */
+fun ensureRaidFramerDirectory(): Path? {
+  return getRaidFramerDirectory()?.also { Files.createDirectories(it) }
+}
+
+/** Writes UTF-8 text through a sibling temporary file before replacing the destination. */
+fun writeTextAtomically(path: Path, text: String) {
+  Files.createDirectories(path.parent)
+  val temporary = path.resolveSibling(".${path.fileName}.tmp")
+  Files.write(
+    temporary,
+    text.toByteArray(Charsets.UTF_8),
+    StandardOpenOption.CREATE,
+    StandardOpenOption.TRUNCATE_EXISTING,
+    StandardOpenOption.WRITE
+  )
+  Files.move(temporary, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
 }
 
 fun getDirectorySizeBytes(directoryPath: String): Long {
