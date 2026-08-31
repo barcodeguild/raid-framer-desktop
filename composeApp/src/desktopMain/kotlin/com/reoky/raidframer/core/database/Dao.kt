@@ -12,7 +12,15 @@ import androidx.room.Transaction
 import kotlin.text.orEmpty
 
 @Database(
-  entities = [WindowStateEntity::class, ConfigEntity::class, PlayerCacheEntity::class, PlayerSessionTotalsEntity::class],
+  entities = [
+    WindowStateEntity::class,
+    ConfigEntity::class,
+    PlayerCacheEntity::class,
+    PlayerSessionTotalsEntity::class,
+    PocketEntryEntity::class,
+    PocketTagEntity::class,
+    PocketAttachmentEntity::class
+  ],
   version = SCHEMA_VERSION,
   exportSchema = false
 )
@@ -21,6 +29,7 @@ abstract class AppDatabase : RoomDatabase() {
   abstract fun getConfigDao(): ConfigDao
   abstract fun getPlayerCacheDao(): PlayerCacheDao
   abstract fun getPlayerSessionDao(): PlayerSessionDao
+  abstract fun getPocketDao(): PocketDao
 }
 
 @Dao
@@ -76,4 +85,43 @@ interface PlayerSessionDao {
   // is a no-op rather than a duplicate row. Cheaper than a defensive DELETE-then-INSERT.
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(session: PlayerSessionTotalsEntity)
+}
+
+@Dao
+interface PocketDao {
+  @Query("SELECT * FROM pocket_entries ORDER BY createdAt DESC LIMIT :limit OFFSET :offset")
+  suspend fun getEntries(limit: Int, offset: Int): List<PocketEntryEntity>
+
+  @Query("SELECT * FROM pocket_entries WHERE id = :id")
+  suspend fun getEntry(id: String): PocketEntryEntity?
+
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insertEntry(entry: PocketEntryEntity)
+
+  @Query("DELETE FROM pocket_entries WHERE id = :id")
+  suspend fun deleteEntry(id: String)
+
+  @Query("SELECT * FROM pocket_tags WHERE entryId = :entryId ORDER BY tag COLLATE NOCASE")
+  suspend fun getTags(entryId: String): List<PocketTagEntity>
+
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insertTags(tags: List<PocketTagEntity>)
+
+  @Query("DELETE FROM pocket_tags WHERE entryId = :entryId")
+  suspend fun deleteTags(entryId: String)
+
+  @Query("SELECT * FROM pocket_tags WHERE normalizedTag LIKE :query ORDER BY tag COLLATE NOCASE")
+  suspend fun findTags(query: String): List<PocketTagEntity>
+
+  @Query("SELECT * FROM pocket_attachments WHERE entryId = :entryId ORDER BY createdAt ASC")
+  suspend fun getAttachments(entryId: String): List<PocketAttachmentEntity>
+
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insertAttachment(attachment: PocketAttachmentEntity)
+
+  @Query("DELETE FROM pocket_attachments WHERE id = :id")
+  suspend fun deleteAttachment(id: String)
+
+  @Query("DELETE FROM pocket_attachments WHERE entryId = :entryId")
+  suspend fun deleteAttachments(entryId: String)
 }

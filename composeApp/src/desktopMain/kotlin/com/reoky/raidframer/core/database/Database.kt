@@ -6,6 +6,7 @@ import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import kotlinx.coroutines.Dispatchers
 import java.io.File
+import com.reoky.raidframer.core.helpers.getRaidFramerDirectory
 
 
 /*
@@ -17,12 +18,12 @@ fun initialize(): AppDatabase {
   val TAG = "Core/Database.initialize()"
 
   // We don't have permissions to write to the program files directory, so we'll use the user's home directory
-  val userHomeDirectory = System.getProperty("user.home")
-  val appDirectory = "$userHomeDirectory/.RaidFramer"
-  val databaseFilePath = "$appDirectory/raidframer.db"
+  val appDirectory = getRaidFramerDirectory()
+    ?: error("Unable to resolve the Raid Framer application directory")
+  val databaseFilePath = appDirectory.resolve("raidframer.db").toString()
 
   // Create the directory if it doesn't exist
-  val directory = File(appDirectory)
+  val directory = File(appDirectory.toString())
   if (!directory.exists()) {
     directory.mkdirs()
   }
@@ -80,7 +81,8 @@ fun initialize(): AppDatabase {
    .addMigrations(MIGRATION_40_41) // added battle graph spell depth for memory optimization
    .addMigrations(MIGRATION_41_42) // added combat overlay tooltip mode toggle
    .addMigrations(MIGRATION_42_43) // added raid caller overlay settings (08/24/26)
-   .addMigrations(MIGRATION_43_44) // added editable meta specs (08/25/26)
+    .addMigrations(MIGRATION_43_44) // added editable meta specs (08/25/26)
+    .addMigrations(MIGRATION_44_45) // added Pocket journal metadata, tags, and attachments (08/31/26)
   .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
   .fallbackToDestructiveMigrationOnDowngrade(true)

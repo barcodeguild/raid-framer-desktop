@@ -469,3 +469,50 @@ val MIGRATION_43_44 = object : Migration(43, 44) {
     connection.prepare("ALTER TABLE config ADD COLUMN customMetaSpecsJson TEXT NOT NULL DEFAULT ''").use { it.step() }
   }
 }
+
+// Added Pocket journal metadata, tags, and attachment tracking (08/31/26).
+val MIGRATION_44_45 = object : Migration(44, 45) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare(
+      """
+      CREATE TABLE IF NOT EXISTS pocket_entries (
+        id TEXT NOT NULL PRIMARY KEY,
+        createdAt INTEGER NOT NULL,
+        updatedAt INTEGER NOT NULL,
+        title TEXT NOT NULL DEFAULT '',
+        markdownPath TEXT NOT NULL
+      )
+      """.trimIndent()
+    ).use { it.step() }
+
+    connection.prepare("CREATE INDEX IF NOT EXISTS index_pocket_entries_createdAt ON pocket_entries(createdAt)").use { it.step() }
+    connection.prepare("CREATE INDEX IF NOT EXISTS index_pocket_entries_updatedAt ON pocket_entries(updatedAt)").use { it.step() }
+
+    connection.prepare(
+      """
+      CREATE TABLE IF NOT EXISTS pocket_tags (
+        entryId TEXT NOT NULL,
+        tag TEXT NOT NULL,
+        normalizedTag TEXT NOT NULL,
+        PRIMARY KEY(entryId, normalizedTag)
+      )
+      """.trimIndent()
+    ).use { it.step() }
+
+    connection.prepare("CREATE INDEX IF NOT EXISTS index_pocket_tags_normalizedTag ON pocket_tags(normalizedTag)").use { it.step() }
+
+    connection.prepare(
+      """
+      CREATE TABLE IF NOT EXISTS pocket_attachments (
+        id TEXT NOT NULL PRIMARY KEY,
+        entryId TEXT NOT NULL,
+        relativePath TEXT NOT NULL,
+        mimeType TEXT NOT NULL,
+        createdAt INTEGER NOT NULL
+      )
+      """.trimIndent()
+    ).use { it.step() }
+
+    connection.prepare("CREATE INDEX IF NOT EXISTS index_pocket_attachments_entryId ON pocket_attachments(entryId)").use { it.step() }
+  }
+}
