@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.helpers.FontsHelper
 import androidx.compose.material.TextButton
+import androidx.compose.material.IconButton
 
 @Composable
 fun TitleBarComponent(
@@ -29,6 +30,7 @@ fun TitleBarComponent(
   onClose: () -> Unit,
   actionLabel: String? = null,
   onAction: (() -> Unit)? = null,
+  captureActions: (@Composable RowScope.() -> Unit)? = null,
   trailingContent: @Composable RowScope.() -> Unit = {},
   transparent: Boolean = false,
   height: Dp = 46.dp,
@@ -102,6 +104,7 @@ fun TitleBarComponent(
       modifier = Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 6.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
+      captureActions?.invoke(this)
       trailingContent()
       CloseButton(onClose = onClose)
     }

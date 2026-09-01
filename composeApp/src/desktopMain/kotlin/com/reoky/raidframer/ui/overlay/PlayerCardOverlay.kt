@@ -71,7 +71,6 @@ import com.reoky.raidframer.ui.component.SessionTotals
 import com.reoky.raidframer.ui.component.StatRow
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.PocketCaptureMenu
-import com.reoky.raidframer.ui.capture.ComposeWindowCaptureService
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
 import kotlinx.coroutines.launch
 import java.nio.file.Files
@@ -253,7 +252,6 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
   val metricType by AppState.selectedMetricType.collectAsState()
 
   var playerSessionCount by remember { mutableStateOf(0) }
-  val scope = rememberCoroutineScope()
   LaunchedEffect(currentPlayer) {
     val name = currentPlayer
     if (!name.isNullOrBlank()) {
@@ -278,35 +276,6 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
         defaultColor.name.lowercase().capitalize(Locale.current)
       }) - ${metricType.displayName} ${stringResource(Res.string.graphs_trend_graph)} (${currentDateString})",
       onClose = { wm?.closeWindow(OverlayType.PLAYER_CARD) },
-      trailingContent = {
-        PocketCaptureMenu(
-          onReferenceInPocket = {
-            val window = wm?.nativeWindow(OverlayType.PLAYER_CARD) as? ComposeWindow
-            val image = window?.let { ComposeWindowCaptureService.capture(it) } ?: return@PocketCaptureMenu
-            scope.launch {
-              val draft = PocketDraftCoordinator.activeDraft.value
-                ?: PocketDraftCoordinator.createDraft(title = "Player Card - ${currentPlayer.orEmpty()}")
-              val name = PocketDraftCoordinator.nextAttachmentName(draft.metadata.id) ?: return@launch
-              val temporary = Files.createTempFile("raid-framer-pocket-capture-", ".png")
-              try {
-                ImageIO.write(image, "png", temporary.toFile())
-                val existingMarkdown = PocketDraftCoordinator.activeDraft.value?.markdown.orEmpty()
-                val separator = if (existingMarkdown.isBlank() || existingMarkdown.endsWith("\n")) "" else "\n"
-                PocketDraftCoordinator.addAttachment(
-                  temporary,
-                  name,
-                  "image/png",
-                  "$existingMarkdown${separator}\n![Player Card]($name)\n"
-                )
-                wm?.openWindow(OverlayType.POCKET_EDITOR)
-              } finally {
-                Files.deleteIfExists(temporary)
-              }
-            }
-          },
-          onExportPng = { }
-        )
-      }
     )
 
     currentPlayer?.let { playerName ->

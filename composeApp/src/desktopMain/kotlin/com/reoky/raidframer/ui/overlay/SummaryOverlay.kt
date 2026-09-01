@@ -10,6 +10,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.Surface
 import androidx.compose.material.IconButton
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.DropdownMenu
@@ -46,6 +47,7 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.PlayerRankingRow
 import com.reoky.raidframer.ui.component.SimpleRankingRow
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.component.titleBarCaptureActions
 import com.reoky.raidframer.ui.component.graphs.RaidComparisonPieChart
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -176,7 +178,7 @@ fun PreviewSummaryOverlay() {
 }
 
 @Composable
-fun SummaryOverlay(wm: WindowManager? = null) {
+fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
 
   val topSilences by PlayerCacheInteractor.topSilences.collectAsState()
   val topCharms by PlayerCacheInteractor.topCharms.collectAsState()
@@ -323,6 +325,13 @@ fun SummaryOverlay(wm: WindowManager? = null) {
       TitleBarComponent(
         title = stringResource(Res.string.summary_battle_summary_title_format, humanReadableDateString),
         onClose = { wm?.closeWindow(OverlayType.SUMMARY) },
+        captureActions = if (window != null && wm != null) {
+          titleBarCaptureActions(
+            window,
+            wm,
+            stringResource(Res.string.summary_battle_summary_title_format, humanReadableDateString)
+          )
+        } else null,
         modifier = Modifier.fillMaxWidth()
       )
       
@@ -2095,4 +2104,3 @@ private fun CoherenceHelp(modifier: Modifier = Modifier) {
     }
   }
 }
-

@@ -42,6 +42,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.unit.IntOffset
@@ -88,6 +89,7 @@ import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.titleBarCaptureActions
 import com.reoky.raidframer.ui.component.CheckBoxComponent
 import com.reoky.raidframer.ui.component.CompositionChartComponent
 import com.reoky.raidframer.ui.component.CompositionBreakdown
@@ -138,7 +140,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
 @Composable
-fun RaidOverlay(wm: WindowManager? = null) {
+fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val playerFaction = Faction.fromString(RFConfig.state.collectAsState().value.playerFaction)
   val mainRaid = PlayerCacheInteractor.getRaidById(0).collectAsState()
   val coRaid = PlayerCacheInteractor.getRaidById(1).collectAsState()
@@ -203,7 +205,10 @@ fun RaidOverlay(wm: WindowManager? = null) {
       Column(modifier = Modifier.fillMaxSize()) {
         TitleBarComponent(
           title = stringResource(Res.string.raid_attendance_title),
-          onClose = { wm?.closeWindow(OverlayType.RAID) }
+          onClose = { wm?.closeWindow(OverlayType.RAID) },
+          captureActions = if (window != null && wm != null) titleBarCaptureActions(
+            window, wm, stringResource(Res.string.raid_attendance_title)
+          ) else null
         )
         Column(
           modifier = Modifier

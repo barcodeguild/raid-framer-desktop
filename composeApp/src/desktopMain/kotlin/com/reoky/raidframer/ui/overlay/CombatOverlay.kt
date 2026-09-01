@@ -41,6 +41,7 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.OverlayHoverState
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.titleBarCaptureActions
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
@@ -59,6 +60,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.IntOffset
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_damage
@@ -97,7 +99,7 @@ fun PreviewCombatOverlay() {
 }
 
 @Composable
-fun CombatOverlay(wm: WindowManager? = null) {
+fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
 
   val scope = rememberCoroutineScope()
   val exportProgress by ImageExportInteractor.progress.collectAsState()
@@ -291,7 +293,10 @@ fun CombatOverlay(wm: WindowManager? = null) {
       if (config.combatOverlayAsTooltipEnabled) {
         TitleBarComponent(
           title = stringResource(Res.string.settings_combat_overlay_title),
-          onClose = { scope.launch { quitAfterSessionStop() } }
+          onClose = { scope.launch { quitAfterSessionStop() } },
+          captureActions = if (window != null && wm != null) titleBarCaptureActions(
+            window, wm, stringResource(Res.string.settings_combat_overlay_title)
+          ) else null
         )
       }
 

@@ -86,8 +86,8 @@ fun OverlayContainer(wm: WindowManager) {
 
         when (type) {
           OverlayType.ABOUT -> AboutOverlay(wm)
-          OverlayType.COMBAT -> CombatOverlay(wm)
-          OverlayType.SUMMARY -> SummaryOverlay(wm)
+          OverlayType.COMBAT -> CombatOverlay(wm, window)
+          OverlayType.SUMMARY -> SummaryOverlay(wm, window)
           OverlayType.MINI -> MiniOverlay(wm)
           OverlayType.SETTINGS -> SettingsOverlay(wm)
           OverlayType.HELP -> HelpOverlay(wm)
@@ -95,9 +95,9 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.POKEMON -> PokemonOverlay(wm)
           OverlayType.TRACKER -> TrackerOverlay(wm)
           OverlayType.NEW_SESSION -> NewSessionOverlay(wm)
-          OverlayType.RAID -> RaidOverlay(wm)
+          OverlayType.RAID -> RaidOverlay(wm, window)
           OverlayType.PLAYER_CARD -> PlayerCardOverlay(wm)
-          OverlayType.BATTLE_GRAPH -> BattleGraphOverlay(wm)
+          OverlayType.BATTLE_GRAPH -> BattleGraphOverlay(wm, window)
           OverlayType.ITEM_USE -> ItemUseOverlay()
           OverlayType.RAID_CALLER -> RaidCallerOverlay(wm)
           OverlayType.META_SPECS -> MetaSpecsOverlay(wm)

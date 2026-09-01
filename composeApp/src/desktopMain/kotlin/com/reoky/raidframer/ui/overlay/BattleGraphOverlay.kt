@@ -48,6 +48,8 @@ import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.component.titleBarCaptureActions
+import androidx.compose.ui.awt.ComposeWindow
 import com.reoky.raidframer.ui.component.CompactSessionTotals
 import com.reoky.raidframer.ui.component.CloseButton
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -97,7 +99,7 @@ import raid_framer_desktop.composeapp.generated.resources.battle_graph_spell_fil
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_spell_filter_debuff
 
 @Composable
-fun BattleGraphOverlay(wm: WindowManager?) {
+fun BattleGraphOverlay(wm: WindowManager?, window: ComposeWindow? = null) {
   val graphData by BattleGraphInteractor.graphData.collectAsState()
   val selectedMode by BattleGraphInteractor.selectedMode.collectAsState()
   val isPaused by BattleGraphInteractor.isPaused.collectAsState()
@@ -157,7 +159,8 @@ fun BattleGraphOverlay(wm: WindowManager?) {
 
       TitleBarComponent(
         title = titleText,
-        onClose = { wm?.closeWindow(OverlayType.BATTLE_GRAPH) }
+        onClose = { wm?.closeWindow(OverlayType.BATTLE_GRAPH) },
+        captureActions = if (window != null && wm != null) titleBarCaptureActions(window, wm, titleText) else null
       )
 
       // Graph area with controls overlaid in upper-right
