@@ -31,6 +31,8 @@ import com.reoky.raidframer.ui.overlay.BattleGraphOverlay
 import com.reoky.raidframer.ui.overlay.ItemUseOverlay
 import com.reoky.raidframer.ui.overlay.RaidCallerOverlay
 import com.reoky.raidframer.ui.overlay.MetaSpecsOverlay
+import com.reoky.raidframer.ui.overlay.PocketEditorOverlay
+import com.reoky.raidframer.ui.overlay.PocketJournalOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -71,7 +73,11 @@ fun OverlayContainer(wm: WindowManager) {
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
         isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(effectiveWindowType == OverlayWindowType.TOOLTIP),
         isResizable = resizable,
-        isFocusable = type == OverlayType.NEW_SESSION || type == OverlayType.BATTLE_GRAPH || type == OverlayType.META_SPECS,
+        isFocusable = type == OverlayType.NEW_SESSION ||
+          type == OverlayType.BATTLE_GRAPH ||
+          type == OverlayType.META_SPECS ||
+          type == OverlayType.POCKET_JOURNAL ||
+          type == OverlayType.POCKET_EDITOR,
         transparentBackground = type == OverlayType.ITEM_USE,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->
@@ -94,6 +100,8 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.ITEM_USE -> ItemUseOverlay()
           OverlayType.RAID_CALLER -> RaidCallerOverlay(wm)
           OverlayType.META_SPECS -> MetaSpecsOverlay(wm)
+          OverlayType.POCKET_JOURNAL -> PocketJournalOverlay(wm)
+          OverlayType.POCKET_EDITOR -> PocketEditorOverlay(wm)
           else -> {}
         }
 

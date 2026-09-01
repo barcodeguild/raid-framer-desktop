@@ -37,6 +37,10 @@ enum class PocketAttachmentRejection {
 class PocketRepository(private val dao: PocketDao) {
   private val writeMutex = Mutex()
 
+  suspend fun listEntries(limit: Int = 100, offset: Int = 0): List<PocketEntry> {
+    return dao.getEntries(limit, offset).mapNotNull { readEntry(it.id) }
+  }
+
   suspend fun createEntry(
     title: String = "",
     markdown: String = "",
