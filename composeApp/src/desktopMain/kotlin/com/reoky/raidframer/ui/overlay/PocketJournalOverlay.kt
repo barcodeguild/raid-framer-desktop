@@ -43,6 +43,7 @@ import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
 import com.reoky.raidframer.core.pocket.PocketEntry
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -57,11 +58,14 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
   val scope = rememberCoroutineScope()
   val entries by PocketDraftCoordinator.entries.collectAsState()
   var search by remember { mutableStateOf("") }
+  var activeTag by remember { mutableStateOf<String?>(null) }
   var activeDeleteMessage by remember { mutableStateOf(false) }
+  val dragLock = LocalDragLock.current
 
   val filtered = entries.filter { entry ->
-    search.isBlank() || entry.metadata.title.contains(search, ignoreCase = true) ||
-      entry.tags.any { it.tag.contains(search, ignoreCase = true) }
+    (search.isBlank() || entry.metadata.title.contains(search, ignoreCase = true) ||
+      entry.tags.any { it.tag.contains(search, ignoreCase = true) }) &&
+      (activeTag == null || entry.tags.any { it.normalizedTag == activeTag })
   }
 
   Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.66f))) {
@@ -97,6 +101,16 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
         singleLine = true,
         label = { Text("Search tags or titles") },
         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+        trailingIcon = {
+          if (search.isNotEmpty() || activeTag != null) {
+            IconButton(onClick = {
+              search = ""
+              activeTag = null
+            }) {
+              Text("X", color = Color.White)
+            }
+          }
+        },
         colors = TextFieldDefaults.outlinedTextFieldColors(
           textColor = Color.White,
           cursorColor = Color.White,
@@ -106,6 +120,19 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
           unfocusedLabelColor = Color.White.copy(alpha = 0.70f)
         )
       )
+    }
+    activeTag?.let { tag ->
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text("Filtering by #$tag", color = Color.White, fontSize = 11.sp)
+        Spacer(Modifier.width(8.dp))
+        Button(
+          onClick = { activeTag = null },
+          colors = ButtonDefaults.buttonColors(backgroundColor = Color.White.copy(alpha = 0.12f), contentColor = Color.White)
+        ) { Text("Clear", fontSize = 11.sp) }
+      }
     }
     if (activeDeleteMessage) {
       Text(
@@ -162,6 +189,10 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
                     wm?.openWindow(OverlayType.POCKET_EDITOR)
                   }
                 },
+                onTagClick = { tag ->
+                  search = ""
+                  activeTag = tag.lowercase()
+                },
                 onDelete = {
                   if (PocketDraftCoordinator.activeDraftId.value != item.entry.metadata.id) {
                     scope.launch {
@@ -203,6 +234,7 @@ private fun TimelineDayMarker(date: String) {
 private fun TimelineEntryRow(
   entry: PocketEntry,
   isLeft: Boolean,
+  onTagClick: (String) -> Unit,
   onOpen: () -> Unit,
   onDelete: () -> Unit,
 ) {
@@ -221,7 +253,7 @@ private fun TimelineEntryRow(
         entry.markdown.lineSequence().firstOrNull { it.isNotBlank() }?.let {
           Text(it, color = RFColors.TextSecondary, fontSize = 12.sp, maxLines = 2)
         }
-        PocketTagChips(entry.tags.map { it.tag })
+        PocketTagChips(entry.tags.map { it.tag }, onTagClick)
       }
     }
     val deleteButton: @Composable () -> Unit = {
@@ -262,7 +294,7 @@ private fun TimelineEntryRow(
 }
 
 @Composable
-private fun PocketTagChips(tags: List<String>) {
+private fun PocketTagChips(tags: List<String>, onTagClick: (String) -> Unit) {
   if (tags.isEmpty()) return
   FlowRow(
     modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
@@ -277,6 +309,7 @@ private fun PocketTagChips(tags: List<String>) {
         modifier = Modifier
           .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
           .padding(horizontal = 6.dp, vertical = 2.dp)
+          .clickable { onTagClick(tag) }
       )
     }
   }

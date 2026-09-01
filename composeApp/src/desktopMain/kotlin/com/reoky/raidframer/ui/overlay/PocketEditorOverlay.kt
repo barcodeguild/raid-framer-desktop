@@ -44,6 +44,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.LocalDragLock
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.nio.file.Path
