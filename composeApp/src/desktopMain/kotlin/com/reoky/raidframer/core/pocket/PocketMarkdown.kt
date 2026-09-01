@@ -17,6 +17,8 @@ import org.commonmark.node.StrongEmphasis
 import org.commonmark.node.Text
 import org.commonmark.node.Node
 import org.commonmark.parser.Parser
+import org.commonmark.ext.gfm.strikethrough.Strikethrough
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 
 sealed interface PocketMarkdownBlock {
   data class Paragraph(val content: List<PocketMarkdownInline>) : PocketMarkdownBlock
@@ -38,10 +40,12 @@ sealed interface PocketMarkdownInline {
   data object Break : PocketMarkdownInline
 }
 
-private val pocketMarkdownParser: Parser = Parser.builder().build()
+private val pocketMarkdownParser: Parser = Parser.builder()
+  .extensions(listOf(StrikethroughExtension.create()))
+  .build()
 
 fun parsePocketMarkdown(markdown: String): List<PocketMarkdownBlock> {
-  val document = pocketMarkdownParser.parse(markdown.replace(Regex("~~([^~\n]+)~~"), "<del>$1</del>"))
+  val document = pocketMarkdownParser.parse(markdown)
   return childNodesOf(document).mapNotNull { (it as? Block)?.toPocketBlock() }
 }
 
@@ -64,6 +68,7 @@ private fun Node.inlineChildren(): List<PocketMarkdownInline> = when (this) {
   is Text -> listOf(PocketMarkdownInline.Plain(literal))
   is StrongEmphasis -> listOf(PocketMarkdownInline.Strong(childNodesOf(this).toPocketInlines()))
   is Emphasis -> listOf(PocketMarkdownInline.Emphasis(childNodesOf(this).toPocketInlines()))
+  is Strikethrough -> listOf(PocketMarkdownInline.Strikethrough(childNodesOf(this).toPocketInlines()))
 
   is Code -> listOf(PocketMarkdownInline.Code(literal))
   is Link -> listOf(PocketMarkdownInline.Link(childNodesOf(this).toPocketInlines(), destination))

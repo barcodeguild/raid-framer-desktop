@@ -31,6 +31,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.font.FontWeight
@@ -437,17 +439,22 @@ private fun PocketMarkdownPreview(markdown: String, markdownPath: String?) {
 
 @Composable
 private fun PocketInlineText(content: List<PocketMarkdownInline>, markdownPath: String?) {
+  val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+  val style = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 14.sp)
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     content.forEach { inline ->
       when (inline) {
         is PocketMarkdownInline.Image -> PocketMarkdownImage(inline, markdownPath)
-        else -> {
-          val rendered = inline.toAnnotatedString()
-          androidx.compose.foundation.text.BasicText(
-          text = rendered,
-          style = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 14.sp)
-          )
-        }
+        is PocketMarkdownInline.Link -> androidx.compose.foundation.text.ClickableText(
+          text = inline.toAnnotatedString(),
+          style = style,
+          modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+          onClick = { uriHandler.openUri(inline.destination) }
+        )
+        else -> androidx.compose.foundation.text.BasicText(
+          text = inline.toAnnotatedString(),
+          style = style
+        )
       }
     }
   }

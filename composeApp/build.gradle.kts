@@ -29,6 +29,7 @@ kotlin {
       implementation(libs.androidx.lifecycle.runtimeCompose)
       implementation(libs.kotlinx.serialization.json)
       implementation(libs.commonmark)
+      implementation(libs.commonmark.strikethrough)
 
       implementation(libs.room.gradle.plugin)
       implementation(libs.room.runtime)
