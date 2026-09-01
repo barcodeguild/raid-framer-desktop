@@ -10,6 +10,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.util.UUID
 
 const val MAX_POCKET_ATTACHMENTS = 10
@@ -143,7 +144,7 @@ class PocketRepository(private val dao: PocketDao) {
       if (destination.parent != directory.normalize()) {
         return@withLock PocketAttachmentResult.Rejected(PocketAttachmentRejection.INVALID_ATTACHMENT_PATH)
       }
-      Files.copy(source, destination, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+      Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING)
       writeTextAtomically(Path.of(metadata.markdownPath), markdown)
       dao.insertAttachment(
         PocketAttachmentEntity(
@@ -160,10 +161,41 @@ class PocketRepository(private val dao: PocketDao) {
     }
   }
 
+  suspend fun nextAttachmentName(id: String): String? {
+    val existing = dao.getAttachments(id)
+    if (existing.size >= MAX_POCKET_ATTACHMENTS) return null
+    val used = existing.map { it.relativePath }.toSet()
+    return (1..MAX_POCKET_ATTACHMENTS)
+      .asSequence()
+      .map { "image-%03d.png".format(it) }
+      .firstOrNull { it !in used }
+  }
+
+  suspend fun removeAttachment(id: String, attachmentId: String, markdown: String): PocketEntry? {
+    return writeMutex.withLock {
+      val metadata = dao.getEntry(id) ?: return@withLock null
+      val attachment = dao.getAttachments(id).firstOrNull { it.id == attachmentId }
+        ?: return@withLock readEntry(id)
+      val updatedMarkdown = removeImageReference(markdown, attachment.relativePath)
+      writeTextAtomically(Path.of(metadata.markdownPath), updatedMarkdown)
+      dao.deleteAttachment(attachmentId)
+      dao.insertEntry(metadata.copy(updatedAt = System.currentTimeMillis()))
+      Files.deleteIfExists(Path.of(metadata.markdownPath).parent.resolve(attachment.relativePath))
+      readEntry(id)
+    }
+  }
+
   private fun deleteDirectory(directory: Path?) {
     if (directory == null || !Files.exists(directory)) return
     Files.walk(directory).use { stream ->
       stream.sorted(Comparator.reverseOrder()).forEach { Files.deleteIfExists(it) }
     }
   }
+}
+
+private fun removeImageReference(markdown: String, fileName: String): String {
+  val escaped = Regex.escape(fileName)
+  return markdown
+    .replace(Regex("!\\[[^]]*]\\($escaped\\)\\r?\\n?"), "")
+    .replace(Regex("(?m)^\\s*$\\n"), "\n")
 }

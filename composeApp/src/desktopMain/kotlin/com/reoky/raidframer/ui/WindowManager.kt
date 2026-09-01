@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.awt.Window
 
 class WindowManager(
   private val scope: CoroutineScope,
@@ -26,6 +27,13 @@ class WindowManager(
 
   // Visibility flags tracked per window type
   val visibilityStates: MutableMap<OverlayType, MutableState<Boolean>> = mutableMapOf()
+  private val nativeWindows: MutableMap<OverlayType, Window> = mutableMapOf()
+
+  fun registerNativeWindow(type: OverlayType, window: Window) {
+    nativeWindows[type] = window
+  }
+
+  fun nativeWindow(type: OverlayType): Window? = nativeWindows[type]
 
   // So we don't accidentally implement this same logic anywhere else except the defaults
   fun defaultVisibility(type: OverlayType): MutableState<Boolean> {

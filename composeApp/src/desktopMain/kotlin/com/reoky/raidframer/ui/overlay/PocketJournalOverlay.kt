@@ -22,8 +22,10 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,11 +37,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
 import com.reoky.raidframer.core.pocket.PocketEntry
-import com.reoky.raidframer.core.pocket.PocketRepository
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -54,16 +54,9 @@ private val journalDateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy 
 @Composable
 fun PocketJournalOverlay(wm: WindowManager? = null) {
   val scope = rememberCoroutineScope()
-  val repository = remember { PocketRepository(RFDao.pocketDao) }
-  var entries by remember { mutableStateOf<List<PocketEntry>>(emptyList()) }
+  val entries by PocketDraftCoordinator.entries.collectAsState()
   var search by remember { mutableStateOf("") }
   var activeDeleteMessage by remember { mutableStateOf(false) }
-
-  fun refresh() {
-    scope.launch { entries = repository.listEntries() }
-  }
-
-  LaunchedEffect(Unit) { refresh() }
 
   val filtered = entries.filter { entry ->
     search.isBlank() || entry.metadata.title.contains(search, ignoreCase = true) ||
@@ -90,7 +83,6 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
           scope.launch {
             PocketDraftCoordinator.createDraft()
             wm?.openWindow(OverlayType.POCKET_EDITOR)
-            refresh()
           }
         },
         colors = ButtonDefaults.buttonColors(backgroundColor = RFColors.AccentRed, contentColor = Color.White)
@@ -102,7 +94,16 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
         onValueChange = { search = it },
         modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 2.dp),
         singleLine = true,
-        label = { Text("Search tags or titles") }
+        label = { Text("Search tags or titles") },
+        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+          textColor = Color.White,
+          cursorColor = Color.White,
+          focusedBorderColor = Color.White,
+          unfocusedBorderColor = Color.White.copy(alpha = 0.45f),
+          focusedLabelColor = Color.White,
+          unfocusedLabelColor = Color.White.copy(alpha = 0.70f)
+        )
       )
     }
     if (activeDeleteMessage) {
@@ -140,7 +141,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
           }
         }
         LazyColumn(
-          modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp),
+          modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp).padding(bottom = 8.dp),
           verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
           items(timelineItems, key = {
@@ -164,7 +165,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
                   if (PocketDraftCoordinator.activeDraftId.value != item.entry.metadata.id) {
                     scope.launch {
                       PocketDraftCoordinator.deleteDraft(item.entry.metadata.id)
-                      refresh()
+                      PocketDraftCoordinator.refreshEntries()
                     }
                   } else {
                     activeDeleteMessage = true
@@ -222,7 +223,7 @@ private fun TimelineEntryRow(
       }
     }
     val deleteButton: @Composable () -> Unit = {
-      val editing = PocketDraftCoordinator.activeDraftId.value == entry.metadata.id
+      val editing = PocketDraftCoordinator.activeDraftId.collectAsState().value == entry.metadata.id
       IconButton(onClick = onDelete, enabled = !editing) {
         Text("X", color = if (editing) RFColors.TextDisabled else RFColors.AccentRed)
       }

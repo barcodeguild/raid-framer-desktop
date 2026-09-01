@@ -81,6 +81,7 @@ fun OverlayContainer(wm: WindowManager) {
         transparentBackground = type == OverlayType.ITEM_USE,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->
+        wm.registerNativeWindow(type, window)
         val scope = rememberCoroutineScope()
 
         when (type) {

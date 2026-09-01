@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.pocket
 
 import com.reoky.raidframer.core.database.PocketDao
+import java.nio.file.Path
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,10 +28,14 @@ object PocketDraftCoordinator {
   private val _activeDraft = MutableStateFlow<PocketEntry?>(null)
   val activeDraft: StateFlow<PocketEntry?> = _activeDraft.asStateFlow()
 
+  private val _entries = MutableStateFlow<List<PocketEntry>>(emptyList())
+  val entries: StateFlow<List<PocketEntry>> = _entries.asStateFlow()
+
   fun init(pocketDao: PocketDao) {
     if (!::dao.isInitialized) {
       dao = pocketDao
       repository = PocketRepository(pocketDao)
+      scope.launch { refreshEntries() }
     }
   }
 
@@ -38,6 +43,7 @@ object PocketDraftCoordinator {
     val entry = repository.createEntry(title = title, markdown = markdown)
     _activeDraftId.value = entry.metadata.id
     _activeDraft.value = entry
+    refreshEntries()
     return entry
   }
 
@@ -51,9 +57,39 @@ object PocketDraftCoordinator {
   fun updateDraft(title: String, markdown: String) {
     val id = _activeDraftId.value ?: return
     scope.launch {
-      repository.updateEntry(id, title, markdown)?.let { _activeDraft.value = it }
+      repository.updateEntry(id, title, markdown)?.let {
+        _activeDraft.value = it
+        refreshEntries()
+      }
     }
   }
+
+  suspend fun addAttachment(
+    source: Path,
+    relativePath: String,
+    mimeType: String,
+    markdown: String,
+  ): PocketAttachmentResult {
+    val id = _activeDraftId.value
+      ?: return PocketAttachmentResult.Rejected(PocketAttachmentRejection.ENTRY_NOT_FOUND)
+    val result = repository.addAttachment(id, source, relativePath, mimeType, markdown)
+    if (result is PocketAttachmentResult.Added) {
+      _activeDraft.value = result.entry
+      refreshEntries()
+    }
+    return result
+  }
+
+  suspend fun nextAttachmentName(id: String): String? = repository.nextAttachmentName(id)
+
+  suspend fun removeAttachment(attachmentId: String, markdown: String): PocketEntry? {
+    val id = _activeDraftId.value ?: return null
+    val entry = repository.removeAttachment(id, attachmentId, markdown) ?: return null
+    _activeDraft.value = entry
+    refreshEntries()
+    return entry
+  }
+
 
   suspend fun deleteDraft(id: String): Boolean {
     val deleted = repository.deleteEntry(id)
@@ -61,6 +97,7 @@ object PocketDraftCoordinator {
       _activeDraftId.value = null
       _activeDraft.value = null
     }
+    refreshEntries()
     return deleted
   }
 
@@ -72,6 +109,12 @@ object PocketDraftCoordinator {
 
   /** Compatibility alias for callers that intentionally clear the active editor session. */
   fun clearActiveDraft() = closeEditorSession()
+
+  suspend fun refreshEntries() {
+    if (::repository.isInitialized) {
+      _entries.value = repository.listEntries()
+    }
+  }
 }
 
 fun initializePocketDraftCoordinator(dao: PocketDao) {
