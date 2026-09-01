@@ -1,6 +1,7 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,11 +12,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,6 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.RFColors
@@ -53,6 +58,9 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.spag_presenting
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -82,21 +90,23 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
         isOnDate(entry.metadata.createdAt, selectedDate)
   }
 
-  Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.66f))) {
+  Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.66f)))
+    SpagPresentingBackground()
+
+    Column(modifier = Modifier.fillMaxSize()) {
     TitleBarComponent(
       title = "Pocket Journal",
       onClose = { wm?.closeWindow(OverlayType.POCKET_JOURNAL) },
       rightActions = {
-        Button(
+        IconButton(
           onClick = {
             scope.launch {
               PocketDraftCoordinator.createDraft()
               wm?.openWindow(OverlayType.POCKET_EDITOR)
             }
           },
-          colors = ButtonDefaults.buttonColors(backgroundColor = RFColors.AccentRed, contentColor = Color.White),
-          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-          modifier = Modifier.height(32.dp)
+          modifier = Modifier.size(28.dp)
         ) { Text("\uf303", color = Color.White, fontFamily = FontsHelper.faSolid(), fontSize = 14.sp) }
       }
     )
@@ -111,7 +121,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
       OutlinedTextField(
         value = search,
         onValueChange = { search = it },
-        modifier = Modifier.weight(1f),
+        modifier = Modifier.weight(1f).height(36.dp),
         singleLine = true,
         placeholder = { Text("Search title or tag", color = Color.White.copy(alpha = 0.75f), fontSize = 12.sp) },
         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 12.sp),
@@ -122,7 +132,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
           dragLock.value = true
           datePickerOpen = true
         },
-        modifier = Modifier.width(124.dp).height(48.dp),
+        modifier = Modifier.width(124.dp).height(36.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
         colors = ButtonDefaults.buttonColors(
           backgroundColor = Color.White.copy(alpha = 0.10f),
@@ -135,7 +145,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
       if (search.isNotBlank() || activeTag != null || selectedDate != null) {
         TextButton(
           onClick = { search = ""; activeTag = null; selectedDate = null },
-          modifier = Modifier.height(48.dp),
+          modifier = Modifier.height(36.dp),
           contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
         ) {
           Text("Clear", color = RFColors.TextSecondary, fontSize = 11.sp)
@@ -253,6 +263,33 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
           }
         }
       }
+    }
+  }
+}
+}
+
+@Composable
+private fun SpagPresentingBackground() {
+  val painter = painterResource(Res.drawable.spag_presenting)
+  Row(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.15f))) {
+    Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.BottomCenter) {
+      Image(
+        painter = painter,
+        contentDescription = null,
+        modifier = Modifier.fillMaxHeight(0.55f).graphicsLayer { alpha = 0.90f },
+        contentScale = ContentScale.Fit
+      )
+    }
+    Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.BottomCenter) {
+      Image(
+        painter = painter,
+        contentDescription = null,
+        modifier = Modifier.fillMaxHeight(0.55f).graphicsLayer {
+          alpha = 0.90f
+          scaleX = -1f
+        },
+        contentScale = ContentScale.Fit
+      )
     }
   }
 }

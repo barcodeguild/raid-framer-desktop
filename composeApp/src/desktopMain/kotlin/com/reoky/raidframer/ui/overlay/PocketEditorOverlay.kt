@@ -33,6 +33,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +63,7 @@ import java.nio.file.Path
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 
+@OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
 fun PocketEditorOverlay(wm: WindowManager? = null) {
   val draft by PocketDraftCoordinator.activeDraft.collectAsState()
@@ -75,7 +78,12 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
   val scope = androidx.compose.runtime.rememberCoroutineScope()
   val dragLock = LocalDragLock.current
   var lastSelection by remember(draft?.metadata?.id) { mutableStateOf<androidx.compose.ui.text.TextRange?>(null) }
+  var editorFocused by remember { mutableStateOf(false) }
+  var editorHovered by remember { mutableStateOf(false) }
   LaunchedEffect(Unit) { dragLock.value = true }
+  LaunchedEffect(editorFocused, editorHovered) {
+    dragLock.value = editorFocused && editorHovered
+  }
 
   LaunchedEffect(title, markdown, draft?.metadata?.id) {
     if (draft != null) {
@@ -93,110 +101,9 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
       }
     )
     Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-      OutlinedTextField(
-        value = title,
-        onValueChange = { title = it },
-        modifier = Modifier.weight(1f),
-        singleLine = true,
-        label = { Text("Title (optional)", color = Color.White.copy(alpha = 0.85f)) },
-        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-          textColor = Color.White,
-          cursorColor = Color.White,
-          focusedBorderColor = Color.White,
-          unfocusedBorderColor = Color.White.copy(alpha = 0.45f),
-          focusedLabelColor = Color.White,
-          unfocusedLabelColor = Color.White.copy(alpha = 0.70f)
-        )
-      )
-    }
-    AttachmentStrip(
-      attachments = draft?.attachments.orEmpty(),
-      onRemove = { attachmentId ->
-        scope.launch {
-          PocketDraftCoordinator.removeAttachment(attachmentId, markdown)
-            ?.let {
-              markdownValue = TextFieldValue(it.markdown)
-              attachmentMessage = null
-            }
-        }
-      }
-    )
-    PocketTagChips(draft?.tags.orEmpty().map { it.tag })
-    MarkdownToolbar(
-      onAction = { action ->
-        when (action) {
-          MarkdownAction.IMAGE -> {
-            scope.launch {
-              val selected = PocketAttachmentPicker.chooseImage(
-                temporarilyHide = listOfNotNull(
-                  wm?.nativeWindow(OverlayType.POCKET_EDITOR),
-                  wm?.nativeWindow(OverlayType.POCKET_JOURNAL)
-                )
-              )
-              if (selected != null) {
-                val image = runCatching { ImageIO.read(selected.toFile()) }.getOrNull()
-                if (image == null) {
-                  attachmentMessage = "Selected file is not a readable image."
-                } else {
-                  val draftId = draft?.metadata?.id
-                  if (draftId == null) {
-                    attachmentMessage = "No Pocket entry is currently open."
-                  } else {
-                    val name = PocketDraftCoordinator.nextAttachmentName(draftId)
-                    if (name == null) {
-                      attachmentMessage = "This Pocket entry already has 10 attachments."
-                    } else {
-                      when (val result = PocketDraftCoordinator.addAttachment(
-                        source = selected,
-                        relativePath = name,
-                        mimeType = "image/png",
-                        markdown = appendImageReference(markdown, name)
-                      )) {
-                        is PocketAttachmentResult.Added -> {
-                          markdownValue = TextFieldValue(result.entry.markdown)
-                          attachmentMessage = null
-                        }
-
-                        is PocketAttachmentResult.Rejected -> {
-                          attachmentMessage = when (result.reason) {
-                            PocketAttachmentRejection.ATTACHMENT_LIMIT_REACHED -> "This Pocket entry already has 10 attachments."
-                            PocketAttachmentRejection.ENTRY_NOT_FOUND -> "The Pocket entry is no longer available."
-                            PocketAttachmentRejection.INVALID_ATTACHMENT_PATH -> "The attachment path was invalid."
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          MarkdownAction.LINK -> {
-            linkUrl = ""
-            linkTitle = markdownValue.selectedText().ifBlank { "Link text" }
-            linkDialogOpen = true
-          }
-
-          MarkdownAction.BOLD -> markdownValue = applyMarkdown(markdownValue, "**", lastSelection)
-          MarkdownAction.ITALIC -> markdownValue = applyMarkdown(markdownValue, "*", lastSelection)
-          MarkdownAction.STRIKE -> markdownValue = applyMarkdown(markdownValue, "~~", lastSelection)
-          MarkdownAction.BULLET -> markdownValue = insertMarkdown(markdownValue, "- ")
-          MarkdownAction.CODE -> markdownValue = applyMarkdown(markdownValue, "`", lastSelection)
-        }
-      }
-    )
-    attachmentMessage?.let {
-      Text(it, color = RFColors.TextSecondary, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 12.dp))
-    }
-    Row(
       modifier = Modifier
         .fillMaxWidth()
-        .padding(horizontal = 8.dp)
+        .padding(horizontal = 8.dp, vertical = 6.dp)
         .background(Color(0xFF141414).copy(alpha = 0.78f), RoundedCornerShape(14.dp))
         .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
         .padding(2.dp),
@@ -216,13 +123,120 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
       }
     }
     if (selectedTab == 0) {
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        OutlinedTextField(
+          value = title,
+          onValueChange = { title = it },
+          modifier = Modifier.weight(1f),
+          singleLine = true,
+          label = { Text("Title (optional)", color = Color.White.copy(alpha = 0.85f)) },
+          textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+          colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = Color.White,
+            cursorColor = Color.White,
+            focusedBorderColor = Color.White,
+            unfocusedBorderColor = Color.White.copy(alpha = 0.45f),
+            focusedLabelColor = Color.White,
+            unfocusedLabelColor = Color.White.copy(alpha = 0.70f)
+          )
+        )
+      }
+      AttachmentStrip(
+        attachments = draft?.attachments.orEmpty(),
+        onRemove = { attachmentId ->
+          scope.launch {
+            PocketDraftCoordinator.removeAttachment(attachmentId, markdown)
+              ?.let {
+                markdownValue = TextFieldValue(it.markdown)
+                attachmentMessage = null
+              }
+          }
+        }
+      )
+      PocketTagChips(draft?.tags.orEmpty().map { it.tag })
+      MarkdownToolbar(
+        onAction = { action ->
+          when (action) {
+            MarkdownAction.IMAGE -> {
+              scope.launch {
+                val selected = PocketAttachmentPicker.chooseImage(
+                  temporarilyHide = listOfNotNull(
+                    wm?.nativeWindow(OverlayType.POCKET_EDITOR),
+                    wm?.nativeWindow(OverlayType.POCKET_JOURNAL)
+                  )
+                )
+                if (selected != null) {
+                  val image = runCatching { ImageIO.read(selected.toFile()) }.getOrNull()
+                  if (image == null) {
+                    attachmentMessage = "Selected file is not a readable image."
+                  } else {
+                    val draftId = draft?.metadata?.id
+                    if (draftId == null) {
+                      attachmentMessage = "No Pocket entry is currently open."
+                    } else {
+                      val name = PocketDraftCoordinator.nextAttachmentName(draftId)
+                      if (name == null) {
+                        attachmentMessage = "This Pocket entry already has 10 attachments."
+                      } else {
+                        when (val result = PocketDraftCoordinator.addAttachment(
+                          source = selected,
+                          relativePath = name,
+                          mimeType = "image/png",
+                          markdown = appendImageReference(markdown, name)
+                        )) {
+                          is PocketAttachmentResult.Added -> {
+                            markdownValue = TextFieldValue(result.entry.markdown)
+                            attachmentMessage = null
+                          }
+
+                          is PocketAttachmentResult.Rejected -> {
+                            attachmentMessage = when (result.reason) {
+                              PocketAttachmentRejection.ATTACHMENT_LIMIT_REACHED -> "This Pocket entry already has 10 attachments."
+                              PocketAttachmentRejection.ENTRY_NOT_FOUND -> "The Pocket entry is no longer available."
+                              PocketAttachmentRejection.INVALID_ATTACHMENT_PATH -> "The attachment path was invalid."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            MarkdownAction.LINK -> {
+              linkUrl = ""
+              linkTitle = markdownValue.selectedText().ifBlank { "Link text" }
+              linkDialogOpen = true
+            }
+
+            MarkdownAction.BOLD -> markdownValue = applyMarkdown(markdownValue, "**", lastSelection)
+            MarkdownAction.ITALIC -> markdownValue = applyMarkdown(markdownValue, "*", lastSelection)
+            MarkdownAction.STRIKE -> markdownValue = applyMarkdown(markdownValue, "~~", lastSelection)
+            MarkdownAction.BULLET -> markdownValue = insertMarkdown(markdownValue, "- ")
+            MarkdownAction.CODE -> markdownValue = applyMarkdown(markdownValue, "`", lastSelection)
+          }
+        }
+      )
+      attachmentMessage?.let {
+        Text(it, color = RFColors.TextSecondary, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 12.dp))
+      }
       OutlinedTextField(
         value = markdownValue,
         onValueChange = {
           markdownValue = it
           if (!it.selection.collapsed) lastSelection = it.selection
         },
-        modifier = Modifier.fillMaxSize().padding(10.dp).onFocusChanged { dragLock.value = it.isFocused },
+        modifier = Modifier
+          .weight(1f)
+          .fillMaxWidth()
+          .padding(10.dp)
+          .onFocusChanged { editorFocused = it.isFocused }
+          .onPointerEvent(PointerEventType.Enter) { editorHovered = true }
+          .onPointerEvent(PointerEventType.Exit) { editorHovered = false },
         label = { Text("Markdown", color = Color.White.copy(alpha = 0.85f)) },
         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
         colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -236,7 +250,11 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
       )
     } else {
       Column(
-        modifier = Modifier.fillMaxSize().padding(10.dp).verticalScroll(rememberScrollState())
+        modifier = Modifier
+          .weight(1f)
+          .fillMaxWidth()
+          .padding(10.dp)
+          .verticalScroll(rememberScrollState())
       ) {
         PocketMarkdownPreview(markdown, draft?.metadata?.markdownPath)
       }
@@ -505,7 +523,7 @@ private fun PocketMarkdownImage(image: PocketMarkdownInline.Image, markdownPath:
     Image(
       bitmap = bitmap,
       contentDescription = image.alt.ifBlank { "Pocket attachment" },
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.height(120.dp).padding(top = 4.dp),
       contentScale = ContentScale.Fit
     )
   }
