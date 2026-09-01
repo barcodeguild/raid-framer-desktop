@@ -29,6 +29,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
+import com.reoky.raidframer.core.pocket.PocketMarkdownBlock
+import com.reoky.raidframer.core.pocket.PocketMarkdownInline
+import com.reoky.raidframer.core.pocket.parsePocketMarkdown
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -132,12 +135,61 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
       Column(
         modifier = Modifier.fillMaxSize().padding(10.dp).verticalScroll(rememberScrollState())
       ) {
-        Text(
-          text = markdown,
-          color = RFColors.TextPrimary,
+        PocketMarkdownPreview(markdown)
+      }
+    }
+  }
+}
+
+@Composable
+private fun PocketMarkdownPreview(markdown: String) {
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    parsePocketMarkdown(markdown).forEach { block ->
+      when (block) {
+        is PocketMarkdownBlock.Paragraph -> PocketInlineText(block.content)
+        is PocketMarkdownBlock.Heading -> Text(
+          text = block.content.toPlainText(),
+          color = Color.White,
+          fontSize = (22 - block.level * 2).coerceAtLeast(14).sp
+        )
+        is PocketMarkdownBlock.BulletList -> block.items.forEach { item ->
+          Row { Text("• ", color = Color.White); PocketInlineText(item) }
+        }
+        is PocketMarkdownBlock.OrderedList -> block.items.forEachIndexed { index, item ->
+          Row { Text("${index + 1}. ", color = Color.White); PocketInlineText(item) }
+        }
+        is PocketMarkdownBlock.Quote -> Text(
+          text = "> ${block.content.toPlainText()}",
+          color = RFColors.TextSecondary,
           fontSize = 14.sp
+        )
+        is PocketMarkdownBlock.CodeBlock -> Text(
+          text = block.code,
+          color = Color.White,
+          fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+          modifier = Modifier.background(Color.Black.copy(alpha = 0.45f)).padding(8.dp)
         )
       }
     }
+  }
+}
+
+@Composable
+private fun PocketInlineText(content: List<PocketMarkdownInline>) {
+  androidx.compose.foundation.text.BasicText(
+    text = content.toPlainText(),
+    style = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 14.sp)
+  )
+}
+
+private fun List<PocketMarkdownInline>.toPlainText(): String = joinToString("") { inline ->
+  when (inline) {
+    is PocketMarkdownInline.Plain -> inline.value
+    is PocketMarkdownInline.Strong -> inline.content.toPlainText()
+    is PocketMarkdownInline.Emphasis -> inline.content.toPlainText()
+    is PocketMarkdownInline.Code -> inline.value
+    is PocketMarkdownInline.Link -> inline.label.toPlainText()
+    is PocketMarkdownInline.Image -> "[Image: ${inline.alt.ifBlank { inline.destination }}]"
+    PocketMarkdownInline.Break -> "\n"
   }
 }

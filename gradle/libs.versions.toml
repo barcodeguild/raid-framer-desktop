@@ -11,6 +11,7 @@ ksp = "2.3.9" # https://github.com/google/ksp/releases
 jna = "5.19.1" # https://github.com/java-native-access/jna
 koala = "0.11.2" # https://github.com/KoalaPlot/koalaplot-core
 kotlinx-serialization = "1.11.0" # https://github.com/Kotlin/kotlinx.serialization/
+commonmark = "0.24.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -20,6 +21,7 @@ androidx-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:life
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
 
 room-gradle-plugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
