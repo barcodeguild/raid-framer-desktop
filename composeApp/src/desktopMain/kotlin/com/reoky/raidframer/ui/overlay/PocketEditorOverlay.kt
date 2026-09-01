@@ -16,6 +16,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,13 +66,27 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
         onValueChange = { title = it },
         modifier = Modifier.weight(1f),
         singleLine = true,
-        label = { Text("Title (optional)") }
+        label = { Text("Title (optional)") },
+        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+          textColor = Color.White,
+          cursorColor = Color.White,
+          focusedBorderColor = Color.White,
+          unfocusedBorderColor = Color.White.copy(alpha = 0.45f),
+          focusedLabelColor = Color.White,
+          unfocusedLabelColor = Color.White.copy(alpha = 0.70f)
+        )
       )
       Button(onClick = {
         if (wm?.isVisible(OverlayType.POCKET_JOURNAL)?.value != true) {
           wm?.openWindow(OverlayType.POCKET_JOURNAL)
         }
-      }) {
+      },
+        colors = androidx.compose.material.ButtonDefaults.buttonColors(
+          backgroundColor = Color.White.copy(alpha = 0.12f),
+          contentColor = Color.White
+        )
+      ) {
         Text("Journal")
       }
     }
@@ -102,7 +117,16 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
         value = markdown,
         onValueChange = { markdown = it },
         modifier = Modifier.fillMaxSize().padding(10.dp),
-        label = { Text("Markdown") }
+        label = { Text("Markdown") },
+        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+          textColor = Color.White,
+          cursorColor = Color.White,
+          focusedBorderColor = Color.White,
+          unfocusedBorderColor = Color.White.copy(alpha = 0.45f),
+          focusedLabelColor = Color.White,
+          unfocusedLabelColor = Color.White.copy(alpha = 0.70f)
+        )
       )
     } else {
       Column(
