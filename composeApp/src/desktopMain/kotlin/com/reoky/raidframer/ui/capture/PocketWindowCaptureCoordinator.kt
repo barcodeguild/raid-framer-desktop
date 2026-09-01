@@ -13,6 +13,30 @@ import java.time.format.DateTimeFormatter
 import javax.imageio.ImageIO
 
 object PocketWindowCaptureCoordinator {
+
+  /** Result of storing a snipped capture: where the PNG copy lives and the images folder. */
+  data class SnippetResult(
+    val snippetFile: Path,
+    val snippetsDirectory: Path,
+  )
+
+  /**
+   * Persists a copy of a snipped [image] to `RFExports/<year>/<month>/snippets/`
+   * with a human-readable timestamped filename. Returns paths for both, or null on failure.
+   */
+  fun saveSnippet(image: BufferedImage): SnippetResult? {
+    val documents = getDocumentsDirectory() ?: return null
+    val now = java.time.LocalDateTime.now()
+    val directory = Path.of(documents, "RFExports", now.year.toString(), "%02d".format(now.monthValue), "snippets")
+    return runCatching {
+      Files.createDirectories(directory)
+      val fileName = "game-snippet_${DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss").format(now)}.png"
+      val output = directory.resolve(fileName)
+      ImageIO.write(image, "png", output.toFile())
+      SnippetResult(output, directory)
+    }.getOrNull()
+  }
+
   suspend fun saveToPocket(
     image: BufferedImage,
     title: String,

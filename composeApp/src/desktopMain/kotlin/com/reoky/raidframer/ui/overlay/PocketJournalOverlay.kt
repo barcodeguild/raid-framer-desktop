@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,9 +52,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.IntOffset
@@ -63,6 +73,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
 import com.reoky.raidframer.core.pocket.PocketEntry
+import com.reoky.raidframer.core.pocket.PocketHtmlExporter
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.LocalDragLock
@@ -278,6 +289,13 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
                   } else {
                     activeDeleteMessage = true
                   }
+                },
+                onExport = {
+                  scope.launch {
+                    PocketHtmlExporter.exportEntryToHtml(item.entry)?.let { folder ->
+                      java.awt.Desktop.getDesktop().open(folder.toFile())
+                    }
+                  }
                 }
               )
             }
@@ -345,6 +363,7 @@ private fun TimelineEntryRow(
   onTagClick: (String) -> Unit,
   onOpen: () -> Unit,
   onDelete: () -> Unit,
+  onExport: () -> Unit,
 ) {
   Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -362,7 +381,7 @@ private fun TimelineEntryRow(
       }
     }
     val textContent: @Composable () -> Unit = {
-      Column(modifier = Modifier.weight(1f)) {
+      Column {
         val created = formatDateTime(entry.metadata.createdAt)
         val edited = formatDateTime(entry.metadata.updatedAt)
         Text(
@@ -378,34 +397,72 @@ private fun TimelineEntryRow(
         PocketTagChips(entry.tags.map { it.tag }, onTagClick)
       }
     }
+    val editing = PocketDraftCoordinator.activeDraftId.collectAsState().value == entry.metadata.id
+    val deleteInteraction = remember { MutableInteractionSource() }
+    val isDeleteHovered by deleteInteraction.collectIsHoveredAsState()
     val deleteButton: @Composable () -> Unit = {
-      val editing = PocketDraftCoordinator.activeDraftId.collectAsState().value == entry.metadata.id
-      IconButton(onClick = onDelete, enabled = !editing) {
-        Text("X", color = if (editing) RFColors.TextDisabled else RFColors.AccentRed)
+      IconButton(
+        onClick = onDelete,
+        enabled = !editing,
+        modifier = Modifier.size(32.dp)
+      ) {
+        Text(
+          "X",
+          color = if (editing) RFColors.TextDisabled else if (isDeleteHovered) Color.Red else Color.White,
+          fontSize = 13.sp,
+          fontWeight = FontWeight.SemiBold,
+          modifier = Modifier.hoverable(interactionSource = deleteInteraction)
+        )
       }
     }
+    val exportInteraction = remember { MutableInteractionSource() }
+    val isExportHovered by exportInteraction.collectIsHoveredAsState()
+    val exportButton: @Composable () -> Unit = {
+      IconButton(
+        onClick = onExport,
+        modifier = Modifier.size(32.dp)
+      ) {
+        Text(
+          "\uF0C7",
+          fontFamily = FontsHelper.faSolid(),
+          fontSize = 13.sp,
+          color = if (isExportHovered) Color.Red else Color.White,
+          modifier = Modifier.hoverable(interactionSource = exportInteraction)
+        )
+      }
+    }
+    // Text always hugs the spline; export sits next to delete with delete outermost so the
+    // left/right cards mirror each other across the spline (Y-axis symmetry).
     val card: @Composable () -> Unit = {
+      val cardShape = TimelineCardShape(arrowPointsRight = isLeft)
       Row(
         modifier = Modifier
           .fillMaxWidth()
-          .background(RFColors.CardBackground, RoundedCornerShape(8.dp))
-          .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
+          .background(RFColors.CardBackground, cardShape)
+          .border(1.dp, Color.White.copy(alpha = 0.12f), cardShape)
           .hoverable(interactionSource)
           .clickable(onClick = onOpen)
-          .padding(10.dp),
+          .padding(start = 12.dp, end = if (isLeft) 18.dp else 12.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
         if (isLeft) {
+          // spline on the right: text hugs the right (spline) edge; actions pinned to the left.
           deleteButton()
+          exportButton()
+          Spacer(Modifier.weight(1f))
           textContent()
         } else {
+          // spline on the left: text hugs the left (spline) edge; actions pinned to the right.
           textContent()
+          Spacer(Modifier.weight(1f))
+          exportButton()
           deleteButton()
         }
       }
     }
+    // Add horizontal margin on the spline-facing side so the extruded notch clears the spline.
     if (isLeft) {
-      Box(Modifier.weight(1f)) {
+      Box(Modifier.weight(1f).padding(end = 8.dp)) {
         card()
         if (showPopup) EntryHoverPopup(entry, isLeft, onHoverChange = { popupHovered = it })
       }
@@ -414,7 +471,7 @@ private fun TimelineEntryRow(
     } else {
       Spacer(Modifier.weight(1f))
       TimelineNode()
-      Box(Modifier.weight(1f)) {
+      Box(Modifier.weight(1f).padding(start = 8.dp)) {
         card()
         if (showPopup) EntryHoverPopup(entry, isLeft, onHoverChange = { popupHovered = it })
       }
@@ -434,7 +491,7 @@ private fun BoxScope.EntryHoverPopup(
   LaunchedEffect(isPopupHovered) { onHoverChange(isPopupHovered) }
   Popup(
     alignment = if (isLeft) Alignment.TopEnd else Alignment.TopStart,
-    offset = IntOffset(if (isLeft) 16 else -16, 8)
+    offset = IntOffset(if (isLeft) 16 else -16, 44)
   ) {
     Surface(
       modifier = Modifier.width(300.dp).hoverable(popupInteractionSource),
@@ -481,6 +538,86 @@ private fun RowScope.TimelineNode() {
         .background(RFColors.AccentRed, androidx.compose.foundation.shape.CircleShape)
         .padding(4.dp)
     )
+  }
+}
+
+/**
+ * A custom card shape whose border extrudes into a triangular notch/pointer that faces the
+ * timeline spline. `arrowPointsRight` carries the point off the right edge (for cards placed
+ * left of the spline); otherwise the point extrudes off the left edge.
+ */
+private class TimelineCardShape(
+  private val cornerRadius: Dp = 8.dp,
+  private val arrowLength: Dp = 10.dp,
+  private val arrowWidth: Dp = 16.dp,
+  private val arrowPointsRight: Boolean,
+) : Shape {
+
+  override fun createOutline(
+    size: Size,
+    layoutDirection: LayoutDirection,
+    density: Density
+  ): Outline {
+    val path = Path().apply {
+      val c = with(density) { cornerRadius.toPx() }
+      val aLen = with(density) { arrowLength.toPx() }
+      val aWid = with(density) { arrowWidth.toPx() }
+      val left = 0f
+      val right = size.width
+      val top = 0f
+      val bottom = size.height
+      val centerY = bottom / 2f
+
+      moveTo(left + c, top)
+      lineTo(right - c, top)
+      arcTo(
+        rect = Rect(right - c * 2, top, right, top + c * 2),
+        startAngleDegrees = 270f,
+        sweepAngleDegrees = 90f,
+        forceMoveTo = false
+      )
+
+      if (arrowPointsRight) {
+        // Point extrudes off the right edge, aimed at the spline.
+        lineTo(right, centerY - aWid / 2f)
+        lineTo(right + aLen, centerY)
+        lineTo(right, centerY + aWid / 2f)
+        lineTo(right, bottom - c)
+      } else {
+        lineTo(right, bottom - c)
+      }
+      arcTo(
+        rect = Rect(right - c * 2, bottom - c * 2, right, bottom),
+        startAngleDegrees = 0f,
+        sweepAngleDegrees = 90f,
+        forceMoveTo = false
+      )
+      lineTo(left + c, bottom)
+      arcTo(
+        rect = Rect(left, bottom - c * 2, left + c * 2, bottom),
+        startAngleDegrees = 90f,
+        sweepAngleDegrees = 90f,
+        forceMoveTo = false
+      )
+
+      if (!arrowPointsRight) {
+        // Point extrudes off the left edge, aimed at the spline.
+        lineTo(left, centerY + aWid / 2f)
+        lineTo(left - aLen, centerY)
+        lineTo(left, centerY - aWid / 2f)
+        lineTo(left, top + c)
+      } else {
+        lineTo(left, top + c)
+      }
+      arcTo(
+        rect = Rect(left, top, left + c * 2, top + c * 2),
+        startAngleDegrees = 180f,
+        sweepAngleDegrees = 90f,
+        forceMoveTo = false
+      )
+      close()
+    }
+    return Outline.Generic(path)
   }
 }
 

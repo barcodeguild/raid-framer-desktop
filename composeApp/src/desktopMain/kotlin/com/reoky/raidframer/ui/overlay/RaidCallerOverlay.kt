@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.animateColor
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
@@ -30,6 +33,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -65,12 +70,11 @@ import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.capture.GameSnippingService
-import com.reoky.raidframer.core.pocket.PocketAttachmentResult
-import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
+import com.reoky.raidframer.ui.capture.PocketWindowCaptureCoordinator
 import com.reoky.raidframer.OverlayNav
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.nio.file.Files
+import java.awt.Desktop
 import javax.imageio.ImageIO
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -745,30 +749,22 @@ private fun GameSnippingButton(wm: WindowManager?) {
   val scope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
   val isHovered by interactionSource.collectIsHoveredAsState()
+  var pendingSnippet by remember { mutableStateOf<PocketWindowCaptureCoordinator.SnippetResult?>(null) }
+  var previewShown by remember { mutableStateOf(false) }
+  var savedToPocket by remember { mutableStateOf(false) }
+
   IconButton(
     onClick = {
       scope.launch {
         val image = GameSnippingService.capture(
           windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.RAID_CALLER))
         ) ?: return@launch
-        val draft = PocketDraftCoordinator.activeDraft.value
-          ?: PocketDraftCoordinator.createDraft(title = "Game Screenshot")
-        val name = PocketDraftCoordinator.nextAttachmentName(draft.metadata.id) ?: return@launch
-        val temporary = Files.createTempFile("raid-framer-snip-", ".png")
-        try {
-          ImageIO.write(image, "png", temporary.toFile())
-          val markdown = PocketDraftCoordinator.activeDraft.value?.markdown.orEmpty()
-          val separator = if (markdown.isBlank() || markdown.endsWith("\n")) "" else "\n"
-          PocketDraftCoordinator.addAttachment(
-            temporary,
-            name,
-            "image/png",
-            "$markdown${separator}\n![Game Screenshot]($name)\n"
-          )
-          wm?.openWindow(OverlayType.POCKET_EDITOR)
-        } finally {
-          Files.deleteIfExists(temporary)
-        }
+        // Always persist a copy of the snipped PNG into the month's snippets folder so it's
+        // never lost, then show a preview letting the user choose to also save it to Pocket.
+        val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
+        pendingSnippet = result
+        savedToPocket = false
+        previewShown = true
       }
     },
     modifier = Modifier.size(32.dp)
@@ -780,6 +776,98 @@ private fun GameSnippingButton(wm: WindowManager?) {
       color = if (isHovered) Color.White else RFColors.TextSecondary,
       modifier = Modifier.hoverable(interactionSource)
     )
+  }
+
+  if (previewShown && pendingSnippet != null) {
+    val result = pendingSnippet!!
+    val image = remember(result.snippetFile) {
+      runCatching { ImageIO.read(result.snippetFile.toFile())?.toComposeImageBitmap() }.getOrNull()
+    }
+    Popup(
+      alignment = Alignment.Center,
+      onDismissRequest = {
+        previewShown = false
+        pendingSnippet = null
+      }
+    ) {
+      Surface(
+        modifier = Modifier.fillMaxWidth().widthIn(max = 440.dp),
+        shape = RoundedCornerShape(10.dp),
+        elevation = 8.dp,
+        color = Color(0xFF171717),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
+      ) {
+      Column(
+        modifier = Modifier.padding(14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
+        Text(
+          "Snippet captured",
+          color = Color.White,
+          fontSize = 14.sp,
+          fontWeight = FontWeight.SemiBold,
+          textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(8.dp))
+        if (image != null) {
+          Image(
+            bitmap = image,
+            contentDescription = "Snippet preview",
+            modifier = Modifier.fillMaxWidth().heightIn(max = 220.dp).clip(RoundedCornerShape(6.dp)),
+            contentScale = ContentScale.Fit
+          )
+        } else {
+          Text(
+            "Saved to ${result.snippetFile.parent}",
+            color = RFColors.TextSecondary,
+            fontSize = 11.sp,
+            textAlign = TextAlign.Center
+          )
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+          result.snippetFile.fileName.toString(),
+          color = RFColors.TextTertiary,
+          fontSize = 11.sp,
+          textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(12.dp))
+        if (savedToPocket) {
+          Text(
+            "Saved to Pocket journal",
+            color = RFColors.UpdateGreen,
+            fontSize = 12.sp
+          )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          Button(
+            onClick = {
+              scope.launch {
+                val img = ImageIO.read(result.snippetFile.toFile())
+                if (img != null) {
+                  PocketWindowCaptureCoordinator.saveToPocket(img, "Game Screenshot", wm ?: return@launch)
+                  savedToPocket = true
+                }
+              }
+            },
+            enabled = !savedToPocket,
+            colors = ButtonDefaults.buttonColors(backgroundColor = RFColors.AccentRed, contentColor = Color.White)
+          ) { Text("Save to Pocket", fontSize = 12.sp) }
+          TextButton(
+            onClick = {
+              runCatching { Desktop.getDesktop().open(result.snippetsDirectory.toFile()) }
+            },
+          ) { Text("Open Folder", color = Color.White, fontSize = 12.sp) }
+          TextButton(
+            onClick = {
+              previewShown = false
+              pendingSnippet = null
+            }
+          ) { Text("Close", color = RFColors.TextSecondary, fontSize = 12.sp) }
+        }
+      }
+      }
+    }
   }
 }
 
