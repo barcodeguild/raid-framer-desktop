@@ -3,12 +3,14 @@ package com.reoky.raidframer.ui.overlay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,8 +42,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.AnnotatedString.Range
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,7 +72,14 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
   var title by remember(draft?.metadata?.id) { mutableStateOf(draft?.metadata?.title.orEmpty()) }
   var markdownValue by remember(draft?.metadata?.id) { mutableStateOf(TextFieldValue(draft?.markdown.orEmpty())) }
   val markdown = markdownValue.text
-  var selectedTab by remember { mutableStateOf(0) }
+  val draftId = draft?.metadata?.id
+  val allEntries by PocketDraftCoordinator.entries.collectAsState()
+  var selectedTab by remember(draftId) {
+    val createdAt = draft?.metadata?.createdAt
+    val newestAt = allEntries.maxOfOrNull { it.metadata.createdAt }
+    val isNewestOrDraft = createdAt != null && newestAt != null && createdAt >= newestAt
+    mutableStateOf(if (isNewestOrDraft) 0 else 1)
+  }
   var attachmentMessage by remember { mutableStateOf<String?>(null) }
   var linkDialogOpen by remember { mutableStateOf(false) }
   var linkUrl by remember { mutableStateOf("") }
@@ -144,18 +153,6 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
           )
         )
       }
-      AttachmentStrip(
-        attachments = draft?.attachments.orEmpty(),
-        onRemove = { attachmentId ->
-          scope.launch {
-            PocketDraftCoordinator.removeAttachment(attachmentId, markdown)
-              ?.let {
-                markdownValue = TextFieldValue(it.markdown)
-                attachmentMessage = null
-              }
-          }
-        }
-      )
       PocketTagChips(draft?.tags.orEmpty().map { it.tag })
       MarkdownToolbar(
         onAction = { action ->
@@ -218,6 +215,18 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
             MarkdownAction.STRIKE -> markdownValue = applyMarkdown(markdownValue, "~~", lastSelection)
             MarkdownAction.BULLET -> markdownValue = insertMarkdown(markdownValue, "- ")
             MarkdownAction.CODE -> markdownValue = applyMarkdown(markdownValue, "`", lastSelection)
+          }
+        }
+      )
+      AttachmentStrip(
+        attachments = draft?.attachments.orEmpty(),
+        onRemove = { attachmentId ->
+          scope.launch {
+            PocketDraftCoordinator.removeAttachment(attachmentId, markdown)
+              ?.let {
+                markdownValue = TextFieldValue(it.markdown)
+                attachmentMessage = null
+              }
           }
         }
       )
@@ -520,12 +529,18 @@ private fun PocketMarkdownImage(image: PocketMarkdownInline.Image, markdownPath:
   if (bitmap == null) {
     Text("[Image: ${image.alt.ifBlank { image.destination }}]", color = Color.White, fontSize = 12.sp)
   } else {
-    Image(
-      bitmap = bitmap,
-      contentDescription = image.alt.ifBlank { "Pocket attachment" },
-      modifier = Modifier.height(120.dp).padding(top = 4.dp),
-      contentScale = ContentScale.Fit
-    )
+    // Cap the width to 2/3 of the available area while letting the height follow the
+    // image's natural aspect ratio so it renders in position and at full size.
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+      Image(
+        bitmap = bitmap,
+        contentDescription = image.alt.ifBlank { "Pocket attachment" },
+        modifier = Modifier
+          .fillMaxWidth(2f / 3f)
+          .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat()),
+        contentScale = ContentScale.Fit
+      )
+    }
   }
 }
 

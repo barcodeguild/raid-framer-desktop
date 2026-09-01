@@ -7,11 +7,17 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.material.Surface
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,16 +31,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextButton
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextButton as Material3TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +56,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.Popup
+import com.reoky.raidframer.ui.component.PocketEntryThumbnail
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
@@ -118,14 +128,25 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
       horizontalArrangement = Arrangement.spacedBy(6.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      OutlinedTextField(
+      BasicTextField(
         value = search,
         onValueChange = { search = it },
-        modifier = Modifier.weight(1f).height(36.dp),
+        modifier = Modifier
+          .weight(1f)
+          .height(36.dp)
+          .background(Color.Black.copy(alpha = 0.40f), RoundedCornerShape(6.dp))
+          .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(6.dp)),
         singleLine = true,
-        placeholder = { Text("Search title or tag", color = Color.White.copy(alpha = 0.75f), fontSize = 12.sp) },
         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 12.sp),
-        colors = journalFieldColors()
+        cursorBrush = SolidColor(RFColors.AccentRed),
+        decorationBox = { innerTextField ->
+          Box(Modifier.fillMaxSize().padding(horizontal = 8.dp), contentAlignment = Alignment.CenterStart) {
+            if (search.isEmpty()) {
+              Text("Search title or tag", color = Color.White.copy(alpha = 0.75f), fontSize = 12.sp)
+            }
+            innerTextField()
+          }
+        }
       )
       Button(
         onClick = {
@@ -312,16 +333,6 @@ private fun TimelineDayMarker(date: String) {
   }
 }
 
-@Composable
-private fun journalFieldColors() = TextFieldDefaults.outlinedTextFieldColors(
-  textColor = Color.White,
-  cursorColor = RFColors.AccentRed,
-  focusedBorderColor = RFColors.AccentRed,
-  unfocusedBorderColor = Color.White.copy(alpha = 0.24f),
-  focusedLabelColor = RFColors.AccentRed,
-  unfocusedLabelColor = RFColors.TextTertiary
-)
-
 private fun isOnDate(timestamp: Long, selectedDate: LocalDate?): Boolean {
   val date = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDate()
   return selectedDate == null || date == selectedDate
@@ -336,6 +347,20 @@ private fun TimelineEntryRow(
   onDelete: () -> Unit,
 ) {
   Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    var popupHovered by remember(entry.metadata.id) { mutableStateOf(false) }
+    var showPopup by remember(entry.metadata.id) { mutableStateOf(false) }
+    // Keep the popup open while hovering the card OR the popup itself, with a short
+    // debounce so moving the cursor from the card into the popup doesn't flicker.
+    LaunchedEffect(isHovered, popupHovered) {
+      if (isHovered || popupHovered) {
+        showPopup = true
+      } else {
+        kotlinx.coroutines.delay(200)
+        if (!isHovered && !popupHovered) showPopup = false
+      }
+    }
     val textContent: @Composable () -> Unit = {
       Column(modifier = Modifier.weight(1f)) {
         val created = formatDateTime(entry.metadata.createdAt)
@@ -365,6 +390,7 @@ private fun TimelineEntryRow(
           .fillMaxWidth()
           .background(RFColors.CardBackground, RoundedCornerShape(8.dp))
           .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
+          .hoverable(interactionSource)
           .clickable(onClick = onOpen)
           .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -379,13 +405,45 @@ private fun TimelineEntryRow(
       }
     }
     if (isLeft) {
-      Box(Modifier.weight(1f)) { card() }
+      Box(Modifier.weight(1f)) {
+        card()
+        if (showPopup) EntryHoverPopup(entry, isLeft, onHoverChange = { popupHovered = it })
+      }
       TimelineNode()
       Spacer(Modifier.weight(1f))
     } else {
       Spacer(Modifier.weight(1f))
       TimelineNode()
-      Box(Modifier.weight(1f)) { card() }
+      Box(Modifier.weight(1f)) {
+        card()
+        if (showPopup) EntryHoverPopup(entry, isLeft, onHoverChange = { popupHovered = it })
+      }
+    }
+  }
+}
+
+@Composable
+private fun BoxScope.EntryHoverPopup(
+  entry: PocketEntry,
+  isLeft: Boolean,
+  onHoverChange: (Boolean) -> Unit,
+) {
+  // Track hover on the popup itself so moving the cursor onto it keeps it open.
+  val popupInteractionSource = remember { MutableInteractionSource() }
+  val isPopupHovered by popupInteractionSource.collectIsHoveredAsState()
+  LaunchedEffect(isPopupHovered) { onHoverChange(isPopupHovered) }
+  Popup(
+    alignment = if (isLeft) Alignment.TopEnd else Alignment.TopStart,
+    offset = IntOffset(if (isLeft) 16 else -16, 8)
+  ) {
+    Surface(
+      modifier = Modifier.width(300.dp).hoverable(popupInteractionSource),
+      shape = RoundedCornerShape(8.dp),
+      elevation = 8.dp,
+      color = Color(0xFF171717),
+      border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
+    ) {
+      PocketEntryThumbnail(entry)
     }
   }
 }
