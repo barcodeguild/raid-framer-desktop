@@ -118,6 +118,7 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
         }
       }
     )
+    PocketTagChips(draft?.tags.orEmpty().map { it.tag })
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -226,14 +227,36 @@ private fun appendImageReference(markdown: String, fileName: String): String {
 }
 
 @Composable
+private fun PocketTagChips(tags: List<String>) {
+  if (tags.isEmpty()) return
+  FlowRow(
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalArrangement = Arrangement.spacedBy(6.dp)
+  ) {
+    tags.forEach { tag ->
+      Text(
+        text = "#$tag",
+        color = Color.White,
+        fontSize = 11.sp,
+        modifier = Modifier
+          .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
+          .border(1.dp, Color.White.copy(alpha = 0.20f), RoundedCornerShape(8.dp))
+          .padding(horizontal = 8.dp, vertical = 3.dp)
+      )
+    }
+  }
+}
+
+@Composable
 private fun AttachmentStrip(
   attachments: List<com.reoky.raidframer.core.database.PocketAttachmentEntity>,
   onRemove: (String) -> Unit,
 ) {
   if (attachments.isEmpty()) return
   FlowRow(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
-    horizontalArrangement = Arrangement.spacedBy(6.dp),
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalArrangement = Arrangement.spacedBy(6.dp)
   ) {
     attachments.forEach { attachment ->

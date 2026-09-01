@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.pocket
 
 import com.reoky.raidframer.core.database.PocketDao
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import java.nio.file.Path
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,8 @@ object PocketDraftCoordinator {
   fun updateDraft(title: String, markdown: String) {
     val id = _activeDraftId.value ?: return
     scope.launch {
-      repository.updateEntry(id, title, markdown)?.let {
+      val knownPlayers = PlayerCacheInteractor.realPlayers.value.map { it.name }
+      repository.updateEntryWithTags(id, title, markdown, knownPlayers)?.let {
         _activeDraft.value = it
         refreshEntries()
       }

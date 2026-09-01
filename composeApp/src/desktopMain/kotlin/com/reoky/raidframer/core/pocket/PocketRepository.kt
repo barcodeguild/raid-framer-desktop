@@ -102,6 +102,17 @@ class PocketRepository(private val dao: PocketDao) {
     }
   }
 
+  suspend fun updateEntryWithTags(
+    id: String,
+    title: String,
+    markdown: String,
+    knownPlayerNames: Collection<String> = emptyList(),
+  ): PocketEntry? {
+    val entry = updateEntry(id, title, markdown) ?: return null
+    replaceTags(id, extractPocketTags(markdown, knownPlayerNames).map { it.displayValue })
+    return readEntry(id)
+  }
+
   suspend fun deleteEntry(id: String): Boolean {
     return writeMutex.withLock {
       val metadata = dao.getEntry(id) ?: return@withLock false

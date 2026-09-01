@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -220,6 +221,7 @@ private fun TimelineEntryRow(
         entry.markdown.lineSequence().firstOrNull { it.isNotBlank() }?.let {
           Text(it, color = RFColors.TextSecondary, fontSize = 12.sp, maxLines = 2)
         }
+        PocketTagChips(entry.tags.map { it.tag })
       }
     }
     val deleteButton: @Composable () -> Unit = {
@@ -255,6 +257,27 @@ private fun TimelineEntryRow(
       Spacer(Modifier.weight(1f))
       TimelineNode()
       Box(Modifier.weight(1f)) { card() }
+    }
+  }
+}
+
+@Composable
+private fun PocketTagChips(tags: List<String>) {
+  if (tags.isEmpty()) return
+  FlowRow(
+    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+    horizontalArrangement = Arrangement.spacedBy(6.dp),
+    verticalArrangement = Arrangement.spacedBy(4.dp)
+  ) {
+    tags.take(6).forEach { tag ->
+      Text(
+        text = "#$tag",
+        color = Color.White,
+        fontSize = 9.sp,
+        modifier = Modifier
+          .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
+          .padding(horizontal = 6.dp, vertical = 2.dp)
+      )
     }
   }
 }
