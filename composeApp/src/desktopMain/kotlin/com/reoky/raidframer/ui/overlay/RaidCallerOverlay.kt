@@ -64,8 +64,14 @@ import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.capture.GameSnippingService
+import com.reoky.raidframer.core.pocket.PocketAttachmentResult
+import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
 import com.reoky.raidframer.OverlayNav
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.nio.file.Files
+import javax.imageio.ImageIO
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_abort_discard
@@ -616,6 +622,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
           LabeledValue("${stringResource(Res.string.raid_caller_recording)}:", formatMinutesSeconds(recordingMs), RFColors.AccentRed, SectionTitleColor)
         }
       }
+      GameSnippingButton(wm)
       RecordingControlButton(wm, isRecording)
     }
 
@@ -730,6 +737,49 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
           .padding(horizontal = 0.dp)
       )
     }
+  }
+}
+
+@Composable
+private fun GameSnippingButton(wm: WindowManager?) {
+  val scope = rememberCoroutineScope()
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
+  IconButton(
+    onClick = {
+      scope.launch {
+        val image = GameSnippingService.capture(
+          windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.RAID_CALLER))
+        ) ?: return@launch
+        val draft = PocketDraftCoordinator.activeDraft.value
+          ?: PocketDraftCoordinator.createDraft(title = "Game Screenshot")
+        val name = PocketDraftCoordinator.nextAttachmentName(draft.metadata.id) ?: return@launch
+        val temporary = Files.createTempFile("raid-framer-snip-", ".png")
+        try {
+          ImageIO.write(image, "png", temporary.toFile())
+          val markdown = PocketDraftCoordinator.activeDraft.value?.markdown.orEmpty()
+          val separator = if (markdown.isBlank() || markdown.endsWith("\n")) "" else "\n"
+          PocketDraftCoordinator.addAttachment(
+            temporary,
+            name,
+            "image/png",
+            "$markdown${separator}\n![Game Screenshot]($name)\n"
+          )
+          wm?.openWindow(OverlayType.POCKET_EDITOR)
+        } finally {
+          Files.deleteIfExists(temporary)
+        }
+      }
+    },
+    modifier = Modifier.size(32.dp)
+  ) {
+    Text(
+      text = "\uf03e",
+      fontFamily = FontsHelper.faSolid(),
+      fontSize = 13.sp,
+      color = if (isHovered) Color.White else RFColors.TextSecondary,
+      modifier = Modifier.hoverable(interactionSource)
+    )
   }
 }
 
