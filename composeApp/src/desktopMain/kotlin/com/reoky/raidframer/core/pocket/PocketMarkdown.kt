@@ -31,6 +31,7 @@ sealed interface PocketMarkdownInline {
   data class Plain(val value: String) : PocketMarkdownInline
   data class Strong(val content: List<PocketMarkdownInline>) : PocketMarkdownInline
   data class Emphasis(val content: List<PocketMarkdownInline>) : PocketMarkdownInline
+  data class Strikethrough(val content: List<PocketMarkdownInline>) : PocketMarkdownInline
   data class Code(val value: String) : PocketMarkdownInline
   data class Link(val label: List<PocketMarkdownInline>, val destination: String) : PocketMarkdownInline
   data class Image(val alt: String, val destination: String) : PocketMarkdownInline
@@ -40,7 +41,7 @@ sealed interface PocketMarkdownInline {
 private val pocketMarkdownParser: Parser = Parser.builder().build()
 
 fun parsePocketMarkdown(markdown: String): List<PocketMarkdownBlock> {
-  val document = pocketMarkdownParser.parse(markdown)
+  val document = pocketMarkdownParser.parse(markdown.replace(Regex("~~([^~\n]+)~~"), "<del>$1</del>"))
   return childNodesOf(document).mapNotNull { (it as? Block)?.toPocketBlock() }
 }
 
@@ -63,6 +64,7 @@ private fun Node.inlineChildren(): List<PocketMarkdownInline> = when (this) {
   is Text -> listOf(PocketMarkdownInline.Plain(literal))
   is StrongEmphasis -> listOf(PocketMarkdownInline.Strong(childNodesOf(this).toPocketInlines()))
   is Emphasis -> listOf(PocketMarkdownInline.Emphasis(childNodesOf(this).toPocketInlines()))
+
   is Code -> listOf(PocketMarkdownInline.Code(literal))
   is Link -> listOf(PocketMarkdownInline.Link(childNodesOf(this).toPocketInlines(), destination))
   is Image -> listOf(PocketMarkdownInline.Image(destination = destination, alt = title.orEmpty()))

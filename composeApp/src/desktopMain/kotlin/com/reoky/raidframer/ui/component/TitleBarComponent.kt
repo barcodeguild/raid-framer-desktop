@@ -31,6 +31,8 @@ fun TitleBarComponent(
   actionLabel: String? = null,
   onAction: (() -> Unit)? = null,
   captureActions: (@Composable RowScope.() -> Unit)? = null,
+  leadingActions: @Composable RowScope.() -> Unit = {},
+  rightActions: @Composable RowScope.() -> Unit = {},
   trailingContent: @Composable RowScope.() -> Unit = {},
   transparent: Boolean = false,
   height: Dp = 46.dp,
@@ -101,9 +103,18 @@ fun TitleBarComponent(
     }
 
     Row(
+      modifier = Modifier.align(Alignment.CenterStart).padding(start = 6.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      leadingActions()
+    }
+
+    Row(
       modifier = Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 6.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
+      rightActions()
+      Spacer(Modifier.width(8.dp))
       captureActions?.invoke(this)
       trailingContent()
       CloseButton(onClose = onClose)

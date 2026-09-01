@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -28,8 +29,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.AnnotatedString.Range
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -45,6 +52,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.LocalDragLock
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.nio.file.Path
@@ -55,10 +63,17 @@ import java.awt.image.BufferedImage
 fun PocketEditorOverlay(wm: WindowManager? = null) {
   val draft by PocketDraftCoordinator.activeDraft.collectAsState()
   var title by remember(draft?.metadata?.id) { mutableStateOf(draft?.metadata?.title.orEmpty()) }
-  var markdown by remember(draft?.metadata?.id) { mutableStateOf(draft?.markdown.orEmpty()) }
+  var markdownValue by remember(draft?.metadata?.id) { mutableStateOf(TextFieldValue(draft?.markdown.orEmpty())) }
+  val markdown = markdownValue.text
   var selectedTab by remember { mutableStateOf(0) }
   var attachmentMessage by remember { mutableStateOf<String?>(null) }
+  var linkDialogOpen by remember { mutableStateOf(false) }
+  var linkUrl by remember { mutableStateOf("") }
+  var linkTitle by remember { mutableStateOf("") }
   val scope = androidx.compose.runtime.rememberCoroutineScope()
+  val dragLock = LocalDragLock.current
+  var lastSelection by remember(draft?.metadata?.id) { mutableStateOf<androidx.compose.ui.text.TextRange?>(null) }
+  LaunchedEffect(Unit) { dragLock.value = true }
 
   LaunchedEffect(title, markdown, draft?.metadata?.id) {
     if (draft != null) {
@@ -84,7 +99,7 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
         onValueChange = { title = it },
         modifier = Modifier.weight(1f),
         singleLine = true,
-        label = { Text("Title (optional)") },
+        label = { Text("Title (optional)", color = Color.White.copy(alpha = 0.85f)) },
         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
         colors = TextFieldDefaults.outlinedTextFieldColors(
           textColor = Color.White,
@@ -95,73 +110,61 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
           unfocusedLabelColor = Color.White.copy(alpha = 0.70f)
         )
       )
-      Button(onClick = {
-        if (wm?.isVisible(OverlayType.POCKET_JOURNAL)?.value != true) {
-          wm?.openWindow(OverlayType.POCKET_JOURNAL)
-        }
-      },
-        colors = androidx.compose.material.ButtonDefaults.buttonColors(
-          backgroundColor = Color.White.copy(alpha = 0.12f),
-          contentColor = Color.White
-        )
-      ) {
-        Text("Journal")
-      }
     }
     AttachmentStrip(
       attachments = draft?.attachments.orEmpty(),
       onRemove = { attachmentId ->
         scope.launch {
-            PocketDraftCoordinator.removeAttachment(attachmentId, markdown)
-              ?.let {
-                markdown = it.markdown
-                attachmentMessage = null
-              }
+          PocketDraftCoordinator.removeAttachment(attachmentId, markdown)
+            ?.let {
+              markdownValue = TextFieldValue(it.markdown)
+              attachmentMessage = null
+            }
         }
       }
     )
     PocketTagChips(draft?.tags.orEmpty().map { it.tag })
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-      Button(
-        onClick = {
-          scope.launch {
-            val selected = PocketAttachmentPicker.chooseImage(
-              temporarilyHide = listOfNotNull(
-                wm?.nativeWindow(OverlayType.POCKET_EDITOR),
-                wm?.nativeWindow(OverlayType.POCKET_JOURNAL)
+    MarkdownToolbar(
+      onAction = { action ->
+        when (action) {
+          MarkdownAction.IMAGE -> {
+            scope.launch {
+              val selected = PocketAttachmentPicker.chooseImage(
+                temporarilyHide = listOfNotNull(
+                  wm?.nativeWindow(OverlayType.POCKET_EDITOR),
+                  wm?.nativeWindow(OverlayType.POCKET_JOURNAL)
+                )
               )
-            )
-            if (selected != null) {
-              val image = runCatching { ImageIO.read(selected.toFile()) }.getOrNull()
-              if (image == null) {
-                attachmentMessage = "Selected file is not a readable image."
-              } else {
-                val draftId = draft?.metadata?.id
-                if (draftId == null) {
-                  attachmentMessage = "No Pocket entry is currently open."
+              if (selected != null) {
+                val image = runCatching { ImageIO.read(selected.toFile()) }.getOrNull()
+                if (image == null) {
+                  attachmentMessage = "Selected file is not a readable image."
                 } else {
-                  val name = PocketDraftCoordinator.nextAttachmentName(draftId)
-                  if (name == null) {
-                    attachmentMessage = "This Pocket entry already has 10 attachments."
+                  val draftId = draft?.metadata?.id
+                  if (draftId == null) {
+                    attachmentMessage = "No Pocket entry is currently open."
                   } else {
-                    when (val result = PocketDraftCoordinator.addAttachment(
-                      source = selected,
-                      relativePath = name,
-                      mimeType = "image/png",
-                      markdown = appendImageReference(markdown, name)
-                    )) {
-                      is PocketAttachmentResult.Added -> {
-                        markdown = result.entry.markdown
-                        attachmentMessage = null
-                      }
-                      is PocketAttachmentResult.Rejected -> {
-                        attachmentMessage = when (result.reason) {
-                          PocketAttachmentRejection.ATTACHMENT_LIMIT_REACHED -> "This Pocket entry already has 10 attachments."
-                          PocketAttachmentRejection.ENTRY_NOT_FOUND -> "The Pocket entry is no longer available."
-                          PocketAttachmentRejection.INVALID_ATTACHMENT_PATH -> "The attachment path was invalid."
+                    val name = PocketDraftCoordinator.nextAttachmentName(draftId)
+                    if (name == null) {
+                      attachmentMessage = "This Pocket entry already has 10 attachments."
+                    } else {
+                      when (val result = PocketDraftCoordinator.addAttachment(
+                        source = selected,
+                        relativePath = name,
+                        mimeType = "image/png",
+                        markdown = appendImageReference(markdown, name)
+                      )) {
+                        is PocketAttachmentResult.Added -> {
+                          markdownValue = TextFieldValue(result.entry.markdown)
+                          attachmentMessage = null
+                        }
+
+                        is PocketAttachmentResult.Rejected -> {
+                          attachmentMessage = when (result.reason) {
+                            PocketAttachmentRejection.ATTACHMENT_LIMIT_REACHED -> "This Pocket entry already has 10 attachments."
+                            PocketAttachmentRejection.ENTRY_NOT_FOUND -> "The Pocket entry is no longer available."
+                            PocketAttachmentRejection.INVALID_ATTACHMENT_PATH -> "The attachment path was invalid."
+                          }
                         }
                       }
                     }
@@ -170,10 +173,23 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
               }
             }
           }
-        },
-        colors = ButtonDefaults.buttonColors(backgroundColor = RFColors.AccentRed, contentColor = Color.White)
-      ) { Text("Import Image") }
-      attachmentMessage?.let { Text(it, color = RFColors.TextSecondary, fontSize = 11.sp) }
+
+          MarkdownAction.LINK -> {
+            linkUrl = ""
+            linkTitle = markdownValue.selectedText().ifBlank { "Link text" }
+            linkDialogOpen = true
+          }
+
+          MarkdownAction.BOLD -> markdownValue = applyMarkdown(markdownValue, "**", lastSelection)
+          MarkdownAction.ITALIC -> markdownValue = applyMarkdown(markdownValue, "*", lastSelection)
+          MarkdownAction.STRIKE -> markdownValue = applyMarkdown(markdownValue, "~~", lastSelection)
+          MarkdownAction.BULLET -> markdownValue = insertMarkdown(markdownValue, "- ")
+          MarkdownAction.CODE -> markdownValue = applyMarkdown(markdownValue, "`", lastSelection)
+        }
+      }
+    )
+    attachmentMessage?.let {
+      Text(it, color = RFColors.TextSecondary, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 12.dp))
     }
     Row(
       modifier = Modifier
@@ -181,7 +197,7 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
         .padding(horizontal = 8.dp)
         .background(Color(0xFF141414).copy(alpha = 0.78f), RoundedCornerShape(14.dp))
         .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
-        .padding(4.dp),
+        .padding(2.dp),
       horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
       listOf("Edit", "Preview").forEachIndexed { index, label ->
@@ -190,7 +206,7 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
           modifier = Modifier.weight(1f),
           shape = RoundedCornerShape(10.dp),
           colors = androidx.compose.material.ButtonDefaults.buttonColors(
-            backgroundColor = if (selectedTab == index) Color.White.copy(alpha = 0.14f) else Color.Transparent,
+            backgroundColor = if (selectedTab == index) RFColors.AccentRed.copy(alpha = 0.82f) else Color.Transparent,
             contentColor = Color.White
           ),
           elevation = androidx.compose.material.ButtonDefaults.elevation(defaultElevation = 2.dp)
@@ -199,18 +215,21 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
     }
     if (selectedTab == 0) {
       OutlinedTextField(
-        value = markdown,
-        onValueChange = { markdown = it },
-        modifier = Modifier.fillMaxSize().padding(10.dp),
-        label = { Text("Markdown") },
+        value = markdownValue,
+        onValueChange = {
+          markdownValue = it
+          if (!it.selection.collapsed) lastSelection = it.selection
+        },
+        modifier = Modifier.fillMaxSize().padding(10.dp).onFocusChanged { dragLock.value = it.isFocused },
+        label = { Text("Markdown", color = Color.White.copy(alpha = 0.85f)) },
         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
         colors = TextFieldDefaults.outlinedTextFieldColors(
           textColor = Color.White,
-          cursorColor = Color.White,
-          focusedBorderColor = Color.White,
-          unfocusedBorderColor = Color.White.copy(alpha = 0.45f),
+          cursorColor = RFColors.AccentRed,
+          focusedBorderColor = RFColors.AccentRed,
+          unfocusedBorderColor = Color.White.copy(alpha = 0.30f),
           focusedLabelColor = Color.White,
-          unfocusedLabelColor = Color.White.copy(alpha = 0.70f)
+          unfocusedLabelColor = Color.White.copy(alpha = 0.78f)
         )
       )
     } else {
@@ -220,8 +239,112 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
         PocketMarkdownPreview(markdown, draft?.metadata?.markdownPath)
       }
     }
+    if (linkDialogOpen) {
+      androidx.compose.material.AlertDialog(
+        onDismissRequest = { linkDialogOpen = false },
+        title = { Text("Insert link", color = Color.White) },
+        text = {
+          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+              value = linkTitle,
+              onValueChange = { linkTitle = it },
+              label = { Text("Title", color = Color.White) },
+              textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+              colors = editorFieldColors()
+            )
+            OutlinedTextField(
+              value = linkUrl,
+              onValueChange = { linkUrl = it },
+              label = { Text("URL", color = Color.White) },
+              textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+              colors = editorFieldColors()
+            )
+          }
+        },
+        confirmButton = {
+          androidx.compose.material.TextButton(onClick = {
+            if (linkUrl.isNotBlank()) markdownValue =
+              insertMarkdown(markdownValue, "[${linkTitle.ifBlank { linkUrl }}]($linkUrl)")
+            linkDialogOpen = false
+          }) { Text("Insert", color = RFColors.AccentRed) }
+        },
+        dismissButton = {
+          androidx.compose.material.TextButton(onClick = { linkDialogOpen = false }) {
+            Text(
+              "Cancel",
+              color = Color.White
+            )
+          }
+        },
+        backgroundColor = Color(0xFF202020),
+        contentColor = Color.White
+      )
+    }
   }
 }
+
+private enum class MarkdownAction { BOLD, ITALIC, STRIKE, CODE, BULLET, LINK, IMAGE }
+
+@Composable
+private fun MarkdownToolbar(onAction: (MarkdownAction) -> Unit) {
+  Row(
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp)
+      .background(Color(0xFF141414).copy(alpha = 0.92f), RoundedCornerShape(10.dp))
+      .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(10.dp))
+      .padding(horizontal = 4.dp, vertical = 2.dp),
+    horizontalArrangement = Arrangement.spacedBy(2.dp)
+  ) {
+    listOf(
+      MarkdownAction.BOLD to "B", MarkdownAction.ITALIC to "I", MarkdownAction.STRIKE to "S",
+      MarkdownAction.CODE to "<>", MarkdownAction.BULLET to "•", MarkdownAction.LINK to "Link",
+      MarkdownAction.IMAGE to "Image"
+    ).forEach { (action, label) ->
+      androidx.compose.material.TextButton(onClick = { onAction(action) }) {
+        Text(label, color = if (action == MarkdownAction.IMAGE) RFColors.AccentRed else Color.White, fontSize = 11.sp)
+      }
+    }
+  }
+}
+
+private fun applyMarkdown(
+  value: TextFieldValue,
+  marker: String,
+  rememberedSelection: androidx.compose.ui.text.TextRange?
+): TextFieldValue {
+  val selection = if (!value.selection.collapsed) value.selection else rememberedSelection ?: value.selection
+  if (selection.collapsed) return value.copy(
+    text = value.text + marker + marker,
+    selection = androidx.compose.ui.text.TextRange(value.text.length + marker.length * 2)
+  )
+  val selected = value.text.substring(selection.min, selection.max)
+  val replacement = "$marker$selected$marker"
+  val text = value.text.replaceRange(selection.min, selection.max, replacement)
+  return value.copy(
+    text = text,
+    selection = androidx.compose.ui.text.TextRange(selection.min, selection.min + replacement.length)
+  )
+}
+
+private fun insertMarkdown(value: TextFieldValue, insertion: String): TextFieldValue {
+  val selection = value.selection
+  val prefix = if (value.text.isBlank() || value.text.endsWith("\n")) "" else "\n"
+  val replacement = prefix + insertion
+  val text = value.text.replaceRange(selection.min, selection.max, replacement)
+  val cursor = selection.min + replacement.length
+  return value.copy(text = text, selection = androidx.compose.ui.text.TextRange(cursor))
+}
+
+private fun TextFieldValue.selectedText(): String = text.substring(selection.min, selection.max)
+
+@Composable
+private fun editorFieldColors() = TextFieldDefaults.outlinedTextFieldColors(
+  textColor = Color.White,
+  cursorColor = RFColors.AccentRed,
+  focusedBorderColor = RFColors.AccentRed,
+  unfocusedBorderColor = Color.White.copy(alpha = 0.30f),
+  focusedLabelColor = Color.White,
+  unfocusedLabelColor = Color.White.copy(alpha = 0.78f)
+)
 
 private fun appendImageReference(markdown: String, fileName: String): String {
   val separator = if (markdown.isBlank() || markdown.endsWith("\n")) "" else "\n"
@@ -286,17 +409,21 @@ private fun PocketMarkdownPreview(markdown: String, markdownPath: String?) {
           color = Color.White,
           fontSize = (22 - block.level * 2).coerceAtLeast(14).sp
         )
+
         is PocketMarkdownBlock.BulletList -> block.items.forEach { item ->
           Row { Text("• ", color = Color.White); PocketInlineText(item, markdownPath) }
         }
+
         is PocketMarkdownBlock.OrderedList -> block.items.forEachIndexed { index, item ->
           Row { Text("${index + 1}. ", color = Color.White); PocketInlineText(item, markdownPath) }
         }
+
         is PocketMarkdownBlock.Quote -> Text(
           text = "> ${block.content.toPlainText()}",
           color = RFColors.TextSecondary,
           fontSize = 14.sp
         )
+
         is PocketMarkdownBlock.CodeBlock -> Text(
           text = block.code,
           color = Color.White,
@@ -313,16 +440,33 @@ private fun PocketInlineText(content: List<PocketMarkdownInline>, markdownPath: 
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     content.forEach { inline ->
       when (inline) {
-        is PocketMarkdownInline.Image -> {
-          PocketMarkdownImage(inline, markdownPath)
-        }
-        else -> androidx.compose.foundation.text.BasicText(
-          text = inline.toPlainText(),
+        is PocketMarkdownInline.Image -> PocketMarkdownImage(inline, markdownPath)
+        else -> {
+          val rendered = inline.toAnnotatedString()
+          androidx.compose.foundation.text.BasicText(
+          text = rendered,
           style = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 14.sp)
-        )
+          )
+        }
       }
     }
   }
+}
+
+private fun PocketMarkdownInline.toAnnotatedString(): androidx.compose.ui.text.AnnotatedString = buildAnnotatedString {
+  fun appendInline(inline: PocketMarkdownInline, style: androidx.compose.ui.text.SpanStyle = androidx.compose.ui.text.SpanStyle()) {
+    when (inline) {
+      is PocketMarkdownInline.Plain -> withStyle(style) { append(inline.value) }
+      is PocketMarkdownInline.Strong -> inline.content.forEach { appendInline(it, style.merge(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold))) }
+      is PocketMarkdownInline.Emphasis -> inline.content.forEach { appendInline(it, style.merge(androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic))) }
+      is PocketMarkdownInline.Strikethrough -> inline.content.forEach { appendInline(it, style.merge(androidx.compose.ui.text.SpanStyle(textDecoration = TextDecoration.LineThrough))) }
+      is PocketMarkdownInline.Code -> withStyle(style.merge(androidx.compose.ui.text.SpanStyle(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace))) { append(inline.value) }
+      is PocketMarkdownInline.Link -> inline.label.forEach { appendInline(it, style.merge(androidx.compose.ui.text.SpanStyle(color = Color(0xFF64B5F6), textDecoration = TextDecoration.Underline))) }
+      is PocketMarkdownInline.Break -> append("\n")
+      is PocketMarkdownInline.Image -> append("[Image: ${inline.alt.ifBlank { inline.destination }}]")
+    }
+  }
+  appendInline(this@toAnnotatedString)
 }
 
 @Composable
@@ -372,6 +516,7 @@ private fun PocketMarkdownInline.toPlainText(): String = when (this) {
   is PocketMarkdownInline.Plain -> value
   is PocketMarkdownInline.Strong -> content.toPlainText()
   is PocketMarkdownInline.Emphasis -> content.toPlainText()
+  is PocketMarkdownInline.Strikethrough -> content.toPlainText()
   is PocketMarkdownInline.Code -> value
   is PocketMarkdownInline.Link -> label.toPlainText()
   is PocketMarkdownInline.Image -> "[Image: ${alt.ifBlank { destination }}]"
@@ -383,6 +528,7 @@ private fun List<PocketMarkdownInline>.toPlainText(): String = joinToString("") 
     is PocketMarkdownInline.Plain -> inline.value
     is PocketMarkdownInline.Strong -> inline.content.toPlainText()
     is PocketMarkdownInline.Emphasis -> inline.content.toPlainText()
+    is PocketMarkdownInline.Strikethrough -> inline.content.toPlainText()
     is PocketMarkdownInline.Code -> inline.value
     is PocketMarkdownInline.Link -> inline.label.toPlainText()
     is PocketMarkdownInline.Image -> "[Image: ${inline.alt.ifBlank { inline.destination }}]"

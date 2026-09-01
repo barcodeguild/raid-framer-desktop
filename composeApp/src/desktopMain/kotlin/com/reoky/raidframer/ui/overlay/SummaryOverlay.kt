@@ -334,7 +334,7 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
         } else null,
         modifier = Modifier.fillMaxWidth()
       )
-      
+
       // Navigation controls - centered vertically, positioned to the left of the close button
       var dropdownExpanded by remember { mutableStateOf(false) }
 
@@ -342,7 +342,7 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
         modifier = Modifier
           .align(Alignment.CenterEnd)
           .offset(y = (-1).dp)
-          .padding(end = 43.dp),
+          .padding(end = 86.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
         // Back arrow
@@ -452,132 +452,154 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
           factionTigerStrikeData = factionTigerStrikeData,
           factionFreezeData = factionFreezeData
         )
+
         1 -> KeyDebuffsTab(
           topSilences = topSilences,
           topCharms = topCharms,
           topDistresses = topDistresses,
           wm = wm
         )
+
         2 -> CCDebuffsTab(
           topTrips = topTrips,
           topBubbles = topBubbles,
           topBracings = topBracings,
           wm = wm
         )
+
         3 -> UtilityDebuffsTab(
           topShieldStrip = topShieldStrip,
           topWeaponDisables = topWeaponDisables,
           topPotionDisables = topPotionDisables,
           wm = wm
         )
+
         4 -> GliderDebuffsTab(
           topBdGlider = topBdGlider,
           topCrystalWings = topCrystalWings,
           topGliderDisables = topGliderDisables,
           wm = wm
         )
+
         5 -> SpecialDebuffsTab(
           topProvoked = topProvoked,
           topPetrification = topPetrification,
           topFreezes = topFreezes,
           wm = wm
         )
+
         6 -> DebuffsContinuedTab(
           topThrowDagger = topThrowDagger,
           topStuns = topStuns,
           topStaggers = topStaggers,
           wm = wm
         )
+
         7 -> DebuffsExtendedTab(
           topAbsorbLifeforce = topAbsorbLifeforce,
           topCorrosiveBarrage = topCorrosiveBarrage,
           topBlindedByCrows = topBlindedByCrows,
           wm = wm
         )
-         8 -> SpecialBuffsTab(topDefiance, topGardenDefiance, topPurges, wm)
-         9 -> SpecialBuffsContinuedTab(
+
+        8 -> SpecialBuffsTab(topDefiance, topGardenDefiance, topPurges, wm)
+        9 -> SpecialBuffsContinuedTab(
           topImpaleImmunity = topImpaleImmunity,
           topProtectiveWings = topProtectiveWings,
           topCourageousAction = topCourageousAction,
           wm = wm
         )
-         10 -> SpecialHealsTab(
+
+        10 -> SpecialHealsTab(
           topManaBarrier = topManaBarrier,
           topRevive = topRevive,
           topLifeMenders = topLifeMenders,
           wm = wm
         )
-         11 -> SpecialMeleeTab(
+
+        11 -> SpecialMeleeTab(
           topTigerStrikes = topTigerStrikes,
           topMistSunder = topMistSunder,
           topRegularSunder = topRegularSunder,
           wm = wm
         )
-         12 -> SpecialDancesTab(
+
+        12 -> SpecialDancesTab(
           topSacDances = topSacDances,
           topDeepTranquility = topDeepTranquility,
           topDeependDebuff = topDeependDebuff,
           wm = wm
         )
-         13 -> SpellDamageByFaction(
+
+        13 -> SpellDamageByFaction(
           topDamageSpellsHaranya = topDamageSpellsHaranya,
           topDamageSpellsNuia = topDamageSpellsNuia,
           topDamageSpellsPirate = topDamageSpellsPirate,
           wm = wm
         )
-         14 -> BuffsDebuffsTab(
+
+        14 -> BuffsDebuffsTab(
           topDebuffs = topDebuffs,
           topSongs = topSongs,
           topBuffers = topBuffers,
           wm = wm
         )
-         15 -> OdeTab(
+
+        15 -> OdeTab(
           topOdeHaranya = topOdeHaranya,
           topOdeNuia = topOdeNuia,
           topOdePirate = topOdePirate,
           wm = wm
         )
-         16 -> KillsDeathsTab(
+
+        16 -> KillsDeathsTab(
           topKillsHaranya = topKillsHaranya,
           topKillsNuia = topKillsNuia,
           topKillsPirate = topKillsPirate,
           wm = wm
         )
-         17 -> DamageTakenHealsReceived(
+
+        17 -> DamageTakenHealsReceived(
           topDamageTaken = topDamageTaken,
           topHealsReceived = tophealsReceived,
           wm = wm
         )
-         18 -> UtilityItemsByFaction(
+
+        18 -> UtilityItemsByFaction(
           topItemUsesHaranya = topItemUsesHaranya,
           topItemUsesNuia = topItemUsesNuia,
           topItemUsesPirate = topItemUsesPirate,
           wm = wm
         )
-         19 -> UtilityItemsTab(
+
+        19 -> UtilityItemsTab(
           topPotters = topPotters,
           topGliderGamers = topGliderGamers,
           topItemSkillCasters = topItemSkillCasters,
           wm = wm
         )
-         20 -> PlayerBuildsTab(
+
+        20 -> PlayerBuildsTab(
           buildCountsHaranya = buildCountsHaranya,
           buildCountsNuia = buildCountsNuia,
           buildCountsPirate = buildCountsPirate,
           wm = wm
         )
-         21 -> PerformanceTab(
+
+        21 -> PerformanceTab(
           topPerformanceHaranya = topPerformanceHaranya,
           topPerformanceNuia = topPerformanceNuia,
           topPerformancePirate = topPerformancePirate,
           wm = wm
         )
+
         22 -> LootBuffTab(
           topLootPeak = topLootPeak,
           worstLootPeak = worstLootPeak,
           topBuffCount = topBuffCount,
           wm = wm
         )
+
         23 -> CoherenceTab(
           topCoherenceRender = topCoherenceRender,
           topCoherenceRaid = topCoherenceRaid,
@@ -1381,7 +1403,7 @@ private fun OdeTab(
       title = stringResource(Res.string.summary_top_ode_nuia),
       cards = topOdeNuia,
       valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
-      valueColor =  RFColors.healsGreen,
+      valueColor = RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1392,7 +1414,7 @@ private fun OdeTab(
       title = stringResource(Res.string.summary_top_ode_pirate),
       cards = topOdePirate,
       valueExtractor = { it.sessionOdeHealsTotal.humanReadableAbbreviation() },
-      valueColor =  RFColors.healsGreen,
+      valueColor = RFColors.healsGreen,
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
@@ -1525,6 +1547,7 @@ private fun healRatioColor(ratio: Float): Color {
         255
       )
     }
+
     clamped < 0.5f -> {
       val t = (clamped - 0.25f) / 0.25f
       Color(
@@ -1534,6 +1557,7 @@ private fun healRatioColor(ratio: Float): Color {
         255
       )
     }
+
     clamped < 1.0f -> {
       val t = (clamped - 0.5f) / 0.5f
       Color(
@@ -1543,6 +1567,7 @@ private fun healRatioColor(ratio: Float): Color {
         255
       )
     }
+
     else -> Color(0, 230, 255, 255) // Cyan for over-healed
   }
 }
@@ -1641,7 +1666,9 @@ private fun StatColumn(
       contentPadding = PaddingValues(0.dp),
       modifier = Modifier.fillMaxWidth()
     ) {
-      itemsIndexed(cards, key = { _, card -> "${card.name}:${card.lastKnownFaction}:${card.currentBuild}" }) { index, card ->
+      itemsIndexed(
+        cards,
+        key = { _, card -> "${card.name}:${card.lastKnownFaction}:${card.currentBuild}" }) { index, card ->
         PlayerRankingRow(
           index = index,
           card = card,
