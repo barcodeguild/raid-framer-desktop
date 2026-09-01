@@ -71,7 +71,8 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
   Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.66f))) {
     TitleBarComponent(
       title = "Pocket Journal",
-      onClose = { wm?.closeWindow(OverlayType.POCKET_JOURNAL) }
+      onClose = { wm?.closeWindow(OverlayType.POCKET_JOURNAL) },
+      trailingContent = {}
     )
     var filtersExpanded by remember { mutableStateOf(true) }
     Row(

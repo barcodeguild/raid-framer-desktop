@@ -3,6 +3,7 @@ package com.reoky.raidframer.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +29,7 @@ fun TitleBarComponent(
   onClose: () -> Unit,
   actionLabel: String? = null,
   onAction: (() -> Unit)? = null,
+  trailingContent: @Composable RowScope.() -> Unit = {},
   transparent: Boolean = false,
   height: Dp = 46.dp,
   modifier: Modifier = Modifier
@@ -96,11 +98,12 @@ fun TitleBarComponent(
       }
     }
 
-    CloseButton(
-      onClose = onClose,
-      modifier = Modifier
-        .align(Alignment.TopEnd)
-        .padding(top = 6.dp, end = 6.dp)
-    )
+    Row(
+      modifier = Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 6.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      trailingContent()
+      CloseButton(onClose = onClose)
+    }
   }
 }

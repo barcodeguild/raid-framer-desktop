@@ -6,19 +6,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.IconButton
@@ -31,6 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
@@ -44,11 +45,11 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
-import com.reoky.raidframer.ui.LocalDragLock
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.nio.file.Path
 import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
 
 @Composable
 fun PocketEditorOverlay(wm: WindowManager? = null) {
@@ -313,7 +314,7 @@ private fun PocketInlineText(content: List<PocketMarkdownInline>, markdownPath: 
     content.forEach { inline ->
       when (inline) {
         is PocketMarkdownInline.Image -> {
-          Text("[Image: ${inline.alt.ifBlank { inline.destination }}]", color = Color.White, fontSize = 12.sp)
+          PocketMarkdownImage(inline, markdownPath)
         }
         else -> androidx.compose.foundation.text.BasicText(
           text = inline.toPlainText(),
@@ -322,6 +323,49 @@ private fun PocketInlineText(content: List<PocketMarkdownInline>, markdownPath: 
       }
     }
   }
+}
+
+@Composable
+private fun PocketMarkdownImage(image: PocketMarkdownInline.Image, markdownPath: String?) {
+  val bitmap = remember(markdownPath, image.destination) {
+    loadPocketImage(image.destination, markdownPath)?.let { bufferedImage ->
+      val colorType = org.jetbrains.skia.ColorType.RGBA_8888
+      val imageInfo = org.jetbrains.skia.ImageInfo(
+        bufferedImage.width,
+        bufferedImage.height,
+        colorType,
+        org.jetbrains.skia.ColorAlphaType.UNPREMUL
+      )
+      val pixels = IntArray(bufferedImage.width * bufferedImage.height)
+      bufferedImage.getRGB(0, 0, bufferedImage.width, bufferedImage.height, pixels, 0, bufferedImage.width)
+      val bytes = ByteArray(pixels.size * 4)
+      pixels.forEachIndexed { index, pixel ->
+        bytes[index * 4] = ((pixel shr 16) and 0xff).toByte()
+        bytes[index * 4 + 1] = ((pixel shr 8) and 0xff).toByte()
+        bytes[index * 4 + 2] = (pixel and 0xff).toByte()
+        bytes[index * 4 + 3] = ((pixel ushr 24) and 0xff).toByte()
+      }
+      org.jetbrains.skia.Image.makeRaster(imageInfo, bytes, bufferedImage.width * 4).toComposeImageBitmap()
+    }
+  }
+  if (bitmap == null) {
+    Text("[Image: ${image.alt.ifBlank { image.destination }}]", color = Color.White, fontSize = 12.sp)
+  } else {
+    Image(
+      bitmap = bitmap,
+      contentDescription = image.alt.ifBlank { "Pocket attachment" },
+      modifier = Modifier.fillMaxWidth(),
+      contentScale = ContentScale.Fit
+    )
+  }
+}
+
+private fun loadPocketImage(destination: String, markdownPath: String?): BufferedImage? {
+  val path = runCatching {
+    val reference = Path.of(destination)
+    if (reference.isAbsolute) reference else markdownPath?.let { Path.of(it).parent.resolve(reference).normalize() }
+  }.getOrNull() ?: return null
+  return runCatching { ImageIO.read(path.toFile()) }.getOrNull()
 }
 
 private fun PocketMarkdownInline.toPlainText(): String = when (this) {
