@@ -1,5 +1,7 @@
 package com.reoky.raidframer.core.database
 
+import com.reoky.raidframer.core.pocket.initializePocketDraftCoordinator
+
 /**
  * Dependency injection object singleton for database-related components.
  * The idea is that once initialized in main, its members can be accessed
@@ -23,5 +25,6 @@ object RFDao {
     windowStateDao = db.getWindowStateDao()
     playerSessionDao = db.getPlayerSessionDao()
     pocketDao = db.getPocketDao()
+    initializePocketDraftCoordinator(pocketDao)
   }
 }
