@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -61,6 +62,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -366,22 +368,13 @@ private fun TimelineEntryRow(
   onExport: () -> Unit,
 ) {
   Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
     var popupHovered by remember(entry.metadata.id) { mutableStateOf(false) }
     var showPopup by remember(entry.metadata.id) { mutableStateOf(false) }
-    // Keep the popup open while hovering the card OR the popup itself, with a short
-    // debounce so moving the cursor from the card into the popup doesn't flicker.
-    LaunchedEffect(isHovered, popupHovered) {
-      if (isHovered || popupHovered) {
-        showPopup = true
-      } else {
-        kotlinx.coroutines.delay(200)
-        if (!isHovered && !popupHovered) showPopup = false
-      }
-    }
     val textContent: @Composable (Modifier) -> Unit = { modifier ->
-      Column(modifier = modifier) {
+      Column(
+        modifier = modifier,
+        horizontalAlignment = if (isLeft) Alignment.End else Alignment.Start
+      ) {
         val created = formatDateTime(entry.metadata.createdAt)
         val edited = formatDateTime(entry.metadata.updatedAt)
         Text(
@@ -409,7 +402,7 @@ private fun TimelineEntryRow(
         Text(
           "X",
           color = if (editing) RFColors.TextDisabled else if (isDeleteHovered) Color.Red else Color.White,
-          fontSize = 13.sp,
+          fontSize = 16.sp,
           fontWeight = FontWeight.SemiBold,
           modifier = Modifier.hoverable(interactionSource = deleteInteraction)
         )
@@ -427,7 +420,31 @@ private fun TimelineEntryRow(
           fontFamily = FontsHelper.faSolid(),
           fontSize = 13.sp,
           color = if (isExportHovered) Color.Red else Color.White,
-          modifier = Modifier.hoverable(interactionSource = exportInteraction)
+          modifier = Modifier.offset(y = 1.dp).hoverable(interactionSource = exportInteraction)
+        )
+      }
+    }
+    val previewInteraction = remember { MutableInteractionSource() }
+    val isPreviewHovered by previewInteraction.collectIsHoveredAsState()
+    LaunchedEffect(isPreviewHovered, popupHovered) {
+      if (isPreviewHovered || popupHovered) {
+        showPopup = true
+      } else {
+        kotlinx.coroutines.delay(200)
+        if (!isPreviewHovered && !popupHovered) showPopup = false
+      }
+    }
+    val previewButton: @Composable () -> Unit = {
+      IconButton(
+        onClick = {},
+        modifier = Modifier.size(32.dp)
+      ) {
+        Text(
+          "\uF002",
+          fontFamily = FontsHelper.faSolid(),
+          fontSize = 13.sp,
+          color = if (isPreviewHovered) Color.Red else Color.White,
+          modifier = Modifier.offset(y = 2.dp).hoverable(interactionSource = previewInteraction)
         )
       }
     }
@@ -436,12 +453,19 @@ private fun TimelineEntryRow(
     // can never be pushed apart or overlapped by wrapping text. The text gets the remaining
     // space and wraps within it.
     val actionButtons: @Composable () -> Unit = {
-      Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy((-2).dp)
       ) {
-        exportButton()
-        deleteButton()
+        if (isLeft) {
+          deleteButton()
+          exportButton()
+          previewButton()
+        } else {
+          previewButton()
+          exportButton()
+          deleteButton()
+        }
       }
     }
     val card: @Composable () -> Unit = {
@@ -451,7 +475,6 @@ private fun TimelineEntryRow(
           .fillMaxWidth()
           .background(RFColors.CardBackground, cardShape)
           .border(1.dp, Color.White.copy(alpha = 0.12f), cardShape)
-          .hoverable(interactionSource)
           .clickable(onClick = onOpen)
           .padding(start = 12.dp, end = if (isLeft) 18.dp else 12.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -518,7 +541,7 @@ private fun BoxScope.EntryHoverPopup(
 private fun PocketTagChips(tags: List<String>, onTagClick: (String) -> Unit) {
   if (tags.isEmpty()) return
   FlowRow(
-    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+    modifier = Modifier.padding(top = 6.dp),
     horizontalArrangement = Arrangement.spacedBy(6.dp),
     verticalArrangement = Arrangement.spacedBy(4.dp)
   ) {
