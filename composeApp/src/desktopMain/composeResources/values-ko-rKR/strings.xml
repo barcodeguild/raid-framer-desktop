@@ -1300,6 +1300,7 @@
     <string name="raid_caller_title">레이드 콜러</string>
     <string name="raid_caller_no_raid">레이드에 참여하면 콜러 통계를 볼 수 있습니다</string>
     <string name="raid_caller_position_hint">Shift+클릭+드래그로 위치 조정</string>
+    <string name="raid_caller_show_anyways">어쨌든 표시</string>
     <string name="raid_caller_avg_gs">평균 GS</string>
     <string name="raid_caller_lowest_gs">최저 GS</string>
     <string name="raid_caller_highest_gs">최고 GS</string>
@@ -1373,3 +1374,4 @@
     <string name="settings_meta_specs_description">구성, 레이드 콜러 및 기술 분석에서 메타로 취급할 스펙을 재정의합니다. 사용자 지정 스펙은 흰색 굵은 글씨로 표시됩니다.</string>
     <string name="meta_specs_edit_icon">메타 스펙 편집</string>
 </resources>
+

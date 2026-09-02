@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.animateColor
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -17,8 +16,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
@@ -33,8 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -71,11 +66,10 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.capture.GameSnippingService
 import com.reoky.raidframer.ui.capture.PocketWindowCaptureCoordinator
+import com.reoky.raidframer.ui.capture.ScreenshotPreviewCoordinator
 import com.reoky.raidframer.OverlayNav
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.awt.Desktop
-import javax.imageio.ImageIO
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_abort_discard
@@ -101,6 +95,7 @@ import raid_framer_desktop.composeapp.generated.resources.raid_caller_no_raid
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_non_meta
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_position_hint
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_raid
+import raid_framer_desktop.composeapp.generated.resources.raid_caller_show_anyways
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_ranged
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_rebirth
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_render
@@ -749,9 +744,6 @@ private fun GameSnippingButton(wm: WindowManager?) {
   val scope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
   val isHovered by interactionSource.collectIsHoveredAsState()
-  var pendingSnippet by remember { mutableStateOf<PocketWindowCaptureCoordinator.SnippetResult?>(null) }
-  var previewShown by remember { mutableStateOf(false) }
-  var savedToPocket by remember { mutableStateOf(false) }
 
   IconButton(
     onClick = {
@@ -760,11 +752,10 @@ private fun GameSnippingButton(wm: WindowManager?) {
           windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.RAID_CALLER))
         ) ?: return@launch
         // Always persist a copy of the snipped PNG into the month's snippets folder so it's
-        // never lost, then show a preview letting the user choose to also save it to Pocket.
+        // never lost, then open the dedicated preview window for the user to decide what to do.
         val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
-        pendingSnippet = result
-        savedToPocket = false
-        previewShown = true
+        ScreenshotPreviewCoordinator.show(result)
+        wm?.openWindow(OverlayType.SCREENSHOT_PREVIEW)
       }
     },
     modifier = Modifier.size(32.dp)
@@ -773,101 +764,9 @@ private fun GameSnippingButton(wm: WindowManager?) {
       text = "\uf03e",
       fontFamily = FontsHelper.faSolid(),
       fontSize = 13.sp,
-      color = if (isHovered) Color.White else RFColors.TextSecondary,
+      color = if (isHovered) RFColors.AccentRed else Color.White,
       modifier = Modifier.hoverable(interactionSource)
     )
-  }
-
-  if (previewShown && pendingSnippet != null) {
-    val result = pendingSnippet!!
-    val image = remember(result.snippetFile) {
-      runCatching { ImageIO.read(result.snippetFile.toFile())?.toComposeImageBitmap() }.getOrNull()
-    }
-    Popup(
-      alignment = Alignment.Center,
-      onDismissRequest = {
-        previewShown = false
-        pendingSnippet = null
-      }
-    ) {
-      Surface(
-        modifier = Modifier.fillMaxWidth().widthIn(max = 440.dp),
-        shape = RoundedCornerShape(10.dp),
-        elevation = 8.dp,
-        color = Color(0xFF171717),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
-      ) {
-      Column(
-        modifier = Modifier.padding(14.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-      ) {
-        Text(
-          "Snippet captured",
-          color = Color.White,
-          fontSize = 14.sp,
-          fontWeight = FontWeight.SemiBold,
-          textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(8.dp))
-        if (image != null) {
-          Image(
-            bitmap = image,
-            contentDescription = "Snippet preview",
-            modifier = Modifier.fillMaxWidth().heightIn(max = 220.dp).clip(RoundedCornerShape(6.dp)),
-            contentScale = ContentScale.Fit
-          )
-        } else {
-          Text(
-            "Saved to ${result.snippetFile.parent}",
-            color = RFColors.TextSecondary,
-            fontSize = 11.sp,
-            textAlign = TextAlign.Center
-          )
-        }
-        Spacer(Modifier.height(6.dp))
-        Text(
-          result.snippetFile.fileName.toString(),
-          color = RFColors.TextTertiary,
-          fontSize = 11.sp,
-          textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(12.dp))
-        if (savedToPocket) {
-          Text(
-            "Saved to Pocket journal",
-            color = RFColors.UpdateGreen,
-            fontSize = 12.sp
-          )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          Button(
-            onClick = {
-              scope.launch {
-                val img = ImageIO.read(result.snippetFile.toFile())
-                if (img != null) {
-                  PocketWindowCaptureCoordinator.saveToPocket(img, "Game Screenshot", wm ?: return@launch)
-                  savedToPocket = true
-                }
-              }
-            },
-            enabled = !savedToPocket,
-            colors = ButtonDefaults.buttonColors(backgroundColor = RFColors.AccentRed, contentColor = Color.White)
-          ) { Text("Save to Pocket", fontSize = 12.sp) }
-          TextButton(
-            onClick = {
-              runCatching { Desktop.getDesktop().open(result.snippetsDirectory.toFile()) }
-            },
-          ) { Text("Open Folder", color = Color.White, fontSize = 12.sp) }
-          TextButton(
-            onClick = {
-              previewShown = false
-              pendingSnippet = null
-            }
-          ) { Text("Close", color = RFColors.TextSecondary, fontSize = 12.sp) }
-        }
-      }
-      }
-    }
   }
 }
 
@@ -983,6 +882,11 @@ fun RaidCallerOverlay(wm: WindowManager? = null) {
 
   val inRaid = raidWasDetected
 
+  // User can force the caller stats to show even when not in a raid. Mirrors the
+  // "stay in raid mode" behavior of raidWasDetected: once opted in, it holds for the
+  // lifetime of the overlay window (re-opening the overlay resets it).
+  var showAnyways by remember { mutableStateOf(false) }
+
   // Flash the overlay border when first enabled so the user can find it.
   var raidCallerPulseActive by remember { mutableStateOf(false) }
   LaunchedEffect(OverlayNav.highlightRaidCallerOverlay.value) {
@@ -994,7 +898,7 @@ fun RaidCallerOverlay(wm: WindowManager? = null) {
   val raidCallerBorder = rememberSectionPulse(raidCallerPulseActive, restColor = Color.Transparent)
 
   Box(modifier = Modifier.fillMaxSize().border(2.dp, raidCallerBorder, RoundedCornerShape(4.dp))) {
-    if (!inRaid) {
+    if (!inRaid && !showAnyways) {
       // When not in a raid, show the positioning helper text (same pattern as ItemUseOverlay).
       Column(
         modifier = Modifier.fillMaxSize(),
@@ -1015,6 +919,21 @@ fun RaidCallerOverlay(wm: WindowManager? = null) {
           fontSize = 10.sp,
           fontWeight = FontWeight.Light,
           textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        val showAnywaysInteraction = remember { MutableInteractionSource() }
+        val showAnywaysHovered by showAnywaysInteraction.collectIsHoveredAsState()
+        Text(
+          text = stringResource(Res.string.raid_caller_show_anyways),
+          color = Color.White.copy(alpha = if (showAnywaysHovered) 0.7f else 0.4f),
+          fontSize = 10.sp,
+          fontWeight = FontWeight.Light,
+          textAlign = TextAlign.Center,
+          modifier = Modifier
+            .hoverable(showAnywaysInteraction)
+            .clip(RoundedCornerShape(4.dp))
+            .clickable(interactionSource = showAnywaysInteraction, indication = null) { showAnyways = true }
+            .padding(horizontal = 6.dp, vertical = 2.dp)
         )
       }
     } else {

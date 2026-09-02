@@ -1237,6 +1237,7 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="raid_caller_title">Raid-Anführer</string>
     <string name="raid_caller_no_raid">Tritt einem Raid bei, um Anführer-Statistiken zu sehen</string>
     <string name="raid_caller_position_hint">Umschalt+Klicken+Ziehen zum Positionieren</string>
+    <string name="raid_caller_show_anyways">Trotzdem anzeigen</string>
     <string name="raid_caller_avg_gs">Ø GS</string>
     <string name="raid_caller_lowest_gs">Niedrigstes GS</string>
     <string name="raid_caller_highest_gs">Höchstes GS</string>
@@ -1313,3 +1314,4 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="settings_meta_specs_description">Überschreiben Sie, welche Specs in Komposition, Raid-Anführer und technischer Analyse als Meta behandelt werden. Benutzerdefinierte Specs werden weiß und fett angezeigt.</string>
     <string name="meta_specs_edit_icon">Meta-Specs bearbeiten</string>
 </resources>
+

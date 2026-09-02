@@ -1300,6 +1300,7 @@
     <string name="raid_caller_title">团队指挥</string>
     <string name="raid_caller_no_raid">加入团队以查看指挥统计信息</string>
     <string name="raid_caller_position_hint">Shift+点击+拖动以定位</string>
+    <string name="raid_caller_show_anyways">仍然显示</string>
     <string name="raid_caller_avg_gs">平均GS</string>
     <string name="raid_caller_lowest_gs">最低GS</string>
     <string name="raid_caller_highest_gs">最高GS</string>
@@ -1373,3 +1374,4 @@
     <string name="settings_meta_specs_description">覆盖哪些配置在阵容、团队指挥和技术分析中被视为元配置。自定义配置以白色加粗显示。</string>
     <string name="meta_specs_edit_icon">编辑元配置</string>
 </resources>
+

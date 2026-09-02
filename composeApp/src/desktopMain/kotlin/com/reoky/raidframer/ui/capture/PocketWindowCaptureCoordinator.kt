@@ -2,6 +2,7 @@ package com.reoky.raidframer.ui.capture
 
 import androidx.compose.ui.awt.ComposeWindow
 import com.reoky.raidframer.core.helpers.getDocumentsDirectory
+import com.reoky.raidframer.core.pocket.PocketAttachmentResult
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -37,26 +38,34 @@ object PocketWindowCaptureCoordinator {
     }.getOrNull()
   }
 
+  /**
+   * Saves [image] into the user's Pocket journal: appends to the most recent draft when it is
+   * still fresh (within the last 30 minutes), otherwise starts a new journal entry. Each journal
+   * entry can hold up to [MAX_POCKET_ATTACHMENTS] attachments. Returns true on success.
+   */
   suspend fun saveToPocket(
     image: BufferedImage,
     title: String,
     windowManager: WindowManager,
-  ) {
-    val draft = PocketDraftCoordinator.activeDraft.value
-      ?: PocketDraftCoordinator.createDraft(title = title)
-    val name = PocketDraftCoordinator.nextAttachmentName(draft.metadata.id) ?: return
+  ): Boolean {
+    val entryId = PocketDraftCoordinator.resolveRecentDraftId()
+      ?: PocketDraftCoordinator.createDraft(title = title).metadata.id
+    val name = PocketDraftCoordinator.nextAttachmentName(entryId) ?: return false
     val temporary = Files.createTempFile("raid-framer-window-", ".png")
-    try {
+    return try {
       ImageIO.write(image, "png", temporary.toFile())
-      val markdown = PocketDraftCoordinator.activeDraft.value?.markdown.orEmpty()
+      val markdown = PocketDraftCoordinator.readEntryMarkdown(entryId).orEmpty()
       val separator = if (markdown.isBlank() || markdown.endsWith("\n")) "" else "\n"
-      PocketDraftCoordinator.addAttachment(
+      val result = PocketDraftCoordinator.addAttachmentToEntry(
+        entryId,
         temporary,
         name,
         "image/png",
         "$markdown${separator}\n![${title}]($name)\n"
       )
-      windowManager.openWindow(OverlayType.POCKET_EDITOR)
+      val added = result is PocketAttachmentResult.Added
+      if (added) windowManager.openWindow(OverlayType.POCKET_EDITOR)
+      added
     } finally {
       Files.deleteIfExists(temporary)
     }

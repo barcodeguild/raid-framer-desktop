@@ -33,6 +33,7 @@ import com.reoky.raidframer.ui.overlay.RaidCallerOverlay
 import com.reoky.raidframer.ui.overlay.MetaSpecsOverlay
 import com.reoky.raidframer.ui.overlay.PocketEditorOverlay
 import com.reoky.raidframer.ui.overlay.PocketJournalOverlay
+import com.reoky.raidframer.ui.overlay.ScreenshotPreviewOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -77,7 +78,8 @@ fun OverlayContainer(wm: WindowManager) {
           type == OverlayType.BATTLE_GRAPH ||
           type == OverlayType.META_SPECS ||
           type == OverlayType.POCKET_JOURNAL ||
-          type == OverlayType.POCKET_EDITOR,
+          type == OverlayType.POCKET_EDITOR ||
+          type == OverlayType.SCREENSHOT_PREVIEW,
         transparentBackground = type == OverlayType.ITEM_USE,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->
@@ -103,6 +105,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.META_SPECS -> MetaSpecsOverlay(wm)
           OverlayType.POCKET_JOURNAL -> PocketJournalOverlay(wm)
           OverlayType.POCKET_EDITOR -> PocketEditorOverlay(wm)
+          OverlayType.SCREENSHOT_PREVIEW -> ScreenshotPreviewOverlay(wm)
           else -> {}
         }
 

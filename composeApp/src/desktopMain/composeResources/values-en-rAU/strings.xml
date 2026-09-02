@@ -1236,6 +1236,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="raid_caller_title">Raid Caller</string>
     <string name="raid_caller_no_raid">Join a raid to see caller stats</string>
     <string name="raid_caller_position_hint">Shift+Click+Drag to Position</string>
+    <string name="raid_caller_show_anyways">Show Anyways</string>
     <string name="raid_caller_avg_gs">Avg GS</string>
     <string name="raid_caller_lowest_gs">Lowest GS</string>
     <string name="raid_caller_highest_gs">Highest GS</string>
@@ -1312,3 +1313,4 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_meta_specs_description">Override which specs are treated as meta in the composition, raid caller, and technical analysis. Custom specs are shown white and bold.</string>
     <string name="meta_specs_edit_icon">Edit meta specs</string>
 </resources>
+

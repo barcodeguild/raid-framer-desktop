@@ -1313,6 +1313,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="raid_caller_title">Raid Caller</string>
     <string name="raid_caller_no_raid">Join a raid to see caller stats</string>
     <string name="raid_caller_position_hint">Shift+Click+Drag to Position</string>
+    <string name="raid_caller_show_anyways">Show Anyways</string>
     <string name="raid_caller_avg_gs">Avg GS</string>
     <string name="raid_caller_lowest_gs">Lowest GS</string>
     <string name="raid_caller_highest_gs">Highest GS</string>

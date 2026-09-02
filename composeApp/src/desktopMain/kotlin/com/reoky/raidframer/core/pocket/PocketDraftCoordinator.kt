@@ -84,6 +84,40 @@ object PocketDraftCoordinator {
 
   suspend fun nextAttachmentName(id: String): String? = repository.nextAttachmentName(id)
 
+  /**
+   * Returns the id of the most recently updated entry when it was touched within [withinMillis]
+   * (a "recent draft" that new screenshots should append to), or null to start a new entry.
+   */
+  suspend fun resolveRecentDraftId(withinMillis: Long = 30 * 60_000L): String? {
+    val now = System.currentTimeMillis()
+    return _entries.value
+      .maxByOrNull { it.metadata.updatedAt }
+      ?.takeIf { it.metadata.updatedAt >= now - withinMillis }
+      ?.metadata?.id
+  }
+
+  suspend fun readEntryMarkdown(id: String): String? = repository.readEntry(id)?.markdown
+
+  /**
+   * Adds an attachment to a specific entry (not just the active editor session) and promotes
+   * that entry to be the active draft so the editor reflects the new attachment.
+   */
+  suspend fun addAttachmentToEntry(
+    entryId: String,
+    source: Path,
+    relativePath: String,
+    mimeType: String,
+    markdown: String,
+  ): PocketAttachmentResult {
+    val result = repository.addAttachment(entryId, source, relativePath, mimeType, markdown)
+    if (result is PocketAttachmentResult.Added) {
+      _activeDraftId.value = entryId
+      _activeDraft.value = result.entry
+      refreshEntries()
+    }
+    return result
+  }
+
   suspend fun removeAttachment(attachmentId: String, markdown: String): PocketEntry? {
     val id = _activeDraftId.value ?: return null
     val entry = repository.removeAttachment(id, attachmentId, markdown) ?: return null

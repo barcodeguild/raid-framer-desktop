@@ -380,8 +380,8 @@ private fun TimelineEntryRow(
         if (!isHovered && !popupHovered) showPopup = false
       }
     }
-    val textContent: @Composable () -> Unit = {
-      Column {
+    val textContent: @Composable (Modifier) -> Unit = { modifier ->
+      Column(modifier = modifier) {
         val created = formatDateTime(entry.metadata.createdAt)
         val edited = formatDateTime(entry.metadata.updatedAt)
         Text(
@@ -431,8 +431,19 @@ private fun TimelineEntryRow(
         )
       }
     }
-    // Text always hugs the spline; export sits next to delete with delete outermost so the
-    // left/right cards mirror each other across the spline (Y-axis symmetry).
+    // Text always hugs the spline; the export/delete icons live in their own fixed-width
+    // column pinned to the outer edge so they are always directly adjacent to each other and
+    // can never be pushed apart or overlapped by wrapping text. The text gets the remaining
+    // space and wraps within it.
+    val actionButtons: @Composable () -> Unit = {
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+      ) {
+        exportButton()
+        deleteButton()
+      }
+    }
     val card: @Composable () -> Unit = {
       val cardShape = TimelineCardShape(arrowPointsRight = isLeft)
       Row(
@@ -446,17 +457,15 @@ private fun TimelineEntryRow(
         verticalAlignment = Alignment.CenterVertically
       ) {
         if (isLeft) {
-          // spline on the right: text hugs the right (spline) edge; actions pinned to the left.
-          deleteButton()
-          exportButton()
-          Spacer(Modifier.weight(1f))
-          textContent()
-        } else {
-          // spline on the left: text hugs the left (spline) edge; actions pinned to the right.
-          textContent()
-          Spacer(Modifier.weight(1f))
-          exportButton()
-          deleteButton()
+          // spline on the right: actions pinned to the left, text hugs the right (spline) edge.
+          actionButtons()
+          Spacer(Modifier.width(8.dp))
+        }
+        textContent(Modifier.weight(1f))
+        if (!isLeft) {
+          // spline on the left: text hugs the left (spline) edge, actions pinned to the right.
+          Spacer(Modifier.width(8.dp))
+          actionButtons()
         }
       }
     }

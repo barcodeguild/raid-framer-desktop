@@ -28,6 +28,10 @@ import raid_framer_desktop.composeapp.generated.resources.time_ago_weeks_other
 import raid_framer_desktop.composeapp.generated.resources.time_ago_months_one
 import raid_framer_desktop.composeapp.generated.resources.time_ago_months_other
 import java.awt.Desktop
+import java.awt.Toolkit
+import java.awt.datatransfer.DataFlavor
+import java.awt.datatransfer.Transferable
+import java.awt.image.BufferedImage
 import java.io.File
 import java.net.URI
 import java.nio.file.Files
@@ -158,6 +162,35 @@ fun openWebLink(url: String) {
   if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
     Desktop.getDesktop().browse(URI(url))
   }
+}
+
+/**
+ * Opens the OS file explorer, revealing [file] with it selected where the platform supports it.
+ */
+fun showInExplorer(file: Path) {
+  runCatching {
+    if (System.getProperty("os.name").lowercase().contains("win")) {
+      ProcessBuilder("explorer.exe", "/select,${file.toAbsolutePath()}").start()
+    } else {
+      Desktop.getDesktop().open(file.parent?.toFile())
+    }
+  }
+}
+
+/**
+ * Places an image on the system clipboard so the user can paste it elsewhere (e.g. Discord).
+ */
+fun copyImageToClipboard(image: BufferedImage) {
+  val imageFlavor = DataFlavor.imageFlavor
+  val transferable = object : Transferable {
+    override fun getTransferDataFlavors(): Array<DataFlavor> = arrayOf(imageFlavor)
+    override fun isDataFlavorSupported(flavor: DataFlavor?): Boolean = flavor == imageFlavor
+    override fun getTransferData(flavor: DataFlavor?): Any {
+      require(flavor == imageFlavor) { "Unsupported flavor: $flavor" }
+      return image
+    }
+  }
+  Toolkit.getDefaultToolkit().systemClipboard.setContents(transferable, null)
 }
 
 /**

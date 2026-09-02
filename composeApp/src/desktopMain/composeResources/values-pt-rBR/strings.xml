@@ -1237,6 +1237,7 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="raid_caller_title">Chamador de Raide</string>
     <string name="raid_caller_no_raid">Entre em uma raide para ver as estatísticas do chamador</string>
     <string name="raid_caller_position_hint">Shift+Clique+Arraste para posicionar</string>
+    <string name="raid_caller_show_anyways">Mostrar mesmo assim</string>
     <string name="raid_caller_avg_gs">GS Médio</string>
     <string name="raid_caller_lowest_gs">GS Mínimo</string>
     <string name="raid_caller_highest_gs">GS Máximo</string>
@@ -1313,3 +1314,4 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="settings_meta_specs_description">Substitua quais especificações são tratadas como meta na composição, chamador de raide e análise técnica. Specs personalizadas são mostradas em branco e em negrito.</string>
     <string name="meta_specs_edit_icon">Editar meta specs</string>
 </resources>
+
