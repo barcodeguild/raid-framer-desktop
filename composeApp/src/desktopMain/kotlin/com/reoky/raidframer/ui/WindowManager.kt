@@ -48,12 +48,20 @@ class WindowManager(
   fun openWindow(type: OverlayType) {
     val visibility = visibilityStates.getOrPut(type) { mutableStateOf(false) }
     visibility.value = true
+    // Sync the entity so persisting captures the correct visibility
+    windowStates[type]?.value?.let { entity ->
+      windowStates[type]?.value = entity.copy(isVisible = true)
+    }
   }
 
   // Closes the overlay window and saves its last known state
   fun closeWindow(type: OverlayType) {
     val visibility = visibilityStates[type] ?: return
     visibility.value = false
+    // Sync the entity so persisting captures the correct visibility
+    windowStates[type]?.value?.let { entity ->
+      windowStates[type]?.value = entity.copy(isVisible = false)
+    }
 
     // Save state
     windowStates[type]?.value?.let { saveState(it) }
@@ -150,7 +158,7 @@ class WindowManager(
 
       // Reset each window to its default state
       OverlayType.entries.forEach { type ->
-        val defaultState = defaultWindowStateForTypeFor(type)
+        val defaultState = defaultWindowStateForTypeFor(type).copy(isVisible = wasVisible[type] == true)
         windowStates[type]?.value = defaultState
 
         // Restore whatever was open before the reset (default state doesn't drive visibility)
