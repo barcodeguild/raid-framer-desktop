@@ -48,6 +48,11 @@ import com.reoky.raidframer.core.definitions.courageousActionBuffIds
 import com.reoky.raidframer.core.definitions.manaBarrierBuffIds
 import com.reoky.raidframer.core.definitions.reviveSpellIds
 import com.reoky.raidframer.core.definitions.lootBuffAmountForIds
+import com.reoky.raidframer.core.definitions.SPELL_CAST_ID_lookup
+import com.reoky.raidframer.core.definitions.ItemSpell
+import com.reoky.raidframer.core.definitions.PotionDefinition
+import com.reoky.raidframer.core.definitions.GliderSpell
+import com.reoky.raidframer.core.definitions.isPlayerBehaviorSpell
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 // Performance: configurable event history depth from settings
@@ -92,6 +97,40 @@ fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
 }
 
 /**
+ * Increments the realPlayerBehaviorMetric when a player performs an action only real players can do:
+ * - Casting a spell from any of the 13 player skill trees (via possibleCastIDs)
+ * - Using a utility item (via ItemSpell matching)
+ * - Using a potion (via PotionDefinition matching)
+ * - Using a glider (via GliderSpell matching on BuffGainedEvent)
+ * - Casting a known player-only spell (via isPlayerBehaviorSpell matching)
+ *
+ * This metric is session-only and used to filter pets that share player names.
+ */
+fun PlayerCard.postBehaviorMetricIncrement(event: CombatEvent): PlayerCard {
+  var increment = 0L
+  when (event) {
+    is SuccessfulCastEvent -> {
+      if (event.spellId in SPELL_CAST_ID_lookup) increment++
+      if (isPlayerBehaviorSpell(event.spellId)) increment++
+      val matchedItem = ItemSpell.entries.any { item ->
+        event.spellId in item.itemSpecificSkillIds ||
+            item.possibleSpellNames.any { it.equals(event.spell, ignoreCase = true) }
+      }
+      if (matchedItem) increment++
+      val matchedPotion = PotionDefinition.entries.any { it.skillId == event.spellId }
+      if (matchedPotion) increment++
+    }
+
+    is BuffGainedEvent -> {
+      val matchedGlider = GliderSpell.findByBuffId(event.buffId) != null
+      if (matchedGlider) increment++
+    }
+  }
+  if (increment == 0L) return this
+  return this.copy(realPlayerBehaviorMetric = this.realPlayerBehaviorMetric + increment)
+}
+
+/**
  * Add a damage event to the PlayerCard, updating recent events and session totals.
  */
 fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
@@ -117,7 +156,8 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
       run {
         val spellKey = event.spell.ifBlank { "Unknown" }
         val targetMap = this.sessionDamageToPlayerBySpell[event.target] ?: emptyMap()
-        (this.sessionDamageToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey] ?: 0L) + event.damage)))))
+        (this.sessionDamageToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey]
+          ?: 0L) + event.damage)))))
           .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
       }
     } else this.sessionDamageToPlayerBySpell
@@ -164,7 +204,8 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
       run {
         val spellKey = event.spell.ifBlank { "Unknown" }
         val targetMap = this.sessionHealToPlayerBySpell[event.target] ?: emptyMap()
-        (this.sessionHealToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey] ?: 0L) + event.amount)))))
+        (this.sessionHealToPlayerBySpell + (event.target to (targetMap + (spellKey to ((targetMap[spellKey]
+          ?: 0L) + event.amount)))))
           .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
       }
     }
@@ -185,7 +226,8 @@ fun PlayerCard.postDamageTakenEvent(event: DamageEvent): PlayerCard {
     ),
     sessionDamageTakenTotal = this.sessionDamageTakenTotal + event.damage,
     sessionDamageFromPlayer = if (RFConfig.state.value.performanceBattleGraphEnabled) {
-      this.sessionDamageFromPlayer + (event.source to ((this.sessionDamageFromPlayer[event.source] ?: 0L) + event.damage))
+      this.sessionDamageFromPlayer + (event.source to ((this.sessionDamageFromPlayer[event.source]
+        ?: 0L) + event.damage))
     } else this.sessionDamageFromPlayer
   )
 }
@@ -232,20 +274,25 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
  * Add a successful cast event to the PlayerCard, updating recent events.
  */
 fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
-  val isMarasNineTails = event.spell == "Charm (Rider Skill)" && (PlayerCacheInteractor.isRealPlayer(event.target) || RFConfig.state.value.allowPVEDamage)
+  val isMarasNineTails =
+    event.spell == "Charm (Rider Skill)" && (PlayerCacheInteractor.isRealPlayer(event.target) || RFConfig.state.value.allowPVEDamage)
   val isGardenDefiance = event.spellId == gardenDefianceCastId
   val isRevive = event.spellId in reviveSpellIds
 
   var card = this.copiedWithUtilityItemDetectionMiddleWare(event) // handles item spells
   card = card.copiedWithPotionDetectionMiddleWare(event) // increments potion usages
+  card = card.postBehaviorMetricIncrement(event) // track player-only behavior
 
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalCharms = if (isMarasNineTails) (card.cache?.lifetimeTotalCharms ?: 0) + 1 else (card.cache?.lifetimeTotalCharms ?: 0),
-      lifetimeTotalGardenDefiance = if (isGardenDefiance) (card.cache?.lifetimeTotalGardenDefiance ?: 0L) + 1 else (card.cache?.lifetimeTotalGardenDefiance ?: 0L),
-      lifetimeTotalRevive = if (isRevive) (card.cache?.lifetimeTotalRevive ?: 0L) + 1 else (card.cache?.lifetimeTotalRevive ?: 0L)
+      lifetimeTotalCharms = if (isMarasNineTails) (card.cache?.lifetimeTotalCharms
+        ?: 0) + 1 else (card.cache?.lifetimeTotalCharms ?: 0),
+      lifetimeTotalGardenDefiance = if (isGardenDefiance) (card.cache?.lifetimeTotalGardenDefiance
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalGardenDefiance ?: 0L),
+      lifetimeTotalRevive = if (isRevive) (card.cache?.lifetimeTotalRevive
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalRevive ?: 0L)
     ),
     sessionCharmTotal = if (isMarasNineTails) card.sessionCharmTotal + 1 else card.sessionCharmTotal,
     sessionGardenDefianceTotal = if (isGardenDefiance) card.sessionGardenDefianceTotal + 1 else card.sessionGardenDefianceTotal,
@@ -258,7 +305,8 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
  * Add a buff gained event to the PlayerCard, updating recent events.
  */
 fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
-  val card = this.copiedWithGliderDetectionMiddleWare(event) // detects glider usage via self-applied buffs
+  var card = this.copiedWithGliderDetectionMiddleWare(event) // detects glider usage via self-applied buffs
+  card = card.postBehaviorMetricIncrement(event) // track glider usage as player behavior
 
   return card.copy(
     lastEvent = event.timestamp,
@@ -286,7 +334,7 @@ fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
 fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
   //if (event.source == event.target) return this // skip self-applied debuffs
   val isCC = findDebuffById(event.debuffId)?.consideredCC == true
-    ?: findDebuffByName(event.debuff)?.consideredCC == true
+      ?: findDebuffByName(event.debuff)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(lastSeen = event.timestamp),
@@ -319,12 +367,14 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
   //if (event.source == event.target) return this // skip self-casts (e.g. self-inflicted debuffs)
   val isCC = findDebuffById(event.debuffId)?.consideredCC == true
-    ?: findDebuffByName(event.debuff)?.consideredCC == true
+      ?: findDebuffByName(event.debuff)?.consideredCC == true
   val isCharm = event.debuffId in charmedDebuffIds
   val isDistress = event.debuffId in distressedDebuffIds
   val isSilence = event.debuffId in silencedDebuffIds
-  val isGlider = event.debuffId in gliderUsageDebuffIds && System.currentTimeMillis() - this.lastGliderUse > 5000L // glider debuff applied, but only count if more than 5 second since last use to avoid double-counting from game bug
-  val isSongs = event.debuffId == 853 || event.debuffId == 847 || event.debuffId == 31367 || event.debuffId == 772 // Unguarded, Lethargy, Weakened Energy, Unpleasant Sensation
+  val isGlider =
+    event.debuffId in gliderUsageDebuffIds && System.currentTimeMillis() - this.lastGliderUse > 5000L // glider debuff applied, but only count if more than 5 second since last use to avoid double-counting from game bug
+  val isSongs =
+    event.debuffId == 853 || event.debuffId == 847 || event.debuffId == 31367 || event.debuffId == 772 // Unguarded, Lethargy, Weakened Energy, Unpleasant Sensation
   val isTigerStrike = event.debuffId in tigerStrikeDebuffIds
   val isFreeze = event.debuffId in freezeDebuffIds
   val isTrips = event.debuffId in trippedDebuffIds
@@ -352,33 +402,60 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     cache = card.cache?.copy(
       lastSeen = event.timestamp,
       lifetimeTotalDebuffsApplied = (card.cache?.lifetimeTotalDebuffsApplied ?: 0L) + 1,
-      lifetimeTotalCCDelivered = if (isCC) (card.cache?.lifetimeTotalCCDelivered ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
-      lifetimeTotalCharms = if (isCharm) (card.cache?.lifetimeTotalCharms ?: 0L) + 1 else (card.cache?.lifetimeTotalCharms ?: 0L),
-      lifetimeTotalSongs = if (isSongs) (card.cache?.lifetimeTotalSongs ?: 0L) + 1 else (card.cache?.lifetimeTotalSongs ?: 0L),
-      lifetimeTotalGliderUses = if (isGlider) (card.cache?.lifetimeTotalGliderUses ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderUses ?: 0L),
-      lifetimeTotalDistresses = if (isDistress) (card.cache?.lifetimeTotalDistresses ?: 0L) + 1 else (card.cache?.lifetimeTotalDistresses ?: 0L),
-      lifetimeTotalSilences = if (isSilence) (card.cache?.lifetimeTotalSilences ?: 0L) + 1 else (card.cache?.lifetimeTotalSilences ?: 0L),
-      lifetimeTotalTigerStrikes = if (isTigerStrike) (card.cache?.lifetimeTotalTigerStrikes ?: 0L) + 1 else (card.cache?.lifetimeTotalTigerStrikes ?: 0L),
-      lifetimeTotalFreezes = if (isFreeze) (card.cache?.lifetimeTotalFreezes ?: 0L) + 1 else (card.cache?.lifetimeTotalFreezes ?: 0L),
-      lifetimeTotalTrips = if (isTrips) (card.cache?.lifetimeTotalTrips ?: 0L) + 1 else (card.cache?.lifetimeTotalTrips ?: 0L),
-      lifetimeTotalBubbles = if (isBubbles) (card.cache?.lifetimeTotalBubbles ?: 0L) + 1 else (card.cache?.lifetimeTotalBubbles ?: 0L),
-      lifetimeTotalShieldStrip = if (isShieldStrip) (card.cache?.lifetimeTotalShieldStrip ?: 0L) + 1 else (card.cache?.lifetimeTotalShieldStrip ?: 0L),
-      lifetimeTotalWeaponDisables = if (isWeaponDisables) (card.cache?.lifetimeTotalWeaponDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalWeaponDisables ?: 0L),
-      lifetimeTotalPotionDisables = if (isPotionDisables) (card.cache?.lifetimeTotalPotionDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalPotionDisables ?: 0L),
-      lifetimeTotalBdGlider = if (isBdGlider) (card.cache?.lifetimeTotalBdGlider ?: 0L) + 1 else (card.cache?.lifetimeTotalBdGlider ?: 0L),
-      lifetimeTotalCrystalWings = if (isCrystalWings) (card.cache?.lifetimeTotalCrystalWings ?: 0L) + 1 else (card.cache?.lifetimeTotalCrystalWings ?: 0L),
-      lifetimeTotalGliderDisables = if (isGliderDisables) (card.cache?.lifetimeTotalGliderDisables ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderDisables ?: 0L),
-      lifetimeTotalProvoked = if (isProvoked) (card.cache?.lifetimeTotalProvoked ?: 0L) + 1 else (card.cache?.lifetimeTotalProvoked ?: 0L),
-      lifetimeTotalThrowDagger = if (isThrowDagger) (card.cache?.lifetimeTotalThrowDagger ?: 0L) + 1 else (card.cache?.lifetimeTotalThrowDagger ?: 0L),
-      lifetimeTotalStuns = if (isStuns) (card.cache?.lifetimeTotalStuns ?: 0L) + 1 else (card.cache?.lifetimeTotalStuns ?: 0L),
-      lifetimeTotalStaggers = if (isStaggers) (card.cache?.lifetimeTotalStaggers ?: 0L) + 1 else (card.cache?.lifetimeTotalStaggers ?: 0L),
-      lifetimeTotalPetrification = if (isPetrification) (card.cache?.lifetimeTotalPetrification ?: 0L) + 1 else (card.cache?.lifetimeTotalPetrification ?: 0L),
-      lifetimeTotalAbsorbLifeforce = if (isAbsorbLifeforce) (card.cache?.lifetimeTotalAbsorbLifeforce ?: 0L) + 1 else (card.cache?.lifetimeTotalAbsorbLifeforce ?: 0L),
-      lifetimeTotalCorrosiveBarrage = if (isCorrosiveBarrage) (card.cache?.lifetimeTotalCorrosiveBarrage ?: 0L) + 1 else (card.cache?.lifetimeTotalCorrosiveBarrage ?: 0L),
-      lifetimeTotalBlindedByCrows = if (isBlindedByCrows) (card.cache?.lifetimeTotalBlindedByCrows ?: 0L) + 1 else (card.cache?.lifetimeTotalBlindedByCrows ?: 0L),
-      lifetimeTotalMistSunder = if (isMistSunder) (card.cache?.lifetimeTotalMistSunder ?: 0L) + 1 else (card.cache?.lifetimeTotalMistSunder ?: 0L),
-      lifetimeTotalDeependDebuff = if (isDeependDebuff) (card.cache?.lifetimeTotalDeependDebuff ?: 0L) + 1 else (card.cache?.lifetimeTotalDeependDebuff ?: 0L),
-      lifetimeTotalImpaleImmunity = if (isImpale) (card.cache?.lifetimeTotalImpaleImmunity ?: 0L) + 1 else (card.cache?.lifetimeTotalImpaleImmunity ?: 0L),
+      lifetimeTotalCCDelivered = if (isCC) (card.cache?.lifetimeTotalCCDelivered
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
+      lifetimeTotalCharms = if (isCharm) (card.cache?.lifetimeTotalCharms
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalCharms ?: 0L),
+      lifetimeTotalSongs = if (isSongs) (card.cache?.lifetimeTotalSongs ?: 0L) + 1 else (card.cache?.lifetimeTotalSongs
+        ?: 0L),
+      lifetimeTotalGliderUses = if (isGlider) (card.cache?.lifetimeTotalGliderUses
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderUses ?: 0L),
+      lifetimeTotalDistresses = if (isDistress) (card.cache?.lifetimeTotalDistresses
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalDistresses ?: 0L),
+      lifetimeTotalSilences = if (isSilence) (card.cache?.lifetimeTotalSilences
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalSilences ?: 0L),
+      lifetimeTotalTigerStrikes = if (isTigerStrike) (card.cache?.lifetimeTotalTigerStrikes
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalTigerStrikes ?: 0L),
+      lifetimeTotalFreezes = if (isFreeze) (card.cache?.lifetimeTotalFreezes
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalFreezes ?: 0L),
+      lifetimeTotalTrips = if (isTrips) (card.cache?.lifetimeTotalTrips ?: 0L) + 1 else (card.cache?.lifetimeTotalTrips
+        ?: 0L),
+      lifetimeTotalBubbles = if (isBubbles) (card.cache?.lifetimeTotalBubbles
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalBubbles ?: 0L),
+      lifetimeTotalShieldStrip = if (isShieldStrip) (card.cache?.lifetimeTotalShieldStrip
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalShieldStrip ?: 0L),
+      lifetimeTotalWeaponDisables = if (isWeaponDisables) (card.cache?.lifetimeTotalWeaponDisables
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalWeaponDisables ?: 0L),
+      lifetimeTotalPotionDisables = if (isPotionDisables) (card.cache?.lifetimeTotalPotionDisables
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalPotionDisables ?: 0L),
+      lifetimeTotalBdGlider = if (isBdGlider) (card.cache?.lifetimeTotalBdGlider
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalBdGlider ?: 0L),
+      lifetimeTotalCrystalWings = if (isCrystalWings) (card.cache?.lifetimeTotalCrystalWings
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalCrystalWings ?: 0L),
+      lifetimeTotalGliderDisables = if (isGliderDisables) (card.cache?.lifetimeTotalGliderDisables
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderDisables ?: 0L),
+      lifetimeTotalProvoked = if (isProvoked) (card.cache?.lifetimeTotalProvoked
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalProvoked ?: 0L),
+      lifetimeTotalThrowDagger = if (isThrowDagger) (card.cache?.lifetimeTotalThrowDagger
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalThrowDagger ?: 0L),
+      lifetimeTotalStuns = if (isStuns) (card.cache?.lifetimeTotalStuns ?: 0L) + 1 else (card.cache?.lifetimeTotalStuns
+        ?: 0L),
+      lifetimeTotalStaggers = if (isStaggers) (card.cache?.lifetimeTotalStaggers
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalStaggers ?: 0L),
+      lifetimeTotalPetrification = if (isPetrification) (card.cache?.lifetimeTotalPetrification
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalPetrification ?: 0L),
+      lifetimeTotalAbsorbLifeforce = if (isAbsorbLifeforce) (card.cache?.lifetimeTotalAbsorbLifeforce
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalAbsorbLifeforce ?: 0L),
+      lifetimeTotalCorrosiveBarrage = if (isCorrosiveBarrage) (card.cache?.lifetimeTotalCorrosiveBarrage
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalCorrosiveBarrage ?: 0L),
+      lifetimeTotalBlindedByCrows = if (isBlindedByCrows) (card.cache?.lifetimeTotalBlindedByCrows
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalBlindedByCrows ?: 0L),
+      lifetimeTotalMistSunder = if (isMistSunder) (card.cache?.lifetimeTotalMistSunder
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalMistSunder ?: 0L),
+      lifetimeTotalDeependDebuff = if (isDeependDebuff) (card.cache?.lifetimeTotalDeependDebuff
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalDeependDebuff ?: 0L),
+      lifetimeTotalImpaleImmunity = if (isImpale) (card.cache?.lifetimeTotalImpaleImmunity
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalImpaleImmunity ?: 0L),
     ),
     recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(eventHistoryDepth),
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
@@ -437,7 +514,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
       run {
         val debuffKey = event.debuff.ifBlank { "Unknown" }
         val targetMap = this.sessionDebuffToPlayerBySpell[event.target] ?: emptyMap()
-        (this.sessionDebuffToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1)))))
+        (this.sessionDebuffToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey]
+          ?: 0) + 1)))))
           .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
       }
     } else this.sessionDebuffToPlayerBySpell,
@@ -460,7 +538,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionCharmToPlayerBySpell = if (isCharm && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionCharmToPlayerBySpell[event.target] ?: emptyMap()
-      (this.sessionCharmToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1)))))
+      (this.sessionCharmToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey]
+        ?: 0) + 1)))))
         .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
     } else {
       this.sessionCharmToPlayerBySpell
@@ -475,7 +554,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionDistressToPlayerBySpell = if (isDistress && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionDistressToPlayerBySpell[event.target] ?: emptyMap()
-      (this.sessionDistressToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1)))))
+      (this.sessionDistressToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey]
+        ?: 0) + 1)))))
         .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
     } else {
       this.sessionDistressToPlayerBySpell
@@ -490,7 +570,8 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionSilenceToPlayerBySpell = if (isSilence && RFConfig.state.value.performanceBattleGraphEnabled) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
       val targetMap = this.sessionSilenceToPlayerBySpell[event.target] ?: emptyMap()
-      (this.sessionSilenceToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey] ?: 0) + 1)))))
+      (this.sessionSilenceToPlayerBySpell + (event.target to (targetMap + (debuffKey to ((targetMap[debuffKey]
+        ?: 0) + 1)))))
         .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
     } else {
       this.sessionSilenceToPlayerBySpell
@@ -522,17 +603,28 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
     cache = card.cache?.copy(
       lastSeen = event.timestamp,
       lifetimeTotalBuffsApplied = (card.cache?.lifetimeTotalBuffsApplied ?: 0L) + 1,
-      lifetimeTotalCCDelivered = if (isBracingImmunity) (card.cache?.lifetimeTotalCCDelivered ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
-      lifetimeTotalBracings = if (isBracingImmunity) (card.cache?.lifetimeTotalBracings ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L),
-      lifetimeTotalDefiance = if (isDefiance) (card.cache?.lifetimeTotalDefiance ?: 0L) + 1 else (card.cache?.lifetimeTotalDefiance ?: 0L),
-      lifetimeTotalSacDances = if (isSacDance) (card.cache?.lifetimeTotalSacDances ?: 0L) + 1 else (card.cache?.lifetimeTotalSacDances ?: 0L),
-      lifetimeTotalPurges = if (isPurge) (card.cache?.lifetimeTotalPurges ?: 0L) + 1 else (card.cache?.lifetimeTotalPurges ?: 0L),
-      lifetimeTotalDeepTranquility = if (isDeepTranquility) (card.cache?.lifetimeTotalDeepTranquility ?: 0L) + 1 else (card.cache?.lifetimeTotalDeepTranquility ?: 0L),
-      lifetimeTotalRegularSunder = if (isRegularSunder) (card.cache?.lifetimeTotalRegularSunder ?: 0L) + 1 else (card.cache?.lifetimeTotalRegularSunder ?: 0L),
-      lifetimeTotalMistSunder = if (isMistSunder) (card.cache?.lifetimeTotalMistSunder ?: 0L) + 1 else (card.cache?.lifetimeTotalMistSunder ?: 0L),
-      lifetimeTotalProtectiveWings = if (isProtectiveWings) (card.cache?.lifetimeTotalProtectiveWings ?: 0L) + 1 else (card.cache?.lifetimeTotalProtectiveWings ?: 0L),
-      lifetimeTotalCourageousAction = if (isCourageousAction) (card.cache?.lifetimeTotalCourageousAction ?: 0L) + 1 else (card.cache?.lifetimeTotalCourageousAction ?: 0L),
-      lifetimeTotalManaBarrier = if (isManaBarrier) (card.cache?.lifetimeTotalManaBarrier ?: 0L) + 1 else (card.cache?.lifetimeTotalManaBarrier ?: 0L),
+      lifetimeTotalCCDelivered = if (isBracingImmunity) (card.cache?.lifetimeTotalCCDelivered
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
+      lifetimeTotalBracings = if (isBracingImmunity) (card.cache?.lifetimeTotalBracings
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L),
+      lifetimeTotalDefiance = if (isDefiance) (card.cache?.lifetimeTotalDefiance
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalDefiance ?: 0L),
+      lifetimeTotalSacDances = if (isSacDance) (card.cache?.lifetimeTotalSacDances
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalSacDances ?: 0L),
+      lifetimeTotalPurges = if (isPurge) (card.cache?.lifetimeTotalPurges
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalPurges ?: 0L),
+      lifetimeTotalDeepTranquility = if (isDeepTranquility) (card.cache?.lifetimeTotalDeepTranquility
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalDeepTranquility ?: 0L),
+      lifetimeTotalRegularSunder = if (isRegularSunder) (card.cache?.lifetimeTotalRegularSunder
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalRegularSunder ?: 0L),
+      lifetimeTotalMistSunder = if (isMistSunder) (card.cache?.lifetimeTotalMistSunder
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalMistSunder ?: 0L),
+      lifetimeTotalProtectiveWings = if (isProtectiveWings) (card.cache?.lifetimeTotalProtectiveWings
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalProtectiveWings ?: 0L),
+      lifetimeTotalCourageousAction = if (isCourageousAction) (card.cache?.lifetimeTotalCourageousAction
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalCourageousAction ?: 0L),
+      lifetimeTotalManaBarrier = if (isManaBarrier) (card.cache?.lifetimeTotalManaBarrier
+        ?: 0L) + 1 else (card.cache?.lifetimeTotalManaBarrier ?: 0L),
     ),
     recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(eventHistoryDepth),
     sessionBuffTotal = this.sessionBuffTotal + 1,

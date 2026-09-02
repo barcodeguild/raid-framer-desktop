@@ -16,7 +16,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 45
+const val SCHEMA_VERSION = 46
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -159,6 +159,11 @@ data class ConfigEntity(
   // Otherwise a JSON blob encoding the user's overrides for the six categories. See
   // core/definitions/MetaSpecsDefinition.kt for the schema and parsing.
   val customMetaSpecsJson: String = "",
+
+  // Nearby filter state (persisted across sessions)
+  val nearbySlidingWindowMinutes: Int = 15,
+  val nearbyParticipationStage: Int = 1,
+  val nearbyBehaviorSensitivity: Int = 0,
 )
 
 /*

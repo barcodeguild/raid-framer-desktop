@@ -1,4 +1,5 @@
 ﻿package com.reoky.raidframer.ui.overlay
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
@@ -91,6 +92,9 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.titleBarCaptureActions
 import com.reoky.raidframer.ui.component.CheckBoxComponent
+import com.reoky.raidframer.ui.component.NearbyFilterControls
+import com.reoky.raidframer.ui.component.NearbyFilterState
+import com.reoky.raidframer.ui.component.filterNearbyPlayers
 import com.reoky.raidframer.ui.component.CompositionChartComponent
 import com.reoky.raidframer.ui.component.CompositionBreakdown
 import com.reoky.raidframer.ui.component.CompositionBreakdownListComponent
@@ -139,6 +143,7 @@ import java.awt.datatransfer.StringSelection
 import kotlin.time.Duration.Companion.milliseconds
 
 enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
+
 @Composable
 fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val playerFaction = Faction.fromString(RFConfig.state.collectAsState().value.playerFaction)
@@ -165,7 +170,26 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
     }
   }
   val buffSelectBorder = rememberSectionPulse(buffSelectPulseActive)
-  var requirePvPParticipation by rememberSaveable { mutableStateOf(false) }
+  val config by RFConfig.state.collectAsState()
+  var filterState by rememberSaveable {
+    mutableStateOf(
+      NearbyFilterState(
+        slidingWindowMinutes = config.nearbySlidingWindowMinutes,
+        participationStage = config.nearbyParticipationStage,
+        behaviorSensitivity = config.nearbyBehaviorSensitivity,
+      )
+    )
+  }
+  // Sync filter state changes back to RFConfig
+  LaunchedEffect(filterState) {
+    RFConfig.update {
+      it.copy(
+        nearbySlidingWindowMinutes = filterState.slidingWindowMinutes,
+        nearbyParticipationStage = filterState.participationStage,
+        nearbyBehaviorSensitivity = filterState.behaviorSensitivity,
+      )
+    }
+  }
   var raidWasDetected by remember { mutableStateOf(false) }
   if (!raidWasDetected && (mainRaid.value.isNotEmpty() || coRaid.value.isNotEmpty())) {
     raidWasDetected = true
@@ -233,11 +257,11 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
               modifier = Modifier.fillMaxWidth()
             ) {
               val tabs = listOf(
-           RaidTab.ATTENDANCE to Res.string.raid_tab_attendance,
-                 RaidTab.BUFFS to Res.string.raid_tab_buffs,
+                RaidTab.ATTENDANCE to Res.string.raid_tab_attendance,
+                RaidTab.BUFFS to Res.string.raid_tab_buffs,
                 RaidTab.NEARBY to Res.string.raid_tab_nearby,
-                RaidTab.NEARBY_GEAR to Res.string.raid_tab_nearby_gear
-                ,RaidTab.COMPOSITION to Res.string.raid_tab_composition
+                RaidTab.NEARBY_GEAR to Res.string.raid_tab_nearby_gear,
+                RaidTab.COMPOSITION to Res.string.raid_tab_composition
               )
               tabs.forEach { (tab, label) ->
                 Tab(
@@ -266,37 +290,40 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
               mainRaid = mainRaid.value,
               coRaid = coRaid.value,
               nearbyNuia = nearbyNuia.value,
-             nearbyHaranya = nearbyHaranya.value,
-             nearbyPirate = nearbyPirate.value,
+              nearbyHaranya = nearbyHaranya.value,
+              nearbyPirate = nearbyPirate.value,
               playerFaction = playerFaction,
               raidDepartures = raidDepartures.value,
-              requirePvPParticipation = requirePvPParticipation,
-              onRequirePvPParticipationChange = { requirePvPParticipation = it }
+              requirePvPParticipation = filterState.participationStage > 0,
+              onRequirePvPParticipationChange = {
+                filterState = filterState.copy(participationStage = if (it) 1 else 0)
+              }
             )
+
             RaidTab.BUFFS -> BuffsTab(mainRaid.value, coRaid.value, buffSelectBorder)
             RaidTab.NEARBY -> NearbyTab(
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
-              requirePvPParticipation = requirePvPParticipation,
-              onRequirePvPParticipationChange = { requirePvPParticipation = it }
+              filterState = filterState,
+              onFilterStateChange = { filterState = it }
             )
+
             RaidTab.NEARBY_GEAR -> NearbyGearTab(
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
-              raidDepartures = raidDepartures.value,
-              requirePvPParticipation = requirePvPParticipation,
-              onRequirePvPParticipationChange = { requirePvPParticipation = it }
+              filterState = filterState,
+              onFilterStateChange = { filterState = it }
             )
+
             RaidTab.COMPOSITION -> CompositionTab(
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
               playerFaction = playerFaction,
-              raidDepartures = raidDepartures.value,
-              requirePvPParticipation = requirePvPParticipation,
-              onRequirePvPParticipationChange = { requirePvPParticipation = it },
+              filterState = filterState,
+              onFilterStateChange = { filterState = it },
               wm = wm
             )
           }
@@ -312,28 +339,14 @@ private fun CompositionTab(
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
   playerFaction: Faction = Faction.UNKNOWN,
-  raidDepartures: Map<Int, Set<String>> = emptyMap(),
-  requirePvPParticipation: Boolean,
-  onRequirePvPParticipationChange: (Boolean) -> Unit,
+  filterState: NearbyFilterState,
+  onFilterStateChange: (NearbyFilterState) -> Unit,
   wm: WindowManager? = null,
 ) {
-  var requireGearOver15k by rememberSaveable { mutableStateOf(false) }
-  var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
-  val departedNames = remember(raidDepartures) {
-    (raidDepartures[0] ?: emptySet()) + (raidDepartures[1] ?: emptySet())
-  }
-  fun sourcePlayers(players: List<PlayerCard>, faction: Faction): List<PlayerCard> = if (!includePlayersThatLeftRaid) {
-    players
-  } else {
-    val currentNames = players.mapTo(mutableSetOf()) { it.name }
-    val departedPlayers = departedNames.mapNotNull { PlayerCacheInteractor.getCard(it) }
-      .filter { it.name !in currentNames && Faction.fromString(it.lastKnownFaction) == faction }
-    (players + departedPlayers).distinctBy { it.name }
-  }
-  val filter: (PlayerCard) -> Boolean = { card ->
-    (!requirePvPParticipation || card.hasPvPParticipation()) &&
-      (!requireGearOver15k || card.lastKnownGearScore > 15000)
-  }
+  val filteredHaranya = filterNearbyPlayers(nearbyHaranya, filterState)
+  val filteredNuia = filterNearbyPlayers(nearbyNuia, filterState)
+  val filteredPirate = filterNearbyPlayers(nearbyPirate, filterState)
+
   val haranyaFormat = stringResource(Res.string.raid_haranya_faction)
   val nuiaFormat = stringResource(Res.string.raid_nuian_faction)
   val pirateFormat = stringResource(Res.string.raid_pirate_faction)
@@ -347,86 +360,90 @@ private fun CompositionTab(
       pirateLabel -> Faction.PIRATE
       else -> Faction.UNKNOWN
     }
-    val filtered = sourcePlayers(players, chartFaction).filter(filter)
     val counts = mutableMapOf<SkillTreeType, Int>()
-    filtered.forEach { card ->
+    players.forEach { card ->
       SpecType.fromName(card.currentBuild)?.trees?.forEach { tree -> counts[tree] = (counts[tree] ?: 0) + 1 }
     }
-    val chartColor = playerFaction.getFactionHighlightColor(chartFaction).takeUnless { it == Color.Transparent } ?: color
-    return FactionComposition(label, filtered.size, counts, chartColor)
+    val chartColor =
+      playerFaction.getFactionHighlightColor(chartFaction).takeUnless { it == Color.Transparent } ?: color
+    return FactionComposition(label, players.size, counts, chartColor)
   }
+
   val charts = listOf(
-    chart(haranyaLabel, nearbyHaranya, factionHighlightColor(Faction.HARANYA)),
-    chart(nuiaLabel, nearbyNuia, factionHighlightColor(Faction.NUIA)),
-    chart(pirateLabel, nearbyPirate, factionHighlightColor(Faction.PIRATE))
+    chart(haranyaLabel, filteredHaranya, factionHighlightColor(Faction.HARANYA)),
+    chart(nuiaLabel, filteredNuia, factionHighlightColor(Faction.NUIA)),
+    chart(pirateLabel, filteredPirate, factionHighlightColor(Faction.PIRATE))
   )
   val factionPlayers = listOf(
-    charts[0].factionLabel to sourcePlayers(nearbyHaranya, Faction.HARANYA).filter(filter),
-    charts[1].factionLabel to sourcePlayers(nearbyNuia, Faction.NUIA).filter(filter),
-    charts[2].factionLabel to sourcePlayers(nearbyPirate, Faction.PIRATE).filter(filter)
+    charts[0].factionLabel to filteredHaranya,
+    charts[1].factionLabel to filteredNuia,
+    charts[2].factionLabel to filteredPirate
   )
   val labels = SKILL_TREE_DISPLAY_ORDER.associateWith { tree ->
-    stringResource(when (tree) {
-      SkillTreeType.ARCHERY -> Res.string.skill_tree_archery
-      SkillTreeType.AURAMANCY -> Res.string.skill_tree_auramancy
-      SkillTreeType.BATTLERAGE -> Res.string.skill_tree_battlerage
-      SkillTreeType.DEFENSE -> Res.string.skill_tree_defense
-      SkillTreeType.GUNSLINGER -> Res.string.skill_tree_gunslinger
-      SkillTreeType.MALEDICTION -> Res.string.skill_tree_malediction
-      SkillTreeType.OCCULTISM -> Res.string.skill_tree_occultism
-      SkillTreeType.SHADOWPLAY -> Res.string.skill_tree_shadowplay
-      SkillTreeType.SONGCRAFT -> Res.string.skill_tree_songcraft
-      SkillTreeType.SORCERY -> Res.string.skill_tree_sorcery
-      SkillTreeType.SPELLDANCE -> Res.string.skill_tree_spelldance
-      SkillTreeType.SWIFTBLADE -> Res.string.skill_tree_swiftblade
-      SkillTreeType.VITALISM -> Res.string.skill_tree_vitalism
-      SkillTreeType.WITCHCRAFT -> Res.string.skill_tree_witchcraft
-    })
+    stringResource(
+      when (tree) {
+        SkillTreeType.ARCHERY -> Res.string.skill_tree_archery
+        SkillTreeType.AURAMANCY -> Res.string.skill_tree_auramancy
+        SkillTreeType.BATTLERAGE -> Res.string.skill_tree_battlerage
+        SkillTreeType.DEFENSE -> Res.string.skill_tree_defense
+        SkillTreeType.GUNSLINGER -> Res.string.skill_tree_gunslinger
+        SkillTreeType.MALEDICTION -> Res.string.skill_tree_malediction
+        SkillTreeType.OCCULTISM -> Res.string.skill_tree_occultism
+        SkillTreeType.SHADOWPLAY -> Res.string.skill_tree_shadowplay
+        SkillTreeType.SONGCRAFT -> Res.string.skill_tree_songcraft
+        SkillTreeType.SORCERY -> Res.string.skill_tree_sorcery
+        SkillTreeType.SPELLDANCE -> Res.string.skill_tree_spelldance
+        SkillTreeType.SWIFTBLADE -> Res.string.skill_tree_swiftblade
+        SkillTreeType.VITALISM -> Res.string.skill_tree_vitalism
+        SkillTreeType.WITCHCRAFT -> Res.string.skill_tree_witchcraft
+      }
+    )
   }
-  Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-     BoxWithConstraints(Modifier.fillMaxWidth()) {
-       val chartGap = 10.dp
-        if (maxWidth >= 1040.dp) {
-         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(chartGap)) {
-           charts.forEach { chart ->
-      CompositionChartComponent(chart, labels, Modifier.weight(1f))
-           }
-         }
-       } else {
-         Column(verticalArrangement = Arrangement.spacedBy(chartGap)) {
-           charts.forEach { chart ->
-             CompositionChartComponent(chart, labels, Modifier.fillMaxWidth())
-           }
-         }
-       }
-     }
-     Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-       CheckBoxComponent(
-         label = stringResource(Res.string.raid_composition_require_pvp),
-         initialChecked = requirePvPParticipation,
-         onCheckedChange = onRequirePvPParticipationChange,
-         textColor = RFColors.TextPrimary
-       )
-        CheckBoxComponent(
-          label = stringResource(Res.string.raid_composition_gear_over_15k),
-         initialChecked = requireGearOver15k,
-         onCheckedChange = { requireGearOver15k = it },
-          textColor = RFColors.TextPrimary
-        )
-        CheckBoxComponent(
-           label = stringResource(Res.string.raid_include_departed),
-          initialChecked = includePlayersThatLeftRaid,
-          onCheckedChange = { includePlayersThatLeftRaid = it },
-          textColor = RFColors.TextPrimary
-        )
-     }
-      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_statistics), onEditMetaSpecs = { openMetaSpecs(wm) }) { faction, players ->
-       FactionStatistics(faction, players)
-     }
-      ResponsiveFactionSections(factionPlayers, stringResource(Res.string.raid_composition_meta_spec_breakdown), onEditMetaSpecs = { openMetaSpecs(wm) }) { faction, players ->
-       MetaSpecBreakdown(faction, players)
-     }
-   }
+  Column(
+    Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+    verticalArrangement = Arrangement.spacedBy(10.dp)
+  ) {
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+      val chartGap = 10.dp
+      if (maxWidth >= 1040.dp) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(chartGap)) {
+          charts.forEach { chart ->
+            CompositionChartComponent(chart, labels, Modifier.weight(1f))
+          }
+        }
+      } else {
+        Column(verticalArrangement = Arrangement.spacedBy(chartGap)) {
+          charts.forEach { chart ->
+            CompositionChartComponent(chart, labels, Modifier.fillMaxWidth())
+          }
+        }
+      }
+    }
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+      horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+      NearbyFilterControls(
+        state = filterState,
+        onStateChange = onFilterStateChange,
+        modifier = Modifier.weight(1f),
+        textColor = RFColors.TextPrimary
+      )
+      // Box(modifier = Modifier.weight(1f)) // reserved for future use
+    }
+    ResponsiveFactionSections(
+      factionPlayers,
+      stringResource(Res.string.raid_composition_statistics),
+      onEditMetaSpecs = { openMetaSpecs(wm) }) { faction, players ->
+      FactionStatistics(faction, players)
+    }
+    ResponsiveFactionSections(
+      factionPlayers,
+      stringResource(Res.string.raid_composition_meta_spec_breakdown),
+      onEditMetaSpecs = { openMetaSpecs(wm) }) { faction, players ->
+      MetaSpecBreakdown(faction, players)
+    }
+  }
 }
 
 @Composable
@@ -458,7 +475,7 @@ private fun ResponsiveFactionSections(
       }
     }
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        if (maxWidth >= 1040.dp) {
+      if (maxWidth >= 1040.dp) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
           factions.forEach { (faction, players) ->
             Column(Modifier.weight(1f)) { content(faction, players) }
@@ -513,10 +530,22 @@ private fun MetaSpecHelp() {
             val meta = rememberMetaSpecs()
             MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_cc), meta.cc, MetaSpecs.STOCK.cc)
             MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_melee), meta.melee, MetaSpecs.STOCK.melee)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_healer), meta.healer, MetaSpecs.STOCK.healer)
+            MetaSpecHelpRow(
+              stringResource(Res.string.raid_composition_meta_healer),
+              meta.healer,
+              MetaSpecs.STOCK.healer
+            )
             MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_mage), meta.mage, MetaSpecs.STOCK.mage)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_dancer), meta.dancer, MetaSpecs.STOCK.dancer)
-            MetaSpecHelpRow(stringResource(Res.string.raid_composition_meta_ranged), meta.ranged, MetaSpecs.STOCK.ranged)
+            MetaSpecHelpRow(
+              stringResource(Res.string.raid_composition_meta_dancer),
+              meta.dancer,
+              MetaSpecs.STOCK.dancer
+            )
+            MetaSpecHelpRow(
+              stringResource(Res.string.raid_composition_meta_ranged),
+              meta.ranged,
+              MetaSpecs.STOCK.ranged
+            )
           }
         }
       }
@@ -576,82 +605,161 @@ private fun MetaSpecHelpRow(label: String, specs: Set<SpecType>, stock: Set<Spec
 
 @Composable
 private fun FactionStatistics(faction: String, players: List<PlayerCard>) {
-      val meta = rememberMetaSpecs()
-      val specs = players.mapNotNull { SpecType.fromName(it.currentBuild) }
-      fun has(tree: SkillTreeType, spec: SpecType) = tree in spec.trees
-      fun matching(predicate: (SpecType) -> Boolean) = players.filter { SpecType.fromName(it.currentBuild)?.let(predicate) == true }
-      fun row(label: String, yes: Int, total: Int) = CompositionBreakdown(label, yes)
-      val battlerage = specs.filter { SkillTreeType.BATTLERAGE in it.trees }
-      val dps = specs.filter { it.trees.any { tree -> tree in setOf(SkillTreeType.ARCHERY, SkillTreeType.BATTLERAGE, SkillTreeType.GUNSLINGER, SkillTreeType.MALEDICTION, SkillTreeType.SORCERY, SkillTreeType.SWIFTBLADE) } }
-      val vitalism = specs.filter { SkillTreeType.VITALISM in it.trees }
-      val dancer = specs.filter { SkillTreeType.SPELLDANCE in it.trees }
-       val shadowplayVitalism = matching { has(SkillTreeType.SHADOWPLAY, it) && has(SkillTreeType.VITALISM, it) }
-       val shadowplayWithoutVitalism = matching { has(SkillTreeType.SHADOWPLAY, it) && !has(SkillTreeType.VITALISM, it) }
-       val rowPlayers = mutableMapOf(
-         stringResource(Res.string.raid_composition_shadowplay_vitalism) to shadowplayVitalism,
-         stringResource(Res.string.raid_composition_shadowplay_without_vitalism) to shadowplayWithoutVitalism
-       )
-        fun addRow(label: String, matchingPlayers: List<PlayerCard>) {
-          rowPlayers[label] = matchingPlayers
-        }
-       val battlerageOccultismOrWitchcraft = players.filter { card ->
-         SpecType.fromName(card.currentBuild)?.let { has(SkillTreeType.BATTLERAGE, it) && (has(SkillTreeType.OCCULTISM, it) || has(SkillTreeType.WITCHCRAFT, it)) } == true
-       }
-       val battlerageWithoutEither = players.filter { card ->
-         SpecType.fromName(card.currentBuild)?.let { has(SkillTreeType.BATTLERAGE, it) && !has(SkillTreeType.OCCULTISM, it) && !has(SkillTreeType.WITCHCRAFT, it) } == true
-       }
-       val battlerageOccultism = players.filter { card -> SpecType.fromName(card.currentBuild)?.let { has(SkillTreeType.BATTLERAGE, it) && has(SkillTreeType.OCCULTISM, it) } == true }
-       val battlerageWitchcraft = players.filter { card -> SpecType.fromName(card.currentBuild)?.let { has(SkillTreeType.BATTLERAGE, it) && has(SkillTreeType.WITCHCRAFT, it) } == true }
-       val dpsAuramancy = players.filter { card -> SpecType.fromName(card.currentBuild)?.let { it in dps && has(SkillTreeType.AURAMANCY, it) } == true }
-       val dpsWithoutAuramancy = players.filter { card -> SpecType.fromName(card.currentBuild)?.let { it in dps && !has(SkillTreeType.AURAMANCY, it) } == true }
-        addRow(stringResource(Res.string.raid_composition_battlerage_occultism_witchcraft), battlerageOccultismOrWitchcraft)
-        addRow(stringResource(Res.string.raid_composition_battlerage_without_either), battlerageWithoutEither)
-        addRow(stringResource(Res.string.raid_composition_battlerage_occultism), battlerageOccultism)
-        addRow(stringResource(Res.string.raid_composition_battlerage_witchcraft), battlerageWitchcraft)
-        addRow(stringResource(Res.string.raid_composition_dps_auramancy), dpsAuramancy)
-        addRow(stringResource(Res.string.raid_composition_dps_without_auramancy), dpsWithoutAuramancy)
-        addRow(stringResource(Res.string.raid_composition_vitalism_confessor), matching { it == SpecType.CONFESSOR })
-        addRow(stringResource(Res.string.raid_composition_vitalism_assassin), matching { it == SpecType.ASSASSIN })
-        addRow(stringResource(Res.string.raid_composition_vitalism_soothsayer), matching { it == SpecType.SOOTHSAYER })
-         addRow(stringResource(Res.string.raid_composition_vitalism_other), matching { has(SkillTreeType.VITALISM, it) && it != SpecType.CONFESSOR && it != SpecType.ASSASSIN })
-        addRow(stringResource(Res.string.raid_composition_dancer_comedian), matching { it == SpecType.COMEDIAN })
-        addRow(stringResource(Res.string.raid_composition_dancer_seal_resolver), matching { it == SpecType.SEAL_RESOLVER })
-        addRow(stringResource(Res.string.raid_composition_dancer_tough_dancer), matching { it == SpecType.TOUGH_DANCER })
-         addRow(stringResource(Res.string.raid_composition_dancer_other), matching { has(SkillTreeType.SPELLDANCE, it) && it !in meta.dancer })
-       val breakdownItems = listOf(
-         row(stringResource(Res.string.raid_composition_shadowplay_vitalism), shadowplayVitalism.size, players.size),
-         row(stringResource(Res.string.raid_composition_shadowplay_without_vitalism), shadowplayWithoutVitalism.size, players.size),
-         row(stringResource(Res.string.raid_composition_battlerage_occultism_witchcraft), battlerageOccultismOrWitchcraft.size, battlerage.size),
-         row(stringResource(Res.string.raid_composition_battlerage_without_either), battlerageWithoutEither.size, battlerage.size),
-         row(stringResource(Res.string.raid_composition_battlerage_occultism), battlerageOccultism.size, battlerage.size),
-         row(stringResource(Res.string.raid_composition_battlerage_witchcraft), battlerageWitchcraft.size, battlerage.size),
-         row(stringResource(Res.string.raid_composition_dps_auramancy), dpsAuramancy.size, dps.size),
-         row(stringResource(Res.string.raid_composition_dps_without_auramancy), dpsWithoutAuramancy.size, dps.size),
-         row(stringResource(Res.string.raid_composition_vitalism_confessor), vitalism.count { it == SpecType.CONFESSOR }, vitalism.size),
-         row(stringResource(Res.string.raid_composition_vitalism_assassin), vitalism.count { it == SpecType.ASSASSIN }, vitalism.size),
-         row(stringResource(Res.string.raid_composition_vitalism_soothsayer), vitalism.count { it == SpecType.SOOTHSAYER }, vitalism.size),
-         row(stringResource(Res.string.raid_composition_vitalism_other), vitalism.count { it != SpecType.CONFESSOR && it != SpecType.ASSASSIN }, vitalism.size),
-         row(stringResource(Res.string.raid_composition_dancer_comedian), dancer.count { it == SpecType.COMEDIAN }, dancer.size),
-         row(stringResource(Res.string.raid_composition_dancer_seal_resolver), dancer.count { it == SpecType.SEAL_RESOLVER }, dancer.size),
-         row(stringResource(Res.string.raid_composition_dancer_tough_dancer), dancer.count { it == SpecType.TOUGH_DANCER }, dancer.size),
-         row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in meta.dancer }, dancer.size)
-       )
-        Surface(
-          color = RFColors.CardBackground.copy(alpha = 0.78f),
-          shape = RoundedCornerShape(8.dp),
-          border = BorderStroke(1.dp, RFColors.CardBorder),
-          modifier = Modifier.fillMaxWidth().padding(12.dp)
-        ) {
-        CompositionBreakdownListComponent(
-         title = faction,
-         total = players.size,
-         items = breakdownItems,
-         itemPlayers = rowPlayers,
-         headingColor = factionHeadingColor(faction),
-         rowHoverColor = factionHeadingColor(faction),
-         sortByCount = false
-       )
-        }
+  val meta = rememberMetaSpecs()
+  val specs = players.mapNotNull { SpecType.fromName(it.currentBuild) }
+  fun has(tree: SkillTreeType, spec: SpecType) = tree in spec.trees
+  fun matching(predicate: (SpecType) -> Boolean) =
+    players.filter { SpecType.fromName(it.currentBuild)?.let(predicate) == true }
+
+  fun row(label: String, yes: Int, total: Int) = CompositionBreakdown(label, yes)
+  val battlerage = specs.filter { SkillTreeType.BATTLERAGE in it.trees }
+  val dps = specs.filter {
+    it.trees.any { tree ->
+      tree in setOf(
+        SkillTreeType.ARCHERY,
+        SkillTreeType.BATTLERAGE,
+        SkillTreeType.GUNSLINGER,
+        SkillTreeType.MALEDICTION,
+        SkillTreeType.SORCERY,
+        SkillTreeType.SWIFTBLADE
+      )
+    }
+  }
+  val vitalism = specs.filter { SkillTreeType.VITALISM in it.trees }
+  val dancer = specs.filter { SkillTreeType.SPELLDANCE in it.trees }
+  val shadowplayVitalism = matching { has(SkillTreeType.SHADOWPLAY, it) && has(SkillTreeType.VITALISM, it) }
+  val shadowplayWithoutVitalism = matching { has(SkillTreeType.SHADOWPLAY, it) && !has(SkillTreeType.VITALISM, it) }
+  val rowPlayers = mutableMapOf(
+    stringResource(Res.string.raid_composition_shadowplay_vitalism) to shadowplayVitalism,
+    stringResource(Res.string.raid_composition_shadowplay_without_vitalism) to shadowplayWithoutVitalism
+  )
+
+  fun addRow(label: String, matchingPlayers: List<PlayerCard>) {
+    rowPlayers[label] = matchingPlayers
+  }
+
+  val battlerageOccultismOrWitchcraft = players.filter { card ->
+    SpecType.fromName(card.currentBuild)?.let {
+      has(SkillTreeType.BATTLERAGE, it) && (has(SkillTreeType.OCCULTISM, it) || has(
+        SkillTreeType.WITCHCRAFT,
+        it
+      ))
+    } == true
+  }
+  val battlerageWithoutEither = players.filter { card ->
+    SpecType.fromName(card.currentBuild)?.let {
+      has(SkillTreeType.BATTLERAGE, it) && !has(SkillTreeType.OCCULTISM, it) && !has(
+        SkillTreeType.WITCHCRAFT,
+        it
+      )
+    } == true
+  }
+  val battlerageOccultism = players.filter { card ->
+    SpecType.fromName(card.currentBuild)
+      ?.let { has(SkillTreeType.BATTLERAGE, it) && has(SkillTreeType.OCCULTISM, it) } == true
+  }
+  val battlerageWitchcraft = players.filter { card ->
+    SpecType.fromName(card.currentBuild)
+      ?.let { has(SkillTreeType.BATTLERAGE, it) && has(SkillTreeType.WITCHCRAFT, it) } == true
+  }
+  val dpsAuramancy = players.filter { card ->
+    SpecType.fromName(card.currentBuild)?.let { it in dps && has(SkillTreeType.AURAMANCY, it) } == true
+  }
+  val dpsWithoutAuramancy = players.filter { card ->
+    SpecType.fromName(card.currentBuild)?.let { it in dps && !has(SkillTreeType.AURAMANCY, it) } == true
+  }
+  addRow(stringResource(Res.string.raid_composition_battlerage_occultism_witchcraft), battlerageOccultismOrWitchcraft)
+  addRow(stringResource(Res.string.raid_composition_battlerage_without_either), battlerageWithoutEither)
+  addRow(stringResource(Res.string.raid_composition_battlerage_occultism), battlerageOccultism)
+  addRow(stringResource(Res.string.raid_composition_battlerage_witchcraft), battlerageWitchcraft)
+  addRow(stringResource(Res.string.raid_composition_dps_auramancy), dpsAuramancy)
+  addRow(stringResource(Res.string.raid_composition_dps_without_auramancy), dpsWithoutAuramancy)
+  addRow(stringResource(Res.string.raid_composition_vitalism_confessor), matching { it == SpecType.CONFESSOR })
+  addRow(stringResource(Res.string.raid_composition_vitalism_assassin), matching { it == SpecType.ASSASSIN })
+  addRow(stringResource(Res.string.raid_composition_vitalism_soothsayer), matching { it == SpecType.SOOTHSAYER })
+  addRow(
+    stringResource(Res.string.raid_composition_vitalism_other),
+    matching { has(SkillTreeType.VITALISM, it) && it != SpecType.CONFESSOR && it != SpecType.ASSASSIN })
+  addRow(stringResource(Res.string.raid_composition_dancer_comedian), matching { it == SpecType.COMEDIAN })
+  addRow(stringResource(Res.string.raid_composition_dancer_seal_resolver), matching { it == SpecType.SEAL_RESOLVER })
+  addRow(stringResource(Res.string.raid_composition_dancer_tough_dancer), matching { it == SpecType.TOUGH_DANCER })
+  addRow(
+    stringResource(Res.string.raid_composition_dancer_other),
+    matching { has(SkillTreeType.SPELLDANCE, it) && it !in meta.dancer })
+  val breakdownItems = listOf(
+    row(stringResource(Res.string.raid_composition_shadowplay_vitalism), shadowplayVitalism.size, players.size),
+    row(
+      stringResource(Res.string.raid_composition_shadowplay_without_vitalism),
+      shadowplayWithoutVitalism.size,
+      players.size
+    ),
+    row(
+      stringResource(Res.string.raid_composition_battlerage_occultism_witchcraft),
+      battlerageOccultismOrWitchcraft.size,
+      battlerage.size
+    ),
+    row(
+      stringResource(Res.string.raid_composition_battlerage_without_either),
+      battlerageWithoutEither.size,
+      battlerage.size
+    ),
+    row(stringResource(Res.string.raid_composition_battlerage_occultism), battlerageOccultism.size, battlerage.size),
+    row(stringResource(Res.string.raid_composition_battlerage_witchcraft), battlerageWitchcraft.size, battlerage.size),
+    row(stringResource(Res.string.raid_composition_dps_auramancy), dpsAuramancy.size, dps.size),
+    row(stringResource(Res.string.raid_composition_dps_without_auramancy), dpsWithoutAuramancy.size, dps.size),
+    row(
+      stringResource(Res.string.raid_composition_vitalism_confessor),
+      vitalism.count { it == SpecType.CONFESSOR },
+      vitalism.size
+    ),
+    row(
+      stringResource(Res.string.raid_composition_vitalism_assassin),
+      vitalism.count { it == SpecType.ASSASSIN },
+      vitalism.size
+    ),
+    row(
+      stringResource(Res.string.raid_composition_vitalism_soothsayer),
+      vitalism.count { it == SpecType.SOOTHSAYER },
+      vitalism.size
+    ),
+    row(
+      stringResource(Res.string.raid_composition_vitalism_other),
+      vitalism.count { it != SpecType.CONFESSOR && it != SpecType.ASSASSIN },
+      vitalism.size
+    ),
+    row(
+      stringResource(Res.string.raid_composition_dancer_comedian),
+      dancer.count { it == SpecType.COMEDIAN },
+      dancer.size
+    ),
+    row(
+      stringResource(Res.string.raid_composition_dancer_seal_resolver),
+      dancer.count { it == SpecType.SEAL_RESOLVER },
+      dancer.size
+    ),
+    row(
+      stringResource(Res.string.raid_composition_dancer_tough_dancer),
+      dancer.count { it == SpecType.TOUGH_DANCER },
+      dancer.size
+    ),
+    row(stringResource(Res.string.raid_composition_dancer_other), dancer.count { it !in meta.dancer }, dancer.size)
+  )
+  Surface(
+    color = RFColors.CardBackground.copy(alpha = 0.78f),
+    shape = RoundedCornerShape(8.dp),
+    border = BorderStroke(1.dp, RFColors.CardBorder),
+    modifier = Modifier.fillMaxWidth().padding(12.dp)
+  ) {
+    CompositionBreakdownListComponent(
+      title = faction,
+      total = players.size,
+      items = breakdownItems,
+      itemPlayers = rowPlayers,
+      headingColor = factionHeadingColor(faction),
+      rowHoverColor = factionHeadingColor(faction),
+      sortByCount = false
+    )
+  }
 }
 
 @Composable
@@ -674,28 +782,28 @@ private fun MetaSpecBreakdown(faction: String, players: List<PlayerCard>) {
   val itemPlayers = groups.associate { (name, set) ->
     name to specs.filter { it.first in set }.map { it.second }
   } + (stringResource(Res.string.raid_composition_other) to other.map { it.second })
-   Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.fillMaxWidth()) {
-     Surface(
-       color = RFColors.CardBackground.copy(alpha = 0.78f),
-       shape = RoundedCornerShape(8.dp),
-       border = BorderStroke(1.dp, RFColors.CardBorder),
-       modifier = Modifier.fillMaxWidth().padding(12.dp)
-     ) {
+  Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.fillMaxWidth()) {
+    Surface(
+      color = RFColors.CardBackground.copy(alpha = 0.78f),
+      shape = RoundedCornerShape(8.dp),
+      border = BorderStroke(1.dp, RFColors.CardBorder),
+      modifier = Modifier.fillMaxWidth().padding(12.dp)
+    ) {
       CompositionBreakdownListComponent(
-       title = faction,
+        title = faction,
         total = players.size,
         items = groups.map { (name, set) -> CompositionBreakdown(name, specs.count { it.first in set }) } +
-          CompositionBreakdown(stringResource(Res.string.raid_composition_other), other.size),
+            CompositionBreakdown(stringResource(Res.string.raid_composition_other), other.size),
         itemPlayers = itemPlayers,
         headingColor = factionHeadingColor(faction),
         rowHoverColor = factionHeadingColor(faction)
       )
-     }
+    }
     Text(
-        text = stringResource(Res.string.raid_composition_other_examples, otherExamples),
-       color = RFColors.TextTertiary,
-       fontWeight = FontWeight.Medium,
-       fontSize = 9.sp,
+      text = stringResource(Res.string.raid_composition_other_examples, otherExamples),
+      color = RFColors.TextTertiary,
+      fontWeight = FontWeight.Medium,
+      fontSize = 9.sp,
       lineHeight = 11.sp
     )
   }
@@ -743,6 +851,7 @@ private fun RaidHeaderStrip() {
     }
   }
 }
+
 @Composable
 private fun RaidHeaderChip(label: String) {
   Box(
@@ -758,6 +867,7 @@ private fun RaidHeaderChip(label: String) {
     )
   }
 }
+
 @Composable
 private fun AttendanceTab(
   mainRaid: List<List<RaidFramePayload>>,
@@ -779,13 +889,16 @@ private fun AttendanceTab(
   fun String.meetsPvP(): Boolean =
     if (!requirePvPParticipation) true
     else PlayerCacheInteractor.getCard(this)?.hasPvPParticipation() ?: false
+
   val attendanceNames = run {
     val names = mutableListOf<String>()
     if (includeMain) {
-      names += mainRaid.flatten().mapNotNull { frame -> frame.playerName.takeIf { it.isNotBlank() } }.filter { it.meetsPvP() }
+      names += mainRaid.flatten().mapNotNull { frame -> frame.playerName.takeIf { it.isNotBlank() } }
+        .filter { it.meetsPvP() }
     }
     if (includeCo) {
-      names += coRaid.flatten().mapNotNull { frame -> frame.playerName.takeIf { it.isNotBlank() } }.filter { it.meetsPvP() }
+      names += coRaid.flatten().mapNotNull { frame -> frame.playerName.takeIf { it.isNotBlank() } }
+        .filter { it.meetsPvP() }
     }
     if (includeNearbySameFaction) {
       val sameFactionCards: List<PlayerCard> = when (playerFaction) {
@@ -812,7 +925,7 @@ private fun AttendanceTab(
     if (includePlayersThatLeftRaid) {
       val departed: Set<String> =
         (raidDepartures[0] ?: emptySet()) +
-          (raidDepartures[1] ?: emptySet())
+            (raidDepartures[1] ?: emptySet())
       names += departed.filter { it.meetsPvP() }
     }
     names.filter { it.isNotBlank() }.distinct().joinToString(", ")
@@ -886,16 +999,102 @@ data class BuffPreset(val label: String, val requirements: RaidBuffRequirements)
 
 val BUFF_PRESETS = listOf(
   BuffPreset("No Buffs", RaidBuffRequirements()),
-  BuffPreset("Light PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.FEAST_RIBS))),
-  BuffPreset("Serious PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING))),
-  BuffPreset("Full Buffed", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER), requireEnhancedLonging = true)),
-  BuffPreset("Full-Buff BD PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER, RaidBuffKey.FACTION_WAR_TIME, RaidBuffKey.MONSTER_HUNTERS_DREAM), requireEnhancedLonging = true)),
-  BuffPreset("Full-Buff Kraken PvP", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.WHISPER, RaidBuffKey.DAHUTAS_BUBBLE), requireEnhancedLonging = true)),
-  BuffPreset("Uncontested Boss Kill", RaidBuffRequirements(selected = setOf(RaidBuffKey.STATUE_BUFF, RaidBuffKey.GOBLET, RaidBuffKey.WAR_DRUM, RaidBuffKey.SECRET_GIFT, RaidBuffKey.FEAST_RIBS, RaidBuffKey.JINHUI_WISH, RaidBuffKey.LONGING, RaidBuffKey.FACTION_WAR_TIME), lootThreshold = 100))
+  BuffPreset(
+    "Light PvP",
+    RaidBuffRequirements(
+      selected = setOf(
+        RaidBuffKey.STATUE_BUFF,
+        RaidBuffKey.GOBLET,
+        RaidBuffKey.WAR_DRUM,
+        RaidBuffKey.FEAST_RIBS
+      )
+    )
+  ),
+  BuffPreset(
+    "Serious PvP",
+    RaidBuffRequirements(
+      selected = setOf(
+        RaidBuffKey.STATUE_BUFF,
+        RaidBuffKey.GOBLET,
+        RaidBuffKey.WAR_DRUM,
+        RaidBuffKey.SECRET_GIFT,
+        RaidBuffKey.FEAST_RIBS,
+        RaidBuffKey.JINHUI_WISH,
+        RaidBuffKey.LONGING
+      )
+    )
+  ),
+  BuffPreset(
+    "Full Buffed",
+    RaidBuffRequirements(
+      selected = setOf(
+        RaidBuffKey.STATUE_BUFF,
+        RaidBuffKey.GOBLET,
+        RaidBuffKey.WAR_DRUM,
+        RaidBuffKey.SECRET_GIFT,
+        RaidBuffKey.FEAST_RIBS,
+        RaidBuffKey.JINHUI_WISH,
+        RaidBuffKey.LONGING,
+        RaidBuffKey.WHISPER
+      ), requireEnhancedLonging = true
+    )
+  ),
+  BuffPreset(
+    "Full-Buff BD PvP",
+    RaidBuffRequirements(
+      selected = setOf(
+        RaidBuffKey.STATUE_BUFF,
+        RaidBuffKey.GOBLET,
+        RaidBuffKey.WAR_DRUM,
+        RaidBuffKey.SECRET_GIFT,
+        RaidBuffKey.FEAST_RIBS,
+        RaidBuffKey.JINHUI_WISH,
+        RaidBuffKey.LONGING,
+        RaidBuffKey.WHISPER,
+        RaidBuffKey.FACTION_WAR_TIME,
+        RaidBuffKey.MONSTER_HUNTERS_DREAM
+      ), requireEnhancedLonging = true
+    )
+  ),
+  BuffPreset(
+    "Full-Buff Kraken PvP",
+    RaidBuffRequirements(
+      selected = setOf(
+        RaidBuffKey.STATUE_BUFF,
+        RaidBuffKey.GOBLET,
+        RaidBuffKey.WAR_DRUM,
+        RaidBuffKey.SECRET_GIFT,
+        RaidBuffKey.FEAST_RIBS,
+        RaidBuffKey.JINHUI_WISH,
+        RaidBuffKey.LONGING,
+        RaidBuffKey.WHISPER,
+        RaidBuffKey.DAHUTAS_BUBBLE
+      ), requireEnhancedLonging = true
+    )
+  ),
+  BuffPreset(
+    "Uncontested Boss Kill",
+    RaidBuffRequirements(
+      selected = setOf(
+        RaidBuffKey.STATUE_BUFF,
+        RaidBuffKey.GOBLET,
+        RaidBuffKey.WAR_DRUM,
+        RaidBuffKey.SECRET_GIFT,
+        RaidBuffKey.FEAST_RIBS,
+        RaidBuffKey.JINHUI_WISH,
+        RaidBuffKey.LONGING,
+        RaidBuffKey.FACTION_WAR_TIME
+      ), lootThreshold = 100
+    )
+  )
 )
 
 @Composable
-private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>, buffSelectBorder: Color = Color.White.copy(alpha = 0.06f)) {
+private fun BuffsTab(
+  mainRaid: List<List<RaidFramePayload>>,
+  coRaid: List<List<RaidFramePayload>>,
+  buffSelectBorder: Color = Color.White.copy(alpha = 0.06f)
+) {
   val config by RFConfig.state.collectAsState()
   val lootEnabled by com.reoky.raidframer.RaidCallerSync.lootBuffEnabled.collectAsState()
   val lootThreshold = config.raidCallerLootBuffThreshold.coerceIn(100, 600)
@@ -909,16 +1108,19 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
   val requirements = remember(baseRequirements, lootEnabled, lootThreshold) {
     baseRequirements.copy(lootThreshold = if (lootEnabled) lootThreshold else 0)
   }
+
   fun persistRequirements(newReq: RaidBuffRequirements) {
     // Persist the buff selection (ignoring loot threshold, which is derived from the in-memory box).
     RFConfig.update { it.copy(raidCallerBuffRequirements = newReq.copy(lootThreshold = 0).serialize()) }
     com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(newReq.lootThreshold > 0)
     RFConfig.update { it.copy(raidCallerLootBuffThreshold = newReq.lootThreshold.coerceIn(100, 600)) }
   }
+
   var selectedPlayer by remember { mutableStateOf<RaidFramePayload?>(null) }
   var selectedPlayerPopupOffset by remember { mutableStateOf(IntOffset.Zero) }
   val selectedPreset by remember(baseRequirements) {
-    mutableStateOf(BUFF_PRESETS.firstOrNull { it.requirements.serialize() == baseRequirements.serialize() } ?: BUFF_PRESETS.first())
+    mutableStateOf(BUFF_PRESETS.firstOrNull { it.requirements.serialize() == baseRequirements.serialize() }
+      ?: BUFF_PRESETS.first())
   }
   var presetExpanded by remember { mutableStateOf(false) }
   val allMembers = (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
@@ -966,35 +1168,101 @@ private fun BuffsTab(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<R
     }
   }
   Box(Modifier.fillMaxSize()) {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+      Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+      verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
       // Performance banner when buff scanning is disabled
       if (!RFConfig.state.collectAsState().value.performanceRaidBuffScanning) {
         PerformanceDisabledBanner(stringResource(Res.string.performance_buff_scanning_disabled_banner))
       }
       BoxWithConstraints(Modifier.fillMaxWidth()) {
-      if (maxWidth >= 760.dp) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
-          Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
-BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
+        if (maxWidth >= 760.dp) {
+          Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top
+          ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+              BuffRaidPane(
+                mainRaid,
+                coRaid,
+                selectedPlayer,
+                requirements,
+                gracePeriod,
+                { selectedPlayer = it },
+                { player, offset ->
+                  if (player.playerName.isNotBlank()) {
+                    selectedPlayer = player; selectedPlayerPopupOffset = offset
+                  }
+                },
+                Modifier.fillMaxWidth()
+              )
+              BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
+              LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
+            }
+            BuffControlsPane(
+              requirements,
+              { persistRequirements(it) },
+              selectedPreset,
+              { persistRequirements(it.requirements) },
+              presetExpanded,
+              { presetExpanded = !presetExpanded },
+              gracePeriod,
+              { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } },
+              lootThreshold,
+              { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } },
+              lootEnabled,
+              { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) },
+              localizedBuffLabels,
+              Modifier.widthIn(min = 320.dp, max = 390.dp),
+              buffSelectBorder
+            )
+          }
+        } else {
+          Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            BuffRaidPane(
+              mainRaid,
+              coRaid,
+              selectedPlayer,
+              requirements,
+              gracePeriod,
+              { selectedPlayer = it },
+              { player, offset ->
+                if (player.playerName.isNotBlank()) {
+                  selectedPlayer = player; selectedPlayerPopupOffset = offset
+                }
+              },
+              Modifier.fillMaxWidth()
+            )
+            BuffControlsPane(
+              requirements,
+              { persistRequirements(it) },
+              selectedPreset,
+              { persistRequirements(it.requirements) },
+              presetExpanded,
+              { presetExpanded = !presetExpanded },
+              gracePeriod,
+              { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } },
+              lootThreshold,
+              { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } },
+              lootEnabled,
+              { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) },
+              localizedBuffLabels,
+              Modifier.fillMaxWidth(),
+              buffSelectBorder
+            )
+            BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
             LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
           }
-          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.widthIn(min = 320.dp, max = 390.dp), buffSelectBorder)
         }
-      } else {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-          BuffRaidPane(mainRaid, coRaid, selectedPlayer, requirements, gracePeriod, { selectedPlayer = it }, { player, offset -> if (player.playerName.isNotBlank()) { selectedPlayer = player; selectedPlayerPopupOffset = offset } }, Modifier.fillMaxWidth())
-          BuffControlsPane(requirements, { persistRequirements(it) }, selectedPreset, { persistRequirements(it.requirements) }, presetExpanded, { presetExpanded = !presetExpanded }, gracePeriod, { gp -> RFConfig.update { cfg -> cfg.copy(raidCallerBuffGracePeriod = gp.name) } }, lootThreshold, { v -> RFConfig.update { cfg -> cfg.copy(raidCallerLootBuffThreshold = v) } }, lootEnabled, { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) }, localizedBuffLabels, Modifier.fillMaxWidth(), buffSelectBorder)
-          BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
-          LootBuffRankList(allMembers, observations, Modifier.fillMaxWidth())
-        }
-      }
       }
     }
     selectedPlayer?.let { player ->
       val selectedObservation = PlayerCacheInteractor.resolveRaidBuffObservation(player, gracePeriod)
       val observationSnapshot = selectedObservation.snapshot
-      val resolvedPlayer = observationSnapshot?.let { player.copy(buffs = it.buffIds.map { id -> BuffPayload(buff_id = id) }) } ?: player
+      val resolvedPlayer =
+        observationSnapshot?.let { player.copy(buffs = it.buffIds.map { id -> BuffPayload(buff_id = id) }) } ?: player
       val observationText = selectedObservation.observedAt?.let { timestamp ->
         if (selectedObservation.isCurrent) {
           stringResource(Res.string.raid_buff_current_scan)
@@ -1005,7 +1273,12 @@ BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
       } ?: stringResource(Res.string.raid_buff_none_found)
       Popup(
         popupPositionProvider = object : PopupPositionProvider {
-          override fun calculatePosition(anchorBounds: IntRect, windowSize: IntSize, layoutDirection: LayoutDirection, popupContentSize: IntSize): IntOffset {
+          override fun calculatePosition(
+            anchorBounds: IntRect,
+            windowSize: IntSize,
+            layoutDirection: LayoutDirection,
+            popupContentSize: IntSize
+          ): IntOffset {
             val gap = 16
             val rightX = selectedPlayerPopupOffset.x + gap
             val leftX = selectedPlayerPopupOffset.x - popupContentSize.width - gap
@@ -1020,11 +1293,21 @@ BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
         onDismissRequest = { selectedPlayer = null },
         properties = PopupProperties(focusable = false)
       ) {
-        Surface(color = RFColors.PopupBackground.copy(alpha = 0.98f), shape = RoundedCornerShape(8.dp), border = BorderStroke(1.dp, RFColors.CardBorder), elevation = 6.dp) {
+        Surface(
+          color = RFColors.PopupBackground.copy(alpha = 0.98f),
+          shape = RoundedCornerShape(8.dp),
+          border = BorderStroke(1.dp, RFColors.CardBorder),
+          elevation = 6.dp
+        ) {
           Column(Modifier.padding(10.dp).widthIn(max = 300.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             val meetsRequirements = requirements.matches(resolvedPlayer)
-            val displayName = if (player.playerName.length > 26) player.playerName.take(26) + "\u2026" else player.playerName
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            val displayName =
+              if (player.playerName.length > 26) player.playerName.take(26) + "\u2026" else player.playerName
+            Row(
+              Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
               Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(displayName, color = RFColors.TextPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 Text(
@@ -1033,18 +1316,47 @@ BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
                   fontSize = 10.sp
                 )
               }
-              IconButton(onClick = { selectedPlayer = null }, modifier = Modifier.size(22.dp)) { Text("X", color = RFColors.TextSecondary, fontSize = 11.sp) }
+              IconButton(onClick = { selectedPlayer = null }, modifier = Modifier.size(22.dp)) {
+                Text(
+                  "X",
+                  color = RFColors.TextSecondary,
+                  fontSize = 11.sp
+                )
+              }
             }
             Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
-            Text(stringResource(Res.string.raid_buff_has_buffs), color = Color(0xFF7CFF8A), fontWeight = FontWeight.Bold, fontSize = 11.sp)
-            Text(requirements.matchedDefinitions(resolvedPlayer).joinToString(", ") { localizedBuffLabels[it.key].orEmpty() }.ifBlank { stringResource(Res.string.raid_buff_none_found) }, color = RFColors.TextSecondary, fontSize = 11.sp)
-            Text(stringResource(Res.string.raid_buff_missing_buffs), color = Color(0xFFFF7777), fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+            Text(
+              stringResource(Res.string.raid_buff_has_buffs),
+              color = Color(0xFF7CFF8A),
+              fontWeight = FontWeight.Bold,
+              fontSize = 11.sp
+            )
+            Text(
+              requirements.matchedDefinitions(resolvedPlayer)
+                .joinToString(", ") { localizedBuffLabels[it.key].orEmpty() }
+                .ifBlank { stringResource(Res.string.raid_buff_none_found) },
+              color = RFColors.TextSecondary,
+              fontSize = 11.sp
+            )
+            Text(
+              stringResource(Res.string.raid_buff_missing_buffs),
+              color = Color(0xFFFF7777),
+              fontWeight = FontWeight.Bold,
+              fontSize = 11.sp,
+              modifier = Modifier.padding(top = 4.dp)
+            )
             val missingBuffText = requirements.missingKeys(resolvedPlayer)
               .mapNotNull { localizedBuffLabels[it] }
               .joinToString(", ")
               .ifBlank { stringResource(Res.string.raid_buff_none_found) }
             Text(missingBuffText, color = RFColors.TextSecondary, fontSize = 11.sp)
-            Text(stringResource(Res.string.raid_buff_loot_buffs), color = RFColors.lootBuffColor, fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+            Text(
+              stringResource(Res.string.raid_buff_loot_buffs),
+              color = RFColors.lootBuffColor,
+              fontWeight = FontWeight.Bold,
+              fontSize = 11.sp,
+              modifier = Modifier.padding(top = 4.dp)
+            )
             // Per-loot-buff breakdown: name + %, descending, with a mini progress bar so
             // the raid lead can see at a glance how heavily a player loot buffed.
             val playerLootBuffs = resolvedPlayer.buffs
@@ -1057,7 +1369,13 @@ BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
               val maxLootAmount = playerLootBuffs.first().lootPercent.coerceAtLeast(1)
               playerLootBuffs.forEach { lootBuff ->
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                  Text(lootBuff.name, color = RFColors.TextSecondary, fontSize = 11.sp, maxLines = 1, modifier = Modifier.weight(1f))
+                  Text(
+                    lootBuff.name,
+                    color = RFColors.TextSecondary,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
+                  )
                   val fraction = (lootBuff.lootPercent.toFloat() / maxLootAmount).coerceIn(0f, 1f)
                   Box(
                     modifier = Modifier
@@ -1075,12 +1393,23 @@ BuffCopyPane(notBuffed, buffed, notScannable, Modifier.fillMaxWidth())
                     )
                   }
                   Spacer(modifier = Modifier.width(6.dp))
-                  Text("${lootBuff.lootPercent}%", color = RFColors.lootBuffColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(38.dp))
+                  Text(
+                    "${lootBuff.lootPercent}%",
+                    color = RFColors.lootBuffColor,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.width(38.dp)
+                  )
                 }
               }
             }
             Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
-            Text(observationText, color = RFColors.TextTertiary, fontSize = 9.sp, modifier = Modifier.padding(top = 2.dp))
+            Text(
+              observationText,
+              color = RFColors.TextTertiary,
+              fontSize = 9.sp,
+              modifier = Modifier.padding(top = 2.dp)
+            )
           }
         }
       }
@@ -1097,24 +1426,82 @@ fun RaidBuffGracePeriod.label(): String = when (this) {
 }
 
 @Composable
-private fun BuffRaidPane(mainRaid: List<List<RaidFramePayload>>, coRaid: List<List<RaidFramePayload>>, selected: RaidFramePayload?, requirements: RaidBuffRequirements, gracePeriod: RaidBuffGracePeriod, onSelect: (RaidFramePayload) -> Unit, onSelectAt: (RaidFramePayload, IntOffset) -> Unit, modifier: Modifier) {
-  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.78f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun BuffRaidPane(
+  mainRaid: List<List<RaidFramePayload>>,
+  coRaid: List<List<RaidFramePayload>>,
+  selected: RaidFramePayload?,
+  requirements: RaidBuffRequirements,
+  gracePeriod: RaidBuffGracePeriod,
+  onSelect: (RaidFramePayload) -> Unit,
+  onSelectAt: (RaidFramePayload, IntOffset) -> Unit,
+  modifier: Modifier
+) {
+  Column(
+    modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.78f), RoundedCornerShape(14.dp))
+      .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+  ) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(stringResource(Res.string.raid_main_raid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(mainRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
+        Text(
+          stringResource(Res.string.raid_main_raid_label),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        RaidComponent(
+          mainRaid,
+          selectedPlayerName = selected?.playerName,
+          onPlayerClick = onSelect,
+          onPlayerClickAt = onSelectAt,
+          isBuffed = { requirements.matchesResolved(it, gracePeriod) },
+          isOutOfRange = { it.distance > 115 },
+          isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
       }
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(stringResource(Res.string.raid_coraid_label), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        RaidComponent(coRaid, selectedPlayerName = selected?.playerName, onPlayerClick = onSelect, onPlayerClickAt = onSelectAt, isBuffed = { requirements.matchesResolved(it, gracePeriod) }, isOutOfRange = { it.distance > 115 }, isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
+        Text(
+          stringResource(Res.string.raid_coraid_label),
+          color = Color.White,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+        RaidComponent(
+          coRaid,
+          selectedPlayerName = selected?.playerName,
+          onPlayerClick = onSelect,
+          onPlayerClickAt = onSelectAt,
+          isBuffed = { requirements.matchesResolved(it, gracePeriod) },
+          isOutOfRange = { it.distance > 115 },
+          isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
       }
     }
   }
 }
 
 @Composable
-private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, preset: BuffPreset, onPreset: (BuffPreset) -> Unit, expanded: Boolean, onExpanded: () -> Unit, gracePeriod: RaidBuffGracePeriod, onGracePeriod: (RaidBuffGracePeriod) -> Unit, lootThreshold: Int, onLootThreshold: (Int) -> Unit, lootEnabled: Boolean, onLootEnabled: (Boolean) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>, modifier: Modifier, borderColor: Color = Color.White.copy(alpha = 0.06f)) {
-  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, borderColor, RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun BuffControlsPane(
+  requirements: RaidBuffRequirements,
+  onRequirements: (RaidBuffRequirements) -> Unit,
+  preset: BuffPreset,
+  onPreset: (BuffPreset) -> Unit,
+  expanded: Boolean,
+  onExpanded: () -> Unit,
+  gracePeriod: RaidBuffGracePeriod,
+  onGracePeriod: (RaidBuffGracePeriod) -> Unit,
+  lootThreshold: Int,
+  onLootThreshold: (Int) -> Unit,
+  lootEnabled: Boolean,
+  onLootEnabled: (Boolean) -> Unit,
+  localizedBuffLabels: Map<RaidBuffKey, String>,
+  modifier: Modifier,
+  borderColor: Color = Color.White.copy(alpha = 0.06f)
+) {
+  Column(
+    modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp))
+      .border(1.dp, borderColor, RoundedCornerShape(14.dp)).padding(12.dp),
+    verticalArrangement = Arrangement.spacedBy(4.dp)
+  ) {
     var graceExpanded by remember { mutableStateOf(false) }
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -1124,15 +1511,42 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
       Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(stringResource(Res.string.raid_buff_preset), color = Color.White, fontWeight = FontWeight.Bold)
         Box {
-          Button(onClick = onExpanded, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.fillMaxWidth()) { Text(preset.label, color = Color.Black, maxLines = 1) }
-          DropdownMenu(expanded = expanded, onDismissRequest = onExpanded) { BUFF_PRESETS.forEach { option -> DropdownMenuItem(onClick = { onPreset(option); onExpanded() }) { Text(option.label) } } }
+          Button(
+            onClick = onExpanded,
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+            modifier = Modifier.fillMaxWidth()
+          ) { Text(preset.label, color = Color.Black, maxLines = 1) }
+          DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = onExpanded
+          ) {
+            BUFF_PRESETS.forEach { option ->
+              DropdownMenuItem(onClick = { onPreset(option); onExpanded() }) {
+                Text(
+                  option.label
+                )
+              }
+            }
+          }
         }
       }
       Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(stringResource(Res.string.raid_buff_grace_period), color = Color.White, fontWeight = FontWeight.Bold)
         Box {
-          Button(onClick = { graceExpanded = !graceExpanded }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.fillMaxWidth()) { Text(gracePeriod.label(), color = Color.Black, maxLines = 1) }
-          DropdownMenu(expanded = graceExpanded, onDismissRequest = { graceExpanded = false }) { RaidBuffGracePeriod.entries.forEach { option -> DropdownMenuItem(onClick = { onGracePeriod(option); graceExpanded = false }) { Text(option.label()) } } }
+          Button(
+            onClick = { graceExpanded = !graceExpanded },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+            modifier = Modifier.fillMaxWidth()
+          ) { Text(gracePeriod.label(), color = Color.Black, maxLines = 1) }
+          DropdownMenu(
+            expanded = graceExpanded,
+            onDismissRequest = { graceExpanded = false }) {
+            RaidBuffGracePeriod.entries.forEach { option ->
+              DropdownMenuItem(onClick = {
+                onGracePeriod(option); graceExpanded = false
+              }) { Text(option.label()) }
+            }
+          }
         }
       }
     }
@@ -1140,14 +1554,24 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
     BoxWithConstraints(Modifier.fillMaxWidth()) {
       val columns = if (maxWidth >= 360.dp) 2 else 1
       if (columns == 2) {
-        FlowRow(maxItemsInEachRow = 2, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+        FlowRow(
+          maxItemsInEachRow = 2,
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
+          verticalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
           BuffRequirementCheckboxes(requirements, onRequirements, localizedBuffLabels)
         }
       } else {
         Column { BuffRequirementCheckboxes(requirements, onRequirements, localizedBuffLabels) }
       }
     }
-    Text(stringResource(Res.string.raid_buff_loot_section), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
+    Text(
+      stringResource(Res.string.raid_buff_loot_section),
+      color = Color.White,
+      fontWeight = FontWeight.Bold,
+      modifier = Modifier.padding(top = 6.dp)
+    )
     // "Check for loot buffs?" + a 100-600% threshold slider (100% is the in-game baseline).
     // The enabled state is held in-memory only (not persisted), while the threshold value is
     // persisted and kept in sync with the Raid Caller overlay settings.
@@ -1188,33 +1612,95 @@ private fun BuffControlsPane(requirements: RaidBuffRequirements, onRequirements:
 @Composable
 private fun BuffCopyPane(notBuffed: String, buffed: String, notScannable: String, modifier: Modifier) {
   var notScannableExpanded by remember { mutableStateOf(false) }
-  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-      Text(stringResource(Res.string.raid_buff_categories_help_title), color = Color.White, fontWeight = FontWeight.Bold)
+  Column(
+    modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp))
+      .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+  ) {
+    Row(
+      Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        stringResource(Res.string.raid_buff_categories_help_title),
+        color = Color.White,
+        fontWeight = FontWeight.Bold
+      )
       BuffCategoriesHelp()
     }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-      Text(stringResource(Res.string.raid_copy_not_buffed_title), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
-      Text(stringResource(Res.string.raid_copy_buffed_title), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
+      Text(
+        stringResource(Res.string.raid_copy_not_buffed_title),
+        color = Color.White,
+        fontWeight = FontWeight.Bold,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.weight(1f)
+      )
+      Text(
+        stringResource(Res.string.raid_copy_buffed_title),
+        color = Color.White,
+        fontWeight = FontWeight.Bold,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.weight(1f)
+      )
     }
-    Row(Modifier.fillMaxWidth().heightIn(min = 50.dp, max = 150.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(
+      Modifier.fillMaxWidth().heightIn(min = 50.dp, max = 150.dp),
+      horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
       SelectableTextField(value = notBuffed, modifier = Modifier.weight(1f).fillMaxHeight(), minHeight = 0.dp)
       SelectableTextField(value = buffed, modifier = Modifier.weight(1f).fillMaxHeight(), minHeight = 0.dp)
     }
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-      Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notBuffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_not_buffed), color = Color.Black) }
-      Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(buffed), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.raid_copy_buffed), color = Color.Black) }
+      Button(
+        onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notBuffed), null) },
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+        modifier = Modifier.weight(1f)
+      ) { Text(stringResource(Res.string.raid_copy_not_buffed), color = Color.Black) }
+      Button(
+        onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(buffed), null) },
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+        modifier = Modifier.weight(1f)
+      ) { Text(stringResource(Res.string.raid_copy_buffed), color = Color.Black) }
     }
     // Collapsible "Not Scannable" section — players we have no in-grace observation for.
     // Collapses to a single header row to avoid taking up screen real estate.
-    Row(Modifier.fillMaxWidth().clickable { notScannableExpanded = !notScannableExpanded }, horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-      Text(stringResource(Res.string.raid_copy_not_scannable_title), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-      Text(if (notScannableExpanded) "\u25B2" else "\u25BC", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+    Row(
+      Modifier.fillMaxWidth().clickable { notScannableExpanded = !notScannableExpanded },
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        stringResource(Res.string.raid_copy_not_scannable_title),
+        color = Color.White,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.weight(1f)
+      )
+      Text(
+        if (notScannableExpanded) "\u25B2" else "\u25BC",
+        color = Color.White,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold
+      )
     }
     if (notScannableExpanded) {
       Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        SelectableTextField(value = notScannable, modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp, max = 150.dp), minHeight = 0.dp)
-        Button(onClick = { Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(notScannable), null) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White), modifier = Modifier.fillMaxWidth()) { Text(stringResource(Res.string.raid_copy_not_scannable), color = Color.Black) }
+        SelectableTextField(
+          value = notScannable,
+          modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp, max = 150.dp),
+          minHeight = 0.dp
+        )
+        Button(
+          onClick = {
+            Toolkit.getDefaultToolkit().systemClipboard.setContents(
+              StringSelection(notScannable),
+              null
+            )
+          },
+          colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+          modifier = Modifier.fillMaxWidth()
+        ) { Text(stringResource(Res.string.raid_copy_not_scannable), color = Color.Black) }
       }
     }
   }
@@ -1258,9 +1744,18 @@ private fun BuffCategoriesHelp() {
               }
             }
             Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
-            BuffCategoryHelpRow(stringResource(Res.string.raid_copy_buffed_title), stringResource(Res.string.raid_buff_categories_buffed))
-            BuffCategoryHelpRow(stringResource(Res.string.raid_copy_not_buffed_title), stringResource(Res.string.raid_buff_categories_not_buffed))
-            BuffCategoryHelpRow(stringResource(Res.string.raid_copy_not_scannable_title), stringResource(Res.string.raid_buff_categories_not_scannable))
+            BuffCategoryHelpRow(
+              stringResource(Res.string.raid_copy_buffed_title),
+              stringResource(Res.string.raid_buff_categories_buffed)
+            )
+            BuffCategoryHelpRow(
+              stringResource(Res.string.raid_copy_not_buffed_title),
+              stringResource(Res.string.raid_buff_categories_not_buffed)
+            )
+            BuffCategoryHelpRow(
+              stringResource(Res.string.raid_copy_not_scannable_title),
+              stringResource(Res.string.raid_buff_categories_not_scannable)
+            )
           }
         }
       }
@@ -1277,7 +1772,11 @@ private fun BuffCategoryHelpRow(title: String, explanation: String) {
 }
 
 @Composable
-private fun LootBuffRankList(members: List<RaidFramePayload>, observations: Map<RaidFramePayload, RaidBuffObservation>, modifier: Modifier) {
+private fun LootBuffRankList(
+  members: List<RaidFramePayload>,
+  observations: Map<RaidFramePayload, RaidBuffObservation>,
+  modifier: Modifier
+) {
   // Scrollable, max-height breakdown of players sorted by their current summed loot buff %,
   // most → least. Uses the grace-period cached snapshots so players who loot buffed recently
   // (but are now out-of-range / empty) still appear. Rows flow across multiple columns so
@@ -1290,7 +1789,11 @@ private fun LootBuffRankList(members: List<RaidFramePayload>, observations: Map<
     }
     .filter { it.second > 0 }
     .sortedByDescending { it.second }
-  Column(modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+  Column(
+    modifier.background(Color(0xFF1A1A1A).copy(alpha = 0.76f), RoundedCornerShape(14.dp))
+      .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(14.dp)).padding(12.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+  ) {
     Text(stringResource(Res.string.raid_loot_breakdown_title), color = Color.White, fontWeight = FontWeight.Bold)
     if (ranked.isEmpty()) {
       Text(stringResource(Res.string.raid_buff_none_found), color = Color.White.copy(alpha = 0.6f), fontSize = 11.sp)
@@ -1350,27 +1853,68 @@ private fun LootBuffRow(name: String, amount: Int, maxAmount: Int) {
       )
     }
     Spacer(modifier = Modifier.width(6.dp))
-    Text("$amount%", color = RFColors.lootBuffColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(42.dp))
+    Text(
+      "$amount%",
+      color = RFColors.lootBuffColor,
+      fontSize = 11.sp,
+      fontWeight = FontWeight.Bold,
+      modifier = Modifier.width(42.dp)
+    )
   }
 }
 
 @Composable
-private fun BuffRequirementCheckboxes(requirements: RaidBuffRequirements, onRequirements: (RaidBuffRequirements) -> Unit, localizedBuffLabels: Map<RaidBuffKey, String>) {
+private fun BuffRequirementCheckboxes(
+  requirements: RaidBuffRequirements,
+  onRequirements: (RaidBuffRequirements) -> Unit,
+  localizedBuffLabels: Map<RaidBuffKey, String>
+) {
   RAID_BUFF_DEFINITIONS.filter { it.section == RaidBuffSection.MAIN }.forEach { definition ->
-    ControlledCheckbox(localizedBuffLabels[definition.key].orEmpty(), definition.key in requirements.selected) { checked -> onRequirements(requirements.copy(selected = if (checked) requirements.selected + definition.key else requirements.selected - definition.key)) }
+    ControlledCheckbox(
+      localizedBuffLabels[definition.key].orEmpty(),
+      definition.key in requirements.selected
+    ) { checked -> onRequirements(requirements.copy(selected = if (checked) requirements.selected + definition.key else requirements.selected - definition.key)) }
   }
-  ControlledCheckbox(stringResource(Res.string.raid_buff_orange_goblet), requirements.requireOrangeGoblet) { onRequirements(requirements.copy(requireOrangeGoblet = it, selected = requirements.selected + RaidBuffKey.GOBLET)) }
-  ControlledCheckbox(stringResource(Res.string.raid_buff_allow_meatballs), requirements.allowMeatballs) { onRequirements(requirements.copy(allowMeatballs = it)) }
-  ControlledCheckbox(stringResource(Res.string.raid_buff_require_enhanced), requirements.requireEnhancedLonging) { onRequirements(requirements.copy(requireEnhancedLonging = it, selected = requirements.selected + RaidBuffKey.LONGING)) }
+  ControlledCheckbox(
+    stringResource(Res.string.raid_buff_orange_goblet),
+    requirements.requireOrangeGoblet
+  ) {
+    onRequirements(
+      requirements.copy(
+        requireOrangeGoblet = it,
+        selected = requirements.selected + RaidBuffKey.GOBLET
+      )
+    )
+  }
+  ControlledCheckbox(
+    stringResource(Res.string.raid_buff_allow_meatballs),
+    requirements.allowMeatballs
+  ) { onRequirements(requirements.copy(allowMeatballs = it)) }
+  ControlledCheckbox(
+    stringResource(Res.string.raid_buff_require_enhanced),
+    requirements.requireEnhancedLonging
+  ) {
+    onRequirements(
+      requirements.copy(
+        requireEnhancedLonging = it,
+        selected = requirements.selected + RaidBuffKey.LONGING
+      )
+    )
+  }
 }
 
 @Composable
 private fun ControlledCheckbox(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
   Row(verticalAlignment = Alignment.CenterVertically) {
-    Checkbox(checked = checked, onCheckedChange = onCheckedChange, colors = CheckboxDefaults.colors(checkedColor = Color.Red, uncheckedColor = Color.White))
+    Checkbox(
+      checked = checked,
+      onCheckedChange = onCheckedChange,
+      colors = CheckboxDefaults.colors(checkedColor = Color.Red, uncheckedColor = Color.White)
+    )
     Text(label, color = Color.White)
   }
 }
+
 @Composable
 private fun AttendanceRaidPane(
   mainRaid: List<List<RaidFramePayload>>,
@@ -1423,6 +1967,7 @@ private fun AttendanceRaidPane(
     }
   }
 }
+
 @Composable
 private fun AttendanceControlsPane(
   includeMain: Boolean,
@@ -1501,19 +2046,20 @@ private fun AttendanceControlsPane(
     }
   }
 }
+
 @Composable
 private fun NearbyTab(
   nearbyNuia: List<PlayerCard>,
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
-  requirePvPParticipation: Boolean,
-  onRequirePvPParticipationChange: (Boolean) -> Unit
+  filterState: NearbyFilterState,
+  onFilterStateChange: (NearbyFilterState) -> Unit
 ) {
   val scrollState = rememberScrollState()
 
-  val filteredHaranya = if (requirePvPParticipation) nearbyHaranya.filter { it.hasPvPParticipation() } else nearbyHaranya
-  val filteredNuia = if (requirePvPParticipation) nearbyNuia.filter { it.hasPvPParticipation() } else nearbyNuia
-  val filteredPirate = if (requirePvPParticipation) nearbyPirate.filter { it.hasPvPParticipation() } else nearbyPirate
+  val filteredHaranya = filterNearbyPlayers(nearbyHaranya, filterState)
+  val filteredNuia = filterNearbyPlayers(nearbyNuia, filterState)
+  val filteredPirate = filterNearbyPlayers(nearbyPirate, filterState)
 
   Column(
     modifier = Modifier
@@ -1540,7 +2086,12 @@ private fun NearbyTab(
         )
         RaidComponent(
           parties = filteredHaranya.mapIndexed { index, card ->
-            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole, gearScore = card.lastKnownGearScore)
+            RaidFramePayload(
+              slot = index,
+              playerName = card.name,
+              role = card.currentRole,
+              gearScore = card.lastKnownGearScore
+            )
           }.chunked(5),
           modifier = Modifier.wrapContentSize()
         )
@@ -1560,7 +2111,12 @@ private fun NearbyTab(
         )
         RaidComponent(
           parties = filteredNuia.mapIndexed { index, card ->
-            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole, gearScore = card.lastKnownGearScore)
+            RaidFramePayload(
+              slot = index,
+              playerName = card.name,
+              role = card.currentRole,
+              gearScore = card.lastKnownGearScore
+            )
           }.chunked(5),
           modifier = Modifier.wrapContentSize()
         )
@@ -1580,7 +2136,12 @@ private fun NearbyTab(
         )
         RaidComponent(
           parties = filteredPirate.mapIndexed { index, card ->
-            RaidFramePayload(slot = index, playerName = card.name, role = card.currentRole, gearScore = card.lastKnownGearScore)
+            RaidFramePayload(
+              slot = index,
+              playerName = card.name,
+              role = card.currentRole,
+              gearScore = card.lastKnownGearScore
+            )
           }.chunked(5),
           modifier = Modifier.wrapContentSize()
         )
@@ -1593,12 +2154,18 @@ private fun NearbyTab(
       fontStyle = FontStyle.Italic,
       modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
     )
-    CheckBoxComponent(
-      label = stringResource(Res.string.raid_nearby_require_pvp),
-      initialChecked = requirePvPParticipation,
-      onCheckedChange = onRequirePvPParticipationChange,
-      textColor = Color.White
-    )
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+      horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+      NearbyFilterControls(
+        state = filterState,
+        onStateChange = onFilterStateChange,
+        modifier = Modifier.weight(1f),
+        textColor = Color.White
+      )
+      // Box(modifier = Modifier.weight(1f)) // reserved for future use
+    }
   }
 }
 
@@ -1612,27 +2179,14 @@ private fun NearbyGearTab(
   nearbyNuia: List<PlayerCard>,
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
-  raidDepartures: Map<Int, Set<String>> = emptyMap(),
-  requirePvPParticipation: Boolean,
-  onRequirePvPParticipationChange: (Boolean) -> Unit
+  filterState: NearbyFilterState,
+  onFilterStateChange: (NearbyFilterState) -> Unit
 ) {
   val scrollState = rememberScrollState()
-  var includePlayersThatLeftRaid by rememberSaveable { mutableStateOf(false) }
-  val departedNames = remember(raidDepartures) {
-    (raidDepartures[0] ?: emptySet()) + (raidDepartures[1] ?: emptySet())
-  }
-  fun sourcePlayers(players: List<PlayerCard>, faction: Faction): List<PlayerCard> = if (!includePlayersThatLeftRaid) {
-    players
-  } else {
-    val currentNames = players.mapTo(mutableSetOf()) { it.name }
-    val departedPlayers = departedNames.mapNotNull { PlayerCacheInteractor.getCard(it) }
-      .filter { it.name !in currentNames && Faction.fromString(it.lastKnownFaction) == faction }
-    (players + departedPlayers).distinctBy { it.name }
-  }
 
-  val filteredHaranya = sourcePlayers(nearbyHaranya, Faction.HARANYA).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
-  val filteredNuia = sourcePlayers(nearbyNuia, Faction.NUIA).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
-  val filteredPirate = sourcePlayers(nearbyPirate, Faction.PIRATE).let { if (requirePvPParticipation) it.filter { card -> card.hasPvPParticipation() } else it }
+  val filteredHaranya = filterNearbyPlayers(nearbyHaranya, filterState)
+  val filteredNuia = filterNearbyPlayers(nearbyNuia, filterState)
+  val filteredPirate = filterNearbyPlayers(nearbyPirate, filterState)
 
   val avgHaranya = averageGearScore(filteredHaranya)
   val avgNuia = averageGearScore(filteredNuia)
@@ -1665,7 +2219,10 @@ private fun NearbyGearTab(
           fontSize = 13.sp
         )
         Text(
-          text = String.format(stringResource(Res.string.nearby_avg_gs_format), avgHaranya, filteredHaranya.count { it.lastKnownGearScore > 0 }),
+          text = String.format(
+            stringResource(Res.string.nearby_avg_gs_format),
+            avgHaranya,
+            filteredHaranya.count { it.lastKnownGearScore > 0 }),
           color = Color.LightGray,
           fontSize = 11.sp
         )
@@ -1688,7 +2245,10 @@ private fun NearbyGearTab(
           fontSize = 13.sp
         )
         Text(
-          text = String.format(stringResource(Res.string.nearby_avg_gs_format), avgNuia, filteredNuia.count { it.lastKnownGearScore > 0 }),
+          text = String.format(
+            stringResource(Res.string.nearby_avg_gs_format),
+            avgNuia,
+            filteredNuia.count { it.lastKnownGearScore > 0 }),
           color = Color.LightGray,
           fontSize = 11.sp
         )
@@ -1711,7 +2271,10 @@ private fun NearbyGearTab(
           fontSize = 13.sp
         )
         Text(
-          text = String.format(stringResource(Res.string.nearby_avg_gs_format), avgPirate, filteredPirate.count { it.lastKnownGearScore > 0 }),
+          text = String.format(
+            stringResource(Res.string.nearby_avg_gs_format),
+            avgPirate,
+            filteredPirate.count { it.lastKnownGearScore > 0 }),
           color = Color.LightGray,
           fontSize = 11.sp
         )
@@ -1721,18 +2284,18 @@ private fun NearbyGearTab(
         )
       }
     }
-    CheckBoxComponent(
-      label = stringResource(Res.string.raid_nearby_require_pvp),
-      initialChecked = requirePvPParticipation,
-      onCheckedChange = onRequirePvPParticipationChange,
-      textColor = Color.White
-    )
-    CheckBoxComponent(
-      label = stringResource(Res.string.raid_include_departed),
-      initialChecked = includePlayersThatLeftRaid,
-      onCheckedChange = { includePlayersThatLeftRaid = it },
-      textColor = Color.White
-    )
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+      horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+      NearbyFilterControls(
+        state = filterState,
+        onStateChange = onFilterStateChange,
+        modifier = Modifier.weight(1f),
+        textColor = Color.White
+      )
+      // Box(modifier = Modifier.weight(1f)) // reserved for future use
+    }
     OverlaidGearScoreChart(
       series = listOf(
         GearFactionSeries(haranyaLabel, filteredHaranya, RFColors.graphNodeAllied),
