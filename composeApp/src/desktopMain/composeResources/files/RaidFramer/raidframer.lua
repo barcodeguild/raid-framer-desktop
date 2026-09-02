@@ -73,8 +73,11 @@ function RF:Init()
   self:Log("Good news, " .. RF.PLAYER_NAME .. "! If you can read this message, then the " .. RF.TAG .. " Lua component is working!")
   self:Log("Please be sure to launch the desktop app to access the multi-monitor game overlay.")
 
-  -- IPC polling must remain available while dormant so the desktop app can wake us.
-  registerForIPCEvents()
+  -- Register every game event handler exactly once for the lifetime of the addon.
+  -- Handlers stay registered across dormancy and guard their own work via the
+  -- `eventHandlers` wrappers (and PERFORMANCE_COMPANION_ENABLED), so we never
+  -- re-register and stack duplicate callbacks on the game's event bus.
+  registerForEvents()
 end
 
 function RF:Shutdown()
@@ -131,10 +134,6 @@ function registerForEvents()
   UIParent:SetEventHandler(UIEVENT_TYPE.CHAT_JOINED_CHANNEL, eventHandlers.chatJoinedChannel)
   UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINTED, eventHandlers.teamJointed)
   UIParent:SetEventHandler(UIEVENT_TYPE.TEAM_JOINT_BROKEN, eventHandlers.teamJointBroken)
-end
-
-function registerForIPCEvents()
-  UIParent:SetEventHandler(UIEVENT_TYPE.COMBAT_MSG, RF.IPC.interact)
 end
 
 -- Do the opposite of registerForEvents as part of the tear-down pattern
