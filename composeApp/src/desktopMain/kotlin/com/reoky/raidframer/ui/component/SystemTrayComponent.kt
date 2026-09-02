@@ -55,6 +55,8 @@ import raid_framer_desktop.composeapp.generated.resources.tray_close
 import raid_framer_desktop.composeapp.generated.resources.tray_dragon_breaths
 import raid_framer_desktop.composeapp.generated.resources.tray_pocket_journal
 import raid_framer_desktop.composeapp.generated.resources.tray_lua_options
+import raid_framer_desktop.composeapp.generated.resources.tray_help
+import raid_framer_desktop.composeapp.generated.resources.tray_take_screenshot
 import raid_framer_desktop.composeapp.generated.resources.tray_new_session
 import raid_framer_desktop.composeapp.generated.resources.tray_raid_management
 import raid_framer_desktop.composeapp.generated.resources.tray_save_session
@@ -90,6 +92,8 @@ fun ApplicationScope.SystemTrayComponent(
   val saveSessionStr = stringResource(Res.string.tray_save_session)
   val abortSessionStr = stringResource(Res.string.tray_abort_session)
   val luaOptionsStr = stringResource(Res.string.tray_lua_options)
+  val helpStr = stringResource(Res.string.tray_help)
+  val takeScreenshotStr = stringResource(Res.string.tray_take_screenshot)
   val closeStr = stringResource(Res.string.tray_close)
 
   DisposableEffect(Unit) {
@@ -124,7 +128,7 @@ fun ApplicationScope.SystemTrayComponent(
     val itemHeight = 26 // Fixed height per item in dp — consistent across languages
     val dividerHeight = 2
     val menuHeight = itemCount * itemHeight + dividerCount * dividerHeight + 10
-    val menuWidth = 140
+    val menuWidth = 160
 
     Window(
       onCloseRequest = { menuVisible = false },
@@ -173,7 +177,7 @@ fun ApplicationScope.SystemTrayComponent(
         TrayMenuDivider()
 
         // --- Overlays ---
-        TrayMenuItem(iconCode = "\uf06b", text = dragonBreathsStr) {
+        TrayMenuItem(iconCode = "\uf6d5", text = dragonBreathsStr) {
           menuVisible = false
           wm.openWindow(OverlayType.POKEMON)
         }
@@ -186,7 +190,7 @@ fun ApplicationScope.SystemTrayComponent(
           wm.openWindow(OverlayType.SUMMARY)
         }
         if (config.performanceBattleGraphEnabled) {
-          TrayMenuItem(iconCode = "\uf201", text = battleGraphStr) {
+          TrayMenuItem(iconCode = "\uf1e0", text = battleGraphStr) {
             menuVisible = false
             wm.openWindow(OverlayType.BATTLE_GRAPH)
           }
@@ -195,6 +199,10 @@ fun ApplicationScope.SystemTrayComponent(
         TrayMenuItem(iconCode = "\uf02d", text = pocketJournalStr) {
           menuVisible = false
           wm.openWindow(OverlayType.POCKET_JOURNAL)
+        }
+        TrayMenuItem(iconCode = "\uf030", text = takeScreenshotStr) {
+          menuVisible = false
+          wm.openWindow(OverlayType.SCREENSHOT_PREVIEW)
         }
 
         TrayMenuDivider()
@@ -211,6 +219,10 @@ fun ApplicationScope.SystemTrayComponent(
         TrayMenuItem(iconCode = "\uf059", text = aboutStr) {
           menuVisible = false
           wm.openWindow(OverlayType.ABOUT)
+        }
+        TrayMenuItem(iconCode = "\uf128", text = helpStr) {
+          menuVisible = false
+          wm.openWindow(OverlayType.HELP)
         }
 
         TrayMenuDivider()

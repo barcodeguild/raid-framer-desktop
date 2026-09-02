@@ -1307,6 +1307,8 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="tray_save_session">Save Session</string>
     <string name="tray_abort_session">Abort Session</string>
     <string name="tray_lua_options">Lua Options</string>
+    <string name="tray_help">Help</string>
+    <string name="tray_take_screenshot">Take Screenshot</string>
     <string name="tray_close">Close</string>
 
     <!-- Raid Caller / Leader Overlay -->

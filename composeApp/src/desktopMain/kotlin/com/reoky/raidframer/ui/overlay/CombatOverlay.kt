@@ -72,7 +72,6 @@ import raid_framer_desktop.composeapp.generated.resources.combat_column_pve_cc
 import raid_framer_desktop.composeapp.generated.resources.combat_no_columns_message
 import raid_framer_desktop.composeapp.generated.resources.combat_open_settings
 import raid_framer_desktop.composeapp.generated.resources.combat_press_plus_to_record
-import raid_framer_desktop.composeapp.generated.resources.combat_update_tooltip
 import raid_framer_desktop.composeapp.generated.resources.settings_combat_overlay_title
 import raid_framer_desktop.composeapp.generated.resources.combat_stop_and_save
 import raid_framer_desktop.composeapp.generated.resources.combat_abort_and_discard
@@ -80,11 +79,25 @@ import raid_framer_desktop.composeapp.generated.resources.combat_save_and_exit_t
 import raid_framer_desktop.composeapp.generated.resources.combat_export_saving_session
 import raid_framer_desktop.composeapp.generated.resources.combat_export_saving_language
 import raid_framer_desktop.composeapp.generated.resources.battle_graph_summary
-import raid_framer_desktop.composeapp.generated.resources.battle_graph_title
 import raid_framer_desktop.composeapp.generated.resources.combat_companion_disabled
 import raid_framer_desktop.composeapp.generated.resources.combat_companion_disabled_hint
 import raid_framer_desktop.composeapp.generated.resources.combat_ranking_disabled
 import raid_framer_desktop.composeapp.generated.resources.combat_ranking_disabled_hint
+import raid_framer_desktop.composeapp.generated.resources.tray_save_session
+import raid_framer_desktop.composeapp.generated.resources.tray_abort_session
+import raid_framer_desktop.composeapp.generated.resources.tray_new_session
+import raid_framer_desktop.composeapp.generated.resources.tray_dragon_breaths
+import raid_framer_desktop.composeapp.generated.resources.tray_raid_management
+import raid_framer_desktop.composeapp.generated.resources.tray_battle_graph
+import raid_framer_desktop.composeapp.generated.resources.tray_pocket_journal
+import raid_framer_desktop.composeapp.generated.resources.tray_lua_options
+import raid_framer_desktop.composeapp.generated.resources.tray_help
+import raid_framer_desktop.composeapp.generated.resources.tray_take_screenshot
+import raid_framer_desktop.composeapp.generated.resources.tray_close
+import raid_framer_desktop.composeapp.generated.resources.app_tray_reset_positions
+import raid_framer_desktop.composeapp.generated.resources.general_settings
+import raid_framer_desktop.composeapp.generated.resources.general_about
+import raid_framer_desktop.composeapp.generated.resources.general_exit
 
 @Preview
 @Composable
@@ -187,10 +200,10 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val stopPopupInteractionSource = remember { MutableInteractionSource() }
   val isStopPopupHovered by stopPopupInteractionSource.collectIsHoveredAsState()
 
-  // View options popup state (Summary / Battle Graph)
-  var showViewPopup by remember { mutableStateOf(false) }
-  val viewPopupInteractionSource = remember { MutableInteractionSource() }
-  val isViewPopupHovered by viewPopupInteractionSource.collectIsHoveredAsState()
+  // Menu popup state (full system tray menu)
+  var showMenuPopup by remember { mutableStateOf(false) }
+  val menuPopupInteractionSource = remember { MutableInteractionSource() }
+  val isMenuPopupHovered by menuPopupInteractionSource.collectIsHoveredAsState()
 
   val damageColumnText = stringResource(
     if (config.allowPVEDamage) Res.string.combat_column_pve_damage else Res.string.combat_column_pvp_damage
@@ -221,10 +234,10 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
     }
   }
 
-  // Dismiss view popup when cursor leaves both the overlay and the popup
-  LaunchedEffect(isOverlayHovered, isViewPopupHovered) {
-    if (!isOverlayHovered && !isViewPopupHovered && showViewPopup) {
-      showViewPopup = false
+  // Dismiss menu popup when cursor leaves both the overlay and the popup
+  LaunchedEffect(isOverlayHovered, isMenuPopupHovered) {
+    if (!isOverlayHovered && !isMenuPopupHovered && showMenuPopup) {
+      showMenuPopup = false
     }
   }
 
@@ -371,27 +384,32 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
             }
             IconButton(onClick = { wm?.openWindow(OverlayType.RAID) }, modifier = Modifier.size(32.dp)) {
               val raidInteractionSource = remember { MutableInteractionSource() }
-              Text(text = "\uf500", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (raidInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = raidInteractionSource))
+              Text(text = "\uf0c0", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (raidInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = raidInteractionSource))
             }
           }
 
           // right icons — overlaid at end edge, never affects title layout
           Row(modifier = Modifier.align(Alignment.CenterEnd).alpha(controlsAlpha), verticalAlignment = Alignment.CenterVertically) {
-            // View options dropdown (Summary / Battle Graph)
-            Box {
+            // Summary — opens Battle Summary directly
+            IconButton(onClick = { wm?.openWindow(OverlayType.SUMMARY) }, modifier = Modifier.size(32.dp)) {
               val summaryInteractionSource = remember { MutableInteractionSource() }
-              val isSummaryHovered by summaryInteractionSource.collectIsHoveredAsState()
-              IconButton(onClick = {
-                if (config.performanceBattleGraphEnabled) {
-                  showViewPopup = !showViewPopup
-                } else {
-                  // When battle graph is disabled, open Summary directly
-                  wm?.openWindow(OverlayType.SUMMARY)
-                }
-              }, modifier = Modifier.size(32.dp)) {
-                Text(text = "\uf200", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (isSummaryHovered || showViewPopup) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = summaryInteractionSource))
+              Text(text = "\uf200", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (summaryInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = summaryInteractionSource))
+            }
+            // Menu button — opens full system tray menu
+            Box {
+              val menuInteractionSource = remember { MutableInteractionSource() }
+              val isMenuHovered by menuInteractionSource.collectIsHoveredAsState()
+              val hasUpdate = pendingUpdate != null
+              val menuColor = when {
+                isMenuHovered -> Color.Red
+                hasUpdate -> RFColors.UpdateGold
+                else -> Color.White
               }
-              if (showViewPopup && config.performanceBattleGraphEnabled) {
+              IconButton(onClick = { showMenuPopup = !showMenuPopup }, modifier = Modifier.size(32.dp)) {
+                Text(text = "\uf013", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = menuColor, modifier = Modifier.hoverable(interactionSource = menuInteractionSource))
+              }
+              if (showMenuPopup) {
+                val isRecording = CombatLogInteractor.isRecording.collectAsState()
                 Popup(
                   alignment = Alignment.TopEnd,
                   offset = IntOffset(0, 36)
@@ -401,60 +419,90 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                     elevation = 4.dp,
                     color = Color.Black.copy(alpha = 0.92f),
                     border = BorderStroke(1.dp, Color.Gray),
-                    modifier = Modifier.hoverable(interactionSource = viewPopupInteractionSource)
+                    modifier = Modifier.hoverable(interactionSource = menuPopupInteractionSource)
                   ) {
-                    Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                      TextButton(
-                        onClick = {
-                          showViewPopup = false
+                    Row(modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)) {
+                      // Left column — Overlays
+                      Column(modifier = Modifier.weight(1f)) {
+                        // Session actions
+                        if (isRecording.value) {
+                          MenuPopupItem("\uf0c7", stringResource(Res.string.tray_save_session)) {
+                            showMenuPopup = false
+                            PlayerCacheInteractor.stopSession()
+                            val currentSessionStart = RFConfig.state.value.lastSessionStart
+                            RFConfig.update { it.copy(lastSessionStart = 0L, previousSessionStart = currentSessionStart) }
+                          }
+                          MenuPopupItem("\uf057", stringResource(Res.string.tray_abort_session), textColor = RFColors.AccentRed) {
+                            showMenuPopup = false
+                            PlayerCacheInteractor.abortSession()
+                          }
+                        } else {
+                          MenuPopupItem("\uf067", stringResource(Res.string.tray_new_session)) {
+                            showMenuPopup = false
+                            wm?.openWindow(OverlayType.NEW_SESSION)
+                          }
+                        }
+                        MenuPopupDivider()
+                        MenuPopupItem("\uf6d5", stringResource(Res.string.tray_dragon_breaths)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.POKEMON)
+                        }
+                        MenuPopupItem("\uf0c0", stringResource(Res.string.tray_raid_management)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.RAID)
+                        }
+                        MenuPopupItem("\uf080", stringResource(Res.string.battle_graph_summary)) {
+                          showMenuPopup = false
                           wm?.openWindow(OverlayType.SUMMARY)
-                        },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                      ) {
-                        Text(text = stringResource(Res.string.battle_graph_summary), color = Color.White, fontSize = 11.sp)
+                        }
+                        if (config.performanceBattleGraphEnabled) {
+                          MenuPopupItem("\uf1e0", stringResource(Res.string.tray_battle_graph)) {
+                            showMenuPopup = false
+                            wm?.openWindow(OverlayType.BATTLE_GRAPH)
+                          }
+                        }
+                        MenuPopupItem("\uf02d", stringResource(Res.string.tray_pocket_journal)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.POCKET_JOURNAL)
+                        }
+                        MenuPopupItem("\uf030", stringResource(Res.string.tray_take_screenshot)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.SCREENSHOT_PREVIEW)
+                        }
                       }
-                      TextButton(
-                        onClick = {
-                          showViewPopup = false
-                          wm?.openWindow(OverlayType.BATTLE_GRAPH)
-                        },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                      ) {
-                        Text(text = stringResource(Res.string.battle_graph_title), color = Color.White, fontSize = 11.sp)
+                      MenuPopupVerticalDivider()
+                      // Right column — App & Actions
+                      Column(modifier = Modifier.weight(1f)) {
+                        MenuPopupItem("\uf013", stringResource(Res.string.general_settings)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.SETTINGS)
+                        }
+                        MenuPopupItem("\uf12c", stringResource(Res.string.tray_lua_options)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.COMPANION)
+                        }
+                        MenuPopupItem("\uf059", stringResource(Res.string.general_about)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.ABOUT)
+                        }
+                        MenuPopupItem("\uf128", stringResource(Res.string.tray_help)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.HELP)
+                        }
+                        MenuPopupDivider()
+                        MenuPopupItem("\uf0e2", stringResource(Res.string.app_tray_reset_positions)) {
+                          showMenuPopup = false
+                          wm?.resetAllWindowPositions()
+                        }
+                        MenuPopupItem("\uf011", stringResource(Res.string.general_exit)) {
+                          showMenuPopup = false
+                          scope.launch { quitAfterSessionStop() }
+                        }
+                        MenuPopupItem("\uf00d", stringResource(Res.string.tray_close)) {
+                          showMenuPopup = false
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-            // Settings cog — turns yellow when an update is available, with hover tooltip
-            var showSettingsTooltip by remember { mutableStateOf(false) }
-            Box {
-              val settingsInteractionSource = remember { MutableInteractionSource() }
-              val isSettingsHovered by settingsInteractionSource.collectIsHoveredAsState()
-              val hasUpdate = pendingUpdate != null
-              val cogColor = when {
-                isSettingsHovered -> Color.Red
-                hasUpdate -> RFColors.UpdateGold
-                else -> Color.White
-              }
-              IconButton(onClick = { wm?.openWindow(OverlayType.SETTINGS) }, modifier = Modifier.size(32.dp)) {
-                Text(text = "\uf013", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = cogColor, modifier = Modifier.hoverable(interactionSource = settingsInteractionSource))
-              }
-              if (hasUpdate && isSettingsHovered) {
-                Popup(alignment = Alignment.TopCenter, offset = IntOffset(0, 36)) {
-                  Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    elevation = 4.dp,
-                    color = Color.Black.copy(alpha = 0.9f),
-                    border = BorderStroke(1.dp, Color.Gray)
-                  ) {
-                    Text(
-                      text = stringResource(Res.string.combat_update_tooltip, pendingUpdate!!.version),
-                      color = Color.White,
-                      modifier = Modifier.padding(6.dp),
-                      fontSize = 11.sp
-                    )
                   }
                 }
               }
@@ -801,4 +849,50 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
       fontWeight = FontWeight.Light
     )
   }
+}
+
+@Composable
+private fun MenuPopupItem(
+  iconCode: String,
+  text: String,
+  textColor: Color = Color.White,
+  onClick: () -> Unit,
+) {
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    modifier = Modifier
+      .fillMaxWidth()
+      .height(26.dp)
+      .hoverable(interactionSource = interactionSource)
+      .clickable(onClick = onClick)
+      .padding(horizontal = 10.dp)
+  ) {
+    Text(text = iconCode, fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (isHovered) Color.Red else textColor)
+    Spacer(modifier = Modifier.width(8.dp))
+    Text(text = text, color = if (isHovered) Color.Red else textColor, fontSize = 11.sp, maxLines = 1)
+  }
+}
+
+@Composable
+private fun MenuPopupDivider() {
+  Spacer(
+    modifier = Modifier
+      .fillMaxWidth()
+      .height(1.dp)
+      .padding(horizontal = 4.dp)
+      .background(Color.White.copy(alpha = 0.15f))
+  )
+}
+
+@Composable
+private fun MenuPopupVerticalDivider() {
+  Spacer(
+    modifier = Modifier
+      .width(1.dp)
+      .fillMaxHeight()
+      .padding(vertical = 4.dp)
+      .background(Color.White.copy(alpha = 0.15f))
+  )
 }

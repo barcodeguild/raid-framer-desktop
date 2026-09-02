@@ -499,7 +499,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 120f,
       lastWidthDp = 900f,
       lastHeightDp = 800f,
-      isVisible = true
+      isVisible = false
     )
 
     OverlayType.POCKET_EDITOR -> WindowStateEntity(
