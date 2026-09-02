@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -78,6 +79,7 @@ import com.reoky.raidframer.core.definitions.rememberMetaSpecs
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.rememberSectionPulse
@@ -191,6 +193,7 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
     }
   }
   var raidWasDetected by remember { mutableStateOf(false) }
+  var showFilterMenu by remember { mutableStateOf(false) }
   if (!raidWasDetected && (mainRaid.value.isNotEmpty() || coRaid.value.isNotEmpty())) {
     raidWasDetected = true
   }
@@ -230,6 +233,39 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
         TitleBarComponent(
           title = stringResource(Res.string.raid_attendance_title),
           onClose = { wm?.closeWindow(OverlayType.RAID) },
+          rightActions = {
+            Box {
+              IconButton(onClick = { showFilterMenu = !showFilterMenu }) {
+                Text(
+                  text = "\uf337", // fa-sliders
+                  fontFamily = FontsHelper.faSolid(),
+                  fontSize = 16.sp,
+                  color = Color.White
+                )
+              }
+              if (showFilterMenu) {
+                Popup(
+                  alignment = Alignment.TopEnd,
+                  offset = IntOffset(0, 50),
+                  onDismissRequest = { showFilterMenu = false }
+                ) {
+                  Box(
+                    modifier = Modifier
+                      .width(350.dp)
+                      .background(Color(0xFF141414).copy(alpha = 0.97f), RoundedCornerShape(10.dp))
+                      .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(10.dp))
+                      .padding(12.dp)
+                  ) {
+                    NearbyFilterControls(
+                      state = filterState,
+                      onStateChange = { filterState = it },
+                      textColor = Color.White
+                    )
+                  }
+                }
+              }
+            }
+          },
           captureActions = if (window != null && wm != null) titleBarCaptureActions(
             window, wm, stringResource(Res.string.raid_attendance_title)
           ) else null
@@ -305,16 +341,14 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
-              filterState = filterState,
-              onFilterStateChange = { filterState = it }
+              filterState = filterState
             )
 
             RaidTab.NEARBY_GEAR -> NearbyGearTab(
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
-              filterState = filterState,
-              onFilterStateChange = { filterState = it }
+              filterState = filterState
             )
 
             RaidTab.COMPOSITION -> CompositionTab(
@@ -323,7 +357,6 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
               nearbyPirate = nearbyPirate.value,
               playerFaction = playerFaction,
               filterState = filterState,
-              onFilterStateChange = { filterState = it },
               wm = wm
             )
           }
@@ -340,7 +373,6 @@ private fun CompositionTab(
   nearbyPirate: List<PlayerCard>,
   playerFaction: Faction = Faction.UNKNOWN,
   filterState: NearbyFilterState,
-  onFilterStateChange: (NearbyFilterState) -> Unit,
   wm: WindowManager? = null,
 ) {
   val filteredHaranya = filterNearbyPlayers(nearbyHaranya, filterState)
@@ -418,18 +450,6 @@ private fun CompositionTab(
           }
         }
       }
-    }
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-      horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-      NearbyFilterControls(
-        state = filterState,
-        onStateChange = onFilterStateChange,
-        modifier = Modifier.weight(1f),
-        textColor = RFColors.TextPrimary
-      )
-      // Box(modifier = Modifier.weight(1f)) // reserved for future use
     }
     ResponsiveFactionSections(
       factionPlayers,
@@ -2052,8 +2072,7 @@ private fun NearbyTab(
   nearbyNuia: List<PlayerCard>,
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
-  filterState: NearbyFilterState,
-  onFilterStateChange: (NearbyFilterState) -> Unit
+  filterState: NearbyFilterState
 ) {
   val scrollState = rememberScrollState()
 
@@ -2154,18 +2173,6 @@ private fun NearbyTab(
       fontStyle = FontStyle.Italic,
       modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
     )
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-      horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-      NearbyFilterControls(
-        state = filterState,
-        onStateChange = onFilterStateChange,
-        modifier = Modifier.weight(1f),
-        textColor = Color.White
-      )
-      // Box(modifier = Modifier.weight(1f)) // reserved for future use
-    }
   }
 }
 
@@ -2179,8 +2186,7 @@ private fun NearbyGearTab(
   nearbyNuia: List<PlayerCard>,
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
-  filterState: NearbyFilterState,
-  onFilterStateChange: (NearbyFilterState) -> Unit
+  filterState: NearbyFilterState
 ) {
   val scrollState = rememberScrollState()
 
@@ -2283,18 +2289,6 @@ private fun NearbyGearTab(
           modifier = Modifier.padding(top = 4.dp)
         )
       }
-    }
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-      horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-      NearbyFilterControls(
-        state = filterState,
-        onStateChange = onFilterStateChange,
-        modifier = Modifier.weight(1f),
-        textColor = Color.White
-      )
-      // Box(modifier = Modifier.weight(1f)) // reserved for future use
     }
     OverlaidGearScoreChart(
       series = listOf(

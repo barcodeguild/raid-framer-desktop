@@ -103,18 +103,18 @@ fun TitleBarComponent(
     }
 
     Row(
-      modifier = Modifier.align(Alignment.CenterStart).padding(start = 6.dp),
+      modifier = Modifier.align(Alignment.CenterEnd).padding(start = 6.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
       leadingActions()
     }
 
     Row(
-      modifier = Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 6.dp),
+      modifier = Modifier.align(Alignment.CenterEnd).padding(end = 8.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
       rightActions()
-      Spacer(Modifier.width(8.dp))
+      if (captureActions != null) Spacer(Modifier.width(2.dp))
       captureActions?.invoke(this)
       trailingContent()
       CloseButton(onClose = onClose)

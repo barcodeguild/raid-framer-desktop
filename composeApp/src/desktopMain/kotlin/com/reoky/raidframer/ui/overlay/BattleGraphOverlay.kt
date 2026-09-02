@@ -34,6 +34,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.togglePlayerCard
@@ -51,7 +52,6 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.titleBarCaptureActions
 import androidx.compose.ui.awt.ComposeWindow
 import com.reoky.raidframer.ui.component.CompactSessionTotals
-import com.reoky.raidframer.ui.component.CloseButton
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.graphs.BattleGraphComponent
 import kotlinx.coroutines.flow.debounce
@@ -160,7 +160,8 @@ fun BattleGraphOverlay(wm: WindowManager?, window: ComposeWindow? = null) {
       TitleBarComponent(
         title = titleText,
         onClose = { wm?.closeWindow(OverlayType.BATTLE_GRAPH) },
-        captureActions = if (window != null && wm != null) titleBarCaptureActions(window, wm, titleText) else null
+        captureActions = if (window != null && wm != null) titleBarCaptureActions(window, wm, titleText) else null,
+        modifier = Modifier.zIndex(1f)
       )
 
       // Graph area with controls overlaid in upper-right
@@ -577,14 +578,6 @@ fun BattleGraphOverlay(wm: WindowManager?, window: ComposeWindow? = null) {
       }
     }
   }
-
-    // Close button overlay so it's always above graph nodes
-    CloseButton(
-      onClose = { wm?.closeWindow(OverlayType.BATTLE_GRAPH) },
-      modifier = Modifier
-        .align(Alignment.TopEnd)
-        .padding(top = 6.dp, end = 6.dp)
-    )
   }
 }
 

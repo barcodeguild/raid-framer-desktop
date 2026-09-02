@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.ui.LocalDragLock
 
@@ -27,9 +28,9 @@ fun PocketWindowCaptureMenu(
 
   IconButton(
     onClick = { expanded = !expanded },
-    modifier = androidx.compose.ui.Modifier.size(32.dp)
+    modifier = Modifier.size(36.dp)
   ) {
-    Text("\uf03e", color = Color.White, fontFamily = FontsHelper.faSolid(), fontSize = 14.sp)
+    Text("\uf03e", color = Color.White, fontFamily = FontsHelper.faSolid(), fontSize = 18.sp)
   }
   DropdownMenu(
     expanded = expanded,

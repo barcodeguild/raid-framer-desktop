@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
@@ -101,7 +104,7 @@ private fun FilterSlider(
     onValueChange = { onValueChange(it.toInt().coerceIn(valueRange.first, valueRange.last)) },
     valueRange = valueRange.first.toFloat()..valueRange.last.toFloat(),
     interactionSource = interactionSource,
-    modifier = modifier,
+    modifier = modifier.height(24.dp),
     colors = SliderDefaults.colors(
       thumbColor = Color(0xFFDC143C),
       activeTrackColor = Color(0xFFDC143C),
@@ -120,10 +123,7 @@ private fun FilterWell(
 ) {
   Column(
     modifier = modifier
-      .clip(RoundedCornerShape(10.dp))
-      .background(RFColors.CardBackground)
-      .border(1.dp, RFColors.CardBorder, RoundedCornerShape(10.dp))
-      .padding(16.dp),
+      .padding(4.dp),
     verticalArrangement = Arrangement.spacedBy(12.dp),
     content = content
   )
@@ -166,15 +166,16 @@ fun NearbyFilterControls(
     // --- Participation Stage ---
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
       Text("PvP Participation", color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-      Row(
+      @OptIn(ExperimentalLayoutApi::class)
+      FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
         PARTICIPATION_STAGE_LABELS.forEachIndexed { index, label ->
           val isSelected = state.participationStage == index
           Box(
             modifier = Modifier
-              .weight(1f)
               .padding(vertical = 2.dp)
               .clip(RoundedCornerShape(6.dp))
               .clickable { onStateChange(state.copy(participationStage = index)) },
