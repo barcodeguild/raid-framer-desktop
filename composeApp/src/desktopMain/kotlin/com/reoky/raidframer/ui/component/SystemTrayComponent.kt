@@ -39,6 +39,9 @@ import com.reoky.raidframer.messageBox
 import com.reoky.raidframer.quitAfterSessionStop
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.capture.GameSnippingService
+import com.reoky.raidframer.ui.capture.PocketWindowCaptureCoordinator
+import com.reoky.raidframer.ui.capture.ScreenshotPreviewCoordinator
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -202,7 +205,12 @@ fun ApplicationScope.SystemTrayComponent(
         }
         TrayMenuItem(iconCode = "\uf030", text = takeScreenshotStr) {
           menuVisible = false
-          wm.openWindow(OverlayType.SCREENSHOT_PREVIEW)
+          scope.launch {
+            val image = GameSnippingService.capture() ?: return@launch
+            val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
+            ScreenshotPreviewCoordinator.show(result)
+            wm.openWindow(OverlayType.SCREENSHOT_PREVIEW)
+          }
         }
 
         TrayMenuDivider()

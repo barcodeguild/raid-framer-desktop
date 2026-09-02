@@ -41,6 +41,9 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.OverlayHoverState
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.capture.GameSnippingService
+import com.reoky.raidframer.ui.capture.PocketWindowCaptureCoordinator
+import com.reoky.raidframer.ui.capture.ScreenshotPreviewCoordinator
 import com.reoky.raidframer.ui.component.titleBarCaptureActions
 import com.reoky.raidframer.core.model.CombatRankingCategory
 import com.reoky.raidframer.core.model.PlayerCard
@@ -467,7 +470,14 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                         }
                         MenuPopupItem("\uf030", stringResource(Res.string.tray_take_screenshot)) {
                           showMenuPopup = false
-                          wm?.openWindow(OverlayType.SCREENSHOT_PREVIEW)
+                          scope.launch {
+                            val image = GameSnippingService.capture(
+                              windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.COMBAT))
+                            ) ?: return@launch
+                            val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
+                            ScreenshotPreviewCoordinator.show(result)
+                            wm?.openWindow(OverlayType.SCREENSHOT_PREVIEW)
+                          }
                         }
                       }
                       MenuPopupVerticalDivider()
