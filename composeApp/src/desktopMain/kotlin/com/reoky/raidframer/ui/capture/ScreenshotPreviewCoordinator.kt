@@ -2,6 +2,7 @@ package com.reoky.raidframer.ui.capture
 
 import com.reoky.raidframer.core.helpers.copyImageToClipboard
 import com.reoky.raidframer.core.helpers.showInExplorer
+import com.reoky.raidframer.core.helpers.showFolderInExplorer
 import java.awt.image.BufferedImage
 import java.nio.file.Files
 import java.nio.file.Path
@@ -38,6 +39,10 @@ object ScreenshotPreviewCoordinator {
 
   fun showInExplorer() {
     _pending.value?.let { showInExplorer(it.snippetFile) }
+  }
+
+  fun showExportsInExplorer() {
+    _pending.value?.let { showFolderInExplorer(it.snippetFile.parent?.parent ?: it.snippetsDirectory) }
   }
 
   fun copyToClipboard() {

@@ -30,9 +30,11 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.helpers.copyImageToClipboard
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.togglePlayerCard
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
@@ -101,6 +103,7 @@ import raid_framer_desktop.composeapp.generated.resources.app_tray_reset_positio
 import raid_framer_desktop.composeapp.generated.resources.general_settings
 import raid_framer_desktop.composeapp.generated.resources.general_about
 import raid_framer_desktop.composeapp.generated.resources.general_exit
+import raid_framer_desktop.composeapp.generated.resources.tray_copy_screenshot_to_clipboard
 
 @Preview
 @Composable
@@ -471,12 +474,23 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                         MenuPopupItem("\uf030", stringResource(Res.string.tray_take_screenshot)) {
                           showMenuPopup = false
                           scope.launch {
+                            delay(150)
                             val image = GameSnippingService.capture(
                               windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.COMBAT))
                             ) ?: return@launch
                             val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
                             ScreenshotPreviewCoordinator.show(result)
                             wm?.openWindow(OverlayType.SCREENSHOT_PREVIEW)
+                          }
+                        }
+                        MenuPopupItem("\uf0c8", stringResource(Res.string.tray_copy_screenshot_to_clipboard)) {
+                          showMenuPopup = false
+                          scope.launch {
+                            delay(150)
+                            val image = GameSnippingService.capture(
+                              windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.COMBAT))
+                            ) ?: return@launch
+                            copyImageToClipboard(image)
                           }
                         }
                       }

@@ -170,9 +170,20 @@ fun openWebLink(url: String) {
 fun showInExplorer(file: Path) {
   runCatching {
     if (System.getProperty("os.name").lowercase().contains("win")) {
-      ProcessBuilder("explorer.exe", "/select,${file.toAbsolutePath()}").start()
+      // Explorer treats /select, as a switch and the target as a separate argument.
+      ProcessBuilder("explorer.exe", "/select,", file.toAbsolutePath().toString()).start()
     } else {
       Desktop.getDesktop().open(file.parent?.toFile())
+    }
+  }
+}
+
+fun showFolderInExplorer(directory: Path) {
+  runCatching {
+    if (System.getProperty("os.name").lowercase().contains("win")) {
+      ProcessBuilder("explorer.exe", directory.toAbsolutePath().toString()).start()
+    } else {
+      Desktop.getDesktop().open(directory.toAbsolutePath().toFile())
     }
   }
 }

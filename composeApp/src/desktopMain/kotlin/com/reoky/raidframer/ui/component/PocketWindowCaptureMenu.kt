@@ -5,6 +5,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,15 +17,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.ui.LocalDragLock
+import kotlinx.coroutines.delay
 
 @Composable
 fun PocketWindowCaptureMenu(
   onSaveToPocket: () -> Unit,
   onExportPng: () -> Unit,
+  onCopyToClipboard: () -> Unit,
 ) {
   var expanded by remember { mutableStateOf(false) }
+  var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
   val dragLock = LocalDragLock.current
   dragLock.value = expanded
+
+  LaunchedEffect(pendingAction) {
+    val action = pendingAction ?: return@LaunchedEffect
+    delay(150)
+    pendingAction = null
+    action()
+  }
 
   IconButton(
     onClick = { expanded = !expanded },
@@ -38,11 +49,15 @@ fun PocketWindowCaptureMenu(
   ) {
     DropdownMenuItem(onClick = {
       expanded = false
-      onSaveToPocket()
+      pendingAction = onSaveToPocket
     }) { Text("Save to Pocket") }
     DropdownMenuItem(onClick = {
       expanded = false
-      onExportPng()
+      pendingAction = onExportPng
     }) { Text("Export PNG") }
+    DropdownMenuItem(onClick = {
+      expanded = false
+      pendingAction = onCopyToClipboard
+    }) { Text("Copy to Clipboard") }
   }
 }

@@ -12,17 +12,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.reoky.raidframer.ui.LocalDragLock
+import kotlinx.coroutines.delay
 
 @Composable
 fun PocketCaptureMenu(
   onReferenceInPocket: () -> Unit,
   onExportPng: () -> Unit,
+  onCopyToClipboard: () -> Unit,
 ) {
   var expanded by remember { mutableStateOf(false) }
+  var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
   val dragLock = LocalDragLock.current
 
   LaunchedEffect(expanded) {
     dragLock.value = expanded
+  }
+
+  LaunchedEffect(pendingAction) {
+    val action = pendingAction ?: return@LaunchedEffect
+    delay(150)
+    pendingAction = null
+    action()
   }
 
   Column {
@@ -35,12 +45,16 @@ fun PocketCaptureMenu(
     ) {
       DropdownMenuItem(onClick = {
         expanded = false
-        onReferenceInPocket()
+        pendingAction = onReferenceInPocket
       }) { Text("Reference in Pocket") }
       DropdownMenuItem(onClick = {
         expanded = false
-        onExportPng()
+        pendingAction = onExportPng
       }) { Text("Export PNG") }
+      DropdownMenuItem(onClick = {
+        expanded = false
+        pendingAction = onCopyToClipboard
+      }) { Text("Copy to Clipboard") }
     }
   }
 }

@@ -1314,6 +1314,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="tray_lua_options">Lua Options</string>
     <string name="tray_help">Help</string>
     <string name="tray_take_screenshot">Take Screenshot</string>
+    <string name="tray_copy_screenshot_to_clipboard">Copy Screenshot to Clipboard</string>
     <string name="tray_close">Close</string>
 
     <!-- Raid Caller / Leader Overlay -->

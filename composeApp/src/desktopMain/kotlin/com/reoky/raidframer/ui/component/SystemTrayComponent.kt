@@ -42,6 +42,8 @@ import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.capture.GameSnippingService
 import com.reoky.raidframer.ui.capture.PocketWindowCaptureCoordinator
 import com.reoky.raidframer.ui.capture.ScreenshotPreviewCoordinator
+import com.reoky.raidframer.core.helpers.copyImageToClipboard
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -59,6 +61,7 @@ import raid_framer_desktop.composeapp.generated.resources.tray_dragon_breaths
 import raid_framer_desktop.composeapp.generated.resources.tray_pocket_journal
 import raid_framer_desktop.composeapp.generated.resources.tray_lua_options
 import raid_framer_desktop.composeapp.generated.resources.tray_help
+import raid_framer_desktop.composeapp.generated.resources.tray_copy_screenshot_to_clipboard
 import raid_framer_desktop.composeapp.generated.resources.tray_take_screenshot
 import raid_framer_desktop.composeapp.generated.resources.tray_new_session
 import raid_framer_desktop.composeapp.generated.resources.tray_raid_management
@@ -97,6 +100,7 @@ fun ApplicationScope.SystemTrayComponent(
   val luaOptionsStr = stringResource(Res.string.tray_lua_options)
   val helpStr = stringResource(Res.string.tray_help)
   val takeScreenshotStr = stringResource(Res.string.tray_take_screenshot)
+  val copyScreenshotStr = stringResource(Res.string.tray_copy_screenshot_to_clipboard)
   val closeStr = stringResource(Res.string.tray_close)
 
   DisposableEffect(Unit) {
@@ -206,10 +210,19 @@ fun ApplicationScope.SystemTrayComponent(
         TrayMenuItem(iconCode = "\uf030", text = takeScreenshotStr) {
           menuVisible = false
           scope.launch {
+            delay(150)
             val image = GameSnippingService.capture() ?: return@launch
             val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
             ScreenshotPreviewCoordinator.show(result)
             wm.openWindow(OverlayType.SCREENSHOT_PREVIEW)
+          }
+        }
+        TrayMenuItem(iconCode = "\uf0c8", text = copyScreenshotStr) {
+          menuVisible = false
+          scope.launch {
+            delay(150)
+            val image = GameSnippingService.capture() ?: return@launch
+            copyImageToClipboard(image)
           }
         }
 
