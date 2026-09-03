@@ -120,6 +120,7 @@ fun RaidBuffRequirements.matches(member: RaidFramePayload, allowGuildBuff: Boole
 fun RaidBuffRequirements.matchesResolved(member: RaidFramePayload, gracePeriod: RaidBuffGracePeriod, allowGuildBuff: Boolean = true): Boolean {
   val observation = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
   val snapshot = observation.snapshot ?: return false
+  if (!snapshot.confirmed) return false
   return matches(member.copy(buffs = snapshot.buffIds.map { id -> com.reoky.raidframer.core.serialization.BuffPayload(buff_id = id) }), allowGuildBuff)
 }
 

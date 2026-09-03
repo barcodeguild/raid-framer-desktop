@@ -1153,14 +1153,16 @@ private fun BuffsTab(
   val allMembers = (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
   val observations = allMembers.associateWith { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod) }
   val buffed = allMembers.filter { member ->
-    val snapshot = observations.getValue(member).snapshot
-    snapshot != null && requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
+    val observation = observations.getValue(member)
+    val snapshot = observation.snapshot
+    snapshot != null && snapshot.confirmed && requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
       BuffPayload(buff_id = id)
     }), config.raidCallerAllowGuildBuff)
   }.joinToString(", ") { it.playerName }
   val notBuffed = allMembers.filter { member ->
-    val snapshot = observations.getValue(member).snapshot
-    snapshot != null && !requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
+    val observation = observations.getValue(member)
+    val snapshot = observation.snapshot
+    snapshot != null && snapshot.confirmed && !requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
       BuffPayload(buff_id = id)
     }), config.raidCallerAllowGuildBuff)
   }.joinToString(", ") { it.playerName }
@@ -1507,7 +1509,7 @@ private fun BuffRaidPane(
           onPlayerClickAt = onSelectAt,
           isBuffed = { requirements.matchesResolved(it, gracePeriod, allowGuildBuff) },
           isOutOfRange = { it.distance > 115 },
-          isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
+           isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).isKnown })
       }
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -1523,7 +1525,7 @@ private fun BuffRaidPane(
           onPlayerClickAt = onSelectAt,
           isBuffed = { requirements.matchesResolved(it, gracePeriod, allowGuildBuff) },
           isOutOfRange = { it.distance > 115 },
-          isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
+           isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).isKnown })
       }
     }
   }

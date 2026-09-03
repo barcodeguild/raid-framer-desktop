@@ -343,22 +343,10 @@ object PlayerCacheInteractor : Interactor() {
   private fun recordRaidBuffSnapshot(member: RaidFramePayload) {
     val now = System.currentTimeMillis()
     val buffIds = member.buffs.map { it.buff_id }.toSet()
-    // Only a non-empty buff read is always a valid confirmation of the player's state.
+    // The addon emits an empty list both for a confirmed empty read and for a player it could not
+    // inspect. Preserve that distinction: an empty read is not evidence that buffs are missing.
     if (buffIds.isNotEmpty()) {
       raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, buffIds, member.distance)
-    } else {
-      // An empty scan means the addon could NOT see the player's buffs. A raid member can be
-      // within the game's "unit in range" radius yet far past the much shorter buff-scan range,
-      // so the game reports zero buffs even though the player is still buffed. We must NOT let
-      // that empty result erase a player's known-buffed state, or the grace period never gets to
-      // keep them as buffed while they walk out of buff-scan range. Only record "unbuffed" when
-      // there is no fresher buffed record to preserve.
-      val existing = raidBuffHistory[member.playerName]
-      val hasFreshBuffed = existing != null && existing.buffIds.isNotEmpty() &&
-        now - existing.observedAt <= RAID_BUFF_HISTORY_RETENTION_MS
-      if (!hasFreshBuffed) {
-        raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, emptySet(), member.distance)
-      }
     }
     if (now - lastRaidBuffHistoryCleanupAt >= 60_000L) {
       val cutoff = now - RAID_BUFF_HISTORY_RETENTION_MS
@@ -371,9 +359,7 @@ object PlayerCacheInteractor : Interactor() {
     val now = System.currentTimeMillis()
     val currentIds = member.buffs.map { it.buff_id }.toSet()
     val currentTimestamp = member.buffScanTimestamp.takeIf { it > 0L }?.times(1000L)
-    // Only trust the live scan when it actually contains buff data.
-    // An out-of-range player still produces a fresh buffScanTimestamp but with empty buffs,
-    // so we must fall through to history instead of short-circuiting.
+    // Only a non-empty live scan confirms the player's buff state. Empty scans are not scannable.
     if (currentIds.isNotEmpty() && currentTimestamp != null && now - currentTimestamp <= gracePeriod.millis) {
       return RaidBuffObservation(member, RaidBuffSnapshot(currentTimestamp, currentIds, member.distance), true)
     }
