@@ -129,6 +129,7 @@ You should still complete the uninstallation of the main application by uninstal
     <string name="settings_item_use_overlay">Enable Item Use Overlay. Shows recent item uses in a kill-feed style. [EXPERIMENTAL / PROTOTYPE]</string>
     <string name="settings_split_chat">Enable OSRS-style split-chat window overlay. (Coming Soon)</string>
     <string name="settings_tabbed_detection">Automatically hide game overlay's while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).</string>
+    <string name="settings_combat_overlay_tooltip">Make Combat Overlay a Multi-Monitor Tool-Tip instead of a Game Overlay. (Shows as a draggable, always-visible tool-tip with a title-bar.)</string>
     <string name="settings_allow_pve_damage">Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)</string>
     <string name="settings_game_schedule_hotkey">Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay. (Coming Soon)</string>
     <string name="settings_use_sadly">I'd prefer to use Sadly.io for in-game schedule data. (Coming Soon)</string>
@@ -1385,5 +1386,19 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="screenshot_game_title">Game Screenshot</string>
     <string name="screenshot_content_desc">Screenshot preview</string>
     <string name="screenshot_ctrl_c_hint">Ctrl+C to copy</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">Open Help and Installation Guide</string>
+    <string name="about_help_button">? Help</string>
+    <string name="player_card_journal_entries">Pocket Journal</string>
+    <string name="raid_loot_breakdown_title">Loot Breakdown (Most → Least)</string>
+    <string name="tray_pocket_journal">Pocket Journal</string>
+    <string name="tray_help">Help</string>
+    <string name="tray_take_screenshot">Take Screenshot</string>
+    <string name="tray_copy_screenshot_to_clipboard">Copy Screenshot to Clipboard</string>
+    <string name="pocket_editor_toolbar_current_target">Target</string>
+    <string name="pocket_editor_toolbar_target_guild">Guild</string>
+    <string name="raid_join_raid_hint">Join a raid to use raid-related features…</string>
+    <string name="raid_tab_buffs">Buffs</string>
 </resources>
 

@@ -1450,5 +1450,17 @@
     <string name="screenshot_game_title">게임 스크린샷</string>
     <string name="screenshot_content_desc">스크린샷 미리 보기</string>
     <string name="screenshot_ctrl_c_hint">복사하려면 Ctrl+C</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">도움말 및 설치 가이드 열기</string>
+    <string name="about_help_button">? 도움말</string>
+    <string name="player_card_journal_entries">포켓 저널</string>
+    <string name="raid_loot_breakdown_title">루트 상세 (많은 순 → 적은 순)</string>
+    <string name="tray_pocket_journal">포켓 저널</string>
+    <string name="tray_help">도움말</string>
+    <string name="tray_take_screenshot">스크린샷 촬영</string>
+    <string name="tray_copy_screenshot_to_clipboard">스크린샷 클립보드에 복사</string>
+    <string name="pocket_editor_toolbar_current_target">대상</string>
+    <string name="pocket_editor_toolbar_target_guild">길드</string>
 </resources>
 

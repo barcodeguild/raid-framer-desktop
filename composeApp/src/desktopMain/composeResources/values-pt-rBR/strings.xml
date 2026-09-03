@@ -1386,5 +1386,19 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="screenshot_game_title">Captura do jogo</string>
     <string name="screenshot_content_desc">Pré-visualização de captura</string>
     <string name="screenshot_ctrl_c_hint">Ctrl+C para copiar</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">Abrir Ajuda e Guia de Instalação</string>
+    <string name="about_help_button">? Ajuda</string>
+    <string name="player_card_journal_entries">Diário Pocket</string>
+    <string name="raid_loot_breakdown_title">Detalhamento de Loot (Mais → Menos)</string>
+    <string name="tray_pocket_journal">Diário Pocket</string>
+    <string name="tray_help">Ajuda</string>
+    <string name="tray_take_screenshot">Tirar Captura de Tela</string>
+    <string name="tray_copy_screenshot_to_clipboard">Copiar Captura de Tela para Área de Transferência</string>
+    <string name="pocket_editor_toolbar_current_target">Alvo</string>
+    <string name="pocket_editor_toolbar_target_guild">Guilda</string>
+    <string name="raid_join_raid_hint">Entre em uma raid para usar recursos relacionados a raids…</string>
+    <string name="raid_tab_buffs">Buffs</string>
 </resources>
 

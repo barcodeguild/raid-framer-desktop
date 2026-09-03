@@ -1386,5 +1386,19 @@
     <string name="screenshot_game_title">Игровой скриншот</string>
     <string name="screenshot_content_desc">Предпросмотр скриншота</string>
     <string name="screenshot_ctrl_c_hint">Ctrl+C для копирования</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">Открыть справку и руководство по установке</string>
+    <string name="about_help_button">? Справка</string>
+    <string name="player_card_journal_entries">Журнал кармана</string>
+    <string name="raid_loot_breakdown_title">Детализация добычи (от большего к меньшему)</string>
+    <string name="tray_pocket_journal">Журнал кармана</string>
+    <string name="tray_help">Справка</string>
+    <string name="tray_take_screenshot">Сделать скриншот</string>
+    <string name="tray_copy_screenshot_to_clipboard">Копировать скриншот в буфер обмена</string>
+    <string name="pocket_editor_toolbar_current_target">Цель</string>
+    <string name="pocket_editor_toolbar_target_guild">Гильдия</string>
+    <string name="raid_join_raid_hint">Присоединитесь к рейду, чтобы использовать рейдовые функции…</string>
+    <string name="raid_tab_buffs">Баффы</string>
 </resources>
 

@@ -1386,5 +1386,19 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="screenshot_game_title">Spiel-Screenshot</string>
     <string name="screenshot_content_desc">Screenshot-Vorschau</string>
     <string name="screenshot_ctrl_c_hint">Strg+C zum Kopieren</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">Hilfe und Installationsanleitung öffnen</string>
+    <string name="about_help_button">? Hilfe</string>
+    <string name="player_card_journal_entries">Taschen-Journal</string>
+    <string name="raid_loot_breakdown_title">Beute-Übersicht (Meiste → Wenigste)</string>
+    <string name="tray_pocket_journal">Taschen-Journal</string>
+    <string name="tray_help">Hilfe</string>
+    <string name="tray_take_screenshot">Screenshot erstellen</string>
+    <string name="tray_copy_screenshot_to_clipboard">Screenshot in Zwischenablage kopieren</string>
+    <string name="pocket_editor_toolbar_current_target">Ziel</string>
+    <string name="pocket_editor_toolbar_target_guild">Gilde</string>
+    <string name="raid_join_raid_hint">Treten Sie einem Raid bei, um Raid-Funktionen zu nutzen…</string>
+    <string name="raid_tab_buffs">Buffs</string>
 </resources>
 

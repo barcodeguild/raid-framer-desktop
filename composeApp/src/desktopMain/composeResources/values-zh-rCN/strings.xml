@@ -1450,5 +1450,17 @@
     <string name="screenshot_game_title">游戏截图</string>
     <string name="screenshot_content_desc">截图预览</string>
     <string name="screenshot_ctrl_c_hint">按 Ctrl+C 复制</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">打开帮助和安装指南</string>
+    <string name="about_help_button">? 帮助</string>
+    <string name="player_card_journal_entries">口袋日记</string>
+    <string name="raid_loot_breakdown_title">战利品明细（从多到少）</string>
+    <string name="tray_pocket_journal">口袋日记</string>
+    <string name="tray_help">帮助</string>
+    <string name="tray_take_screenshot">截图</string>
+    <string name="tray_copy_screenshot_to_clipboard">复制截图到剪贴板</string>
+    <string name="pocket_editor_toolbar_current_target">目标</string>
+    <string name="pocket_editor_toolbar_target_guild">公会</string>
 </resources>
 
