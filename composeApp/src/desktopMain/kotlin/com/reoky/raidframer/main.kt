@@ -9,6 +9,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.config.RenderingBackendConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
 import com.reoky.raidframer.core.pocket.initializePocketDraftCoordinator
@@ -17,6 +18,7 @@ import com.reoky.raidframer.core.helpers.UpdateStatus
 import com.reoky.raidframer.core.interactor.BattleGraphInteractor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
+import com.reoky.raidframer.core.interactor.CrashLogger
 import com.reoky.raidframer.core.interactor.DeathAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.GraphDataInteractor
@@ -58,6 +60,9 @@ private var appMutexHandle: HANDLE? = null
 
 /* ~ Entry Point ~ */
 fun main(args: Array<String>) {
+  System.setProperty("skiko.renderApi", RenderingBackendConfig.load())
+  CrashLogger.install()
+
   // Prevent duplicate launch
   if (!acquireSingleInstanceMutex()) {
     messageBox(AppGlobals.APP_NAME, "Raid Framer is already running.")
@@ -75,9 +80,16 @@ fun main(args: Array<String>) {
       exitProcess(1)
     }
 
-    RFConfig.init(RFDao.configDao)
-    initializePocketDraftCoordinator(RFDao.pocketDao)
-    RFConfig.initSync()
+  RFConfig.init(RFDao.configDao)
+  initializePocketDraftCoordinator(RFDao.pocketDao)
+  RFConfig.initSync()
+  val configuredBackend = RFConfig.state.value.renderingBackend
+    .uppercase()
+    .takeIf { it in setOf("OPENGL", "DIRECTX", "SOFTWARE") }
+  if (configuredBackend != null) {
+    RenderingBackendConfig.save(configuredBackend)
+  }
+  Log.info(TAG, "Configured Skiko rendering backend: ${System.getProperty("skiko.renderApi")}")
 
     // Apply language preference before Compose starts (must be before first composition)
     try {

@@ -85,6 +85,7 @@ fun initialize(): AppDatabase {
     .addMigrations(MIGRATION_44_45) // added Pocket journal metadata, tags, and attachments (08/31/26)
     .addMigrations(MIGRATION_45_46) // added nearby filter state persistence (sliding window, participation, behavior sensitivity)
     .addMigrations(MIGRATION_46_47) // added raid caller allow guild buff toggle (Gallant's Blessing)
+    .addMigrations(MIGRATION_47_48) // added Skiko rendering backend selection
     .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
     .fallbackToDestructiveMigrationOnDowngrade(true)

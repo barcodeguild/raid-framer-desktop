@@ -645,3 +645,10 @@ val MIGRATION_46_47 = object : Migration(46, 47) {
       .use { it.step() }
   }
 }
+
+val MIGRATION_47_48 = object : Migration(47, 48) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN renderingBackend TEXT NOT NULL DEFAULT 'DEFAULT'")
+      .use { it.step() }
+  }
+}

@@ -20,7 +20,12 @@ abstract class Interactor {
     scope.launch {
       startJob = coroutineContext[Job]
       while (isActive) {
-        interact()
+        try {
+          interact()
+        } catch (throwable: Throwable) {
+          if (throwable is CancellationException) throw throwable
+          CrashLogger.record("Unhandled exception in ${this@Interactor::class.simpleName}.interact()", throwable)
+        }
         delay(delay)
       }
     }

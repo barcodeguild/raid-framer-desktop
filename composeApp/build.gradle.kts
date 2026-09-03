@@ -1,7 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 val APP_NAME = "Raid Framer"
-val APP_VERSION = "2.3.8"
+val APP_VERSION = "2.3.9"
 val PACKAGE_ID = "com.reoky.raidframer"
 
 plugins {
@@ -76,6 +76,7 @@ compose.desktop {
         menu = true
         shortcut = true
         menuGroup = APP_NAME
+        console = true
 
         /* Allows for combat.log files to be right-click openable in Windows */
         fileAssociation(
@@ -100,6 +101,7 @@ compose.desktop {
       jvmArgs(
         "--add-opens=java.desktop/java.awt=ALL-UNNAMED",
         "--add-opens=java.desktop/sun.awt.windows=ALL-UNNAMED",
+        "-Dskiko.renderApi=OPENGL",
         // Eagerly return committed heap to the OS after GC so the process working set
         // doesn't stay ratcheted up after a battle. Requires a serial/parallel collector
         // (G1, the JDK default, ignores these ratio flags), so we force parallel GC here.
@@ -110,4 +112,3 @@ compose.desktop {
     }
   }
 }
-

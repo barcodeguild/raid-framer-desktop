@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.config.RenderingBackendConfig
+import org.jetbrains.skiko.SkikoProperties.renderApi
 import com.reoky.raidframer.core.database.ConfigEntity
 import com.reoky.raidframer.core.database.MAX_EXPORT_BACKGROUND_DIMNESS
 import com.reoky.raidframer.core.locale.AppLocale
@@ -334,6 +336,8 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       CombatOverlaySettingsPanel()
 
       PerformanceSettingsPanel(wm)
+
+      RenderingBackendSettingsPanel()
 
       RamUsagePanel()
 
@@ -1248,6 +1252,64 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
   // Distance help dialog
   if (showDistanceHelp) {
     PerformanceDistanceHelpDialog(onDismiss = { showDistanceHelp = false })
+  }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun RenderingBackendSettingsPanel() {
+  val config by RFConfig.state.collectAsState()
+  var expanded by remember { mutableStateOf(false) }
+  val options = listOf("DIRECTX", "OPENGL", "SOFTWARE")
+  val activeBackend = renderApi.name
+
+  SettingsSection(
+    title = "Rendering Backend",
+    description = "Choose the Skiko graphics backend. The selected backend is applied after restarting Raid Framer."
+  ) {
+    Text(
+      text = "Current backend: $activeBackend",
+      color = RFColors.UpdateGreen,
+      fontSize = 12.sp,
+      modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+    )
+    ExposedDropdownMenuBox(
+      expanded = expanded,
+      onExpandedChange = { expanded = !expanded }
+    ) {
+      OutlinedTextField(
+        value = config.renderingBackend,
+        textStyle = TextStyle(color = Color.White),
+        onValueChange = {},
+        readOnly = true,
+        label = { Text("Backend") },
+        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+        colors = OutlinedTextFieldDefaults.colors(
+          focusedTextColor = Color.White,
+          unfocusedTextColor = Color.White,
+          disabledTextColor = Color.White,
+          focusedBorderColor = RFColors.AccentRed,
+          unfocusedBorderColor = RFColors.CardBorder,
+          focusedLabelColor = RFColors.AccentRed,
+          unfocusedLabelColor = Color.White,
+          focusedTrailingIconColor = Color.White,
+          unfocusedTrailingIconColor = Color.White
+        )
+      )
+      ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        options.forEach { option ->
+          DropdownMenuItem(
+            text = { Text(option) },
+            onClick = {
+              RFConfig.update { it.copy(renderingBackend = option) }
+              RenderingBackendConfig.save(option)
+              expanded = false
+            }
+          )
+        }
+      }
+    }
   }
 }
 

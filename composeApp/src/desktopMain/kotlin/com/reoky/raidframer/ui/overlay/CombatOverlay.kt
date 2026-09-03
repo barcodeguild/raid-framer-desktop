@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.zIndex
@@ -33,7 +32,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.reoky.raidframer.AppGlobals
-import com.reoky.raidframer.AppState
 import com.reoky.raidframer.core.helpers.copyImageToClipboard
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.togglePlayerCard
@@ -67,6 +65,8 @@ import androidx.compose.material.Surface
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.IntOffset
+import com.reoky.raidframer.core.interactor.Log
+import org.jetbrains.skiko.SkikoProperties.renderApi
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_damage
 import raid_framer_desktop.composeapp.generated.resources.combat_column_pvp_heals
@@ -95,13 +95,10 @@ import raid_framer_desktop.composeapp.generated.resources.tray_dragon_breaths
 import raid_framer_desktop.composeapp.generated.resources.tray_raid_management
 import raid_framer_desktop.composeapp.generated.resources.tray_battle_graph
 import raid_framer_desktop.composeapp.generated.resources.tray_pocket_journal
-import raid_framer_desktop.composeapp.generated.resources.tray_lua_options
 import raid_framer_desktop.composeapp.generated.resources.tray_help
 import raid_framer_desktop.composeapp.generated.resources.tray_take_screenshot
-import raid_framer_desktop.composeapp.generated.resources.tray_close
 import raid_framer_desktop.composeapp.generated.resources.app_tray_reset_positions
 import raid_framer_desktop.composeapp.generated.resources.general_settings
-import raid_framer_desktop.composeapp.generated.resources.general_about
 import raid_framer_desktop.composeapp.generated.resources.general_exit
 import raid_framer_desktop.composeapp.generated.resources.tray_copy_screenshot_to_clipboard
 
@@ -122,6 +119,10 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
 
   val scope = rememberCoroutineScope()
   val exportProgress by ImageExportInteractor.progress.collectAsState()
+
+  LaunchedEffect(Unit) {
+    Log.debug("CombatOverlay", "Actual Skiko render API: ${renderApi.name}")
+  }
 
   // Update dialog — shown once on startup if an update is available
   val shouldShowUpdateDialog = remember { mutableStateOf(false) }

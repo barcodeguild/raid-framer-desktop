@@ -16,7 +16,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 47
+const val SCHEMA_VERSION = 48
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -109,6 +109,9 @@ data class ConfigEntity(
 
   // Language preference (empty = use system locale)
   val preferredLanguage: String = "",
+
+  // Skiko rendering backend. Applied on the next launch because it is read during startup.
+  val renderingBackend: String = "DEFAULT",
 
   // Auto-update settings
   val autoUpdateEnabled: Boolean = true,

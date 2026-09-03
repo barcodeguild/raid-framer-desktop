@@ -24,8 +24,6 @@ import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinDef.HWND
 import com.sun.jna.platform.win32.WinUser
 import java.awt.Point
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import java.awt.Rectangle
 import java.awt.Shape
 import java.awt.Window
@@ -33,7 +31,6 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.geom.*
 import java.lang.reflect.Field
-import kotlinx.coroutines.delay
 
 /**
  * A CompositionLocal that child composables can use to signal that the window should not
@@ -97,40 +94,8 @@ fun OverlayWindow(
       onWindowCreated(composeWindow)
     }
 
-    // Apply Discord-style overlay behavior whenever the window becomes visible
-    LaunchedEffect(window, isVisible.value, isEverythingVisible.value) {
-      if (windowType == OverlayWindowType.OVERLAY && isVisible.value && isEverythingVisible.value) {
-        delay(100)
-        getHWND(window)?.let { windowHandle ->
-          makeDiscordStyleOverlay(windowHandle)
-          bringToTopmost(windowHandle)
-        }
-      }
-    }
-
-    // Re-assert topmost when the window gains focus/activation. Register these
-    // listeners once and remove them with the Compose window lifecycle.
-    DisposableEffect(window, windowType) {
-      var adapter: WindowAdapter? = null
-      if (windowType == OverlayWindowType.OVERLAY) {
-        getHWND(window)?.let { hwnd ->
-          val listener = object : WindowAdapter() {
-            override fun windowActivated(e: WindowEvent?) {
-              bringToTopmost(hwnd)
-            }
-          }
-          adapter = listener
-          window.addWindowFocusListener(listener)
-          window.addWindowListener(listener)
-        }
-      }
-      onDispose {
-        adapter?.let {
-          window.removeWindowFocusListener(it)
-          window.removeWindowListener(it)
-        }
-      }
-    }
+    // The native window remains managed by Compose. Repeated Win32 style/Z-order mutations
+    // can race Skiko's native surface lifecycle on some Windows graphics drivers.
 
     // shift-click mouse listener to allow dragging the window around (tooltips always draggable without shift)
     val dragLocked = remember { mutableStateOf(false) }

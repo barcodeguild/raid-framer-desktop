@@ -37,6 +37,11 @@ object LoggingInteractor : Interactor() {
   fun warn(tag: String, message: String) = log(Level.WARN, tag, message)
   fun error(tag: String, message: String) = log(Level.ERROR, tag, message)
 
+  /** Writes an error immediately so fatal failures are not lost with the queued logger. */
+  fun error(tag: String, throwable: Throwable, message: String = throwable.message.orEmpty()) {
+    CrashLogger.record("$tag: $message", throwable)
+  }
+
   fun log(level: Level, tag: String, message: String) {
     val entry = LogEntry(Instant.now(), level, tag, message, seq.incrementAndGet())
     queue.add(entry)
