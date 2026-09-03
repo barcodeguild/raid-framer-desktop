@@ -42,7 +42,10 @@ object ScreenshotPreviewCoordinator {
   }
 
   fun showExportsInExplorer() {
-    _pending.value?.let { showFolderInExplorer(it.snippetFile.parent?.parent ?: it.snippetsDirectory) }
+    _pending.value?.let { pending ->
+      val exported = PocketWindowCaptureCoordinator.exportPng(pending.image, "game-screenshot")
+      exported?.let { showFolderInExplorer(it.parent ?: pending.snippetsDirectory) }
+    }
   }
 
   fun copyToClipboard() {

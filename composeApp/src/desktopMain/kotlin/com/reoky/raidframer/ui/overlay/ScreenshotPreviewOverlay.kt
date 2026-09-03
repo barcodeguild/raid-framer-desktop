@@ -149,6 +149,9 @@ fun ScreenshotPreviewOverlay(wm: WindowManager? = null) {
               val ok = PocketWindowCaptureCoordinator.saveToPocket(screenshot.image, "Game Screenshot", wm ?: return@launch)
               if (ok) { savedToPocket = true; feedback = "Saved to Pocket journal" }
               else feedback = "Could not save (attachment limit reached?)"
+              ScreenshotPreviewCoordinator.clear()
+              wm?.closeWindow(OverlayType.SCREENSHOT_PREVIEW)
+
             }
           }
           PreviewAction("\uf0c5", "Copy to Clipboard", highlighted = copyPulse) {
@@ -156,7 +159,11 @@ fun ScreenshotPreviewOverlay(wm: WindowManager? = null) {
             feedback = "Copied to clipboard"
             copyPulse = true
           }
-          PreviewAction("\uf019", "Save to Exports") { ScreenshotPreviewCoordinator.showExportsInExplorer() }
+          PreviewAction("\uf019", "Save to Exports") {
+            ScreenshotPreviewCoordinator.showExportsInExplorer()
+            ScreenshotPreviewCoordinator.clear()
+            wm?.closeWindow(OverlayType.SCREENSHOT_PREVIEW)
+          }
         }
       }
 
