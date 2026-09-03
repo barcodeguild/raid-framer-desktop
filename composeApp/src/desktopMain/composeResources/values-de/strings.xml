@@ -1288,6 +1288,7 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="raid_buff_loot_section">Beute-Buffs erforderlich</string>
     <string name="raid_buff_check_loot">Auf Beute-Buffs prüfen?</string>
     <string name="raid_buff_loot_threshold_label">Schwelle:</string>
+    <string name="raid_buff_allow_guild_buff">Gildenbuff (Gallant's Blessing) als vollständig gewertet zählen lassen</string>
     <string name="raid_caller_loot_threshold">Beuteschwelle</string>
     <string name="raid_caller_buff_mode">Buff-Modus</string>
     <string name="raid_caller_buff_grace">Buff-Gnadenfrist</string>

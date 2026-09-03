@@ -1288,6 +1288,7 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="raid_buff_loot_section">Exigir buffs de saque</string>
     <string name="raid_buff_check_loot">Verificar buffs de saque?</string>
     <string name="raid_buff_loot_threshold_label">Limite:</string>
+    <string name="raid_buff_allow_guild_buff">Permitir que o Buff de Guilda (Gallant's Blessing) conte como totalmente buffado</string>
     <string name="raid_caller_loot_threshold">Limite de Saque</string>
     <string name="raid_caller_buff_mode">Modo de Buff</string>
     <string name="raid_caller_buff_grace">Período de Carência de Buff</string>

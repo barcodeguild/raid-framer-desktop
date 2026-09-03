@@ -783,7 +783,7 @@
     <string name="raid_buff_golden_taffy">황금빛 환약</string>
     <string name="raid_buff_egg_of_fortune">행복이 담긴 달걀</string>
     <string name="raid_buff_gallants_blessing">Gallant's Blessing</string>
-    <string name="raid_buff_allow_guild_buff">Allow Guild Buff (Gallant's Blessing) to count as fully-buffed</string>
+    <string name="raid_buff_allow_guild_buff">길드 버프（페르디타의 권능）를 완전한 버프로 인정</string>
     <string name="raid_buff_guild_buff">Guild Buff</string>
     <string name="raid_buff_guild_buff_covers_all">None — Guild Buff covers all requirements</string>
     <string name="raid_copy_not_buffed">버프 없음 복사</string>

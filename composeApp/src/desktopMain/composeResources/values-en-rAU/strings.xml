@@ -1288,6 +1288,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="raid_buff_loot_section">Require Loot Buffs</string>
     <string name="raid_buff_check_loot">Check for loot buffs?</string>
     <string name="raid_buff_loot_threshold_label">Threshold:</string>
+    <string name="raid_buff_allow_guild_buff">Allow Guild Buff (Gallant's Blessing) to count as fully-buffed</string>
     <string name="raid_caller_loot_threshold">Loot Threshold</string>
     <string name="raid_caller_buff_mode">Buff Mode</string>
     <string name="raid_caller_buff_grace">Buff Grace</string>

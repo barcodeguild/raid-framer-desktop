@@ -1445,7 +1445,7 @@ private fun BuffsTab(
                   }
                   Spacer(modifier = Modifier.width(6.dp))
                   Text(
-                    "${lootBuff.lootPercent + 100}%",
+                    "${lootBuff.lootPercent}%",
                     color = RFColors.lootBuffColor,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
@@ -1907,7 +1907,7 @@ private fun LootBuffRow(name: String, amount: Int, maxAmount: Int) {
     }
     Spacer(modifier = Modifier.width(6.dp))
     Text(
-      "${amount + 100}%",
+      "${amount}%",
       color = RFColors.lootBuffColor,
       fontSize = 11.sp,
       fontWeight = FontWeight.Bold,
@@ -1923,7 +1923,7 @@ private fun BuffRequirementCheckboxes(
   localizedBuffLabels: Map<RaidBuffKey, String>,
   config: ConfigEntity
 ) {
-  RAID_BUFF_DEFINITIONS.filter { it.section == RaidBuffSection.MAIN }.forEach { definition ->
+  RAID_BUFF_DEFINITIONS.filter { it.section == RaidBuffSection.MAIN && it.key != RaidBuffKey.GALLANTS_BLESSING }.forEach { definition ->
     ControlledCheckbox(
       localizedBuffLabels[definition.key].orEmpty(),
       definition.key in requirements.selected

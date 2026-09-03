@@ -461,16 +461,6 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                           showMenuPopup = false
                           wm?.openWindow(OverlayType.SUMMARY)
                         }
-                        if (config.performanceBattleGraphEnabled) {
-                          MenuPopupItem("\uf1e0", stringResource(Res.string.tray_battle_graph)) {
-                            showMenuPopup = false
-                            wm?.openWindow(OverlayType.BATTLE_GRAPH)
-                          }
-                        }
-                        MenuPopupItem("\uf02d", stringResource(Res.string.tray_pocket_journal)) {
-                          showMenuPopup = false
-                          wm?.openWindow(OverlayType.POCKET_JOURNAL)
-                        }
                         MenuPopupItem("\uf030", stringResource(Res.string.tray_take_screenshot)) {
                           showMenuPopup = false
                           scope.launch {
@@ -493,26 +483,30 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                             copyImageToClipboard(image)
                           }
                         }
+
                       }
                       MenuPopupVerticalDivider()
                       // Right column — App & Actions
                       Column(modifier = Modifier.weight(1f)) {
-                        MenuPopupItem("\uf013", stringResource(Res.string.general_settings)) {
+                        MenuPopupItem("\uf02d", stringResource(Res.string.tray_pocket_journal)) {
                           showMenuPopup = false
-                          wm?.openWindow(OverlayType.SETTINGS)
+                          wm?.openWindow(OverlayType.POCKET_JOURNAL)
                         }
-                        MenuPopupItem("\uf12c", stringResource(Res.string.tray_lua_options)) {
-                          showMenuPopup = false
-                          wm?.openWindow(OverlayType.COMPANION)
-                        }
-                        MenuPopupItem("\uf059", stringResource(Res.string.general_about)) {
-                          showMenuPopup = false
-                          wm?.openWindow(OverlayType.ABOUT)
+                        if (config.performanceBattleGraphEnabled) {
+                          MenuPopupItem("\uf1e0", stringResource(Res.string.tray_battle_graph)) {
+                            showMenuPopup = false
+                            wm?.openWindow(OverlayType.BATTLE_GRAPH)
+                          }
                         }
                         MenuPopupItem("\uf128", stringResource(Res.string.tray_help)) {
                           showMenuPopup = false
                           wm?.openWindow(OverlayType.HELP)
                         }
+                        MenuPopupItem("\uf013", stringResource(Res.string.general_settings)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.SETTINGS)
+                        }
+
                         MenuPopupDivider()
                         MenuPopupItem("\uf0e2", stringResource(Res.string.app_tray_reset_positions)) {
                           showMenuPopup = false
@@ -521,9 +515,6 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                         MenuPopupItem("\uf011", stringResource(Res.string.general_exit)) {
                           showMenuPopup = false
                           scope.launch { quitAfterSessionStop() }
-                        }
-                        MenuPopupItem("\uf00d", stringResource(Res.string.tray_close)) {
-                          showMenuPopup = false
                         }
                       }
                     }

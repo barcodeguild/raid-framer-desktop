@@ -127,7 +127,7 @@ fun ApplicationScope.SystemTrayComponent(
     val mouseY = pointer?.y ?: (screen.y + screen.height)
 
     // Dynamic height based on items shown
-    var itemCount = 7 // Pocket Journal, Settings, Lua Options, About, Reset, Exit, Close
+    var itemCount = 10 // Take Screenshot, Copy Screenshot, Pocket Journal, Settings, Lua Options, About, Help, Reset, Exit, Close
     if (isRecording) itemCount += 2 else itemCount += 1 // Save+Abort or New
     itemCount += 3 // Dragon Breaths, Raid Mgmt, Battle Summary
     if (config.performanceBattleGraphEnabled) itemCount += 1

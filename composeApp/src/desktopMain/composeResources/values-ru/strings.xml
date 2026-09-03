@@ -1288,6 +1288,7 @@
     <string name="raid_buff_loot_section">Требуются баффы добычи</string>
     <string name="raid_buff_check_loot">Проверять баффы добычи?</string>
     <string name="raid_buff_loot_threshold_label">Порог:</string>
+    <string name="raid_buff_allow_guild_buff">Разрешить гильдейский бафф (Gallant's Blessing) считаться полноценным баффом</string>
     <string name="raid_caller_loot_threshold">Порог добычи</string>
     <string name="raid_caller_buff_mode">Режим баффов</string>
     <string name="raid_caller_buff_grace">Льготный период баффа</string>
