@@ -76,7 +76,6 @@ compose.desktop {
         menu = true
         shortcut = true
         menuGroup = APP_NAME
-        console = true
 
         /* Allows for combat.log files to be right-click openable in Windows */
         fileAssociation(
