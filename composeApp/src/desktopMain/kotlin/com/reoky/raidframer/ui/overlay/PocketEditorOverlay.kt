@@ -55,6 +55,8 @@ import com.reoky.raidframer.core.pocket.PocketAttachmentRejection
 import com.reoky.raidframer.core.pocket.PocketAttachmentResult
 import com.reoky.raidframer.core.pocket.parsePocketMarkdown
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.FontsHelper
+import com.reoky.raidframer.core.helpers.togglePocketJournal
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -107,6 +109,19 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
       onClose = {
         PocketDraftCoordinator.closeEditorSession()
         wm?.closeWindow(OverlayType.POCKET_EDITOR)
+      },
+      rightActions = {
+        IconButton(
+          onClick = { togglePocketJournal(wm) },
+          modifier = Modifier.size(28.dp).padding(end = 2.dp)
+        ) {
+          Text(
+            "\uf02d",
+            color = Color.White,
+            fontFamily = FontsHelper.faSolid(),
+            fontSize = 14.sp
+          )
+        }
       }
     )
     Row(

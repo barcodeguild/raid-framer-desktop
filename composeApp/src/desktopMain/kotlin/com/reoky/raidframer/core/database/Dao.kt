@@ -124,4 +124,13 @@ interface PocketDao {
 
   @Query("DELETE FROM pocket_attachments WHERE entryId = :entryId")
   suspend fun deleteAttachments(entryId: String)
+
+  @Query("""
+    SELECT e.* FROM pocket_entries e
+    INNER JOIN pocket_tags t ON e.id = t.entryId
+    WHERE t.normalizedTag = :normalizedTag
+    ORDER BY e.createdAt DESC
+    LIMIT :limit
+  """)
+  suspend fun getEntriesByTag(normalizedTag: String, limit: Int): List<PocketEntryEntity>
 }

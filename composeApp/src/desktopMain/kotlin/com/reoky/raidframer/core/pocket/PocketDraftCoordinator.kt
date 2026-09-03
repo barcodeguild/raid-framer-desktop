@@ -151,6 +151,11 @@ object PocketDraftCoordinator {
       _entries.value = repository.listEntries()
     }
   }
+
+  suspend fun getEntriesByTag(normalizedTag: String, limit: Int = 12): List<PocketEntry> {
+    if (!::repository.isInitialized) return emptyList()
+    return repository.listEntriesByTag(normalizedTag, limit)
+  }
 }
 
 fun initializePocketDraftCoordinator(dao: PocketDao) {

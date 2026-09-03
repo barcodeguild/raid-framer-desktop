@@ -129,7 +129,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
               wm?.openWindow(OverlayType.POCKET_EDITOR)
             }
           },
-          modifier = Modifier.size(28.dp)
+          modifier = Modifier.size(28.dp).padding(end = 2.dp)
         ) { Text("\uf303", color = Color.White, fontFamily = FontsHelper.faSolid(), fontSize = 14.sp) }
       }
     )

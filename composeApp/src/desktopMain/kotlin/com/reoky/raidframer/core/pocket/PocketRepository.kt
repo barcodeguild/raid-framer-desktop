@@ -42,6 +42,10 @@ class PocketRepository(private val dao: PocketDao) {
     return dao.getEntries(limit, offset).mapNotNull { readEntry(it.id) }
   }
 
+  suspend fun listEntriesByTag(normalizedTag: String, limit: Int = 12): List<PocketEntry> {
+    return dao.getEntriesByTag(normalizedTag.lowercase(), limit).mapNotNull { readEntry(it.id) }
+  }
+
   suspend fun createEntry(
     title: String = "",
     markdown: String = "",

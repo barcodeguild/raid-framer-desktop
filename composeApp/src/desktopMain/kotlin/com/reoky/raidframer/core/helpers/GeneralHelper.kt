@@ -408,3 +408,14 @@ fun togglePokemon(wm: WindowManager?) {
     wm?.openWindow(OverlayType.POKEMON)
   }
 }
+
+/**
+ * Toggles the Pocket Journal overlay open/closed.
+ */
+fun togglePocketJournal(wm: WindowManager?) {
+  if (wm != null && wm.isVisible(OverlayType.POCKET_JOURNAL).value) {
+    wm.closeWindow(OverlayType.POCKET_JOURNAL)
+  } else {
+    wm?.openWindow(OverlayType.POCKET_JOURNAL)
+  }
+}

@@ -215,6 +215,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="time_ago_months_other">%1$d months ago</string>
     <string name="player_inventory_time_ago">%1$s</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
+    <string name="player_card_journal_entries">Pocket Journal</string>
     <string name="player_card_recent_damage">Recent Damage</string>
     <string name="player_card_recent_heals">Recent Heals</string>
     <string name="player_card_recent_kd">Recent Kills &amp; Deaths</string>
