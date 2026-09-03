@@ -12,20 +12,23 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,13 +45,18 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +68,7 @@ import com.reoky.raidframer.core.pocket.PocketAttachmentRejection
 import com.reoky.raidframer.core.pocket.PocketAttachmentResult
 import com.reoky.raidframer.core.pocket.parsePocketMarkdown
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.database.PocketAttachmentEntity
 import com.reoky.raidframer.core.helpers.FontsHelper
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -92,6 +101,10 @@ import kotlinx.coroutines.launch
 import java.nio.file.Path
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
+import org.jetbrains.skia.ColorAlphaType
+import org.jetbrains.skia.ColorType
+import org.jetbrains.skia.Image as SkiaImage
+import org.jetbrains.skia.ImageInfo
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -192,7 +205,7 @@ rightActions = {
           modifier = Modifier.weight(1f),
           singleLine = true,
           label = { Text(stringResource(Res.string.pocket_editor_title_label), color = Color.White.copy(alpha = 0.85f)) },
-          textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+          textStyle = TextStyle(color = Color.White),
           colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = Color.White,
             cursorColor = Color.White,
@@ -297,7 +310,7 @@ rightActions = {
           .onPointerEvent(PointerEventType.Enter) { editorHovered = true }
           .onPointerEvent(PointerEventType.Exit) { editorHovered = false },
         label = { Text(stringResource(Res.string.pocket_editor_markdown_label), color = Color.White.copy(alpha = 0.85f)) },
-        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+        textStyle = TextStyle(color = Color.White),
         colors = TextFieldDefaults.outlinedTextFieldColors(
           textColor = Color.White,
           cursorColor = RFColors.AccentRed,
@@ -319,7 +332,7 @@ rightActions = {
       }
     }
     if (linkDialogOpen) {
-      androidx.compose.material.AlertDialog(
+      AlertDialog(
         onDismissRequest = { linkDialogOpen = false },
         title = { Text(stringResource(Res.string.pocket_editor_insert_link_title), color = Color.White) },
         text = {
@@ -328,27 +341,27 @@ rightActions = {
               value = linkTitle,
               onValueChange = { linkTitle = it },
               label = { Text(stringResource(Res.string.pocket_editor_link_title_label), color = Color.White) },
-              textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+              textStyle = TextStyle(color = Color.White),
               colors = editorFieldColors()
             )
             OutlinedTextField(
               value = linkUrl,
               onValueChange = { linkUrl = it },
               label = { Text(stringResource(Res.string.pocket_editor_link_url_label), color = Color.White) },
-              textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+              textStyle = TextStyle(color = Color.White),
               colors = editorFieldColors()
             )
           }
         },
         confirmButton = {
-          androidx.compose.material.TextButton(onClick = {
+          TextButton(onClick = {
             if (linkUrl.isNotBlank()) markdownValue =
               insertMarkdown(markdownValue, "[${linkTitle.ifBlank { linkUrl }}]($linkUrl)")
             linkDialogOpen = false
           }) { Text(stringResource(Res.string.pocket_editor_insert), color = RFColors.AccentRed) }
         },
         dismissButton = {
-          androidx.compose.material.TextButton(onClick = { linkDialogOpen = false }) {
+          TextButton(onClick = { linkDialogOpen = false }) {
             Text(
               stringResource(Res.string.pocket_editor_cancel),
               color = Color.White
@@ -379,7 +392,7 @@ private fun MarkdownToolbar(onAction: (MarkdownAction) -> Unit) {
       MarkdownAction.LINK to stringResource(Res.string.pocket_editor_toolbar_link),
       MarkdownAction.IMAGE to stringResource(Res.string.pocket_editor_toolbar_image)
     ).forEach { (action, label) ->
-      androidx.compose.material.TextButton(onClick = { onAction(action) }) {
+      TextButton(onClick = { onAction(action) }) {
         Text(label, color = if (action == MarkdownAction.IMAGE) RFColors.AccentRed else Color.White, fontSize = 11.sp)
       }
     }
@@ -455,7 +468,7 @@ private fun PocketTagChips(tags: List<String>) {
 
 @Composable
 private fun AttachmentStrip(
-  attachments: List<com.reoky.raidframer.core.database.PocketAttachmentEntity>,
+  attachments: List<PocketAttachmentEntity>,
   onRemove: (String) -> Unit,
 ) {
   if (attachments.isEmpty()) return
@@ -507,7 +520,7 @@ private fun PocketMarkdownPreview(markdown: String, markdownPath: String?) {
         is PocketMarkdownBlock.CodeBlock -> Text(
           text = block.code,
           color = Color.White,
-          fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+          fontFamily = FontFamily.Monospace,
           modifier = Modifier.background(Color.Black.copy(alpha = 0.45f)).padding(8.dp)
         )
       }
@@ -517,19 +530,19 @@ private fun PocketMarkdownPreview(markdown: String, markdownPath: String?) {
 
 @Composable
 private fun PocketInlineText(content: List<PocketMarkdownInline>, markdownPath: String?) {
-  val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
-  val style = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 14.sp)
+  val uriHandler = LocalUriHandler.current
+  val style = TextStyle(color = Color.White, fontSize = 14.sp)
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
     content.forEach { inline ->
       when (inline) {
         is PocketMarkdownInline.Image -> PocketMarkdownImage(inline, markdownPath)
-        is PocketMarkdownInline.Link -> androidx.compose.foundation.text.ClickableText(
+        is PocketMarkdownInline.Link -> ClickableText(
           text = inline.toAnnotatedString(),
           style = style,
           modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
           onClick = { uriHandler.openUri(inline.destination) }
         )
-        else -> androidx.compose.foundation.text.BasicText(
+        else -> BasicText(
           text = inline.toAnnotatedString(),
           style = style
         )
@@ -539,14 +552,14 @@ private fun PocketInlineText(content: List<PocketMarkdownInline>, markdownPath: 
 }
 
 private fun PocketMarkdownInline.toAnnotatedString(): androidx.compose.ui.text.AnnotatedString = buildAnnotatedString {
-  fun appendInline(inline: PocketMarkdownInline, style: androidx.compose.ui.text.SpanStyle = androidx.compose.ui.text.SpanStyle()) {
+  fun appendInline(inline: PocketMarkdownInline, style: SpanStyle = SpanStyle()) {
     when (inline) {
       is PocketMarkdownInline.Plain -> withStyle(style) { append(inline.value) }
-      is PocketMarkdownInline.Strong -> inline.content.forEach { appendInline(it, style.merge(androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold))) }
-      is PocketMarkdownInline.Emphasis -> inline.content.forEach { appendInline(it, style.merge(androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic))) }
-      is PocketMarkdownInline.Strikethrough -> inline.content.forEach { appendInline(it, style.merge(androidx.compose.ui.text.SpanStyle(textDecoration = TextDecoration.LineThrough))) }
-      is PocketMarkdownInline.Code -> withStyle(style.merge(androidx.compose.ui.text.SpanStyle(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace))) { append(inline.value) }
-      is PocketMarkdownInline.Link -> inline.label.forEach { appendInline(it, style.merge(androidx.compose.ui.text.SpanStyle(color = Color(0xFF64B5F6), textDecoration = TextDecoration.Underline))) }
+      is PocketMarkdownInline.Strong -> inline.content.forEach { appendInline(it, style.merge(SpanStyle(fontWeight = FontWeight.Bold))) }
+      is PocketMarkdownInline.Emphasis -> inline.content.forEach { appendInline(it, style.merge(SpanStyle(fontStyle = FontStyle.Italic))) }
+      is PocketMarkdownInline.Strikethrough -> inline.content.forEach { appendInline(it, style.merge(SpanStyle(textDecoration = TextDecoration.LineThrough))) }
+      is PocketMarkdownInline.Code -> withStyle(style.merge(SpanStyle(fontFamily = FontFamily.Monospace))) { append(inline.value) }
+      is PocketMarkdownInline.Link -> inline.label.forEach { appendInline(it, style.merge(SpanStyle(color = Color(0xFF64B5F6), textDecoration = TextDecoration.Underline))) }
       is PocketMarkdownInline.Break -> append("\n")
       is PocketMarkdownInline.Image -> append("[Image: ${inline.alt.ifBlank { inline.destination }}]")
     }
@@ -558,12 +571,12 @@ private fun PocketMarkdownInline.toAnnotatedString(): androidx.compose.ui.text.A
 private fun PocketMarkdownImage(image: PocketMarkdownInline.Image, markdownPath: String?) {
   val bitmap = remember(markdownPath, image.destination) {
     loadPocketImage(image.destination, markdownPath)?.let { bufferedImage ->
-      val colorType = org.jetbrains.skia.ColorType.RGBA_8888
-      val imageInfo = org.jetbrains.skia.ImageInfo(
+      val colorType = ColorType.RGBA_8888
+      val imageInfo = ImageInfo(
         bufferedImage.width,
         bufferedImage.height,
         colorType,
-        org.jetbrains.skia.ColorAlphaType.UNPREMUL
+        ColorAlphaType.UNPREMUL
       )
       val pixels = IntArray(bufferedImage.width * bufferedImage.height)
       bufferedImage.getRGB(0, 0, bufferedImage.width, bufferedImage.height, pixels, 0, bufferedImage.width)
@@ -574,7 +587,7 @@ private fun PocketMarkdownImage(image: PocketMarkdownInline.Image, markdownPath:
         bytes[index * 4 + 2] = (pixel and 0xff).toByte()
         bytes[index * 4 + 3] = ((pixel ushr 24) and 0xff).toByte()
       }
-      org.jetbrains.skia.Image.makeRaster(imageInfo, bytes, bufferedImage.width * 4).toComposeImageBitmap()
+      SkiaImage.makeRaster(imageInfo, bytes, bufferedImage.width * 4).toComposeImageBitmap()
     }
   }
   if (bitmap == null) {

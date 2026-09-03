@@ -143,8 +143,6 @@ object PocketDraftCoordinator {
     _activeDraft.value = null
   }
 
-  /** Compatibility alias for callers that intentionally clear the active editor session. */
-  fun clearActiveDraft() = closeEditorSession()
 
   suspend fun refreshEntries() {
     if (::repository.isInitialized) {
