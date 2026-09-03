@@ -663,7 +663,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
           centerTop = stringResource(Res.string.raid_caller_loot),
           centerMiddle = "$lootBuffedCount/${lootSums.size}",
           centerMiddleColor = Color.White,
-          centerBottom = "$lootAvg%",
+          centerBottom = "${lootAvg + 100}%",
           centerBottomColor = RFColors.dpsOrange
         )
         MiniPieChart(

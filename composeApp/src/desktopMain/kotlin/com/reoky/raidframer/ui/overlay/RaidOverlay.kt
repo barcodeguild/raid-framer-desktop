@@ -1437,7 +1437,7 @@ private fun BuffsTab(
                   }
                   Spacer(modifier = Modifier.width(6.dp))
                   Text(
-                    "${lootBuff.lootPercent}%",
+                    "${lootBuff.lootPercent + 100}%",
                     color = RFColors.lootBuffColor,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
@@ -1899,7 +1899,7 @@ private fun LootBuffRow(name: String, amount: Int, maxAmount: Int) {
     }
     Spacer(modifier = Modifier.width(6.dp))
     Text(
-      "$amount%",
+      "${amount + 100}%",
       color = RFColors.lootBuffColor,
       fontSize = 11.sp,
       fontWeight = FontWeight.Bold,

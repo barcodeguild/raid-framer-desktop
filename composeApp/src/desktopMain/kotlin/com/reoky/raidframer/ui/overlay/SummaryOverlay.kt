@@ -2003,7 +2003,7 @@ private fun LootBuffTab(
       icon = "\uD83C\uDFC6",
       title = stringResource(Res.string.summary_top_loot_peak),
       cards = topLootPeak,
-      valueExtractor = { "${it.sessionPeakLootBuffAmount}%" },
+      valueExtractor = { "${it.sessionPeakLootBuffAmount + 100}%" },
       valueColor = RFColors.lootBuffColor,
       modifier = Modifier.weight(1f)
     ) { card ->
@@ -2014,7 +2014,7 @@ private fun LootBuffTab(
       icon = "\uD83D\uDD0C",
       title = stringResource(Res.string.summary_worst_loot_peak),
       cards = worstLootPeak,
-      valueExtractor = { "${it.sessionPeakLootBuffAmount}%" },
+      valueExtractor = { "${it.sessionPeakLootBuffAmount + 100}%" },
       valueColor = RFColors.lootBuffColor,
       modifier = Modifier.weight(1f)
     ) { card ->

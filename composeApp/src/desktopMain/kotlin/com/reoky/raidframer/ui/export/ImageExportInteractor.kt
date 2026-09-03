@@ -1569,8 +1569,8 @@ val coherenceRecordingMs: Long,
 
     // Loot buffs: best peak %, worst peak %, most simultaneous buffs (raid-wide)
     tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_loot_peak), "\uD83C\uDFC6", ColumnData.CardData(data.topLootPeak, { "${it.sessionPeakLootBuffAmount}%" }, LOOT_BUFF_COLOR)),
-      Triple(getString(Res.string.summary_worst_loot_peak), "\uD83D\uDD0C", ColumnData.CardData(data.worstLootPeak, { "${it.sessionPeakLootBuffAmount}%" }, LOOT_BUFF_COLOR)),
+      Triple(getString(Res.string.summary_top_loot_peak), "\uD83C\uDFC6", ColumnData.CardData(data.topLootPeak, { "${it.sessionPeakLootBuffAmount + 100}%" }, LOOT_BUFF_COLOR)),
+      Triple(getString(Res.string.summary_worst_loot_peak), "\uD83D\uDD0C", ColumnData.CardData(data.worstLootPeak, { "${it.sessionPeakLootBuffAmount + 100}%" }, LOOT_BUFF_COLOR)),
       Triple(getString(Res.string.summary_top_buff_count), "\u26A1", ColumnData.CardData(data.topBuffCount, { it.sessionCurrentBuffCount.toString() }, LOOT_BUFF_COLOR)),
     )))
 
