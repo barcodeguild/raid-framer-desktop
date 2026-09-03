@@ -1282,7 +1282,7 @@ private fun RenderingBackendSettingsPanel() {
         textStyle = TextStyle(color = Color.White),
         onValueChange = {},
         readOnly = true,
-        label = { Text("Backend") },
+        label = { Text("Backend", color = Color.White) },
         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
         modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
