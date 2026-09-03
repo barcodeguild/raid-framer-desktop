@@ -2,6 +2,9 @@ package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -110,16 +113,19 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
         PocketDraftCoordinator.closeEditorSession()
         wm?.closeWindow(OverlayType.POCKET_EDITOR)
       },
-      rightActions = {
+rightActions = {
+        val editorInteractionSource = remember { MutableInteractionSource() }
+        val isEditorHovered by editorInteractionSource.collectIsHoveredAsState()
         IconButton(
           onClick = { togglePocketJournal(wm) },
           modifier = Modifier.size(28.dp).padding(end = 2.dp)
         ) {
           Text(
             "\uf02d",
-            color = Color.White,
+            color = if (isEditorHovered) RFColors.AccentRed else Color.White,
             fontFamily = FontsHelper.faSolid(),
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            modifier = Modifier.hoverable(editorInteractionSource)
           )
         }
       }

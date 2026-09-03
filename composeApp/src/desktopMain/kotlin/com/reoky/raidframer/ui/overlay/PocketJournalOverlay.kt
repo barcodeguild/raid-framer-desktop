@@ -122,6 +122,8 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
       title = "Pocket Journal",
       onClose = { wm?.closeWindow(OverlayType.POCKET_JOURNAL) },
       rightActions = {
+        val journalInteractionSource = remember { MutableInteractionSource() }
+        val isJournalHovered by journalInteractionSource.collectIsHoveredAsState()
         IconButton(
           onClick = {
             scope.launch {
@@ -130,7 +132,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
             }
           },
           modifier = Modifier.size(28.dp).padding(end = 2.dp)
-        ) { Text("\uf303", color = Color.White, fontFamily = FontsHelper.faSolid(), fontSize = 14.sp) }
+        ) { Text("\uf303", color = if (isJournalHovered) RFColors.AccentRed else Color.White, fontFamily = FontsHelper.faSolid(), fontSize = 14.sp, modifier = Modifier.hoverable(journalInteractionSource)) }
       }
     )
     Row(

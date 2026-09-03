@@ -1,5 +1,9 @@
 package com.reoky.raidframer.ui.component
 
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.IconButton
@@ -10,12 +14,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.FontsHelper
+import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.LocalDragLock
 import kotlinx.coroutines.delay
 
@@ -37,11 +41,19 @@ fun PocketWindowCaptureMenu(
     action()
   }
 
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
   IconButton(
     onClick = { expanded = !expanded },
     modifier = Modifier.size(36.dp)
   ) {
-    Text("\uf03e", color = Color.White, fontFamily = FontsHelper.faSolid(), fontSize = 18.sp)
+    Text(
+      "\uf03e",
+      color = if (isHovered) RFColors.AccentRed else Color.White,
+      fontFamily = FontsHelper.faSolid(),
+      fontSize = 18.sp,
+      modifier = Modifier.hoverable(interactionSource)
+    )
   }
   DropdownMenu(
     expanded = expanded,

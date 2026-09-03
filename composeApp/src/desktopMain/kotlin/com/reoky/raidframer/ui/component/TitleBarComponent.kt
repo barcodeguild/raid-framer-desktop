@@ -1,6 +1,9 @@
 package com.reoky.raidframer.ui.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -11,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -21,6 +26,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.helpers.FontsHelper
+import com.reoky.raidframer.core.helpers.RFColors
 import androidx.compose.material.TextButton
 import androidx.compose.material.IconButton
 
@@ -94,11 +100,17 @@ fun TitleBarComponent(
     }
 
     if (actionLabel != null && onAction != null) {
+      val interactionSource = remember { MutableInteractionSource() }
+      val isHovered by interactionSource.collectIsHoveredAsState()
       TextButton(
         onClick = onAction,
         modifier = Modifier.align(Alignment.CenterStart).padding(start = 6.dp)
       ) {
-        Text(actionLabel, color = Color.White)
+        Text(
+          actionLabel,
+          color = if (isHovered) RFColors.AccentRed else Color.White,
+          modifier = Modifier.hoverable(interactionSource)
+        )
       }
     }
 

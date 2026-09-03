@@ -283,15 +283,18 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
       }) - ${metricType.displayName} ${stringResource(Res.string.graphs_trend_graph)} (${currentDateString})",
       onClose = { wm?.closeWindow(OverlayType.PLAYER_CARD) },
       rightActions = {
+        val cardInteractionSource = remember { MutableInteractionSource() }
+        val isCardHovered by cardInteractionSource.collectIsHoveredAsState()
         IconButton(
           onClick = { wm?.openWindow(OverlayType.POCKET_JOURNAL) },
           modifier = Modifier.size(28.dp).padding(end = 2.dp)
         ) {
           Text(
             "\uf02d",
-            color = Color.White,
+            color = if (isCardHovered) RFColors.AccentRed else Color.White,
             fontFamily = FontsHelper.faSolid(),
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            modifier = Modifier.hoverable(cardInteractionSource)
           )
         }
       }

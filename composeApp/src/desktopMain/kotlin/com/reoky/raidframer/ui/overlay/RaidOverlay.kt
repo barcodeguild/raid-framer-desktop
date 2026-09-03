@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.offset
@@ -236,12 +239,15 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
           onClose = { wm?.closeWindow(OverlayType.RAID) },
           rightActions = {
             Box {
+              val filterInteractionSource = remember { MutableInteractionSource() }
+              val isFilterHovered by filterInteractionSource.collectIsHoveredAsState()
               IconButton(onClick = { showFilterMenu = !showFilterMenu }) {
                 Text(
                   text = "\uf337", // fa-sliders
                   fontFamily = FontsHelper.faSolid(),
                   fontSize = 16.sp,
-                  color = Color.White
+                  color = if (isFilterHovered) RFColors.AccentRed else Color.White,
+                  modifier = Modifier.hoverable(filterInteractionSource)
                 )
               }
               if (showFilterMenu) {
