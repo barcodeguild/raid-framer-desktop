@@ -47,7 +47,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
@@ -59,6 +61,27 @@ import com.reoky.raidframer.core.pocket.PocketAttachmentResult
 import com.reoky.raidframer.core.pocket.parsePocketMarkdown
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.FontsHelper
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.pocket_attachment_content_desc
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_cancel
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_err_attachment_limit
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_err_entry_not_found
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_err_invalid_path
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_err_no_entry_open
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_err_not_image
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_insert
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_insert_link_title
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_link_text_default
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_link_title_label
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_link_url_label
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_markdown_label
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_tab_edit
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_tab_preview
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_title
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_title_label
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_image
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_link
 import com.reoky.raidframer.core.helpers.togglePocketJournal
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -70,7 +93,7 @@ import java.nio.file.Path
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 
-@OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PocketEditorOverlay(wm: WindowManager? = null) {
   val draft by PocketDraftCoordinator.activeDraft.collectAsState()
@@ -91,7 +114,13 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
   var linkTitle by remember { mutableStateOf("") }
   val scope = androidx.compose.runtime.rememberCoroutineScope()
   val dragLock = LocalDragLock.current
-  var lastSelection by remember(draft?.metadata?.id) { mutableStateOf<androidx.compose.ui.text.TextRange?>(null) }
+  val errNotImage = stringResource(Res.string.pocket_editor_err_not_image)
+  val errNoEntryOpen = stringResource(Res.string.pocket_editor_err_no_entry_open)
+  val errAttachmentLimit = stringResource(Res.string.pocket_editor_err_attachment_limit)
+  val errEntryNotFound = stringResource(Res.string.pocket_editor_err_entry_not_found)
+  val errInvalidPath = stringResource(Res.string.pocket_editor_err_invalid_path)
+  val linkTextDefault = stringResource(Res.string.pocket_editor_link_text_default)
+  var lastSelection by remember(draft?.metadata?.id) { mutableStateOf<TextRange?>(null) }
   var editorFocused by remember { mutableStateOf(false) }
   var editorHovered by remember { mutableStateOf(false) }
   LaunchedEffect(Unit) { dragLock.value = true }
@@ -108,7 +137,7 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
 
   Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.66f))) {
     TitleBarComponent(
-      title = "Pocket Editor",
+      title = stringResource(Res.string.pocket_editor_title),
       onClose = {
         PocketDraftCoordinator.closeEditorSession()
         wm?.closeWindow(OverlayType.POCKET_EDITOR)
@@ -139,17 +168,17 @@ rightActions = {
         .padding(2.dp),
       horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-      listOf("Edit", "Preview").forEachIndexed { index, label ->
+      listOf(Res.string.pocket_editor_tab_edit, Res.string.pocket_editor_tab_preview).forEachIndexed { index, labelRes ->
         Button(
           onClick = { selectedTab = index },
           modifier = Modifier.weight(1f),
           shape = RoundedCornerShape(10.dp),
-          colors = androidx.compose.material.ButtonDefaults.buttonColors(
+          colors = ButtonDefaults.buttonColors(
             backgroundColor = if (selectedTab == index) RFColors.AccentRed.copy(alpha = 0.82f) else Color.Transparent,
             contentColor = Color.White
           ),
-          elevation = androidx.compose.material.ButtonDefaults.elevation(defaultElevation = 2.dp)
-        ) { Text(label, fontSize = 12.sp) }
+          elevation = ButtonDefaults.elevation(defaultElevation = 2.dp)
+        ) { Text(stringResource(labelRes), fontSize = 12.sp) }
       }
     }
     if (selectedTab == 0) {
@@ -162,7 +191,7 @@ rightActions = {
           onValueChange = { title = it },
           modifier = Modifier.weight(1f),
           singleLine = true,
-          label = { Text("Title (optional)", color = Color.White.copy(alpha = 0.85f)) },
+          label = { Text(stringResource(Res.string.pocket_editor_title_label), color = Color.White.copy(alpha = 0.85f)) },
           textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
           colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = Color.White,
@@ -189,15 +218,15 @@ rightActions = {
                 if (selected != null) {
                   val image = runCatching { ImageIO.read(selected.toFile()) }.getOrNull()
                   if (image == null) {
-                    attachmentMessage = "Selected file is not a readable image."
+                    attachmentMessage = errNotImage
                   } else {
                     val draftId = draft?.metadata?.id
                     if (draftId == null) {
-                      attachmentMessage = "No Pocket entry is currently open."
+                      attachmentMessage = errNoEntryOpen
                     } else {
                       val name = PocketDraftCoordinator.nextAttachmentName(draftId)
                       if (name == null) {
-                        attachmentMessage = "This Pocket entry already has 10 attachments."
+                        attachmentMessage = errAttachmentLimit
                       } else {
                         when (val result = PocketDraftCoordinator.addAttachment(
                           source = selected,
@@ -212,9 +241,9 @@ rightActions = {
 
                           is PocketAttachmentResult.Rejected -> {
                             attachmentMessage = when (result.reason) {
-                              PocketAttachmentRejection.ATTACHMENT_LIMIT_REACHED -> "This Pocket entry already has 10 attachments."
-                              PocketAttachmentRejection.ENTRY_NOT_FOUND -> "The Pocket entry is no longer available."
-                              PocketAttachmentRejection.INVALID_ATTACHMENT_PATH -> "The attachment path was invalid."
+                              PocketAttachmentRejection.ATTACHMENT_LIMIT_REACHED -> errAttachmentLimit
+                              PocketAttachmentRejection.ENTRY_NOT_FOUND -> errEntryNotFound
+                              PocketAttachmentRejection.INVALID_ATTACHMENT_PATH -> errInvalidPath
                             }
                           }
                         }
@@ -227,7 +256,7 @@ rightActions = {
 
             MarkdownAction.LINK -> {
               linkUrl = ""
-              linkTitle = markdownValue.selectedText().ifBlank { "Link text" }
+              linkTitle = markdownValue.selectedText().ifBlank { linkTextDefault }
               linkDialogOpen = true
             }
 
@@ -267,7 +296,7 @@ rightActions = {
           .onFocusChanged { editorFocused = it.isFocused }
           .onPointerEvent(PointerEventType.Enter) { editorHovered = true }
           .onPointerEvent(PointerEventType.Exit) { editorHovered = false },
-        label = { Text("Markdown", color = Color.White.copy(alpha = 0.85f)) },
+        label = { Text(stringResource(Res.string.pocket_editor_markdown_label), color = Color.White.copy(alpha = 0.85f)) },
         textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
         colors = TextFieldDefaults.outlinedTextFieldColors(
           textColor = Color.White,
@@ -292,20 +321,20 @@ rightActions = {
     if (linkDialogOpen) {
       androidx.compose.material.AlertDialog(
         onDismissRequest = { linkDialogOpen = false },
-        title = { Text("Insert link", color = Color.White) },
+        title = { Text(stringResource(Res.string.pocket_editor_insert_link_title), color = Color.White) },
         text = {
           Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
               value = linkTitle,
               onValueChange = { linkTitle = it },
-              label = { Text("Title", color = Color.White) },
+              label = { Text(stringResource(Res.string.pocket_editor_link_title_label), color = Color.White) },
               textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
               colors = editorFieldColors()
             )
             OutlinedTextField(
               value = linkUrl,
               onValueChange = { linkUrl = it },
-              label = { Text("URL", color = Color.White) },
+              label = { Text(stringResource(Res.string.pocket_editor_link_url_label), color = Color.White) },
               textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
               colors = editorFieldColors()
             )
@@ -316,12 +345,12 @@ rightActions = {
             if (linkUrl.isNotBlank()) markdownValue =
               insertMarkdown(markdownValue, "[${linkTitle.ifBlank { linkUrl }}]($linkUrl)")
             linkDialogOpen = false
-          }) { Text("Insert", color = RFColors.AccentRed) }
+          }) { Text(stringResource(Res.string.pocket_editor_insert), color = RFColors.AccentRed) }
         },
         dismissButton = {
           androidx.compose.material.TextButton(onClick = { linkDialogOpen = false }) {
             Text(
-              "Cancel",
+              stringResource(Res.string.pocket_editor_cancel),
               color = Color.White
             )
           }
@@ -346,8 +375,9 @@ private fun MarkdownToolbar(onAction: (MarkdownAction) -> Unit) {
   ) {
     listOf(
       MarkdownAction.BOLD to "B", MarkdownAction.ITALIC to "I", MarkdownAction.STRIKE to "S",
-      MarkdownAction.CODE to "<>", MarkdownAction.BULLET to "•", MarkdownAction.LINK to "Link",
-      MarkdownAction.IMAGE to "Image"
+      MarkdownAction.CODE to "<>", MarkdownAction.BULLET to "•",
+      MarkdownAction.LINK to stringResource(Res.string.pocket_editor_toolbar_link),
+      MarkdownAction.IMAGE to stringResource(Res.string.pocket_editor_toolbar_image)
     ).forEach { (action, label) ->
       androidx.compose.material.TextButton(onClick = { onAction(action) }) {
         Text(label, color = if (action == MarkdownAction.IMAGE) RFColors.AccentRed else Color.White, fontSize = 11.sp)
@@ -359,19 +389,19 @@ private fun MarkdownToolbar(onAction: (MarkdownAction) -> Unit) {
 private fun applyMarkdown(
   value: TextFieldValue,
   marker: String,
-  rememberedSelection: androidx.compose.ui.text.TextRange?
+  rememberedSelection: TextRange?
 ): TextFieldValue {
   val selection = if (!value.selection.collapsed) value.selection else rememberedSelection ?: value.selection
   if (selection.collapsed) return value.copy(
     text = value.text + marker + marker,
-    selection = androidx.compose.ui.text.TextRange(value.text.length + marker.length * 2)
+    selection = TextRange(value.text.length + marker.length * 2)
   )
   val selected = value.text.substring(selection.min, selection.max)
   val replacement = "$marker$selected$marker"
   val text = value.text.replaceRange(selection.min, selection.max, replacement)
   return value.copy(
     text = text,
-    selection = androidx.compose.ui.text.TextRange(selection.min, selection.min + replacement.length)
+    selection = TextRange(selection.min, selection.min + replacement.length)
   )
 }
 
@@ -381,7 +411,7 @@ private fun insertMarkdown(value: TextFieldValue, insertion: String): TextFieldV
   val replacement = prefix + insertion
   val text = value.text.replaceRange(selection.min, selection.max, replacement)
   val cursor = selection.min + replacement.length
-  return value.copy(text = text, selection = androidx.compose.ui.text.TextRange(cursor))
+  return value.copy(text = text, selection = TextRange(cursor))
 }
 
 private fun TextFieldValue.selectedText(): String = text.substring(selection.min, selection.max)
@@ -437,7 +467,7 @@ private fun AttachmentStrip(
     attachments.forEach { attachment ->
       Row(
         modifier = Modifier.background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(6.dp)).padding(4.dp),
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically
       ) {
         Text(attachment.relativePath, color = Color.White, fontSize = 11.sp)
         IconButton(onClick = { onRemove(attachment.id) }) {
@@ -555,7 +585,7 @@ private fun PocketMarkdownImage(image: PocketMarkdownInline.Image, markdownPath:
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
       Image(
         bitmap = bitmap,
-        contentDescription = image.alt.ifBlank { "Pocket attachment" },
+        contentDescription = image.alt.ifBlank { stringResource(Res.string.pocket_attachment_content_desc) },
         modifier = Modifier
           .fillMaxWidth(2f / 3f)
           .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat()),
@@ -571,17 +601,6 @@ private fun loadPocketImage(destination: String, markdownPath: String?): Buffere
     if (reference.isAbsolute) reference else markdownPath?.let { Path.of(it).parent.resolve(reference).normalize() }
   }.getOrNull() ?: return null
   return runCatching { ImageIO.read(path.toFile()) }.getOrNull()
-}
-
-private fun PocketMarkdownInline.toPlainText(): String = when (this) {
-  is PocketMarkdownInline.Plain -> value
-  is PocketMarkdownInline.Strong -> content.toPlainText()
-  is PocketMarkdownInline.Emphasis -> content.toPlainText()
-  is PocketMarkdownInline.Strikethrough -> content.toPlainText()
-  is PocketMarkdownInline.Code -> value
-  is PocketMarkdownInline.Link -> label.toPlainText()
-  is PocketMarkdownInline.Image -> "[Image: ${alt.ifBlank { destination }}]"
-  PocketMarkdownInline.Break -> "\n"
 }
 
 private fun List<PocketMarkdownInline>.toPlainText(): String = joinToString("") { inline ->

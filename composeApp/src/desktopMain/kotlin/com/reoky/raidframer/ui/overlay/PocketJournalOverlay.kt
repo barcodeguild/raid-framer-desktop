@@ -82,7 +82,20 @@ import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_apply
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_cancel
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_clear
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_created_format
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_currently_editing
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_empty
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_entry_title_format
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_filter_by_day
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_filtering_by_tag
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_last_edited_format
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_search_placeholder
+import raid_framer_desktop.composeapp.generated.resources.pocket_journal_title
 import raid_framer_desktop.composeapp.generated.resources.spag_presenting
 import java.time.Instant
 import java.time.LocalDate
@@ -119,7 +132,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
 
     Column(modifier = Modifier.fillMaxSize()) {
     TitleBarComponent(
-      title = "Pocket Journal",
+      title = stringResource(Res.string.pocket_journal_title),
       onClose = { wm?.closeWindow(OverlayType.POCKET_JOURNAL) },
       rightActions = {
         val journalInteractionSource = remember { MutableInteractionSource() }
@@ -157,7 +170,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
         decorationBox = { innerTextField ->
           Box(Modifier.fillMaxSize().padding(horizontal = 8.dp), contentAlignment = Alignment.CenterStart) {
             if (search.isEmpty()) {
-              Text("Search title or tag", color = Color.White.copy(alpha = 0.75f), fontSize = 12.sp)
+              Text(stringResource(Res.string.pocket_journal_search_placeholder), color = Color.White.copy(alpha = 0.75f), fontSize = 12.sp)
             }
             innerTextField()
           }
@@ -176,7 +189,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
         ),
         shape = RoundedCornerShape(6.dp)
       ) {
-        Text(selectedDate?.format(journalDateFormatter) ?: "Filter by day", color = Color.White, fontSize = 11.sp)
+        Text(selectedDate?.format(journalDateFormatter) ?: stringResource(Res.string.pocket_journal_filter_by_day), color = Color.White, fontSize = 11.sp)
       }
       if (search.isNotBlank() || activeTag != null || selectedDate != null) {
         TextButton(
@@ -184,7 +197,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
           modifier = Modifier.height(36.dp),
           contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
         ) {
-          Text("Clear", color = RFColors.TextSecondary, fontSize = 11.sp)
+          Text(stringResource(Res.string.pocket_journal_clear), color = RFColors.TextSecondary, fontSize = 11.sp)
         }
       }
     }
@@ -200,11 +213,11 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
               selectedDate = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
             }
             datePickerOpen = false
-          }) { Text("Apply", color = RFColors.AccentRed) }
+          }) { Text(stringResource(Res.string.pocket_journal_apply), color = RFColors.AccentRed) }
         },
         dismissButton = {
           Material3TextButton(onClick = { datePickerOpen = false }) {
-            Text("Cancel", color = Color.White)
+            Text(stringResource(Res.string.pocket_journal_cancel), color = Color.White)
           }
         }
       ) { DatePicker(state = pickerState) }
@@ -214,7 +227,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
-        Text("Filtering by #$tag", color = Color.White, fontSize = 11.sp)
+        Text(stringResource(Res.string.pocket_journal_filtering_by_tag, tag), color = Color.White, fontSize = 11.sp)
         Spacer(Modifier.width(8.dp))
         Button(
           onClick = { activeTag = null },
@@ -222,12 +235,12 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
             backgroundColor = Color.White.copy(alpha = 0.12f),
             contentColor = Color.White
           )
-        ) { Text("Clear", fontSize = 11.sp) }
+        ) { Text(stringResource(Res.string.pocket_journal_clear), fontSize = 11.sp) }
       }
     }
     if (activeDeleteMessage) {
       Text(
-        text = "Currently Editing",
+        text = stringResource(Res.string.pocket_journal_currently_editing),
         color = RFColors.TextTertiary,
         fontSize = 11.sp,
         modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 4.dp)
@@ -236,7 +249,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
 
     if (filtered.isEmpty()) {
       Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("No Pocket entries yet.", color = RFColors.TextSecondary)
+        Text(stringResource(Res.string.pocket_journal_empty), color = RFColors.TextSecondary)
       }
     } else {
       Box(Modifier.fillMaxSize()) {
@@ -380,12 +393,12 @@ private fun TimelineEntryRow(
         val created = formatDateTime(entry.metadata.createdAt)
         val edited = formatDateTime(entry.metadata.updatedAt)
         Text(
-          text = entry.metadata.title.ifBlank { "Journal Entry $created" },
+          text = entry.metadata.title.ifBlank { stringResource(Res.string.pocket_journal_entry_title_format, created) },
           color = RFColors.TextPrimary,
           fontSize = 14.sp
         )
-        Text("Created $created", color = RFColors.TextSecondary, fontSize = 10.sp)
-        Text("Last Edited $edited", color = RFColors.TextTertiary, fontSize = 10.sp)
+        Text(stringResource(Res.string.pocket_journal_created_format, created), color = RFColors.TextSecondary, fontSize = 10.sp)
+        Text(stringResource(Res.string.pocket_journal_last_edited_format, edited), color = RFColors.TextTertiary, fontSize = 10.sp)
         entry.markdown.lineSequence().firstOrNull { it.isNotBlank() }?.let {
           Text(it, color = RFColors.TextSecondary, fontSize = 12.sp, maxLines = 2)
         }

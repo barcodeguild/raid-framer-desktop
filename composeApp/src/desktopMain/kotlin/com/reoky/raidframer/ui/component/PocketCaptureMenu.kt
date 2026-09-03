@@ -13,6 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.reoky.raidframer.ui.LocalDragLock
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.pocket_menu_copy_to_clipboard
+import raid_framer_desktop.composeapp.generated.resources.pocket_menu_export_png
+import raid_framer_desktop.composeapp.generated.resources.pocket_menu_reference_in_pocket
 
 @Composable
 fun PocketCaptureMenu(
@@ -46,15 +51,15 @@ fun PocketCaptureMenu(
       DropdownMenuItem(onClick = {
         expanded = false
         pendingAction = onReferenceInPocket
-      }) { Text("Reference in Pocket") }
+      }) { Text(stringResource(Res.string.pocket_menu_reference_in_pocket)) }
       DropdownMenuItem(onClick = {
         expanded = false
         pendingAction = onExportPng
-      }) { Text("Export PNG") }
+      }) { Text(stringResource(Res.string.pocket_menu_export_png)) }
       DropdownMenuItem(onClick = {
         expanded = false
         pendingAction = onCopyToClipboard
-      }) { Text("Copy to Clipboard") }
+      }) { Text(stringResource(Res.string.pocket_menu_copy_to_clipboard)) }
     }
   }
 }

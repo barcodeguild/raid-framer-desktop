@@ -30,6 +30,10 @@ import com.reoky.raidframer.core.pocket.PocketEntry
 import com.reoky.raidframer.core.pocket.PocketMarkdownBlock
 import com.reoky.raidframer.core.pocket.PocketMarkdownInline
 import com.reoky.raidframer.core.pocket.parsePocketMarkdown
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.pocket_attachment_content_desc
+import raid_framer_desktop.composeapp.generated.resources.pocket_thumbnail_untitled
 import java.awt.image.BufferedImage
 import java.nio.file.Path
 import java.time.Instant
@@ -53,7 +57,7 @@ fun PocketEntryThumbnail(entry: PocketEntry) {
     verticalArrangement = Arrangement.spacedBy(6.dp)
   ) {
     Text(
-      text = entry.metadata.title.ifBlank { "Untitled entry" },
+      text = entry.metadata.title.ifBlank { stringResource(Res.string.pocket_thumbnail_untitled) },
       color = RFColors.TextPrimary,
       fontSize = 13.sp,
       fontWeight = FontWeight.SemiBold,
@@ -175,7 +179,7 @@ private fun ThumbnailImage(image: PocketMarkdownInline.Image, markdownPath: Stri
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
       Image(
         bitmap = bitmap,
-        contentDescription = image.alt.ifBlank { "Pocket attachment" },
+        contentDescription = image.alt.ifBlank { stringResource(Res.string.pocket_attachment_content_desc) },
         modifier = Modifier
           .fillMaxWidth(THUMBNAIL_IMAGE_MAX_WIDTH)
           .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat()),

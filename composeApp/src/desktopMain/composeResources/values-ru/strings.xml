@@ -426,6 +426,10 @@
     <string name="summary_top_debuffs">Топ дебаффов</string>
     <string name="summary_top_songs">Топ песен</string>
     <string name="summary_top_buffs">Топ баффов</string>
+    <string name="summary_top_loot_peak">Топ пик шмот-баффа %</string>
+    <string name="summary_worst_loot_peak">Худший пик шмот-баффа %</string>
+    <string name="summary_top_buff_count">Топ кол-во баффов (Слишком много?)</string>
+    <string name="summary_tab_loot">Шмот-баффы</string>
     <string name="summary_top_ode_haranya">Топ Ода Харанья</string>
     <string name="summary_top_ode_nuia">Топ Ода Нуиан</string>
     <string name="summary_top_ode_pirate">Топ Ода Пиратов</string>
@@ -1313,5 +1317,71 @@
     <string name="settings_meta_specs_state">Текущее состояние мета-спеков: %1$s</string>
     <string name="settings_meta_specs_description">Переопределите, какие спеки считаются метой в составе, рейд-коллере и техническом анализе. Пользовательские спеки показаны белым и жирным.</string>
     <string name="meta_specs_edit_icon">Изменить мета-спеки</string>
+
+    <!-- Pocket Journal -->
+    <string name="pocket_journal_title">Pocket Journal</string>
+    <string name="pocket_journal_search_placeholder">Поиск по названию или тегу</string>
+    <string name="pocket_journal_filter_by_day">Фильтр по дню</string>
+    <string name="pocket_journal_clear">Очистить</string>
+    <string name="pocket_journal_apply">Применить</string>
+    <string name="pocket_journal_cancel">Отмена</string>
+    <string name="pocket_journal_filtering_by_tag">Фильтр по #%1$s</string>
+    <string name="pocket_journal_currently_editing">Сейчас редактируется</string>
+    <string name="pocket_journal_empty">Пока нет записей Pocket.</string>
+    <string name="pocket_journal_entry_title_format">Запись журнала %1$s</string>
+    <string name="pocket_journal_created_format">Создано %1$s</string>
+    <string name="pocket_journal_last_edited_format">Изменено %1$s</string>
+
+    <!-- Pocket Editor -->
+    <string name="pocket_editor_title">Редактор Pocket</string>
+    <string name="pocket_editor_tab_edit">Правка</string>
+    <string name="pocket_editor_tab_preview">Просмотр</string>
+    <string name="pocket_editor_title_label">Название (необязательно)</string>
+    <string name="pocket_editor_err_not_image">Выбранный файл не является читаемым изображением.</string>
+    <string name="pocket_editor_err_no_entry_open">Сейчас не открыта ни одна запись Pocket.</string>
+    <string name="pocket_editor_err_attachment_limit">В этой записи Pocket уже 10 вложений.</string>
+    <string name="pocket_editor_err_entry_not_found">Запись Pocket больше недоступна.</string>
+    <string name="pocket_editor_err_invalid_path">Путь к вложению недействителен.</string>
+    <string name="pocket_editor_link_text_default">Текст ссылки</string>
+    <string name="pocket_editor_markdown_label">Markdown</string>
+    <string name="pocket_editor_insert_link_title">Вставить ссылку</string>
+    <string name="pocket_editor_link_title_label">Название</string>
+    <string name="pocket_editor_link_url_label">URL</string>
+    <string name="pocket_editor_insert">Вставить</string>
+    <string name="pocket_editor_cancel">Отмена</string>
+    <string name="pocket_editor_toolbar_link">Ссылка</string>
+    <string name="pocket_editor_toolbar_image">Изображение</string>
+    <string name="pocket_attachment_content_desc">Вложение Pocket</string>
+
+    <!-- Pocket Thumbnail -->
+    <string name="pocket_thumbnail_untitled">Запись без названия</string>
+
+    <!-- Pocket Capture Menus -->
+    <string name="pocket_menu_save_to_pocket">Сохранить в Pocket</string>
+    <string name="pocket_menu_reference_in_pocket">Сослаться в Pocket</string>
+    <string name="pocket_menu_export_png">Экспорт PNG</string>
+    <string name="pocket_menu_copy_to_clipboard">Копировать в буфер обмена</string>
+
+    <!-- Nearby Filter Controls -->
+    <string name="nearby_filter_seen_within">Видно в течение</string>
+    <string name="nearby_filter_disabled">Отключено</string>
+    <string name="nearby_filter_minutes_format">%1$s мин</string>
+    <string name="nearby_filter_participation">PvP-участие</string>
+    <string name="nearby_filter_behavior">Поведение только игроков</string>
+    <string name="nearby_participation_disabled">Отключено</string>
+    <string name="nearby_participation_25k">25k урона/лечения или 25 CC</string>
+    <string name="nearby_participation_50k">50k урона/лечения или 50 CC</string>
+    <string name="nearby_participation_100k">100k урона/лечения или 100 CC</string>
+
+    <!-- Screenshot Preview -->
+    <string name="screenshot_preview_title">Предпросмотр скриншота</string>
+    <string name="screenshot_copied_feedback">Скопировано в буфер обмена</string>
+    <string name="screenshot_discard">Отменить</string>
+    <string name="screenshot_saved_to_pocket">Сохранено в журнале Pocket</string>
+    <string name="screenshot_save_failed">Не удалось сохранить (достигнут лимит вложений?)</string>
+    <string name="screenshot_save_to_exports">Сохранить в Exports</string>
+    <string name="screenshot_game_title">Игровой скриншот</string>
+    <string name="screenshot_content_desc">Предпросмотр скриншота</string>
+    <string name="screenshot_ctrl_c_hint">Ctrl+C для копирования</string>
 </resources>
 

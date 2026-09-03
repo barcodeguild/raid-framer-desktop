@@ -426,6 +426,10 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_top_debuffs">Top-Debuffs</string>
     <string name="summary_top_songs">Top-Lieder</string>
     <string name="summary_top_buffs">Top-Buffs</string>
+    <string name="summary_top_loot_peak">Spitzen-Loot-Buff %</string>
+    <string name="summary_worst_loot_peak">Schlechtester Loot-Buff %</string>
+    <string name="summary_top_buff_count">Top # Buffs (Zu viele?)</string>
+    <string name="summary_tab_loot">Loot-Buffs</string>
     <string name="summary_top_ode_haranya">Top Ode Haranya</string>
     <string name="summary_top_ode_nuia">Top Ode Nuia</string>
     <string name="summary_top_ode_pirate">Top Ode Piraten</string>
@@ -1313,5 +1317,71 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="settings_meta_specs_state">Aktueller Meta-Spec-Status: %1$s</string>
     <string name="settings_meta_specs_description">Überschreiben Sie, welche Specs in Komposition, Raid-Anführer und technischer Analyse als Meta behandelt werden. Benutzerdefinierte Specs werden weiß und fett angezeigt.</string>
     <string name="meta_specs_edit_icon">Meta-Specs bearbeiten</string>
+
+    <!-- Pocket Journal -->
+    <string name="pocket_journal_title">Pocket Journal</string>
+    <string name="pocket_journal_search_placeholder">Titel oder Tag suchen</string>
+    <string name="pocket_journal_filter_by_day">Nach Tag filtern</string>
+    <string name="pocket_journal_clear">Löschen</string>
+    <string name="pocket_journal_apply">Übernehmen</string>
+    <string name="pocket_journal_cancel">Abbrechen</string>
+    <string name="pocket_journal_filtering_by_tag">Gefiltert nach #%1$s</string>
+    <string name="pocket_journal_currently_editing">Wird gerade bearbeitet</string>
+    <string name="pocket_journal_empty">Noch keine Pocket-Einträge.</string>
+    <string name="pocket_journal_entry_title_format">Journal-Eintrag %1$s</string>
+    <string name="pocket_journal_created_format">Erstellt %1$s</string>
+    <string name="pocket_journal_last_edited_format">Zuletzt bearbeitet %1$s</string>
+
+    <!-- Pocket Editor -->
+    <string name="pocket_editor_title">Pocket-Editor</string>
+    <string name="pocket_editor_tab_edit">Bearbeiten</string>
+    <string name="pocket_editor_tab_preview">Vorschau</string>
+    <string name="pocket_editor_title_label">Titel (optional)</string>
+    <string name="pocket_editor_err_not_image">Die ausgewählte Datei ist kein lesbares Bild.</string>
+    <string name="pocket_editor_err_no_entry_open">Derzeit ist kein Pocket-Eintrag geöffnet.</string>
+    <string name="pocket_editor_err_attachment_limit">Dieser Pocket-Eintrag hat bereits 10 Anhänge.</string>
+    <string name="pocket_editor_err_entry_not_found">Der Pocket-Eintrag ist nicht mehr verfügbar.</string>
+    <string name="pocket_editor_err_invalid_path">Der Anhangspfad war ungültig.</string>
+    <string name="pocket_editor_link_text_default">Linktext</string>
+    <string name="pocket_editor_markdown_label">Markdown</string>
+    <string name="pocket_editor_insert_link_title">Link einfügen</string>
+    <string name="pocket_editor_link_title_label">Titel</string>
+    <string name="pocket_editor_link_url_label">URL</string>
+    <string name="pocket_editor_insert">Einfügen</string>
+    <string name="pocket_editor_cancel">Abbrechen</string>
+    <string name="pocket_editor_toolbar_link">Link</string>
+    <string name="pocket_editor_toolbar_image">Bild</string>
+    <string name="pocket_attachment_content_desc">Pocket-Anhang</string>
+
+    <!-- Pocket Thumbnail -->
+    <string name="pocket_thumbnail_untitled">Unbenannter Eintrag</string>
+
+    <!-- Pocket Capture Menus -->
+    <string name="pocket_menu_save_to_pocket">In Pocket speichern</string>
+    <string name="pocket_menu_reference_in_pocket">In Pocket verweisen</string>
+    <string name="pocket_menu_export_png">PNG exportieren</string>
+    <string name="pocket_menu_copy_to_clipboard">In Zwischenablage kopieren</string>
+
+    <!-- Nearby Filter Controls -->
+    <string name="nearby_filter_seen_within">Gesehen innerhalb</string>
+    <string name="nearby_filter_disabled">Deaktiviert</string>
+    <string name="nearby_filter_minutes_format">%1$s Min.</string>
+    <string name="nearby_filter_participation">PvP-Teilnahme</string>
+    <string name="nearby_filter_behavior">Verhalten nur für Spieler</string>
+    <string name="nearby_participation_disabled">Deaktiviert</string>
+    <string name="nearby_participation_25k">25k Schaden/Heilung oder 25 CC</string>
+    <string name="nearby_participation_50k">50k Schaden/Heilung oder 50 CC</string>
+    <string name="nearby_participation_100k">100k Schaden/Heilung oder 100 CC</string>
+
+    <!-- Screenshot Preview -->
+    <string name="screenshot_preview_title">Screenshot-Vorschau</string>
+    <string name="screenshot_copied_feedback">In Zwischenablage kopiert</string>
+    <string name="screenshot_discard">Verwerfen</string>
+    <string name="screenshot_saved_to_pocket">In Pocket-Journal gespeichert</string>
+    <string name="screenshot_save_failed">Konnte nicht gespeichert werden (Anhangslimit erreicht?)</string>
+    <string name="screenshot_save_to_exports">In Exports speichern</string>
+    <string name="screenshot_game_title">Spiel-Screenshot</string>
+    <string name="screenshot_content_desc">Screenshot-Vorschau</string>
+    <string name="screenshot_ctrl_c_hint">Strg+C zum Kopieren</string>
 </resources>
 

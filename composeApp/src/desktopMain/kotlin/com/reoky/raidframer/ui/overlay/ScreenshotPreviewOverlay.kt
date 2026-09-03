@@ -55,11 +55,28 @@ import com.reoky.raidframer.ui.capture.ScreenshotPreviewCoordinator
 import com.reoky.raidframer.ui.capture.ScreenshotCopyHotkey
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.pocket_menu_copy_to_clipboard
+import raid_framer_desktop.composeapp.generated.resources.pocket_menu_save_to_pocket
+import raid_framer_desktop.composeapp.generated.resources.screenshot_content_desc
+import raid_framer_desktop.composeapp.generated.resources.screenshot_copied_feedback
+import raid_framer_desktop.composeapp.generated.resources.screenshot_ctrl_c_hint
+import raid_framer_desktop.composeapp.generated.resources.screenshot_discard
+import raid_framer_desktop.composeapp.generated.resources.screenshot_game_title
+import raid_framer_desktop.composeapp.generated.resources.screenshot_preview_title
+import raid_framer_desktop.composeapp.generated.resources.screenshot_save_failed
+import raid_framer_desktop.composeapp.generated.resources.screenshot_save_to_exports
+import raid_framer_desktop.composeapp.generated.resources.screenshot_saved_to_pocket
 
 @Composable
 fun ScreenshotPreviewOverlay(wm: WindowManager? = null) {
   val scope = rememberCoroutineScope()
   val pending by ScreenshotPreviewCoordinator.pending.collectAsState()
+  val copiedFeedback = stringResource(Res.string.screenshot_copied_feedback)
+  val savedFeedback = stringResource(Res.string.screenshot_saved_to_pocket)
+  val saveFailedFeedback = stringResource(Res.string.screenshot_save_failed)
+  val gameScreenshotTitle = stringResource(Res.string.screenshot_game_title)
   var savedToPocket by remember { mutableStateOf(false) }
   var feedback by remember { mutableStateOf<String?>(null) }
   var copyPulse by remember { mutableStateOf(false) }
@@ -76,7 +93,7 @@ fun ScreenshotPreviewOverlay(wm: WindowManager? = null) {
     } else {
       ScreenshotCopyHotkey.start {
         ScreenshotPreviewCoordinator.copyToClipboard()
-        feedback = "Copied to clipboard"
+        feedback = copiedFeedback
         copyPulse = true
       }
     }
@@ -96,7 +113,7 @@ fun ScreenshotPreviewOverlay(wm: WindowManager? = null) {
       .onPreviewKeyEvent { event: KeyEvent ->
         if (event.type == KeyEventType.KeyDown && event.key == Key.C && (event.isCtrlPressed || event.isMetaPressed)) {
           ScreenshotPreviewCoordinator.copyToClipboard()
-          feedback = "Copied to clipboard"
+          feedback = copiedFeedback
           copyPulse = true
           true
         } else {
@@ -106,7 +123,7 @@ fun ScreenshotPreviewOverlay(wm: WindowManager? = null) {
   ) {
     Column(Modifier.fillMaxSize()) {
       TitleBarComponent(
-        title = "Screenshot Preview",
+        title = stringResource(Res.string.screenshot_preview_title),
         onClose = {
           ScreenshotPreviewCoordinator.clear()
           wm?.closeWindow(OverlayType.SCREENSHOT_PREVIEW)
@@ -143,23 +160,23 @@ fun ScreenshotPreviewOverlay(wm: WindowManager? = null) {
           horizontalArrangement = Arrangement.spacedBy(2.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
-          PreviewAction("\uf2ed", "Discard") { ScreenshotPreviewCoordinator.discard(); wm?.closeWindow(OverlayType.SCREENSHOT_PREVIEW) }
-          PreviewAction("\uf02d", "Save to Pocket", enabled = !savedToPocket, accent = !savedToPocket) {
+          PreviewAction("\uf2ed", stringResource(Res.string.screenshot_discard)) { ScreenshotPreviewCoordinator.discard(); wm?.closeWindow(OverlayType.SCREENSHOT_PREVIEW) }
+          PreviewAction("\uf02d", stringResource(Res.string.pocket_menu_save_to_pocket), enabled = !savedToPocket, accent = !savedToPocket) {
             scope.launch {
-              val ok = PocketWindowCaptureCoordinator.saveToPocket(screenshot.image, "Game Screenshot", wm ?: return@launch)
-              if (ok) { savedToPocket = true; feedback = "Saved to Pocket journal" }
-              else feedback = "Could not save (attachment limit reached?)"
+              val ok = PocketWindowCaptureCoordinator.saveToPocket(screenshot.image, gameScreenshotTitle, wm ?: return@launch)
+              if (ok) { savedToPocket = true; feedback = savedFeedback }
+              else feedback = saveFailedFeedback
               ScreenshotPreviewCoordinator.clear()
               wm?.closeWindow(OverlayType.SCREENSHOT_PREVIEW)
 
             }
           }
-          PreviewAction("\uf0c5", "Copy to Clipboard", highlighted = copyPulse) {
+          PreviewAction("\uf0c5", stringResource(Res.string.pocket_menu_copy_to_clipboard), highlighted = copyPulse) {
             ScreenshotPreviewCoordinator.copyToClipboard()
-            feedback = "Copied to clipboard"
+            feedback = copiedFeedback
             copyPulse = true
           }
-          PreviewAction("\uf019", "Save to Exports") {
+          PreviewAction("\uf019", stringResource(Res.string.screenshot_save_to_exports)) {
             ScreenshotPreviewCoordinator.showExportsInExplorer()
             ScreenshotPreviewCoordinator.clear()
             wm?.closeWindow(OverlayType.SCREENSHOT_PREVIEW)
@@ -181,7 +198,7 @@ fun ScreenshotPreviewOverlay(wm: WindowManager? = null) {
         Box(modifier = Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(8.dp))) {
           Image(
             bitmap = remember(screenshot.snippetFile) { screenshot.image.toComposeImageBitmap() },
-            contentDescription = "Screenshot preview",
+            contentDescription = stringResource(Res.string.screenshot_content_desc),
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit
           )
@@ -191,7 +208,7 @@ fun ScreenshotPreviewOverlay(wm: WindowManager? = null) {
         Text(screenshot.snippetFile.fileName.toString(), color = RFColors.TextTertiary, fontSize = 11.sp, textAlign = TextAlign.Center)
         feedback?.let { Spacer(Modifier.height(6.dp)); Text(it, color = RFColors.UpdateGreen, fontSize = 12.sp) }
         Spacer(Modifier.height(4.dp))
-        Text("Ctrl+C to copy", color = RFColors.TextTertiary, fontSize = 10.sp)
+        Text(stringResource(Res.string.screenshot_ctrl_c_hint), color = RFColors.TextTertiary, fontSize = 10.sp)
       }
     }
   }

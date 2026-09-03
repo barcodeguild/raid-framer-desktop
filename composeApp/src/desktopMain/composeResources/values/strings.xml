@@ -1398,4 +1398,70 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_meta_specs_state">Current Meta Spec State: %1$s</string>
     <string name="settings_meta_specs_description">Override which specs are treated as meta in the composition, raid caller, and technical analysis. Custom specs are shown white and bold.</string>
     <string name="meta_specs_edit_icon">Edit meta specs</string>
+
+    <!-- Pocket Journal -->
+    <string name="pocket_journal_title">Pocket Journal</string>
+    <string name="pocket_journal_search_placeholder">Search title or tag</string>
+    <string name="pocket_journal_filter_by_day">Filter by day</string>
+    <string name="pocket_journal_clear">Clear</string>
+    <string name="pocket_journal_apply">Apply</string>
+    <string name="pocket_journal_cancel">Cancel</string>
+    <string name="pocket_journal_filtering_by_tag">Filtering by #%1$s</string>
+    <string name="pocket_journal_currently_editing">Currently Editing</string>
+    <string name="pocket_journal_empty">No Pocket entries yet.</string>
+    <string name="pocket_journal_entry_title_format">Journal Entry %1$s</string>
+    <string name="pocket_journal_created_format">Created %1$s</string>
+    <string name="pocket_journal_last_edited_format">Last Edited %1$s</string>
+
+    <!-- Pocket Editor -->
+    <string name="pocket_editor_title">Pocket Editor</string>
+    <string name="pocket_editor_tab_edit">Edit</string>
+    <string name="pocket_editor_tab_preview">Preview</string>
+    <string name="pocket_editor_title_label">Title (optional)</string>
+    <string name="pocket_editor_err_not_image">Selected file is not a readable image.</string>
+    <string name="pocket_editor_err_no_entry_open">No Pocket entry is currently open.</string>
+    <string name="pocket_editor_err_attachment_limit">This Pocket entry already has 10 attachments.</string>
+    <string name="pocket_editor_err_entry_not_found">The Pocket entry is no longer available.</string>
+    <string name="pocket_editor_err_invalid_path">The attachment path was invalid.</string>
+    <string name="pocket_editor_link_text_default">Link text</string>
+    <string name="pocket_editor_markdown_label">Markdown</string>
+    <string name="pocket_editor_insert_link_title">Insert link</string>
+    <string name="pocket_editor_link_title_label">Title</string>
+    <string name="pocket_editor_link_url_label">URL</string>
+    <string name="pocket_editor_insert">Insert</string>
+    <string name="pocket_editor_cancel">Cancel</string>
+    <string name="pocket_editor_toolbar_link">Link</string>
+    <string name="pocket_editor_toolbar_image">Image</string>
+    <string name="pocket_attachment_content_desc">Pocket attachment</string>
+
+    <!-- Pocket Thumbnail -->
+    <string name="pocket_thumbnail_untitled">Untitled entry</string>
+
+    <!-- Pocket Capture Menus -->
+    <string name="pocket_menu_save_to_pocket">Save to Pocket</string>
+    <string name="pocket_menu_reference_in_pocket">Reference in Pocket</string>
+    <string name="pocket_menu_export_png">Export PNG</string>
+    <string name="pocket_menu_copy_to_clipboard">Copy to Clipboard</string>
+
+    <!-- Nearby Filter Controls -->
+    <string name="nearby_filter_seen_within">Seen Within</string>
+    <string name="nearby_filter_disabled">Disabled</string>
+    <string name="nearby_filter_minutes_format">%1$s min</string>
+    <string name="nearby_filter_participation">PvP Participation</string>
+    <string name="nearby_filter_behavior">Player-Only Behavior</string>
+    <string name="nearby_participation_disabled">Disabled</string>
+    <string name="nearby_participation_25k">25k DMG/Heals or 25 CC</string>
+    <string name="nearby_participation_50k">50k DMG/Heals or 50 CC</string>
+    <string name="nearby_participation_100k">100k DMG/Heals or 100 CC</string>
+
+    <!-- Screenshot Preview -->
+    <string name="screenshot_preview_title">Screenshot Preview</string>
+    <string name="screenshot_copied_feedback">Copied to clipboard</string>
+    <string name="screenshot_discard">Discard</string>
+    <string name="screenshot_saved_to_pocket">Saved to Pocket journal</string>
+    <string name="screenshot_save_failed">Could not save (attachment limit reached?)</string>
+    <string name="screenshot_save_to_exports">Save to Exports</string>
+    <string name="screenshot_game_title">Game Screenshot</string>
+    <string name="screenshot_content_desc">Screenshot preview</string>
+    <string name="screenshot_ctrl_c_hint">Ctrl+C to copy</string>
 </resources>

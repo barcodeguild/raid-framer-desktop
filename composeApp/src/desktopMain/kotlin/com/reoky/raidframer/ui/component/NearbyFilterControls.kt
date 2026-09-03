@@ -32,6 +32,17 @@ import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.ui.LocalDragLock
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.nearby_filter_behavior
+import raid_framer_desktop.composeapp.generated.resources.nearby_filter_disabled
+import raid_framer_desktop.composeapp.generated.resources.nearby_filter_minutes_format
+import raid_framer_desktop.composeapp.generated.resources.nearby_filter_participation
+import raid_framer_desktop.composeapp.generated.resources.nearby_filter_seen_within
+import raid_framer_desktop.composeapp.generated.resources.nearby_participation_100k
+import raid_framer_desktop.composeapp.generated.resources.nearby_participation_25k
+import raid_framer_desktop.composeapp.generated.resources.nearby_participation_50k
+import raid_framer_desktop.composeapp.generated.resources.nearby_participation_disabled
 
 /**
  * Holds the state for all nearby-player filters used on the Nearby, Nearby Gear, and Composition tabs.
@@ -46,11 +57,12 @@ data class NearbyFilterState(
 /**
  * The four participation stage labels for display in the UI.
  */
-val PARTICIPATION_STAGE_LABELS = listOf(
-  "Disabled",
-  "25k DMG/Heals or 25 CC",
-  "50k DMG/Heals or 50 CC",
-  "100k DMG/Heals or 100 CC",
+@Composable
+fun participationStageLabels(): List<String> = listOf(
+  stringResource(Res.string.nearby_participation_disabled),
+  stringResource(Res.string.nearby_participation_25k),
+  stringResource(Res.string.nearby_participation_50k),
+  stringResource(Res.string.nearby_participation_100k),
 )
 
 /**
@@ -148,9 +160,9 @@ fun NearbyFilterControls(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
-        Text("Seen Within", color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+        Text(stringResource(Res.string.nearby_filter_seen_within), color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
         Text(
-          text = if (state.slidingWindowMinutes == 0) "Disabled" else "${state.slidingWindowMinutes} min",
+          text = if (state.slidingWindowMinutes == 0) stringResource(Res.string.nearby_filter_disabled) else stringResource(Res.string.nearby_filter_minutes_format, state.slidingWindowMinutes),
           color = RFColors.TextSecondary,
           fontSize = 12.sp
         )
@@ -165,14 +177,14 @@ fun NearbyFilterControls(
 
     // --- Participation Stage ---
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-      Text("PvP Participation", color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+      Text(stringResource(Res.string.nearby_filter_participation), color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
       @OptIn(ExperimentalLayoutApi::class)
       FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
-        PARTICIPATION_STAGE_LABELS.forEachIndexed { index, label ->
+        participationStageLabels().forEachIndexed { index, label ->
           val isSelected = state.participationStage == index
           Box(
             modifier = Modifier
@@ -205,9 +217,9 @@ fun NearbyFilterControls(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
-        Text("Player-Only Behavior", color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+        Text(stringResource(Res.string.nearby_filter_behavior), color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
         Text(
-          text = if (state.behaviorSensitivity == 0) "Disabled" else "${state.behaviorSensitivity}",
+          text = if (state.behaviorSensitivity == 0) stringResource(Res.string.nearby_filter_disabled) else "${state.behaviorSensitivity}",
           color = RFColors.TextSecondary,
           fontSize = 12.sp
         )

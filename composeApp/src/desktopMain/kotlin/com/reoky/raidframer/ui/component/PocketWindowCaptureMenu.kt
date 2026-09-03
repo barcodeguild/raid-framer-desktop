@@ -22,6 +22,11 @@ import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.ui.LocalDragLock
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.pocket_menu_copy_to_clipboard
+import raid_framer_desktop.composeapp.generated.resources.pocket_menu_export_png
+import raid_framer_desktop.composeapp.generated.resources.pocket_menu_save_to_pocket
 
 @Composable
 fun PocketWindowCaptureMenu(
@@ -62,14 +67,14 @@ fun PocketWindowCaptureMenu(
     DropdownMenuItem(onClick = {
       expanded = false
       pendingAction = onSaveToPocket
-    }) { Text("Save to Pocket") }
+    }) { Text(stringResource(Res.string.pocket_menu_save_to_pocket)) }
     DropdownMenuItem(onClick = {
       expanded = false
       pendingAction = onExportPng
-    }) { Text("Export PNG") }
+    }) { Text(stringResource(Res.string.pocket_menu_export_png)) }
     DropdownMenuItem(onClick = {
       expanded = false
       pendingAction = onCopyToClipboard
-    }) { Text("Copy to Clipboard") }
+    }) { Text(stringResource(Res.string.pocket_menu_copy_to_clipboard)) }
   }
 }
