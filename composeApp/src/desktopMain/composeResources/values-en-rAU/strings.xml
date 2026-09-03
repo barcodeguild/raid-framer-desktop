@@ -129,6 +129,7 @@ You should still complete the uninstallation of the main application by uninstal
     <string name="settings_item_use_overlay">Enable Item Use Overlay. Shows recent item uses in a kill-feed style. [EXPERIMENTAL / PROTOTYPE]</string>
     <string name="settings_split_chat">Enable OSRS-style split-chat window overlay. (Coming Soon)</string>
     <string name="settings_tabbed_detection">Automatically hide game overlay's while tabbed-out of the game. Doesn't apply to tool-tips (those with a title-bar).</string>
+    <string name="settings_combat_overlay_tooltip">Make Combat Overlay a Multi-Monitor Tool-Tip instead of a Game Overlay. (Shows as a draggable, always-visible tool-tip with a title-bar.)</string>
     <string name="settings_allow_pve_damage">Allow PvE Damage to be counted towards DPS/Kill Counters. (Useful for solo players who want to see their damage output against PvE targets)</string>
     <string name="settings_game_schedule_hotkey">Enable [HOLD TAB] to bring-up the official in-game event schedule website as an overlay. (Coming Soon)</string>
     <string name="settings_use_sadly">I'd prefer to use Sadly.io for in-game schedule data. (Coming Soon)</string>
@@ -424,6 +425,10 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_top_debuffs">Top Debuffs</string>
     <string name="summary_top_songs">Top Songs</string>
     <string name="summary_top_buffs">Top Buffs</string>
+    <string name="summary_top_loot_peak">Top Peak Loot Buff %</string>
+    <string name="summary_worst_loot_peak">Worst Peak Loot Buff %</string>
+    <string name="summary_top_buff_count">Top # of Buffs (Too Many?)</string>
+    <string name="summary_tab_loot">Loot Buffs</string>
     <string name="summary_top_ode_haranya">Top Ode Haranya</string>
     <string name="summary_top_ode_nuia">Top Ode Nuia</string>
     <string name="summary_top_ode_pirate">Top Ode Pirate</string>
@@ -1236,6 +1241,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="raid_caller_title">Raid Caller</string>
     <string name="raid_caller_no_raid">Join a raid to see caller stats</string>
     <string name="raid_caller_position_hint">Shift+Click+Drag to Position</string>
+    <string name="raid_caller_show_anyways">Show Anyways</string>
     <string name="raid_caller_avg_gs">Avg GS</string>
     <string name="raid_caller_lowest_gs">Lowest GS</string>
     <string name="raid_caller_highest_gs">Highest GS</string>
@@ -1282,6 +1288,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="raid_buff_loot_section">Require Loot Buffs</string>
     <string name="raid_buff_check_loot">Check for loot buffs?</string>
     <string name="raid_buff_loot_threshold_label">Threshold:</string>
+    <string name="raid_buff_allow_guild_buff">Allow Guild Buff (Gallant's Blessing) to count as fully-buffed</string>
     <string name="raid_caller_loot_threshold">Loot Threshold</string>
     <string name="raid_caller_buff_mode">Buff Mode</string>
     <string name="raid_caller_buff_grace">Buff Grace</string>
@@ -1311,4 +1318,88 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_meta_specs_state">Current Meta Spec State: %1$s</string>
     <string name="settings_meta_specs_description">Override which specs are treated as meta in the composition, raid caller, and technical analysis. Custom specs are shown white and bold.</string>
     <string name="meta_specs_edit_icon">Edit meta specs</string>
+
+    <!-- Pocket Journal -->
+    <string name="pocket_journal_title">Pocket Journal</string>
+    <string name="pocket_journal_search_placeholder">Search title or tag</string>
+    <string name="pocket_journal_filter_by_day">Filter by day</string>
+    <string name="pocket_journal_clear">Clear</string>
+    <string name="pocket_journal_apply">Apply</string>
+    <string name="pocket_journal_cancel">Cancel</string>
+    <string name="pocket_journal_filtering_by_tag">Filtering by #%1$s</string>
+    <string name="pocket_journal_currently_editing">Currently Editing</string>
+    <string name="pocket_journal_empty">No Pocket entries yet.</string>
+    <string name="pocket_journal_entry_title_format">Journal Entry %1$s</string>
+    <string name="pocket_journal_created_format">Created %1$s</string>
+    <string name="pocket_journal_last_edited_format">Last Edited %1$s</string>
+
+    <!-- Pocket Editor -->
+    <string name="pocket_editor_title">Pocket Editor</string>
+    <string name="pocket_editor_tab_edit">Edit</string>
+    <string name="pocket_editor_tab_preview">Preview</string>
+    <string name="pocket_editor_title_label">Title (optional)</string>
+    <string name="pocket_editor_err_not_image">Selected file is not a readable image.</string>
+    <string name="pocket_editor_err_no_entry_open">No Pocket entry is currently open.</string>
+    <string name="pocket_editor_err_attachment_limit">This Pocket entry already has 10 attachments.</string>
+    <string name="pocket_editor_err_entry_not_found">The Pocket entry is no longer available.</string>
+    <string name="pocket_editor_err_invalid_path">The attachment path was invalid.</string>
+    <string name="pocket_editor_link_text_default">Link text</string>
+    <string name="pocket_editor_markdown_label">Markdown</string>
+    <string name="pocket_editor_insert_link_title">Insert link</string>
+    <string name="pocket_editor_link_title_label">Title</string>
+    <string name="pocket_editor_link_url_label">URL</string>
+    <string name="pocket_editor_insert">Insert</string>
+    <string name="pocket_editor_cancel">Cancel</string>
+    <string name="pocket_editor_toolbar_link">Link</string>
+    <string name="pocket_editor_toolbar_image">Image</string>
+    <string name="pocket_editor_toolbar_event">Event</string>
+    <string name="pocket_editor_toolbar_raid">Raid</string>
+    <string name="pocket_editor_event_search_hint">Search events…</string>
+    <string name="pocket_attachment_content_desc">Pocket attachment</string>
+
+    <!-- Pocket Thumbnail -->
+    <string name="pocket_thumbnail_untitled">Untitled entry</string>
+
+    <!-- Pocket Capture Menus -->
+    <string name="pocket_menu_save_to_pocket">Save to Pocket</string>
+    <string name="pocket_menu_reference_in_pocket">Reference in Pocket</string>
+    <string name="pocket_menu_export_png">Export PNG</string>
+    <string name="pocket_menu_copy_to_clipboard">Copy to Clipboard</string>
+
+    <!-- Nearby Filter Controls -->
+    <string name="nearby_filter_seen_within">Seen Within</string>
+    <string name="nearby_filter_disabled">Disabled</string>
+    <string name="nearby_filter_minutes_format">%1$s min</string>
+    <string name="nearby_filter_participation">PvP Participation</string>
+    <string name="nearby_filter_behavior">Player-Only Behavior</string>
+    <string name="nearby_participation_disabled">Disabled</string>
+    <string name="nearby_participation_25k">25k DMG/Heals or 25 CC</string>
+    <string name="nearby_participation_50k">50k DMG/Heals or 50 CC</string>
+    <string name="nearby_participation_100k">100k DMG/Heals or 100 CC</string>
+
+    <!-- Screenshot Preview -->
+    <string name="screenshot_preview_title">Screenshot Preview</string>
+    <string name="screenshot_copied_feedback">Copied to clipboard</string>
+    <string name="screenshot_discard">Discard</string>
+    <string name="screenshot_saved_to_pocket">Saved to Pocket journal</string>
+    <string name="screenshot_save_failed">Could not save (attachment limit reached?)</string>
+    <string name="screenshot_save_to_exports">Save to Exports</string>
+    <string name="screenshot_game_title">Game Screenshot</string>
+    <string name="screenshot_content_desc">Screenshot preview</string>
+    <string name="screenshot_ctrl_c_hint">Ctrl+C to copy</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">Open Help and Installation Guide</string>
+    <string name="about_help_button">? Help</string>
+    <string name="player_card_journal_entries">Pocket Journal</string>
+    <string name="raid_loot_breakdown_title">Loot Breakdown (Most → Least)</string>
+    <string name="tray_pocket_journal">Pocket Journal</string>
+    <string name="tray_help">Help</string>
+    <string name="tray_take_screenshot">Take Screenshot</string>
+    <string name="tray_copy_screenshot_to_clipboard">Copy Screenshot to Clipboard</string>
+    <string name="pocket_editor_toolbar_current_target">Target</string>
+    <string name="pocket_editor_toolbar_target_guild">Guild</string>
+    <string name="raid_join_raid_hint">Join a raid to use raid-related features…</string>
+    <string name="raid_tab_buffs">Buffs</string>
 </resources>
+

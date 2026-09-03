@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.database
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.model.FactionStatus
@@ -15,7 +16,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 44
+const val SCHEMA_VERSION = 47
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -158,6 +159,14 @@ data class ConfigEntity(
   // Otherwise a JSON blob encoding the user's overrides for the six categories. See
   // core/definitions/MetaSpecsDefinition.kt for the schema and parsing.
   val customMetaSpecsJson: String = "",
+
+  // Nearby filter state (persisted across sessions)
+  val nearbySlidingWindowMinutes: Int = 15,
+  val nearbyParticipationStage: Int = 1,
+  val nearbyBehaviorSensitivity: Int = 0,
+
+  // Allow Guild Buff (Gallant's Blessing) to count as fully-buffed (09/02/26)
+  val raidCallerAllowGuildBuff: Boolean = true,
 )
 
 /*
@@ -380,6 +389,47 @@ data class PlayerSessionTotalsEntity(
   val totalCourageousAction: Int = 0,
   val totalManaBarrier: Int = 0,
   val totalRevive: Int = 0,
+)
+
+/** Metadata for a locally persisted Pocket journal entry. */
+@Entity(
+  tableName = "pocket_entries",
+  indices = [
+    Index(value = ["createdAt"]),
+    Index(value = ["updatedAt"])
+  ]
+)
+data class PocketEntryEntity(
+  @PrimaryKey val id: String,
+  val createdAt: Long,
+  val updatedAt: Long,
+  val title: String = "",
+  val markdownPath: String,
+)
+
+/** A normalized tag associated with a Pocket entry. */
+@Entity(
+  tableName = "pocket_tags",
+  primaryKeys = ["entryId", "normalizedTag"],
+  indices = [Index(value = ["normalizedTag"])]
+)
+data class PocketTagEntity(
+  val entryId: String,
+  val tag: String,
+  val normalizedTag: String,
+)
+
+/** A local image or other file copied into a Pocket entry directory. */
+@Entity(
+  tableName = "pocket_attachments",
+  indices = [Index(value = ["entryId"])]
+)
+data class PocketAttachmentEntity(
+  @PrimaryKey val id: String,
+  val entryId: String,
+  val relativePath: String,
+  val mimeType: String,
+  val createdAt: Long,
 )
 
 // global enums below for consolidation

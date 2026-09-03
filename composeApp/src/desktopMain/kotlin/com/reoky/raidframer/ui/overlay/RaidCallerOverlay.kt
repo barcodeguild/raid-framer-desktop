@@ -64,8 +64,12 @@ import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.capture.GameSnippingService
+import com.reoky.raidframer.ui.capture.PocketWindowCaptureCoordinator
+import com.reoky.raidframer.ui.capture.ScreenshotPreviewCoordinator
 import com.reoky.raidframer.OverlayNav
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_abort_discard
@@ -91,6 +95,7 @@ import raid_framer_desktop.composeapp.generated.resources.raid_caller_no_raid
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_non_meta
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_position_hint
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_raid
+import raid_framer_desktop.composeapp.generated.resources.raid_caller_show_anyways
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_ranged
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_rebirth
 import raid_framer_desktop.composeapp.generated.resources.raid_caller_render
@@ -477,7 +482,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
       val snapshot = obs.snapshot ?: return@filter false
       requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
         com.reoky.raidframer.core.serialization.BuffPayload(buff_id = id)
-      }))
+      }), config.raidCallerAllowGuildBuff)
     }
   }
   val minBuffedCount = buffedMembers.size
@@ -616,6 +621,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
           LabeledValue("${stringResource(Res.string.raid_caller_recording)}:", formatMinutesSeconds(recordingMs), RFColors.AccentRed, SectionTitleColor)
         }
       }
+      GameSnippingButton(wm)
       RecordingControlButton(wm, isRecording)
     }
 
@@ -657,7 +663,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
           centerTop = stringResource(Res.string.raid_caller_loot),
           centerMiddle = "$lootBuffedCount/${lootSums.size}",
           centerMiddleColor = Color.White,
-          centerBottom = "$lootAvg%",
+          centerBottom = "${lootAvg}%",
           centerBottomColor = RFColors.dpsOrange
         )
         MiniPieChart(
@@ -730,6 +736,37 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
           .padding(horizontal = 0.dp)
       )
     }
+  }
+}
+
+@Composable
+private fun GameSnippingButton(wm: WindowManager?) {
+  val scope = rememberCoroutineScope()
+  val interactionSource = remember { MutableInteractionSource() }
+  val isHovered by interactionSource.collectIsHoveredAsState()
+
+  IconButton(
+    onClick = {
+      scope.launch {
+        val image = GameSnippingService.capture(
+          windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.RAID_CALLER))
+        ) ?: return@launch
+        // Always persist a copy of the snipped PNG into the month's snippets folder so it's
+        // never lost, then open the dedicated preview window for the user to decide what to do.
+        val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
+        ScreenshotPreviewCoordinator.show(result)
+        wm?.openWindow(OverlayType.SCREENSHOT_PREVIEW)
+      }
+    },
+    modifier = Modifier.size(32.dp)
+  ) {
+    Text(
+      text = "\uf03e",
+      fontFamily = FontsHelper.faSolid(),
+      fontSize = 13.sp,
+      color = if (isHovered) RFColors.AccentRed else Color.White,
+      modifier = Modifier.hoverable(interactionSource)
+    )
   }
 }
 
@@ -845,6 +882,11 @@ fun RaidCallerOverlay(wm: WindowManager? = null) {
 
   val inRaid = raidWasDetected
 
+  // User can force the caller stats to show even when not in a raid. Mirrors the
+  // "stay in raid mode" behavior of raidWasDetected: once opted in, it holds for the
+  // lifetime of the overlay window (re-opening the overlay resets it).
+  var showAnyways by remember { mutableStateOf(false) }
+
   // Flash the overlay border when first enabled so the user can find it.
   var raidCallerPulseActive by remember { mutableStateOf(false) }
   LaunchedEffect(OverlayNav.highlightRaidCallerOverlay.value) {
@@ -856,7 +898,7 @@ fun RaidCallerOverlay(wm: WindowManager? = null) {
   val raidCallerBorder = rememberSectionPulse(raidCallerPulseActive, restColor = Color.Transparent)
 
   Box(modifier = Modifier.fillMaxSize().border(2.dp, raidCallerBorder, RoundedCornerShape(4.dp))) {
-    if (!inRaid) {
+    if (!inRaid && !showAnyways) {
       // When not in a raid, show the positioning helper text (same pattern as ItemUseOverlay).
       Column(
         modifier = Modifier.fillMaxSize(),
@@ -877,6 +919,21 @@ fun RaidCallerOverlay(wm: WindowManager? = null) {
           fontSize = 10.sp,
           fontWeight = FontWeight.Light,
           textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        val showAnywaysInteraction = remember { MutableInteractionSource() }
+        val showAnywaysHovered by showAnywaysInteraction.collectIsHoveredAsState()
+        Text(
+          text = stringResource(Res.string.raid_caller_show_anyways),
+          color = Color.White.copy(alpha = if (showAnywaysHovered) 0.7f else 0.4f),
+          fontSize = 10.sp,
+          fontWeight = FontWeight.Light,
+          textAlign = TextAlign.Center,
+          modifier = Modifier
+            .hoverable(showAnywaysInteraction)
+            .clip(RoundedCornerShape(4.dp))
+            .clickable(interactionSource = showAnywaysInteraction, indication = null) { showAnyways = true }
+            .padding(horizontal = 6.dp, vertical = 2.dp)
         )
       }
     } else {

@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.awt.Window
 
 class WindowManager(
   private val scope: CoroutineScope,
@@ -18,6 +19,11 @@ class WindowManager(
 
   companion object {
     private const val TAG = "WindowManager"
+
+    /** Overlay types that should always start closed, even if their saved state was open. */
+    private val ALWAYS_START_CLOSED = setOf(
+      OverlayType.PLAYER_CARD,
+    )
   }
 
   // Holds actual state for each window
@@ -26,6 +32,13 @@ class WindowManager(
 
   // Visibility flags tracked per window type
   val visibilityStates: MutableMap<OverlayType, MutableState<Boolean>> = mutableMapOf()
+  private val nativeWindows: MutableMap<OverlayType, Window> = mutableMapOf()
+
+  fun registerNativeWindow(type: OverlayType, window: Window) {
+    nativeWindows[type] = window
+  }
+
+  fun nativeWindow(type: OverlayType): Window? = nativeWindows[type]
 
   // So we don't accidentally implement this same logic anywhere else except the defaults
   fun defaultVisibility(type: OverlayType): MutableState<Boolean> {
@@ -40,12 +53,20 @@ class WindowManager(
   fun openWindow(type: OverlayType) {
     val visibility = visibilityStates.getOrPut(type) { mutableStateOf(false) }
     visibility.value = true
+    // Sync the entity so persisting captures the correct visibility
+    windowStates[type]?.value?.let { entity ->
+      windowStates[type]?.value = entity.copy(isVisible = true)
+    }
   }
 
   // Closes the overlay window and saves its last known state
   fun closeWindow(type: OverlayType) {
     val visibility = visibilityStates[type] ?: return
     visibility.value = false
+    // Sync the entity so persisting captures the correct visibility
+    windowStates[type]?.value?.let { entity ->
+      windowStates[type]?.value = entity.copy(isVisible = false)
+    }
 
     // Save state
     windowStates[type]?.value?.let { saveState(it) }
@@ -84,6 +105,14 @@ class WindowManager(
       // replace pre-populated values with the one from the database
       existingWindowState.value = entity
       visibilityStates[type]?.value = entity.isVisible
+    }
+
+    // Force always-start-closed windows shut (geometry is preserved, only visibility overridden).
+    ALWAYS_START_CLOSED.forEach { type ->
+      windowStates[type]?.value?.let { entity ->
+        windowStates[type]?.value = entity.copy(isVisible = false)
+      }
+      visibilityStates[type]?.value = false
     }
   }
 
@@ -142,7 +171,7 @@ class WindowManager(
 
       // Reset each window to its default state
       OverlayType.entries.forEach { type ->
-        val defaultState = defaultWindowStateForTypeFor(type)
+        val defaultState = defaultWindowStateForTypeFor(type).copy(isVisible = wasVisible[type] == true)
         windowStates[type]?.value = defaultState
 
         // Restore whatever was open before the reset (default state doesn't drive visibility)

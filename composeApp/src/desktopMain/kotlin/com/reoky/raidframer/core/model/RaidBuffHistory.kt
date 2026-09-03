@@ -13,7 +13,9 @@ enum class RaidBuffGracePeriod(val millis: Long) {
 data class RaidBuffSnapshot(
   val observedAt: Long,
   val buffIds: Set<Int>,
-  val distance: Int
+  val distance: Int,
+  /** True when the scan actually returned buff data, including a confirmed empty result. */
+  val confirmed: Boolean = true
 )
 
 data class RaidBuffObservation(
@@ -22,4 +24,5 @@ data class RaidBuffObservation(
   val isCurrent: Boolean
 ) {
   val observedAt: Long? get() = snapshot?.observedAt
+  val isKnown: Boolean get() = snapshot?.confirmed == true
 }

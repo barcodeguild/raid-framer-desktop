@@ -28,10 +28,17 @@ import raid_framer_desktop.composeapp.generated.resources.time_ago_weeks_other
 import raid_framer_desktop.composeapp.generated.resources.time_ago_months_one
 import raid_framer_desktop.composeapp.generated.resources.time_ago_months_other
 import java.awt.Desktop
+import java.awt.Toolkit
+import java.awt.datatransfer.DataFlavor
+import java.awt.datatransfer.Transferable
+import java.awt.image.BufferedImage
 import java.io.File
 import java.net.URI
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import java.nio.file.StandardOpenOption
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -93,6 +100,43 @@ fun getExportDirectory(): String? {
   return Paths.get(documentsDir, "RFExports").toString()
 }
 
+/** Root directory for application-owned files that should not live beside the installed app. */
+fun getRaidFramerDirectory(): Path? {
+  val home = System.getProperty("user.home") ?: return null
+  return Paths.get(home, ".RaidFramer")
+}
+
+/** Root directory for locally persisted Pocket journal entries. */
+fun getPocketJournalDirectory(createdAt: Long, entryId: String): Path? {
+  val root = getRaidFramerDirectory() ?: return null
+  val date = Instant.ofEpochMilli(createdAt)
+    .atZone(ZoneId.systemDefault())
+    .toLocalDate()
+  return root.resolve("journals")
+    .resolve(date.year.toString())
+    .resolve("%02d".format(date.monthValue))
+    .resolve(entryId)
+}
+
+/** Creates an application directory and returns it, or null when the user home is unavailable. */
+fun ensureRaidFramerDirectory(): Path? {
+  return getRaidFramerDirectory()?.also { Files.createDirectories(it) }
+}
+
+/** Writes UTF-8 text through a sibling temporary file before replacing the destination. */
+fun writeTextAtomically(path: Path, text: String) {
+  Files.createDirectories(path.parent)
+  val temporary = path.resolveSibling(".${path.fileName}.tmp")
+  Files.write(
+    temporary,
+    text.toByteArray(Charsets.UTF_8),
+    StandardOpenOption.CREATE,
+    StandardOpenOption.TRUNCATE_EXISTING,
+    StandardOpenOption.WRITE
+  )
+  Files.move(temporary, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
+}
+
 fun getDirectorySizeBytes(directoryPath: String): Long {
   return try {
     val directory = File(directoryPath)
@@ -118,6 +162,46 @@ fun openWebLink(url: String) {
   if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
     Desktop.getDesktop().browse(URI(url))
   }
+}
+
+/**
+ * Opens the OS file explorer, revealing [file] with it selected where the platform supports it.
+ */
+fun showInExplorer(file: Path) {
+  runCatching {
+    if (System.getProperty("os.name").lowercase().contains("win")) {
+      // Explorer treats /select, as a switch and the target as a separate argument.
+      ProcessBuilder("explorer.exe", "/select,", file.toAbsolutePath().toString()).start()
+    } else {
+      Desktop.getDesktop().open(file.parent?.toFile())
+    }
+  }
+}
+
+fun showFolderInExplorer(directory: Path) {
+  runCatching {
+    if (System.getProperty("os.name").lowercase().contains("win")) {
+      ProcessBuilder("explorer.exe", directory.toAbsolutePath().toString()).start()
+    } else {
+      Desktop.getDesktop().open(directory.toAbsolutePath().toFile())
+    }
+  }
+}
+
+/**
+ * Places an image on the system clipboard so the user can paste it elsewhere (e.g. Discord).
+ */
+fun copyImageToClipboard(image: BufferedImage) {
+  val imageFlavor = DataFlavor.imageFlavor
+  val transferable = object : Transferable {
+    override fun getTransferDataFlavors(): Array<DataFlavor> = arrayOf(imageFlavor)
+    override fun isDataFlavorSupported(flavor: DataFlavor?): Boolean = flavor == imageFlavor
+    override fun getTransferData(flavor: DataFlavor?): Any {
+      require(flavor == imageFlavor) { "Unsupported flavor: $flavor" }
+      return image
+    }
+  }
+  Toolkit.getDefaultToolkit().systemClipboard.setContents(transferable, null)
 }
 
 /**
@@ -333,5 +417,16 @@ fun togglePokemon(wm: WindowManager?) {
     wm.closeWindow(OverlayType.POKEMON)
   } else {
     wm?.openWindow(OverlayType.POKEMON)
+  }
+}
+
+/**
+ * Toggles the Pocket Journal overlay open/closed.
+ */
+fun togglePocketJournal(wm: WindowManager?) {
+  if (wm != null && wm.isVisible(OverlayType.POCKET_JOURNAL).value) {
+    wm.closeWindow(OverlayType.POCKET_JOURNAL)
+  } else {
+    wm?.openWindow(OverlayType.POCKET_JOURNAL)
   }
 }

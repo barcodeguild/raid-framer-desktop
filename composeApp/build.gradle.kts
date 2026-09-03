@@ -1,7 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 val APP_NAME = "Raid Framer"
-val APP_VERSION = "2.3.7"
+val APP_VERSION = "2.3.8"
 val PACKAGE_ID = "com.reoky.raidframer"
 
 plugins {
@@ -28,6 +28,8 @@ kotlin {
       implementation(libs.androidx.lifecycle.viewmodel)
       implementation(libs.androidx.lifecycle.runtimeCompose)
       implementation(libs.kotlinx.serialization.json)
+      implementation(libs.commonmark)
+      implementation(libs.commonmark.strikethrough)
 
       implementation(libs.room.gradle.plugin)
       implementation(libs.room.runtime)
@@ -108,5 +110,4 @@ compose.desktop {
     }
   }
 }
-
 

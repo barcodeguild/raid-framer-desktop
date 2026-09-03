@@ -426,6 +426,10 @@
     <string name="summary_top_debuffs">디버프 순위</string>
     <string name="summary_top_songs">피리 순위</string>
     <string name="summary_top_buffs">버프 순위</string>
+    <string name="summary_top_loot_peak">최대 피크 루트 버프 %</string>
+    <string name="summary_worst_loot_peak">최악 피크 루트 버프 %</string>
+    <string name="summary_top_buff_count">최대 버프 수 (너무 많음?)</string>
+    <string name="summary_tab_loot">루트 버프</string>
     <string name="summary_top_ode_haranya">동대륙 치무</string>
     <string name="summary_top_ode_nuia">서대륙 치무</string>
     <string name="summary_top_ode_pirate">해적 치무</string>
@@ -778,6 +782,10 @@
     <string name="raid_buff_shortbread_cookie">초코맛 막대 과자 효과</string>
     <string name="raid_buff_golden_taffy">황금빛 환약</string>
     <string name="raid_buff_egg_of_fortune">행복이 담긴 달걀</string>
+    <string name="raid_buff_gallants_blessing">Gallant's Blessing</string>
+    <string name="raid_buff_allow_guild_buff">길드 버프（페르디타의 권능）를 완전한 버프로 인정</string>
+    <string name="raid_buff_guild_buff">Guild Buff</string>
+    <string name="raid_buff_guild_buff_covers_all">None — Guild Buff covers all requirements</string>
     <string name="raid_copy_not_buffed">버프 없음 복사</string>
     <string name="raid_copy_not_buffed_title">버프 없음</string>
     <string name="raid_copy_buffed">버프 있음 복사</string>
@@ -1300,6 +1308,7 @@
     <string name="raid_caller_title">레이드 콜러</string>
     <string name="raid_caller_no_raid">레이드에 참여하면 콜러 통계를 볼 수 있습니다</string>
     <string name="raid_caller_position_hint">Shift+클릭+드래그로 위치 조정</string>
+    <string name="raid_caller_show_anyways">어쨌든 표시</string>
     <string name="raid_caller_avg_gs">평균 GS</string>
     <string name="raid_caller_lowest_gs">최저 GS</string>
     <string name="raid_caller_highest_gs">최고 GS</string>
@@ -1372,4 +1381,86 @@
     <string name="settings_meta_specs_state">현재 메타 스펙 상태: %1$s</string>
     <string name="settings_meta_specs_description">구성, 레이드 콜러 및 기술 분석에서 메타로 취급할 스펙을 재정의합니다. 사용자 지정 스펙은 흰색 굵은 글씨로 표시됩니다.</string>
     <string name="meta_specs_edit_icon">메타 스펙 편집</string>
+
+    <!-- Pocket Journal -->
+    <string name="pocket_journal_title">포켓 저널</string>
+    <string name="pocket_journal_search_placeholder">제목 또는 태그 검색</string>
+    <string name="pocket_journal_filter_by_day">날짜별 필터</string>
+    <string name="pocket_journal_clear">지우기</string>
+    <string name="pocket_journal_apply">적용</string>
+    <string name="pocket_journal_cancel">취소</string>
+    <string name="pocket_journal_filtering_by_tag">#%1$s별 필터링</string>
+    <string name="pocket_journal_currently_editing">현재 편집 중</string>
+    <string name="pocket_journal_empty">아직 포켓 항목이 없습니다.</string>
+    <string name="pocket_journal_entry_title_format">저널 항목 %1$s</string>
+    <string name="pocket_journal_created_format">생성됨 %1$s</string>
+    <string name="pocket_journal_last_edited_format">마지막 편집 %1$s</string>
+
+    <!-- Pocket Editor -->
+    <string name="pocket_editor_title">포켓 편집기</string>
+    <string name="pocket_editor_tab_edit">편집</string>
+    <string name="pocket_editor_tab_preview">미리 보기</string>
+    <string name="pocket_editor_title_label">제목 (선택 사항)</string>
+    <string name="pocket_editor_err_not_image">선택한 파일은 읽을 수 있는 이미지가 아닙니다.</string>
+    <string name="pocket_editor_err_no_entry_open">현재 열려 있는 포켓 항목이 없습니다.</string>
+    <string name="pocket_editor_err_attachment_limit">이 포켓 항목에는 이미 첨부 파일 10개가 있습니다.</string>
+    <string name="pocket_editor_err_entry_not_found">포켓 항목을 더 이상 사용할 수 없습니다.</string>
+    <string name="pocket_editor_err_invalid_path">첨부 파일 경로가 잘못되었습니다.</string>
+    <string name="pocket_editor_link_text_default">링크 텍스트</string>
+    <string name="pocket_editor_markdown_label">마크다운</string>
+    <string name="pocket_editor_insert_link_title">링크 삽입</string>
+    <string name="pocket_editor_link_title_label">제목</string>
+    <string name="pocket_editor_link_url_label">URL</string>
+    <string name="pocket_editor_insert">삽입</string>
+    <string name="pocket_editor_cancel">취소</string>
+    <string name="pocket_editor_toolbar_link">링크</string>
+    <string name="pocket_editor_toolbar_image">이미지</string>
+    <string name="pocket_editor_toolbar_event">이벤트</string>
+    <string name="pocket_editor_toolbar_raid">레이드</string>
+    <string name="pocket_editor_event_search_hint">이벤트 검색…</string>
+    <string name="pocket_attachment_content_desc">포켓 첨부 파일</string>
+
+    <!-- Pocket Thumbnail -->
+    <string name="pocket_thumbnail_untitled">제목 없는 항목</string>
+
+    <!-- Pocket Capture Menus -->
+    <string name="pocket_menu_save_to_pocket">포켓에 저장</string>
+    <string name="pocket_menu_reference_in_pocket">포켓에서 참조</string>
+    <string name="pocket_menu_export_png">PNG 내보내기</string>
+    <string name="pocket_menu_copy_to_clipboard">클립보드에 복사</string>
+
+    <!-- Nearby Filter Controls -->
+    <string name="nearby_filter_seen_within">다음 시간 내 확인됨</string>
+    <string name="nearby_filter_disabled">비활성화</string>
+    <string name="nearby_filter_minutes_format">%1$s분</string>
+    <string name="nearby_filter_participation">PvP 참여</string>
+    <string name="nearby_filter_behavior">플레이어 전용 행동</string>
+    <string name="nearby_participation_disabled">비활성화</string>
+    <string name="nearby_participation_25k">25k 피해/치유 또는 25 CC</string>
+    <string name="nearby_participation_50k">50k 피해/치유 또는 50 CC</string>
+    <string name="nearby_participation_100k">100k 피해/치유 또는 100 CC</string>
+
+    <!-- Screenshot Preview -->
+    <string name="screenshot_preview_title">스크린샷 미리 보기</string>
+    <string name="screenshot_copied_feedback">클립보드에 복사됨</string>
+    <string name="screenshot_discard">버리기</string>
+    <string name="screenshot_saved_to_pocket">포켓 저널에 저장됨</string>
+    <string name="screenshot_save_failed">저장할 수 없음(첨부 파일 제한 도달?)</string>
+    <string name="screenshot_save_to_exports">Exports에 저장</string>
+    <string name="screenshot_game_title">게임 스크린샷</string>
+    <string name="screenshot_content_desc">스크린샷 미리 보기</string>
+    <string name="screenshot_ctrl_c_hint">복사하려면 Ctrl+C</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">도움말 및 설치 가이드 열기</string>
+    <string name="about_help_button">? 도움말</string>
+    <string name="player_card_journal_entries">포켓 저널</string>
+    <string name="raid_loot_breakdown_title">루트 상세 (많은 순 → 적은 순)</string>
+    <string name="tray_pocket_journal">포켓 저널</string>
+    <string name="tray_help">도움말</string>
+    <string name="tray_take_screenshot">스크린샷 촬영</string>
+    <string name="tray_copy_screenshot_to_clipboard">스크린샷 클립보드에 복사</string>
+    <string name="pocket_editor_toolbar_current_target">대상</string>
+    <string name="pocket_editor_toolbar_target_guild">길드</string>
 </resources>
+

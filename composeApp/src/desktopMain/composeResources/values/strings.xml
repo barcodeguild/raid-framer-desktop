@@ -215,6 +215,7 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="time_ago_months_other">%1$d months ago</string>
     <string name="player_inventory_time_ago">%1$s</string>
     <string name="player_inventory_controls_hint">Controls the session totals below</string>
+    <string name="player_card_journal_entries">Pocket Journal</string>
     <string name="player_card_recent_damage">Recent Damage</string>
     <string name="player_card_recent_heals">Recent Heals</string>
     <string name="player_card_recent_kd">Recent Kills &amp; Deaths</string>
@@ -809,6 +810,10 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_shortbread_cookie">Shortbread Cookie</string>
     <string name="raid_buff_golden_taffy">Golden Taffy</string>
     <string name="raid_buff_egg_of_fortune">Egg of Fortune</string>
+    <string name="raid_buff_gallants_blessing">Gallant's Blessing</string>
+    <string name="raid_buff_allow_guild_buff">Allow Guild Buff (Gallant's Blessing) to count as fully-buffed</string>
+    <string name="raid_buff_guild_buff">Guild Buff</string>
+    <string name="raid_buff_guild_buff_covers_all">None — Guild Buff covers all requirements</string>
     <string name="raid_copy_not_buffed">Copy Not Buffed</string>
     <string name="raid_copy_not_buffed_title">Not Buffed</string>
     <string name="raid_copy_buffed">Copy Buffed</string>
@@ -1298,6 +1303,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="performance_distance_help_body">The in-game combat settings (ESC \u2192 Options \u2192 Game Info) control what data flows into the addon.\n\n\u201CShow Combat Messages\u201D checkbox: Toggles damage/heal hitsplats in the game visually, but does NOT affect data flow to the addon. You can have them on or off.\n\nInfo Filter (SELF / PARTY / RAID / GUILD / ALL): This DOES affect data flow. Changing the filter limits which combat events the addon receives.\n\nDistance Slider: This DOES affect data flow. Reducing the range limits how far away combat events are detected.\n\nExamples:\n\u2022 SELF \u2014 Only your own character\u2019s events. The distance slider is automatically greyed out since it\u2019s not relevant.\n\u2022 PARTY \u2014 Your group of 5. In ArcheAge, everyone in your raid column is considered your \u201Cparty.\u201D For example, spells like Sonic Wave that \u201Cremove negative effects from all party members\u201D affect your column of 5, not the entire raid.\n\u2022 RAID \u2014 All parties in the raid (all columns).\n\u2022 GUILD \u2014 Only players matching your guild tag. A second guild tag won\u2019t appear since it\u2019s technically a different guild.\n\nAdjusting these in-game filters may be preferable to disabling features in the app, as they provide finer control over what data is processed.</string>
 
     <!-- Tray Menu Labels -->
+    <string name="tray_pocket_journal">Pocket Journal</string>
     <string name="tray_dragon_breaths">Dragon Breaths</string>
     <string name="tray_raid_management">Raid Management</string>
     <string name="tray_battle_summary">Battle Summary</string>
@@ -1306,12 +1312,16 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="tray_save_session">Save Session</string>
     <string name="tray_abort_session">Abort Session</string>
     <string name="tray_lua_options">Lua Options</string>
+    <string name="tray_help">Help</string>
+    <string name="tray_take_screenshot">Take Screenshot</string>
+    <string name="tray_copy_screenshot_to_clipboard">Copy Screenshot to Clipboard</string>
     <string name="tray_close">Close</string>
 
     <!-- Raid Caller / Leader Overlay -->
     <string name="raid_caller_title">Raid Caller</string>
     <string name="raid_caller_no_raid">Join a raid to see caller stats</string>
     <string name="raid_caller_position_hint">Shift+Click+Drag to Position</string>
+    <string name="raid_caller_show_anyways">Show Anyways</string>
     <string name="raid_caller_avg_gs">Avg GS</string>
     <string name="raid_caller_lowest_gs">Lowest GS</string>
     <string name="raid_caller_highest_gs">Highest GS</string>
@@ -1388,4 +1398,75 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="settings_meta_specs_state">Current Meta Spec State: %1$s</string>
     <string name="settings_meta_specs_description">Override which specs are treated as meta in the composition, raid caller, and technical analysis. Custom specs are shown white and bold.</string>
     <string name="meta_specs_edit_icon">Edit meta specs</string>
+
+    <!-- Pocket Journal -->
+    <string name="pocket_journal_title">Pocket Journal</string>
+    <string name="pocket_journal_search_placeholder">Search title or tag</string>
+    <string name="pocket_journal_filter_by_day">Filter by day</string>
+    <string name="pocket_journal_clear">Clear</string>
+    <string name="pocket_journal_apply">Apply</string>
+    <string name="pocket_journal_cancel">Cancel</string>
+    <string name="pocket_journal_filtering_by_tag">Filtering by #%1$s</string>
+    <string name="pocket_journal_currently_editing">Currently Editing</string>
+    <string name="pocket_journal_empty">No Pocket entries yet.</string>
+    <string name="pocket_journal_entry_title_format">Journal Entry %1$s</string>
+    <string name="pocket_journal_created_format">Created %1$s</string>
+    <string name="pocket_journal_last_edited_format">Last Edited %1$s</string>
+
+    <!-- Pocket Editor -->
+    <string name="pocket_editor_title">Pocket Editor</string>
+    <string name="pocket_editor_tab_edit">Edit</string>
+    <string name="pocket_editor_tab_preview">Preview</string>
+    <string name="pocket_editor_title_label">Title (optional)</string>
+    <string name="pocket_editor_err_not_image">Selected file is not a readable image.</string>
+    <string name="pocket_editor_err_no_entry_open">No Pocket entry is currently open.</string>
+    <string name="pocket_editor_err_attachment_limit">This Pocket entry already has 10 attachments.</string>
+    <string name="pocket_editor_err_entry_not_found">The Pocket entry is no longer available.</string>
+    <string name="pocket_editor_err_invalid_path">The attachment path was invalid.</string>
+    <string name="pocket_editor_link_text_default">Link text</string>
+    <string name="pocket_editor_markdown_label">Markdown</string>
+    <string name="pocket_editor_insert_link_title">Insert link</string>
+    <string name="pocket_editor_link_title_label">Title</string>
+    <string name="pocket_editor_link_url_label">URL</string>
+    <string name="pocket_editor_insert">Insert</string>
+    <string name="pocket_editor_cancel">Cancel</string>
+    <string name="pocket_editor_toolbar_link">Link</string>
+    <string name="pocket_editor_toolbar_image">Image</string>
+    <string name="pocket_editor_toolbar_current_target">Target</string>
+    <string name="pocket_editor_toolbar_target_guild">Guild</string>
+    <string name="pocket_editor_toolbar_event">Event</string>
+    <string name="pocket_editor_toolbar_raid">Raid</string>
+    <string name="pocket_editor_event_search_hint">Search events…</string>
+    <string name="pocket_attachment_content_desc">Pocket attachment</string>
+
+    <!-- Pocket Thumbnail -->
+    <string name="pocket_thumbnail_untitled">Untitled entry</string>
+
+    <!-- Pocket Capture Menus -->
+    <string name="pocket_menu_save_to_pocket">Save to Pocket</string>
+    <string name="pocket_menu_reference_in_pocket">Reference in Pocket</string>
+    <string name="pocket_menu_export_png">Export PNG</string>
+    <string name="pocket_menu_copy_to_clipboard">Copy to Clipboard</string>
+
+    <!-- Nearby Filter Controls -->
+    <string name="nearby_filter_seen_within">Seen Within</string>
+    <string name="nearby_filter_disabled">Disabled</string>
+    <string name="nearby_filter_minutes_format">%1$s min</string>
+    <string name="nearby_filter_participation">PvP Participation</string>
+    <string name="nearby_filter_behavior">Player-Only Behavior</string>
+    <string name="nearby_participation_disabled">Disabled</string>
+    <string name="nearby_participation_25k">25k DMG/Heals or 25 CC</string>
+    <string name="nearby_participation_50k">50k DMG/Heals or 50 CC</string>
+    <string name="nearby_participation_100k">100k DMG/Heals or 100 CC</string>
+
+    <!-- Screenshot Preview -->
+    <string name="screenshot_preview_title">Screenshot Preview</string>
+    <string name="screenshot_copied_feedback">Copied to clipboard</string>
+    <string name="screenshot_discard">Discard</string>
+    <string name="screenshot_saved_to_pocket">Saved to Pocket journal</string>
+    <string name="screenshot_save_failed">Could not save (attachment limit reached?)</string>
+    <string name="screenshot_save_to_exports">Save to Exports</string>
+    <string name="screenshot_game_title">Game Screenshot</string>
+    <string name="screenshot_content_desc">Screenshot preview</string>
+    <string name="screenshot_ctrl_c_hint">Ctrl+C to copy</string>
 </resources>

@@ -282,7 +282,7 @@ class OverlayWindowShape(
 }
 
 enum class OverlayType {
-  COMBAT, SETTINGS, SUMMARY, NEW_SESSION, INSTALL, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, HELP, AGGRO, PLAYER_CARD, FILTERS, DUMMY, BATTLE_GRAPH, ITEM_USE, RAID_CALLER, META_SPECS
+  COMBAT, SETTINGS, SUMMARY, NEW_SESSION, INSTALL, COMPANION, POKEMON, RAID, TRACKER, MINI, ABOUT, HELP, AGGRO, PLAYER_CARD, FILTERS, DUMMY, BATTLE_GRAPH, ITEM_USE, RAID_CALLER, META_SPECS, POCKET_JOURNAL, POCKET_EDITOR, SCREENSHOT_PREVIEW
 }
 
 enum class OverlayWindowType {
@@ -477,7 +477,7 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       windowType = OverlayWindowType.OVERLAY,
       lastPositionXDp = 1800f, // near the top/right by default
       lastPositionYDp = 80f,
-      lastWidthDp = 420f,
+      lastWidthDp = 430f,
       lastHeightDp = 175f,
       isVisible = false
     )
@@ -489,6 +489,36 @@ fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
       lastPositionYDp = 303f,
       lastWidthDp = 560f,
       lastHeightDp = 760f,
+      isVisible = false
+    )
+
+    OverlayType.POCKET_JOURNAL -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
+      lastPositionXDp = 600f,
+      lastPositionYDp = 120f,
+      lastWidthDp = 900f,
+      lastHeightDp = 800f,
+      isVisible = false
+    )
+
+    OverlayType.POCKET_EDITOR -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
+      lastPositionXDp = 650f,
+      lastPositionYDp = 160f,
+      lastWidthDp = 1000f,
+      lastHeightDp = 800f,
+      isVisible = false
+    )
+
+    OverlayType.SCREENSHOT_PREVIEW -> WindowStateEntity(
+      overlayType = type.name,
+      windowType = OverlayWindowType.TOOLTIP,
+      lastPositionXDp = 700f,
+      lastPositionYDp = 140f,
+      lastWidthDp = 560f,
+      lastHeightDp = 700f,
       isVisible = false
     )
   }

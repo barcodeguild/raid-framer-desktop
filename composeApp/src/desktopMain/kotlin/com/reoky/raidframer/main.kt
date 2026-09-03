@@ -11,6 +11,7 @@ import androidx.compose.ui.window.application
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.database.initialize
+import com.reoky.raidframer.core.pocket.initializePocketDraftCoordinator
 import com.reoky.raidframer.core.helpers.UpdateHelper
 import com.reoky.raidframer.core.helpers.UpdateStatus
 import com.reoky.raidframer.core.interactor.BattleGraphInteractor
@@ -75,6 +76,7 @@ fun main(args: Array<String>) {
     }
 
     RFConfig.init(RFDao.configDao)
+    initializePocketDraftCoordinator(RFDao.pocketDao)
     RFConfig.initSync()
 
     // Apply language preference before Compose starts (must be before first composition)

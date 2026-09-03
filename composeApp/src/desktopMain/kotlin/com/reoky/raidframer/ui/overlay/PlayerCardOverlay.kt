@@ -20,7 +20,9 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.ExposedDropdownMenuDefaults
+import androidx.compose.material.IconButton
 import androidx.compose.foundation.Image
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -69,6 +71,14 @@ import com.reoky.raidframer.ui.component.SessionStatRows
 import com.reoky.raidframer.ui.component.SessionTotals
 import com.reoky.raidframer.ui.component.StatRow
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.component.PocketCaptureMenu
+import com.reoky.raidframer.ui.component.PocketEntryThumbnail
+import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
+import com.reoky.raidframer.core.helpers.FontsHelper
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import java.nio.file.Files
+import javax.imageio.ImageIO
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
 import com.reoky.raidframer.ui.component.graphs.GroupSpec
 import com.reoky.raidframer.ui.component.graphs.MultiPlayerMetricLineChart
@@ -110,6 +120,7 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_damage_by_
 import raid_framer_desktop.composeapp.generated.resources.player_card_heals_by_skill
 import raid_framer_desktop.composeapp.generated.resources.player_card_cc_by_skill
 import raid_framer_desktop.composeapp.generated.resources.player_card_no_historical_data
+import raid_framer_desktop.composeapp.generated.resources.player_card_journal_entries
 import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_all
 import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_current
 import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_last_n
@@ -241,6 +252,7 @@ fun PreviewPlayerCardOverlay() {
 @OptIn(InternalResourceApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun PlayerCardOverlay(wm: WindowManager? = null) {
+  val scope = rememberCoroutineScope()
 
   val currentPlayer by AppState.selectedPlayer.collectAsState()
   val metricType by AppState.selectedMetricType.collectAsState()
@@ -269,7 +281,33 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
       title = stringResource(Res.string.player_card_title_format, currentPlayer ?: "") + " (${
         defaultColor.name.lowercase().capitalize(Locale.current)
       }) - ${metricType.displayName} ${stringResource(Res.string.graphs_trend_graph)} (${currentDateString})",
-      onClose = { wm?.closeWindow(OverlayType.PLAYER_CARD) }
+      onClose = { wm?.closeWindow(OverlayType.PLAYER_CARD) },
+      rightActions = {
+        val cardInteractionSource = remember { MutableInteractionSource() }
+        val isCardHovered by cardInteractionSource.collectIsHoveredAsState()
+        IconButton(
+          onClick = {
+            scope.launch {
+              val playerName = currentPlayer
+              if (!playerName.isNullOrBlank()) {
+                PocketDraftCoordinator.createDraft(markdown = "@$playerName")
+              } else {
+                PocketDraftCoordinator.createDraft()
+              }
+              wm?.openWindow(OverlayType.POCKET_EDITOR)
+            }
+          },
+          modifier = Modifier.size(28.dp).padding(end = 2.dp)
+        ) {
+          Text(
+            "\uf02d",
+            color = if (isCardHovered) RFColors.AccentRed else Color.White,
+            fontFamily = FontsHelper.faSolid(),
+            fontSize = 14.sp,
+            modifier = Modifier.hoverable(cardInteractionSource)
+          )
+        }
+      }
     )
 
     currentPlayer?.let { playerName ->
@@ -587,6 +625,49 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             }
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            // Pocket Journal Entries Section
+            var journalEntries by remember(playerName) { mutableStateOf(emptyList<com.reoky.raidframer.core.pocket.PocketEntry>()) }
+            LaunchedEffect(playerName) {
+              journalEntries = PocketDraftCoordinator.getEntriesByTag(playerName, 12)
+            }
+            if (journalEntries.isNotEmpty()) {
+              val columns = journalEntries.chunked((journalEntries.size + 2) / 3.coerceAtLeast(1))
+              SectionCard(
+                title = stringResource(Res.string.player_card_journal_entries),
+                accentColor = RFColors.itemSkillYellow
+              ) {
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                  columns.forEach { columnEntries ->
+                    Column(
+                      modifier = Modifier.weight(1f),
+                      verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                      columnEntries.forEach { entry ->
+                        Surface(
+                          modifier = Modifier.clickable {
+                            scope.launch {
+                              PocketDraftCoordinator.openDraft(entry.metadata.id)
+                              wm?.openWindow(OverlayType.POCKET_EDITOR)
+                            }
+                          },
+                          shape = RoundedCornerShape(8.dp),
+                          color = Color(0xFF171717),
+                          border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
+                        ) {
+                          PocketEntryThumbnail(entry)
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
+              Spacer(modifier = Modifier.height(12.dp))
+            }
 
             // Totals Row
             var selectedScope by remember(playerName) { mutableStateOf(SessionScope.CURRENT) }

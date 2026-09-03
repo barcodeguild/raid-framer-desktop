@@ -426,6 +426,10 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="summary_top_debuffs">Top Debuffs</string>
     <string name="summary_top_songs">Top Músicas</string>
     <string name="summary_top_buffs">Top Buffs</string>
+    <string name="summary_top_loot_peak">Top Pico Loot Buff %</string>
+    <string name="summary_worst_loot_peak">Pior Pico Loot Buff %</string>
+    <string name="summary_top_buff_count">Top # de Buffs (Muitos demais?)</string>
+    <string name="summary_tab_loot">Loot Buffs</string>
     <string name="summary_top_ode_haranya">Top Ode Haranya</string>
     <string name="summary_top_ode_nuia">Top Ode Nuia</string>
     <string name="summary_top_ode_pirate">Top Ode Pirata</string>
@@ -1237,6 +1241,7 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="raid_caller_title">Chamador de Raide</string>
     <string name="raid_caller_no_raid">Entre em uma raide para ver as estatísticas do chamador</string>
     <string name="raid_caller_position_hint">Shift+Clique+Arraste para posicionar</string>
+    <string name="raid_caller_show_anyways">Mostrar mesmo assim</string>
     <string name="raid_caller_avg_gs">GS Médio</string>
     <string name="raid_caller_lowest_gs">GS Mínimo</string>
     <string name="raid_caller_highest_gs">GS Máximo</string>
@@ -1283,6 +1288,7 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="raid_buff_loot_section">Exigir buffs de saque</string>
     <string name="raid_buff_check_loot">Verificar buffs de saque?</string>
     <string name="raid_buff_loot_threshold_label">Limite:</string>
+    <string name="raid_buff_allow_guild_buff">Permitir que o Buff de Guilda (Gallant's Blessing) conte como totalmente buffado</string>
     <string name="raid_caller_loot_threshold">Limite de Saque</string>
     <string name="raid_caller_buff_mode">Modo de Buff</string>
     <string name="raid_caller_buff_grace">Período de Carência de Buff</string>
@@ -1312,4 +1318,88 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="settings_meta_specs_state">Estado Atual das Meta Specs: %1$s</string>
     <string name="settings_meta_specs_description">Substitua quais especificações são tratadas como meta na composição, chamador de raide e análise técnica. Specs personalizadas são mostradas em branco e em negrito.</string>
     <string name="meta_specs_edit_icon">Editar meta specs</string>
+
+    <!-- Pocket Journal -->
+    <string name="pocket_journal_title">Pocket Journal</string>
+    <string name="pocket_journal_search_placeholder">Pesquisar título ou tag</string>
+    <string name="pocket_journal_filter_by_day">Filtrar por dia</string>
+    <string name="pocket_journal_clear">Limpar</string>
+    <string name="pocket_journal_apply">Aplicar</string>
+    <string name="pocket_journal_cancel">Cancelar</string>
+    <string name="pocket_journal_filtering_by_tag">Filtrando por #%1$s</string>
+    <string name="pocket_journal_currently_editing">Editando atualmente</string>
+    <string name="pocket_journal_empty">Ainda não há entradas Pocket.</string>
+    <string name="pocket_journal_entry_title_format">Entrada do diário %1$s</string>
+    <string name="pocket_journal_created_format">Criado %1$s</string>
+    <string name="pocket_journal_last_edited_format">Última edição %1$s</string>
+
+    <!-- Pocket Editor -->
+    <string name="pocket_editor_title">Editor Pocket</string>
+    <string name="pocket_editor_tab_edit">Editar</string>
+    <string name="pocket_editor_tab_preview">Pré-visualizar</string>
+    <string name="pocket_editor_title_label">Título (opcional)</string>
+    <string name="pocket_editor_err_not_image">O arquivo selecionado não é uma imagem legível.</string>
+    <string name="pocket_editor_err_no_entry_open">Nenhuma entrada Pocket está aberta no momento.</string>
+    <string name="pocket_editor_err_attachment_limit">Esta entrada Pocket já tem 10 anexos.</string>
+    <string name="pocket_editor_err_entry_not_found">A entrada Pocket não está mais disponível.</string>
+    <string name="pocket_editor_err_invalid_path">O caminho do anexo era inválido.</string>
+    <string name="pocket_editor_link_text_default">Texto do link</string>
+    <string name="pocket_editor_markdown_label">Markdown</string>
+    <string name="pocket_editor_insert_link_title">Inserir link</string>
+    <string name="pocket_editor_link_title_label">Título</string>
+    <string name="pocket_editor_link_url_label">URL</string>
+    <string name="pocket_editor_insert">Inserir</string>
+    <string name="pocket_editor_cancel">Cancelar</string>
+    <string name="pocket_editor_toolbar_link">Link</string>
+    <string name="pocket_editor_toolbar_image">Imagem</string>
+    <string name="pocket_editor_toolbar_event">Evento</string>
+    <string name="pocket_editor_toolbar_raid">Raid</string>
+    <string name="pocket_editor_event_search_hint">Buscar eventos…</string>
+    <string name="pocket_attachment_content_desc">Anexo Pocket</string>
+
+    <!-- Pocket Thumbnail -->
+    <string name="pocket_thumbnail_untitled">Entrada sem título</string>
+
+    <!-- Pocket Capture Menus -->
+    <string name="pocket_menu_save_to_pocket">Salvar no Pocket</string>
+    <string name="pocket_menu_reference_in_pocket">Referenciar no Pocket</string>
+    <string name="pocket_menu_export_png">Exportar PNG</string>
+    <string name="pocket_menu_copy_to_clipboard">Copiar para a área de transferência</string>
+
+    <!-- Nearby Filter Controls -->
+    <string name="nearby_filter_seen_within">Visto dentro de</string>
+    <string name="nearby_filter_disabled">Desativado</string>
+    <string name="nearby_filter_minutes_format">%1$s min</string>
+    <string name="nearby_filter_participation">Participação PvP</string>
+    <string name="nearby_filter_behavior">Comportamento apenas de jogadores</string>
+    <string name="nearby_participation_disabled">Desativado</string>
+    <string name="nearby_participation_25k">25k de dano/cura ou 25 CC</string>
+    <string name="nearby_participation_50k">50k de dano/cura ou 50 CC</string>
+    <string name="nearby_participation_100k">100k de dano/cura ou 100 CC</string>
+
+    <!-- Screenshot Preview -->
+    <string name="screenshot_preview_title">Pré-visualização de captura</string>
+    <string name="screenshot_copied_feedback">Copiado para a área de transferência</string>
+    <string name="screenshot_discard">Descartar</string>
+    <string name="screenshot_saved_to_pocket">Salvo no diário Pocket</string>
+    <string name="screenshot_save_failed">Não foi possível salvar (limite de anexos atingido?)</string>
+    <string name="screenshot_save_to_exports">Salvar em Exports</string>
+    <string name="screenshot_game_title">Captura do jogo</string>
+    <string name="screenshot_content_desc">Pré-visualização de captura</string>
+    <string name="screenshot_ctrl_c_hint">Ctrl+C para copiar</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">Abrir Ajuda e Guia de Instalação</string>
+    <string name="about_help_button">? Ajuda</string>
+    <string name="player_card_journal_entries">Diário Pocket</string>
+    <string name="raid_loot_breakdown_title">Detalhamento de Loot (Mais → Menos)</string>
+    <string name="tray_pocket_journal">Diário Pocket</string>
+    <string name="tray_help">Ajuda</string>
+    <string name="tray_take_screenshot">Tirar Captura de Tela</string>
+    <string name="tray_copy_screenshot_to_clipboard">Copiar Captura de Tela para Área de Transferência</string>
+    <string name="pocket_editor_toolbar_current_target">Alvo</string>
+    <string name="pocket_editor_toolbar_target_guild">Guilda</string>
+    <string name="raid_join_raid_hint">Entre em uma raid para usar recursos relacionados a raids…</string>
+    <string name="raid_tab_buffs">Buffs</string>
 </resources>
+

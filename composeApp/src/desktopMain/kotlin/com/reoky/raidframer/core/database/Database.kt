@@ -6,6 +6,7 @@ import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import kotlinx.coroutines.Dispatchers
 import java.io.File
+import com.reoky.raidframer.core.helpers.getRaidFramerDirectory
 
 
 /*
@@ -17,12 +18,12 @@ fun initialize(): AppDatabase {
   val TAG = "Core/Database.initialize()"
 
   // We don't have permissions to write to the program files directory, so we'll use the user's home directory
-  val userHomeDirectory = System.getProperty("user.home")
-  val appDirectory = "$userHomeDirectory/.RaidFramer"
-  val databaseFilePath = "$appDirectory/raidframer.db"
+  val appDirectory = getRaidFramerDirectory()
+    ?: error("Unable to resolve the Raid Framer application directory")
+  val databaseFilePath = appDirectory.resolve("raidframer.db").toString()
 
   // Create the directory if it doesn't exist
-  val directory = File(appDirectory)
+  val directory = File(appDirectory.toString())
   if (!directory.exists()) {
     directory.mkdirs()
   }
@@ -37,53 +38,56 @@ fun initialize(): AppDatabase {
   return Room.databaseBuilder<AppDatabase>(
     name = File(databaseFilePath).absolutePath,
   )
-  .setDriver(BundledSQLiteDriver())
-  .fallbackToDestructiveMigrationFrom(true, 1) // still developing, wipe from v1
-  .addMigrations(MIGRATION_2_3) // added kill methods and basic migration for testing migrations to (2 -> 3 : 01/18/26)
-  .addMigrations(MIGRATION_3_4) // added charm sounds conf entry (3 -> 4 : 01/19/26)
-  .addMigrations(MIGRATION_4_5) // added leaderships to cache (4 -> 5 : 01/21/26)
-  .addMigrations(MIGRATION_5_6) // 01/22/26 added PVE damage flag
-  .addMigrations(MIGRATION_6_7) // 01/23/26 added lifetimeTotalKillsKB to cache
-  .addMigrations(MIGRATION_7_8) // 01/26/26 added lifetimeTotalSongs to cache
-  .addMigrations(MIGRATION_8_9) // 01/25/26 added lifetimeTotalBuffsApplied to cache
-  .addMigrations(MIGRATION_9_10) // 02/22/26 added lifetimeTotalHealsReceived to cache
-  .addMigrations(MIGRATION_10_11) // 02/22/26 added lifetimeTotalPotionUsages to cache
-  .addMigrations(MIGRATION_11_12) // 02/22/26 added val lastKrakenShield: Long = 0L, to cache
-  .addMigrations(MIGRATION_12_13) // 05/10/26 added val companionShowDistressedInChat: Boolean = true, to config
-  .addMigrations(MIGRATION_13_14)
-  .addMigrations(MIGRATION_14_15) // 06/07/26 added three checkboxes in settings for combat overlay columns
-  .addMigrations(MIGRATION_15_16) // 06/07/26 added combatControlsFadeEnabled to config
-  .addMigrations(MIGRATION_16_17) // 06/13/26 added val windowOpacity: Float = 0.43f, to config
-  .addMigrations(MIGRATION_17_18) // 06/13/26 added windowColor to config
-  .addMigrations(MIGRATION_18_19) // 06/16/26 added session recording fields to config
-  .addMigrations(MIGRATION_19_20) // 06/19/26 added lastSessionDurationMs and lastSessionExportDir to config
-  .addMigrations(MIGRATION_20_21) // 06/20/26 added exportIncludeRawJsonLogs to config
-  .addMigrations(MIGRATION_21_22) // 06/25/26 added seed table config fields
-  .addMigrations(MIGRATION_22_23) // 06/25/26 added preferredLanguage to config eek!
-  .addMigrations(MIGRATION_23_24) // 07/07/26 added combat custom category columns to config
-  .addMigrations(MIGRATION_24_25) // 07/11/26 added player_session_totals table for historical session views
-  .addMigrations(MIGRATION_25_26) // 07/11/26 added companionShowDebugInfo and companionShowDeathsPerMinute to config
-  .addMigrations(MIGRATION_26_27) // 07/12/26 added autoUpdateEnabled to config
-  .addMigrations(MIGRATION_27_28) // 07/14/26 added allowOdeToRecoveryCountAsHeals to config for filtering Ode heals in rankings
-  .addMigrations(MIGRATION_28_29) // 07/23/26 added lifetimeTotalTigerStrikes to cache and totalTigerStrikes to session totals for Battlerage heuristic
-  .addMigrations(MIGRATION_29_30) // 07/25/26 added 11 new debuff category totals (freeze/trip/bubble/bracing/shieldstrip/weapondisable/potiondisable/bdglider/crystalwings/gliderdisable/provoke)
-  .addMigrations(MIGRATION_30_31) // 07/29/26 added lastRavenspineWings, lastTWTGlider, lastMoonshadowGlider for glider buff tracking
-  .addMigrations(MIGRATION_31_32) // 07/31/26 added packed usage fields for all utility items (snake, BD, anthalon, library, serpentis, mistsong)
-   .addMigrations(MIGRATION_32_33) // 08/02/26 added previousSessionStart to config for item highlight persistence across sessions
-   .addMigrations(MIGRATION_33_34) // 08/04/26 added defiance, garden defiance, purge, and sacrifice dance totals
+    .setDriver(BundledSQLiteDriver())
+    .fallbackToDestructiveMigrationFrom(true, 1) // still developing, wipe from v1
+    .addMigrations(MIGRATION_2_3) // added kill methods and basic migration for testing migrations to (2 -> 3 : 01/18/26)
+    .addMigrations(MIGRATION_3_4) // added charm sounds conf entry (3 -> 4 : 01/19/26)
+    .addMigrations(MIGRATION_4_5) // added leaderships to cache (4 -> 5 : 01/21/26)
+    .addMigrations(MIGRATION_5_6) // 01/22/26 added PVE damage flag
+    .addMigrations(MIGRATION_6_7) // 01/23/26 added lifetimeTotalKillsKB to cache
+    .addMigrations(MIGRATION_7_8) // 01/26/26 added lifetimeTotalSongs to cache
+    .addMigrations(MIGRATION_8_9) // 01/25/26 added lifetimeTotalBuffsApplied to cache
+    .addMigrations(MIGRATION_9_10) // 02/22/26 added lifetimeTotalHealsReceived to cache
+    .addMigrations(MIGRATION_10_11) // 02/22/26 added lifetimeTotalPotionUsages to cache
+    .addMigrations(MIGRATION_11_12) // 02/22/26 added val lastKrakenShield: Long = 0L, to cache
+    .addMigrations(MIGRATION_12_13) // 05/10/26 added val companionShowDistressedInChat: Boolean = true, to config
+    .addMigrations(MIGRATION_13_14)
+    .addMigrations(MIGRATION_14_15) // 06/07/26 added three checkboxes in settings for combat overlay columns
+    .addMigrations(MIGRATION_15_16) // 06/07/26 added combatControlsFadeEnabled to config
+    .addMigrations(MIGRATION_16_17) // 06/13/26 added val windowOpacity: Float = 0.43f, to config
+    .addMigrations(MIGRATION_17_18) // 06/13/26 added windowColor to config
+    .addMigrations(MIGRATION_18_19) // 06/16/26 added session recording fields to config
+    .addMigrations(MIGRATION_19_20) // 06/19/26 added lastSessionDurationMs and lastSessionExportDir to config
+    .addMigrations(MIGRATION_20_21) // 06/20/26 added exportIncludeRawJsonLogs to config
+    .addMigrations(MIGRATION_21_22) // 06/25/26 added seed table config fields
+    .addMigrations(MIGRATION_22_23) // 06/25/26 added preferredLanguage to config eek!
+    .addMigrations(MIGRATION_23_24) // 07/07/26 added combat custom category columns to config
+    .addMigrations(MIGRATION_24_25) // 07/11/26 added player_session_totals table for historical session views
+    .addMigrations(MIGRATION_25_26) // 07/11/26 added companionShowDebugInfo and companionShowDeathsPerMinute to config
+    .addMigrations(MIGRATION_26_27) // 07/12/26 added autoUpdateEnabled to config
+    .addMigrations(MIGRATION_27_28) // 07/14/26 added allowOdeToRecoveryCountAsHeals to config for filtering Ode heals in rankings
+    .addMigrations(MIGRATION_28_29) // 07/23/26 added lifetimeTotalTigerStrikes to cache and totalTigerStrikes to session totals for Battlerage heuristic
+    .addMigrations(MIGRATION_29_30) // 07/25/26 added 11 new debuff category totals (freeze/trip/bubble/bracing/shieldstrip/weapondisable/potiondisable/bdglider/crystalwings/gliderdisable/provoke)
+    .addMigrations(MIGRATION_30_31) // 07/29/26 added lastRavenspineWings, lastTWTGlider, lastMoonshadowGlider for glider buff tracking
+    .addMigrations(MIGRATION_31_32) // 07/31/26 added packed usage fields for all utility items (snake, BD, anthalon, library, serpentis, mistsong)
+    .addMigrations(MIGRATION_32_33) // 08/02/26 added previousSessionStart to config for item highlight persistence across sessions
+    .addMigrations(MIGRATION_33_34) // 08/04/26 added defiance, garden defiance, purge, and sacrifice dance totals
     .addMigrations(MIGRATION_34_35) // added PNG export background settings
     .addMigrations(MIGRATION_35_36) // added item use overlay toggle and combat overlay spec icons toggle
     .addMigrations(MIGRATION_36_37) // added Deep Tranquility buff tracking (buff id 29951)
-   .addMigrations(MIGRATION_37_38) // added new debuff/buff/spell tracking columns (08/13/26)
-   .addMigrations(MIGRATION_38_39) // added PNG export toggle and export language selections
-   .addMigrations(MIGRATION_39_40) // added performance settings for event tracking control
-   .addMigrations(MIGRATION_40_41) // added battle graph spell depth for memory optimization
-   .addMigrations(MIGRATION_41_42) // added combat overlay tooltip mode toggle
-   .addMigrations(MIGRATION_42_43) // added raid caller overlay settings (08/24/26)
-   .addMigrations(MIGRATION_43_44) // added editable meta specs (08/25/26)
-  .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
+    .addMigrations(MIGRATION_37_38) // added new debuff/buff/spell tracking columns (08/13/26)
+    .addMigrations(MIGRATION_38_39) // added PNG export toggle and export language selections
+    .addMigrations(MIGRATION_39_40) // added performance settings for event tracking control
+    .addMigrations(MIGRATION_40_41) // added battle graph spell depth for memory optimization
+    .addMigrations(MIGRATION_41_42) // added combat overlay tooltip mode toggle
+    .addMigrations(MIGRATION_42_43) // added raid caller overlay settings (08/24/26)
+    .addMigrations(MIGRATION_43_44) // added editable meta specs (08/25/26)
+    .addMigrations(MIGRATION_44_45) // added Pocket journal metadata, tags, and attachments (08/31/26)
+    .addMigrations(MIGRATION_45_46) // added nearby filter state persistence (sliding window, participation, behavior sensitivity)
+    .addMigrations(MIGRATION_46_47) // added raid caller allow guild buff toggle (Gallant's Blessing)
+    .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
-  .fallbackToDestructiveMigrationOnDowngrade(true)
-  .setQueryCoroutineContext(Dispatchers.IO)
-  .build()
+    .fallbackToDestructiveMigrationOnDowngrade(true)
+    .setQueryCoroutineContext(Dispatchers.IO)
+    .build()
 }

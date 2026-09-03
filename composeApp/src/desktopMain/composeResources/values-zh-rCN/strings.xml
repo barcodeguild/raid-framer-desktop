@@ -425,6 +425,10 @@
     <string name="summary_top_debuffs">减益榜</string>
     <string name="summary_top_songs">歌曲榜</string>
     <string name="summary_top_buffs">增益榜</string>
+    <string name="summary_top_loot_peak">峰值掠夺增益 %</string>
+    <string name="summary_worst_loot_peak">最低掠夺增益 %</string>
+    <string name="summary_top_buff_count">增益数量排行（太多了吗？）</string>
+    <string name="summary_tab_loot">掠夺增益</string>
     <string name="summary_top_ode_haranya">哈拉尼亚颂歌</string>
     <string name="summary_top_ode_nuia">努伊安颂歌</string>
     <string name="summary_top_ode_pirate">海盗颂歌</string>
@@ -777,6 +781,10 @@
     <string name="raid_buff_shortbread_cookie">巧克力味大拇指饼干效果</string>
     <string name="raid_buff_golden_taffy">金黄色药丸</string>
     <string name="raid_buff_egg_of_fortune">幸运之蛋</string>
+    <string name="raid_buff_gallants_blessing">Gallant's Blessing</string>
+    <string name="raid_buff_allow_guild_buff">允许公会增益（英勇者的祝福）视为完全增益</string>
+    <string name="raid_buff_guild_buff">Guild Buff</string>
+    <string name="raid_buff_guild_buff_covers_all">None — Guild Buff covers all requirements</string>
     <string name="raid_copy_not_buffed">复制未获得增益玩家</string>
     <string name="raid_copy_not_buffed_title">未获得增益</string>
     <string name="raid_copy_buffed">复制已获得增益玩家</string>
@@ -1300,6 +1308,7 @@
     <string name="raid_caller_title">团队指挥</string>
     <string name="raid_caller_no_raid">加入团队以查看指挥统计信息</string>
     <string name="raid_caller_position_hint">Shift+点击+拖动以定位</string>
+    <string name="raid_caller_show_anyways">仍然显示</string>
     <string name="raid_caller_avg_gs">平均GS</string>
     <string name="raid_caller_lowest_gs">最低GS</string>
     <string name="raid_caller_highest_gs">最高GS</string>
@@ -1372,4 +1381,86 @@
     <string name="settings_meta_specs_state">当前元配置状态：%1$s</string>
     <string name="settings_meta_specs_description">覆盖哪些配置在阵容、团队指挥和技术分析中被视为元配置。自定义配置以白色加粗显示。</string>
     <string name="meta_specs_edit_icon">编辑元配置</string>
+
+    <!-- Pocket Journal -->
+    <string name="pocket_journal_title">口袋日记</string>
+    <string name="pocket_journal_search_placeholder">按标题或标签搜索</string>
+    <string name="pocket_journal_filter_by_day">按日期筛选</string>
+    <string name="pocket_journal_clear">清除</string>
+    <string name="pocket_journal_apply">应用</string>
+    <string name="pocket_journal_cancel">取消</string>
+    <string name="pocket_journal_filtering_by_tag">正在按 #%1$s 筛选</string>
+    <string name="pocket_journal_currently_editing">正在编辑</string>
+    <string name="pocket_journal_empty">还没有口袋条目。</string>
+    <string name="pocket_journal_entry_title_format">日记条目 %1$s</string>
+    <string name="pocket_journal_created_format">创建于 %1$s</string>
+    <string name="pocket_journal_last_edited_format">上次编辑于 %1$s</string>
+
+    <!-- Pocket Editor -->
+    <string name="pocket_editor_title">口袋编辑器</string>
+    <string name="pocket_editor_tab_edit">编辑</string>
+    <string name="pocket_editor_tab_preview">预览</string>
+    <string name="pocket_editor_title_label">标题（可选）</string>
+    <string name="pocket_editor_err_not_image">所选文件不是可读的图像。</string>
+    <string name="pocket_editor_err_no_entry_open">当前没有打开的口袋条目。</string>
+    <string name="pocket_editor_err_attachment_limit">此口袋条目已有 10 个附件。</string>
+    <string name="pocket_editor_err_entry_not_found">该口袋条目已不可用。</string>
+    <string name="pocket_editor_err_invalid_path">附件路径无效。</string>
+    <string name="pocket_editor_link_text_default">链接文本</string>
+    <string name="pocket_editor_markdown_label">Markdown</string>
+    <string name="pocket_editor_insert_link_title">插入链接</string>
+    <string name="pocket_editor_link_title_label">标题</string>
+    <string name="pocket_editor_link_url_label">URL</string>
+    <string name="pocket_editor_insert">插入</string>
+    <string name="pocket_editor_cancel">取消</string>
+    <string name="pocket_editor_toolbar_link">链接</string>
+    <string name="pocket_editor_toolbar_image">图像</string>
+    <string name="pocket_editor_toolbar_event">事件</string>
+    <string name="pocket_editor_toolbar_raid">团队</string>
+    <string name="pocket_editor_event_search_hint">搜索事件…</string>
+    <string name="pocket_attachment_content_desc">口袋附件</string>
+
+    <!-- Pocket Thumbnail -->
+    <string name="pocket_thumbnail_untitled">未命名条目</string>
+
+    <!-- Pocket Capture Menus -->
+    <string name="pocket_menu_save_to_pocket">保存到口袋</string>
+    <string name="pocket_menu_reference_in_pocket">在口袋中引用</string>
+    <string name="pocket_menu_export_png">导出 PNG</string>
+    <string name="pocket_menu_copy_to_clipboard">复制到剪贴板</string>
+
+    <!-- Nearby Filter Controls -->
+    <string name="nearby_filter_seen_within">在此时间内可见</string>
+    <string name="nearby_filter_disabled">已禁用</string>
+    <string name="nearby_filter_minutes_format">%1$s 分钟</string>
+    <string name="nearby_filter_participation">PVP 参与</string>
+    <string name="nearby_filter_behavior">仅玩家行为</string>
+    <string name="nearby_participation_disabled">已禁用</string>
+    <string name="nearby_participation_25k">25k 伤害/治疗或 25 CC</string>
+    <string name="nearby_participation_50k">50k 伤害/治疗或 50 CC</string>
+    <string name="nearby_participation_100k">100k 伤害/治疗或 100 CC</string>
+
+    <!-- Screenshot Preview -->
+    <string name="screenshot_preview_title">截图预览</string>
+    <string name="screenshot_copied_feedback">已复制到剪贴板</string>
+    <string name="screenshot_discard">丢弃</string>
+    <string name="screenshot_saved_to_pocket">已保存到口袋日记</string>
+    <string name="screenshot_save_failed">无法保存（附件数量达到上限？）</string>
+    <string name="screenshot_save_to_exports">保存到导出</string>
+    <string name="screenshot_game_title">游戏截图</string>
+    <string name="screenshot_content_desc">截图预览</string>
+    <string name="screenshot_ctrl_c_hint">按 Ctrl+C 复制</string>
+
+    <!-- Missing UI Strings -->
+    <string name="settings_help_button">打开帮助和安装指南</string>
+    <string name="about_help_button">? 帮助</string>
+    <string name="player_card_journal_entries">口袋日记</string>
+    <string name="raid_loot_breakdown_title">战利品明细（从多到少）</string>
+    <string name="tray_pocket_journal">口袋日记</string>
+    <string name="tray_help">帮助</string>
+    <string name="tray_take_screenshot">截图</string>
+    <string name="tray_copy_screenshot_to_clipboard">复制截图到剪贴板</string>
+    <string name="pocket_editor_toolbar_current_target">目标</string>
+    <string name="pocket_editor_toolbar_target_guild">公会</string>
 </resources>
+

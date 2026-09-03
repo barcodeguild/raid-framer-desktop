@@ -89,7 +89,6 @@ function RF.IPC.interact()
     if not RF.IPC.DORMANT then
       RF.IPC.DORMANT = true
       RF.Config.PERFORMANCE_COMPANION_ENABLED = false
-      deregisterForEvents()
       if RF.Config.SHOW_DEBUG_INFO then RF:Log("Companion asleep: desktop app heartbeat timed out.") end
     end
   end
@@ -319,7 +318,6 @@ function RF.IPC.HandleRawMessage(rawMessage)
     if RF.IPC.DORMANT then
       RF.IPC.DORMANT = false
       RF.Config.PERFORMANCE_COMPANION_ENABLED = true
-      registerForEvents()
       if RF.Config.SHOW_DEBUG_INFO then RF:Log("Companion awake: desktop app heartbeat received.") end
     end
   elseif message.type == RF.IPC.MESSAGE_TYPES.SHUTDOWN then

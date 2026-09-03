@@ -14,11 +14,14 @@ object RFDao {
     private set
   lateinit var playerSessionDao: PlayerSessionDao
     private set
+  lateinit var pocketDao: PocketDao
+    private set
 
   fun init(db: AppDatabase) {
     configDao = db.getConfigDao()
     playerCacheDao = db.getPlayerCacheDao()
     windowStateDao = db.getWindowStateDao()
     playerSessionDao = db.getPlayerSessionDao()
+    pocketDao = db.getPocketDao()
   }
 }

@@ -31,6 +31,9 @@ import com.reoky.raidframer.ui.overlay.BattleGraphOverlay
 import com.reoky.raidframer.ui.overlay.ItemUseOverlay
 import com.reoky.raidframer.ui.overlay.RaidCallerOverlay
 import com.reoky.raidframer.ui.overlay.MetaSpecsOverlay
+import com.reoky.raidframer.ui.overlay.PocketEditorOverlay
+import com.reoky.raidframer.ui.overlay.PocketJournalOverlay
+import com.reoky.raidframer.ui.overlay.ScreenshotPreviewOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -71,16 +74,22 @@ fun OverlayContainer(wm: WindowManager) {
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
         isEverythingVisible = if (everythingVisible) mutableStateOf(true) else mutableStateOf(effectiveWindowType == OverlayWindowType.TOOLTIP),
         isResizable = resizable,
-        isFocusable = type == OverlayType.NEW_SESSION || type == OverlayType.BATTLE_GRAPH || type == OverlayType.META_SPECS,
+        isFocusable = type == OverlayType.NEW_SESSION ||
+          type == OverlayType.BATTLE_GRAPH ||
+          type == OverlayType.META_SPECS ||
+          type == OverlayType.POCKET_JOURNAL ||
+          type == OverlayType.POCKET_EDITOR ||
+           type == OverlayType.SCREENSHOT_PREVIEW,
         transparentBackground = type == OverlayType.ITEM_USE,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->
+        wm.registerNativeWindow(type, window)
         val scope = rememberCoroutineScope()
 
         when (type) {
           OverlayType.ABOUT -> AboutOverlay(wm)
-          OverlayType.COMBAT -> CombatOverlay(wm)
-          OverlayType.SUMMARY -> SummaryOverlay(wm)
+          OverlayType.COMBAT -> CombatOverlay(wm, window)
+          OverlayType.SUMMARY -> SummaryOverlay(wm, window)
           OverlayType.MINI -> MiniOverlay(wm)
           OverlayType.SETTINGS -> SettingsOverlay(wm)
           OverlayType.HELP -> HelpOverlay(wm)
@@ -88,12 +97,15 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.POKEMON -> PokemonOverlay(wm)
           OverlayType.TRACKER -> TrackerOverlay(wm)
           OverlayType.NEW_SESSION -> NewSessionOverlay(wm)
-          OverlayType.RAID -> RaidOverlay(wm)
+          OverlayType.RAID -> RaidOverlay(wm, window)
           OverlayType.PLAYER_CARD -> PlayerCardOverlay(wm)
-          OverlayType.BATTLE_GRAPH -> BattleGraphOverlay(wm)
+          OverlayType.BATTLE_GRAPH -> BattleGraphOverlay(wm, window)
           OverlayType.ITEM_USE -> ItemUseOverlay()
           OverlayType.RAID_CALLER -> RaidCallerOverlay(wm)
           OverlayType.META_SPECS -> MetaSpecsOverlay(wm)
+          OverlayType.POCKET_JOURNAL -> PocketJournalOverlay(wm)
+          OverlayType.POCKET_EDITOR -> PocketEditorOverlay(wm)
+          OverlayType.SCREENSHOT_PREVIEW -> ScreenshotPreviewOverlay(wm)
           else -> {}
         }
 

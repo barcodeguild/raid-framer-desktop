@@ -39,7 +39,7 @@ enum class LifeMendQuality(val labelRes: StringResource, val color: Color) {
  *
  * See: [PlayerCacheEntity] for database storage, and also PlayerCardExtensions for helper methods. eek
  */
-data class PlayerCard (
+data class PlayerCard(
   val name: String, // player character name
   val recentCids: List<String>, // these change so keeping a list
   val lastEvent: Long, // timestamp of the last event seen for this player
@@ -57,6 +57,7 @@ data class PlayerCard (
   val isLoaded: Boolean = false,
   val isRealPlayer: Boolean = false, // determined after some analysis
   val isShotcaller: Boolean = false, // is the player a shotcaller (frequently issues commands in voice chat, determined externally)
+  val realPlayerBehaviorMetric: Long = 0L, // session-only metric incremented by player-only spell casts, item uses, glider uses
   val cache: PlayerCacheEntity?, // saved to the database
 
   // important buffs/debuffs currently active on the player

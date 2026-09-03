@@ -22,6 +22,7 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.PetListItem
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.component.titleBarCaptureActions
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.pokemon_no_companions
@@ -61,7 +62,10 @@ fun PokemonOverlay(wm: WindowManager? = null) {
     // Title bar
     TitleBarComponent(
       title = stringResource(Res.string.pokemon_title),
-      onClose = { wm?.closeWindow(OverlayType.POKEMON) }
+      onClose = { wm?.closeWindow(OverlayType.POKEMON) },
+      captureActions = wm?.nativeWindow(OverlayType.POKEMON)?.let { window ->
+        titleBarCaptureActions(window as androidx.compose.ui.awt.ComposeWindow, wm, "Dragon Breaths")
+      }
     )
 
     // Pet list

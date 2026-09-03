@@ -386,14 +386,34 @@ import raid_framer_desktop.composeapp.generated.resources.spec_type_zephyr
  * Whitelist of preferred builds. This is mostly just opinionated. I'm going to put a badge next to players who are playing PvP specs.
  */
 val META_CC_SPECS = setOf<SpecType>(
-  SpecType.DREAMBREAKER, SpecType.DEFILER, SpecType.REVENANT, SpecType.NIGHTCLOAK, SpecType.SKULLKNIGHT, SpecType.THAUMATURGE
+  SpecType.DREAMBREAKER,
+  SpecType.DEFILER,
+  SpecType.REVENANT,
+  SpecType.NIGHTCLOAK,
+  SpecType.SKULLKNIGHT,
+  SpecType.THAUMATURGE
 )
 val META_MELEE_SPECS = setOf<SpecType>(
-  SpecType.ABOLISHER,  SpecType.EXECUTIONER, SpecType.DEATHWISH, SpecType.CURSEBRAND, SpecType.BLOODREAVER, SpecType.BLADE_DANCER, SpecType.DOOMLORD, SpecType.HEXBLADE, SpecType.HEX_WARDEN,
-  SpecType.HERALD, SpecType.FLASHBLADE
+  SpecType.ABOLISHER,
+  SpecType.EXECUTIONER,
+  SpecType.DEATHWISH,
+  SpecType.CURSEBRAND,
+  SpecType.BLOODREAVER,
+  SpecType.BLADE_DANCER,
+  SpecType.DOOMLORD,
+  SpecType.HEXBLADE,
+  SpecType.HEX_WARDEN,
+  SpecType.HERALD,
+  SpecType.FLASHBLADE
 )
 val META_HEALER_SPECS = setOf<SpecType>(
-  SpecType.SOOTHSAYER, SpecType.CONFESSOR, SpecType.ASSASSIN, SpecType.DOOMBRINGER, SpecType.HIEROPHANT, SpecType.DEATH_WARDEN, SpecType.TEMPLAR,
+  SpecType.SOOTHSAYER,
+  SpecType.CONFESSOR,
+  SpecType.ASSASSIN,
+  SpecType.DOOMBRINGER,
+  SpecType.HIEROPHANT,
+  SpecType.DEATH_WARDEN,
+  SpecType.TEMPLAR,
   SpecType.ATHAME
 )
 val META_MAGE_SPECS = setOf<SpecType>(
@@ -403,7 +423,13 @@ val META_DANCER_SPECS = setOf<SpecType>(
   SpecType.COMEDIAN, SpecType.SEAL_RESOLVER, SpecType.TOUGH_DANCER
 )
 val META_RANGED_SPEC = setOf<SpecType>(
-  SpecType.EBONSONG, SpecType.PRIMEVAL, SpecType.STONE_ARROW, SpecType.PRIVATEER, SpecType.LEADBITER, SpecType.TEMPEST, SpecType.DEATHTRIGGER
+  SpecType.EBONSONG,
+  SpecType.PRIMEVAL,
+  SpecType.STONE_ARROW,
+  SpecType.PRIVATEER,
+  SpecType.LEADBITER,
+  SpecType.TEMPEST,
+  SpecType.DEATHTRIGGER
 )
 
 /*
@@ -421,10 +447,25 @@ data class Skill(
   val castTime: Double,
   val cooldown: Double,
   val possibleNames: List<String> = emptyList(),
+  val possibleCastIDs: List<Int> = emptyList(),
   val isPetInitiator: Boolean = false,
   val allowedPetTypes: Set<String> = emptySet(),
   val relatedDamageIds: Set<Int> = emptySet()
 )
+
+data class SpellCastLookupResult(val skill: Skill, val tree: SkillTreeType)
+
+val SPELL_CAST_ID_lookup: Map<Int, SpellCastLookupResult> by lazy {
+  val map = mutableMapOf<Int, SpellCastLookupResult>()
+  SkillTreeType.entries.forEach { treeType ->
+    treeType.tree.skills.forEach { skill ->
+      skill.possibleCastIDs.forEach { castId ->
+        map[castId] = SpellCastLookupResult(skill, treeType)
+      }
+    }
+  }
+  map
+}
 
 // Build a map of all skill-trees to a last-used timestamp initialized to 0.
 fun buildSkillTreeLastUsedMap(): MutableMap<SkillTreeType, Long> {
@@ -516,6 +557,7 @@ enum class SkillTreeType(val tree: SkillTreeDefinition) {
     fun fromName(name: String): SkillTreeType? {
       return entries.find { it.name.equals(name, ignoreCase = true) }
     }
+
     fun fromGameId(id: Int): SkillTreeType? {
       return entries.find { it.tree.gameId == id }
     }

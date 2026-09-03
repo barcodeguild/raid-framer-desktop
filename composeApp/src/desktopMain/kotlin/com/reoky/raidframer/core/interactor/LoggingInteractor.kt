@@ -4,10 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import com.reoky.raidframer.core.helpers.getRaidFramerDirectory
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.time.Instant
 import java.time.ZoneId
@@ -24,9 +24,9 @@ object LoggingInteractor : Interactor() {
   private val seq = AtomicLong(0)
   private val writeMutex = Mutex()
 
-  private val userHomeDirectory = System.getProperty("user.home")
-  private val appDirectory = "$userHomeDirectory/.RaidFramer"
-  private val loggingFilePath: Path = Paths.get("$appDirectory/debug.log")
+  private val loggingFilePath: Path = getRaidFramerDirectory()
+    ?.resolve("debug.log")
+    ?: Path.of("debug.log")
 
   private val timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
     .withZone(ZoneId.systemDefault())
@@ -117,4 +117,3 @@ object LoggingInteractor : Interactor() {
     val seq: Long
   )
 }
-

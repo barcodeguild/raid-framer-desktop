@@ -39,6 +39,11 @@ import com.reoky.raidframer.messageBox
 import com.reoky.raidframer.quitAfterSessionStop
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
+import com.reoky.raidframer.ui.capture.GameSnippingService
+import com.reoky.raidframer.ui.capture.PocketWindowCaptureCoordinator
+import com.reoky.raidframer.ui.capture.ScreenshotPreviewCoordinator
+import com.reoky.raidframer.core.helpers.copyImageToClipboard
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -53,7 +58,11 @@ import raid_framer_desktop.composeapp.generated.resources.tray_battle_graph
 import raid_framer_desktop.composeapp.generated.resources.tray_battle_summary
 import raid_framer_desktop.composeapp.generated.resources.tray_close
 import raid_framer_desktop.composeapp.generated.resources.tray_dragon_breaths
+import raid_framer_desktop.composeapp.generated.resources.tray_pocket_journal
 import raid_framer_desktop.composeapp.generated.resources.tray_lua_options
+import raid_framer_desktop.composeapp.generated.resources.tray_help
+import raid_framer_desktop.composeapp.generated.resources.tray_copy_screenshot_to_clipboard
+import raid_framer_desktop.composeapp.generated.resources.tray_take_screenshot
 import raid_framer_desktop.composeapp.generated.resources.tray_new_session
 import raid_framer_desktop.composeapp.generated.resources.tray_raid_management
 import raid_framer_desktop.composeapp.generated.resources.tray_save_session
@@ -81,6 +90,7 @@ fun ApplicationScope.SystemTrayComponent(
   val resetStr = stringResource(Res.string.app_tray_reset_positions)
   val exitStr = stringResource(Res.string.general_exit)
   val dragonBreathsStr = stringResource(Res.string.tray_dragon_breaths)
+  val pocketJournalStr = stringResource(Res.string.tray_pocket_journal)
   val raidManagementStr = stringResource(Res.string.tray_raid_management)
   val battleSummaryStr = stringResource(Res.string.tray_battle_summary)
   val battleGraphStr = stringResource(Res.string.tray_battle_graph)
@@ -88,6 +98,9 @@ fun ApplicationScope.SystemTrayComponent(
   val saveSessionStr = stringResource(Res.string.tray_save_session)
   val abortSessionStr = stringResource(Res.string.tray_abort_session)
   val luaOptionsStr = stringResource(Res.string.tray_lua_options)
+  val helpStr = stringResource(Res.string.tray_help)
+  val takeScreenshotStr = stringResource(Res.string.tray_take_screenshot)
+  val copyScreenshotStr = stringResource(Res.string.tray_copy_screenshot_to_clipboard)
   val closeStr = stringResource(Res.string.tray_close)
 
   DisposableEffect(Unit) {
@@ -114,7 +127,7 @@ fun ApplicationScope.SystemTrayComponent(
     val mouseY = pointer?.y ?: (screen.y + screen.height)
 
     // Dynamic height based on items shown
-    var itemCount = 6 // Settings, Lua Options, About, Reset, Exit, Close
+    var itemCount = 10 // Take Screenshot, Copy Screenshot, Pocket Journal, Settings, Lua Options, About, Help, Reset, Exit, Close
     if (isRecording) itemCount += 2 else itemCount += 1 // Save+Abort or New
     itemCount += 3 // Dragon Breaths, Raid Mgmt, Battle Summary
     if (config.performanceBattleGraphEnabled) itemCount += 1
@@ -122,7 +135,7 @@ fun ApplicationScope.SystemTrayComponent(
     val itemHeight = 26 // Fixed height per item in dp — consistent across languages
     val dividerHeight = 2
     val menuHeight = itemCount * itemHeight + dividerCount * dividerHeight + 10
-    val menuWidth = 140
+    val menuWidth = 160
 
     Window(
       onCloseRequest = { menuVisible = false },
@@ -171,7 +184,7 @@ fun ApplicationScope.SystemTrayComponent(
         TrayMenuDivider()
 
         // --- Overlays ---
-        TrayMenuItem(iconCode = "\uf06b", text = dragonBreathsStr) {
+        TrayMenuItem(iconCode = "\uf6d5", text = dragonBreathsStr) {
           menuVisible = false
           wm.openWindow(OverlayType.POKEMON)
         }
@@ -184,9 +197,32 @@ fun ApplicationScope.SystemTrayComponent(
           wm.openWindow(OverlayType.SUMMARY)
         }
         if (config.performanceBattleGraphEnabled) {
-          TrayMenuItem(iconCode = "\uf201", text = battleGraphStr) {
+          TrayMenuItem(iconCode = "\uf1e0", text = battleGraphStr) {
             menuVisible = false
             wm.openWindow(OverlayType.BATTLE_GRAPH)
+          }
+        }
+
+        TrayMenuItem(iconCode = "\uf02d", text = pocketJournalStr) {
+          menuVisible = false
+          wm.openWindow(OverlayType.POCKET_JOURNAL)
+        }
+        TrayMenuItem(iconCode = "\uf030", text = takeScreenshotStr) {
+          menuVisible = false
+          scope.launch {
+            delay(150)
+            val image = GameSnippingService.capture() ?: return@launch
+            val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
+            ScreenshotPreviewCoordinator.show(result)
+            wm.openWindow(OverlayType.SCREENSHOT_PREVIEW)
+          }
+        }
+        TrayMenuItem(iconCode = "\uf0c8", text = copyScreenshotStr) {
+          menuVisible = false
+          scope.launch {
+            delay(150)
+            val image = GameSnippingService.capture() ?: return@launch
+            copyImageToClipboard(image)
           }
         }
 
@@ -204,6 +240,10 @@ fun ApplicationScope.SystemTrayComponent(
         TrayMenuItem(iconCode = "\uf059", text = aboutStr) {
           menuVisible = false
           wm.openWindow(OverlayType.ABOUT)
+        }
+        TrayMenuItem(iconCode = "\uf128", text = helpStr) {
+          menuVisible = false
+          wm.openWindow(OverlayType.HELP)
         }
 
         TrayMenuDivider()

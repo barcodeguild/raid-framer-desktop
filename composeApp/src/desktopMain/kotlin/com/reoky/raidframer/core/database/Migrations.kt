@@ -69,9 +69,10 @@ val MIGRATION_8_9 = object : Migration(8, 9) {
 // migration to add   val lifetimeTotalHealsReceived: Long = 0L, to PlayerCacheEntity for tracking heals received over time
 val MIGRATION_9_10 = object : Migration(9, 10) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalHealsReceived INTEGER NOT NULL DEFAULT 0").use {
-      it.step()
-    }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalHealsReceived INTEGER NOT NULL DEFAULT 0")
+      .use {
+        it.step()
+      }
   }
 }
 
@@ -114,8 +115,10 @@ val MIGRATION_13_14 = object : Migration(13, 14) {
 // added combat overlay visibility flags to ConfigEntity
 val MIGRATION_14_15 = object : Migration(14, 15) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN combatShowDamageColumn INTEGER NOT NULL DEFAULT 1").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN combatShowHealsColumn INTEGER NOT NULL DEFAULT 1").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN combatShowDamageColumn INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN combatShowHealsColumn INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
     connection.prepare("ALTER TABLE config ADD COLUMN combatShowCCColumn INTEGER NOT NULL DEFAULT 1").use { it.step() }
   }
 }
@@ -123,7 +126,8 @@ val MIGRATION_14_15 = object : Migration(14, 15) {
 // added combatControlsFadeEnabled to ConfigEntity (06/07/26)
 val MIGRATION_15_16 = object : Migration(15, 16) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN combatControlsFadeEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN combatControlsFadeEnabled INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
@@ -152,7 +156,8 @@ val MIGRATION_18_19 = object : Migration(18, 19) {
 
 val MIGRATION_19_20 = object : Migration(19, 20) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionDurationMs INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN lastSessionDurationMs INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     connection.prepare("ALTER TABLE config ADD COLUMN lastSessionExportDir TEXT NOT NULL DEFAULT ''").use { it.step() }
   }
 }
@@ -160,14 +165,16 @@ val MIGRATION_19_20 = object : Migration(19, 20) {
 // added exportIncludeRawJsonLogs to ConfigEntity (06/20/26)
 val MIGRATION_20_21 = object : Migration(20, 21) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN exportIncludeRawJsonLogs INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportIncludeRawJsonLogs INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
 // added seed table config fields to ConfigEntity
 val MIGRATION_21_22 = object : Migration(21, 22) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN seedTableLastAppliedTimestamp INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN seedTableLastAppliedTimestamp INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     connection.prepare("ALTER TABLE config ADD COLUMN seedTableFileName TEXT NOT NULL DEFAULT ''").use { it.step() }
   }
 }
@@ -230,8 +237,10 @@ val MIGRATION_24_25 = object : Migration(24, 25) {
 // added companionShowDebugInfo and companionShowDeathsPerMinute to ConfigEntity
 val MIGRATION_25_26 = object : Migration(25, 26) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN companionShowDebugInfo INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN companionShowDeathsPerMinute INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN companionShowDebugInfo INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN companionShowDeathsPerMinute INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
@@ -245,52 +254,79 @@ val MIGRATION_26_27 = object : Migration(26, 27) {
 // added allowOdeToRecoveryCountAsHeals to ConfigEntity for filtering Ode heals in rankings
 val MIGRATION_27_28 = object : Migration(27, 28) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN allowOdeToRecoveryCountAsHeals INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN allowOdeToRecoveryCountAsHeals INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
 // added lifetimeTotalTigerStrikes to player_cache and totalTigerStrikes to player_session_totals for Battlerage tiger strike heuristic
 val MIGRATION_28_29 = object : Migration(28, 29) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalTigerStrikes INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalTigerStrikes INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalTigerStrikes INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalTigerStrikes INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
 // added lifetime freeze/trip/bubble/bracing/shieldstrip/weapondisable/potiondisable/bdglider/crystalwings/gliderdisable/provoke totals to player_cache and session totals
 val MIGRATION_29_30 = object : Migration(29, 30) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalFreezes INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalTrips INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBubbles INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBracings INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalShieldStrip INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalWeaponDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPotionDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBdGlider INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCrystalWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalGliderDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalProvoked INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalFreezes INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalTrips INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBubbles INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBracings INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalShieldStrip INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalWeaponDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPotionDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBdGlider INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCrystalWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalGliderDisables INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalProvoked INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalFreezes INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalTrips INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBubbles INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBracings INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalShieldStrip INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalWeaponDisables INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPotionDisables INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBdGlider INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCrystalWings INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalGliderDisables INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalProvoked INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalFreezes INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalTrips INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBubbles INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBracings INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalShieldStrip INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalWeaponDisables INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPotionDisables INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBdGlider INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCrystalWings INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalGliderDisables INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalProvoked INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
 // added lastRavenspineWings, lastTWTGlider, lastMoonshadowGlider to player_cache for glider buff tracking
 val MIGRATION_30_31 = object : Migration(30, 31) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastRavenspineWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastRavenspineWings INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastTWTGlider INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMoonshadowGlider INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMoonshadowGlider INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
@@ -298,11 +334,15 @@ val MIGRATION_30_31 = object : Migration(30, 31) {
 val MIGRATION_31_32 = object : Migration(31, 32) {
   override fun migrate(connection: SQLiteConnection) {
     // snake weapons and shield
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeGreatsword INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeShield INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeSword INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeGreatsword INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeShield INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeSword INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeAxe INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeScepter INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeScepter INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSnakeGun INTEGER NOT NULL DEFAULT 0").use { it.step() }
     // black dragon items
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBdShield INTEGER NOT NULL DEFAULT 0").use { it.step() }
@@ -313,58 +353,79 @@ val MIGRATION_31_32 = object : Migration(31, 32) {
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBdSword INTEGER NOT NULL DEFAULT 0").use { it.step() }
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastBd2hSword INTEGER NOT NULL DEFAULT 0").use { it.step() }
     // anthalon items
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastAnthSetPull INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastGardenAnthSetPull INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastAnthSetPull INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastGardenAnthSetPull INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     // library dungeon items
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastLibBow INTEGER NOT NULL DEFAULT 0").use { it.step() }
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastLibDagger INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastLibShortspear INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastLibShortspear INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastLibStaff INTEGER NOT NULL DEFAULT 0").use { it.step() }
     // serpentis dungeon items
     connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSerpStaff INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSerpShield INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastSerpShield INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     // mistsong dungeon items
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMistNodachi INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMistDagger INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMistShield INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMistNodachi INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMistDagger INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lastMistShield INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
 // added previousSessionStart to config for item highlight persistence across sessions
 val MIGRATION_32_33 = object : Migration(32, 33) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN previousSessionStart INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN previousSessionStart INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
 // added defiance, garden defiance, purge, and sacrifice dance totals (08/04/26)
 val MIGRATION_33_34 = object : Migration(33, 34) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalGardenDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPurges INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalSacDances INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalGardenDefiance INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPurges INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalSacDances INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDefiance INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalGardenDefiance INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPurges INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalSacDances INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDefiance INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalGardenDefiance INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPurges INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalSacDances INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
 // Added PNG export background selection, solid color, custom path, and dimness.
 val MIGRATION_34_35 = object : Migration(34, 35) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundSelection TEXT NOT NULL DEFAULT 'REOKY'").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN exportCustomBackgroundPath TEXT NOT NULL DEFAULT ''").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundColor INTEGER NOT NULL DEFAULT -16777216").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundDimness REAL NOT NULL DEFAULT 0.20").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundSelection TEXT NOT NULL DEFAULT 'REOKY'")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportCustomBackgroundPath TEXT NOT NULL DEFAULT ''")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundColor INTEGER NOT NULL DEFAULT -16777216")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN exportBackgroundDimness REAL NOT NULL DEFAULT 0.20")
+      .use { it.step() }
   }
 }
 
 // Added item use overlay toggle and combat overlay spec icons toggle.
 val MIGRATION_35_36 = object : Migration(35, 36) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN itemUseOverlayEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN itemUseOverlayEnabled INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     connection.prepare("ALTER TABLE config ADD COLUMN combatShowSpecIcons INTEGER NOT NULL DEFAULT 1").use { it.step() }
   }
 }
@@ -372,8 +433,10 @@ val MIGRATION_35_36 = object : Migration(35, 36) {
 // added Deep Tranquility buff tracking (buff id 29951)
 val MIGRATION_36_37 = object : Migration(36, 37) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDeepTranquility INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDeepTranquility INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDeepTranquility INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDeepTranquility INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
@@ -381,39 +444,69 @@ val MIGRATION_36_37 = object : Migration(36, 37) {
 val MIGRATION_37_38 = object : Migration(37, 38) {
   override fun migrate(connection: SQLiteConnection) {
     // Debuffs
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDeependDebuff INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalThrowDagger INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalStuns INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalStaggers INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPetrification INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalAbsorbLifeforce INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCorrosiveBarrage INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBlindedByCrows INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalMistSunder INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDeependDebuff INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalThrowDagger INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalStuns INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalStaggers INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalPetrification INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalAbsorbLifeforce INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCorrosiveBarrage INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBlindedByCrows INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalMistSunder INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     // Buffs
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalRegularSunder INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalImpaleImmunity INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalProtectiveWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCourageousAction INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalManaBarrier INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalRegularSunder INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalImpaleImmunity INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalProtectiveWings INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCourageousAction INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalManaBarrier INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     // Spells
-    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalRevive INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalRevive INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
     // Session totals
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDeependDebuff INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalThrowDagger INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStuns INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStaggers INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPetrification INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalAbsorbLifeforce INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCorrosiveBarrage INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBlindedByCrows INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMistSunder INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalRegularSunder INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalImpaleImmunity INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalProtectiveWings INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCourageousAction INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalManaBarrier INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalRevive INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDeependDebuff INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalThrowDagger INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStuns INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStaggers INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalPetrification INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalAbsorbLifeforce INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCorrosiveBarrage INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBlindedByCrows INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMistSunder INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalRegularSunder INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalImpaleImmunity INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalProtectiveWings INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCourageousAction INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalManaBarrier INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalRevive INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
@@ -428,38 +521,52 @@ val MIGRATION_38_39 = object : Migration(38, 39) {
 // Added performance settings for granular control over event tracking and resource usage.
 val MIGRATION_39_40 = object : Migration(39, 40) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN performanceCompanionEnabled INTEGER NOT NULL DEFAULT 1").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN performanceRaidBuffScanning INTEGER NOT NULL DEFAULT 1").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN performanceBuffDebuffTracking INTEGER NOT NULL DEFAULT 1").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN performanceRaidRosterTracking INTEGER NOT NULL DEFAULT 1").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN performanceDuelTracking INTEGER NOT NULL DEFAULT 1").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN performanceTargetChangedTracking INTEGER NOT NULL DEFAULT 1").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN performanceBattleGraphEnabled INTEGER NOT NULL DEFAULT 1").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN performanceEventHistoryDepth INTEGER NOT NULL DEFAULT 500").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceCompanionEnabled INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceRaidBuffScanning INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceBuffDebuffTracking INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceRaidRosterTracking INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceDuelTracking INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceTargetChangedTracking INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceBattleGraphEnabled INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceEventHistoryDepth INTEGER NOT NULL DEFAULT 500")
+      .use { it.step() }
   }
 }
 
 // Added battle graph spell depth setting to cap per-target spell breakdowns for memory optimization.
 val MIGRATION_40_41 = object : Migration(40, 41) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN performanceBattleGraphSpellDepth INTEGER NOT NULL DEFAULT 30").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN performanceBattleGraphSpellDepth INTEGER NOT NULL DEFAULT 30")
+      .use { it.step() }
   }
 }
 
 // Added combatOverlayAsTooltipEnabled to ConfigEntity (08/23/26)
 val MIGRATION_41_42 = object : Migration(41, 42) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN combatOverlayAsTooltipEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN combatOverlayAsTooltipEnabled INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
   }
 }
 
 // Added Raid Caller / Leader overlay config to ConfigEntity (08/24/26)
 val MIGRATION_42_43 = object : Migration(42, 43) {
   override fun migrate(connection: SQLiteConnection) {
-    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerOverlayEnabled INTEGER NOT NULL DEFAULT 0").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerLootBuffThreshold INTEGER NOT NULL DEFAULT 150").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerBuffRequirements TEXT NOT NULL DEFAULT 'FEAST_RIBS,GOBLET,STATUE_BUFF,WAR_DRUM'").use { it.step() }
-    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerBuffGracePeriod TEXT NOT NULL DEFAULT 'FIFTEEN_MINUTES'").use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerOverlayEnabled INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerLootBuffThreshold INTEGER NOT NULL DEFAULT 150")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerBuffRequirements TEXT NOT NULL DEFAULT 'FEAST_RIBS,GOBLET,STATUE_BUFF,WAR_DRUM'")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerBuffGracePeriod TEXT NOT NULL DEFAULT 'FIFTEEN_MINUTES'")
+      .use { it.step() }
   }
 }
 
@@ -467,5 +574,74 @@ val MIGRATION_42_43 = object : Migration(42, 43) {
 val MIGRATION_43_44 = object : Migration(43, 44) {
   override fun migrate(connection: SQLiteConnection) {
     connection.prepare("ALTER TABLE config ADD COLUMN customMetaSpecsJson TEXT NOT NULL DEFAULT ''").use { it.step() }
+  }
+}
+
+// Added Pocket journal metadata, tags, and attachment tracking (08/31/26).
+val MIGRATION_44_45 = object : Migration(44, 45) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare(
+      """
+      CREATE TABLE IF NOT EXISTS pocket_entries (
+        id TEXT NOT NULL PRIMARY KEY,
+        createdAt INTEGER NOT NULL,
+        updatedAt INTEGER NOT NULL,
+        title TEXT NOT NULL DEFAULT '',
+        markdownPath TEXT NOT NULL
+      )
+      """.trimIndent()
+    ).use { it.step() }
+
+    connection.prepare("CREATE INDEX IF NOT EXISTS index_pocket_entries_createdAt ON pocket_entries(createdAt)")
+      .use { it.step() }
+    connection.prepare("CREATE INDEX IF NOT EXISTS index_pocket_entries_updatedAt ON pocket_entries(updatedAt)")
+      .use { it.step() }
+
+    connection.prepare(
+      """
+      CREATE TABLE IF NOT EXISTS pocket_tags (
+        entryId TEXT NOT NULL,
+        tag TEXT NOT NULL,
+        normalizedTag TEXT NOT NULL,
+        PRIMARY KEY(entryId, normalizedTag)
+      )
+      """.trimIndent()
+    ).use { it.step() }
+
+    connection.prepare("CREATE INDEX IF NOT EXISTS index_pocket_tags_normalizedTag ON pocket_tags(normalizedTag)")
+      .use { it.step() }
+
+    connection.prepare(
+      """
+      CREATE TABLE IF NOT EXISTS pocket_attachments (
+        id TEXT NOT NULL PRIMARY KEY,
+        entryId TEXT NOT NULL,
+        relativePath TEXT NOT NULL,
+        mimeType TEXT NOT NULL,
+        createdAt INTEGER NOT NULL
+      )
+      """.trimIndent()
+    ).use { it.step() }
+
+    connection.prepare("CREATE INDEX IF NOT EXISTS index_pocket_attachments_entryId ON pocket_attachments(entryId)")
+      .use { it.step() }
+  }
+}
+
+val MIGRATION_45_46 = object : Migration(45, 46) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN nearbySlidingWindowMinutes INTEGER NOT NULL DEFAULT 15")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN nearbyParticipationStage INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE config ADD COLUMN nearbyBehaviorSensitivity INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+  }
+}
+
+val MIGRATION_46_47 = object : Migration(46, 47) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerAllowGuildBuff INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
   }
 }
