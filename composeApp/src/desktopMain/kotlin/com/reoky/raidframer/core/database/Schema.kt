@@ -16,7 +16,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 46
+const val SCHEMA_VERSION = 47
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -164,6 +164,9 @@ data class ConfigEntity(
   val nearbySlidingWindowMinutes: Int = 15,
   val nearbyParticipationStage: Int = 1,
   val nearbyBehaviorSensitivity: Int = 0,
+
+  // Allow Guild Buff (Gallant's Blessing) to count as fully-buffed (09/02/26)
+  val raidCallerAllowGuildBuff: Boolean = true,
 )
 
 /*

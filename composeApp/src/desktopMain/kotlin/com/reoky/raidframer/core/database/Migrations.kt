@@ -638,3 +638,10 @@ val MIGRATION_45_46 = object : Migration(45, 46) {
       .use { it.step() }
   }
 }
+
+val MIGRATION_46_47 = object : Migration(46, 47) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN raidCallerAllowGuildBuff INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+  }
+}

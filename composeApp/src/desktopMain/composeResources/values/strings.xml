@@ -809,6 +809,10 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_shortbread_cookie">Shortbread Cookie</string>
     <string name="raid_buff_golden_taffy">Golden Taffy</string>
     <string name="raid_buff_egg_of_fortune">Egg of Fortune</string>
+    <string name="raid_buff_gallants_blessing">Gallant's Blessing</string>
+    <string name="raid_buff_allow_guild_buff">Allow Guild Buff (Gallant's Blessing) to count as fully-buffed</string>
+    <string name="raid_buff_guild_buff">Guild Buff</string>
+    <string name="raid_buff_guild_buff_covers_all">None — Guild Buff covers all requirements</string>
     <string name="raid_copy_not_buffed">Copy Not Buffed</string>
     <string name="raid_copy_not_buffed_title">Not Buffed</string>
     <string name="raid_copy_buffed">Copy Buffed</string>

@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.database.ConfigEntity
 import com.reoky.raidframer.ui.component.PerformanceDisabledBanner
 import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
@@ -1149,13 +1150,13 @@ private fun BuffsTab(
     val snapshot = observations.getValue(member).snapshot
     snapshot != null && requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
       BuffPayload(buff_id = id)
-    }))
+    }), config.raidCallerAllowGuildBuff)
   }.joinToString(", ") { it.playerName }
   val notBuffed = allMembers.filter { member ->
     val snapshot = observations.getValue(member).snapshot
     snapshot != null && !requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
       BuffPayload(buff_id = id)
-    }))
+    }), config.raidCallerAllowGuildBuff)
   }.joinToString(", ") { it.playerName }
   val notScannable = allMembers.filter { observations.getValue(it).snapshot == null }
     .joinToString(", ") { it.playerName }
@@ -1178,6 +1179,7 @@ private fun BuffsTab(
       RaidBuffKey.BLUE_FLOWER_FRUIT -> stringResource(Res.string.raid_buff_blue_flower_fruit)
       RaidBuffKey.STATUE_BUFF -> stringResource(Res.string.raid_buff_statue)
       RaidBuffKey.FACTION_WAR_TIME -> stringResource(Res.string.raid_buff_faction_war_time)
+      RaidBuffKey.GALLANTS_BLESSING -> stringResource(Res.string.raid_buff_gallants_blessing)
       RaidBuffKey.MOONLIGHT_JUICE -> stringResource(Res.string.raid_buff_moonlight_juice)
       RaidBuffKey.HUNTING_ELIXIR -> stringResource(Res.string.raid_buff_hunting_elixir)
       RaidBuffKey.CHOCOLATE -> stringResource(Res.string.raid_buff_chocolate)
@@ -1210,6 +1212,7 @@ private fun BuffsTab(
                 selectedPlayer,
                 requirements,
                 gracePeriod,
+                config.raidCallerAllowGuildBuff,
                 { selectedPlayer = it },
                 { player, offset ->
                   if (player.playerName.isNotBlank()) {
@@ -1235,6 +1238,7 @@ private fun BuffsTab(
               lootEnabled,
               { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) },
               localizedBuffLabels,
+              config,
               Modifier.widthIn(min = 320.dp, max = 390.dp),
               buffSelectBorder
             )
@@ -1247,6 +1251,7 @@ private fun BuffsTab(
               selectedPlayer,
               requirements,
               gracePeriod,
+              config.raidCallerAllowGuildBuff,
               { selectedPlayer = it },
               { player, offset ->
                 if (player.playerName.isNotBlank()) {
@@ -1269,6 +1274,7 @@ private fun BuffsTab(
               lootEnabled,
               { com.reoky.raidframer.RaidCallerSync.setLootBuffEnabled(it) },
               localizedBuffLabels,
+              config,
               Modifier.fillMaxWidth(),
               buffSelectBorder
             )
@@ -1320,7 +1326,7 @@ private fun BuffsTab(
           elevation = 6.dp
         ) {
           Column(Modifier.padding(10.dp).widthIn(max = 300.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            val meetsRequirements = requirements.matches(resolvedPlayer)
+            val meetsRequirements = requirements.matches(resolvedPlayer, config.raidCallerAllowGuildBuff)
             val displayName =
               if (player.playerName.length > 26) player.playerName.take(26) + "\u2026" else player.playerName
             Row(
@@ -1345,19 +1351,28 @@ private fun BuffsTab(
               }
             }
             Divider(color = Color.White.copy(alpha = 0.1f), thickness = 0.5.dp)
+            val hasGuildBuff = config.raidCallerAllowGuildBuff && resolvedPlayer.buffs.any { it.buff_id == 9002633 }
             Text(
               stringResource(Res.string.raid_buff_has_buffs),
               color = Color(0xFF7CFF8A),
               fontWeight = FontWeight.Bold,
               fontSize = 11.sp
             )
-            Text(
-              requirements.matchedDefinitions(resolvedPlayer)
-                .joinToString(", ") { localizedBuffLabels[it.key].orEmpty() }
-                .ifBlank { stringResource(Res.string.raid_buff_none_found) },
-              color = RFColors.TextSecondary,
-              fontSize = 11.sp
-            )
+            if (hasGuildBuff) {
+              Text(
+                localizedBuffLabels[RaidBuffKey.GALLANTS_BLESSING].orEmpty() + " (" + stringResource(Res.string.raid_buff_guild_buff) + ")",
+                color = RFColors.TextSecondary,
+                fontSize = 11.sp
+              )
+            } else {
+              Text(
+                requirements.matchedDefinitions(resolvedPlayer, config.raidCallerAllowGuildBuff)
+                  .joinToString(", ") { localizedBuffLabels[it.key].orEmpty() }
+                  .ifBlank { stringResource(Res.string.raid_buff_none_found) },
+                color = RFColors.TextSecondary,
+                fontSize = 11.sp
+              )
+            }
             Text(
               stringResource(Res.string.raid_buff_missing_buffs),
               color = Color(0xFFFF7777),
@@ -1365,11 +1380,19 @@ private fun BuffsTab(
               fontSize = 11.sp,
               modifier = Modifier.padding(top = 4.dp)
             )
-            val missingBuffText = requirements.missingKeys(resolvedPlayer)
-              .mapNotNull { localizedBuffLabels[it] }
-              .joinToString(", ")
-              .ifBlank { stringResource(Res.string.raid_buff_none_found) }
-            Text(missingBuffText, color = RFColors.TextSecondary, fontSize = 11.sp)
+            if (hasGuildBuff) {
+              Text(
+                stringResource(Res.string.raid_buff_guild_buff_covers_all),
+                color = RFColors.TextSecondary,
+                fontSize = 11.sp
+              )
+            } else {
+              val missingBuffText = requirements.missingKeys(resolvedPlayer, config.raidCallerAllowGuildBuff)
+                .mapNotNull { localizedBuffLabels[it] }
+                .joinToString(", ")
+                .ifBlank { stringResource(Res.string.raid_buff_none_found) }
+              Text(missingBuffText, color = RFColors.TextSecondary, fontSize = 11.sp)
+            }
             Text(
               stringResource(Res.string.raid_buff_loot_buffs),
               color = RFColors.lootBuffColor,
@@ -1452,6 +1475,7 @@ private fun BuffRaidPane(
   selected: RaidFramePayload?,
   requirements: RaidBuffRequirements,
   gracePeriod: RaidBuffGracePeriod,
+  allowGuildBuff: Boolean,
   onSelect: (RaidFramePayload) -> Unit,
   onSelectAt: (RaidFramePayload, IntOffset) -> Unit,
   modifier: Modifier
@@ -1475,7 +1499,7 @@ private fun BuffRaidPane(
           selectedPlayerName = selected?.playerName,
           onPlayerClick = onSelect,
           onPlayerClickAt = onSelectAt,
-          isBuffed = { requirements.matchesResolved(it, gracePeriod) },
+          isBuffed = { requirements.matchesResolved(it, gracePeriod, allowGuildBuff) },
           isOutOfRange = { it.distance > 115 },
           isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
       }
@@ -1491,7 +1515,7 @@ private fun BuffRaidPane(
           selectedPlayerName = selected?.playerName,
           onPlayerClick = onSelect,
           onPlayerClickAt = onSelectAt,
-          isBuffed = { requirements.matchesResolved(it, gracePeriod) },
+          isBuffed = { requirements.matchesResolved(it, gracePeriod, allowGuildBuff) },
           isOutOfRange = { it.distance > 115 },
           isObservationKnown = { PlayerCacheInteractor.resolveRaidBuffObservation(it, gracePeriod).snapshot != null })
       }
@@ -1514,6 +1538,7 @@ private fun BuffControlsPane(
   lootEnabled: Boolean,
   onLootEnabled: (Boolean) -> Unit,
   localizedBuffLabels: Map<RaidBuffKey, String>,
+  config: ConfigEntity,
   modifier: Modifier,
   borderColor: Color = Color.White.copy(alpha = 0.06f)
 ) {
@@ -1580,10 +1605,10 @@ private fun BuffControlsPane(
           horizontalArrangement = Arrangement.spacedBy(4.dp),
           verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
-          BuffRequirementCheckboxes(requirements, onRequirements, localizedBuffLabels)
+          BuffRequirementCheckboxes(requirements, onRequirements, localizedBuffLabels, config)
         }
       } else {
-        Column { BuffRequirementCheckboxes(requirements, onRequirements, localizedBuffLabels) }
+        Column { BuffRequirementCheckboxes(requirements, onRequirements, localizedBuffLabels, config) }
       }
     }
     Text(
@@ -1887,7 +1912,8 @@ private fun LootBuffRow(name: String, amount: Int, maxAmount: Int) {
 private fun BuffRequirementCheckboxes(
   requirements: RaidBuffRequirements,
   onRequirements: (RaidBuffRequirements) -> Unit,
-  localizedBuffLabels: Map<RaidBuffKey, String>
+  localizedBuffLabels: Map<RaidBuffKey, String>,
+  config: ConfigEntity
 ) {
   RAID_BUFF_DEFINITIONS.filter { it.section == RaidBuffSection.MAIN }.forEach { definition ->
     ControlledCheckbox(
@@ -1895,6 +1921,10 @@ private fun BuffRequirementCheckboxes(
       definition.key in requirements.selected
     ) { checked -> onRequirements(requirements.copy(selected = if (checked) requirements.selected + definition.key else requirements.selected - definition.key)) }
   }
+  ControlledCheckbox(
+    stringResource(Res.string.raid_buff_allow_guild_buff),
+    config.raidCallerAllowGuildBuff
+  ) { RFConfig.update { cfg -> cfg.copy(raidCallerAllowGuildBuff = it) } }
   ControlledCheckbox(
     stringResource(Res.string.raid_buff_orange_goblet),
     requirements.requireOrangeGoblet

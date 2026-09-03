@@ -23,6 +23,7 @@ enum class RaidBuffKey {
   BLUE_FLOWER_FRUIT,
   STATUE_BUFF,
   FACTION_WAR_TIME,
+  GALLANTS_BLESSING,
   MOONLIGHT_JUICE,
   HUNTING_ELIXIR,
   CHOCOLATE,
@@ -71,6 +72,7 @@ val RAID_BUFF_DEFINITIONS = listOf(
   RaidBuffDefinition(RaidBuffKey.BLUE_FLOWER_FRUIT, setOf(3075), "raid_buff_blue_flower_fruit"),
   RaidBuffDefinition(RaidBuffKey.STATUE_BUFF, setOf(30767, 30764, 9002338, 9002337, 30773, 30772, 30766, 9002340, 30760, 9002339, 30770, 30771, 30768, 30765, 9002342, 9002341), "raid_buff_statue"),
   RaidBuffDefinition(RaidBuffKey.FACTION_WAR_TIME, setOf(23717, 32025), "raid_buff_faction_war_time"),
+  RaidBuffDefinition(RaidBuffKey.GALLANTS_BLESSING, setOf(9002633), "raid_buff_gallants_blessing"),
   RaidBuffDefinition(RaidBuffKey.MOONLIGHT_JUICE, setOf(23215, 9002077), "raid_buff_moonlight_juice", RaidBuffSection.LOOT),
   RaidBuffDefinition(RaidBuffKey.HUNTING_ELIXIR, setOf(22516, 22941, 22929, 31422, 8000681, 8000803, 9001658), "raid_buff_hunting_elixir", RaidBuffSection.LOOT),
   RaidBuffDefinition(RaidBuffKey.CHOCOLATE, setOf(8000726, 9001956, 8000779, 8000794, 8000795, 8000796), "raid_buff_chocolate", RaidBuffSection.LOOT),
@@ -103,8 +105,10 @@ data class RaidBuffRequirements(
   val lootThreshold: Int = 0
 )
 
-fun RaidBuffRequirements.matches(member: RaidFramePayload): Boolean {
+fun RaidBuffRequirements.matches(member: RaidFramePayload, allowGuildBuff: Boolean = true): Boolean {
   val ids = member.buffs.map { it.buff_id }.toSet()
+  // Guild buff bypasses all other requirements
+  if (allowGuildBuff && 9002633 in ids) return true
   val mainMatches = selected.filter { definitionsByKey[it]?.section == RaidBuffSection.MAIN }.all { key ->
     definitionsByKey.getValue(key).matches(ids, requireOrangeGoblet, allowMeatballs, requireEnhancedLonging)
   }
@@ -113,14 +117,18 @@ fun RaidBuffRequirements.matches(member: RaidFramePayload): Boolean {
   return mainMatches && lootOk
 }
 
-fun RaidBuffRequirements.matchesResolved(member: RaidFramePayload, gracePeriod: RaidBuffGracePeriod): Boolean {
+fun RaidBuffRequirements.matchesResolved(member: RaidFramePayload, gracePeriod: RaidBuffGracePeriod, allowGuildBuff: Boolean = true): Boolean {
   val observation = PlayerCacheInteractor.resolveRaidBuffObservation(member, gracePeriod)
   val snapshot = observation.snapshot ?: return false
-  return matches(member.copy(buffs = snapshot.buffIds.map { id -> com.reoky.raidframer.core.serialization.BuffPayload(buff_id = id) }))
+  return matches(member.copy(buffs = snapshot.buffIds.map { id -> com.reoky.raidframer.core.serialization.BuffPayload(buff_id = id) }), allowGuildBuff)
 }
 
-fun RaidBuffRequirements.matchedDefinitions(member: RaidFramePayload): List<RaidBuffDefinition> {
+fun RaidBuffRequirements.matchedDefinitions(member: RaidFramePayload, allowGuildBuff: Boolean = true): List<RaidBuffDefinition> {
   val ids = member.buffs.map { it.buff_id }.toSet()
+  // Guild buff satisfies all selected requirements
+  if (allowGuildBuff && 9002633 in ids) {
+    return selected.mapNotNull { definitionsByKey[it] }
+  }
   return RAID_BUFF_DEFINITIONS.filter { definition ->
     val acceptedIds = when {
       definition.key == RaidBuffKey.FEAST_RIBS && !allowMeatballs -> definition.ids - definition.meatballIds
@@ -132,8 +140,10 @@ fun RaidBuffRequirements.matchedDefinitions(member: RaidFramePayload): List<Raid
   }
 }
 
-fun RaidBuffRequirements.missingKeys(member: RaidFramePayload): List<RaidBuffKey> {
+fun RaidBuffRequirements.missingKeys(member: RaidFramePayload, allowGuildBuff: Boolean = true): List<RaidBuffKey> {
   val ids = member.buffs.map { it.buff_id }.toSet()
+  // Guild buff covers all requirements
+  if (allowGuildBuff && 9002633 in ids) return emptyList()
   val missing = selected.mapNotNull { key ->
     val definition = definitionsByKey[key] ?: return@mapNotNull null
     if (definition.matches(ids, requireOrangeGoblet, allowMeatballs, requireEnhancedLonging)) null else key

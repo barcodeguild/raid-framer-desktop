@@ -482,7 +482,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
       val snapshot = obs.snapshot ?: return@filter false
       requirements.matches(member.copy(buffs = snapshot.buffIds.map { id ->
         com.reoky.raidframer.core.serialization.BuffPayload(buff_id = id)
-      }))
+      }), config.raidCallerAllowGuildBuff)
     }
   }
   val minBuffedCount = buffedMembers.size
