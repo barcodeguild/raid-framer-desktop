@@ -1351,6 +1351,9 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="pocket_editor_cancel">Abbrechen</string>
     <string name="pocket_editor_toolbar_link">Link</string>
     <string name="pocket_editor_toolbar_image">Bild</string>
+    <string name="pocket_editor_toolbar_event">Event</string>
+    <string name="pocket_editor_toolbar_raid">Raid</string>
+    <string name="pocket_editor_event_search_hint">Events suchen…</string>
     <string name="pocket_attachment_content_desc">Pocket-Anhang</string>
 
     <!-- Pocket Thumbnail -->

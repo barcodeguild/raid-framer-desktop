@@ -1415,6 +1415,9 @@
     <string name="pocket_editor_cancel">取消</string>
     <string name="pocket_editor_toolbar_link">链接</string>
     <string name="pocket_editor_toolbar_image">图像</string>
+    <string name="pocket_editor_toolbar_event">事件</string>
+    <string name="pocket_editor_toolbar_raid">团队</string>
+    <string name="pocket_editor_event_search_hint">搜索事件…</string>
     <string name="pocket_attachment_content_desc">口袋附件</string>
 
     <!-- Pocket Thumbnail -->

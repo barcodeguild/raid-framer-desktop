@@ -1351,6 +1351,9 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="pocket_editor_cancel">Cancelar</string>
     <string name="pocket_editor_toolbar_link">Link</string>
     <string name="pocket_editor_toolbar_image">Imagem</string>
+    <string name="pocket_editor_toolbar_event">Evento</string>
+    <string name="pocket_editor_toolbar_raid">Raid</string>
+    <string name="pocket_editor_event_search_hint">Buscar eventos…</string>
     <string name="pocket_attachment_content_desc">Anexo Pocket</string>
 
     <!-- Pocket Thumbnail -->

@@ -286,7 +286,17 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
         val cardInteractionSource = remember { MutableInteractionSource() }
         val isCardHovered by cardInteractionSource.collectIsHoveredAsState()
         IconButton(
-          onClick = { wm?.openWindow(OverlayType.POCKET_JOURNAL) },
+          onClick = {
+            scope.launch {
+              val playerName = currentPlayer
+              if (!playerName.isNullOrBlank()) {
+                PocketDraftCoordinator.createDraft(markdown = "@$playerName")
+              } else {
+                PocketDraftCoordinator.createDraft()
+              }
+              wm?.openWindow(OverlayType.POCKET_EDITOR)
+            }
+          },
           modifier = Modifier.size(28.dp).padding(end = 2.dp)
         ) {
           Text(

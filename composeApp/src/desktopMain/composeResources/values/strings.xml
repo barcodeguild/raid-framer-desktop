@@ -1432,6 +1432,11 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="pocket_editor_cancel">Cancel</string>
     <string name="pocket_editor_toolbar_link">Link</string>
     <string name="pocket_editor_toolbar_image">Image</string>
+    <string name="pocket_editor_toolbar_current_target">Target</string>
+    <string name="pocket_editor_toolbar_target_guild">Guild</string>
+    <string name="pocket_editor_toolbar_event">Event</string>
+    <string name="pocket_editor_toolbar_raid">Raid</string>
+    <string name="pocket_editor_event_search_hint">Search events…</string>
     <string name="pocket_attachment_content_desc">Pocket attachment</string>
 
     <!-- Pocket Thumbnail -->

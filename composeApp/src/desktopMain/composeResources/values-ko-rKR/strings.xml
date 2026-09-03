@@ -1415,6 +1415,9 @@
     <string name="pocket_editor_cancel">취소</string>
     <string name="pocket_editor_toolbar_link">링크</string>
     <string name="pocket_editor_toolbar_image">이미지</string>
+    <string name="pocket_editor_toolbar_event">이벤트</string>
+    <string name="pocket_editor_toolbar_raid">레이드</string>
+    <string name="pocket_editor_event_search_hint">이벤트 검색…</string>
     <string name="pocket_attachment_content_desc">포켓 첨부 파일</string>
 
     <!-- Pocket Thumbnail -->

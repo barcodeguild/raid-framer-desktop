@@ -1,6 +1,7 @@
 package com.reoky.raidframer.ui.overlay
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,20 +13,29 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
@@ -37,8 +47,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.onPointerEvent
@@ -60,6 +77,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
 import com.reoky.raidframer.core.pocket.PocketMarkdownBlock
 import com.reoky.raidframer.core.pocket.PocketMarkdownInline
@@ -70,6 +91,9 @@ import com.reoky.raidframer.core.pocket.parsePocketMarkdown
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.database.PocketAttachmentEntity
 import com.reoky.raidframer.core.helpers.FontsHelper
+import com.reoky.raidframer.AppState
+import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.ui.component.SESSION_TYPES
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.pocket_attachment_content_desc
@@ -91,6 +115,11 @@ import raid_framer_desktop.composeapp.generated.resources.pocket_editor_title
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_title_label
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_image
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_link
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_current_target
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_target_guild
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_event
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_raid
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_event_search_hint
 import com.reoky.raidframer.core.helpers.togglePocketJournal
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -278,6 +307,42 @@ rightActions = {
             MarkdownAction.STRIKE -> markdownValue = applyMarkdown(markdownValue, "~~", lastSelection)
             MarkdownAction.BULLET -> markdownValue = insertMarkdown(markdownValue, "- ")
             MarkdownAction.CODE -> markdownValue = applyMarkdown(markdownValue, "`", lastSelection)
+            MarkdownAction.CURRENT_TARGET -> {
+              val target = AppState.selectedTarget.value
+              if (!target.isNullOrBlank()) {
+                markdownValue = insertMarkdown(markdownValue, "@$target ")
+              }
+            }
+            MarkdownAction.TARGET_GUILD -> {
+              val target = AppState.selectedTarget.value
+              if (!target.isNullOrBlank()) {
+                val card = PlayerCacheInteractor.getCard(target)
+                val guild = card?.lastKnownGuild
+                if (!guild.isNullOrBlank()) {
+                  val guildTag = guild.replace(" ", "_")
+                  markdownValue = insertMarkdown(markdownValue, "#$guildTag ")
+                }
+              }
+            }
+            MarkdownAction.RAID -> {
+              val raidParties = PlayerCacheInteractor.getRaidById(0).value
+              val names = raidParties.flatten().map { it.playerName }.filter { it.isNotBlank() }
+              if (names.isNotEmpty()) {
+                val tagString = names.joinToString(" ") { "@$it" } + " "
+                markdownValue = insertMarkdown(markdownValue, tagString)
+              }
+            }
+            MarkdownAction.EVENT -> { /* handled via onEventSelected */ }
+          }
+        },
+        onEventSelected = { sessionType ->
+          val tag = sessionType
+            .lowercase()
+            .replace(Regex("[^a-z0-9\\s]"), "")
+            .trim()
+            .replace(Regex("\\s+"), "_")
+          if (tag.isNotBlank() && tag != "don_t_care") {
+            markdownValue = insertMarkdown(markdownValue, "#$tag ")
           }
         }
       )
@@ -375,10 +440,28 @@ rightActions = {
   }
 }
 
-private enum class MarkdownAction { BOLD, ITALIC, STRIKE, CODE, BULLET, LINK, IMAGE }
+private enum class MarkdownAction { BOLD, ITALIC, STRIKE, CODE, BULLET, LINK, IMAGE, CURRENT_TARGET, TARGET_GUILD, EVENT, RAID }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun MarkdownToolbar(onAction: (MarkdownAction) -> Unit) {
+private fun MarkdownToolbar(onAction: (MarkdownAction) -> Unit, onEventSelected: (String) -> Unit) {
+  var eventMenuExpanded by remember { mutableStateOf(false) }
+  var eventSearchQuery by remember { mutableStateOf("") }
+  var eventHighlightedIndex by remember { mutableStateOf(0) }
+  val eventFocusRequester = remember { FocusRequester() }
+  val normalizedQuery = eventSearchQuery.trim()
+  val filteredEvents = SESSION_TYPES
+    .filter { it != "Don't Care" && (normalizedQuery.isBlank() || it.contains(normalizedQuery, ignoreCase = true)) }
+    .sortedWith(compareBy { !it.startsWith(normalizedQuery, ignoreCase = true) })
+
+  LaunchedEffect(eventMenuExpanded) {
+    if (eventMenuExpanded) {
+      eventSearchQuery = ""
+      eventHighlightedIndex = 0
+      eventFocusRequester.requestFocus()
+    }
+  }
+
   Row(
     modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp)
       .background(Color(0xFF141414).copy(alpha = 0.92f), RoundedCornerShape(10.dp))
@@ -390,11 +473,77 @@ private fun MarkdownToolbar(onAction: (MarkdownAction) -> Unit) {
       MarkdownAction.BOLD to "B", MarkdownAction.ITALIC to "I", MarkdownAction.STRIKE to "S",
       MarkdownAction.CODE to "<>", MarkdownAction.BULLET to "•",
       MarkdownAction.LINK to stringResource(Res.string.pocket_editor_toolbar_link),
-      MarkdownAction.IMAGE to stringResource(Res.string.pocket_editor_toolbar_image)
+      MarkdownAction.IMAGE to stringResource(Res.string.pocket_editor_toolbar_image),
+      MarkdownAction.CURRENT_TARGET to stringResource(Res.string.pocket_editor_toolbar_current_target),
+      MarkdownAction.TARGET_GUILD to stringResource(Res.string.pocket_editor_toolbar_target_guild)
     ).forEach { (action, label) ->
       TextButton(onClick = { onAction(action) }) {
-        Text(label, color = if (action == MarkdownAction.IMAGE) RFColors.AccentRed else Color.White, fontSize = 11.sp)
+        Text(label, color = if (action == MarkdownAction.IMAGE || action == MarkdownAction.CURRENT_TARGET || action == MarkdownAction.TARGET_GUILD) RFColors.AccentRed else Color.White, fontSize = 11.sp)
       }
+    }
+    Box {
+      TextButton(onClick = { eventMenuExpanded = true }) {
+        Text(stringResource(Res.string.pocket_editor_toolbar_event), color = RFColors.AccentRed, fontSize = 11.sp)
+      }
+      if (eventMenuExpanded) {
+        Popup(
+          onDismissRequest = { eventMenuExpanded = false },
+          properties = PopupProperties(focusable = true)
+        ) {
+          Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = Color(0xFF1E1E1E),
+            border = BorderStroke(1.dp, RFColors.CardBorder),
+            elevation = 8.dp,
+            modifier = Modifier.width(260.dp).heightIn(max = 320.dp)
+          ) {
+            Column(modifier = Modifier.padding(4.dp)) {
+              OutlinedTextField(
+                value = eventSearchQuery,
+                onValueChange = { eventSearchQuery = it; eventHighlightedIndex = 0 },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp)
+                  .focusRequester(eventFocusRequester)
+                  .onPreviewKeyEvent { event ->
+                    if (event.type != KeyEventType.KeyDown) false
+                    else when (event.key) {
+                      Key.DirectionDown -> { if (filteredEvents.isNotEmpty()) eventHighlightedIndex = (eventHighlightedIndex + 1) % filteredEvents.size; true }
+                      Key.DirectionUp -> { if (filteredEvents.isNotEmpty()) eventHighlightedIndex = (eventHighlightedIndex - 1 + filteredEvents.size) % filteredEvents.size; true }
+                      Key.Enter -> { filteredEvents.getOrNull(eventHighlightedIndex)?.let { onEventSelected(it); eventMenuExpanded = false }; true }
+                      Key.Escape -> { eventMenuExpanded = false; true }
+                      else -> false
+                    }
+                  },
+                singleLine = true,
+                textStyle = TextStyle(color = Color.White, fontSize = 12.sp),
+                placeholder = { Text(stringResource(Res.string.pocket_editor_event_search_hint), color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp) },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                  textColor = Color.White,
+                  cursorColor = RFColors.AccentRed,
+                  focusedBorderColor = RFColors.AccentRed,
+                  unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                  focusedLabelColor = Color.White,
+                  unfocusedLabelColor = Color.White.copy(alpha = 0.7f)
+                )
+              )
+              Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).heightIn(max = 260.dp)) {
+                filteredEvents.forEachIndexed { index, type ->
+                  DropdownMenuItem(
+                    onClick = { onEventSelected(type); eventMenuExpanded = false },
+                    modifier = Modifier.background(
+                      if (index == eventHighlightedIndex) RFColors.AccentRed.copy(alpha = 0.15f) else Color.Transparent
+                    )
+                  ) {
+                    Text(type, color = RFColors.TextPrimary, fontSize = 12.sp, maxLines = 1)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    TextButton(onClick = { onAction(MarkdownAction.RAID) }) {
+      Text(stringResource(Res.string.pocket_editor_toolbar_raid), color = RFColors.AccentRed, fontSize = 11.sp)
     }
   }
 }

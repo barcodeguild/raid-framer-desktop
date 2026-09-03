@@ -1351,6 +1351,9 @@
     <string name="pocket_editor_cancel">Отмена</string>
     <string name="pocket_editor_toolbar_link">Ссылка</string>
     <string name="pocket_editor_toolbar_image">Изображение</string>
+    <string name="pocket_editor_toolbar_event">Событие</string>
+    <string name="pocket_editor_toolbar_raid">Рейд</string>
+    <string name="pocket_editor_event_search_hint">Поиск событий…</string>
     <string name="pocket_attachment_content_desc">Вложение Pocket</string>
 
     <!-- Pocket Thumbnail -->
