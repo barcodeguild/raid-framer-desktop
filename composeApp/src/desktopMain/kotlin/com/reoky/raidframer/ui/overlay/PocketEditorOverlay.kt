@@ -55,6 +55,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -130,6 +131,10 @@ import kotlinx.coroutines.launch
 import java.nio.file.Path
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
+import java.awt.datatransfer.DataFlavor
+import java.awt.Toolkit
+import java.io.File
+import java.util.UUID
 import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.ColorType
 import org.jetbrains.skia.Image as SkiaImage
@@ -263,40 +268,17 @@ rightActions = {
                   )
                 )
                 if (selected != null) {
-                  val image = runCatching { ImageIO.read(selected.toFile()) }.getOrNull()
-                  if (image == null) {
-                    attachmentMessage = errNotImage
-                  } else {
-                    val draftId = draft?.metadata?.id
-                    if (draftId == null) {
-                      attachmentMessage = errNoEntryOpen
-                    } else {
-                      val name = PocketDraftCoordinator.nextAttachmentName(draftId)
-                      if (name == null) {
-                        attachmentMessage = errAttachmentLimit
-                      } else {
-                        when (val result = PocketDraftCoordinator.addAttachment(
-                          source = selected,
-                          relativePath = name,
-                          mimeType = "image/png",
-                          markdown = appendImageReference(markdown, name)
-                        )) {
-                          is PocketAttachmentResult.Added -> {
-                            markdownValue = TextFieldValue(result.entry.markdown)
-                            attachmentMessage = null
-                          }
-
-                          is PocketAttachmentResult.Rejected -> {
-                            attachmentMessage = when (result.reason) {
-                              PocketAttachmentRejection.ATTACHMENT_LIMIT_REACHED -> errAttachmentLimit
-                              PocketAttachmentRejection.ENTRY_NOT_FOUND -> errEntryNotFound
-                              PocketAttachmentRejection.INVALID_ATTACHMENT_PATH -> errInvalidPath
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
+                  addImageFromSource(
+                    source = selected,
+                    markdown = markdown,
+                    onMarkdownUpdated = { markdownValue = it },
+                    onMessage = { attachmentMessage = it },
+                    errNotImage = errNotImage,
+                    errNoEntryOpen = errNoEntryOpen,
+                    errAttachmentLimit = errAttachmentLimit,
+                    errEntryNotFound = errEntryNotFound,
+                    errInvalidPath = errInvalidPath,
+                  )
                 }
               }
             }
@@ -378,7 +360,32 @@ rightActions = {
           .padding(10.dp)
           .onFocusChanged { editorFocused = it.isFocused }
           .onPointerEvent(PointerEventType.Enter) { editorHovered = true }
-          .onPointerEvent(PointerEventType.Exit) { editorHovered = false },
+          .onPointerEvent(PointerEventType.Exit) { editorHovered = false }
+          .onPreviewKeyEvent { event ->
+            if (event.type == KeyEventType.KeyDown && event.key == Key.V && event.isCtrlPressed) {
+              val tempFile = readClipboardImage()
+              if (tempFile != null) {
+                scope.launch {
+                  addImageFromSource(
+                    source = tempFile.toPath(),
+                    markdown = markdown,
+                    onMarkdownUpdated = { markdownValue = it },
+                    onMessage = { attachmentMessage = it },
+                    errNotImage = errNotImage,
+                    errNoEntryOpen = errNoEntryOpen,
+                    errAttachmentLimit = errAttachmentLimit,
+                    errEntryNotFound = errEntryNotFound,
+                    errInvalidPath = errInvalidPath,
+                  )
+                }
+                true
+              } else {
+                false
+              }
+            } else {
+              false
+            }
+          },
         label = { Text(stringResource(Res.string.pocket_editor_markdown_label), color = Color.White.copy(alpha = 0.85f)) },
         textStyle = TextStyle(color = Color.White),
         colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -768,6 +775,68 @@ private fun loadPocketImage(destination: String, markdownPath: String?): Buffere
     if (reference.isAbsolute) reference else markdownPath?.let { Path.of(it).parent.resolve(reference).normalize() }
   }.getOrNull() ?: return null
   return runCatching { ImageIO.read(path.toFile()) }.getOrNull()
+}
+
+private fun readClipboardImage(): File? {
+  return try {
+    val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+    val contents = clipboard.getContents(null) ?: return null
+    if (!contents.isDataFlavorSupported(DataFlavor.imageFlavor)) return null
+    val image = contents.getTransferData(DataFlavor.imageFlavor) as? BufferedImage ?: return null
+    val tempFile = File.createTempFile("pocket-paste-${UUID.randomUUID()}", ".png")
+    tempFile.deleteOnExit()
+    ImageIO.write(image, "png", tempFile)
+    tempFile
+  } catch (_: Exception) {
+    null
+  }
+}
+
+private suspend fun addImageFromSource(
+  source: Path,
+  markdown: String,
+  onMarkdownUpdated: (TextFieldValue) -> Unit,
+  onMessage: (String?) -> Unit,
+  errNotImage: String,
+  errNoEntryOpen: String,
+  errAttachmentLimit: String,
+  errEntryNotFound: String,
+  errInvalidPath: String,
+) {
+  val image = runCatching { ImageIO.read(source.toFile()) }.getOrNull()
+  if (image == null) {
+    onMessage(errNotImage)
+    return
+  }
+  val draft = PocketDraftCoordinator.activeDraft.value
+  val draftId = draft?.metadata?.id
+  if (draftId == null) {
+    onMessage(errNoEntryOpen)
+    return
+  }
+  val name = PocketDraftCoordinator.nextAttachmentName(draftId)
+  if (name == null) {
+    onMessage(errAttachmentLimit)
+    return
+  }
+  when (val result = PocketDraftCoordinator.addAttachment(
+    source = source,
+    relativePath = name,
+    mimeType = "image/png",
+    markdown = appendImageReference(markdown, name)
+  )) {
+    is PocketAttachmentResult.Added -> {
+      onMarkdownUpdated(TextFieldValue(result.entry.markdown))
+      onMessage(null)
+    }
+    is PocketAttachmentResult.Rejected -> {
+      onMessage(when (result.reason) {
+        PocketAttachmentRejection.ATTACHMENT_LIMIT_REACHED -> errAttachmentLimit
+        PocketAttachmentRejection.ENTRY_NOT_FOUND -> errEntryNotFound
+        PocketAttachmentRejection.INVALID_ATTACHMENT_PATH -> errInvalidPath
+      })
+    }
+  }
 }
 
 private fun List<PocketMarkdownInline>.toPlainText(): String = joinToString("") { inline ->
