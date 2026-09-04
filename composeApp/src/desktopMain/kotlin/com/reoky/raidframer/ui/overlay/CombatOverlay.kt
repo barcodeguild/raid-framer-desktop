@@ -385,9 +385,9 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                 }
               }
             }
-            IconButton(onClick = { wm?.openWindow(OverlayType.POKEMON) }, modifier = Modifier.size(32.dp)) {
-              val petsInteractionSource = remember { MutableInteractionSource() }
-              Text(text = "\uf6d5", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (petsInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = petsInteractionSource))
+            IconButton(onClick = { wm?.openWindow(OverlayType.POCKET_JOURNAL) }, modifier = Modifier.size(32.dp)) {
+              val journalInteractionSource = remember { MutableInteractionSource() }
+              Text(text = "\uf02d", fontFamily = FontsHelper.faSolid(), fontSize = 13.sp, color = if (journalInteractionSource.collectIsHoveredAsState().value) Color.Red else Color.White, modifier = Modifier.hoverable(interactionSource = journalInteractionSource))
             }
             IconButton(onClick = { wm?.openWindow(OverlayType.RAID) }, modifier = Modifier.size(32.dp)) {
               val raidInteractionSource = remember { MutableInteractionSource() }
