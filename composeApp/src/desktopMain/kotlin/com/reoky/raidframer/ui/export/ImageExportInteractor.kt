@@ -834,22 +834,25 @@ val coherenceRecordingMs: Long,
       "CUSTOM" -> "CUSTOM:${config.exportCustomBackgroundPath}"
       else -> config.exportBackgroundSelection
     }
-    val wallpaper = wallpaperCache.getOrPut(wallpaperKey) {
-      try {
-        when (config.exportBackgroundSelection) {
-          "SOLID_COLOR" -> null
-          "CUSTOM" -> {
-            val file = File(config.exportCustomBackgroundPath)
-            if (!file.isFile) throw IllegalStateException("Custom background is missing")
-            ImageIO.read(file) ?: throw IllegalStateException("Custom background is unreadable")
+    val wallpaper = if (config.exportBackgroundSelection == "SOLID_COLOR") {
+      null
+    } else {
+      wallpaperCache.getOrPut(wallpaperKey) {
+        try {
+          when (config.exportBackgroundSelection) {
+            "CUSTOM" -> {
+              val file = File(config.exportCustomBackgroundPath)
+              if (!file.isFile) throw IllegalStateException("Custom background is missing")
+              ImageIO.read(file) ?: throw IllegalStateException("Custom background is unreadable")
+            }
+            "SPAGUETTI" -> ImageIO.read(URI(Res.getUri("drawable/spaguetti_wallpaper.png")).toURL())
+            "SPACEA" -> ImageIO.read(URI(Res.getUri("drawable/spacea_wallpaper.png")).toURL())
+            "BROOKLYYN" -> ImageIO.read(URI(Res.getUri("drawable/brooklyyn_wallpaper.png")).toURL())
+            else -> ImageIO.read(URI(fallbackUri).toURL())
           }
-          "SPAGUETTI" -> ImageIO.read(URI(Res.getUri("drawable/spaguetti_wallpaper.png")).toURL())
-          "SPACEA" -> ImageIO.read(URI(Res.getUri("drawable/spacea_wallpaper.png")).toURL())
-          "BROOKLYYN" -> ImageIO.read(URI(Res.getUri("drawable/brooklyyn_wallpaper.png")).toURL())
-          else -> ImageIO.read(URI(fallbackUri).toURL())
+        } catch (_: Exception) {
+          ImageIO.read(URI(fallbackUri).toURL())
         }
-      } catch (_: Exception) {
-        ImageIO.read(URI(fallbackUri).toURL())
       }
     }
 
