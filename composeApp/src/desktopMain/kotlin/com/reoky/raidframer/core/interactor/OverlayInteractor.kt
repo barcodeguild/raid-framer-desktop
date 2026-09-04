@@ -54,7 +54,7 @@ object OverlayInteractor : Interactor() {
    * Matching based on string comparison only for now. Probably good enough.
    */
   private fun isGameForegrounded(windowTitle: String): Boolean {
-    return windowTitle.contains("- ArcheRage - 10", ignoreCase = true)
+    return windowTitle.contains("ArcheRage", ignoreCase = true)
   }
 
   /*

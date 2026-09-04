@@ -72,6 +72,7 @@ val SESSION_TYPES = listOf(
   "Player Duels",
   "Rangora",
   "Reset Raid",
+  "Risopodia",
   "Scramble",
   "Scrims",
   "Siege Calmlands",

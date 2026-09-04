@@ -165,9 +165,11 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
   var lastSelection by remember(draft?.metadata?.id) { mutableStateOf<TextRange?>(null) }
   var editorFocused by remember { mutableStateOf(false) }
   var editorHovered by remember { mutableStateOf(false) }
+  var titleFocused by remember { mutableStateOf(false) }
+  var titleHovered by remember { mutableStateOf(false) }
   LaunchedEffect(Unit) { dragLock.value = true }
-  LaunchedEffect(editorFocused, editorHovered) {
-    dragLock.value = editorFocused && editorHovered
+  LaunchedEffect(editorFocused, editorHovered, titleFocused, titleHovered) {
+    dragLock.value = (editorFocused && editorHovered) || (titleFocused && titleHovered)
   }
 
   LaunchedEffect(title, markdown, draft?.metadata?.id) {
@@ -231,7 +233,10 @@ rightActions = {
         OutlinedTextField(
           value = title,
           onValueChange = { title = it },
-          modifier = Modifier.weight(1f),
+          modifier = Modifier.weight(1f)
+            .onFocusChanged { titleFocused = it.isFocused }
+            .onPointerEvent(PointerEventType.Enter) { titleHovered = true }
+            .onPointerEvent(PointerEventType.Exit) { titleHovered = false },
           singleLine = true,
           label = { Text(stringResource(Res.string.pocket_editor_title_label), color = Color.White.copy(alpha = 0.85f)) },
           textStyle = TextStyle(color = Color.White),
