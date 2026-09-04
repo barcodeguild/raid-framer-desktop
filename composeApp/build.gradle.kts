@@ -30,6 +30,8 @@ kotlin {
       implementation(libs.kotlinx.serialization.json)
       implementation(libs.commonmark)
       implementation(libs.commonmark.strikethrough)
+      implementation(libs.commonmark.tables)
+      implementation(libs.commonmark.task.list.items)
 
       implementation(libs.room.gradle.plugin)
       implementation(libs.room.runtime)
