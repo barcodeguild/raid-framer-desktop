@@ -1,7 +1,7 @@
 [versions]
 androidx-lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/versions
-composeHotReload = "1.12.0" # https://github.com/JetBrains/compose-hot-reload/releases
-composeMultiplatform = "1.12.0" # https://github.com/JetBrains/compose-multiplatform/releases/
+composeHotReload = "1.11.1" # https://github.com/JetBrains/compose-hot-reload/releases
+composeMultiplatform = "1.11.1" # https://github.com/JetBrains/compose-multiplatform/releases/
 junit = "4.13.2"# https://search.maven.org/artifact/junit/junit
 kotlin = "2.4.0" # https://github.com/JetBrains/kotlin/releases/
 kotlinx-coroutines = "1.11.0" # https://github.com/Kotlin/kotlinx.coroutines/releases/
