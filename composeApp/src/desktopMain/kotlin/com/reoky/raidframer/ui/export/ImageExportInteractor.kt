@@ -630,7 +630,24 @@ val coherenceRecordingMs: Long,
 
   suspend fun exportToPng(data: ExportData): File? {
     val languages = selectedExportLanguages()
-    if (!RFConfig.state.value.exportPngEnabled || languages.isEmpty()) return null
+    val config = RFConfig.state.value
+    Log.info(
+      "ImageExport",
+      "PNG export requested: enabled=${config.exportPngEnabled}, " +
+        "languages=${languages.joinToString { it.code }}, " +
+        "sessionTitle=${data.sessionTitle}, appVersion=${AppGlobals.APP_VERSION}, " +
+        "javaVersion=${System.getProperty("java.version")}, " +
+        "javaVendor=${System.getProperty("java.vendor")}, " +
+        "os=${System.getProperty("os.name")} ${System.getProperty("os.version")} " +
+        "${System.getProperty("os.arch")}, " +
+        "maxMemory=${Runtime.getRuntime().maxMemory()}, " +
+        "totalMemory=${Runtime.getRuntime().totalMemory()}, " +
+        "freeMemory=${Runtime.getRuntime().freeMemory()}"
+    )
+    if (!config.exportPngEnabled || languages.isEmpty()) {
+      Log.info("ImageExport", "PNG export skipped: enabled=${config.exportPngEnabled}, languageCount=${languages.size}")
+      return null
+    }
     _progress.value = ExportProgress(isExporting = true, current = 0, total = languages.size)
     return withContext(Dispatchers.IO) {
       var firstOutput: File? = null
@@ -642,36 +659,75 @@ val coherenceRecordingMs: Long,
             // this synchronous render, then restore it before another export or UI work runs.
             Locale.setDefault(language.locale)
             _progress.value = ExportProgress(true, 0f, index, languages.size, language.code, language.nativeLabel)
+            Log.info("ImageExport", "${language.code}: capturing localized data")
             val localizedData = captureLocalizedData(data)
             _progress.value = ExportProgress(true, 0.05f, index, languages.size, language.code, language.nativeLabel)
+            Log.info("ImageExport", "${language.code}: calculating image height")
             val imageHeight = calculateImageHeight(localizedData)
+            Log.info(
+              "ImageExport",
+              "Rendering ${language.code} (${index + 1}/${languages.size}): " +
+                "imageSize=${IMAGE_WIDTH}x$imageHeight, renderSize=${IMAGE_WIDTH * EXPORT_RENDER_SCALE}x${imageHeight * EXPORT_RENDER_SCALE}, " +
+                "background=${RFConfig.state.value.exportBackgroundSelection}, " +
+                "customBackground=${RFConfig.state.value.exportCustomBackgroundPath}"
+            )
+            Log.info("ImageExport", "${language.code}: rendering image")
             val image = renderExportImage(localizedData, imageHeight) { fraction ->
               _progress.value = ExportProgress(true, fraction, index, languages.size, language.code, language.nativeLabel)
             }
             _progress.value = ExportProgress(true, 0.88f, index, languages.size, language.code, language.nativeLabel)
 
-        val config = RFConfig.state.value
-        val exportDir = if (config.lastSessionExportDir.isNotBlank()) {
-          Paths.get(config.lastSessionExportDir)
-        } else {
-          val documentsDir = getDocumentsDirectory() ?: return@withContext null
-          val now = Date()
-          val year  = SimpleDateFormat("yyyy", Locale.US).format(now)
-          val month = SimpleDateFormat("MM",   Locale.US).format(now)
-          Paths.get(documentsDir, "RFExports", year, month)
-        }
-        Files.createDirectories(exportDir)
+            Log.info("ImageExport", "${language.code}: resolving output path")
+            val config = RFConfig.state.value
+            val exportDir = if (config.lastSessionExportDir.isNotBlank()) {
+              Paths.get(config.lastSessionExportDir)
+            } else {
+              val documentsDir = getDocumentsDirectory()
+              if (documentsDir == null) {
+                Log.error("ImageExport", "No Documents directory could be resolved for ${language.code}")
+                return@withContext null
+              }
+              val now = Date()
+              val year  = SimpleDateFormat("yyyy", Locale.US).format(now)
+              val month = SimpleDateFormat("MM",   Locale.US).format(now)
+              Paths.get(documentsDir, "RFExports", year, month)
+            }
+            Log.info(
+              "ImageExport",
+              "Resolved output directory for ${language.code}: path=$exportDir, " +
+                "configuredSessionDir=${config.lastSessionExportDir}, " +
+                "existsBefore=${Files.exists(exportDir)}, writableBefore=${Files.isWritable(exportDir)}"
+            )
+            Files.createDirectories(exportDir)
             val outputFile = exportDir.resolve("${safeFileName(data.sessionTitle)}_${language.code}.png").toFile()
+            Log.info(
+              "ImageExport",
+              "Writing ${language.code} PNG: path=${outputFile.absolutePath}, " +
+                "parentExists=${outputFile.parentFile?.exists()}, " +
+                "parentWritable=${outputFile.parentFile?.canWrite()}, " +
+                "imageSize=${image.width}x${image.height}"
+            )
 
             try {
-              ImageIO.write(image, "png", outputFile)
+              val writeResult = ImageIO.write(image, "png", outputFile)
+              Log.info(
+                "ImageExport",
+                "ImageIO.write completed: language=${language.code}, result=$writeResult, " +
+                  "existsAfter=${outputFile.exists()}, lengthAfter=${outputFile.length()}, " +
+                  "path=${outputFile.absolutePath}"
+              )
             } finally {
               image.flush()
             }
             if (firstOutput == null) firstOutput = outputFile
             _progress.value = ExportProgress(true, 1f, index + 1, languages.size, language.code, language.nativeLabel)
           } catch (e: Exception) {
-            Log.error("ImageExport", "Failed to export ${language.code} PNG: ${e.message}")
+            Log.error(
+              "ImageExport",
+              "Failed to export ${language.code} PNG: " +
+                "exception=${e::class.qualifiedName}, toString=$e, message=${e.message}, " +
+                "stackTrace=${e.stackTraceToString()}"
+            )
           } finally {
             Locale.setDefault(previousLocale)
           }
@@ -680,6 +736,7 @@ val coherenceRecordingMs: Long,
       } finally {
         _progress.value = ExportProgress()
         clearImageCaches()
+        Log.info("ImageExport", "PNG export finished: firstOutput=${firstOutput?.absolutePath}")
       }
     }
   }
@@ -687,6 +744,14 @@ val coherenceRecordingMs: Long,
   private suspend fun renderExportImage(data: ExportData, imageHeight: Int, progress: (Float) -> Unit): BufferedImage {
     val renderWidth = IMAGE_WIDTH * EXPORT_RENDER_SCALE
     val renderHeight = imageHeight * EXPORT_RENDER_SCALE
+    Log.info(
+      "ImageExport",
+      "Allocating render image: size=${renderWidth}x$renderHeight, " +
+        "estimatedArgbBytes=${renderWidth.toLong() * renderHeight.toLong() * 4L}, " +
+        "freeMemory=${Runtime.getRuntime().freeMemory()}, " +
+        "totalMemory=${Runtime.getRuntime().totalMemory()}, " +
+        "maxMemory=${Runtime.getRuntime().maxMemory()}"
+    )
     val renderedImage = BufferedImage(renderWidth, renderHeight, BufferedImage.TYPE_INT_ARGB)
     try {
       val g2d = renderedImage.createGraphics()
@@ -699,7 +764,14 @@ val coherenceRecordingMs: Long,
         g2d.dispose()
       }
       progress(0.72f)
-      return downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
+      val result = downsampleImage(renderedImage, IMAGE_WIDTH, imageHeight)
+      Log.info(
+        "ImageExport",
+        "Render completed: finalSize=${result.width}x${result.height}, " +
+          "freeMemory=${Runtime.getRuntime().freeMemory()}, " +
+          "totalMemory=${Runtime.getRuntime().totalMemory()}"
+      )
+      return result
     } finally {
       renderedImage.flush()
     }
