@@ -24,6 +24,11 @@ class WindowManager(
     private val ALWAYS_START_CLOSED = setOf(
       OverlayType.PLAYER_CARD,
     )
+
+    /** Overlay types that should always start open, even if their saved state was closed. */
+    private val ALWAYS_START_OPEN = setOf(
+      OverlayType.COMBAT,
+    )
   }
 
   // Holds actual state for each window
@@ -61,6 +66,7 @@ class WindowManager(
 
   // Closes the overlay window and saves its last known state
   fun closeWindow(type: OverlayType) {
+    if (type in ALWAYS_START_OPEN) return // these must never close
     val visibility = visibilityStates[type] ?: return
     visibility.value = false
     // Sync the entity so persisting captures the correct visibility
@@ -113,6 +119,14 @@ class WindowManager(
         windowStates[type]?.value = entity.copy(isVisible = false)
       }
       visibilityStates[type]?.value = false
+    }
+
+    // Force always-start-open windows open (geometry is preserved, only visibility overridden).
+    ALWAYS_START_OPEN.forEach { type ->
+      windowStates[type]?.value?.let { entity ->
+        windowStates[type]?.value = entity.copy(isVisible = true)
+      }
+      visibilityStates[type]?.value = true
     }
   }
 
