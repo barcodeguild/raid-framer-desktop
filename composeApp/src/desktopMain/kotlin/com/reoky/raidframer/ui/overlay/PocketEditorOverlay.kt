@@ -543,9 +543,13 @@ private fun MarkdownToolbar(
       if (emojiMenuExpanded) {
         Popup(onDismissRequest = { emojiMenuExpanded = false }, properties = PopupProperties(focusable = true)) {
           Surface(color = Color(0xFF1E1E1E), shape = RoundedCornerShape(8.dp), border = BorderStroke(1.dp, RFColors.CardBorder), elevation = 8.dp) {
-            FlowRow(Modifier.width(250.dp).padding(8.dp), horizontalArrangement = Arrangement.spacedBy(2.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-              commonPocketEmojis.forEach { emoji ->
-                TextButton(onClick = { onEmojiSelected(emoji); emojiMenuExpanded = false }) { Text(emoji, fontSize = 19.sp) }
+            Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+              commonPocketEmojis.chunked(5).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                  row.forEach { emoji ->
+                    TextButton(onClick = { onEmojiSelected(emoji); emojiMenuExpanded = false }) { Text(emoji, fontSize = 19.sp) }
+                  }
+                }
               }
             }
           }
