@@ -23,6 +23,7 @@ import org.commonmark.ext.gfm.tables.TableBlock
 import org.commonmark.ext.gfm.tables.TableCell
 import org.commonmark.ext.gfm.tables.TableRow
 import org.commonmark.ext.gfm.tables.TablesExtension
+import org.commonmark.ext.task.list.items.TaskListItemMarker
 import org.commonmark.ext.task.list.items.TaskListItemsExtension
 
 sealed interface PocketMarkdownBlock {
@@ -54,9 +55,6 @@ private val pocketMarkdownParser: Parser = Parser.builder()
   .build()
 
 fun parsePocketMarkdown(markdown: String): List<PocketMarkdownBlock> {
-  val taskStates = markdown.lineSequence().mapNotNull { line ->
-    Regex("^\\s*[-+*]\\s+\\[([ xX])\\]").find(line)?.groupValues?.get(1)?.equals("x", true)
-  }.iterator()
   val blocks = mutableListOf<PocketMarkdownBlock>()
   val lines = markdown.lines()
   var i = 0
@@ -85,7 +83,7 @@ fun parsePocketMarkdown(markdown: String): List<PocketMarkdownBlock> {
         val chunk = nonTableLines.joinToString("\n")
         if (chunk.isNotBlank()) {
           val doc = pocketMarkdownParser.parse(chunk)
-          blocks.addAll(childNodesOf(doc).mapNotNull { (it as? Block)?.toPocketBlock(taskStates) })
+          blocks.addAll(childNodesOf(doc).mapNotNull { (it as? Block)?.toPocketBlock() })
         }
       }
     }
@@ -127,11 +125,11 @@ private fun List<PocketMarkdownInline>.toPlainText(): String = joinToString("") 
   }
 }
 
-private fun Block.toPocketBlock(taskStates: Iterator<Boolean>): PocketMarkdownBlock? = when (this) {
+private fun Block.toPocketBlock(): PocketMarkdownBlock? = when (this) {
   is Paragraph -> PocketMarkdownBlock.Paragraph(childNodesOf(this).toPocketInlines())
   is Heading -> PocketMarkdownBlock.Heading(level, childNodesOf(this).toPocketInlines())
-  is BulletList -> PocketMarkdownBlock.BulletList(childNodesOf(this).mapNotNull { it.listItemContent(taskStates) })
-  is OrderedList -> PocketMarkdownBlock.OrderedList(childNodesOf(this).mapNotNull { it.listItemContent(taskStates) })
+  is BulletList -> PocketMarkdownBlock.BulletList(childNodesOf(this).mapNotNull { it.listItemContent() })
+  is OrderedList -> PocketMarkdownBlock.OrderedList(childNodesOf(this).mapNotNull { it.listItemContent() })
   is BlockQuote -> PocketMarkdownBlock.Quote(childNodesOf(this).flatMap { childNodesOf(it).toPocketInlines() })
   is FencedCodeBlock -> PocketMarkdownBlock.CodeBlock(literal)
   is TableBlock -> {
@@ -144,32 +142,15 @@ private fun Block.toPocketBlock(taskStates: Iterator<Boolean>): PocketMarkdownBl
 
 private fun List<Node>.toPocketInlines(): List<PocketMarkdownInline> = flatMap { it.inlineChildren() }
 
-private fun Node.listItemContent(taskStates: Iterator<Boolean>): ListItemContent? = (this as? ListItem)?.let { item ->
-  var rawInlines = childNodesOf(item).flatMap { childNodesOf(it).toPocketInlines() }
-  var checked: Boolean? = null
-  val first = rawInlines.firstOrNull()
-  if (first is PocketMarkdownInline.Plain) {
-    val str = first.value
-    val match = Regex("^\\[([ xX])\\]\\s*").find(str)
-    if (match != null) {
-      checked = match.groupValues[1].equals("x", ignoreCase = true)
-      val remainder = str.substring(match.range.last + 1)
-      rawInlines = if (remainder.isEmpty()) {
-        rawInlines.drop(1)
-      } else {
-        listOf(PocketMarkdownInline.Plain(remainder)) + rawInlines.drop(1)
-      }
-    }
-  }
-  if (checked == null) {
-    checked = taskStates.nextOrNull()
-  }
+private fun Node.listItemContent(): ListItemContent? = (this as? ListItem)?.let { item ->
+  val checked = childNodesOf(item).filterIsInstance<TaskListItemMarker>().firstOrNull()?.isChecked
+  val rawInlines = childNodesOf(item).filter { it !is TaskListItemMarker }
+    .flatMap { childNodesOf(it).toPocketInlines() }
   ListItemContent(rawInlines, checked)
 }
 
-private fun <T> Iterator<T>.nextOrNull(): T? = if (hasNext()) next() else null
-
 private fun Node.inlineChildren(): List<PocketMarkdownInline> = when (this) {
+  is TaskListItemMarker -> emptyList()
   is Text -> parseHighlights(literal)
   is StrongEmphasis -> listOf(PocketMarkdownInline.Strong(childNodesOf(this).toPocketInlines()))
   is Emphasis -> listOf(PocketMarkdownInline.Emphasis(childNodesOf(this).toPocketInlines()))

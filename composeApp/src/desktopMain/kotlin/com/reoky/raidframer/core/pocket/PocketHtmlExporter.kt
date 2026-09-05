@@ -40,8 +40,15 @@ object PocketHtmlExporter {
     Parser.builder().extensions(listOf(StrikethroughExtension.create(), TablesExtension.create(), TaskListItemsExtension.create())).build()
   }
 
+  private val htmlExtensions = listOf(
+    StrikethroughExtension.create(),
+    TablesExtension.create(),
+    TaskListItemsExtension.create()
+  )
+
   private val renderer by lazy {
     HtmlRenderer.builder()
+      .extensions(htmlExtensions)
       .attributeProviderFactory(ImageSrcAttributeProviderFactory)
       .build()
   }
@@ -86,11 +93,7 @@ object PocketHtmlExporter {
     val tags = entry.tags.joinToString("\n") { "    <span class=\"tag\">${escape("#${it.tag}")}</span>" }
     // Render markdown to standard HTML via CommonMark; image srcs are rewritten by
     // ImageSrcAttributeProvider so attachments resolve from this folder.
-    val body = renderMarkdownWithPipeTables(entry.markdown)
-      .replace(Regex("(?i)<li>\\s*<p>\\s*\\[x\\]\\s*"), "<li class=\"task-list-item\"><input type=\"checkbox\" disabled checked> ")
-      .replace(Regex("<li>\\s*<p>\\s*\\[ \\]\\s*"), "<li class=\"task-list-item\"><input type=\"checkbox\" disabled> ")
-      .replace(Regex("(?i)<li>\\s*\\[x\\]\\s*"), "<li class=\"task-list-item\"><input type=\"checkbox\" disabled checked> ")
-      .replace(Regex("<li>\\s*\\[ \\]\\s*"), "<li class=\"task-list-item\"><input type=\"checkbox\" disabled> ")
+    val body = renderer.render(parser.parse(entry.markdown))
     return """
       |<!doctype html>
       |<html lang="en">
@@ -125,39 +128,6 @@ object PocketHtmlExporter {
       |</body>
       |</html>
     """.trimMargin()
-  }
-
-  private fun renderMarkdownWithPipeTables(markdown: String): String {
-    val lines = markdown.lines()
-    val output = StringBuilder()
-    var index = 0
-    while (index < lines.size) {
-      val header = lines[index].trim()
-      val divider = lines.getOrNull(index + 1)?.trim()
-      if (header.startsWith("|") && header.endsWith("|") && divider != null &&
-        divider.startsWith("|") && divider.endsWith("|") &&
-        divider.trim('|').split('|').all { it.trim().matches(Regex(":?-{3,}:?")) }) {
-        val rows = mutableListOf(header)
-        index += 2
-        while (index < lines.size && lines[index].trim().let { it.startsWith("|") && it.endsWith("|") }) {
-          rows += lines[index].trim()
-          index++
-        }
-        output.append("<table><thead><tr>")
-        rows.first().trim('|').split('|').forEach { output.append("<th>").append(escape(it.trim())).append("</th>") }
-        output.append("</tr></thead><tbody>")
-        rows.drop(1).forEach { row ->
-          output.append("<tr>")
-          row.trim('|').split('|').forEach { output.append("<td>").append(escape(it.trim())).append("</td>") }
-          output.append("</tr>")
-        }
-        output.append("</tbody></table>")
-      } else {
-        output.append(renderer.render(parser.parse(lines[index]))).append('\n')
-        index++
-      }
-    }
-    return output.toString()
   }
 
   private fun safeFolderName(value: String): String = value
