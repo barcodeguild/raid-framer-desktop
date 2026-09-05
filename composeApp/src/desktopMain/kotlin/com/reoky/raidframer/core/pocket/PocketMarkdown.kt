@@ -7,6 +7,7 @@ import org.commonmark.node.Code
 import org.commonmark.node.Emphasis
 import org.commonmark.node.FencedCodeBlock
 import org.commonmark.node.HardLineBreak
+import org.commonmark.node.SoftLineBreak
 import org.commonmark.node.Heading
 import org.commonmark.node.Image
 import org.commonmark.node.Link
@@ -165,6 +166,7 @@ private fun Node.inlineChildren(): List<PocketMarkdownInline> = when (this) {
     listOf(PocketMarkdownInline.Image(destination = destination, alt = altText))
   }
   is HardLineBreak -> listOf(PocketMarkdownInline.Break)
+  is SoftLineBreak -> listOf(PocketMarkdownInline.Break)
   else -> childNodesOf(this).flatMap { it.inlineChildren() }
 }
 
