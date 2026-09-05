@@ -506,15 +506,12 @@ private fun MarkdownToolbar(
       MarkdownAction.CODE to "<>", MarkdownAction.HIGHLIGHT to "==", MarkdownAction.BULLET to "•",
       MarkdownAction.TASK to "Task",
       MarkdownAction.LINK to stringResource(Res.string.pocket_editor_toolbar_link),
-      MarkdownAction.IMAGE to stringResource(Res.string.pocket_editor_toolbar_image),
-      MarkdownAction.CURRENT_TARGET to stringResource(Res.string.pocket_editor_toolbar_current_target),
-      MarkdownAction.TARGET_GUILD to stringResource(Res.string.pocket_editor_toolbar_target_guild)
     ).forEach { (action, label) ->
       val isActive = action in activeStyles
       TextButton(onClick = { onAction(action) }) {
         Text(
           label,
-          color = if (isActive || action == MarkdownAction.IMAGE || action == MarkdownAction.CURRENT_TARGET || action == MarkdownAction.TARGET_GUILD) RFColors.AccentRed else Color.White,
+          color = if (isActive) RFColors.AccentRed else Color.White,
           fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
           fontSize = 11.sp
         )
@@ -553,6 +550,21 @@ private fun MarkdownToolbar(
             }
           }
         }
+      }
+    }
+    listOf(
+      MarkdownAction.IMAGE to stringResource(Res.string.pocket_editor_toolbar_image),
+      MarkdownAction.CURRENT_TARGET to stringResource(Res.string.pocket_editor_toolbar_current_target),
+      MarkdownAction.TARGET_GUILD to stringResource(Res.string.pocket_editor_toolbar_target_guild)
+    ).forEach { (action, label) ->
+      val isActive = action in activeStyles
+      TextButton(onClick = { onAction(action) }) {
+        Text(
+          label,
+          color = if (isActive || action == MarkdownAction.IMAGE || action == MarkdownAction.CURRENT_TARGET || action == MarkdownAction.TARGET_GUILD) RFColors.AccentRed else Color.White,
+          fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+          fontSize = 11.sp
+        )
       }
     }
     Box {
