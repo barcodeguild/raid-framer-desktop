@@ -158,7 +158,12 @@ private fun Node.inlineChildren(): List<PocketMarkdownInline> = when (this) {
 
   is Code -> listOf(PocketMarkdownInline.Code(literal))
   is Link -> listOf(PocketMarkdownInline.Link(childNodesOf(this).toPocketInlines(), destination))
-  is Image -> listOf(PocketMarkdownInline.Image(destination = destination, alt = title.orEmpty()))
+  is Image -> {
+    val children = childNodesOf(this)
+    val altText = children.filterIsInstance<Text>().joinToString("") { it.literal }
+      .ifBlank { children.toPocketInlines().toPlainText() }
+    listOf(PocketMarkdownInline.Image(destination = destination, alt = altText))
+  }
   is HardLineBreak -> listOf(PocketMarkdownInline.Break)
   else -> childNodesOf(this).flatMap { it.inlineChildren() }
 }

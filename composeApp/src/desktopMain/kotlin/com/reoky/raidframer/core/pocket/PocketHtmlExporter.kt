@@ -6,6 +6,7 @@ import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.ext.task.list.items.TaskListItemsExtension
 import org.commonmark.node.Image
+import org.commonmark.node.ListItem
 import org.commonmark.node.Node
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.AttributeProvider
@@ -158,6 +159,16 @@ private object ImageSrcAttributeProviderFactory : AttributeProviderFactory {
         if (!destination.startsWith("/") && !destination.contains("://")) {
           val relative = Path.of(destination).normalize()
           if (!relative.startsWith("..")) attributes["src"] = relative.toString().replace('\\', '/')
+        }
+      } else if (node is ListItem && tagName == "li" && attributes != null) {
+        var child = node.firstChild
+        while (child != null) {
+          if (child is org.commonmark.ext.task.list.items.TaskListItemMarker) {
+            val existing = attributes["class"]
+            attributes["class"] = if (existing.isNullOrBlank()) "task-list-item" else "$existing task-list-item"
+            break
+          }
+          child = child.next
         }
       }
     }

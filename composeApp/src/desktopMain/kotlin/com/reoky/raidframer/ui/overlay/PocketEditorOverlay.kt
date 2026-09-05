@@ -863,24 +863,70 @@ private fun ListMarker(item: ListItemContent) {
 private fun PocketInlineText(content: List<PocketMarkdownInline>, markdownPath: String?) {
   val uriHandler = LocalUriHandler.current
   val style = TextStyle(color = Color.White, fontSize = 14.sp)
+  // Group consecutive text-like inlines into a single BasicText so words/emoji
+  // flow inline (matching HTML). Images and links keep their own composables.
+  val chunks = remember(content) { splitInlineChunks(content) }
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-    content.forEach { inline ->
-      when (inline) {
-        is PocketMarkdownInline.Image -> PocketMarkdownImage(inline, markdownPath)
-        is PocketMarkdownInline.Link -> ClickableText(
-          text = inline.toAnnotatedString(),
+    chunks.forEach { chunk ->
+      when (chunk) {
+        is PocketInlineChunk.TextRun -> BasicText(text = chunk.inlines.toAnnotatedString(), style = style)
+        is PocketInlineChunk.ImageChunk -> PocketMarkdownImage(chunk.inline, markdownPath)
+        is PocketInlineChunk.LinkChunk -> ClickableText(
+          text = chunk.inline.toAnnotatedString(),
           style = style,
           modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-          onClick = { uriHandler.openUri(inline.destination) }
-        )
-        else -> BasicText(
-          text = inline.toAnnotatedString(),
-          style = style
+          onClick = { uriHandler.openUri(chunk.inline.destination) }
         )
       }
     }
   }
 }
+
+private sealed interface PocketInlineChunk {
+  data class TextRun(val inlines: List<PocketMarkdownInline>) : PocketInlineChunk
+  data class ImageChunk(val inline: PocketMarkdownInline.Image) : PocketInlineChunk
+  data class LinkChunk(val inline: PocketMarkdownInline.Link) : PocketInlineChunk
+}
+
+private fun splitInlineChunks(content: List<PocketMarkdownInline>): List<PocketInlineChunk> {
+  val out = mutableListOf<PocketInlineChunk>()
+  var run = mutableListOf<PocketMarkdownInline>()
+  fun flushRun() {
+    if (run.isNotEmpty()) {
+      out.add(PocketInlineChunk.TextRun(run.toList()))
+      run = mutableListOf()
+    }
+  }
+  content.forEach { inline ->
+    when (inline) {
+      is PocketMarkdownInline.Image -> { flushRun(); out.add(PocketInlineChunk.ImageChunk(inline)) }
+      is PocketMarkdownInline.Link -> { flushRun(); out.add(PocketInlineChunk.LinkChunk(inline)) }
+      else -> run.add(inline)
+    }
+  }
+  flushRun()
+  return out
+}
+
+private fun List<PocketMarkdownInline>.toAnnotatedString(): androidx.compose.ui.text.AnnotatedString =
+  buildAnnotatedString {
+    fun appendInline(inline: PocketMarkdownInline, style: SpanStyle = SpanStyle()) {
+      when (inline) {
+        is PocketMarkdownInline.Plain -> withStyle(style) { append(inline.value) }
+        is PocketMarkdownInline.Strong -> inline.content.forEach { appendInline(it, style.merge(SpanStyle(fontWeight = FontWeight.Bold))) }
+        is PocketMarkdownInline.Emphasis -> inline.content.forEach { appendInline(it, style.merge(SpanStyle(fontStyle = FontStyle.Italic))) }
+        is PocketMarkdownInline.Strikethrough -> inline.content.forEach { appendInline(it, style.merge(SpanStyle(textDecoration = TextDecoration.LineThrough))) }
+        is PocketMarkdownInline.Code -> withStyle(style.merge(SpanStyle(fontFamily = FontFamily.Monospace))) { append(inline.value) }
+        is PocketMarkdownInline.Link -> inline.label.forEach { appendInline(it, style.merge(SpanStyle(color = Color(0xFF64B5F6), textDecoration = TextDecoration.Underline))) }
+        is PocketMarkdownInline.Break -> append("\n")
+        is PocketMarkdownInline.Image -> append("[Image: ${inline.alt.ifBlank { inline.destination }}]")
+        is PocketMarkdownInline.Highlight -> inline.content.forEach {
+          appendInline(it, style.merge(SpanStyle(background = RFColors.AccentRed.copy(alpha = 0.35f), color = Color.White)))
+        }
+      }
+    }
+    this@toAnnotatedString.forEach { appendInline(it) }
+  }
 
 private fun PocketMarkdownInline.toAnnotatedString(): androidx.compose.ui.text.AnnotatedString = buildAnnotatedString {
   fun appendInline(inline: PocketMarkdownInline, style: SpanStyle = SpanStyle()) {
