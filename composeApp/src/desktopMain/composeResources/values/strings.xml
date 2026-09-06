@@ -1304,6 +1304,7 @@ This will allow the app to use this seed table as a reference for player data.</
 
     <!-- Tray Menu Labels -->
     <string name="tray_pocket_journal">Pocket Journal</string>
+    <string name="tray_player_browser">Player Browser</string>
     <string name="tray_dragon_breaths">Dragon Breaths</string>
     <string name="tray_raid_management">Raid Management</string>
     <string name="tray_battle_summary">Battle Summary</string>

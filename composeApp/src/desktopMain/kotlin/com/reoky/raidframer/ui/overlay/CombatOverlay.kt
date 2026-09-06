@@ -95,6 +95,7 @@ import raid_framer_desktop.composeapp.generated.resources.tray_dragon_breaths
 import raid_framer_desktop.composeapp.generated.resources.tray_raid_management
 import raid_framer_desktop.composeapp.generated.resources.tray_battle_graph
 import raid_framer_desktop.composeapp.generated.resources.tray_pocket_journal
+import raid_framer_desktop.composeapp.generated.resources.tray_player_browser
 import raid_framer_desktop.composeapp.generated.resources.tray_help
 import raid_framer_desktop.composeapp.generated.resources.tray_take_screenshot
 import raid_framer_desktop.composeapp.generated.resources.app_tray_reset_positions
@@ -492,6 +493,10 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                         MenuPopupItem("\uf02d", stringResource(Res.string.tray_pocket_journal)) {
                           showMenuPopup = false
                           wm?.openWindow(OverlayType.POCKET_JOURNAL)
+                        }
+                        MenuPopupItem("\uf0c0", stringResource(Res.string.tray_player_browser)) {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.PLAYER_BROWSER)
                         }
                         if (config.performanceBattleGraphEnabled) {
                           MenuPopupItem("\uf1e0", stringResource(Res.string.tray_battle_graph)) {

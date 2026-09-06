@@ -1394,6 +1394,7 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="player_card_journal_entries">Diário Pocket</string>
     <string name="raid_loot_breakdown_title">Detalhamento de Loot (Mais → Menos)</string>
     <string name="tray_pocket_journal">Diário Pocket</string>
+    <string name="tray_player_browser">Navegador de Jogadores</string>
     <string name="tray_help">Ajuda</string>
     <string name="tray_take_screenshot">Tirar Captura de Tela</string>
     <string name="tray_copy_screenshot_to_clipboard">Copiar Captura de Tela para Área de Transferência</string>

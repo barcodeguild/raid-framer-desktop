@@ -1394,6 +1394,7 @@
     <string name="player_card_journal_entries">Журнал кармана</string>
     <string name="raid_loot_breakdown_title">Детализация добычи (от большего к меньшему)</string>
     <string name="tray_pocket_journal">Журнал кармана</string>
+    <string name="tray_player_browser">Браузер игроков</string>
     <string name="tray_help">Справка</string>
     <string name="tray_take_screenshot">Сделать скриншот</string>
     <string name="tray_copy_screenshot_to_clipboard">Копировать скриншот в буфер обмена</string>

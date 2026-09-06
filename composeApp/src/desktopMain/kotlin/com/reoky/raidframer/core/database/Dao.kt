@@ -60,6 +60,12 @@ interface PlayerCacheDao {
   @Query("SELECT * FROM player_cache ORDER BY lastSeen DESC LIMIT 10000")
   suspend fun getRecentPlayerCacheMetadata(): List<PlayerCacheEntity>
 
+  @Query("SELECT * FROM player_cache WHERE playerName LIKE '%' || :query || '%' OR lastKnownGuild LIKE '%' || :query || '%' ORDER BY lastSeen DESC LIMIT :limit")
+  suspend fun searchPlayers(query: String, limit: Int = 50): List<PlayerCacheEntity>
+
+  @Query("SELECT * FROM player_cache ORDER BY lastSeen DESC LIMIT :limit OFFSET :offset")
+  suspend fun getPlayersPaged(limit: Int, offset: Int): List<PlayerCacheEntity>
+
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(cache: PlayerCacheEntity)
 
