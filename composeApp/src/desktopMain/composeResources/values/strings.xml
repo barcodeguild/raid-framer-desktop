@@ -1417,6 +1417,7 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="pocket_editor_title">Pocket Editor</string>
     <string name="pocket_editor_tab_edit">Edit</string>
     <string name="pocket_editor_tab_preview">Preview</string>
+    <string name="pocket_editor_title_format">Pocket Editor — %1$s</string>
     <string name="pocket_editor_title_label">Title (optional)</string>
     <string name="pocket_editor_err_not_image">Selected file is not a readable image.</string>
     <string name="pocket_editor_err_no_entry_open">No Pocket entry is currently open.</string>

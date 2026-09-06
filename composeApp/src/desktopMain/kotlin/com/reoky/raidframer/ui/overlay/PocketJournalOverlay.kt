@@ -74,7 +74,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
 import com.reoky.raidframer.core.pocket.PocketEntry
-import com.reoky.raidframer.core.pocket.PocketHtmlExporter
+import com.reoky.raidframer.core.helpers.exportPocketEntryAndReveal
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.LocalDragLock
@@ -308,9 +308,7 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
                 },
                 onExport = {
                   scope.launch {
-                    PocketHtmlExporter.exportEntryToHtml(item.entry)?.let { folder ->
-                      java.awt.Desktop.getDesktop().open(folder.toFile())
-                    }
+                    exportPocketEntryAndReveal(item.entry, wm)
                   }
                 }
               )

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.border
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -29,6 +30,7 @@ import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.pocket.PocketEntry
 import com.reoky.raidframer.core.pocket.PocketMarkdownBlock
 import com.reoky.raidframer.core.pocket.PocketMarkdownInline
+import com.reoky.raidframer.core.pocket.ListItemContent
 import com.reoky.raidframer.core.pocket.parsePocketMarkdown
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -106,11 +108,11 @@ private fun ThumbnailMarkdown(markdown: String, markdownPath: String?) {
         )
 
         is PocketMarkdownBlock.BulletList -> block.items.forEach { item ->
-          Row { Text("• ", color = Color.White, fontSize = 12.sp); ThumbnailInlineContent(item, markdownPath) }
+          Row { Text(if (item.checked == true) "☑ " else if (item.checked == false) "☐ " else "• ", color = Color.White, fontSize = 12.sp); ThumbnailInlineContent(item.content, markdownPath) }
         }
 
         is PocketMarkdownBlock.OrderedList -> block.items.forEachIndexed { index, item ->
-          Row { Text("${index + 1}. ", color = Color.White, fontSize = 12.sp); ThumbnailInlineContent(item, markdownPath) }
+          Row { Text("${index + 1}. ", color = Color.White, fontSize = 12.sp); ThumbnailInlineContent(item.content, markdownPath) }
         }
 
         is PocketMarkdownBlock.Quote -> Text(
@@ -128,6 +130,13 @@ private fun ThumbnailMarkdown(markdown: String, markdownPath: String?) {
           overflow = TextOverflow.Ellipsis,
           modifier = Modifier.background(Color.Black.copy(alpha = 0.45f)).padding(6.dp)
         )
+        is PocketMarkdownBlock.Table -> Column {
+          (listOf(block.headers) + block.rows).forEachIndexed { index, row ->
+            Row(Modifier.fillMaxWidth()) {
+              row.forEach { cell -> Text(cell.toPlainText(), color = Color.White, fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.weight(1f).border(1.dp, Color.White.copy(alpha = 0.2f)).padding(4.dp)) }
+            }
+          }
+        }
       }
     }
   }
@@ -205,6 +214,7 @@ private fun PocketMarkdownInline.toPlainText(): String = when (this) {
   is PocketMarkdownInline.Code -> value
   is PocketMarkdownInline.Link -> label.toPlainText()
   is PocketMarkdownInline.Image -> "[Image: ${alt.ifBlank { destination }}]"
+  is PocketMarkdownInline.Highlight -> content.toPlainText()
   PocketMarkdownInline.Break -> "\n"
 }
 
@@ -217,6 +227,7 @@ private fun List<PocketMarkdownInline>.toPlainText(): String = joinToString("") 
     is PocketMarkdownInline.Code -> inline.value
     is PocketMarkdownInline.Link -> inline.label.toPlainText()
     is PocketMarkdownInline.Image -> "[Image: ${inline.alt.ifBlank { inline.destination }}]"
+    is PocketMarkdownInline.Highlight -> inline.content.toPlainText()
     PocketMarkdownInline.Break -> "\n"
   }
 }

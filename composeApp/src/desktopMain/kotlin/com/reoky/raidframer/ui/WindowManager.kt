@@ -20,12 +20,21 @@ class WindowManager(
   companion object {
     private const val TAG = "WindowManager"
 
-    /** Overlay types that should always start closed, even if their saved state was open. */
-    private val ALWAYS_START_CLOSED = setOf(
-      OverlayType.PLAYER_CARD,
+    /**
+     * Only these windows may be restored as visible from the previous session.
+     * Contextual windows must be opened by the feature that owns their content.
+     */
+    private val RESTORABLE_WINDOWS = setOf(
+      OverlayType.COMBAT,
+      OverlayType.MINI,
+      OverlayType.ITEM_USE,
+      OverlayType.RAID_CALLER,
     )
 
-    /** Overlay types that should always start open, even if their saved state was closed. */
+    /** Overlay types that should always start closed, even if their saved state was open. */
+    private val ALWAYS_START_CLOSED = OverlayType.entries.toSet() - RESTORABLE_WINDOWS
+
+    /** Windows that should be open when the application starts. */
     private val ALWAYS_START_OPEN = setOf(
       OverlayType.COMBAT,
     )
@@ -113,7 +122,7 @@ class WindowManager(
       visibilityStates[type]?.value = entity.isVisible
     }
 
-    // Force always-start-closed windows shut (geometry is preserved, only visibility overridden).
+    // Force non-restorable windows shut (geometry is preserved, only visibility overridden).
     ALWAYS_START_CLOSED.forEach { type ->
       windowStates[type]?.value?.let { entity ->
         windowStates[type]?.value = entity.copy(isVisible = false)

@@ -189,6 +189,18 @@ fun showFolderInExplorer(directory: Path) {
 }
 
 /**
+ * Exports a Pocket entry to HTML, closes the Pocket overlays (which are always-on-top
+ * and would otherwise hide Explorer), then reveals the export folder.
+ */
+fun exportPocketEntryAndReveal(entry: com.reoky.raidframer.core.pocket.PocketEntry, wm: WindowManager?) {
+  val folder = com.reoky.raidframer.core.pocket.PocketHtmlExporter.exportEntryToHtml(entry) ?: return
+  com.reoky.raidframer.core.pocket.PocketDraftCoordinator.closeEditorSession()
+  wm?.closeWindow(OverlayType.POCKET_EDITOR)
+  wm?.closeWindow(OverlayType.POCKET_JOURNAL)
+  showFolderInExplorer(folder)
+}
+
+/**
  * Places an image on the system clipboard so the user can paste it elsewhere (e.g. Discord).
  */
 fun copyImageToClipboard(image: BufferedImage) {

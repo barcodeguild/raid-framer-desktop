@@ -3,13 +3,19 @@ package com.reoky.raidframer.core.pocket
 import com.reoky.raidframer.core.helpers.getExportDirectory
 import com.reoky.raidframer.core.helpers.writeTextAtomically
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.ext.gfm.tables.TablesExtension
+import org.commonmark.ext.task.list.items.TaskListItemsExtension
 import org.commonmark.node.Image
+import org.commonmark.node.ListItem
 import org.commonmark.node.Node
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.AttributeProvider
 import org.commonmark.renderer.html.AttributeProviderContext
 import org.commonmark.renderer.html.AttributeProviderFactory
 import org.commonmark.renderer.html.HtmlRenderer
+import org.commonmark.renderer.NodeRenderer
+import org.commonmark.renderer.html.HtmlNodeRendererContext
+import org.commonmark.renderer.html.HtmlWriter
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -32,11 +38,19 @@ object PocketHtmlExporter {
   private val timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
 
   private val parser by lazy {
-    Parser.builder().extensions(listOf(StrikethroughExtension.create())).build()
+    Parser.builder().extensions(listOf(StrikethroughExtension.create(), TablesExtension.create(), TaskListItemsExtension.create())).build()
   }
+
+  private val htmlExtensions = listOf(
+    StrikethroughExtension.create(),
+    TablesExtension.create(),
+    TaskListItemsExtension.create()
+  )
 
   private val renderer by lazy {
     HtmlRenderer.builder()
+      .extensions(htmlExtensions)
+      .softbreak("<br />")
       .attributeProviderFactory(ImageSrcAttributeProviderFactory)
       .build()
   }
@@ -81,7 +95,8 @@ object PocketHtmlExporter {
     val tags = entry.tags.joinToString("\n") { "    <span class=\"tag\">${escape("#${it.tag}")}</span>" }
     // Render markdown to standard HTML via CommonMark; image srcs are rewritten by
     // ImageSrcAttributeProvider so attachments resolve from this folder.
-    val body = renderer.render(parser.parse(entry.markdown))
+    // ==highlight== is converted to <mark> pre-parse (fenced code skipped) to match native.
+    val body = renderer.render(parser.parse(highlightsToMark(entry.markdown)))
     return """
       |<!doctype html>
       |<html lang="en">
@@ -95,7 +110,16 @@ object PocketHtmlExporter {
       |    h1 { margin-bottom: 4px; }
       |    .meta { color: #6b6b70; font-size: 14px; margin-bottom: 20px; }
       |    .tags { margin-bottom: 20px; }
-      |    .tag { display: inline-block; background: #eef0f3; border-radius: 8px; padding: 2px 8px; margin-right: 6px; font-size: 12px; color: #444; }
+    |    .tag { display: inline-block; background: #eef0f3; border-radius: 8px; padding: 2px 8px; margin-right: 6px; font-size: 12px; color: #444; }
+    |    table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+    |    th, td { border: 1px solid #d5d7dc; padding: 7px 9px; text-align: left; }
+    |    th { background: #f1f2f4; }
+    |    .task-list-item { list-style: none; margin-left: -1.25em; }
+    |    .task-list-item input { margin-right: 0.45em; }
+    |    li > p:first-child { margin-top: 0; }
+    |    li > p:last-child { margin-bottom: 0; }
+    |    li.task-list-item > p { display: inline; margin: 0; }
+    |    mark { background: rgba(220, 20, 60, 0.35); color: inherit; border-radius: 3px; padding: 0 2px; }
       |    img { max-width: min(100%, 480px); height: auto; display: block; margin: 12px auto; border-radius: 6px; border: 1px solid #ddd; }
       |    blockquote { margin-left: 0; padding-left: 14px; border-left: 3px solid #c9cdd3; color: #555; }
       |    pre { background: #f4f4f6; padding: 12px; border-radius: 6px; overflow-x: auto; }
@@ -111,6 +135,40 @@ object PocketHtmlExporter {
       |</body>
       |</html>
     """.trimMargin()
+  }
+
+  private fun highlightsToMark(markdown: String): String {
+    // Mirror native parseHighlights: split on ==, wrap odd segments in <mark>.
+    // Skip fenced code blocks so == inside code stays literal.
+    val out = StringBuilder()
+    var inFence = false
+    markdown.lineSequence().forEachIndexed { index, line ->
+      if (index > 0) out.append('\n')
+      val trimmed = line.trimStart()
+      if (trimmed.startsWith("```")) {
+        inFence = !inFence
+        out.append(line)
+        return@forEachIndexed
+      }
+      if (inFence || !line.contains("==")) {
+        out.append(line)
+        return@forEachIndexed
+      }
+      val parts = line.split("==")
+      if (parts.size < 3) {
+        out.append(line)
+        return@forEachIndexed
+      }
+      parts.forEachIndexed { idx, part ->
+        if (part.isEmpty()) return@forEachIndexed
+        if (idx % 2 == 1 && idx < parts.size - 1) {
+          out.append("<mark>").append(escape(part)).append("</mark>")
+        } else {
+          out.append(part)
+        }
+      }
+    }
+    return out.toString()
   }
 
   private fun safeFolderName(value: String): String = value
@@ -141,6 +199,16 @@ private object ImageSrcAttributeProviderFactory : AttributeProviderFactory {
         if (!destination.startsWith("/") && !destination.contains("://")) {
           val relative = Path.of(destination).normalize()
           if (!relative.startsWith("..")) attributes["src"] = relative.toString().replace('\\', '/')
+        }
+      } else if (node is ListItem && tagName == "li" && attributes != null) {
+        var child = node.firstChild
+        while (child != null) {
+          if (child is org.commonmark.ext.task.list.items.TaskListItemMarker) {
+            val existing = attributes["class"]
+            attributes["class"] = if (existing.isNullOrBlank()) "task-list-item" else "$existing task-list-item"
+            break
+          }
+          child = child.next
         }
       }
     }

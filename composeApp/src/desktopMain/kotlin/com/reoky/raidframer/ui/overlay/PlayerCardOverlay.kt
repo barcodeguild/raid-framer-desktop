@@ -632,7 +632,26 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               journalEntries = PocketDraftCoordinator.getEntriesByTag(playerName, 12)
             }
             if (journalEntries.isNotEmpty()) {
-              val columns = journalEntries.chunked((journalEntries.size + 2) / 3.coerceAtLeast(1))
+              // Balanced masonry: estimate each brick's height and always append to
+              // the currently shortest column so long journals spread evenly.
+              val columns: List<List<com.reoky.raidframer.core.pocket.PocketEntry>> = remember(journalEntries) {
+                fun estimatedBrickHeight(entry: com.reoky.raidframer.core.pocket.PocketEntry): Int {
+                  val title = if (entry.metadata.title.isBlank()) 1 else 2
+                  val tags = if (entry.tags.isEmpty()) 0 else 1
+                  val attachments = (entry.attachments.size + 1) / 2
+                  val markdownLines = entry.markdown.lineSequence().count { it.isNotBlank() }.coerceAtMost(40)
+                  val markdownWeight = (markdownLines * 3 + 1) / 2
+                  return (title + tags + attachments + markdownWeight + 3).coerceIn(4, 48)
+                }
+                val columnHeights = IntArray(3)
+                val buckets = List(3) { mutableListOf<com.reoky.raidframer.core.pocket.PocketEntry>() }
+                journalEntries.forEach { entry ->
+                  val shortest = columnHeights.indices.minByOrNull { columnHeights[it] } ?: 0
+                  buckets[shortest].add(entry)
+                  columnHeights[shortest] += estimatedBrickHeight(entry)
+                }
+                buckets.map { it.toList() }
+              }
               SectionCard(
                 title = stringResource(Res.string.player_card_journal_entries),
                 accentColor = RFColors.itemSkillYellow
@@ -648,7 +667,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                     ) {
                       columnEntries.forEach { entry ->
                         Surface(
-                          modifier = Modifier.clickable {
+                          modifier = Modifier.heightIn(min = 120.dp, max = 420.dp).clickable {
                             scope.launch {
                               PocketDraftCoordinator.openDraft(entry.metadata.id)
                               wm?.openWindow(OverlayType.POCKET_EDITOR)
@@ -658,7 +677,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                           color = Color(0xFF171717),
                           border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
                         ) {
-                          PocketEntryThumbnail(entry)
+                          Box(Modifier.verticalScroll(rememberScrollState())) {
+                            PocketEntryThumbnail(entry)
+                          }
                         }
                       }
                     }
