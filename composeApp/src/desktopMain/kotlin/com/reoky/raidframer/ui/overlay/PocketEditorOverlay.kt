@@ -117,6 +117,7 @@ import raid_framer_desktop.composeapp.generated.resources.pocket_editor_link_tit
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_link_url_label
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_markdown_label
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_title
+import raid_framer_desktop.composeapp.generated.resources.pocket_editor_title_format
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_title_label
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_image
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_link
@@ -126,6 +127,7 @@ import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_toolbar_raid
 import raid_framer_desktop.composeapp.generated.resources.pocket_editor_event_search_hint
 import com.reoky.raidframer.core.helpers.togglePocketJournal
+import com.reoky.raidframer.core.helpers.exportPocketEntryAndReveal
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.TitleBarComponent
@@ -188,13 +190,43 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
   }
 
   Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.66f))) {
+    val editorBaseTitle = stringResource(Res.string.pocket_editor_title)
+    val editorTitle = if (title.isBlank()) editorBaseTitle else stringResource(Res.string.pocket_editor_title_format, title)
     TitleBarComponent(
-      title = stringResource(Res.string.pocket_editor_title),
+      title = editorTitle,
       onClose = {
         PocketDraftCoordinator.closeEditorSession()
         wm?.closeWindow(OverlayType.POCKET_EDITOR)
       },
 rightActions = {
+        val exportInteractionSource = remember { MutableInteractionSource() }
+        val isExportHovered by exportInteractionSource.collectIsHoveredAsState()
+        IconButton(
+          onClick = {
+            val entry = draft
+            if (entry != null) {
+              scope.launch {
+                PocketDraftCoordinator.updateDraft(title, markdown)
+                exportPocketEntryAndReveal(
+                  entry.copy(
+                    metadata = entry.metadata.copy(title = title.ifBlank { entry.metadata.title }),
+                    markdown = markdown
+                  ),
+                  wm
+                )
+              }
+            }
+          },
+          modifier = Modifier.size(28.dp).padding(end = 2.dp)
+        ) {
+          Text(
+            "",
+            color = if (isExportHovered) RFColors.AccentRed else Color.White,
+            fontFamily = FontsHelper.faSolid(),
+            fontSize = 14.sp,
+            modifier = Modifier.hoverable(exportInteractionSource)
+          )
+        }
         val editorInteractionSource = remember { MutableInteractionSource() }
         val isEditorHovered by editorInteractionSource.collectIsHoveredAsState()
         IconButton(
@@ -494,12 +526,13 @@ private fun MarkdownToolbar(
     }
   }
 
-  Row(
+  FlowRow(
     modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp)
       .background(Color(0xFF141414).copy(alpha = 0.92f), RoundedCornerShape(10.dp))
       .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(10.dp))
       .padding(horizontal = 4.dp, vertical = 2.dp),
-    horizontalArrangement = Arrangement.spacedBy(2.dp)
+    horizontalArrangement = Arrangement.spacedBy(2.dp),
+    verticalArrangement = Arrangement.spacedBy(2.dp)
   ) {
     listOf(
       MarkdownAction.BOLD to "B", MarkdownAction.ITALIC to "I", MarkdownAction.STRIKE to "S",
