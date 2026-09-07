@@ -34,6 +34,7 @@ import com.reoky.raidframer.ui.overlay.MetaSpecsOverlay
 import com.reoky.raidframer.ui.overlay.PocketEditorOverlay
 import com.reoky.raidframer.ui.overlay.PocketJournalOverlay
 import com.reoky.raidframer.ui.overlay.PlayerBrowserOverlay
+import com.reoky.raidframer.ui.overlay.SessionHistoryOverlay
 import com.reoky.raidframer.ui.overlay.ScreenshotPreviewOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -81,7 +82,8 @@ fun OverlayContainer(wm: WindowManager) {
           type == OverlayType.POCKET_JOURNAL ||
           type == OverlayType.POCKET_EDITOR ||
            type == OverlayType.SCREENSHOT_PREVIEW ||
-           type == OverlayType.PLAYER_BROWSER,
+            type == OverlayType.PLAYER_BROWSER ||
+            type == OverlayType.SESSION_HISTORY,
         transparentBackground = type == OverlayType.ITEM_USE,
         onCloseRequest = { wm.closeWindow(type) }
       ) { window ->
@@ -109,6 +111,7 @@ fun OverlayContainer(wm: WindowManager) {
           OverlayType.POCKET_EDITOR -> PocketEditorOverlay(wm)
           OverlayType.SCREENSHOT_PREVIEW -> ScreenshotPreviewOverlay(wm)
           OverlayType.PLAYER_BROWSER -> PlayerBrowserOverlay(wm)
+          OverlayType.SESSION_HISTORY -> SessionHistoryOverlay(wm)
           else -> {}
         }
 

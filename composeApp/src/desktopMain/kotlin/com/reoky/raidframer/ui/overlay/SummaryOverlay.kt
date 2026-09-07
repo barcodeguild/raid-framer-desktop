@@ -88,6 +88,9 @@ import raid_framer_desktop.composeapp.generated.resources.summary_glider_disable
 import raid_framer_desktop.composeapp.generated.resources.summary_provokes_by_faction
 import raid_framer_desktop.composeapp.generated.resources.summary_tiger_strikes_by_faction
 import raid_framer_desktop.composeapp.generated.resources.summary_freezes_by_faction
+import raid_framer_desktop.composeapp.generated.resources.summary_damage_by_faction
+import raid_framer_desktop.composeapp.generated.resources.summary_heals_by_faction
+import raid_framer_desktop.composeapp.generated.resources.summary_cc_by_faction
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_new_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_debuffs_continued
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_debuffs_extended
@@ -638,7 +641,36 @@ private fun FactionChartsTab(
     contentPadding = PaddingValues(bottom = 8.dp),
     verticalArrangement = Arrangement.spacedBy(8.dp)
   ) {
-    // Row 1: Silences, Charms, Distresses
+    // Row 1: Damage, Heals, CC
+    item {
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        RaidComparisonPieChart(
+          title = stringResource(Res.string.summary_damage_by_faction),
+          icon = "\u2694",
+          dataFlow = PlayerCacheInteractor.factionDamageComparisonAll,
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
+        )
+        RaidComparisonPieChart(
+          title = stringResource(Res.string.summary_heals_by_faction),
+          icon = "\u271A",
+          dataFlow = PlayerCacheInteractor.factionHealsComparisonAll,
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
+        )
+        RaidComparisonPieChart(
+          title = stringResource(Res.string.summary_cc_by_faction),
+          icon = "\u26A1",
+          dataFlow = PlayerCacheInteractor.factionCCComparisonAll,
+          modifier = Modifier.weight(1f),
+          factionColors = factionColors
+        )
+      }
+    }
+    // Row 2: Silences, Charms, Distresses
     item {
       Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),

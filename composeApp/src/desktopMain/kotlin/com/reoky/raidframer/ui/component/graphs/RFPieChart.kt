@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.helpers.RFGraphColor
+import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.helpers.pickNextColor
 import io.github.koalaplot.core.pie.DefaultSlice
 import io.github.koalaplot.core.pie.PieChart
@@ -93,7 +94,7 @@ fun RFPieChart(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-              text = "${slice.label}: ${slice.value.toInt()}",
+              text = "${slice.label}: ${slice.value.toLong().humanReadableAbbreviation()}",
               style = MaterialTheme.typography.body2,
               color = Color.White,
               modifier = Modifier.weight(1f)

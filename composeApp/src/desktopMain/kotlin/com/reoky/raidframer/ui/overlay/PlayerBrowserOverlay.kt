@@ -15,6 +15,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -408,16 +409,20 @@ private fun MiniDropdown(label: String, options: List<String>, onPick: (String) 
     Text(label, color = RFColors.TextPrimary, fontSize = 11.sp,
       modifier = Modifier.clip(RoundedCornerShape(4.dp)).background(Color(0xFF2A2A2A))
         .clickable { open = true }.padding(horizontal = 8.dp, vertical = 4.dp))
+    MaterialTheme(
+      colors = MaterialTheme.colors.copy(surface = Color(0xFF1E1E1E))
+    ) {
     DropdownMenu(
       expanded = open,
       onDismissRequest = { open = false },
-      modifier = Modifier.background(Color(0xFF1E1E1E)).border(1.dp, RFColors.CardBorder, RoundedCornerShape(6.dp))
+      modifier = Modifier.background(Color(0xFF1E1E1E), RoundedCornerShape(6.dp)).border(1.dp, RFColors.CardBorder, RoundedCornerShape(6.dp))
     ) {
       options.take(60).forEach { o ->
         DropdownMenuItem(onClick = { onPick(o); open = false }) {
           Text(o, color = RFColors.TextPrimary, fontSize = 11.sp)
         }
       }
+    }
     }
   }
 }

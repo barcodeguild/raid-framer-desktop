@@ -498,6 +498,10 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                           showMenuPopup = false
                           wm?.openWindow(OverlayType.PLAYER_BROWSER)
                         }
+                        MenuPopupItem("\uf1da", "Session History") {
+                          showMenuPopup = false
+                          wm?.openWindow(OverlayType.SESSION_HISTORY)
+                        }
                         if (config.performanceBattleGraphEnabled) {
                           MenuPopupItem("\uf1e0", stringResource(Res.string.tray_battle_graph)) {
                             showMenuPopup = false

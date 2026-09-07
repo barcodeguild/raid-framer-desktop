@@ -229,54 +229,77 @@ data class SessionTotals(
 
 @Composable
 fun SessionStatRows(totals: SessionTotals) {
-  StatRow(stringResource(Res.string.player_card_stat_damage), totals.damage, RFColors.dpsOrange)
-  StatRow(stringResource(Res.string.player_card_stat_healing), totals.healing, RFColors.healsGreen)
-  StatRow(stringResource(Res.string.player_card_stat_cc), totals.cc.toLong(), RFColors.ccCyan)
-  StatRow(stringResource(Res.string.player_card_stat_buffs), totals.buffs.toLong(), RFColors.buffsBlue)
-  StatRow(stringResource(Res.string.player_card_stat_debuffs), totals.debuffs.toLong(), RFColors.debuffsPurple)
-  StatRow(stringResource(Res.string.player_card_stat_charms), totals.charms.toLong(), RFColors.charmPink)
-  StatRow(stringResource(Res.string.player_card_stat_distress), totals.distress.toLong(), RFColors.distressPurple)
-  StatRow(stringResource(Res.string.player_card_stat_silence), totals.silence.toLong(), RFColors.silencePurple)
-  StatRow(stringResource(Res.string.player_card_stat_tiger_strikes), totals.tigerStrikes.toLong(), RFColors.techNoTigerStrikes)
-  StatRow(stringResource(Res.string.player_card_stat_freezes), totals.freezes.toLong(), RFColors.freezeIceBlue)
-  StatRow(stringResource(Res.string.player_card_stat_trips), totals.trips.toLong(), RFColors.tripsAmber)
-  StatRow(stringResource(Res.string.player_card_stat_bubbles), totals.bubbles.toLong(), RFColors.bubblesCyan)
-  StatRow(stringResource(Res.string.player_card_stat_bracings), totals.bracings.toLong(), RFColors.bracingsGreen)
-  StatRow(stringResource(Res.string.player_card_stat_shield_strip), totals.shieldStrip.toLong(), RFColors.shieldStripOrange)
-  StatRow(stringResource(Res.string.player_card_stat_weapon_disables), totals.weaponDisables.toLong(), RFColors.weaponDisablesRed)
-  StatRow(stringResource(Res.string.player_card_stat_potion_disables), totals.potionDisables.toLong(), RFColors.potionDisablesPurple)
-  StatRow(stringResource(Res.string.player_card_stat_bd_glider), totals.bdGlider.toLong(), RFColors.bdGliderTeal)
-  StatRow(stringResource(Res.string.player_card_stat_crystal_wings), totals.crystalWings.toLong(), RFColors.crystalWingsBlue)
-  StatRow(stringResource(Res.string.player_card_stat_glider_disables), totals.gliderDisables.toLong(), RFColors.gliderDisablesPink)
-  StatRow(stringResource(Res.string.player_card_stat_provoked), totals.provoked.toLong(), RFColors.provokesDeepPurple)
-  StatRow(stringResource(Res.string.player_card_stat_defiance), totals.defiance.toLong(), RFColors.defianceGold)
-  StatRow(stringResource(Res.string.player_card_stat_garden_defiance), totals.gardenDefiance.toLong(), RFColors.gardenDefianceBlue)
-  StatRow(stringResource(Res.string.player_card_stat_purges), totals.purges.toLong(), RFColors.purgeGreen)
-  StatRow(stringResource(Res.string.player_card_stat_sac_dances), totals.sacDances.toLong(), RFColors.sacDancePurple)
-  StatRow(stringResource(Res.string.player_card_stat_deep_tranquility), totals.deepTranquility.toLong(), RFColors.deepTranquilityTeal)
-  StatRow(stringResource(Res.string.player_card_stat_deepend_debuff), totals.deedendDebuff.toLong(), RFColors.deedendDebuffRed)
-  StatRow(stringResource(Res.string.player_card_stat_throw_dagger), totals.throwDagger.toLong(), RFColors.throwDaggerAmber)
-  StatRow(stringResource(Res.string.player_card_stat_stuns), totals.stuns.toLong(), RFColors.stunDeepRed)
-  StatRow(stringResource(Res.string.player_card_stat_staggers), totals.staggers.toLong(), RFColors.staggerBrown)
-  StatRow(stringResource(Res.string.player_card_stat_petrification), totals.petrification.toLong(), RFColors.petrificationGray)
-  StatRow(stringResource(Res.string.player_card_stat_absorb_lifeforce), totals.absorbLifeforce.toLong(), RFColors.absorbLifeforceMagenta)
-  StatRow(stringResource(Res.string.player_card_stat_corrosive_barrage), totals.corrosiveBarrage.toLong(), RFColors.corrosiveBarrageLime)
-  StatRow(stringResource(Res.string.player_card_stat_blinded_by_crows), totals.blindedByCrows.toLong(), RFColors.blindedByCrowsDark)
-  StatRow(stringResource(Res.string.player_card_stat_mist_sunder), totals.mistSunder.toLong(), RFColors.mistSunderCyan)
-  StatRow(stringResource(Res.string.player_card_stat_regular_sunder), totals.regularSunder.toLong(), RFColors.regularSunderOrange)
-  StatRow(stringResource(Res.string.player_card_stat_impales), totals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel)
-  StatRow(stringResource(Res.string.player_card_stat_protective_wings), totals.protectiveWings.toLong(), RFColors.protectiveWingsGold)
-  StatRow(stringResource(Res.string.player_card_stat_courageous_action), totals.courageousAction.toLong(), RFColors.courageousActionBright)
-  StatRow(stringResource(Res.string.player_card_stat_mana_barrier), totals.manaBarrier.toLong(), RFColors.manaBarrierBlue)
-  StatRow(stringResource(Res.string.player_card_stat_revive), totals.revive.toLong(), RFColors.reviveGhostWhite)
-  StatRow(stringResource(Res.string.player_card_stat_glider), totals.glider.toLong(), RFColors.gliderBlue)
-  StatRow(stringResource(Res.string.player_card_stat_items), totals.items.toLong(), RFColors.itemSkillYellow)
-  StatRow(stringResource(Res.string.player_card_stat_potions), totals.potions.toLong(), RFColors.potionTeal)
-  StatRow(stringResource(Res.string.player_card_stat_kills_most_damage), totals.kills.toLong(), RFColors.killsRed)
-  StatRow(stringResource(Res.string.player_card_stat_kills_killing_blow), totals.killsKB.toLong(), RFColors.killsHaranyaGreen)
-  StatRow(stringResource(Res.string.player_card_stat_total_damage_taken), totals.damageTaken.toLong(), RFColors.killsRed)
-  StatRow(stringResource(Res.string.player_card_stat_total_heals_received), totals.healsReceived.toLong(), RFColors.healsGreen)
+  sessionStatEntries(totals).forEach { (labelRes, value, color) ->
+    StatRow(stringResource(labelRes), value, color)
+  }
 }
+
+/** Three-column layout of the same stats to reclaim vertical space. */
+@Composable
+fun SessionStatGrid(totals: SessionTotals, columns: Int = 3) {
+  val entries = sessionStatEntries(totals)
+  val perCol = (entries.size + columns - 1) / columns
+  Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    for (c in 0 until columns) {
+      Column(modifier = Modifier.weight(1f)) {
+        entries.drop(c * perCol).take(perCol).forEach { (labelRes, value, color) ->
+          StatRow(stringResource(labelRes), value, color)
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun sessionStatEntries(totals: SessionTotals): List<Triple<org.jetbrains.compose.resources.StringResource, Long, Color>> = listOf(
+  Triple(Res.string.player_card_stat_damage, totals.damage, RFColors.dpsOrange),
+  Triple(Res.string.player_card_stat_healing, totals.healing, RFColors.healsGreen),
+  Triple(Res.string.player_card_stat_cc, totals.cc.toLong(), RFColors.ccCyan),
+  Triple(Res.string.player_card_stat_buffs, totals.buffs.toLong(), RFColors.buffsBlue),
+  Triple(Res.string.player_card_stat_debuffs, totals.debuffs.toLong(), RFColors.debuffsPurple),
+  Triple(Res.string.player_card_stat_charms, totals.charms.toLong(), RFColors.charmPink),
+  Triple(Res.string.player_card_stat_distress, totals.distress.toLong(), RFColors.distressPurple),
+  Triple(Res.string.player_card_stat_silence, totals.silence.toLong(), RFColors.silencePurple),
+  Triple(Res.string.player_card_stat_tiger_strikes, totals.tigerStrikes.toLong(), RFColors.techNoTigerStrikes),
+  Triple(Res.string.player_card_stat_freezes, totals.freezes.toLong(), RFColors.freezeIceBlue),
+  Triple(Res.string.player_card_stat_trips, totals.trips.toLong(), RFColors.tripsAmber),
+  Triple(Res.string.player_card_stat_bubbles, totals.bubbles.toLong(), RFColors.bubblesCyan),
+  Triple(Res.string.player_card_stat_bracings, totals.bracings.toLong(), RFColors.bracingsGreen),
+  Triple(Res.string.player_card_stat_shield_strip, totals.shieldStrip.toLong(), RFColors.shieldStripOrange),
+  Triple(Res.string.player_card_stat_weapon_disables, totals.weaponDisables.toLong(), RFColors.weaponDisablesRed),
+  Triple(Res.string.player_card_stat_potion_disables, totals.potionDisables.toLong(), RFColors.potionDisablesPurple),
+  Triple(Res.string.player_card_stat_bd_glider, totals.bdGlider.toLong(), RFColors.bdGliderTeal),
+  Triple(Res.string.player_card_stat_crystal_wings, totals.crystalWings.toLong(), RFColors.crystalWingsBlue),
+  Triple(Res.string.player_card_stat_glider_disables, totals.gliderDisables.toLong(), RFColors.gliderDisablesPink),
+  Triple(Res.string.player_card_stat_provoked, totals.provoked.toLong(), RFColors.provokesDeepPurple),
+  Triple(Res.string.player_card_stat_defiance, totals.defiance.toLong(), RFColors.defianceGold),
+  Triple(Res.string.player_card_stat_garden_defiance, totals.gardenDefiance.toLong(), RFColors.gardenDefianceBlue),
+  Triple(Res.string.player_card_stat_purges, totals.purges.toLong(), RFColors.purgeGreen),
+  Triple(Res.string.player_card_stat_sac_dances, totals.sacDances.toLong(), RFColors.sacDancePurple),
+  Triple(Res.string.player_card_stat_deep_tranquility, totals.deepTranquility.toLong(), RFColors.deepTranquilityTeal),
+  Triple(Res.string.player_card_stat_deepend_debuff, totals.deedendDebuff.toLong(), RFColors.deedendDebuffRed),
+  Triple(Res.string.player_card_stat_throw_dagger, totals.throwDagger.toLong(), RFColors.throwDaggerAmber),
+  Triple(Res.string.player_card_stat_stuns, totals.stuns.toLong(), RFColors.stunDeepRed),
+  Triple(Res.string.player_card_stat_staggers, totals.staggers.toLong(), RFColors.staggerBrown),
+  Triple(Res.string.player_card_stat_petrification, totals.petrification.toLong(), RFColors.petrificationGray),
+  Triple(Res.string.player_card_stat_absorb_lifeforce, totals.absorbLifeforce.toLong(), RFColors.absorbLifeforceMagenta),
+  Triple(Res.string.player_card_stat_corrosive_barrage, totals.corrosiveBarrage.toLong(), RFColors.corrosiveBarrageLime),
+  Triple(Res.string.player_card_stat_blinded_by_crows, totals.blindedByCrows.toLong(), RFColors.blindedByCrowsDark),
+  Triple(Res.string.player_card_stat_mist_sunder, totals.mistSunder.toLong(), RFColors.mistSunderCyan),
+  Triple(Res.string.player_card_stat_regular_sunder, totals.regularSunder.toLong(), RFColors.regularSunderOrange),
+  Triple(Res.string.player_card_stat_impales, totals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel),
+  Triple(Res.string.player_card_stat_protective_wings, totals.protectiveWings.toLong(), RFColors.protectiveWingsGold),
+  Triple(Res.string.player_card_stat_courageous_action, totals.courageousAction.toLong(), RFColors.courageousActionBright),
+  Triple(Res.string.player_card_stat_mana_barrier, totals.manaBarrier.toLong(), RFColors.manaBarrierBlue),
+  Triple(Res.string.player_card_stat_revive, totals.revive.toLong(), RFColors.reviveGhostWhite),
+  Triple(Res.string.player_card_stat_glider, totals.glider.toLong(), RFColors.gliderBlue),
+  Triple(Res.string.player_card_stat_items, totals.items.toLong(), RFColors.itemSkillYellow),
+  Triple(Res.string.player_card_stat_potions, totals.potions.toLong(), RFColors.potionTeal),
+  Triple(Res.string.player_card_stat_kills_most_damage, totals.kills.toLong(), RFColors.killsRed),
+  Triple(Res.string.player_card_stat_kills_killing_blow, totals.killsKB.toLong(), RFColors.killsHaranyaGreen),
+  Triple(Res.string.player_card_stat_total_damage_taken, totals.damageTaken.toLong(), RFColors.killsRed),
+  Triple(Res.string.player_card_stat_total_heals_received, totals.healsReceived.toLong(), RFColors.healsGreen)
+)
 
 @Composable
 fun StatRow(label: String, value: Long, valueColor: Color = RFColors.TextPrimary) {
