@@ -40,8 +40,13 @@ import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.rememberSectionPulse
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import com.reoky.raidframer.ui.LocalDragLock
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
@@ -54,13 +59,15 @@ import raid_framer_desktop.composeapp.generated.resources.player_search_placehol
  * @param highlightBorder when true, pulses the border gold (via [rememberSectionPulse])
  *   to draw the user's eye — used when the box is the primary way to pick context.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PlayerSearchBox(
   currentName: String,
   onSelect: (String) -> Unit,
   modifier: Modifier = Modifier,
   placeholder: String? = null,
-  highlightBorder: Boolean = false
+  highlightBorder: Boolean = false,
+  onClear: (() -> Unit)? = null
 ) {
   val dragLock = LocalDragLock.current
   val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
@@ -73,19 +80,55 @@ fun PlayerSearchBox(
   // Keyboard highlight within the suggestion list. -1 = follow the text field.
   var activeIndex by remember { mutableStateOf(-1) }
   val focusRequester = remember { FocusRequester() }
+  val scope = androidx.compose.runtime.rememberCoroutineScope()
 
   // Shared select path: report the pick, reset query state, and release focus
   // so the field falls back to the idle "Name [Guild]" display. Without the
   // focus release, isFocused stays true and the cleared query renders blank.
   fun pick(name: String) {
-    onSelect(name)
-    search = ""
-    seededFor = null
+    // Set local state BEFORE notifying the parent: onSelect triggers a
+    // recomposition with a new currentName, and the LaunchedEffect below
+    // only seeds the box when !isFocused. Calling onSelect first left
+    // isFocused true during that recomposition, so the seed was skipped
+    // and the box stayed empty.
+    search = name
+    seededFor = name
     dropdownVisible = false
     activeIndex = -1
     isFocused = false
     dragLock.value = false
     focusManager.clearFocus()
+    onSelect(name)
+  }
+
+  // Guards double-fire: onPointerEvent(Press) + clickable both run on a
+  // single mouse click. Without this, onSelect fires twice per click.
+  var lastPickMs by remember { mutableStateOf(0L) }
+  fun pickGuarded(name: String, via: (String) -> Unit) {
+    val now = System.currentTimeMillis()
+    if (now - lastPickMs < 500) return
+    lastPickMs = now
+    via(name)
+  }
+  // Mouse clicks on dropdown rows arrive while the text field is focused; the
+  // focus change can recompose (and hide) the dropdown before clickable fires.
+  // Press handlers dodge that race: they run on the down event.
+  fun pickOnPressDown(name: String) {
+    search = name
+    seededFor = name
+    dropdownVisible = false
+    activeIndex = -1
+    isFocused = false
+    focusManager.clearFocus()
+    // Defer dragLock + onSelect so the pointer-up (which the window-drag
+    // MouseListener would otherwise see as a tooltip drag) lands while
+    // dragging is still suppressed.
+    dragLock.value = true
+    scope.launch {
+      delay(150)
+      dragLock.value = false
+      onSelect(name)
+    }
   }
 
   // Reconcile drag lock from the two sources of truth (dropdown + focus)
@@ -93,6 +136,33 @@ fun PlayerSearchBox(
   // left it stuck (e.g. pick() cleared it, then a stale focus event set it).
   fun syncDragLock() {
     dragLock.value = dropdownVisible || isFocused
+  }
+  fun clearBox() {
+    search = ""
+    seededFor = ""
+    dropdownVisible = false
+    activeIndex = -1
+    isFocused = false
+    focusManager.clearFocus()
+    syncDragLock()
+    onClear?.invoke()
+  }
+  var lastClearMs by remember { mutableStateOf(0L) }
+  fun clearGuarded() {
+    val now = System.currentTimeMillis()
+    if (now - lastClearMs < 500) return
+    lastClearMs = now
+    // Suppress the tooltip window-drag while the pointer-up lands,
+    // same race as suggestion-row clicks.
+    isFocused = false
+    dropdownVisible = false
+    dragLock.value = true
+    clearBox()
+    scope.launch {
+      delay(150)
+      dragLock.value = false
+      syncDragLock()
+    }
   }
 
   val allPlayers by produceState<List<PlayerCacheEntity>>(
@@ -128,14 +198,12 @@ fun PlayerSearchBox(
     } else currentName
   }
 
-  // Seed the visible query only for genuine selection changes (window open,
-  // AppState switch). Deliberately NOT keyed on the DB result: when the player
-  // list loads, currentEntry resolves and idleDisplay flips from the bare name
-  // to "Name [Guild]" — re-seeding then would wipe whatever the user typed.
-  // Typing never triggers this: keystrokes only touch `search`, and picks go
-  // through pick() which resets explicitly.
-  LaunchedEffect(currentName) {
-    if (!isFocused) {
+  // Seed the visible query on selection changes AND when the guild label
+  // resolves (idleDisplay flips bare name -> "Name [Guild]"). Guarded so
+  // typing is never wiped: only seed when idle, or when the field still
+  // shows a previously seeded value.
+  LaunchedEffect(currentName, idleDisplay) {
+    if (!isFocused && (search.isBlank() || search == seededFor || search == currentName)) {
       search = idleDisplay
       seededFor = idleDisplay
     }
@@ -170,16 +238,21 @@ fun PlayerSearchBox(
     ) {
     // BasicTextField instead of Material TextField: zero internal padding, so the
     // 32.dp compact height fits the text exactly with no clipping.
+    // Box overlays the ✕ clear pill on top of the field (field drawn first).
+    Box(modifier = Modifier.width(220.dp).height(32.dp)) {
     BasicTextField(
       value = search,
       onValueChange = { search = it; dropdownVisible = true; activeIndex = -1 },
-      modifier = Modifier.width(220.dp).height(32.dp).focusRequester(focusRequester)
+      modifier = Modifier.fillMaxWidth().height(32.dp).focusRequester(focusRequester)
         .background(Color(0xFF1E1E1E), RoundedCornerShape(6.dp))
         .border(2.dp, pulseBorder, RoundedCornerShape(6.dp))
         .onFocusChanged {
           isFocused = it.isFocused
           if (!it.isFocused) {
-            // Commit on blur: keep raw query as typed; idle display re-seeds on next selection change.
+            // Commit on blur: snap back to the idle display so a half-typed
+            // query that was never picked doesn't linger in the box.
+            search = idleDisplay
+            seededFor = idleDisplay
             dropdownVisible = false
             activeIndex = -1
           }
@@ -222,7 +295,7 @@ fun PlayerSearchBox(
       cursorBrush = SolidColor(RFColors.AccentRed),
       decorationBox = { innerTextField ->
         Box(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+          modifier = Modifier.fillMaxWidth().padding(end = 28.dp).padding(horizontal = 8.dp),
           contentAlignment = Alignment.CenterStart
         ) {
           if (search.isEmpty()) {
@@ -232,6 +305,20 @@ fun PlayerSearchBox(
         }
       }
     )
+    if (search.isNotEmpty()) {
+      Box(
+        modifier = Modifier.align(Alignment.CenterEnd).padding(end = 4.dp)
+          .clip(RoundedCornerShape(4.dp))
+          .background(Color.White.copy(alpha = 0.08f))
+          .onPointerEvent(PointerEventType.Press) { clearGuarded() }
+          .clickable { clearGuarded() }
+          .padding(horizontal = 8.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center
+      ) {
+        Text("✕", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+      }
+    }
+    }
     }
     if (dropdownVisible && suggestions.isNotEmpty()) {
       Column(
@@ -245,7 +332,8 @@ fun PlayerSearchBox(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
               .background(if (highlighted) RFColors.AccentRed.copy(alpha = 0.25f) else Color.Transparent)
-              .clickable { pick(p.playerName) }
+              .onPointerEvent(PointerEventType.Press) { pickGuarded(p.playerName, { n -> pickOnPressDown(n) }) }
+              .clickable { pickGuarded(p.playerName, { n -> pick(n) }) }
               .padding(horizontal = 10.dp, vertical = 5.dp)
           ) {
             Text(p.playerName, color = RFColors.TextPrimary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)

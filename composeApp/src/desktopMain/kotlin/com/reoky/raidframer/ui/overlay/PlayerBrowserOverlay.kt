@@ -25,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -33,6 +34,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -125,10 +128,11 @@ private fun roleLabel(v: Int): String = when (LeadershipRole.fromInt(v)) {
   LeadershipRole.GM -> "GM"
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun PlayerBrowserOverlay(wm: WindowManager?) {
   val dragLock = LocalDragLock.current
+  val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
   val scope = rememberCoroutineScope()
   var allPlayers by remember { mutableStateOf<List<PlayerCacheEntity>>(emptyList()) }
   var loading by remember { mutableStateOf(true) }
@@ -187,7 +191,7 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
     if (days <= 0L) 0L else System.currentTimeMillis() - days * 24 * 60 * 60 * 1000L
   }
 
-  val searchQuery = remember(search) { search.substringBefore(" [").trim() }
+  val searchQuery = remember(search) { search.trim() }
 
   val filtered = remember(allPlayers, searchQuery, factionFilter, guildFilter, specFilter, gearFilter, lastSeenAfter, roleFilter, conditions, sortKey, descending) {
     val gear = gearFilter.toIntOrNull() ?: 0
@@ -215,11 +219,56 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
     if (activeIndex >= suggestions.size) activeIndex = suggestions.size - 1
   }
 
+  // Display text: picked player renders "Name [Guild]" (guild is visual only —
+  // filtering always uses the stripped query). Typing shows the raw query.
+  fun displayFor(p: PlayerCacheEntity): String =
+    if (p.lastKnownGuild.isNotBlank()) "${p.playerName} [${p.lastKnownGuild}]" else p.playerName
+
   fun pickPlayer(p: PlayerCacheEntity) {
     selected = p
-    search = p.playerName
+    search = displayFor(p)
     dropdownVisible = false
     activeIndex = -1
+    searchFocused = false
+    dragLock.value = false
+    focusManager.clearFocus()
+    syncBrowserDragLock()
+  }
+
+  // Mouse clicks on dropdown rows arrive while the text field is focused; the
+  // focus change can recompose (and hide) the dropdown before clickable fires.
+  // Press handlers dodge that race: they run on the down event. Deferred
+  // onSelect-equivalent keeps the pointer-up (which the window-drag
+  // MouseListener would otherwise see as a tooltip drag) suppressed.
+  var lastPickMs by remember { mutableStateOf(0L) }
+  fun pickPlayerGuarded(p: PlayerCacheEntity, via: (PlayerCacheEntity) -> Unit) {
+    val now = System.currentTimeMillis()
+    if (now - lastPickMs < 500) return
+    lastPickMs = now
+    via(p)
+  }
+  fun pickPlayerOnPressDown(p: PlayerCacheEntity) {
+    selected = p
+    search = displayFor(p)
+    dropdownVisible = false
+    activeIndex = -1
+    searchFocused = false
+    focusManager.clearFocus()
+    dragLock.value = true
+    scope.launch {
+      delay(150)
+      dragLock.value = false
+      syncBrowserDragLock()
+    }
+  }
+
+  fun clearSearch() {
+    selected = null
+    search = ""
+    dropdownVisible = false
+    activeIndex = -1
+    searchFocused = false
+    focusManager.clearFocus()
     syncBrowserDragLock()
   }
 
@@ -277,8 +326,8 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
 
     Column(Modifier.fillMaxSize().padding(10.dp)) {
       // Compact search (32dp, BasicTextField so text is never clipped)
-      Box(Modifier.fillMaxWidth()) {
-        Column {
+      Column(Modifier.fillMaxWidth()) {
+        Box(Modifier.fillMaxWidth().height(32.dp)) {
           BasicTextField(
             value = search,
             onValueChange = { search = it; dropdownVisible = true; activeIndex = -1 },
@@ -329,37 +378,71 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
             textStyle = TextStyle(fontSize = 12.sp, color = Color.White),
             cursorBrush = SolidColor(RFColors.AccentRed),
             decorationBox = { inner ->
-              Box(Modifier.fillMaxSize().padding(horizontal = 10.dp), contentAlignment = Alignment.CenterStart) {
+              Box(Modifier.fillMaxSize().padding(end = 28.dp).padding(horizontal = 10.dp), contentAlignment = Alignment.CenterStart) {
                 if (search.isEmpty()) Text(searchPlaceholder, color = Color.White.copy(alpha = 0.55f), fontSize = 12.sp, maxLines = 1)
                 inner()
               }
             }
           )
-          if (dropdownVisible && suggestions.isNotEmpty()) {
-            Column(
-              modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 6.dp))
-                .background(Color(0xFF1E1E1E)).border(1.dp, RFColors.CardBorder, RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 6.dp))
-                .padding(vertical = 2.dp)
-            ) {
-              suggestions.forEachIndexed { index, p ->
-                val highlighted = index == activeIndex
-                Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  modifier = Modifier.fillMaxWidth()
-                    .background(if (highlighted) RFColors.AccentRed.copy(alpha = 0.25f) else Color.Transparent)
-                    .clickable { pickPlayer(p) }
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
-                ) {
-                  Text(p.playerName, color = RFColors.TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                  if (p.lastKnownGuild.isNotBlank()) {
-                    Text("  [${p.lastKnownGuild}]", color = RFColors.TextTertiary, fontSize = 11.sp)
+          if (search.isNotEmpty()) {
+            var lastClearMs by remember { mutableStateOf(0L) }
+            fun clearGuarded() {
+              val now = System.currentTimeMillis()
+              if (now - lastClearMs < 500) return
+              lastClearMs = now
+              clearSearch()
+            }
+            Box(
+              modifier = Modifier.align(Alignment.CenterEnd).padding(end = 4.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color.White.copy(alpha = 0.08f))
+                .onPointerEvent(PointerEventType.Press) {
+                  // Same tooltip-drag race as suggestion rows: the native
+                  // mousePressed arms a window drag before clickable fires.
+                  // Suppress drag on press so the click lands as a clear.
+                  searchFocused = false
+                  dropdownVisible = false
+                  dragLock.value = true
+                  clearGuarded()
+                  scope.launch {
+                    delay(150)
+                    dragLock.value = false
+                    syncBrowserDragLock()
                   }
+                }
+                .clickable { clearGuarded() }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+              contentAlignment = Alignment.Center
+            ) {
+              Text("✕", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            }
+          }
+        } // end 32dp field box
+        if (dropdownVisible && suggestions.isNotEmpty()) {
+          Column(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 6.dp))
+              .background(Color(0xFF1E1E1E)).border(1.dp, RFColors.CardBorder, RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 6.dp))
+              .padding(vertical = 2.dp)
+          ) {
+            suggestions.forEachIndexed { index, p ->
+              val highlighted = index == activeIndex
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+                  .background(if (highlighted) RFColors.AccentRed.copy(alpha = 0.25f) else Color.Transparent)
+                  .onPointerEvent(PointerEventType.Press) { pickPlayerGuarded(p, ::pickPlayerOnPressDown) }
+                  .clickable { pickPlayerGuarded(p, ::pickPlayer) }
+                  .padding(horizontal = 10.dp, vertical = 5.dp)
+              ) {
+                Text(p.playerName, color = RFColors.TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                if (p.lastKnownGuild.isNotBlank()) {
+                  Text("  [${p.lastKnownGuild}]", color = RFColors.TextTertiary, fontSize = 11.sp)
                 }
               }
             }
           }
-        }
-      }
+        } // end dropdown
+      } // end search column
 
       Spacer(Modifier.height(8.dp))
 

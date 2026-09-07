@@ -50,3 +50,29 @@ fun exportSessionCsv(sessions: List<PlayerSessionTotalsEntity>, file: File): Fil
   out.writeText(lines.joinToString("\n"))
   return out
 }
+
+/** Writes one CSV per session (all roster rows) into a new timestamped folder under [parentDir]. */
+fun exportSessionsToFolder(
+  rowsBySession: Map<Long, List<PlayerSessionTotalsEntity>>,
+  parentDir: File,
+  folderPrefix: String = "session-export"
+): File {
+  val stamp = java.text.SimpleDateFormat("yyyyMMdd-HHmmss", java.util.Locale.US).format(java.util.Date())
+  var dir = File(parentDir, "${folderPrefix}_${stamp}")
+  var n = 1
+  while (dir.exists()) { dir = File(parentDir, "${folderPrefix}_${stamp}_${n++}") }
+  dir.mkdirs()
+  val fileFmt = java.text.SimpleDateFormat("yyyyMMdd-HHmm", java.util.Locale.US)
+  for ((start, rows) in rowsBySession) {
+    val first = rows.firstOrNull()
+    val label = buildString {
+      append(fileFmt.format(java.util.Date(start)))
+      first?.let {
+        if (it.sessionType.isNotBlank()) append("_${it.sessionType}")
+        if (it.sessionTitle.isNotBlank()) append("_${it.sessionTitle}")
+      }
+    }.replace(Regex("[^A-Za-z0-9_.-]"), "_").take(80)
+    exportSessionCsv(rows, File(dir, "session_${label}.csv"))
+  }
+  return dir
+}

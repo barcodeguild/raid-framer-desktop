@@ -87,11 +87,29 @@ interface PlayerSessionDao {
   @Query("SELECT COUNT(*) FROM player_session_totals WHERE playerName = :playerName")
   suspend fun getSessionCountForPlayer(playerName: String): Int
 
+  // Entire-session mode: distinct sessions across all players with roster size.
+  @Query("SELECT sessionStart, MAX(sessionEnd) AS sessionEnd, MAX(sessionType) AS sessionType, MAX(sessionTitle) AS sessionTitle, COUNT(*) AS playerCount FROM player_session_totals GROUP BY sessionStart ORDER BY sessionStart DESC")
+  suspend fun getDistinctSessions(): List<SessionSummary>
+
+  @Query("SELECT * FROM player_session_totals WHERE sessionStart IN (:starts) ORDER BY sessionStart DESC, totalDamage DESC")
+  suspend fun getRowsForSessions(starts: List<Long>): List<PlayerSessionTotalsEntity>
+
+  @Query("SELECT * FROM player_session_totals WHERE sessionStart = :start ORDER BY totalDamage DESC")
+  suspend fun getRowsForSession(start: Long): List<PlayerSessionTotalsEntity>
+
   // Composite primary key (playerName, sessionStart) makes this an upsert: re-archiving a session
   // is a no-op rather than a duplicate row. Cheaper than a defensive DELETE-then-INSERT.
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(session: PlayerSessionTotalsEntity)
 }
+
+data class SessionSummary(
+  val sessionStart: Long,
+  val sessionEnd: Long,
+  val sessionType: String = "",
+  val sessionTitle: String = "",
+  val playerCount: Int = 0
+)
 
 @Dao
 interface PocketDao {

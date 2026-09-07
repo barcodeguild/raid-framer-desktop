@@ -35,3 +35,29 @@ fun showCsvSaveChooser(
     }
   } catch (e: Exception) { onCancel() }
 }
+
+fun showFolderChooser(
+  dialogTitle: String,
+  onFolderSelected: (File) -> Unit,
+  onCancel: () -> Unit = {}
+) {
+  try {
+    SwingUtilities.invokeLater {
+      try {
+        val chooser = JFileChooser()
+        chooser.dialogTitle = dialogTitle
+        chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+        chooser.isAcceptAllFileFilterUsed = false
+        val parent = try {
+          java.awt.Window.getWindows().firstOrNull { it.isVisible && it is java.awt.Frame } as? java.awt.Component
+        } catch (e: Exception) { null }
+        val result = chooser.showOpenDialog(parent)
+        if (result == JFileChooser.APPROVE_OPTION) {
+          onFolderSelected(chooser.selectedFile)
+        } else {
+          onCancel()
+        }
+      } catch (e: Exception) { onCancel() }
+    }
+  } catch (e: Exception) { onCancel() }
+}
