@@ -2,6 +2,7 @@ package com.reoky.raidframer.ui.component.graphs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -84,10 +85,16 @@ fun RaidComparisonPieChart(
     if (pieData.isEmpty()) {
       Box(
         modifier = Modifier
-          .size(200.dp)
+          .size(120.dp)
           .background(Color.Transparent),
         contentAlignment = Alignment.Center
       ) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+            .background(Color.White.copy(alpha = 0.05f), shape = CircleShape)
+        )
         Text(
           text = stringResource(Res.string.general_no_data_available),
           color = RFColors.TextSecondary,

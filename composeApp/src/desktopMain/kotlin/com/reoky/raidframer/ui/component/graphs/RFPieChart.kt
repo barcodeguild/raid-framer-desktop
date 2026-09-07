@@ -2,6 +2,7 @@ package com.reoky.raidframer.ui.component.graphs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -59,7 +60,15 @@ fun RFPieChart(
         .size(chartSize)
         .background(Color.Transparent)
         .graphicsLayer(alpha = 0.99f) // Forces hardware acceleration
+      ,
+      contentAlignment = Alignment.Center
     ) {
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(8.dp)
+          .background(Color.White.copy(alpha = 0.05f), shape = CircleShape)
+      )
       PieChart(
         values = values,
         modifier = Modifier.fillMaxSize(),
