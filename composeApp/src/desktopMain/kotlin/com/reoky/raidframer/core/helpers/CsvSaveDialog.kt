@@ -7,7 +7,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 
 fun showCsvSaveChooser(
   suggestedName: String,
-  dialogTitle: String = "Export CSV",
+  dialogTitle: String,
   onFileSelected: (File) -> Unit,
   onCancel: () -> Unit = {}
 ) {

@@ -126,6 +126,7 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_session_sc
 import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_last_n
 import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_previous
 import raid_framer_desktop.composeapp.generated.resources.player_card_totals_scope_label
+import raid_framer_desktop.composeapp.generated.resources.session_history_full_history
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_buffs
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_cc
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_charms
@@ -1172,7 +1173,7 @@ private fun TotalsFiltersBar(
           modifier = Modifier.height(24.dp)
         ) {
           Text(
-            text = "Full History",
+            text = stringResource(Res.string.session_history_full_history),
             color = RFColors.AccentRed,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold

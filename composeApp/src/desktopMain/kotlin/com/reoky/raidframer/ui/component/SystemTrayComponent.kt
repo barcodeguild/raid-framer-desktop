@@ -60,6 +60,7 @@ import raid_framer_desktop.composeapp.generated.resources.tray_close
 import raid_framer_desktop.composeapp.generated.resources.tray_dragon_breaths
 import raid_framer_desktop.composeapp.generated.resources.tray_pocket_journal
 import raid_framer_desktop.composeapp.generated.resources.tray_player_browser
+import raid_framer_desktop.composeapp.generated.resources.tray_session_history
 import raid_framer_desktop.composeapp.generated.resources.tray_lua_options
 import raid_framer_desktop.composeapp.generated.resources.tray_help
 import raid_framer_desktop.composeapp.generated.resources.tray_copy_screenshot_to_clipboard
@@ -93,7 +94,7 @@ fun ApplicationScope.SystemTrayComponent(
   val dragonBreathsStr = stringResource(Res.string.tray_dragon_breaths)
   val pocketJournalStr = stringResource(Res.string.tray_pocket_journal)
   val playerBrowserStr = stringResource(Res.string.tray_player_browser)
-  val sessionHistoryStr = "Session History" // TODO: stringResource(Res.string.tray_session_history) once accessors regenerate
+  val sessionHistoryStr = stringResource(Res.string.tray_session_history)
   val raidManagementStr = stringResource(Res.string.tray_raid_management)
   val battleSummaryStr = stringResource(Res.string.tray_battle_summary)
   val battleGraphStr = stringResource(Res.string.tray_battle_graph)

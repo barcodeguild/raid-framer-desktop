@@ -73,11 +73,48 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.Image
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.player_browser_asc
+import raid_framer_desktop.composeapp.generated.resources.player_browser_add
+import raid_framer_desktop.composeapp.generated.resources.player_browser_count_format
+import raid_framer_desktop.composeapp.generated.resources.player_browser_desc
+import raid_framer_desktop.composeapp.generated.resources.player_browser_export_dialog_title
+import raid_framer_desktop.composeapp.generated.resources.player_browser_export_rows_format
+import raid_framer_desktop.composeapp.generated.resources.player_browser_faction_format
+import raid_framer_desktop.composeapp.generated.resources.player_browser_filter_guild
+import raid_framer_desktop.composeapp.generated.resources.player_browser_filter_min_gs
+import raid_framer_desktop.composeapp.generated.resources.player_browser_filter_spec
+import raid_framer_desktop.composeapp.generated.resources.player_browser_filter_val_hint
+import raid_framer_desktop.composeapp.generated.resources.player_browser_hint
+import raid_framer_desktop.composeapp.generated.resources.player_browser_lifetime_totals
+import raid_framer_desktop.composeapp.generated.resources.player_browser_loading
+import raid_framer_desktop.composeapp.generated.resources.player_browser_nothing_to_export
+import raid_framer_desktop.composeapp.generated.resources.player_browser_role_all
+import raid_framer_desktop.composeapp.generated.resources.player_browser_role_guild_lead
+import raid_framer_desktop.composeapp.generated.resources.player_browser_role_hero
+import raid_framer_desktop.composeapp.generated.resources.player_browser_role_none
+import raid_framer_desktop.composeapp.generated.resources.player_browser_role_raid_lead
+import raid_framer_desktop.composeapp.generated.resources.player_browser_role_shot_caller
+import raid_framer_desktop.composeapp.generated.resources.player_browser_search_placeholder
+import raid_framer_desktop.composeapp.generated.resources.player_browser_title
+import raid_framer_desktop.composeapp.generated.resources.player_browser_role_label_format
+import raid_framer_desktop.composeapp.generated.resources.player_browser_seen_format
+import raid_framer_desktop.composeapp.generated.resources.player_browser_sort_format
 
 private val LAST_SEEN_OPTIONS = listOf("All" to 0L, "7d" to 7L, "30d" to 30L, "90d" to 90L)
 private val OP_OPTIONS = listOf(">", ">=", "<", "=")
 private val ROLE_OPTIONS = listOf("All", "None", "Raid Lead", "Guild Lead", "Hero", "Shot Caller")
 private const val TICKER_MS = 6000L
+
+private fun roleLabelRes(v: Int): org.jetbrains.compose.resources.StringResource = when (LeadershipRole.fromInt(v)) {
+  LeadershipRole.NONE -> Res.string.player_browser_role_none
+  LeadershipRole.RAID_LEAD -> Res.string.player_browser_role_raid_lead
+  LeadershipRole.GUILD_LEAD -> Res.string.player_browser_role_guild_lead
+  LeadershipRole.FACTION_HERO -> Res.string.player_browser_role_hero
+  LeadershipRole.SHOT_CALLER -> Res.string.player_browser_role_shot_caller
+  LeadershipRole.GM -> Res.string.player_browser_role_none
+}
 
 private fun roleLabel(v: Int): String = when (LeadershipRole.fromInt(v)) {
   LeadershipRole.NONE -> "None"
@@ -186,9 +223,40 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
   val exportRows = remember(filtered, checked) {
     if (checked.isEmpty()) filtered else filtered.filter { checked.contains(it.playerName) }
   }
+  val searchPlaceholder = stringResource(Res.string.player_browser_search_placeholder)
+  val titleText = stringResource(Res.string.player_browser_title)
+  val hintText = stringResource(Res.string.player_browser_hint)
+  val exportRowsText = stringResource(Res.string.player_browser_export_rows_format, exportRows.size)
+  val exportDialogTitle = stringResource(Res.string.player_browser_export_dialog_title)
+  val loadingText = stringResource(Res.string.player_browser_loading)
+  val countText = stringResource(Res.string.player_browser_count_format, filtered.size)
+  val lifetimeTotalsText = stringResource(Res.string.player_browser_lifetime_totals)
+  val nothingToExportText = stringResource(Res.string.player_browser_nothing_to_export)
+  val allText = stringResource(Res.string.player_browser_role_all)
+  val roleNoneText = stringResource(Res.string.player_browser_role_none)
+  val roleRaidLeadText = stringResource(Res.string.player_browser_role_raid_lead)
+  val roleGuildLeadText = stringResource(Res.string.player_browser_role_guild_lead)
+  val roleHeroText = stringResource(Res.string.player_browser_role_hero)
+  val roleShotCallerText = stringResource(Res.string.player_browser_role_shot_caller)
+  fun roleValueToLabel(v: String): String = when (v) {
+    "None" -> roleNoneText
+    "Raid Lead" -> roleRaidLeadText
+    "Guild Lead" -> roleGuildLeadText
+    "Hero" -> roleHeroText
+    "Shot Caller" -> roleShotCallerText
+    else -> allText
+  }
+  fun roleLabelToValue(label: String): String = when (label) {
+    roleNoneText -> "None"
+    roleRaidLeadText -> "Raid Lead"
+    roleGuildLeadText -> "Guild Lead"
+    roleHeroText -> "Hero"
+    roleShotCallerText -> "Shot Caller"
+    else -> "All"
+  }
 
   Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0E0E0E))) {
-    TitleBarComponent(title = "Player Browser (Lifetime Totals)", onClose = { wm?.closeWindow(OverlayType.PLAYER_BROWSER) })
+    TitleBarComponent(title = titleText, onClose = { wm?.closeWindow(OverlayType.PLAYER_BROWSER) })
 
     Column(Modifier.fillMaxSize().padding(10.dp)) {
       // Compact search (32dp, BasicTextField so text is never clipped)
@@ -212,7 +280,7 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
             cursorBrush = SolidColor(RFColors.AccentRed),
             decorationBox = { inner ->
               Box(Modifier.fillMaxSize().padding(horizontal = 10.dp), contentAlignment = Alignment.CenterStart) {
-                if (search.isEmpty()) Text("Search players or guilds...", color = Color.White.copy(alpha = 0.55f), fontSize = 12.sp, maxLines = 1)
+                if (search.isEmpty()) Text(searchPlaceholder, color = Color.White.copy(alpha = 0.55f), fontSize = 12.sp, maxLines = 1)
                 inner()
               }
             }
@@ -278,11 +346,14 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
         specFilter = specFilter, onSpec = { specFilter = it },
         gearFilter = gearFilter, onGear = { gearFilter = it },
         lastSeenFilter = lastSeenFilter, onLastSeen = { lastSeenFilter = it },
-        roleFilter = roleFilter, onRole = { roleFilter = it },
+        roleFilter = roleFilter,
         sortKey = sortKey, onSort = { sortKey = it },
         descending = descending, onDir = { descending = it },
         conditions = conditions, onAdd = { conditions = (conditions + it).take(5) },
-        onRemove = { conditions = conditions - it }
+        onRemove = { conditions = conditions - it },
+        roleDisplay = { roleValueToLabel(it) },
+        allText = allText,
+        onRole2 = { roleFilter = roleLabelToValue(it) }
       )
 
       Spacer(Modifier.height(6.dp))
@@ -290,19 +361,20 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
       // Toolbar: lifetime-totals hint + always-visible export
       Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-          "Lifetime totals per player — use Session History to export per-session stats.",
+          hintText,
           color = RFColors.TextTertiary, fontSize = 10.sp, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis
         )
         Button(
           onClick = {
             exportStatus = ""
             val rows = exportRows.toList()
-            if (rows.isEmpty()) { exportStatus = "Nothing to export."; return@Button }
+            if (rows.isEmpty()) { exportStatus = nothingToExportText; return@Button }
             val summary = buildExportSummary(sortKey, descending, factionFilter, guildFilter, specFilter, gearFilter, lastSeenFilter, conditions)
             val exportScope = CoroutineScope(Dispatchers.IO)
             wm?.closeWindow(OverlayType.PLAYER_BROWSER)
             showCsvSaveChooser(
               suggestedName = summary,
+              dialogTitle = exportDialogTitle,
               onFileSelected = { file ->
                 exportScope.launch {
                   try {
@@ -318,7 +390,7 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
           colors = ButtonDefaults.buttonColors(RFColors.AccentRed), modifier = Modifier.height(32.dp),
           contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
         ) {
-          Text("Export ${exportRows.size} Rows to CSV", color = Color.White, fontSize = 12.sp)
+          Text(exportRowsText, color = Color.White, fontSize = 12.sp)
         }
       }
       if (exportStatus.isNotBlank()) Text(exportStatus, color = RFColors.TextTertiary, fontSize = 10.sp)
@@ -328,9 +400,9 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
       Box(Modifier.fillMaxSize().weight(1f)) {
         Column(Modifier.fillMaxSize()) {
           if (loading) {
-            Text("Loading players...", color = RFColors.TextTertiary, fontSize = 13.sp)
+            Text(loadingText, color = RFColors.TextTertiary, fontSize = 13.sp)
           } else {
-            Text("${filtered.size} players (lifetime)", color = RFColors.TextTertiary, fontSize = 11.sp)
+            Text(countText, color = RFColors.TextTertiary, fontSize = 11.sp)
             LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
               itemsIndexed(filtered.take(400), key = { _, p -> p.playerName }) { i, p ->
                 BrowserRow(
@@ -361,10 +433,11 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
                 Text(fp.playerName, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 Text("✕", color = RFColors.TextTertiary, fontSize = 13.sp, modifier = Modifier.clickable { flyout = null }.padding(4.dp))
               }
-              Text("${fp.lastKnownGuild} • ${fp.lastKnownSpec} • GS ${fp.lastKnownGearScore} • ${roleLabel(fp.leaderships)}",
+              Text(
+                "${fp.lastKnownGuild} • ${fp.lastKnownSpec} • GS ${fp.lastKnownGearScore} • ${stringResource(roleLabelRes(fp.leaderships))}",
                 color = RFColors.TextSecondary, fontSize = 11.sp)
               Spacer(Modifier.height(8.dp))
-              Text("LIFETIME TOTALS", color = RFColors.TextTertiary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+              Text(lifetimeTotalsText, color = RFColors.TextTertiary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
               Spacer(Modifier.height(4.dp))
               BROWSER_STATS.forEach { def ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 1.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -483,32 +556,46 @@ private fun FilterBar(
   specFilter: String, onSpec: (String) -> Unit,
   gearFilter: String, onGear: (String) -> Unit,
   lastSeenFilter: String, onLastSeen: (String) -> Unit,
-  roleFilter: String, onRole: (String) -> Unit,
+  roleFilter: String,
   sortKey: String, onSort: (String) -> Unit,
   descending: Boolean, onDir: (Boolean) -> Unit,
   conditions: List<BrowserCondition>, onAdd: (BrowserCondition) -> Unit,
-  onRemove: (BrowserCondition) -> Unit
+  onRemove: (BrowserCondition) -> Unit,
+  roleDisplay: (String) -> String,
+  allText: String,
+  onRole2: (String) -> Unit
 ) {
+  val guildText = stringResource(Res.string.player_browser_filter_guild)
+  val specText = stringResource(Res.string.player_browser_filter_spec)
+  val minGsText = stringResource(Res.string.player_browser_filter_min_gs)
+  val descText = stringResource(Res.string.player_browser_desc)
+  val ascText = stringResource(Res.string.player_browser_asc)
+  val addText = stringResource(Res.string.player_browser_add)
+  val valHint = stringResource(Res.string.player_browser_filter_val_hint)
+  val factionFmt = stringResource(Res.string.player_browser_faction_format, factionFilter)
+  val seenFmt = stringResource(Res.string.player_browser_seen_format, lastSeenFilter)
+  val roleFmt = stringResource(Res.string.player_browser_role_label_format, roleDisplay(roleFilter))
+  val sortFmt = stringResource(Res.string.player_browser_sort_format, BROWSER_STATS.firstOrNull { it.key == sortKey }?.label ?: sortKey)
   Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-      MiniDropdown("Faction: $factionFilter", listOf("All", "Nuia", "Haranya", "Pirate")) { onFaction(it) }
-      MiniField("Guild", guildFilter, onGuild, Modifier.weight(1f))
-      MiniField("Spec", specFilter, onSpec, Modifier.weight(1f))
-      MiniField("Min GS", gearFilter, onGear, Modifier.width(90.dp))
-      MiniDropdown("Seen: $lastSeenFilter", LAST_SEEN_OPTIONS.map { it.first }) { onLastSeen(it) }
-      MiniDropdown("Role: $roleFilter", ROLE_OPTIONS) { onRole(it) }
+      MiniDropdown(factionFmt, listOf(allText, "Nuia", "Haranya", "Pirate")) { onFaction(it) }
+      MiniField(guildText, guildFilter, onGuild, Modifier.weight(1f))
+      MiniField(specText, specFilter, onSpec, Modifier.weight(1f))
+      MiniField(minGsText, gearFilter, onGear, Modifier.width(90.dp))
+      MiniDropdown(seenFmt, LAST_SEEN_OPTIONS.map { it.first }) { onLastSeen(it) }
+      MiniDropdown(roleFmt, ROLE_OPTIONS.map { roleDisplay(it) }) { label -> onRole2(label) }
     }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-      MiniDropdown("Sort: ${BROWSER_STATS.firstOrNull { it.key == sortKey }?.label ?: sortKey}",
+      MiniDropdown(sortFmt,
         BROWSER_STATS.map { it.key }) { onSort(it) }
-      Text(if (descending) "DESC" else "ASC", color = RFColors.AccentRed, fontSize = 11.sp,
+      Text(if (descending) descText else ascText, color = RFColors.AccentRed, fontSize = 11.sp,
         modifier = Modifier.clickable { onDir(!descending) })
       conditions.forEach { c ->
         Text("${c.statKey} ${c.op} ${c.value}  ✕", color = RFColors.TextPrimary, fontSize = 11.sp,
           modifier = Modifier.clip(RoundedCornerShape(4.dp)).background(Color(0xFF2A2A2A)).padding(horizontal = 6.dp, vertical = 2.dp)
             .clickable { onRemove(c) })
       }
-      if (conditions.size < 5) ConditionAdder { onAdd(it) }
+      if (conditions.size < 5) ConditionAdder(valHint, addText) { onAdd(it) }
     }
   }
 }
@@ -559,15 +646,15 @@ private fun MiniField(label: String, value: String, onChange: (String) -> Unit, 
 }
 
 @Composable
-private fun ConditionAdder(onAdd: (BrowserCondition) -> Unit) {
+private fun ConditionAdder(valHint: String, addText: String, onAdd: (BrowserCondition) -> Unit) {
   var stat by remember { mutableStateOf("damage") }
   var op by remember { mutableStateOf(">") }
   var value by remember { mutableStateOf("") }
   Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
     MiniDropdown(BROWSER_STATS.firstOrNull { it.key == stat }?.label ?: stat, BROWSER_STATS.map { it.key }) { stat = it }
     MiniDropdown(op, OP_OPTIONS) { op = it }
-    MiniField("val (5M)", value, { value = it }, Modifier.width(90.dp))
-    Text("+ Add", color = RFColors.AccentRed, fontSize = 11.sp, modifier = Modifier.clickable {
+    MiniField(valHint, value, { value = it }, Modifier.width(90.dp))
+    Text(addText, color = RFColors.AccentRed, fontSize = 11.sp, modifier = Modifier.clickable {
       val v = parseShorthand(value)
       onAdd(BrowserCondition(stat, op, v))
       value = ""
@@ -597,12 +684,12 @@ private fun buildExportSummary(
   return "player-browser_${stamp}_${slug.take(80)}.csv"
 }
 
-private fun showCsvSaveChooser(suggestedName: String, onFileSelected: (File) -> Unit, onCancel: () -> Unit = {}) {
+private fun showCsvSaveChooser(suggestedName: String, dialogTitle: String, onFileSelected: (File) -> Unit, onCancel: () -> Unit = {}) {
   try {
     SwingUtilities.invokeLater {
       try {
         val chooser = JFileChooser()
-        chooser.dialogTitle = "Export Player Browser CSV"
+            chooser.dialogTitle = dialogTitle
         chooser.selectedFile = File(suggestedName)
         chooser.setFileFilter(FileNameExtensionFilter("CSV (*.csv)", "csv"))
         val parent = wm_parentWindow()

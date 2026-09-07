@@ -47,6 +47,9 @@ import com.reoky.raidframer.core.helpers.rememberSectionPulse
 import com.reoky.raidframer.ui.LocalDragLock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.player_search_placeholder
 
 /**
  * Compact unified player search box (extracted from the Player Browser search pattern).
@@ -60,7 +63,7 @@ fun PlayerSearchBox(
   currentName: String,
   onSelect: (String) -> Unit,
   modifier: Modifier = Modifier,
-  placeholder: String = "Enter player name...",
+  placeholder: String? = null,
   highlightBorder: Boolean = false
 ) {
   val dragLock = LocalDragLock.current
@@ -172,7 +175,7 @@ fun PlayerSearchBox(
           contentAlignment = Alignment.CenterStart
         ) {
           if (search.isEmpty()) {
-            Text(placeholder, color = Color.White.copy(alpha = 0.55f), fontSize = 11.sp, maxLines = 1)
+            Text(placeholder ?: stringResource(Res.string.player_search_placeholder), color = Color.White.copy(alpha = 0.55f), fontSize = 11.sp, maxLines = 1)
           }
           innerTextField()
         }

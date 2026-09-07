@@ -1458,6 +1458,7 @@
     <string name="raid_loot_breakdown_title">루트 상세 (많은 순 → 적은 순)</string>
     <string name="tray_pocket_journal">포켓 저널</string>
     <string name="tray_player_browser">플레이어 브라우저</string>
+    <string name="tray_session_history">세션 기록</string>
     <string name="tray_help">도움말</string>
     <string name="tray_take_screenshot">스크린샷 촬영</string>
     <string name="tray_copy_screenshot_to_clipboard">스크린샷 클립보드에 복사</string>

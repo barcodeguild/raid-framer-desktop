@@ -63,6 +63,25 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.session_history_apply
+import raid_framer_desktop.composeapp.generated.resources.session_history_cancel
+import raid_framer_desktop.composeapp.generated.resources.session_history_checked_all_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_checked_count_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_clear
+import raid_framer_desktop.composeapp.generated.resources.session_history_export_csv
+import raid_framer_desktop.composeapp.generated.resources.session_history_export_dialog_title
+import raid_framer_desktop.composeapp.generated.resources.session_history_filter_by_day
+import raid_framer_desktop.composeapp.generated.resources.session_history_full_history_count_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_next
+import raid_framer_desktop.composeapp.generated.resources.session_history_no_sessions
+import raid_framer_desktop.composeapp.generated.resources.session_history_nothing_to_export
+import raid_framer_desktop.composeapp.generated.resources.session_history_pager_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_prev
+import raid_framer_desktop.composeapp.generated.resources.session_history_select_all
+import raid_framer_desktop.composeapp.generated.resources.session_history_select_none
+import raid_framer_desktop.composeapp.generated.resources.session_history_session_stats_suffix
 
 private val WellShape = RoundedCornerShape(8.dp)
 private val dateFmt = DateTimeFormatter.ofPattern("MMM d, yyyy")
@@ -103,6 +122,22 @@ fun PlayerHistoryFlyout(
   LaunchedEffect(datePickerOpen) { dragLock.value = datePickerOpen }
 
   val selected = filtered.getOrNull(selectedIndex)
+  val fullHistoryText = stringResource(Res.string.session_history_full_history_count_format, filtered.size)
+  val exportCsvText = stringResource(Res.string.session_history_export_csv)
+  val filterByDayText = stringResource(Res.string.session_history_filter_by_day)
+  val clearText = stringResource(Res.string.session_history_clear)
+  val applyText = stringResource(Res.string.session_history_apply)
+  val cancelText = stringResource(Res.string.session_history_cancel)
+  val noSessionsText = stringResource(Res.string.session_history_no_sessions)
+  val prevText = stringResource(Res.string.session_history_prev, "<")
+  val nextText = stringResource(Res.string.session_history_next, ">")
+  val pagerText = stringResource(Res.string.session_history_pager_format, selectedIndex + 1, filtered.size)
+  val statsSuffix = stringResource(Res.string.session_history_session_stats_suffix)
+  val checkedAllText = stringResource(Res.string.session_history_checked_all_format)
+  val checkedCountText = stringResource(Res.string.session_history_checked_count_format, checked.size)
+  val selectToggleText = if (checked.size == filtered.size && filtered.isNotEmpty()) stringResource(Res.string.session_history_select_none) else stringResource(Res.string.session_history_select_all)
+  val nothingToExportText = stringResource(Res.string.session_history_nothing_to_export)
+  val exportDialogTitle = stringResource(Res.string.session_history_export_dialog_title)
 
   Column(
     modifier = modifier
@@ -118,19 +153,19 @@ fun PlayerHistoryFlyout(
       horizontalArrangement = Arrangement.SpaceBetween
     ) {
       Text(
-        "Full History (${filtered.size})",
+        fullHistoryText,
         color = RFColors.TextPrimary,
         fontSize = 13.sp,
         fontWeight = FontWeight.Bold
       )
       Row(verticalAlignment = Alignment.CenterVertically) {
         Button(
-          onClick = { exportSessions(filtered, checked, playerName, wm, onExportStatus = { exportStatus = it }) },
+          onClick = { exportSessions(filtered, checked, playerName, wm, { exportStatus = it }, nothingToExportText, exportDialogTitle) },
           colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
           modifier = Modifier.height(30.dp),
           contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 0.dp)
         ) {
-          Text("Export CSV", color = Color.White, fontSize = 11.sp)
+          Text(exportCsvText, color = Color.White, fontSize = 11.sp)
         }
         Spacer(Modifier.width(4.dp))
         Text(
@@ -162,7 +197,7 @@ fun PlayerHistoryFlyout(
         shape = RoundedCornerShape(6.dp)
       ) {
         Text(
-          selectedDate?.format(dateFmt) ?: "Filter by day",
+          selectedDate?.format(dateFmt) ?: filterByDayText,
           color = Color.White,
           fontSize = 11.sp,
           maxLines = 1,
@@ -171,17 +206,17 @@ fun PlayerHistoryFlyout(
       }
       if (selectedDate != null) {
         TextButton(onClick = { selectedDate = null }, modifier = Modifier.height(32.dp)) {
-          Text("Clear", color = RFColors.TextSecondary, fontSize = 11.sp)
+          Text(clearText, color = RFColors.TextSecondary, fontSize = 11.sp)
         }
       }
       Spacer(Modifier.weight(1f))
       Text(
-        if (checked.isEmpty()) "Checked: all" else "Checked: ${checked.size}",
+        if (checked.isEmpty()) checkedAllText else checkedCountText,
         color = RFColors.TextTertiary,
         fontSize = 10.sp
       )
       Text(
-        if (checked.size == filtered.size && filtered.isNotEmpty()) "None" else "All",
+        selectToggleText,
         color = RFColors.AccentRed,
         fontSize = 11.sp,
         modifier = Modifier.clickable {
@@ -203,11 +238,11 @@ fun PlayerHistoryFlyout(
             }
             datePickerOpen = false
             dragLock.value = false
-          }) { Text("Apply", color = RFColors.AccentRed) }
+          }) { Text(applyText, color = RFColors.AccentRed) }
         },
         dismissButton = {
           Material3TextButton(onClick = { datePickerOpen = false; dragLock.value = false }) {
-            Text("Cancel", color = Color.White)
+            Text(cancelText, color = Color.White)
           }
         }
       ) { DatePicker(state = pickerState) }
@@ -217,7 +252,7 @@ fun PlayerHistoryFlyout(
 
     // Session list
     if (filtered.isEmpty()) {
-      Text("No historical sessions.", color = RFColors.TextDisabled, fontSize = 12.sp)
+      Text(noSessionsText, color = RFColors.TextDisabled, fontSize = 12.sp)
     } else {
       LazyColumn(
         modifier = Modifier.fillMaxWidth().heightIn(max = 220.dp),
@@ -275,19 +310,19 @@ fun PlayerHistoryFlyout(
         horizontalArrangement = Arrangement.SpaceBetween
       ) {
         Text(
-          "< Prev",
+          prevText,
           color = if (selectedIndex > 0) RFColors.AccentRed else RFColors.TextDisabled,
           fontSize = 12.sp,
           fontWeight = FontWeight.Bold,
           modifier = Modifier.clickable(enabled = selectedIndex > 0) { selectedIndex-- }.padding(4.dp)
         )
         Text(
-          "${selectedIndex + 1} / ${filtered.size}",
+          pagerText,
           color = RFColors.TextSecondary,
           fontSize = 11.sp
         )
         Text(
-          "Next >",
+          nextText,
           color = if (selectedIndex < filtered.size - 1) RFColors.AccentRed else RFColors.TextDisabled,
           fontSize = 12.sp,
           fontWeight = FontWeight.Bold,
@@ -300,7 +335,7 @@ fun PlayerHistoryFlyout(
       // Preview using the same SessionTotals component
       selected?.let { s ->
         Text(
-          rowFmt.format(Date(s.sessionEnd)) + " session stats",
+          rowFmt.format(Date(s.sessionEnd)) + " $statsSuffix",
           color = RFColors.TextPrimary,
           fontSize = 12.sp,
           fontWeight = FontWeight.Bold,
@@ -322,11 +357,13 @@ private fun exportSessions(
   checked: Set<Long>,
   playerName: String,
   wm: WindowManager?,
-  onExportStatus: (String) -> Unit
+  onExportStatus: (String) -> Unit,
+  nothingToExportText: String,
+  exportDialogTitle: String
 ) {
   val rows = if (checked.isEmpty()) filtered else filtered.filter { checked.contains(it.sessionStart) }
   if (rows.isEmpty()) {
-    onExportStatus("Nothing to export.")
+    onExportStatus(nothingToExportText)
     return
   }
   val stamp = SimpleDateFormat("yyyyMMdd-HHmm", Locale.US).format(Date())
@@ -337,7 +374,7 @@ private fun exportSessions(
   wm?.closeWindow(OverlayType.PLAYER_CARD)
   showCsvSaveChooser(
     suggestedName = suggested,
-    dialogTitle = "Export Player History CSV",
+    dialogTitle = exportDialogTitle,
     onFileSelected = { file ->
       exportScope.launch {
         try {

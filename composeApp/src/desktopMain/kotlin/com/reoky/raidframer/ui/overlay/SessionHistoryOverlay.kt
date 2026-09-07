@@ -72,6 +72,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.stringResource
+import raid_framer_desktop.composeapp.generated.resources.Res
+import raid_framer_desktop.composeapp.generated.resources.session_history_apply
+import raid_framer_desktop.composeapp.generated.resources.session_history_cancel
+import raid_framer_desktop.composeapp.generated.resources.session_history_checked_count_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_clear
+import raid_framer_desktop.composeapp.generated.resources.session_history_export_all_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_export_checked_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_export_csv
+import raid_framer_desktop.composeapp.generated.resources.session_history_export_dialog_title
+import raid_framer_desktop.composeapp.generated.resources.session_history_filter_by_day
+import raid_framer_desktop.composeapp.generated.resources.session_history_next
+import raid_framer_desktop.composeapp.generated.resources.session_history_no_sessions
+import raid_framer_desktop.composeapp.generated.resources.session_history_nothing_to_export
+import raid_framer_desktop.composeapp.generated.resources.session_history_pager_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_prev
+import raid_framer_desktop.composeapp.generated.resources.session_history_select_all
+import raid_framer_desktop.composeapp.generated.resources.session_history_select_none
+import raid_framer_desktop.composeapp.generated.resources.session_history_select_prompt
+import raid_framer_desktop.composeapp.generated.resources.session_history_title_format
 
 private val dateFmt = DateTimeFormatter.ofPattern("MMM d, yyyy")
 private val rowFmt = SimpleDateFormat("MMM d HH:mm", Locale.US)
@@ -112,12 +132,29 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
   }
   LaunchedEffect(datePickerOpen) { dragLock.value = datePickerOpen }
 
-  val selected = filtered.getOrNull(selectedIndex)
   val name = playerName ?: ""
+  val titleText = stringResource(Res.string.session_history_title_format, name, filtered.size)
+  val filterByDayText = stringResource(Res.string.session_history_filter_by_day)
+  val clearText = stringResource(Res.string.session_history_clear)
+  val exportCsvText = stringResource(Res.string.session_history_export_csv)
+  val applyText = stringResource(Res.string.session_history_apply)
+  val cancelText = stringResource(Res.string.session_history_cancel)
+  val noSessionsText = stringResource(Res.string.session_history_no_sessions)
+  val selectPromptText = stringResource(Res.string.session_history_select_prompt)
+  val prevText = stringResource(Res.string.session_history_prev, "<")
+  val nextText = stringResource(Res.string.session_history_next, ">")
+  val pagerText = stringResource(Res.string.session_history_pager_format, selectedIndex + 1, filtered.size)
+  val exportAllText = stringResource(Res.string.session_history_export_all_format, filtered.size)
+  val exportCheckedText = stringResource(Res.string.session_history_export_checked_format, checked.size)
+  val selectToggleText = if (checked.size == filtered.size && filtered.isNotEmpty()) stringResource(Res.string.session_history_select_none) else stringResource(Res.string.session_history_select_all)
+  val nothingToExportText = stringResource(Res.string.session_history_nothing_to_export)
+  val exportDialogTitle = stringResource(Res.string.session_history_export_dialog_title)
+
+  val selected = filtered.getOrNull(selectedIndex)
 
   Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0E0E0E).copy(alpha = 0.97f))) {
     TitleBarComponent(
-      title = "Session History — $name (${filtered.size})",
+      title = titleText,
       onClose = { wm?.closeWindow(OverlayType.SESSION_HISTORY) }
     )
 
@@ -149,22 +186,22 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
         shape = RoundedCornerShape(6.dp)
       ) {
         Text(
-          selectedDate?.format(dateFmt) ?: "Filter by day",
+          selectedDate?.format(dateFmt) ?: filterByDayText,
           color = Color.White, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis
         )
       }
       if (selectedDate != null) {
         TextButton(onClick = { selectedDate = null }, modifier = Modifier.height(32.dp)) {
-          Text("Clear", color = RFColors.TextSecondary, fontSize = 11.sp)
+          Text(clearText, color = RFColors.TextSecondary, fontSize = 11.sp)
         }
       }
       Spacer(Modifier.weight(1f))
       Text(
-        if (checked.isEmpty()) "Export: all ${filtered.size}" else "Export: ${checked.size}",
+        if (checked.isEmpty()) exportAllText else exportCheckedText,
         color = RFColors.TextTertiary, fontSize = 10.sp
       )
       Text(
-        if (checked.size == filtered.size && filtered.isNotEmpty()) "None" else "All",
+        selectToggleText,
         color = RFColors.AccentRed, fontSize = 11.sp,
         modifier = Modifier.clickable {
           checked = if (checked.size == filtered.size) emptySet()
@@ -173,13 +210,13 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
       )
       Button(
         onClick = {
-          exportHistorySessions(filtered, checked, name, wm) { exportStatus = it }
+          exportHistorySessions(filtered, checked, name, wm, { exportStatus = it }, nothingToExportText, exportDialogTitle)
         },
         colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
         modifier = Modifier.height(32.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 0.dp)
       ) {
-        Text("Export CSV", color = Color.White, fontSize = 11.sp)
+        Text(exportCsvText, color = Color.White, fontSize = 11.sp)
       }
     }
     if (datePickerOpen) {
@@ -195,11 +232,11 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
             }
             datePickerOpen = false
             dragLock.value = false
-          }) { Text("Apply", color = RFColors.AccentRed) }
+          }) { Text(applyText, color = RFColors.AccentRed) }
         },
         dismissButton = {
           Material3TextButton(onClick = { datePickerOpen = false; dragLock.value = false }) {
-            Text("Cancel", color = Color.White)
+            Text(cancelText, color = Color.White)
           }
         }
       ) { DatePicker(state = pickerState) }
@@ -217,7 +254,7 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
       // Left: session list
       Column(Modifier.weight(0.9f).fillMaxHeight()) {
         if (filtered.isEmpty()) {
-          Text("No historical sessions.", color = RFColors.TextDisabled, fontSize = 12.sp)
+          Text(noSessionsText, color = RFColors.TextDisabled, fontSize = 12.sp)
         } else {
           LazyColumn(
             modifier = Modifier.fillMaxSize()
@@ -277,7 +314,7 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
           .verticalScroll(rememberScrollState())
       ) {
         if (selected == null) {
-          Text("Select a session to preview.", color = RFColors.TextTertiary, fontSize = 12.sp)
+          Text(selectPromptText, color = RFColors.TextTertiary, fontSize = 12.sp)
         } else {
           Row(
             modifier = Modifier.fillMaxWidth(),
@@ -285,14 +322,14 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
             horizontalArrangement = Arrangement.SpaceBetween
           ) {
             Text(
-              "< Prev",
+              prevText,
               color = if (selectedIndex > 0) RFColors.AccentRed else RFColors.TextDisabled,
               fontSize = 12.sp, fontWeight = FontWeight.Bold,
               modifier = Modifier.clickable(enabled = selectedIndex > 0) { selectedIndex-- }.padding(4.dp)
             )
-            Text("${selectedIndex + 1} / ${filtered.size}", color = RFColors.TextSecondary, fontSize = 11.sp)
+            Text(pagerText, color = RFColors.TextSecondary, fontSize = 11.sp)
             Text(
-              "Next >",
+              nextText,
               color = if (selectedIndex < filtered.size - 1) RFColors.AccentRed else RFColors.TextDisabled,
               fontSize = 12.sp, fontWeight = FontWeight.Bold,
               modifier = Modifier.clickable(enabled = selectedIndex < filtered.size - 1) { selectedIndex++ }.padding(4.dp)
@@ -311,11 +348,13 @@ private fun exportHistorySessions(
   checked: Set<Long>,
   playerName: String,
   wm: WindowManager?,
-  onExportStatus: (String) -> Unit
+  onExportStatus: (String) -> Unit,
+  nothingToExportText: String,
+  exportDialogTitle: String
 ) {
   val rows = if (checked.isEmpty()) filtered else filtered.filter { checked.contains(it.sessionStart) }
   if (rows.isEmpty()) {
-    onExportStatus("Nothing to export.")
+    onExportStatus(nothingToExportText)
     return
   }
   val stamp = SimpleDateFormat("yyyyMMdd-HHmm", Locale.US).format(Date())
@@ -327,7 +366,7 @@ private fun exportHistorySessions(
   wm?.closeWindow(OverlayType.SESSION_HISTORY)
   showCsvSaveChooser(
     suggestedName = suggested,
-    dialogTitle = "Export Player History CSV",
+    dialogTitle = exportDialogTitle,
     onFileSelected = { file ->
       exportScope.launch {
         try {

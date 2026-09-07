@@ -1264,11 +1264,11 @@ private fun RenderingBackendSettingsPanel() {
   val activeBackend = renderApi.name
 
   SettingsSection(
-    title = "Rendering Backend",
-    description = "Choose the Skiko graphics backend. The selected backend is applied after restarting Raid Framer."
+    title = stringResource(Res.string.settings_rendering_backend_title),
+    description = stringResource(Res.string.settings_rendering_backend_description)
   ) {
     Text(
-      text = "Current backend: $activeBackend",
+      text = stringResource(Res.string.settings_rendering_backend_current_format, activeBackend),
       color = RFColors.UpdateGreen,
       fontSize = 12.sp,
       modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
@@ -1282,7 +1282,7 @@ private fun RenderingBackendSettingsPanel() {
         textStyle = TextStyle(color = Color.White),
         onValueChange = {},
         readOnly = true,
-        label = { Text("Backend", color = Color.White) },
+        label = { Text(stringResource(Res.string.settings_rendering_backend_label), color = Color.White) },
         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
         modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(

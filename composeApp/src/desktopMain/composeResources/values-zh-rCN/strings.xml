@@ -1458,6 +1458,7 @@
     <string name="raid_loot_breakdown_title">战利品明细（从多到少）</string>
     <string name="tray_pocket_journal">口袋日记</string>
     <string name="tray_player_browser">玩家浏览器</string>
+    <string name="tray_session_history">会话记录</string>
     <string name="tray_help">帮助</string>
     <string name="tray_take_screenshot">截图</string>
     <string name="tray_copy_screenshot_to_clipboard">复制截图到剪贴板</string>
