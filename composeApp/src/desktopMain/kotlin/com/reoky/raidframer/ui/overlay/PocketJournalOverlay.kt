@@ -78,6 +78,8 @@ import com.reoky.raidframer.core.helpers.exportPocketEntryAndReveal
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.LocalDragLock
+import com.reoky.raidframer.ui.component.PocketNav
+
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -110,7 +112,11 @@ private val journalDateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy 
 fun PocketJournalOverlay(wm: WindowManager? = null) {
   val scope = rememberCoroutineScope()
   val entries by PocketDraftCoordinator.entries.collectAsState()
-  var search by remember { mutableStateOf("") }
+  var search by remember {
+    val pending = PocketNav.journalQuery
+    PocketNav.journalQuery = null
+    mutableStateOf(pending ?: "")
+  }
   var activeTag by remember { mutableStateOf<String?>(null) }
   var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
   var datePickerOpen by remember { mutableStateOf(false) }

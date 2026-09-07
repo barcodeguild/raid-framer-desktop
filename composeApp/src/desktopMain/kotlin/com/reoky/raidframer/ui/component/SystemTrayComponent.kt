@@ -210,7 +210,7 @@ fun ApplicationScope.SystemTrayComponent(
           menuVisible = false
           wm.openWindow(OverlayType.POCKET_JOURNAL)
         }
-        TrayMenuItem(iconCode = "\uf0c0", text = playerBrowserStr) {
+        TrayMenuItem(iconCode = "\uf2bd", text = playerBrowserStr) {
           menuVisible = false
           wm.openWindow(OverlayType.PLAYER_BROWSER)
         }
