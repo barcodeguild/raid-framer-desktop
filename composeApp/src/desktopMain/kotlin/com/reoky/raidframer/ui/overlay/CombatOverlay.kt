@@ -60,6 +60,8 @@ import com.reoky.raidframer.ui.dialog.updateDialog
 import com.reoky.raidframer.ui.export.ImageExportInteractor
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.ui.window.Popup
@@ -95,6 +97,8 @@ import raid_framer_desktop.composeapp.generated.resources.tray_dragon_breaths
 import raid_framer_desktop.composeapp.generated.resources.tray_raid_management
 import raid_framer_desktop.composeapp.generated.resources.tray_battle_graph
 import raid_framer_desktop.composeapp.generated.resources.tray_pocket_journal
+import raid_framer_desktop.composeapp.generated.resources.tray_player_browser
+import raid_framer_desktop.composeapp.generated.resources.tray_session_history
 import raid_framer_desktop.composeapp.generated.resources.tray_help
 import raid_framer_desktop.composeapp.generated.resources.tray_take_screenshot
 import raid_framer_desktop.composeapp.generated.resources.app_tray_reset_positions
@@ -428,94 +432,86 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                     border = BorderStroke(1.dp, Color.Gray),
                     modifier = Modifier.hoverable(interactionSource = menuPopupInteractionSource)
                   ) {
-                    Row(modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)) {
-                      // Left column — Overlays
-                      Column(modifier = Modifier.weight(1f)) {
-                        // Session actions
-                        if (isRecording.value) {
-                          MenuPopupItem("\uf0c7", stringResource(Res.string.tray_save_session)) {
-                            showMenuPopup = false
-                            PlayerCacheInteractor.stopSession()
-                            val currentSessionStart = RFConfig.state.value.lastSessionStart
-                            RFConfig.update { it.copy(lastSessionStart = 0L, previousSessionStart = currentSessionStart) }
-                          }
-                          MenuPopupItem("\uf057", stringResource(Res.string.tray_abort_session), textColor = RFColors.AccentRed) {
-                            showMenuPopup = false
-                            PlayerCacheInteractor.abortSession()
-                          }
-                        } else {
-                          MenuPopupItem("\uf067", stringResource(Res.string.tray_new_session)) {
-                            showMenuPopup = false
-                            wm?.openWindow(OverlayType.NEW_SESSION)
-                          }
-                        }
-                        MenuPopupDivider()
-                        MenuPopupItem("\uf6d5", stringResource(Res.string.tray_dragon_breaths)) {
-                          showMenuPopup = false
-                          wm?.openWindow(OverlayType.POKEMON)
-                        }
-                        MenuPopupItem("\uf0c0", stringResource(Res.string.tray_raid_management)) {
-                          showMenuPopup = false
-                          wm?.openWindow(OverlayType.RAID)
-                        }
-                        MenuPopupItem("\uf080", stringResource(Res.string.battle_graph_summary)) {
-                          showMenuPopup = false
-                          wm?.openWindow(OverlayType.SUMMARY)
-                        }
-                        MenuPopupItem("\uf030", stringResource(Res.string.tray_take_screenshot)) {
-                          showMenuPopup = false
-                          scope.launch {
-                            delay(150)
-                            val image = GameSnippingService.capture(
-                              windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.COMBAT))
-                            ) ?: return@launch
-                            val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
-                            ScreenshotPreviewCoordinator.show(result)
-                            wm?.openWindow(OverlayType.SCREENSHOT_PREVIEW)
-                          }
-                        }
-                        MenuPopupItem("\uf0c8", stringResource(Res.string.tray_copy_screenshot_to_clipboard)) {
-                          showMenuPopup = false
-                          scope.launch {
-                            delay(150)
-                            val image = GameSnippingService.capture(
-                              windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.COMBAT))
-                            ) ?: return@launch
-                            copyImageToClipboard(image)
-                          }
-                        }
-
+                    // Flatten menu into entries so column count adapts to available height.
+                    // Each entry: icon, label resolver, color flag, divider-after, action.
+                    data class MenuEntry(
+                      val icon: String,
+                      val label: String,
+                      val isDestructive: Boolean = false,
+                      val dividerAfter: Boolean = false,
+                      val onClick: () -> Unit
+                    )
+                    val dismissAnd = { block: () -> Unit -> { showMenuPopup = false; block() } }
+                    val entries = buildList {
+                      if (isRecording.value) {
+                        add(MenuEntry("\uf0c7", stringResource(Res.string.tray_save_session), onClick = dismissAnd {
+                          PlayerCacheInteractor.stopSession()
+                          val s = RFConfig.state.value.lastSessionStart
+                          RFConfig.update { it.copy(lastSessionStart = 0L, previousSessionStart = s) }
+                        }))
+                        add(MenuEntry("\uf057", stringResource(Res.string.tray_abort_session), isDestructive = true, dividerAfter = true, onClick = dismissAnd {
+                          PlayerCacheInteractor.abortSession()
+                        }))
+                      } else {
+                        add(MenuEntry("\uf067", stringResource(Res.string.tray_new_session), dividerAfter = true, onClick = dismissAnd {
+                          wm?.openWindow(OverlayType.NEW_SESSION)
+                        }))
                       }
-                      MenuPopupVerticalDivider()
-                      // Right column — App & Actions
-                      Column(modifier = Modifier.weight(1f)) {
-                        MenuPopupItem("\uf02d", stringResource(Res.string.tray_pocket_journal)) {
-                          showMenuPopup = false
-                          wm?.openWindow(OverlayType.POCKET_JOURNAL)
+                      add(MenuEntry("\uf6d5", stringResource(Res.string.tray_dragon_breaths), onClick = dismissAnd { wm?.openWindow(OverlayType.POKEMON) }))
+                      add(MenuEntry("\uf0c0", stringResource(Res.string.tray_raid_management), onClick = dismissAnd { wm?.openWindow(OverlayType.RAID) }))
+                      add(MenuEntry("\uf080", stringResource(Res.string.battle_graph_summary), onClick = dismissAnd { wm?.openWindow(OverlayType.SUMMARY) }))
+                      add(MenuEntry("\uf030", stringResource(Res.string.tray_take_screenshot), onClick = dismissAnd {
+                        scope.launch {
+                          delay(150)
+                          val image = GameSnippingService.capture(
+                            windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.COMBAT))
+                          ) ?: return@launch
+                          val result = PocketWindowCaptureCoordinator.saveSnippet(image) ?: return@launch
+                          ScreenshotPreviewCoordinator.show(result)
+                          wm?.openWindow(OverlayType.SCREENSHOT_PREVIEW)
                         }
-                        if (config.performanceBattleGraphEnabled) {
-                          MenuPopupItem("\uf1e0", stringResource(Res.string.tray_battle_graph)) {
-                            showMenuPopup = false
-                            wm?.openWindow(OverlayType.BATTLE_GRAPH)
+                      }))
+                      add(MenuEntry("\uf0c8", stringResource(Res.string.tray_copy_screenshot_to_clipboard), onClick = dismissAnd {
+                        scope.launch {
+                          delay(150)
+                          val image = GameSnippingService.capture(
+                            windowsToHide = listOfNotNull(wm?.nativeWindow(OverlayType.COMBAT))
+                          ) ?: return@launch
+                          copyImageToClipboard(image)
+                        }
+                      }))
+                      add(MenuEntry("\uf02d", stringResource(Res.string.tray_pocket_journal), onClick = dismissAnd { wm?.openWindow(OverlayType.POCKET_JOURNAL) }))
+                      add(MenuEntry("\uf0c0", stringResource(Res.string.tray_player_browser), onClick = dismissAnd { wm?.openWindow(OverlayType.PLAYER_BROWSER) }))
+                      add(MenuEntry("\uf1da", stringResource(Res.string.tray_session_history), onClick = dismissAnd { wm?.openWindow(OverlayType.SESSION_HISTORY) }))
+                      if (config.performanceBattleGraphEnabled) {
+                        add(MenuEntry("\uf1e0", stringResource(Res.string.tray_battle_graph), onClick = dismissAnd { wm?.openWindow(OverlayType.BATTLE_GRAPH) }))
+                      }
+                      add(MenuEntry("\uf128", stringResource(Res.string.tray_help), onClick = dismissAnd { wm?.openWindow(OverlayType.HELP) }))
+                      add(MenuEntry("\uf013", stringResource(Res.string.general_settings), dividerAfter = true, onClick = dismissAnd { wm?.openWindow(OverlayType.SETTINGS) }))
+                      add(MenuEntry("\uf0e2", stringResource(Res.string.app_tray_reset_positions), onClick = dismissAnd { wm?.resetAllWindowPositions() }))
+                      add(MenuEntry("\uf011", stringResource(Res.string.general_exit), onClick = dismissAnd { scope.launch { quitAfterSessionStop() } }))
+                    }
+                    BoxWithConstraints(modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)) {
+                      // 26.dp rows + ~1.dp dividers; pick 2 cols when it fits, else 3.
+                      // Vertical scroll remains as final fallback for very short windows.
+                      val rowH = 26.dp
+                      val twoColRows = (entries.size + 1) / 2
+                      val twoColHeight = rowH * twoColRows
+                      val columnCount = if (twoColHeight <= maxHeight) 2 else 3
+                      val chunked = entries.chunked((entries.size + columnCount - 1) / columnCount)
+                      Row(
+                        modifier = Modifier
+                          .heightIn(max = maxHeight)
+                          .verticalScroll(rememberScrollState())
+                      ) {
+                        chunked.forEachIndexed { ci, chunk ->
+                          if (ci > 0) MenuPopupVerticalDivider()
+                          Column(modifier = Modifier.weight(1f)) {
+                            chunk.forEach { e ->
+                              MenuPopupItem(e.icon, e.label, textColor = if (e.isDestructive) RFColors.AccentRed else Color.White, onClick = e.onClick)
+                              if (e.dividerAfter) MenuPopupDivider()
+                            }
                           }
-                        }
-                        MenuPopupItem("\uf128", stringResource(Res.string.tray_help)) {
-                          showMenuPopup = false
-                          wm?.openWindow(OverlayType.HELP)
-                        }
-                        MenuPopupItem("\uf013", stringResource(Res.string.general_settings)) {
-                          showMenuPopup = false
-                          wm?.openWindow(OverlayType.SETTINGS)
-                        }
-
-                        MenuPopupDivider()
-                        MenuPopupItem("\uf0e2", stringResource(Res.string.app_tray_reset_positions)) {
-                          showMenuPopup = false
-                          wm?.resetAllWindowPositions()
-                        }
-                        MenuPopupItem("\uf011", stringResource(Res.string.general_exit)) {
-                          showMenuPopup = false
-                          scope.launch { quitAfterSessionStop() }
                         }
                       }
                     }

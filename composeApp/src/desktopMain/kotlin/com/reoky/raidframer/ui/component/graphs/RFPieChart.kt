@@ -2,6 +2,7 @@ package com.reoky.raidframer.ui.component.graphs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -13,6 +14,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.reoky.raidframer.core.helpers.RFGraphColor
+import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.helpers.pickNextColor
 import io.github.koalaplot.core.pie.DefaultSlice
 import io.github.koalaplot.core.pie.PieChart
@@ -58,7 +60,15 @@ fun RFPieChart(
         .size(chartSize)
         .background(Color.Transparent)
         .graphicsLayer(alpha = 0.99f) // Forces hardware acceleration
+      ,
+      contentAlignment = Alignment.Center
     ) {
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(8.dp)
+          .background(Color.White.copy(alpha = 0.05f), shape = CircleShape)
+      )
       PieChart(
         values = values,
         modifier = Modifier.fillMaxSize(),
@@ -93,7 +103,7 @@ fun RFPieChart(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-              text = "${slice.label}: ${slice.value.toInt()}",
+              text = "${slice.label}: ${slice.value.toLong().humanReadableAbbreviation()}",
               style = MaterialTheme.typography.body2,
               color = Color.White,
               modifier = Modifier.weight(1f)

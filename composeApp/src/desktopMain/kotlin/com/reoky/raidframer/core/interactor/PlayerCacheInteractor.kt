@@ -2322,6 +2322,42 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
+  val factionDamageComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionDamageTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionHealsComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionHealTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+  val factionCCComparisonAll: StateFlow<Map<String, Float>> = cardSnapshots
+    .map {
+      val totals = aggregateSessionLongByFaction({ it.sessionCCTotal })
+      mapOf(
+        Faction.HARANYA.value to (totals[Faction.HARANYA] ?: 0f),
+        Faction.NUIA.value to (totals[Faction.NUIA] ?: 0f),
+        Faction.PIRATE.value to (totals[Faction.PIRATE] ?: 0f)
+      )
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
   // PvP performance score pumps (one per faction)
   val topPerformanceHaranya: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cardList ->

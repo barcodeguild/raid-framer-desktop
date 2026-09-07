@@ -1394,6 +1394,8 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="player_card_journal_entries">Taschen-Journal</string>
     <string name="raid_loot_breakdown_title">Beute-Übersicht (Meiste → Wenigste)</string>
     <string name="tray_pocket_journal">Taschen-Journal</string>
+    <string name="tray_player_browser">Spieler-Browser</string>
+    <string name="tray_session_history">Sitzungsverlauf</string>
     <string name="tray_help">Hilfe</string>
     <string name="tray_take_screenshot">Screenshot erstellen</string>
     <string name="tray_copy_screenshot_to_clipboard">Screenshot in Zwischenablage kopieren</string>
@@ -1401,5 +1403,67 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="pocket_editor_toolbar_target_guild">Gilde</string>
     <string name="raid_join_raid_hint">Treten Sie einem Raid bei, um Raid-Funktionen zu nutzen…</string>
     <string name="raid_tab_buffs">Buffs</string>
+    <!-- Player Browser -->
+    <string name="player_browser_title">Spieler-Browser (Lebenszeit-Gesamtwerte)</string>
+    <string name="player_browser_search_placeholder">Spieler oder Gilden suchen...</string>
+    <string name="player_browser_hint">Lebenszeitwerte pro Spieler — nutze den Sitzungsverlauf für sitzungsweise Statistiken.</string>
+    <string name="player_browser_export_rows_format">Zeilen als CSV exportieren: %1$s</string>
+    <string name="player_browser_export_dialog_title">Spieler-Browser CSV exportieren</string>
+    <string name="player_browser_loading">Spieler werden geladen...</string>
+    <string name="player_browser_count_format">%1$s Spieler (Lebenszeit)</string>
+    <string name="player_browser_lifetime_totals">GESAMTWERTE (LEBENSZEIT)</string>
+    <string name="player_browser_nothing_to_export">Nichts zu exportieren.</string>
+    <string name="player_browser_role_label_format">Rolle: %1$s</string>
+    <string name="player_browser_role_all">Alle</string>
+    <string name="player_browser_role_none">Keine</string>
+    <string name="player_browser_role_raid_lead">Raid-Lead</string>
+    <string name="player_browser_role_guild_lead">Gilden-Lead</string>
+    <string name="player_browser_role_hero">Held</string>
+    <string name="player_browser_role_shot_caller">Ansager</string>
+    <string name="player_browser_filter_faction_format">Fraktion: %1$s</string>
+    <string name="player_browser_filter_seen_format">Gesehen: %1$s</string>
+    <string name="player_browser_filter_guild">Gilde</string>
+    <string name="player_browser_filter_spec">Spezialisierung</string>
+    <string name="player_browser_filter_min_gs">Min-GS</string>
+    <string name="player_browser_filter_val_hint">Wert (5M)</string>
+    <string name="player_browser_add">+ Hinzufügen</string>
+    <string name="player_browser_sort_format">Sortieren: %1$s</string>
+    <string name="player_browser_faction_format">Fraktion: %1$s</string>
+    <string name="player_browser_seen_format">Gesehen: %1$s</string>
+    <string name="player_browser_desc">ABST</string>
+    <string name="player_browser_asc">AUFST</string>
+    <string name="player_search_placeholder">Spielernamen eingeben...</string>
+    <!-- Session History -->
+    <string name="session_history_title_format">Sitzungsgeschichte — %1$s (%2$s)</string>
+    <string name="session_history_filter_by_day">Nach Tag filtern</string>
+    <string name="session_history_clear">Leeren</string>
+    <string name="session_history_apply">Anwenden</string>
+    <string name="session_history_cancel">Abbrechen</string>
+    <string name="session_history_export_csv">CSV exportieren</string>
+    <string name="session_history_export_all_format">Exportieren: alle %1$s</string>
+    <string name="session_history_export_checked_format">Exportieren: %1$s</string>
+    <string name="session_history_checked_all_format">Geprüft: alle</string>
+    <string name="session_history_checked_count_format">Geprüft: %1$s</string>
+    <string name="session_history_select_all">Alle</string>
+    <string name="session_history_select_none">Keine</string>
+    <string name="session_history_no_sessions">Keine früheren Sitzungen.</string>
+    <string name="session_history_select_prompt">Wähle eine Sitzung zur Vorschau.</string>
+    <string name="session_history_prev">%1$s Zurück</string>
+    <string name="session_history_next">Weiter %1$s</string>
+    <string name="session_history_pager_format">%1$s / %2$s</string>
+    <string name="session_history_nothing_to_export">Nichts zu exportieren.</string>
+    <string name="session_history_export_dialog_title">Spielerverlauf als CSV exportieren</string>
+    <string name="session_history_full_history">Voller Verlauf</string>
+    <string name="session_history_full_history_count_format">Voller Verlauf (%1$s)</string>
+    <string name="session_history_session_stats_suffix">Sitzungsstatistiken</string>
+    <string name="csv_export_default_title">CSV exportieren</string>
+    <string name="session_history_row_summary_format">DMG %1$s • Heilung %2$s • CC %3$s • K %4$s/%5$s</string>
+    <!-- Settings -->
+    <string name="settings_rendering_backend_title">Rendering-Backend</string>
+    <string name="settings_rendering_backend_description">Wähle das Skiko-Grafik-Backend. Das gewählte Backend wird nach einem Neustart von Raid Framer übernommen.</string>
+    <string name="settings_rendering_backend_current_format">Aktuelles Backend: %1$s</string>
+    <string name="settings_rendering_backend_label">Backend</string>
+    <string name="settings_ram_graph_jvm_heap">JVM-Heap</string>
+    <string name="settings_ram_graph_process_memory">Prozessspeicher</string>
 </resources>
 

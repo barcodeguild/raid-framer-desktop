@@ -126,6 +126,7 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_session_sc
 import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_last_n
 import raid_framer_desktop.composeapp.generated.resources.player_card_session_scope_previous
 import raid_framer_desktop.composeapp.generated.resources.player_card_totals_scope_label
+import raid_framer_desktop.composeapp.generated.resources.session_history_full_history
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_buffs
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_cc
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_charms
@@ -285,6 +286,18 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
       rightActions = {
         val cardInteractionSource = remember { MutableInteractionSource() }
         val isCardHovered by cardInteractionSource.collectIsHoveredAsState()
+        IconButton(
+          onClick = { wm?.openWindow(OverlayType.SESSION_HISTORY) },
+          modifier = Modifier.size(28.dp).padding(end = 2.dp)
+        ) {
+          Text(
+            "\uf1da",
+            color = if (isCardHovered) RFColors.AccentRed else Color.White,
+            fontFamily = FontsHelper.faSolid(),
+            fontSize = 14.sp,
+            modifier = Modifier.hoverable(cardInteractionSource)
+          )
+        }
         IconButton(
           onClick = {
             scope.launch {
@@ -716,6 +729,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
             TotalsFiltersBar(
               selectedScope = selectedScope,
               onScopeChange = { selectedScope = it },
+              onHistoryClick = { wm?.openWindow(OverlayType.SESSION_HISTORY) },
               modifier = Modifier.fillMaxWidth()
             )
 
@@ -1130,6 +1144,7 @@ private fun SessionScopeDropdown(
 private fun TotalsFiltersBar(
   selectedScope: SessionScope,
   onScopeChange: (SessionScope) -> Unit,
+  onHistoryClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   Surface(
@@ -1152,11 +1167,18 @@ private fun TotalsFiltersBar(
           fontSize = 13.sp,
           fontWeight = FontWeight.Bold
         )
-        Text(
-          text = stringResource(Res.string.player_inventory_controls_hint),
-          color = RFColors.TextTertiary,
-          fontSize = 11.sp
-        )
+        androidx.compose.material.TextButton(
+          onClick = onHistoryClick,
+          contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+          modifier = Modifier.height(24.dp)
+        ) {
+          Text(
+            text = stringResource(Res.string.session_history_full_history),
+            color = RFColors.AccentRed,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+          )
+        }
       }
 
       SessionScopeDropdown(

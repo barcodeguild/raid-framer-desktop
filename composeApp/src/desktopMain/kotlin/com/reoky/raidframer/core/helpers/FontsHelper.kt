@@ -2,6 +2,7 @@ package com.reoky.raidframer.core.helpers
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
@@ -28,8 +29,8 @@ object FontsHelper {
 }
 
 @Composable
-fun FaIcon(codepoint: String, useSolid: Boolean = true, sizeSp: Int = 20) {
+fun FaIcon(codepoint: String, useSolid: Boolean = true, sizeSp: Int = 20, color: Color = Color.White) {
   // We call the Composable font loaders here
   val family = if (useSolid) FontsHelper.faSolid() else FontsHelper.faRegular()
-  Text(text = codepoint, style = TextStyle(fontFamily = family, fontSize = sizeSp.sp))
+  Text(text = codepoint, style = TextStyle(fontFamily = family, fontSize = sizeSp.sp, color = color))
 }
