@@ -1403,5 +1403,67 @@
     <string name="pocket_editor_toolbar_target_guild">Гильдия</string>
     <string name="raid_join_raid_hint">Присоединитесь к рейду, чтобы использовать рейдовые функции…</string>
     <string name="raid_tab_buffs">Баффы</string>
+    <!-- Player Browser -->
+    <string name="player_browser_title">Браузер игроков (Суммарная статистика)</string>
+    <string name="player_browser_search_placeholder">Поиск игроков или гильдий...</string>
+    <string name="player_browser_hint">Суммарная статистика по игрокам — для статистики по сессиям используйте Историю сессий.</string>
+    <string name="player_browser_export_rows_format">Экспортировать строк в CSV: %1$s</string>
+    <string name="player_browser_export_dialog_title">Экспорт CSV браузера игроков</string>
+    <string name="player_browser_loading">Загрузка игроков...</string>
+    <string name="player_browser_count_format">Игроков: %1$s (суммарно)</string>
+    <string name="player_browser_lifetime_totals">СУММАРНАЯ СТАТИСТИКА</string>
+    <string name="player_browser_nothing_to_export">Нечего экспортировать.</string>
+    <string name="player_browser_role_label_format">Роль: %1$s</string>
+    <string name="player_browser_role_all">Все</string>
+    <string name="player_browser_role_none">Нет</string>
+    <string name="player_browser_role_raid_lead">Рейд-лид</string>
+    <string name="player_browser_role_guild_lead">Гильд-лид</string>
+    <string name="player_browser_role_hero">Герой</string>
+    <string name="player_browser_role_shot_caller">Координатор</string>
+    <string name="player_browser_filter_faction_format">Фракция: %1$s</string>
+    <string name="player_browser_filter_seen_format">Был(а): %1$s</string>
+    <string name="player_browser_filter_guild">Гильдия</string>
+    <string name="player_browser_filter_spec">Класс</string>
+    <string name="player_browser_filter_min_gs">Мин. GS</string>
+    <string name="player_browser_filter_val_hint">знач. (5M)</string>
+    <string name="player_browser_add">+ Добавить</string>
+    <string name="player_browser_sort_format">Сортировка: %1$s</string>
+    <string name="player_browser_faction_format">Фракция: %1$s</string>
+    <string name="player_browser_seen_format">Был(а): %1$s</string>
+    <string name="player_browser_desc">УБЫВ</string>
+    <string name="player_browser_asc">ВОЗР</string>
+    <string name="player_search_placeholder">Введите имя игрока...</string>
+    <!-- Session History -->
+    <string name="session_history_title_format">История сессий — %1$s (%2$s)</string>
+    <string name="session_history_filter_by_day">Фильтр по дню</string>
+    <string name="session_history_clear">Очистить</string>
+    <string name="session_history_apply">Применить</string>
+    <string name="session_history_cancel">Отмена</string>
+    <string name="session_history_export_csv">Экспорт CSV</string>
+    <string name="session_history_export_all_format">Экспорт: все %1$s</string>
+    <string name="session_history_export_checked_format">Экспорт: %1$s</string>
+    <string name="session_history_checked_all_format">Отмечено: все</string>
+    <string name="session_history_checked_count_format">Отмечено: %1$s</string>
+    <string name="session_history_select_all">Все</string>
+    <string name="session_history_select_none">Нет</string>
+    <string name="session_history_no_sessions">Нет прошлых сессий.</string>
+    <string name="session_history_select_prompt">Выберите сессию для просмотра.</string>
+    <string name="session_history_prev">%1$s Назад</string>
+    <string name="session_history_next">Далее %1$s</string>
+    <string name="session_history_pager_format">%1$s / %2$s</string>
+    <string name="session_history_nothing_to_export">Нечего экспортировать.</string>
+    <string name="session_history_export_dialog_title">Экспорт CSV истории игрока</string>
+    <string name="session_history_full_history">Полная история</string>
+    <string name="session_history_full_history_count_format">Полная история (%1$s)</string>
+    <string name="session_history_session_stats_suffix">статистика сессии</string>
+    <string name="csv_export_default_title">Экспорт CSV</string>
+    <string name="session_history_row_summary_format">Урон %1$s • Лечение %2$s • CC %3$s • K %4$s/%5$s</string>
+    <!-- Settings -->
+    <string name="settings_rendering_backend_title">Графический backend</string>
+    <string name="settings_rendering_backend_description">Выберите графический backend Skiko. Выбранный backend будет применён после перезапуска Raid Framer.</string>
+    <string name="settings_rendering_backend_current_format">Текущий backend: %1$s</string>
+    <string name="settings_rendering_backend_label">Backend</string>
+    <string name="settings_ram_graph_jvm_heap">Куча JVM</string>
+    <string name="settings_ram_graph_process_memory">Память процесса</string>
 </resources>
 

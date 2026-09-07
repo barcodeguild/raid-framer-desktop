@@ -79,6 +79,7 @@ import raid_framer_desktop.composeapp.generated.resources.session_history_no_ses
 import raid_framer_desktop.composeapp.generated.resources.session_history_nothing_to_export
 import raid_framer_desktop.composeapp.generated.resources.session_history_pager_format
 import raid_framer_desktop.composeapp.generated.resources.session_history_prev
+import raid_framer_desktop.composeapp.generated.resources.session_history_row_summary_format
 import raid_framer_desktop.composeapp.generated.resources.session_history_select_all
 import raid_framer_desktop.composeapp.generated.resources.session_history_select_none
 import raid_framer_desktop.composeapp.generated.resources.session_history_session_stats_suffix
@@ -290,7 +291,14 @@ fun PlayerHistoryFlyout(
                 overflow = TextOverflow.Ellipsis
               )
               Text(
-                "Dmg ${s.totalDamage.humanReadableAbbreviation()} • Heal ${s.totalHealing.humanReadableAbbreviation()} • CC ${s.totalCC} • K ${s.totalKills}/${s.totalKillsKB}",
+                stringResource(
+                  Res.string.session_history_row_summary_format,
+                  s.totalDamage.humanReadableAbbreviation(),
+                  s.totalHealing.humanReadableAbbreviation(),
+                  s.totalCC.toString(),
+                  s.totalKills.toString(),
+                  s.totalKillsKB.toString()
+                ),
                 color = RFColors.TextTertiary,
                 fontSize = 10.sp,
                 maxLines = 1,

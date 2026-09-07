@@ -133,7 +133,9 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
   var allPlayers by remember { mutableStateOf<List<PlayerCacheEntity>>(emptyList()) }
   var loading by remember { mutableStateOf(true) }
   var search by remember { mutableStateOf("") }
-  var dropdownOpen by remember { mutableStateOf(false) }
+  var dropdownVisible by remember { mutableStateOf(false) }
+  // Keyboard highlight within the suggestion list. -1 = follow the text field.
+  var activeIndex by remember { mutableStateOf(-1) }
   var selected by remember { mutableStateOf<PlayerCacheEntity?>(null) }
   var flyout by remember { mutableStateOf<PlayerCacheEntity?>(null) }
   var sortKey by remember { mutableStateOf("damage") }
@@ -160,8 +162,17 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
     loading = false
   }
 
-  LaunchedEffect(dropdownOpen, search) {
-    dragLock.value = dropdownOpen || search.isNotEmpty()
+  var searchFocused by remember { mutableStateOf(false) }
+
+  // Reconcile drag lock from the two sources of truth (dropdown + focus)
+  // instead of writing it from individual event handlers, which raced and
+  // left it stuck (e.g. pickPlayer() cleared it, then a stale focus event set it).
+  fun syncBrowserDragLock() {
+    dragLock.value = dropdownVisible || searchFocused
+  }
+
+  LaunchedEffect(dropdownVisible, searchFocused) {
+    syncBrowserDragLock()
   }
 
   LaunchedEffect(Unit) {
@@ -199,11 +210,17 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
     }.take(8)
   }
 
+  // Clamp the keyboard highlight whenever the list changes.
+  LaunchedEffect(suggestions) {
+    if (activeIndex >= suggestions.size) activeIndex = suggestions.size - 1
+  }
+
   fun pickPlayer(p: PlayerCacheEntity) {
     selected = p
     search = p.playerName
-    dropdownOpen = false
-    dragLock.value = false
+    dropdownVisible = false
+    activeIndex = -1
+    syncBrowserDragLock()
   }
 
   fun openJournalFor(name: String) {
@@ -264,16 +281,49 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
         Column {
           BasicTextField(
             value = search,
-            onValueChange = { search = it; dropdownOpen = true },
+            onValueChange = { search = it; dropdownVisible = true; activeIndex = -1 },
             modifier = Modifier.fillMaxWidth().height(32.dp).focusRequester(focusRequester)
               .background(Color(0xFF1E1E1E), RoundedCornerShape(6.dp))
               .border(1.dp, RFColors.CardBorder, RoundedCornerShape(6.dp))
-              .onFocusChanged { dragLock.value = it.isFocused }
+              .onFocusChanged {
+                searchFocused = it.isFocused
+                syncBrowserDragLock()
+                if (!it.isFocused) {
+                  dropdownVisible = false
+                  activeIndex = -1
+                }
+              }
               .onKeyEvent {
-                if (it.key == Key.Enter) {
-                  suggestions.firstOrNull()?.let { p -> pickPlayer(p) }
-                  true
-                } else false
+                when (it.key) {
+                  Key.Enter -> {
+                    val target = if (activeIndex in suggestions.indices) suggestions[activeIndex]
+                    else suggestions.firstOrNull()
+                    target?.let { p -> pickPlayer(p) }
+                    true
+                  }
+                  Key.Escape -> {
+                    dropdownVisible = false
+                    activeIndex = -1
+                    syncBrowserDragLock()
+                    true
+                  }
+                  Key.DirectionDown -> {
+                    if (suggestions.isNotEmpty()) {
+                      dropdownVisible = true
+                      activeIndex = (activeIndex + 1) % suggestions.size
+                    }
+                    true
+                  }
+                  Key.DirectionUp -> {
+                    if (suggestions.isNotEmpty()) {
+                      dropdownVisible = true
+                      activeIndex = if (activeIndex < 0) suggestions.size - 1
+                      else (activeIndex - 1 + suggestions.size) % suggestions.size
+                    }
+                    true
+                  }
+                  else -> false
+                }
               },
             singleLine = true,
             textStyle = TextStyle(fontSize = 12.sp, color = Color.White),
@@ -285,16 +335,19 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
               }
             }
           )
-          if (dropdownOpen && suggestions.isNotEmpty()) {
+          if (dropdownVisible && suggestions.isNotEmpty()) {
             Column(
               modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 6.dp))
                 .background(Color(0xFF1E1E1E)).border(1.dp, RFColors.CardBorder, RoundedCornerShape(bottomStart = 6.dp, bottomEnd = 6.dp))
                 .padding(vertical = 2.dp)
             ) {
-              suggestions.forEach { p ->
+              suggestions.forEachIndexed { index, p ->
+                val highlighted = index == activeIndex
                 Row(
                   verticalAlignment = Alignment.CenterVertically,
-                  modifier = Modifier.fillMaxWidth().clickable { pickPlayer(p) }
+                  modifier = Modifier.fillMaxWidth()
+                    .background(if (highlighted) RFColors.AccentRed.copy(alpha = 0.25f) else Color.Transparent)
+                    .clickable { pickPlayer(p) }
                     .padding(horizontal = 10.dp, vertical = 5.dp)
                 ) {
                   Text(p.playerName, color = RFColors.TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
@@ -530,14 +583,14 @@ private fun BrowserRow(
 @Composable
 private fun RowScope.JournalFaButton(onClick: () -> Unit) {
   Box(Modifier.padding(2.dp).clip(RoundedCornerShape(4.dp)).clickable { onClick() }.padding(4.dp)) {
-    FaIcon(codepoint = "\uf02d", useSolid = true, sizeSp = 13)
+    FaIcon(codepoint = "\uf02d", useSolid = true, sizeSp = 13, color = RFColors.TextPrimary)
   }
 }
 
 @Composable
 private fun RowScope.EditFaButton(onClick: () -> Unit) {
   Box(Modifier.padding(2.dp).clip(RoundedCornerShape(4.dp)).clickable { onClick() }.padding(4.dp)) {
-    FaIcon(codepoint = "\uf303", useSolid = true, sizeSp = 13)
+    FaIcon(codepoint = "\uf303", useSolid = true, sizeSp = 13, color = RFColors.TextPrimary)
   }
 }
 

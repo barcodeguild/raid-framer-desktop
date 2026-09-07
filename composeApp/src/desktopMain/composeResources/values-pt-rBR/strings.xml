@@ -1403,5 +1403,67 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="pocket_editor_toolbar_target_guild">Guilda</string>
     <string name="raid_join_raid_hint">Entre em uma raid para usar recursos relacionados a raids…</string>
     <string name="raid_tab_buffs">Buffs</string>
+    <!-- Player Browser -->
+    <string name="player_browser_title">Navegador de Jogadores (Totais Acumulados)</string>
+    <string name="player_browser_search_placeholder">Pesquisar jogadores ou guildas...</string>
+    <string name="player_browser_hint">Totais acumulados por jogador — use o Histórico de Sessões para exportar estatísticas por sessão.</string>
+    <string name="player_browser_export_rows_format">Exportar %1$s linhas para CSV</string>
+    <string name="player_browser_export_dialog_title">Exportar CSV do Navegador de Jogadores</string>
+    <string name="player_browser_loading">Carregando jogadores...</string>
+    <string name="player_browser_count_format">%1$s jogadores (acumulado)</string>
+    <string name="player_browser_lifetime_totals">TOTAIS ACUMULADOS</string>
+    <string name="player_browser_nothing_to_export">Nada para exportar.</string>
+    <string name="player_browser_role_label_format">Função: %1$s</string>
+    <string name="player_browser_role_all">Todas</string>
+    <string name="player_browser_role_none">Nenhuma</string>
+    <string name="player_browser_role_raid_lead">Líder de Raid</string>
+    <string name="player_browser_role_guild_lead">Líder de Guilda</string>
+    <string name="player_browser_role_hero">Herói</string>
+    <string name="player_browser_role_shot_caller">Coordenador</string>
+    <string name="player_browser_filter_faction_format">Facção: %1$s</string>
+    <string name="player_browser_filter_seen_format">Visto: %1$s</string>
+    <string name="player_browser_filter_guild">Guilda</string>
+    <string name="player_browser_filter_spec">Classe</string>
+    <string name="player_browser_filter_min_gs">GS mín.</string>
+    <string name="player_browser_filter_val_hint">valor (5M)</string>
+    <string name="player_browser_add">+ Adicionar</string>
+    <string name="player_browser_sort_format">Ordenar: %1$s</string>
+    <string name="player_browser_faction_format">Facção: %1$s</string>
+    <string name="player_browser_seen_format">Visto: %1$s</string>
+    <string name="player_browser_desc">DESC</string>
+    <string name="player_browser_asc">ASC</string>
+    <string name="player_search_placeholder">Digite o nome do jogador...</string>
+    <!-- Session History -->
+    <string name="session_history_title_format">Histórico de Sessões — %1$s (%2$s)</string>
+    <string name="session_history_filter_by_day">Filtrar por dia</string>
+    <string name="session_history_clear">Limpar</string>
+    <string name="session_history_apply">Aplicar</string>
+    <string name="session_history_cancel">Cancelar</string>
+    <string name="session_history_export_csv">Exportar CSV</string>
+    <string name="session_history_export_all_format">Exportar: todas %1$s</string>
+    <string name="session_history_export_checked_format">Exportar: %1$s</string>
+    <string name="session_history_checked_all_format">Marcados: todos</string>
+    <string name="session_history_checked_count_format">Marcados: %1$s</string>
+    <string name="session_history_select_all">Todas</string>
+    <string name="session_history_select_none">Nenhuma</string>
+    <string name="session_history_no_sessions">Sem sessões anteriores.</string>
+    <string name="session_history_select_prompt">Selecione uma sessão para visualizar.</string>
+    <string name="session_history_prev">%1$s Anterior</string>
+    <string name="session_history_next">Próxima %1$s</string>
+    <string name="session_history_pager_format">%1$s / %2$s</string>
+    <string name="session_history_nothing_to_export">Nada para exportar.</string>
+    <string name="session_history_export_dialog_title">Exportar CSV do Histórico do Jogador</string>
+    <string name="session_history_full_history">Histórico Completo</string>
+    <string name="session_history_full_history_count_format">Histórico Completo (%1$s)</string>
+    <string name="session_history_session_stats_suffix">estatísticas da sessão</string>
+    <string name="csv_export_default_title">Exportar CSV</string>
+    <string name="session_history_row_summary_format">Dano %1$s • Cura %2$s • CC %3$s • K %4$s/%5$s</string>
+    <!-- Settings -->
+    <string name="settings_rendering_backend_title">Backend de Renderização</string>
+    <string name="settings_rendering_backend_description">Escolha o backend gráfico Skiko. O backend selecionado é aplicado após reiniciar o Raid Framer.</string>
+    <string name="settings_rendering_backend_current_format">Backend atual: %1$s</string>
+    <string name="settings_rendering_backend_label">Backend</string>
+    <string name="settings_ram_graph_jvm_heap">Heap da JVM</string>
+    <string name="settings_ram_graph_process_memory">Memória do processo</string>
 </resources>
 

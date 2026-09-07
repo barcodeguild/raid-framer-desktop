@@ -1327,12 +1327,12 @@ private fun RamUsagePanel() {
     ) {
       MemoryGraphComponent(
         modifier = Modifier.fillMaxWidth(),
-        title = "JVM heap"
+        title = stringResource(Res.string.settings_ram_graph_jvm_heap)
       )
       Divider(color = RFColors.CardBorder, modifier = Modifier.padding(vertical = 8.dp))
       MemoryGraphComponent(
         modifier = Modifier.fillMaxWidth(),
-        title = "Process memory",
+        title = stringResource(Res.string.settings_ram_graph_process_memory),
         processMemory = true
       )
     }

@@ -1313,7 +1313,7 @@ This will allow the app to use this seed table as a reference for player data.</
 
     <!-- Tray Menu Labels -->
     <string name="tray_pocket_journal">Pocket Journal</string>
-    <string name="tray_player_browser">Player Browser</string>
+    <string name="tray_player_browser">Player Browser (Godness Mode)</string>
     <string name="tray_session_history">Session History</string>
     <string name="tray_dragon_breaths">Dragon Breaths</string>
     <string name="tray_raid_management">Raid Management</string>
@@ -1504,7 +1504,12 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="session_history_full_history">Full History</string>
     <string name="session_history_full_history_count_format">Full History (%1$s)</string>
     <string name="session_history_session_stats_suffix">session stats</string>
+    <string name="session_history_row_summary_format">Dmg %1$s • Heal %2$s • CC %3$s • K %4$s/%5$s</string>
     <string name="csv_export_default_title">Export CSV</string>
+
+    <!-- RAM graph titles -->
+    <string name="settings_ram_graph_jvm_heap">JVM heap</string>
+    <string name="settings_ram_graph_process_memory">Process memory</string>
 
     <!-- Player Browser -->
     <string name="player_browser_title">Player Browser (Lifetime Totals)</string>
