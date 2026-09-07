@@ -358,7 +358,7 @@ private fun TrayMenuItem(iconCode: String, text: String, onClick: () -> Unit) {
       .clickable(onClick = onClick)
       .padding(horizontal = 10.dp)
   ) {
-    FaIcon(codepoint = iconCode, useSolid = true, sizeSp = 13)
+    FaIcon(codepoint = iconCode, useSolid = true, sizeSp = 13, color = MaterialTheme.colorScheme.onSurface)
     Spacer(modifier = Modifier.width(8.dp))
     Text(
       text = text,
