@@ -405,6 +405,9 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="summary_provokes_by_faction">Herausforderung nach Fraktion</string>
     <string name="summary_tiger_strikes_by_faction">Tigerschläge nach Fraktion</string>
     <string name="summary_freezes_by_faction">Einfrieren nach Fraktion</string>
+    <string name="summary_damage_by_faction">Schaden nach Fraktion</string>
+    <string name="summary_heals_by_faction">Heilung nach Fraktion</string>
+    <string name="summary_cc_by_faction">CC nach Fraktion</string>
     <string name="summary_top_silences">Top-Stille</string>
     <string name="summary_top_charms">Top-Verzauberungen</string>
     <string name="summary_top_distresses">Top-Bedrängnisse</string>

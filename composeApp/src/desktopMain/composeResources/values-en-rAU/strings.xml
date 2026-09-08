@@ -404,6 +404,9 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_provokes_by_faction">Provokes by Faction</string>
     <string name="summary_tiger_strikes_by_faction">Tiger Strikes by Faction</string>
     <string name="summary_freezes_by_faction">Freezes by Faction</string>
+    <string name="summary_damage_by_faction">Damage by Faction</string>
+    <string name="summary_heals_by_faction">Heals by Faction</string>
+    <string name="summary_cc_by_faction">CC by Faction</string>
     <string name="summary_top_silences">Top Silences</string>
     <string name="summary_top_charms">Top Charms</string>
     <string name="summary_top_distresses">Top Distresses</string>

@@ -405,6 +405,9 @@
     <string name="summary_provokes_by_faction">진영별 도발</string>
     <string name="summary_tiger_strikes_by_faction">진영별 호랑이 타격</string>
     <string name="summary_freezes_by_faction">진영별 동결</string>
+    <string name="summary_damage_by_faction">진영별 딜</string>
+    <string name="summary_heals_by_faction">진영별 힐</string>
+    <string name="summary_cc_by_faction">진영별 CC</string>
     <string name="summary_top_silences">침묵 순위</string>
     <string name="summary_top_charms">매혹 순위</string>
     <string name="summary_top_distresses">강위축 순위</string>
@@ -1519,6 +1522,20 @@
     <string name="session_history_session_stats_suffix">세션 통계</string>
     <string name="csv_export_default_title">CSV 내보내기</string>
     <string name="session_history_row_summary_format">딜 %1$s • 힐 %2$s • CC %3$s • K %4$s/%5$s</string>
+    <string name="session_history_title">세션 기록</string>
+    <string name="session_history_mode_entire">전체 세션</string>
+    <string name="session_history_mode_player">플레이어 세션</string>
+    <string name="session_history_summary_entire">전체 세션 내보내기 — 세션당 하나의 CSV, 각 파일에 모든 플레이어 포함.</string>
+    <string name="session_history_summary_player">한 플레이어의 세션 내보내기 — 해당 플레이어의 세션별 통계가 담긴 하나의 CSV.</string>
+    <string name="session_history_folder_dialog_title">세션 CSV 폴더 선택</string>
+    <string name="session_history_export_done_format">%2$s에 CSV %1$s개 기록함</string>
+    <string name="session_history_export_failed_format">내보내기 실패: %1$s</string>
+    <string name="session_history_players_format">플레이어 %1$s명</string>
+    <string name="session_history_players_present_format">참가 플레이어 %1$s명</string>
+    <string name="session_history_select_session_prompt">미리 볼 세션을 선택하세요.</string>
+    <string name="session_history_top_dmg_format">최고 딜: %1$s (%2$s)</string>
+    <string name="session_history_top_charms_format">최고 부적: %1$s (%2$s)</string>
+    <string name="session_history_section_totals">세션 합계</string>
     <!-- Settings -->
     <string name="settings_rendering_backend_title">렌더링 백엔드</string>
     <string name="settings_rendering_backend_description">Skiko 그래픽 백엔드를 선택하세요. 선택한 백엔드는 Raid Framer를 다시 시작하면 적용됩니다.</string>

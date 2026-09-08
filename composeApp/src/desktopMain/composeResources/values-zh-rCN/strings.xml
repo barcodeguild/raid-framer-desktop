@@ -404,6 +404,9 @@
     <string name="summary_provokes_by_faction">按阵营挑衅</string>
     <string name="summary_tiger_strikes_by_faction">按阵营猛虎打击</string>
     <string name="summary_freezes_by_faction">按阵营冻结</string>
+    <string name="summary_damage_by_faction">按阵营伤害</string>
+    <string name="summary_heals_by_faction">按阵营治疗</string>
+    <string name="summary_cc_by_faction">按阵营CC</string>
     <string name="summary_top_silences">沉默之王</string>
     <string name="summary_top_charms">魅惑之王</string>
     <string name="summary_top_distresses">苦恼之王</string>
@@ -1519,6 +1522,20 @@
     <string name="session_history_session_stats_suffix">会话统计</string>
     <string name="csv_export_default_title">导出 CSV</string>
     <string name="session_history_row_summary_format">伤害 %1$s • 治疗 %2$s • CC %3$s • K %4$s/%5$s</string>
+    <string name="session_history_title">会话记录</string>
+    <string name="session_history_mode_entire">完整会话</string>
+    <string name="session_history_mode_player">玩家会话</string>
+    <string name="session_history_summary_entire">导出完整会话——每个会话一个 CSV，每个文件包含所有玩家。</string>
+    <string name="session_history_summary_player">导出一名玩家的会话——一个 CSV 包含该玩家各会话统计。</string>
+    <string name="session_history_folder_dialog_title">选择会话 CSV 保存文件夹</string>
+    <string name="session_history_export_done_format">已将 %1$s 个 CSV 写入 %2$s</string>
+    <string name="session_history_export_failed_format">导出失败：%1$s</string>
+    <string name="session_history_players_format">%1$s 名玩家</string>
+    <string name="session_history_players_present_format">%1$s 名玩家在场</string>
+    <string name="session_history_select_session_prompt">选择一个会话进行预览。</string>
+    <string name="session_history_top_dmg_format">最高伤害：%1$s（%2$s）</string>
+    <string name="session_history_top_charms_format">最多护符：%1$s（%2$s）</string>
+    <string name="session_history_section_totals">会话总计</string>
     <!-- Settings -->
     <string name="settings_rendering_backend_title">渲染后端</string>
     <string name="settings_rendering_backend_description">选择 Skiko 图形后端。所选后端将在重启 Raid Framer 后生效。</string>

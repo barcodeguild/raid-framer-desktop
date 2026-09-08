@@ -405,6 +405,9 @@
     <string name="summary_provokes_by_faction">Провокации по фракциям</string>
     <string name="summary_tiger_strikes_by_faction">Удары тигра по фракциям</string>
     <string name="summary_freezes_by_faction">Заморозки по фракциям</string>
+    <string name="summary_damage_by_faction">Урон по фракциям</string>
+    <string name="summary_heals_by_faction">Лечение по фракциям</string>
+    <string name="summary_cc_by_faction">CC по фракциям</string>
     <string name="summary_top_silences">Топ блокировок</string>
     <string name="summary_top_charms">Топ очарований</string>
     <string name="summary_top_distresses">Топ расстройств</string>

@@ -405,6 +405,9 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="summary_provokes_by_faction">Provocações por Facção</string>
     <string name="summary_tiger_strikes_by_faction">Golpes de Tigre por Facção</string>
     <string name="summary_freezes_by_faction">Congelamentos por Facção</string>
+    <string name="summary_damage_by_faction">Dano por Facção</string>
+    <string name="summary_heals_by_faction">Curas por Facção</string>
+    <string name="summary_cc_by_faction">CC por Facção</string>
     <string name="summary_top_silences">Top Silenciamentos</string>
     <string name="summary_top_charms">Top Encantos</string>
     <string name="summary_top_distresses">Top Angústias</string>
