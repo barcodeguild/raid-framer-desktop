@@ -1458,6 +1458,20 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="session_history_session_stats_suffix">Sitzungsstatistiken</string>
     <string name="csv_export_default_title">CSV exportieren</string>
     <string name="session_history_row_summary_format">DMG %1$s • Heilung %2$s • CC %3$s • K %4$s/%5$s</string>
+    <string name="session_history_title">Sitzungsverlauf</string>
+    <string name="session_history_mode_entire">Ganze Sitzungen</string>
+    <string name="session_history_mode_player">Spieler-Sitzungen</string>
+    <string name="session_history_summary_entire">Ganze Sitzungen exportieren — eine CSV pro Sitzung, alle Spieler pro Datei.</string>
+    <string name="session_history_summary_player">Sitzungen eines Spielers exportieren — eine CSV mit den sitzungsweisen Werten dieses Spielers.</string>
+    <string name="session_history_folder_dialog_title">Ordner für Sitzungs-CSVs wählen</string>
+    <string name="session_history_export_done_format">%1$s CSVs nach %2$s geschrieben</string>
+    <string name="session_history_export_failed_format">Export fehlgeschlagen: %1$s</string>
+    <string name="session_history_players_format">%1$s Spieler</string>
+    <string name="session_history_players_present_format">%1$s Spieler anwesend</string>
+    <string name="session_history_select_session_prompt">Wähle eine Sitzung zur Vorschau.</string>
+    <string name="session_history_top_dmg_format">Top-DMG: %1$s (%2$s)</string>
+    <string name="session_history_top_charms_format">Top-Charms: %1$s (%2$s)</string>
+    <string name="session_history_section_totals">SITZUNGSWERTE</string>
     <!-- Settings -->
     <string name="settings_rendering_backend_title">Rendering-Backend</string>
     <string name="settings_rendering_backend_description">Wähle das Skiko-Grafik-Backend. Das gewählte Backend wird nach einem Neustart von Raid Framer übernommen.</string>

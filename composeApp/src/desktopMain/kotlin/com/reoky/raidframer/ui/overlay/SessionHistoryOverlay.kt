@@ -93,21 +93,44 @@ import raid_framer_desktop.composeapp.generated.resources.session_history_export
 import raid_framer_desktop.composeapp.generated.resources.session_history_export_checked_format
 import raid_framer_desktop.composeapp.generated.resources.session_history_export_csv
 import raid_framer_desktop.composeapp.generated.resources.session_history_export_dialog_title
+import raid_framer_desktop.composeapp.generated.resources.session_history_export_done_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_export_failed_format
 import raid_framer_desktop.composeapp.generated.resources.session_history_filter_by_day
+import raid_framer_desktop.composeapp.generated.resources.session_history_folder_dialog_title
+import raid_framer_desktop.composeapp.generated.resources.session_history_mode_entire
+import raid_framer_desktop.composeapp.generated.resources.session_history_mode_player
 import raid_framer_desktop.composeapp.generated.resources.session_history_next
 import raid_framer_desktop.composeapp.generated.resources.session_history_no_sessions
 import raid_framer_desktop.composeapp.generated.resources.session_history_nothing_to_export
 import raid_framer_desktop.composeapp.generated.resources.session_history_pager_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_players_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_players_present_format
 import raid_framer_desktop.composeapp.generated.resources.session_history_prev
 import raid_framer_desktop.composeapp.generated.resources.session_history_row_summary_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_section_totals
 import raid_framer_desktop.composeapp.generated.resources.session_history_select_all
 import raid_framer_desktop.composeapp.generated.resources.session_history_select_none
 import raid_framer_desktop.composeapp.generated.resources.session_history_select_prompt
-import raid_framer_desktop.composeapp.generated.resources.session_history_title_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_select_session_prompt
+import raid_framer_desktop.composeapp.generated.resources.session_history_summary_entire
+import raid_framer_desktop.composeapp.generated.resources.session_history_summary_player
+import raid_framer_desktop.composeapp.generated.resources.session_history_title
+import raid_framer_desktop.composeapp.generated.resources.session_history_top_charms_format
+import raid_framer_desktop.composeapp.generated.resources.session_history_top_dmg_format
 
 private val dateFmt = DateTimeFormatter.ofPattern("MMM d, yyyy")
 private val rowFmt = SimpleDateFormat("MMM d HH:mm", Locale.US)
 private enum class HistoryMode { ENTIRE, PLAYER }
+
+/** Split a resolved "%1$s/%2$s" template on its substituted sentinel args. */
+private fun splitTemplate(resolved: String, first: String, second: String?): Triple<String, String, String> {
+  val i = resolved.indexOf(first).takeIf { it >= 0 } ?: return Triple(resolved, "", "")
+  val head = resolved.substring(0, i)
+  val rest = resolved.substring(i + first.length)
+  if (second == null) return Triple(head, "", rest.replace(first, first))
+  val j = rest.indexOf(second).takeIf { it >= 0 } ?: return Triple(head, rest, "")
+  return Triple(head, rest.substring(0, j), rest.substring(j + second.length))
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,13 +154,14 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
   val noSessionsText = stringResource(Res.string.session_history_no_sessions)
   val nothingToExportText = stringResource(Res.string.session_history_nothing_to_export)
   val exportDialogTitle = stringResource(Res.string.session_history_export_dialog_title)
+  val historyTitleText = stringResource(Res.string.session_history_title)
 
   fun dateOf(millis: Long) = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
   fun matchesDate(end: Long) = selectedDate == null || dateOf(end) == selectedDate
 
   Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0E0E0E).copy(alpha = 0.97f))) {
     TitleBarComponent(
-      title = "Session History",
+      title = historyTitleText,
       onClose = { wm?.closeWindow(OverlayType.SESSION_HISTORY) }
     )
 
@@ -202,14 +226,19 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
 }
 
 @Composable
-private fun ModeSegment(mode: HistoryMode, onMode: (HistoryMode) -> Unit) {
+private fun ModeSegment(
+  mode: HistoryMode,
+  onMode: (HistoryMode) -> Unit,
+  entireText: String = stringResource(Res.string.session_history_mode_entire),
+  playerText: String = stringResource(Res.string.session_history_mode_player)
+) {
   Row(
     modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color(0xFF1E1E1E))
       .border(1.dp, RFColors.CardBorder, RoundedCornerShape(8.dp)).padding(2.dp),
     horizontalArrangement = Arrangement.spacedBy(2.dp)
   ) {
-    SegmentBtn("Entire Sessions", mode == HistoryMode.ENTIRE) { onMode(HistoryMode.ENTIRE) }
-    SegmentBtn("Player Sessions", mode == HistoryMode.PLAYER) { onMode(HistoryMode.PLAYER) }
+    SegmentBtn(entireText, mode == HistoryMode.ENTIRE) { onMode(HistoryMode.ENTIRE) }
+    SegmentBtn(playerText, mode == HistoryMode.PLAYER) { onMode(HistoryMode.PLAYER) }
   }
 }
 
@@ -327,12 +356,25 @@ private fun EntireSessionsView(
 
   val topDmg = remember(roster) { roster.maxByOrNull { it.totalDamage } }
   val topCharm = remember(roster) { roster.maxByOrNull { it.totalCharms } }
-  val statusText = if (checked.isEmpty()) "Export: all ${filtered.size}" else "Export: ${checked.size}"
-  val toggleText = if (checked.size == filtered.size && filtered.isNotEmpty()) "None" else "All"
+  val exportAllTextEntire = stringResource(Res.string.session_history_export_all_format, filtered.size)
+  val exportCheckedTextEntire = stringResource(Res.string.session_history_export_checked_format, checked.size)
+  val toggleAllText = stringResource(Res.string.session_history_select_all)
+  val toggleNoneText = stringResource(Res.string.session_history_select_none)
+  val statusText = if (checked.isEmpty()) exportAllTextEntire else exportCheckedTextEntire
+  val toggleText = if (checked.size == filtered.size && filtered.isNotEmpty()) toggleNoneText else toggleAllText
+  val summaryEntireText = stringResource(Res.string.session_history_summary_entire)
+  val folderDialogTitle = stringResource(Res.string.session_history_folder_dialog_title)
+  val selectSessionPromptText = stringResource(Res.string.session_history_select_session_prompt)
+  val sectionTotalsText = stringResource(Res.string.session_history_section_totals)
+  // Export status lines are computed in a Dispatchers.IO coroutine where
+  // stringResource cannot run. Snapshot plain format parts from the resolved
+  // templates here, then reassemble below without re-entering composition.
+  val exportDoneParts = splitTemplate(stringResource(Res.string.session_history_export_done_format, 0, "-"), "0", "-")
+  val exportFailedParts = splitTemplate(stringResource(Res.string.session_history_export_failed_format, "-"), "-", null)
 
   ControlStrip(
     mode = mode, onMode = onMode,
-    summaryText = "Export entire sessions — one CSV per session, all players in each file.",
+    summaryText = summaryEntireText,
     filterLabel = selectedDate?.format(dateFmt) ?: filterByDayText, clearText = clearText,
     hasDate = selectedDate != null,
     onFilter = { dragLock.value = true; onDatePickerOpen(true) }, onClear = { onSelectDate(null) },
@@ -345,7 +387,7 @@ private fun EntireSessionsView(
       val exportScope = CoroutineScope(Dispatchers.IO)
       wm?.closeWindow(OverlayType.SESSION_HISTORY)
       showFolderChooser(
-        dialogTitle = "Select folder for session CSVs",
+        dialogTitle = folderDialogTitle,
         onFolderSelected = { folder ->
           exportScope.launch {
             try {
@@ -353,8 +395,12 @@ private fun EntireSessionsView(
               val bySession = rows.groupBy { it.sessionStart }
               val out = exportSessionsToFolder(bySession, folder)
               try { Desktop.getDesktop().open(out) } catch (e: Exception) { }
-              onExportStatus("Wrote ${bySession.size} CSVs to ${out.name}")
-            } catch (e: Exception) { onExportStatus("Export failed: ${e.message}") }
+              val doneMsg = exportDoneParts.let { (a, b, c) -> "$a${bySession.size}$b${out.name}$c" }
+              withContext(Dispatchers.Main) { onExportStatus(doneMsg) }
+            } catch (e: Exception) {
+              val failMsg = exportFailedParts.let { (a, _, c) -> "$a${e.message ?: ""}$c" }
+              withContext(Dispatchers.Main) { onExportStatus(failMsg) }
+            }
             withContext(Dispatchers.Main) { wm?.openWindow(OverlayType.SESSION_HISTORY) }
           }
         },
@@ -381,11 +427,12 @@ private fun EntireSessionsView(
             verticalArrangement = Arrangement.spacedBy(2.dp)
           ) {
             itemsIndexed(filtered, key = { _, s -> s.sessionStart }) { i, s ->
+              val rowSubtitle = stringResource(Res.string.session_history_players_format, s.playerCount)
               SessionRowCard(
                 title = rowFmt.format(Date(s.sessionEnd)) +
                   (if (s.sessionType.isNotBlank()) " · ${s.sessionType}" else "") +
                   (if (s.sessionTitle.isNotBlank()) " · ${s.sessionTitle}" else ""),
-                subtitle = "${s.playerCount} players",
+                subtitle = rowSubtitle,
                 checked = checked.contains(s.sessionStart), selected = i == selectedIndex,
                 onCheck = { on -> checked = if (on) checked + s.sessionStart else checked - s.sessionStart },
                 onSelect = { selectedIndex = i }
@@ -400,7 +447,7 @@ private fun EntireSessionsView(
           .verticalScroll(rememberScrollState())
       ) {
         if (selected == null) {
-          Text("Select a session to preview.", color = RFColors.TextTertiary, fontSize = 12.sp)
+          Text(selectSessionPromptText, color = RFColors.TextTertiary, fontSize = 12.sp)
         } else {
           Text(
             rowFmt.format(Date(selected.sessionEnd)) +
@@ -408,9 +455,9 @@ private fun EntireSessionsView(
               (if (selected.sessionTitle.isNotBlank()) " · ${selected.sessionTitle}" else ""),
             color = RFColors.TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold
           )
-          Text("${roster.size} players present", color = RFColors.TextSecondary, fontSize = 11.sp)
-          if (topDmg != null) Text("Top dmg: ${topDmg.playerName} (${topDmg.totalDamage.humanReadableAbbreviation()})", color = RFColors.TextTertiary, fontSize = 10.sp)
-          if (topCharm != null && (topCharm.totalCharms > 0)) Text("Top charms: ${topCharm.playerName} (${topCharm.totalCharms})", color = RFColors.TextTertiary, fontSize = 10.sp)
+          Text(stringResource(Res.string.session_history_players_present_format, roster.size), color = RFColors.TextSecondary, fontSize = 11.sp)
+          if (topDmg != null) Text(stringResource(Res.string.session_history_top_dmg_format, topDmg.playerName, topDmg.totalDamage.humanReadableAbbreviation()), color = RFColors.TextTertiary, fontSize = 10.sp)
+          if (topCharm != null && (topCharm.totalCharms > 0)) Text(stringResource(Res.string.session_history_top_charms_format, topCharm.playerName, topCharm.totalCharms.toString()), color = RFColors.TextTertiary, fontSize = 10.sp)
           Spacer(Modifier.height(6.dp))
           // Resolve specs for skill-tree icons (batched, cached per roster).
           val specsByName by produceState<Map<String, SpecType?>>(initialValue = emptyMap(), key1 = roster.map { it.playerName }) {
@@ -443,7 +490,7 @@ private fun EntireSessionsView(
             Text(fp.playerName, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
             Text("✕", color = RFColors.TextTertiary, fontSize = 13.sp, modifier = Modifier.clickable { flyoutPlayer = null }.padding(4.dp))
           }
-          Text("SESSION TOTALS", color = RFColors.TextTertiary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+          Text(sectionTotalsText, color = RFColors.TextTertiary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
           Spacer(Modifier.height(4.dp))
           SessionStatGrid(SessionTotals.fromEntity(fp), columns = 1)
         }
@@ -546,6 +593,7 @@ private fun PlayerSessionsView(
   val exportCheckedText = stringResource(Res.string.session_history_export_checked_format, checked.size)
   val selectToggleText = if (checked.size == filtered.size && filtered.isNotEmpty()) stringResource(Res.string.session_history_select_none) else stringResource(Res.string.session_history_select_all)
   val selectPromptText = stringResource(Res.string.session_history_select_prompt)
+  val summaryPlayerText = stringResource(Res.string.session_history_summary_player)
 
   Row(
     modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
@@ -556,7 +604,7 @@ private fun PlayerSessionsView(
   }
   ControlStrip(
     mode = mode, onMode = onMode,
-    summaryText = "Export one player's sessions — one CSV with that player's per-session stats.",
+    summaryText = summaryPlayerText,
     filterLabel = selectedDate?.format(dateFmt) ?: filterByDayText, clearText = clearText,
     hasDate = selectedDate != null,
     onFilter = { dragLock.value = true; onDatePickerOpen(true) }, onClear = { onSelectDate(null) },

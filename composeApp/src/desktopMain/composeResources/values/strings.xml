@@ -1313,7 +1313,7 @@ This will allow the app to use this seed table as a reference for player data.</
 
     <!-- Tray Menu Labels -->
     <string name="tray_pocket_journal">Pocket Journal</string>
-    <string name="tray_player_browser">Player Browser (Godness Mode)</string>
+    <string name="tray_player_browser">Player Browser</string>
     <string name="tray_session_history">Session History</string>
     <string name="tray_dragon_breaths">Dragon Breaths</string>
     <string name="tray_raid_management">Raid Management</string>
@@ -1505,6 +1505,20 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="session_history_full_history_count_format">Full History (%1$s)</string>
     <string name="session_history_session_stats_suffix">session stats</string>
     <string name="session_history_row_summary_format">Dmg %1$s • Heal %2$s • CC %3$s • K %4$s/%5$s</string>
+    <string name="session_history_title">Session History</string>
+    <string name="session_history_mode_entire">Entire Sessions</string>
+    <string name="session_history_mode_player">Player Sessions</string>
+    <string name="session_history_summary_entire">Export entire sessions — one CSV per session, all players in each file.</string>
+    <string name="session_history_summary_player">Export one player\'s sessions — one CSV with that player\'s per-session stats.</string>
+    <string name="session_history_folder_dialog_title">Select folder for session CSVs</string>
+    <string name="session_history_export_done_format">Wrote %1$s CSVs to %2$s</string>
+    <string name="session_history_export_failed_format">Export failed: %1$s</string>
+    <string name="session_history_players_format">%1$s players</string>
+    <string name="session_history_players_present_format">%1$s players present</string>
+    <string name="session_history_select_session_prompt">Select a session to preview.</string>
+    <string name="session_history_top_dmg_format">Top dmg: %1$s (%2$s)</string>
+    <string name="session_history_top_charms_format">Top charms: %1$s (%2$s)</string>
+    <string name="session_history_section_totals">SESSION TOTALS</string>
     <string name="csv_export_default_title">Export CSV</string>
 
     <!-- RAM graph titles -->

@@ -1458,6 +1458,20 @@ Isso permitirá que o app use esta tabela seed como referência para dados de jo
     <string name="session_history_session_stats_suffix">estatísticas da sessão</string>
     <string name="csv_export_default_title">Exportar CSV</string>
     <string name="session_history_row_summary_format">Dano %1$s • Cura %2$s • CC %3$s • K %4$s/%5$s</string>
+    <string name="session_history_title">Histórico de Sessões</string>
+    <string name="session_history_mode_entire">Sessões Inteiras</string>
+    <string name="session_history_mode_player">Sessões do Jogador</string>
+    <string name="session_history_summary_entire">Exportar sessões inteiras — um CSV por sessão, todos os jogadores em cada arquivo.</string>
+    <string name="session_history_summary_player">Exportar sessões de um jogador — um CSV com as estatísticas desse jogador por sessão.</string>
+    <string name="session_history_folder_dialog_title">Selecione a pasta para os CSVs das sessões</string>
+    <string name="session_history_export_done_format">%1$s CSVs gravados em %2$s</string>
+    <string name="session_history_export_failed_format">Falha na exportação: %1$s</string>
+    <string name="session_history_players_format">%1$s jogadores</string>
+    <string name="session_history_players_present_format">%1$s jogadores presentes</string>
+    <string name="session_history_select_session_prompt">Selecione uma sessão para visualizar.</string>
+    <string name="session_history_top_dmg_format">Maior dano: %1$s (%2$s)</string>
+    <string name="session_history_top_charms_format">Mais charms: %1$s (%2$s)</string>
+    <string name="session_history_section_totals">TOTAIS DA SESSÃO</string>
     <!-- Settings -->
     <string name="settings_rendering_backend_title">Backend de Renderização</string>
     <string name="settings_rendering_backend_description">Escolha o backend gráfico Skiko. O backend selecionado é aplicado após reiniciar o Raid Framer.</string>

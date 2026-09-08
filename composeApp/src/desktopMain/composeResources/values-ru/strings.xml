@@ -1458,6 +1458,20 @@
     <string name="session_history_session_stats_suffix">статистика сессии</string>
     <string name="csv_export_default_title">Экспорт CSV</string>
     <string name="session_history_row_summary_format">Урон %1$s • Лечение %2$s • CC %3$s • K %4$s/%5$s</string>
+    <string name="session_history_title">История сессий</string>
+    <string name="session_history_mode_entire">Целые сессии</string>
+    <string name="session_history_mode_player">Сессии игрока</string>
+    <string name="session_history_summary_entire">Экспорт целых сессий — один CSV на сессию, все игроки в каждом файле.</string>
+    <string name="session_history_summary_player">Экспорт сессий игрока — один CSV со статистикой этого игрока по сессиям.</string>
+    <string name="session_history_folder_dialog_title">Выберите папку для CSV сессий</string>
+    <string name="session_history_export_done_format">Записано CSV (%1$s) в %2$s</string>
+    <string name="session_history_export_failed_format">Ошибка экспорта: %1$s</string>
+    <string name="session_history_players_format">Игроков: %1$s</string>
+    <string name="session_history_players_present_format">Присутствует игроков: %1$s</string>
+    <string name="session_history_select_session_prompt">Выберите сессию для просмотра.</string>
+    <string name="session_history_top_dmg_format">Топ урон: %1$s (%2$s)</string>
+    <string name="session_history_top_charms_format">Топ чармы: %1$s (%2$s)</string>
+    <string name="session_history_section_totals">ИТОГИ СЕССИИ</string>
     <!-- Settings -->
     <string name="settings_rendering_backend_title">Графический backend</string>
     <string name="settings_rendering_backend_description">Выберите графический backend Skiko. Выбранный backend будет применён после перезапуска Raid Framer.</string>
