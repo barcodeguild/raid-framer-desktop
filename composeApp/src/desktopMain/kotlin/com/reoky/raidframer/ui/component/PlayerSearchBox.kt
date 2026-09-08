@@ -173,22 +173,6 @@ fun PlayerSearchBox(
     } catch (e: Exception) { emptyList() }
   }
 
-  val suggestions = remember(search, allPlayers, currentName) {
-    if (search.isBlank()) emptyList()
-    else {
-      val matches = allPlayers.filter {
-        it.playerName.contains(search, true) || it.lastKnownGuild.contains(search, true)
-      }.take(8)
-      // Exclude the already-selected player so typing never offers a
-      // one-item self-match (whose pick() resets the field mid-typing).
-      matches.filterNot { it.playerName.equals(currentName, ignoreCase = true) && currentName.isNotBlank() }
-    }
-  }
-
-  // Display "Name [Guild]" like the dropdown rows when idle, matching
-  // SessionTypeDropdown's value-if-collapsed pattern. While focused/typing,
-  // show the raw query instead. `search` is the source of truth for the
-  // visible value — no second idleDisplay branch that can go stale.
   val currentEntry = remember(currentName, allPlayers) {
     allPlayers.firstOrNull { it.playerName.equals(currentName, ignoreCase = true) }
   }
@@ -196,6 +180,26 @@ fun PlayerSearchBox(
     if (currentName.isBlank()) "" else if (currentEntry != null && currentEntry.lastKnownGuild.isNotBlank()) {
       "${currentEntry.playerName} [${currentEntry.lastKnownGuild}]"
     } else currentName
+  }
+
+  // Display "Name [Guild]" like the dropdown rows when idle, matching
+  // SessionTypeDropdown's value-if-collapsed pattern. While focused/typing,
+  // show the raw query instead. `search` is the source of truth for the
+  // visible value — no second idleDisplay branch that can go stale.
+  val suggestions = remember(search, allPlayers, currentName, idleDisplay) {
+    // When idle the box shows "Name [Guild]"; strip that suffix so the
+    // filter matches on the typed name instead of the decorated display.
+    val query = if (search == idleDisplay) currentName
+    else search.substringBefore(" [").trim().ifEmpty { search.trim() }
+    if (query.isBlank()) emptyList()
+    else {
+      val matches = allPlayers.filter {
+        it.playerName.contains(query, true) || it.lastKnownGuild.contains(query, true)
+      }.take(8)
+      // Exclude the already-selected player so typing never offers a
+      // one-item self-match (whose pick() resets the field mid-typing).
+      matches.filterNot { it.playerName.equals(currentName, ignoreCase = true) && currentName.isNotBlank() }
+    }
   }
 
   // Seed the visible query on selection changes AND when the guild label
@@ -248,7 +252,14 @@ fun PlayerSearchBox(
         .border(2.dp, pulseBorder, RoundedCornerShape(6.dp))
         .onFocusChanged {
           isFocused = it.isFocused
-          if (!it.isFocused) {
+          if (it.isFocused) {
+            // Drop the " [Guild]" decoration while editing so keystrokes
+            // append to the bare name instead of the display suffix.
+            if (search == idleDisplay) {
+              search = currentName
+              seededFor = currentName
+            }
+          } else {
             // Commit on blur: snap back to the idle display so a half-typed
             // query that was never picked doesn't linger in the box.
             search = idleDisplay

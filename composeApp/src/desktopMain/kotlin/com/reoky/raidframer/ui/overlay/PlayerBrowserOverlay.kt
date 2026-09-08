@@ -191,7 +191,18 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
     if (days <= 0L) 0L else System.currentTimeMillis() - days * 24 * 60 * 60 * 1000L
   }
 
-  val searchQuery = remember(search) { search.trim() }
+  // Display text: picked player renders "Name [Guild]" (guild is visual only —
+  // filtering always uses the stripped query). Typing shows the raw query.
+  fun displayFor(p: PlayerCacheEntity): String =
+    if (p.lastKnownGuild.isNotBlank()) "${p.playerName} [${p.lastKnownGuild}]" else p.playerName
+
+  // Strip the visual " [Guild]" suffix after a pick: the field shows
+  // "Name [Guild]" but the filter must match on the bare player name,
+  // otherwise Enter-after-pick filters to 0 rows.
+  val searchQuery = remember(search, selected) {
+    val s = selected
+    if (s != null && search == displayFor(s)) s.playerName else search.trim()
+  }
 
   val filtered = remember(allPlayers, searchQuery, factionFilter, guildFilter, specFilter, gearFilter, lastSeenAfter, roleFilter, conditions, sortKey, descending) {
     val gear = gearFilter.toIntOrNull() ?: 0
@@ -218,11 +229,6 @@ fun PlayerBrowserOverlay(wm: WindowManager?) {
   LaunchedEffect(suggestions) {
     if (activeIndex >= suggestions.size) activeIndex = suggestions.size - 1
   }
-
-  // Display text: picked player renders "Name [Guild]" (guild is visual only —
-  // filtering always uses the stripped query). Typing shows the raw query.
-  fun displayFor(p: PlayerCacheEntity): String =
-    if (p.lastKnownGuild.isNotBlank()) "${p.playerName} [${p.lastKnownGuild}]" else p.playerName
 
   fun pickPlayer(p: PlayerCacheEntity) {
     selected = p
