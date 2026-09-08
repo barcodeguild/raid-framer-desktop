@@ -481,7 +481,7 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                         }
                       }))
                       add(MenuEntry("\uf02d", stringResource(Res.string.tray_pocket_journal), onClick = dismissAnd { wm?.openWindow(OverlayType.POCKET_JOURNAL) }))
-                      add(MenuEntry("\uf0c0", stringResource(Res.string.tray_player_browser), onClick = dismissAnd { wm?.openWindow(OverlayType.PLAYER_BROWSER) }))
+                      add(MenuEntry("\uf2bd", stringResource(Res.string.tray_player_browser), onClick = dismissAnd { wm?.openWindow(OverlayType.PLAYER_BROWSER) }))
                       add(MenuEntry("\uf1da", stringResource(Res.string.tray_session_history), onClick = dismissAnd { wm?.openWindow(OverlayType.SESSION_HISTORY) }))
                       if (config.performanceBattleGraphEnabled) {
                         add(MenuEntry("\uf1e0", stringResource(Res.string.tray_battle_graph), onClick = dismissAnd { wm?.openWindow(OverlayType.BATTLE_GRAPH) }))
