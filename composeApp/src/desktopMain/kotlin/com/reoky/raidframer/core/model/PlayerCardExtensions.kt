@@ -774,18 +774,22 @@ fun PlayerCard.hasPvPParticipation(): Boolean {
 
 /**
  * Compute a single "PvP performance score" summarizing how active a player was this session.
- * Updated algorithm:
- *  - Dmg/Heals: 1 point per 100k (e.g., 5.5M dmg = 55 points)
- *  - CC: 0.1 point per CC point (e.g., 2000 CC = 200 points)
- *  - Songs: 0.04 points per song (e.g., 2000 songs = 80 points)
- *  - Charms: 1 point per charm (e.g., 100 charms = 100 points)
+ * Updated algorithm (biases towards damage less):
+ *  - Kills: 1 point per kill (e.g., 50 kills = 50 points)
+ *  - Damage: 1 point per 200k (e.g., 10M dmg = 50 points)
+ *  - Heals: 1 point per 100k (e.g., 5M heals = 50 points)
+ *  - CC: 0.1 point per CC point (e.g., 500 CC = 50 points)
+ *  - Songs: 0.06 points per song (e.g., 833 songs = 50 points)
+ *  - Charms: 0.33334 points per charm (e.g., 150 charms = 50 points)
  */
 fun PlayerCard.pvpPerformancePoints(): Int {
-  val damageAndHeals = (sessionDamageTotal + sessionHealTotal) / 100_000L
+  val killPoints = sessionKillTotal * 1.0
+  val damagePoints = sessionDamageTotal / 200_000.0
+  val healPoints = sessionHealTotal / 100_000.0
   val ccPoints = sessionCCTotal * 0.1
-  val songsPoints = sessionSongsTotal * 0.04
-  val charmsPoints = sessionCharmTotal * 1.0
-  return (damageAndHeals + ccPoints + songsPoints + charmsPoints).toInt()
+  val songsPoints = sessionSongsTotal * 0.06
+  val charmsPoints = sessionCharmTotal * 0.33334
+  return (killPoints + damagePoints + healPoints + ccPoints + songsPoints + charmsPoints).toInt()
 }
 
 /**
