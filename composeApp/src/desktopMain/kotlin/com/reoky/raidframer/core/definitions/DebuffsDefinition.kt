@@ -41,7 +41,7 @@ val shieldStripDebuffIds = listOf(23654, 23066, 31837)
 val weaponDisablesDebuffIds = listOf(23107)
 val potionDisablesDebuffIds = listOf(24543)
 val bdGliderDebuffIds = listOf(6670)
-val crystalWingsDebuffIds = listOf(8000605)
+val crystalWingsDebuffIds = listOf(8000605, 22217)
 val gliderDisablesDebuffIds = listOf(24544, 22602)
 val provokedDebuffIds = listOf(502, 24060)
 val defianceBuffIds = listOf(22968, 30018)
@@ -155,7 +155,7 @@ data class DebuffsDefinition(
     Debuff(ids = listOf(16498, 26512, 26473, 26743), name = "Crippling Mire", consideredCC = true), // Reduces movement speed significantly.
     Debuff(ids = listOf(21397, 82, 26455, 21398), name = "Earthen Grip", consideredCC = true), // prevents movement and turning
     Debuff(ids = listOf(6670), name = "Dragonfire", consideredCC = true), // BD glider trips people
-    Debuff(ids = listOf(8000605), name = "Freezing", consideredCC = true), // crystal wings freeze slows movement
+    Debuff(ids = listOf(8000605, 22217), name = "Freezing", consideredCC = true), // crystal wings freeze slows movement
     Debuff(ids = listOf(18950), name = "Sonic Wave", consideredCC = true), // prevents targeting
     Debuff(ids = listOf(2871, 2872, 2873, 2874, 2875), name = "Focal Concussion", consideredCC = true), // it's a sleep, but the buff isn't the sleep debuff
     Debuff(ids = listOf(1366, 24051, 31626), name = "Dahuta's Breath", consideredCC = true), // pushes / pulls enough to pull someone off the castle walls, so that's pvp I guess
