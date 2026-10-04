@@ -28,6 +28,8 @@ inline fun <reified T : CombatEvent> CombatEvent.normalize(): T {
     is DebuffEndedEvent -> DebuffEndedEvent(timestamp, cid, s, t, debuff, debuffId)
     is DebuffAppliedEvent -> DebuffAppliedEvent(timestamp, cid, s, t, debuff, debuffId)
     is BuffAppliedEvent -> BuffAppliedEvent(timestamp, cid, s, t, buff, buffId)
+    is SpellMissedEvent -> SpellMissedEvent(timestamp, cid, s, t, spell, missResult, avoidedAmount)
+    is MeleeMissedEvent -> MeleeMissedEvent(timestamp, cid, s, t, missResult, avoidedAmount)
     else -> throw IllegalArgumentException("Unsupported CombatEvent subtype: ${this::class.simpleName}") // better to just crash if this were to happen because this is supposed to be type-safe friends!
   } as T
 }
@@ -41,6 +43,7 @@ data class DamageEvent(
   val spell: String,
   val spellId: Int,
   val critical: Boolean,
+  val absorbedAmount: Int = 0,
 ) : CombatEvent
 
 data class HealEvent(
@@ -125,3 +128,31 @@ data class BuffAppliedEvent(
   val buff: String,
   val buffId: Int,
 ) : CombatEvent
+
+enum class AvoidanceKind { BLOCK, PARRY, DODGE, IMMUNE, MISS, OTHER }
+
+fun String.toAvoidanceKind(): AvoidanceKind = CombatEventsHelper.parseAvoidanceKind(this)
+
+sealed interface AvoidanceEvent : CombatEvent {
+  val missResult: AvoidanceKind
+  val avoidedAmount: Int
+}
+
+data class SpellMissedEvent(
+  override val timestamp: Long,
+  override val cid: String,
+  override val source: String,
+  override val target: String,
+  val spell: String,
+  override val missResult: AvoidanceKind,
+  override val avoidedAmount: Int,
+) : CombatEvent, AvoidanceEvent
+
+data class MeleeMissedEvent(
+  override val timestamp: Long,
+  override val cid: String,
+  override val source: String,
+  override val target: String,
+  override val missResult: AvoidanceKind,
+  override val avoidedAmount: Int,
+) : CombatEvent, AvoidanceEvent

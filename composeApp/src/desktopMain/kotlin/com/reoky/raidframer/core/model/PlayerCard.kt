@@ -86,6 +86,7 @@ data class PlayerCard(
   // don't look at me aaaaaaaaaa
   val recentBuffAppliedEvents: List<BuffAppliedEvent> = listOf(),
   val recentDebuffAppliedEvents: List<DebuffAppliedEvent> = listOf(),
+  val recentAvoidanceEvents: List<AvoidanceEvent> = listOf(),
 
   // session edge weights for battle graph: per-player adjacency lists (graph-database style)
   val sessionDamageToPlayer: Map<String, Long> = mapOf(),   // target name -> damage dealt to them
@@ -182,6 +183,12 @@ data class PlayerCard(
   val sessionManaBarrierTotal: Int = 0,
   val sessionReviveTotal: Int = 0,
   val sessionDeependDebuffTotal: Int = 0,
+  val sessionBlockTotal: Int = 0, // times this player avoided via BLOCK (target-side)
+  val sessionParryTotal: Int = 0, // times via PARRY (target-side)
+  val sessionEvadeTotal: Int = 0, // times via DODGE (target-side)
+  val sessionImmuneTotal: Int = 0, // times this player's spells were IMMUNE (source-side)
+  val sessionMissTotal: Int = 0, // true MISS count (source-side)
+  val sessionAbsorbTotal: Long = 0L, // HP absorbed (damage_absorbed + absorb-shield heals)
 
   // Coherence: session time (milliseconds) spent with this player within each distance
   // threshold of the recorder (the user). Held in memory for the session only; not persisted.

@@ -511,6 +511,12 @@ To reduce bias, the recorder must try to stay in range of the raid at all times.
     <string name="player_card_stat_courageous_action">Courageous Action</string>
     <string name="player_card_stat_mana_barrier">Mana Barrier</string>
     <string name="player_card_stat_revive">Revive</string>
+    <string name="player_card_stat_blocks">Blocks</string>
+    <string name="player_card_stat_parries">Parries</string>
+    <string name="player_card_stat_evades">Evades</string>
+    <string name="player_card_stat_immunes">Immunes</string>
+    <string name="player_card_stat_misses">Misses</string>
+    <string name="player_card_stat_absorbs">Absorbs</string>
     <string name="summary_top_defiance">Top Defiance</string>
     <string name="summary_top_garden_defiance">Top Divine Blessing</string>
     <string name="summary_top_purges">Top Purges</string>
@@ -530,6 +536,14 @@ To reduce bias, the recorder must try to stay in range of the raid at all times.
     <string name="summary_top_courageous_action">Top Courageous Action</string>
     <string name="summary_top_mana_barrier">Top Mana Barrier</string>
     <string name="summary_top_revive">Top Revive</string>
+    <string name="summary_top_blocks">Top Blocks</string>
+    <string name="summary_top_parries">Top Parry</string>
+    <string name="summary_top_evades">Top Evades</string>
+    <string name="summary_top_immunes">Top Immune</string>
+    <string name="summary_top_misses">Top Misses</string>
+    <string name="summary_top_absorbs">Top Absorbs</string>
+    <string name="summary_tab_avoidance">Avoidance</string>
+    <string name="summary_tab_mitigation">Mitigation</string>
     <string name="summary_top_petrification">Top Petrification</string>
     <string name="summary_tab_spells">Spells</string>
     <string name="summary_tab_buffs">Buffs</string>

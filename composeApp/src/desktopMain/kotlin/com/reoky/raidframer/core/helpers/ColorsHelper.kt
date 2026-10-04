@@ -118,6 +118,12 @@ object RFColors {
   val courageousActionBright = Color(0xFFFFAB40)
   val manaBarrierBlue = Color(0xFF42A5F5)
   val reviveGhostWhite = Color(0xFFE0E0E0)
+  val avoidanceBlockBlue = Color(0xFF42A5F5)
+  val avoidanceParryAmber = Color(0xFFFFB300)
+  val avoidanceEvadeGreen = Color(0xFF66BB6A)
+  val avoidanceImmunePurple = Color(0xFFAB47BC)
+  val avoidanceMissGray = Color(0xFF90A4AE)
+  val avoidanceAbsorbCyan = Color(0xFF4DD0E1)
 
   // Overlay background
   val OverlayBackground = Color(0xFF121212)

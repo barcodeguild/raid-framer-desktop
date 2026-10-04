@@ -169,6 +169,7 @@ fun PlayerCard.resetSession(): PlayerCard {
     recentDebuffGainedEvents = listOf(),
     recentDebuffEndedEvents = listOf(),
     recentDebuffAppliedEvents = listOf(),
+    recentAvoidanceEvents = listOf(),
     recentSkillItemUsages = listOf(),
 
     // Session totals
@@ -223,6 +224,12 @@ fun PlayerCard.resetSession(): PlayerCard {
     sessionManaBarrierTotal = 0,
     sessionReviveTotal = 0,
     sessionDeependDebuffTotal = 0,
+    sessionBlockTotal = 0,
+    sessionParryTotal = 0,
+    sessionEvadeTotal = 0,
+    sessionImmuneTotal = 0,
+    sessionMissTotal = 0,
+    sessionAbsorbTotal = 0L,
 
     // Life Mend tracking
     lifeMendTotal = 0,

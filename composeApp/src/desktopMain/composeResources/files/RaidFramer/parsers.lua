@@ -65,7 +65,7 @@ function RF.Parser.ParseBuffEvent(t)
   return event
 end
 
--- SPELL_DAMAGE
+-- SPELL_DAMAGE / SPELL_DOT_DAMAGE
 function RF.Parser.ParseDamageEvent(t)
   local event = {}
 
@@ -81,12 +81,13 @@ function RF.Parser.ParseDamageEvent(t)
   event.damageType    = t[7] -- PHYSICAL / FIRE / HOLY
   event.amount        = t[8] -- integer (negative means removed health)
   event.pool          = t[9] -- HEALTH / MANA
-  event.result        = t[10] -- string HIT
-  event.f11           = t[11] -- zero int
-  event.f12           = t[12] -- zero int
-  event.f13           = t[13] -- bool
-  event.f14           = t[14] -- string bool
-  event.f15           = t[15] -- bool
+  event.result        = t[10] -- HIT/CRITICAL
+  event.absorbedAmount = t[11] -- absorbed HP
+  event.f12           = t[12] -- zero int (unknown)
+  event.f13           = t[13] -- zero int (unknown)
+  event.f14           = t[14] -- bool critical flag
+  event.f15           = t[15] -- string bool (unknown)
+  event.f16           = t[16] -- bool (unknown)
 
   return event
 end
@@ -107,7 +108,7 @@ function RF.Parser.ParseHealEvent(t)
   event.damageType    = t[7] -- PHYSICAL / FIRE / HOLY
   event.amount        = t[8] -- integer (negative means removed health)
   event.result        = t[9] -- string HIT
-  event.f10           = t[10] -- bool
+  event.f10           = t[10] -- bool (critical flag)
   event.f11           = t[11] -- zero int
 
   return event
@@ -150,9 +151,10 @@ function RF.Parser.ParseSpellMissedEvent(t)
   event.unknownInt    = t[5] -- always seems to be zero
   event.spell         = t[6] -- name of spell
   event.damageType    = t[7] -- PHYSICAL / FIRE / HOLY
-  event.result        = t[8] -- string BLOCK / IMMUNE
-  event.amount        = t[9] -- amount removed anyways (a lot of times it's just one hp)
-  event.f10           = t[10] -- zero int
+  event.result        = t[8] -- BLOCK/PARRY/DODGE/IMMUNE/MISS
+  event.amount        = t[9] -- avoided-amount
+  event.f10           = t[10] -- avoided-amount candidate 2
+  event.f11           = t[11] -- zero int (unknown)
   event.f11           = t[11] -- zero int
   event.f12           = t[12] -- bool
   event.f13           = t[13] -- zero int
@@ -171,8 +173,8 @@ function RF.Parser.ParseMeleeMissedEvent(t)
   event.target         = t[4] -- always target name
 
   -- specific fields for MELEE_MISSED events
-  event.result        = t[5] -- BLOCK / IMMUNE
-  event.amount        = t[6] -- health removed
+  event.result        = t[5] -- BLOCK/PARRY/DODGE/IMMUNE/MISS
+  event.amount        = t[6] -- avoided-amount
   event.f7            = t[7] -- zero int
   event.f8            = t[8] -- zero int
   event.f9            = t[9] -- bool

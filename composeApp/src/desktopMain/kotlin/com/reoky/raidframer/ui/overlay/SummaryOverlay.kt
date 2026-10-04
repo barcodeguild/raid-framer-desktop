@@ -133,6 +133,14 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_protective
 import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
 import raid_framer_desktop.composeapp.generated.resources.summary_top_mana_barrier
 import raid_framer_desktop.composeapp.generated.resources.summary_top_revive
+import raid_framer_desktop.composeapp.generated.resources.summary_top_blocks
+import raid_framer_desktop.composeapp.generated.resources.summary_top_parries
+import raid_framer_desktop.composeapp.generated.resources.summary_top_evades
+import raid_framer_desktop.composeapp.generated.resources.summary_top_immunes
+import raid_framer_desktop.composeapp.generated.resources.summary_top_misses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_absorbs
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_avoidance
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_mitigation
 import raid_framer_desktop.composeapp.generated.resources.summary_top_petrification
 import raid_framer_desktop.composeapp.generated.resources.summary_top_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_distresses
@@ -255,6 +263,12 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val topCourageousAction by PlayerCacheInteractor.topCourageousAction.collectAsState()
   val topManaBarrier by PlayerCacheInteractor.topManaBarrier.collectAsState()
   val topRevive by PlayerCacheInteractor.topRevive.collectAsState()
+  val topBlocks by PlayerCacheInteractor.topBlocks.collectAsState()
+  val topParries by PlayerCacheInteractor.topParries.collectAsState()
+  val topEvades by PlayerCacheInteractor.topEvades.collectAsState()
+  val topImmunes by PlayerCacheInteractor.topImmunes.collectAsState()
+  val topMisses by PlayerCacheInteractor.topMisses.collectAsState()
+  val topAbsorbs by PlayerCacheInteractor.topAbsorbs.collectAsState()
 
   // Loot buff rankings (raid-wide)
   val topLootPeak by PlayerCacheInteractor.topLootPeak.collectAsState()
@@ -304,6 +318,8 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
     stringResource(Res.string.summary_tab_special_heals),
     stringResource(Res.string.summary_tab_special_melee),
     stringResource(Res.string.summary_tab_special_dances),
+    stringResource(Res.string.summary_tab_avoidance),
+    stringResource(Res.string.summary_tab_mitigation),
     stringResource(Res.string.summary_tab_spells),
     stringResource(Res.string.summary_tab_buffs),
     stringResource(Res.string.summary_tab_ode),
@@ -534,76 +550,90 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
           wm = wm
         )
 
-        13 -> SpellDamageByFaction(
+        13 -> AvoidanceTab(
+          topBlocks = topBlocks,
+          topParries = topParries,
+          topEvades = topEvades,
+          wm = wm
+        )
+
+        14 -> MitigationTab(
+          topImmunes = topImmunes,
+          topMisses = topMisses,
+          topAbsorbs = topAbsorbs,
+          wm = wm
+        )
+
+        15 -> SpellDamageByFaction(
           topDamageSpellsHaranya = topDamageSpellsHaranya,
           topDamageSpellsNuia = topDamageSpellsNuia,
           topDamageSpellsPirate = topDamageSpellsPirate,
           wm = wm
         )
 
-        14 -> BuffsDebuffsTab(
+        16 -> BuffsDebuffsTab(
           topDebuffs = topDebuffs,
           topSongs = topSongs,
           topBuffers = topBuffers,
           wm = wm
         )
 
-        15 -> OdeTab(
+        17 -> OdeTab(
           topOdeHaranya = topOdeHaranya,
           topOdeNuia = topOdeNuia,
           topOdePirate = topOdePirate,
           wm = wm
         )
 
-        16 -> KillsDeathsTab(
+        18 -> KillsDeathsTab(
           topKillsHaranya = topKillsHaranya,
           topKillsNuia = topKillsNuia,
           topKillsPirate = topKillsPirate,
           wm = wm
         )
 
-        17 -> DamageTakenHealsReceived(
+        19 -> DamageTakenHealsReceived(
           topDamageTaken = topDamageTaken,
           topHealsReceived = tophealsReceived,
           wm = wm
         )
 
-        18 -> UtilityItemsByFaction(
+        20 -> UtilityItemsByFaction(
           topItemUsesHaranya = topItemUsesHaranya,
           topItemUsesNuia = topItemUsesNuia,
           topItemUsesPirate = topItemUsesPirate,
           wm = wm
         )
 
-        19 -> UtilityItemsTab(
+        21 -> UtilityItemsTab(
           topPotters = topPotters,
           topGliderGamers = topGliderGamers,
           topItemSkillCasters = topItemSkillCasters,
           wm = wm
         )
 
-        20 -> PlayerBuildsTab(
+        22 -> PlayerBuildsTab(
           buildCountsHaranya = buildCountsHaranya,
           buildCountsNuia = buildCountsNuia,
           buildCountsPirate = buildCountsPirate,
           wm = wm
         )
 
-        21 -> PerformanceTab(
+        23 -> PerformanceTab(
           topPerformanceHaranya = topPerformanceHaranya,
           topPerformanceNuia = topPerformanceNuia,
           topPerformancePirate = topPerformancePirate,
           wm = wm
         )
 
-        22 -> LootBuffTab(
+        24 -> LootBuffTab(
           topLootPeak = topLootPeak,
           worstLootPeak = worstLootPeak,
           topBuffCount = topBuffCount,
           wm = wm
         )
 
-        23 -> CoherenceTab(
+        25 -> CoherenceTab(
           topCoherenceRender = topCoherenceRender,
           topCoherenceRaid = topCoherenceRaid,
           topCoherenceClump = topCoherenceClump,
@@ -1237,6 +1267,88 @@ private fun SpecialHealsTab(
       valueColor = RFColors.healsGreen,
       modifier = Modifier.weight(1f),
       colorExtractor = { it.lifeMendQuality.color }
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+  }
+}
+
+@Composable
+private fun AvoidanceTab(
+  topBlocks: List<PlayerCard>,
+  topParries: List<PlayerCard>,
+  topEvades: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\uD83D\uDEE1",
+      title = stringResource(Res.string.summary_top_blocks),
+      cards = topBlocks,
+      valueExtractor = { it.sessionBlockTotal.toString() },
+      valueColor = RFColors.avoidanceBlockBlue,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+    StatColumn(
+      icon = "\u2694",
+      title = stringResource(Res.string.summary_top_parries),
+      cards = topParries,
+      valueExtractor = { it.sessionParryTotal.toString() },
+      valueColor = RFColors.avoidanceParryAmber,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+    StatColumn(
+      icon = "\uD83D\uDCA8",
+      title = stringResource(Res.string.summary_top_evades),
+      cards = topEvades,
+      valueExtractor = { it.sessionEvadeTotal.toString() },
+      valueColor = RFColors.avoidanceEvadeGreen,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+  }
+}
+
+@Composable
+private fun MitigationTab(
+  topImmunes: List<PlayerCard>,
+  topMisses: List<PlayerCard>,
+  topAbsorbs: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\uD83D\uDD30",
+      title = stringResource(Res.string.summary_top_immunes),
+      cards = topImmunes,
+      valueExtractor = { it.sessionImmuneTotal.toString() },
+      valueColor = RFColors.avoidanceImmunePurple,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+    StatColumn(
+      icon = "\u2601",
+      title = stringResource(Res.string.summary_top_misses),
+      cards = topMisses,
+      valueExtractor = { it.sessionMissTotal.toString() },
+      valueColor = RFColors.avoidanceMissGray,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+    StatColumn(
+      icon = "\uD83E\uDE78",
+      title = stringResource(Res.string.summary_top_absorbs),
+      cards = topAbsorbs,
+      valueExtractor = { it.sessionAbsorbTotal.humanReadableAbbreviation() },
+      valueColor = RFColors.avoidanceAbsorbCyan,
+      modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
     }

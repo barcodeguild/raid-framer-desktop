@@ -129,6 +129,12 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_protective
 import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
 import raid_framer_desktop.composeapp.generated.resources.summary_top_mana_barrier
 import raid_framer_desktop.composeapp.generated.resources.summary_top_revive
+import raid_framer_desktop.composeapp.generated.resources.summary_top_blocks
+import raid_framer_desktop.composeapp.generated.resources.summary_top_parries
+import raid_framer_desktop.composeapp.generated.resources.summary_top_evades
+import raid_framer_desktop.composeapp.generated.resources.summary_top_immunes
+import raid_framer_desktop.composeapp.generated.resources.summary_top_misses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_absorbs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_petrification
 import raid_framer_desktop.composeapp.generated.resources.summary_top_defiance
 import raid_framer_desktop.composeapp.generated.resources.summary_top_garden_defiance
@@ -221,6 +227,12 @@ object ImageExportInteractor {
   private val COURAGEOUS_ACTION_COLOR = toAwtColor(RFColors.courageousActionBright)
   private val MANA_BARRIER_COLOR = toAwtColor(RFColors.manaBarrierBlue)
   private val REVIVE_COLOR = toAwtColor(RFColors.reviveGhostWhite)
+  private val BLOCK_COLOR = toAwtColor(RFColors.avoidanceBlockBlue)
+  private val PARRY_COLOR = toAwtColor(RFColors.avoidanceParryAmber)
+  private val EVADE_COLOR = toAwtColor(RFColors.avoidanceEvadeGreen)
+  private val IMMUNE_COLOR = toAwtColor(RFColors.avoidanceImmunePurple)
+  private val MISS_COLOR = toAwtColor(RFColors.avoidanceMissGray)
+  private val ABSORB_COLOR = toAwtColor(RFColors.avoidanceAbsorbCyan)
   private val LOOT_BUFF_COLOR = toAwtColor(RFColors.lootBuffColor)
 
   /**
@@ -431,6 +443,12 @@ object ImageExportInteractor {
       val topCourageousAction: List<PlayerCard>,
 val topManaBarrier: List<PlayerCard>,
     val topRevive: List<PlayerCard>,
+    val topBlocks: List<PlayerCard>,
+    val topParries: List<PlayerCard>,
+    val topEvades: List<PlayerCard>,
+    val topImmunes: List<PlayerCard>,
+    val topMisses: List<PlayerCard>,
+    val topAbsorbs: List<PlayerCard>,
     // Loot buff rankings (raid-wide)
     val topLootPeak: List<PlayerCard>,
     val worstLootPeak: List<PlayerCard>,
@@ -603,6 +621,12 @@ val coherenceRecordingMs: Long,
       topCourageousAction = PlayerCacheInteractor.topCourageousAction.value.take(25),
       topManaBarrier = PlayerCacheInteractor.topManaBarrier.value.take(25),
       topRevive = PlayerCacheInteractor.topRevive.value.take(25),
+      topBlocks = PlayerCacheInteractor.topBlocks.value.take(25),
+      topParries = PlayerCacheInteractor.topParries.value.take(25),
+      topEvades = PlayerCacheInteractor.topEvades.value.take(25),
+      topImmunes = PlayerCacheInteractor.topImmunes.value.take(25),
+      topMisses = PlayerCacheInteractor.topMisses.value.take(25),
+      topAbsorbs = PlayerCacheInteractor.topAbsorbs.value.take(25),
       topLootPeak = PlayerCacheInteractor.topLootPeak.value.take(25),
       worstLootPeak = PlayerCacheInteractor.worstLootPeak.value.take(25),
       topBuffCount = PlayerCacheInteractor.topBuffCount.value.take(25),
@@ -1576,6 +1600,20 @@ val coherenceRecordingMs: Long,
         { card -> toAwtColor(card.lifeMendQuality.color) },
         showIcons = false
       )),
+    )))
+
+    // Avoidance: Blocks, Parries, Evades
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_blocks), "\uD83D\uDEE1", ColumnData.CardData(data.topBlocks, { it.sessionBlockTotal.toString() }, BLOCK_COLOR)),
+      Triple(getString(Res.string.summary_top_parries), "\u2694", ColumnData.CardData(data.topParries, { it.sessionParryTotal.toString() }, PARRY_COLOR)),
+      Triple(getString(Res.string.summary_top_evades), "\uD83D\uDCA8", ColumnData.CardData(data.topEvades, { it.sessionEvadeTotal.toString() }, EVADE_COLOR)),
+    )))
+
+    // Mitigation: Immunes, Misses, Absorbs
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_immunes), "\uD83D\uDD30", ColumnData.CardData(data.topImmunes, { it.sessionImmuneTotal.toString() }, IMMUNE_COLOR)),
+      Triple(getString(Res.string.summary_top_misses), "\u2601", ColumnData.CardData(data.topMisses, { it.sessionMissTotal.toString() }, MISS_COLOR)),
+      Triple(getString(Res.string.summary_top_absorbs), "\uD83E\uDE78", ColumnData.CardData(data.topAbsorbs, { it.sessionAbsorbTotal.humanReadableAbbreviation() }, ABSORB_COLOR)),
     )))
 
     // CC Debuffs: Trips, Bubbles, Bracings

@@ -76,11 +76,12 @@ sealed class CombatEventPayload {
     val amount: Int,
     val pool: String, // HEALTH / MANA
     val result: String, // HIT / CRITICAL
-    val f11: Int,
-    val f12: Int,
-    val f13: Boolean,
-    val f14: String, // sometimes false sometime 0
-    val f15: Boolean
+    val absorbedAmount: Int = 0, // absorbed HP
+    val f12: Int = 0, // unknown
+    val f13: Boolean = false, // critical flag
+    val f14: String = "", // unknown (sometimes false sometime 0)
+    val f15: Boolean = false, // unknown
+    val f16: Boolean = false // unknown
   ) : CombatEventPayload()
 
   @Serializable
@@ -119,7 +120,7 @@ sealed class CombatEventPayload {
   ) : CombatEventPayload()
 
 
-  // if a person heals after a duel we've seen this event come through
+  // if a person heals after a duel, we've seen this event come through
   // as a healing from the source to themselves
   @Serializable
   @SerialName("SPELL_ENERGIZE")
@@ -144,15 +145,15 @@ sealed class CombatEventPayload {
     val cid: String,
     val source: String = "Unknown Target",
     val target: String = "Unknown Target",
-    val unknownInt: Int,
-    val spell: String,
-    val damageType: String, // PHYSICAL / FIRE / HOLY
-    val result: String, // BLOCK / IMMUNNE
-    val amount: Int,
-    val f10: Int,
-    val f11: Int,
-    val f12: Boolean,
-    val f13: Int
+    val unknownInt: Int = 0,
+    val spell: String = "",
+    val damageType: String = "", // PHYSICAL / FIRE / HOLY
+    val result: String = "", // BLOCK / PARRY / DODGE / IMMUNE / MISS
+    val amount: Int = 0, // avoided-amount
+    val f10: Int = 0,
+    val f11: Int = 0, // unknown
+    val f12: Boolean = false, // unknown
+    val f13: Int = 0 // unknown
   ) : CombatEventPayload()
 
   @Serializable
@@ -163,12 +164,12 @@ sealed class CombatEventPayload {
     val cid: String,
     val source: String = "Unknown Target",
     val target: String = "Unknown Target",
-    val result: String, // BLOCK / IMMUNE
-    val amount: Int,
-    val f7: Int,
-    val f8: Int,
-    val f9: Boolean,
-    val f10: String // string bool
+    val result: String = "", // BLOCK / PARRY / DODGE / IMMUNE / MISS
+    val amount: Int, // avoided-amount candidate
+    val f7: Int = 0,
+    val f8: Int = 0,
+    val f9: Boolean = false,
+    val f10: String = "" // string bool
   ) : CombatEventPayload()
 
   // Thinking this means damage as a result of a spell like burning and earthen grip's damage
@@ -186,11 +187,12 @@ sealed class CombatEventPayload {
     val amount: Int,
     val pool: String, // HEALTH / MANA
     val result: String, // HIT / CRITICAL
-    val f11: Int,
-    val f12: Int,
-    val f13: Boolean,
-    val f14: String, // sometimes false sometime 0
-    val f15: Boolean
+    val absorbedAmount: Int = 0, // absorbed HP
+    val f12: Int = 0, // unknown
+    val f13: Boolean = false, // unknown (critical flag per app usage)
+    val f14: String = "", // unknown (sometimes false sometime 0)
+    val f15: Boolean = false, // unknown
+    val f16: Boolean = false // unknown
   ) : CombatEventPayload()
 
   @Serializable

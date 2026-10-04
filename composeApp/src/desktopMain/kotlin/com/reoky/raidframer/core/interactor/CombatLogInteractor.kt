@@ -8,6 +8,8 @@ import com.reoky.raidframer.core.model.CombatEvent
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
+import com.reoky.raidframer.core.model.MeleeMissedEvent
+import com.reoky.raidframer.core.model.SpellMissedEvent
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
 import com.reoky.raidframer.core.serialization.AppJson
 import com.reoky.raidframer.core.serialization.CombatEventPayload
@@ -202,7 +204,7 @@ object CombatLogInteractor : Interactor() {
         amount = damage,
         pool = "HEALTH",
         result = if (critical) "CRITICAL" else "HIT",
-        f11 = 0,
+        absorbedAmount = absorbedAmount,
         f12 = 0,
         f13 = critical,
         f14 = "",
@@ -271,6 +273,25 @@ object CombatLogInteractor : Interactor() {
         damageType = "",
         buffType = "DEBUFF",
         isActive = true,
+      )
+      is SpellMissedEvent -> CombatEventPayload.SpellMissedPayload(
+        timestamp = timestamp,
+        cid = cid,
+        source = source,
+        target = target,
+        unknownInt = 0,
+        spell = spell,
+        damageType = "",
+        result = missResult.name,
+        amount = avoidedAmount,
+      )
+      is MeleeMissedEvent -> CombatEventPayload.MeleeMissedPayload(
+        timestamp = timestamp,
+        cid = cid,
+        source = source,
+        target = target,
+        result = missResult.name,
+        amount = avoidedAmount,
       )
       else -> null
     }

@@ -64,6 +64,7 @@ import com.reoky.raidframer.core.helpers.timeAgo
 import com.reoky.raidframer.core.helpers.resolveLocalizedString
 import com.reoky.raidframer.core.interactor.GameMonitorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.model.CombatEventsHelper
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
@@ -412,6 +413,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                     withStyle(SpanStyle(color = Color(0xFFEF5350))) { append(evt.target) }
                     append(": ")
                     withStyle(SpanStyle(color = RFColors.TextPrimary, fontWeight = FontWeight.SemiBold)) { append(evt.damage.toString()) }
+                    if (evt.absorbedAmount > 0) {
+                      withStyle(SpanStyle(color = Color(0xFF81D4FA))) { append(" (${evt.absorbedAmount} absorbed)") }
+                    }
                   })
                 }
               }
@@ -432,6 +436,9 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                     withStyle(SpanStyle(color = Color(0xFFA5D6A7))) { append(evt.target) }
                     append(": ")
                     withStyle(SpanStyle(color = RFColors.TextPrimary, fontWeight = FontWeight.SemiBold)) { append(evt.amount.toString()) }
+                    if (CombatEventsHelper.isAbsorbShieldSkill(evt.spell)) {
+                      withStyle(SpanStyle(color = Color(0xFF81D4FA))) { append(" (absorb)") }
+                    }
                   })
                 }
               }

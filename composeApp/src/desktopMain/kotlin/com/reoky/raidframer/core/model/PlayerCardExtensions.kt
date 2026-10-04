@@ -208,8 +208,39 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
           ?: 0L) + event.amount)))))
           .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
       }
-    }
+    },
+    // absorbs chart (source-side): SPELL_HEALED with absorb-shield skill name
+    sessionAbsorbTotal = if (CombatEventsHelper.isAbsorbShieldSkill(event.spell)) {
+      this.sessionAbsorbTotal + event.amount.coerceAtLeast(0)
+    } else this.sessionAbsorbTotal,
   )
+}
+
+/**
+ * Avoidance counting. Every kind credits the avoider (target card): BLOCK,
+ * PARRY, DODGE, IMMUNE and MISS all mean the defender avoided the hit.
+ * postAvoidanceCaused is kept for callers that still route source-side; it is
+ * a no-op record so historical behavior stays visible in recent events.
+ */
+fun PlayerCard.postAvoidanceTaken(event: AvoidanceEvent): PlayerCard {
+  if (!PlayerCacheInteractor.isRealPlayer(name) && !RFConfig.state.value.allowPVEDamage) return this
+  val recent = (recentAvoidanceEvents + event).takeLast(eventHistoryDepth)
+  return when (event.missResult) {
+    AvoidanceKind.BLOCK -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionBlockTotal = sessionBlockTotal + 1, sessionAbsorbTotal = sessionAbsorbTotal + event.avoidedAmount.coerceAtLeast(0))
+    AvoidanceKind.PARRY -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionParryTotal = sessionParryTotal + 1, sessionAbsorbTotal = sessionAbsorbTotal + event.avoidedAmount.coerceAtLeast(0))
+    AvoidanceKind.DODGE -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionEvadeTotal = sessionEvadeTotal + 1)
+    AvoidanceKind.IMMUNE -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionImmuneTotal = sessionImmuneTotal + 1)
+    AvoidanceKind.MISS -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionMissTotal = sessionMissTotal + 1)
+    else -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent)
+  }
+}
+
+fun PlayerCard.postAvoidanceCaused(event: AvoidanceEvent): PlayerCard {
+  if (!PlayerCacheInteractor.isRealPlayer(name) && !RFConfig.state.value.allowPVEDamage) return this
+  // Source-side is only a touch so the card exists for rendering; all
+  // avoidance points belong to the avoider (target card).
+  val recent = (recentAvoidanceEvents + event).takeLast(eventHistoryDepth)
+  return copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent)
 }
 
 /*
@@ -218,6 +249,7 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
  */
 fun PlayerCard.postDamageTakenEvent(event: DamageEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
+  val absorb = event.absorbedAmount.coerceAtLeast(0).toLong()
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
@@ -225,6 +257,7 @@ fun PlayerCard.postDamageTakenEvent(event: DamageEvent): PlayerCard {
       lifetimeTotalDamageTaken = cache.lifetimeTotalDamageTaken + event.damage
     ),
     sessionDamageTakenTotal = this.sessionDamageTakenTotal + event.damage,
+    sessionAbsorbTotal = this.sessionAbsorbTotal + absorb, // damage_absorbed credited to target
     sessionDamageFromPlayer = if (RFConfig.state.value.performanceBattleGraphEnabled) {
       this.sessionDamageFromPlayer + (event.source to ((this.sessionDamageFromPlayer[event.source]
         ?: 0L) + event.damage))
@@ -778,7 +811,7 @@ fun PlayerCard.hasPvPParticipation(): Boolean {
  *  - Kills: 1 point per kill (e.g., 50 kills = 50 points)
  *  - Damage: 1 point per 200k (e.g., 10M dmg = 50 points)
  *  - Heals: 1 point per 100k (e.g., 5M heals = 50 points)
- *  - CC: 0.1 point per CC point (e.g., 500 CC = 50 points)
+ *  - CC: 0.2 point per CC point (e.g., 250 CC = 50 points)
  *  - Songs: 0.06 points per song (e.g., 833 songs = 50 points)
  *  - Charms: 0.33334 points per charm (e.g., 150 charms = 50 points)
  */
@@ -786,7 +819,7 @@ fun PlayerCard.pvpPerformancePoints(): Int {
   val killPoints = sessionKillTotal * 1.0
   val damagePoints = sessionDamageTotal / 200_000.0
   val healPoints = sessionHealTotal / 100_000.0
-  val ccPoints = sessionCCTotal * 0.1
+  val ccPoints = sessionCCTotal * 0.2
   val songsPoints = sessionSongsTotal * 0.06
   val charmsPoints = sessionCharmTotal * 0.33334
   return (killPoints + damagePoints + healPoints + ccPoints + songsPoints + charmsPoints).toInt()

@@ -7,8 +7,13 @@ import com.reoky.raidframer.core.model.CastingEvent
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
+import com.reoky.raidframer.core.model.AvoidanceKind
+import com.reoky.raidframer.core.model.CombatEventsHelper
+import com.reoky.raidframer.core.model.MeleeMissedEvent
+import com.reoky.raidframer.core.model.SpellMissedEvent
 import com.reoky.raidframer.core.model.SuccessfulCastEvent
 import com.reoky.raidframer.core.model.normalize
+import com.reoky.raidframer.core.model.toAvoidanceKind
 
 import com.reoky.raidframer.core.serialization.AppJson
 import com.reoky.raidframer.core.serialization.CombatEventPayload
@@ -256,7 +261,8 @@ object CompanionInteractor : Interactor() {
                 damage = abs(event.amount),
                 spell = event.spell,
                 critical = event.f13,
-                spellId = 0
+                spellId = 0,
+                absorbedAmount = abs(event.absorbedAmount),
               ).normalize<DamageEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} damaged ${combatEvent.target} (${combatEvent.cid}) for ${combatEvent.damage} using ${combatEvent.spell}.")
               AreaEffectAttributorInteractor.onDamageEvent(combatEvent)
@@ -334,37 +340,35 @@ object CompanionInteractor : Interactor() {
                 damage = abs(event.amount),
                 spell = "Basic Melee",
                 critical = event.f10,
-                spellId = 0
+                spellId = 0,
+                absorbedAmount = 0,
               ).normalize<DamageEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} melee damaged ${combatEvent.target} for ${combatEvent.damage} damage.")
               PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.MeleeMissedPayload -> {
-              val combatEvent = DamageEvent(
+              val combatEvent = MeleeMissedEvent(
                 timestamp = event.timestamp,
                 cid = event.cid,
                 source = event.source,
                 target = event.target,
-                damage = abs(event.amount),
-                spell = "Melee Missed (Smol Scratch)",
-                critical = false,
-                spellId = 0
-              ).normalize<DamageEvent>()
-              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s melee attack (miss).")
+                missResult = event.result.toAvoidanceKind(),
+                avoidedAmount = abs(event.amount),
+              ).normalize<MeleeMissedEvent>()
+              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s melee attack (${combatEvent.missResult}).")
               PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.SpellMissedPayload -> {
-              val combatEvent = DamageEvent(
+              val combatEvent = SpellMissedEvent(
                 timestamp = event.timestamp,
                 cid = event.cid,
                 source = event.source,
                 target = event.target,
-                damage = abs(event.amount),
-                spell = "Spell Missed (hehe)",
-                critical = false,
-                spellId = 0
-              ).normalize<DamageEvent>()
-              Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s ${event.spell} spell (miss for ${event.amount} dmg) ${event.result}.")
+                spell = event.spell,
+                missResult = event.result.toAvoidanceKind(),
+                avoidedAmount = CombatEventsHelper.firstNonZero(abs(event.amount), abs(event.f10)),
+              ).normalize<SpellMissedEvent>()
+              Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s ${event.spell} spell (${combatEvent.missResult}).")
               PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.EnergizePayload -> {
@@ -382,7 +386,8 @@ object CompanionInteractor : Interactor() {
                 damage = abs(event.amount),
                 spell = event.spell,
                 critical = event.f13,
-                spellId = 0
+                spellId = 0,
+                absorbedAmount = abs(event.absorbedAmount),
               ).normalize<DamageEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target} suffered ${combatEvent.damage} damage to their ${event.pool} because of ${combatEvent.source}'s ${combatEvent.spell} spell.")
               PlayerCacheInteractor.postEvent(combatEvent)

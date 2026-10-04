@@ -1067,6 +1067,7 @@ object PlayerCacheInteractor : Interactor() {
         is BuffEndedEvent -> postBuffEnded(event)
         is DebuffGainedEvent -> postDebuffGained(event)
         is DebuffEndedEvent -> postDebuffEnded(event)
+        is AvoidanceEvent -> postAvoidance(event)
         else -> {} // no-op for other event types
       }
     }
@@ -1086,6 +1087,7 @@ object PlayerCacheInteractor : Interactor() {
         is BuffEndedEvent -> postBuffEnded(event)
         is DebuffGainedEvent -> postDebuffGained(event)
         is DebuffEndedEvent -> postDebuffEnded(event)
+        is AvoidanceEvent -> postAvoidance(event)
         else -> {} // no-op for other event types
       }
     }
@@ -1099,6 +1101,35 @@ object PlayerCacheInteractor : Interactor() {
     if (!CombatLogInteractor.isRecording.value) return false
     val allowPvE = RFConfig.state.value.allowPVEDamage
     return isRealPlayer(event.target) || allowPvE
+  }
+
+  /**
+   * Avoidance pump: every kind credits the avoider (target card).
+   * The source card is only touched so it exists for rendering.
+   * OTHER is recorded but uncounted.
+   */
+  private fun postAvoidance(event: AvoidanceEvent) {
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(cid = event.cid, playerName = event.source)
+        createCardIfNoneExists(cid = event.cid, playerName = event.target)
+        when (event.missResult) {
+          AvoidanceKind.BLOCK, AvoidanceKind.PARRY, AvoidanceKind.DODGE,
+          AvoidanceKind.IMMUNE, AvoidanceKind.MISS -> {
+            cards[event.target]?.let { card ->
+              cards[event.target] = card.postAvoidanceTaken(event)
+            }
+            // still touch the source card so it exists for playercard rendering
+            cards[event.source]?.let { card ->
+              cards[event.source] = card.postAvoidanceCaused(event)
+            }
+          }
+          AvoidanceKind.OTHER -> {
+            Log.debug(TAG, "Unclassified avoidance result for ${event.source} -> ${event.target}")
+          }
+        }
+      }
+    }
   }
 
   private fun postDamage(event: DamageEvent) {
@@ -1886,6 +1917,30 @@ object PlayerCacheInteractor : Interactor() {
 
   val topRevive: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { it.filter { card -> card.isRealPlayer && card.sessionReviveTotal > 0 }.sortedByDescending { card -> card.sessionReviveTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topBlocks: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { it.filter { card -> card.isRealPlayer && card.sessionBlockTotal > 0 }.sortedByDescending { card -> card.sessionBlockTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topParries: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { it.filter { card -> card.isRealPlayer && card.sessionParryTotal > 0 }.sortedByDescending { card -> card.sessionParryTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topEvades: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { it.filter { card -> card.isRealPlayer && card.sessionEvadeTotal > 0 }.sortedByDescending { card -> card.sessionEvadeTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topImmunes: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { it.filter { card -> card.isRealPlayer && card.sessionImmuneTotal > 0 }.sortedByDescending { card -> card.sessionImmuneTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topMisses: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { it.filter { card -> card.isRealPlayer && card.sessionMissTotal > 0 }.sortedByDescending { card -> card.sessionMissTotal }.take(100) }
+    .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topAbsorbs: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { it.filter { card -> card.isRealPlayer && card.sessionAbsorbTotal > 0L }.sortedByDescending { card -> card.sessionAbsorbTotal }.take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   // Coherence rankings (session time in range of the recorder, sorted by most time at each threshold)
