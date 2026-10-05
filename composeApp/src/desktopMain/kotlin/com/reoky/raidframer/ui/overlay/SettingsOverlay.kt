@@ -31,9 +31,11 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -91,6 +93,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale.getDefault
 import kotlin.system.exitProcess
 import javax.imageio.ImageIO
+import javax.swing.filechooser.FileNameExtensionFilter
 
 @Composable
 private fun SettingsSection(
@@ -751,7 +754,7 @@ private fun RaidCallerDefaultSettings(config: ConfigEntity) {
 private fun BuffPresetDropdown(currentRequirements: String, onSelected: (com.reoky.raidframer.core.definitions.RaidBuffRequirements) -> Unit) {
   var expanded by remember { mutableStateOf(false) }
   val selectedLabel = BUFF_PRESETS.firstOrNull { it.requirements.serialize() == currentRequirements }?.label
-    ?: stringResource(Res.string.category_none)
+    ?: stringResource(Res.string.general_none)
 
   ExposedDropdownMenuBox(
     expanded = expanded,
@@ -789,7 +792,7 @@ private fun BuffPresetDropdown(currentRequirements: String, onSelected: (com.reo
             onSelected(preset.requirements)
             expanded = false
           },
-          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
         )
       }
     }
@@ -838,7 +841,7 @@ private fun GracePeriodDropdown(current: String, onSelected: (String) -> Unit) {
             onSelected(option.name)
             expanded = false
           },
-          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
         )
       }
     }
@@ -895,7 +898,7 @@ private fun LanguageDropdown(currentCode: String) {
             }
             expanded = false
           },
-          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
         )
       }
     }
@@ -1489,7 +1492,7 @@ private fun CategoryDropdown(
   var expanded by remember { mutableStateOf(false) }
 
   val displayLabel = if (selectedCategory.isBlank()) {
-    stringResource(Res.string.category_none)
+    stringResource(Res.string.general_none)
   } else {
     CombatRankingCategory.fromString(selectedCategory)?.let { category ->
       stringResource(category.displayNameRes)
@@ -1532,7 +1535,7 @@ private fun CategoryDropdown(
         DropdownMenuItem(
           text = {
             Text(
-              text = if (option.isBlank()) stringResource(Res.string.category_none)
+              text = if (option.isBlank()) stringResource(Res.string.general_none)
               else CombatRankingCategory.fromString(option)?.let { stringResource(it.displayNameRes) }
               ?: option,
               color = RFColors.TextPrimary
@@ -1542,7 +1545,7 @@ private fun CategoryDropdown(
             onCategorySelected(option)
             expanded = false
           },
-          contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
         )
       }
     }
@@ -2335,7 +2338,7 @@ private fun ExportBackgroundCard(
                 else -> Res.drawable.reoky_wallpaper_thumb
               }),
               contentDescription = null,
-              contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+              contentScale = ContentScale.Crop,
               modifier = Modifier.fillMaxSize()
             )
             option == ExportBackgroundOption.SOLID_COLOR -> Box(
@@ -2394,7 +2397,7 @@ private fun CustomBackgroundStatusPreview(
         color = RFColors.TextPrimary,
         fontSize = 10.sp,
         maxLines = 1,
-        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+        overflow = TextOverflow.Ellipsis,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
         textAlign = TextAlign.Center
       )
@@ -2413,7 +2416,7 @@ private fun chooseCustomExportBackground(
   Thread {
     val chooser = javax.swing.JFileChooser()
     chooser.dialogTitle = title
-    chooser.fileFilter = javax.swing.filechooser.FileNameExtensionFilter(filterDescription, "png")
+    chooser.fileFilter = FileNameExtensionFilter(filterDescription, "png")
     if (chooser.showOpenDialog(null) != javax.swing.JFileChooser.APPROVE_OPTION) {
       onResult(null, null)
       return@Thread

@@ -67,6 +67,8 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_coura
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mana_barrier
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_revive
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_blocks
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_blocked
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_parried
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_parries
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_evades
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_immunes
@@ -129,13 +131,15 @@ data class SessionTotals(
   val courageousAction: Int,
   val manaBarrier: Int,
   val revive: Int,
-  // In-memory only (no DB migration): avoidance + absorb session counters
+  // avoidance + mitigation counters (persisted since v49)
   val blocks: Int = 0,
   val parries: Int = 0,
   val evades: Int = 0,
   val immunes: Int = 0,
   val misses: Int = 0,
-  val absorbs: Long = 0L
+  val absorbs: Long = 0L,
+  val blockMitigated: Long = 0L,
+  val parryMitigated: Long = 0L
 ) {
   companion object {
     fun fromPlayerCard(card: PlayerCard) = SessionTotals(
@@ -191,8 +195,10 @@ data class SessionTotals(
         evades = card.sessionEvadeTotal,
         immunes = card.sessionImmuneTotal,
         misses = card.sessionMissTotal,
-        absorbs = card.sessionAbsorbTotal
-     )
+        absorbs = card.sessionAbsorbTotal,
+        blockMitigated = card.sessionBlockMitigated,
+        parryMitigated = card.sessionParryMitigated
+       )
 
     fun fromEntity(entity: PlayerSessionTotalsEntity) = SessionTotals(
       damage = entity.totalDamage,
@@ -239,9 +245,17 @@ data class SessionTotals(
        regularSunder = entity.totalRegularSunder,
        impaleImmunity = entity.totalImpaleImmunity,
        protectiveWings = entity.totalProtectiveWings,
-       courageousAction = entity.totalCourageousAction,
-       manaBarrier = entity.totalManaBarrier,
-       revive = entity.totalRevive
+        courageousAction = entity.totalCourageousAction,
+        manaBarrier = entity.totalManaBarrier,
+        revive = entity.totalRevive,
+        blocks = entity.totalBlocks,
+        parries = entity.totalParries,
+        evades = entity.totalEvades,
+        immunes = entity.totalImmunes,
+        misses = entity.totalMisses,
+        absorbs = entity.totalAbsorbs,
+        blockMitigated = entity.totalBlockMitigated,
+        parryMitigated = entity.totalParryMitigated
     )
   }
 }
@@ -312,7 +326,9 @@ private fun sessionStatEntries(totals: SessionTotals): List<Triple<org.jetbrains
   Triple(Res.string.player_card_stat_mana_barrier, totals.manaBarrier.toLong(), RFColors.manaBarrierBlue),
   Triple(Res.string.player_card_stat_revive, totals.revive.toLong(), RFColors.reviveGhostWhite),
   Triple(Res.string.player_card_stat_blocks, totals.blocks.toLong(), RFColors.avoidanceBlockBlue),
+  Triple(Res.string.player_card_stat_damage_blocked, totals.blockMitigated, RFColors.avoidanceBlockBlue),
   Triple(Res.string.player_card_stat_parries, totals.parries.toLong(), RFColors.avoidanceParryAmber),
+  Triple(Res.string.player_card_stat_damage_parried, totals.parryMitigated, RFColors.avoidanceParryAmber),
   Triple(Res.string.player_card_stat_evades, totals.evades.toLong(), RFColors.avoidanceEvadeGreen),
   Triple(Res.string.player_card_stat_immunes, totals.immunes.toLong(), RFColors.avoidanceImmunePurple),
   Triple(Res.string.player_card_stat_misses, totals.misses.toLong(), RFColors.avoidanceMissGray),
@@ -407,7 +423,9 @@ fun CompactSessionTotals(
     CompactStatRow(stringResource(Res.string.player_card_stat_mana_barrier), sessionTotals.manaBarrier.toLong(), RFColors.manaBarrierBlue)
     CompactStatRow(stringResource(Res.string.player_card_stat_revive), sessionTotals.revive.toLong(), RFColors.reviveGhostWhite)
     CompactStatRow(stringResource(Res.string.player_card_stat_blocks), sessionTotals.blocks.toLong(), RFColors.avoidanceBlockBlue)
+    CompactStatRow(stringResource(Res.string.player_card_stat_damage_blocked), sessionTotals.blockMitigated, RFColors.avoidanceBlockBlue)
     CompactStatRow(stringResource(Res.string.player_card_stat_parries), sessionTotals.parries.toLong(), RFColors.avoidanceParryAmber)
+    CompactStatRow(stringResource(Res.string.player_card_stat_damage_parried), sessionTotals.parryMitigated, RFColors.avoidanceParryAmber)
     CompactStatRow(stringResource(Res.string.player_card_stat_evades), sessionTotals.evades.toLong(), RFColors.avoidanceEvadeGreen)
     CompactStatRow(stringResource(Res.string.player_card_stat_immunes), sessionTotals.immunes.toLong(), RFColors.avoidanceImmunePurple)
     CompactStatRow(stringResource(Res.string.player_card_stat_misses), sessionTotals.misses.toLong(), RFColors.avoidanceMissGray)

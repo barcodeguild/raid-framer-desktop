@@ -652,3 +652,47 @@ val MIGRATION_47_48 = object : Migration(47, 48) {
       .use { it.step() }
   }
 }
+
+// added avoidance + mitigation lifetime totals to player_cache and session totals to
+// player_session_totals so the session card's avoidance rows persist historically and
+// match the lifetime card (10/05/26)
+val MIGRATION_48_49 = object : Migration(48, 49) {
+  override fun migrate(connection: SQLiteConnection) {
+    // lifetime avoidance totals
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBlocks INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalParries INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalEvades INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalImmunes INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalMisses INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalAbsorbs INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBlockMitigated INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalParryMitigated INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalOdeHeals INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    // session avoidance totals
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBlocks INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalParries INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalEvades INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalImmunes INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMisses INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalAbsorbs INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBlockMitigated INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalParryMitigated INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+  }
+}

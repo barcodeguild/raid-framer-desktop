@@ -176,7 +176,11 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount
+      lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount,
+      lifetimeTotalAbsorbs = if (CombatEventsHelper.isAbsorbShieldSkill(event.spell)) {
+        cache.lifetimeTotalAbsorbs + event.amount.coerceAtLeast(0)
+      } else cache.lifetimeTotalAbsorbs,
+      lifetimeTotalOdeHeals = if (isOde) cache.lifetimeTotalOdeHeals + event.amount else cache.lifetimeTotalOdeHeals
     ),
     recentHealEvents = (this.recentHealEvents + event).takeLast(eventHistoryDepth),
     sessionHealTotal = if (isOde && !allowOdeAsHeal) this.sessionHealTotal else this.sessionHealTotal + event.amount,
@@ -237,6 +241,11 @@ fun PlayerCard.postAvoidanceTaken(event: AvoidanceEvent): PlayerCard {
       sessionBlockTotal = sessionBlockTotal + 1,
       sessionBlockMitigated = sessionBlockMitigated + mitigated,
       sessionAbsorbTotal = sessionAbsorbTotal + mitigated,
+      cache = cache?.copy(
+        lifetimeTotalBlocks = cache.lifetimeTotalBlocks + 1,
+        lifetimeTotalBlockMitigated = cache.lifetimeTotalBlockMitigated + mitigated,
+        lifetimeTotalAbsorbs = cache.lifetimeTotalAbsorbs + mitigated
+      ),
     )
     AvoidanceKind.PARRY -> copy(
       lastEvent = event.timestamp,
@@ -244,10 +253,30 @@ fun PlayerCard.postAvoidanceTaken(event: AvoidanceEvent): PlayerCard {
       sessionParryTotal = sessionParryTotal + 1,
       sessionParryMitigated = sessionParryMitigated + mitigated,
       sessionAbsorbTotal = sessionAbsorbTotal + mitigated,
+      cache = cache?.copy(
+        lifetimeTotalParries = cache.lifetimeTotalParries + 1,
+        lifetimeTotalParryMitigated = cache.lifetimeTotalParryMitigated + mitigated,
+        lifetimeTotalAbsorbs = cache.lifetimeTotalAbsorbs + mitigated
+      ),
     )
-    AvoidanceKind.DODGE -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionEvadeTotal = sessionEvadeTotal + 1)
-    AvoidanceKind.IMMUNE -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionImmuneTotal = sessionImmuneTotal + 1)
-    AvoidanceKind.MISS -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionMissTotal = sessionMissTotal + 1)
+    AvoidanceKind.DODGE -> copy(
+      lastEvent = event.timestamp,
+      recentAvoidanceEvents = recent,
+      sessionEvadeTotal = sessionEvadeTotal + 1,
+      cache = cache?.copy(lifetimeTotalEvades = cache.lifetimeTotalEvades + 1)
+    )
+    AvoidanceKind.IMMUNE -> copy(
+      lastEvent = event.timestamp,
+      recentAvoidanceEvents = recent,
+      sessionImmuneTotal = sessionImmuneTotal + 1,
+      cache = cache?.copy(lifetimeTotalImmunes = cache.lifetimeTotalImmunes + 1)
+    )
+    AvoidanceKind.MISS -> copy(
+      lastEvent = event.timestamp,
+      recentAvoidanceEvents = recent,
+      sessionMissTotal = sessionMissTotal + 1,
+      cache = cache?.copy(lifetimeTotalMisses = cache.lifetimeTotalMisses + 1)
+    )
     else -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent)
   }
 }
@@ -271,7 +300,8 @@ fun PlayerCard.postDamageTakenEvent(event: DamageEvent): PlayerCard {
     lastEvent = event.timestamp,
     cache = cache?.copy(
       lastSeen = event.timestamp,
-      lifetimeTotalDamageTaken = cache.lifetimeTotalDamageTaken + event.damage
+      lifetimeTotalDamageTaken = cache.lifetimeTotalDamageTaken + event.damage,
+      lifetimeTotalAbsorbs = cache.lifetimeTotalAbsorbs + absorb
     ),
     sessionDamageTakenTotal = this.sessionDamageTakenTotal + event.damage,
     sessionAbsorbTotal = this.sessionAbsorbTotal + absorb, // damage_absorbed credited to target

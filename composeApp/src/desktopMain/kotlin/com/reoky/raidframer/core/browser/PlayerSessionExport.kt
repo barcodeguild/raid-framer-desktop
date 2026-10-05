@@ -24,7 +24,9 @@ fun exportSessionCsv(sessions: List<PlayerSessionTotalsEntity>, file: File): Fil
     "totalStuns", "totalStaggers", "totalPetrification", "totalAbsorbLifeforce",
     "totalCorrosiveBarrage", "totalBlindedByCrows", "totalMistSunder", "totalRegularSunder",
     "totalImpaleImmunity", "totalProtectiveWings", "totalCourageousAction",
-    "totalManaBarrier", "totalRevive"
+    "totalManaBarrier", "totalRevive",
+    "totalBlocks", "totalParries", "totalEvades", "totalImmunes", "totalMisses",
+    "totalAbsorbs", "totalBlockMitigated", "totalParryMitigated"
   )
   val lines = mutableListOf(header.joinToString(","))
   for (s in sessions) {
@@ -43,7 +45,9 @@ fun exportSessionCsv(sessions: List<PlayerSessionTotalsEntity>, file: File): Fil
       s.totalStuns, s.totalStaggers, s.totalPetrification, s.totalAbsorbLifeforce,
       s.totalCorrosiveBarrage, s.totalBlindedByCrows, s.totalMistSunder, s.totalRegularSunder,
       s.totalImpaleImmunity, s.totalProtectiveWings, s.totalCourageousAction,
-      s.totalManaBarrier, s.totalRevive
+      s.totalManaBarrier, s.totalRevive,
+      s.totalBlocks, s.totalParries, s.totalEvades, s.totalImmunes, s.totalMisses,
+      s.totalAbsorbs, s.totalBlockMitigated, s.totalParryMitigated
     )
     lines.add(vals.map { esc(it) }.joinToString(","))
   }

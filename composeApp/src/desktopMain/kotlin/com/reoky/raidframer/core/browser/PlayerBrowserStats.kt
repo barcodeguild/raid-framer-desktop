@@ -60,7 +60,16 @@ val BROWSER_STATS: List<BrowserStatDef> = listOf(
   BrowserStatDef("protWings", "ProtWings", RFColors.protectiveWingsGold, { it.lifetimeTotalProtectiveWings }),
   BrowserStatDef("courageous", "Courage", RFColors.courageousActionBright, { it.lifetimeTotalCourageousAction }),
   BrowserStatDef("manaBarrier", "ManaBar", RFColors.manaBarrierBlue, { it.lifetimeTotalManaBarrier }),
-  BrowserStatDef("revive", "Revive", RFColors.reviveGhostWhite, { it.lifetimeTotalRevive })
+  BrowserStatDef("revive", "Revive", RFColors.reviveGhostWhite, { it.lifetimeTotalRevive }),
+  BrowserStatDef("blocks", "Blocks", RFColors.avoidanceBlockBlue, { it.lifetimeTotalBlocks }),
+  BrowserStatDef("parries", "Parries", RFColors.avoidanceParryAmber, { it.lifetimeTotalParries }),
+  BrowserStatDef("evades", "Evades", RFColors.avoidanceEvadeGreen, { it.lifetimeTotalEvades }),
+  BrowserStatDef("immunes", "Immunes", RFColors.avoidanceImmunePurple, { it.lifetimeTotalImmunes }),
+  BrowserStatDef("misses", "Misses", RFColors.avoidanceMissGray, { it.lifetimeTotalMisses }),
+  BrowserStatDef("absorbs", "Absorbs", RFColors.avoidanceAbsorbCyan, { it.lifetimeTotalAbsorbs }),
+  BrowserStatDef("dmgBlocked", "BlkMit", RFColors.avoidanceBlockBlue, { it.lifetimeTotalBlockMitigated }),
+  BrowserStatDef("dmgParried", "ParMit", RFColors.avoidanceParryAmber, { it.lifetimeTotalParryMitigated }),
+  BrowserStatDef("ode", "Ode", RFColors.healsGreen, { it.lifetimeTotalOdeHeals })
 )
 
 val HERO_STATS: List<BrowserStatDef> = listOf(

@@ -86,6 +86,7 @@ fun initialize(): AppDatabase {
     .addMigrations(MIGRATION_45_46) // added nearby filter state persistence (sliding window, participation, behavior sensitivity)
     .addMigrations(MIGRATION_46_47) // added raid caller allow guild buff toggle (Gallant's Blessing)
     .addMigrations(MIGRATION_47_48) // added Skiko rendering backend selection
+    .addMigrations(MIGRATION_48_49) // 10/05/26 added avoidance lifetime + session totals (blocks/parries/evades/immunes/misses/absorbs, block/parry mitigated HP, lifetime ode)
     .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
     .fallbackToDestructiveMigrationOnDowngrade(true)

@@ -755,6 +755,14 @@ object PlayerCacheInteractor : Interactor() {
            ,totalCourageousAction = card.sessionCourageousActionTotal
            ,totalManaBarrier = card.sessionManaBarrierTotal
            ,totalRevive = card.sessionReviveTotal
+           ,totalBlocks = card.sessionBlockTotal
+           ,totalParries = card.sessionParryTotal
+           ,totalEvades = card.sessionEvadeTotal
+           ,totalImmunes = card.sessionImmuneTotal
+           ,totalMisses = card.sessionMissTotal
+           ,totalAbsorbs = card.sessionAbsorbTotal
+           ,totalBlockMitigated = card.sessionBlockMitigated
+           ,totalParryMitigated = card.sessionParryMitigated
         )
         RFDao.playerSessionDao.insert(entity)
         written++
@@ -817,6 +825,12 @@ object PlayerCacheInteractor : Interactor() {
          || card.sessionCourageousActionTotal != 0
          || card.sessionManaBarrierTotal != 0
          || card.sessionReviveTotal != 0
+         || card.sessionBlockTotal != 0
+         || card.sessionParryTotal != 0
+         || card.sessionEvadeTotal != 0
+         || card.sessionImmuneTotal != 0
+         || card.sessionMissTotal != 0
+         || card.sessionAbsorbTotal != 0L
   }
 
   /**
@@ -890,7 +904,15 @@ object PlayerCacheInteractor : Interactor() {
        totalProtectiveWings = sessions.sumOf { it.totalProtectiveWings },
        totalCourageousAction = sessions.sumOf { it.totalCourageousAction },
        totalManaBarrier = sessions.sumOf { it.totalManaBarrier },
-       totalRevive = sessions.sumOf { it.totalRevive }
+       totalRevive = sessions.sumOf { it.totalRevive },
+       totalBlocks = sessions.sumOf { it.totalBlocks },
+       totalParries = sessions.sumOf { it.totalParries },
+       totalEvades = sessions.sumOf { it.totalEvades },
+       totalImmunes = sessions.sumOf { it.totalImmunes },
+       totalMisses = sessions.sumOf { it.totalMisses },
+       totalAbsorbs = sessions.sumOf { it.totalAbsorbs },
+       totalBlockMitigated = sessions.sumOf { it.totalBlockMitigated },
+       totalParryMitigated = sessions.sumOf { it.totalParryMitigated }
     )
   }
 
@@ -2580,6 +2602,43 @@ object PlayerCacheInteractor : Interactor() {
       CombatRankingCategory.COHERENCE_RENDER -> topCoherenceRender
       CombatRankingCategory.COHERENCE_RAID -> topCoherenceRaid
       CombatRankingCategory.COHERENCE_CLUMP -> topCoherenceClump
+      // older gaps (10/05/26)
+      CombatRankingCategory.DEATHS -> topDeaths
+      CombatRankingCategory.DAMAGE_TAKEN -> topDamageTaken
+      CombatRankingCategory.HEALS_RECEIVED -> topHealsReceived
+      CombatRankingCategory.ODE_HEALS -> topHealsOde
+      CombatRankingCategory.KILLS_KB -> topKillsKB
+      // 08/04 + deep tranquility batch
+      CombatRankingCategory.DEFIANCE -> topDefiance
+      CombatRankingCategory.GARDEN_DEFIANCE -> topGardenDefiance
+      CombatRankingCategory.PURGES -> topPurges
+      CombatRankingCategory.SAC_DANCES -> topSacDances
+      CombatRankingCategory.DEEP_TRANQUILITY -> topDeepTranquility
+      // 08/13 batch
+      CombatRankingCategory.DEEPEND_DEBUFF -> topDeependDebuff
+      CombatRankingCategory.THROW_DAGGER -> topThrowDagger
+      CombatRankingCategory.STUNS -> topStuns
+      CombatRankingCategory.STAGGERS -> topStaggers
+      CombatRankingCategory.PETRIFICATION -> topPetrification
+      CombatRankingCategory.ABSORB_LIFEFORCE -> topAbsorbLifeforce
+      CombatRankingCategory.CORROSIVE_BARRAGE -> topCorrosiveBarrage
+      CombatRankingCategory.BLINDED_BY_CROWS -> topBlindedByCrows
+      CombatRankingCategory.MIST_SUNDER -> topMistSunder
+      CombatRankingCategory.REGULAR_SUNDER -> topRegularSunder
+      CombatRankingCategory.IMPALE_IMMUNITY -> topImpaleImmunity
+      CombatRankingCategory.PROTECTIVE_WINGS -> topProtectiveWings
+      CombatRankingCategory.COURAGEOUS_ACTION -> topCourageousAction
+      CombatRankingCategory.MANA_BARRIER -> topManaBarrier
+      CombatRankingCategory.REVIVE -> topRevive
+      // avoidance batch (10/05/26) — block/parry rankings already sort by mitigated HP first
+      CombatRankingCategory.BLOCKS -> topBlocks
+      CombatRankingCategory.PARRIES -> topParries
+      CombatRankingCategory.EVADES -> topEvades
+      CombatRankingCategory.IMMUNES -> topImmunes
+      CombatRankingCategory.MISSES -> topMisses
+      CombatRankingCategory.ABSORBS -> topAbsorbs
+      CombatRankingCategory.DAMAGE_BLOCKED -> topBlocks
+      CombatRankingCategory.DAMAGE_PARRIED -> topParries
     }
   }
 

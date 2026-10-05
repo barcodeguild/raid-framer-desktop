@@ -147,7 +147,16 @@ fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntit
     lifetimeTotalProtectiveWings = c?.lifetimeTotalProtectiveWings ?: 0L,
     lifetimeTotalCourageousAction = c?.lifetimeTotalCourageousAction ?: 0L,
     lifetimeTotalManaBarrier = c?.lifetimeTotalManaBarrier ?: 0L,
-    lifetimeTotalRevive = c?.lifetimeTotalRevive ?: 0L
+    lifetimeTotalRevive = c?.lifetimeTotalRevive ?: 0L,
+    lifetimeTotalBlocks = c?.lifetimeTotalBlocks ?: 0L,
+    lifetimeTotalParries = c?.lifetimeTotalParries ?: 0L,
+    lifetimeTotalEvades = c?.lifetimeTotalEvades ?: 0L,
+    lifetimeTotalImmunes = c?.lifetimeTotalImmunes ?: 0L,
+    lifetimeTotalMisses = c?.lifetimeTotalMisses ?: 0L,
+    lifetimeTotalAbsorbs = c?.lifetimeTotalAbsorbs ?: 0L,
+    lifetimeTotalBlockMitigated = c?.lifetimeTotalBlockMitigated ?: 0L,
+    lifetimeTotalParryMitigated = c?.lifetimeTotalParryMitigated ?: 0L,
+    lifetimeTotalOdeHeals = c?.lifetimeTotalOdeHeals ?: 0L
   )
 }
 

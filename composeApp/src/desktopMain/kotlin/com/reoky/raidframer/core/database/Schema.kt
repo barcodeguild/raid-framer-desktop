@@ -16,7 +16,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 48
+const val SCHEMA_VERSION = 49
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -322,6 +322,17 @@ data class PlayerCacheEntity(
   val lifetimeTotalCourageousAction: Long = 0L,
   val lifetimeTotalManaBarrier: Long = 0L,
   val lifetimeTotalRevive: Long = 0L,
+
+  // avoidance + mitigation lifetime stats (10/05/26)
+  val lifetimeTotalBlocks: Long = 0L,
+  val lifetimeTotalParries: Long = 0L,
+  val lifetimeTotalEvades: Long = 0L,
+  val lifetimeTotalImmunes: Long = 0L,
+  val lifetimeTotalMisses: Long = 0L,
+  val lifetimeTotalAbsorbs: Long = 0L, // HP prevented (absorb shields + damage_absorbed + block/parry mitigated)
+  val lifetimeTotalBlockMitigated: Long = 0L, // HP prevented specifically by blocks
+  val lifetimeTotalParryMitigated: Long = 0L, // HP prevented specifically by parries
+  val lifetimeTotalOdeHeals: Long = 0L, // Ode to Recovery heals cast (session-only semantics, persisted for filtering)
 )
 
 /*
@@ -392,6 +403,16 @@ data class PlayerSessionTotalsEntity(
   val totalCourageousAction: Int = 0,
   val totalManaBarrier: Int = 0,
   val totalRevive: Int = 0,
+
+  // avoidance + mitigation session totals (10/05/26)
+  val totalBlocks: Int = 0,
+  val totalParries: Int = 0,
+  val totalEvades: Int = 0,
+  val totalImmunes: Int = 0,
+  val totalMisses: Int = 0,
+  val totalAbsorbs: Long = 0L, // HP prevented (absorb shields + damage_absorbed + block/parry mitigated)
+  val totalBlockMitigated: Long = 0L, // HP prevented specifically by blocks
+  val totalParryMitigated: Long = 0L, // HP prevented specifically by parries
 )
 
 /** Metadata for a locally persisted Pocket journal entry. */

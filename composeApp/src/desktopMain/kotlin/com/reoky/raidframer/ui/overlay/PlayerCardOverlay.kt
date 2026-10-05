@@ -192,6 +192,14 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_prote
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_courageous_action
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mana_barrier
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_revive
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_blocks
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_parries
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_evades
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_immunes
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_misses
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_absorbs
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_blocked
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_parried
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_defiance
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_garden_defiance
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_purges
@@ -812,6 +820,14 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_courageous_action), cache.lifetimeTotalCourageousAction, RFColors.courageousActionBright)
                   StatRow(stringResource(Res.string.player_card_stat_mana_barrier), cache.lifetimeTotalManaBarrier, RFColors.manaBarrierBlue)
                   StatRow(stringResource(Res.string.player_card_stat_revive), cache.lifetimeTotalRevive, RFColors.reviveGhostWhite)
+                  StatRow(stringResource(Res.string.player_card_stat_blocks), cache.lifetimeTotalBlocks, RFColors.avoidanceBlockBlue)
+                  StatRow(stringResource(Res.string.player_card_stat_damage_blocked), cache.lifetimeTotalBlockMitigated, RFColors.avoidanceBlockBlue)
+                  StatRow(stringResource(Res.string.player_card_stat_parries), cache.lifetimeTotalParries, RFColors.avoidanceParryAmber)
+                  StatRow(stringResource(Res.string.player_card_stat_damage_parried), cache.lifetimeTotalParryMitigated, RFColors.avoidanceParryAmber)
+                  StatRow(stringResource(Res.string.player_card_stat_evades), cache.lifetimeTotalEvades, RFColors.avoidanceEvadeGreen)
+                  StatRow(stringResource(Res.string.player_card_stat_immunes), cache.lifetimeTotalImmunes, RFColors.avoidanceImmunePurple)
+                  StatRow(stringResource(Res.string.player_card_stat_misses), cache.lifetimeTotalMisses, RFColors.avoidanceMissGray)
+                  StatRow(stringResource(Res.string.player_card_stat_absorbs), cache.lifetimeTotalAbsorbs, RFColors.avoidanceAbsorbCyan)
                   StatRow(stringResource(Res.string.player_card_stat_glider), cache.lifetimeTotalGliderUses, RFColors.gliderBlue)
                   StatRow(stringResource(Res.string.player_card_stat_items), cache.lifetimeTotalItemSkillsUsed, RFColors.itemSkillYellow)
                   StatRow(stringResource(Res.string.player_card_stat_potions), cache.lifetimeTotalPotionUsages, RFColors.potionTeal)
