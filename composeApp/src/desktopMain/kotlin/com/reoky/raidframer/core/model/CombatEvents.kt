@@ -28,8 +28,8 @@ inline fun <reified T : CombatEvent> CombatEvent.normalize(): T {
     is DebuffEndedEvent -> DebuffEndedEvent(timestamp, cid, s, t, debuff, debuffId)
     is DebuffAppliedEvent -> DebuffAppliedEvent(timestamp, cid, s, t, debuff, debuffId)
     is BuffAppliedEvent -> BuffAppliedEvent(timestamp, cid, s, t, buff, buffId)
-    is SpellMissedEvent -> SpellMissedEvent(timestamp, cid, s, t, spell, missResult, avoidedAmount)
-    is MeleeMissedEvent -> MeleeMissedEvent(timestamp, cid, s, t, missResult, avoidedAmount)
+    is SpellMissedEvent -> SpellMissedEvent(timestamp, cid, s, t, spell, missResult, damageTaken)
+    is MeleeMissedEvent -> MeleeMissedEvent(timestamp, cid, s, t, missResult, damageTaken)
     else -> throw IllegalArgumentException("Unsupported CombatEvent subtype: ${this::class.simpleName}") // better to just crash if this were to happen because this is supposed to be type-safe friends!
   } as T
 }
@@ -135,7 +135,15 @@ fun String.toAvoidanceKind(): AvoidanceKind = CombatEventsHelper.parseAvoidanceK
 
 sealed interface AvoidanceEvent : CombatEvent {
   val missResult: AvoidanceKind
-  val avoidedAmount: Int
+
+  /**
+   * The damage the defender ACTUALLY took after the game's fixed mitigation
+   * (this is the raw `amount` field of SPELL_MISSED / MELEE_MISSED, abs'd).
+   * It is NOT the avoided HP — see [CombatEventsHelper.mitigatedHp] to derive
+   * how much was prevented: PARRY leaves 60% of the hit, BLOCK leaves 40%,
+   * and DODGE/IMMUNE/MISS report 0 (original damage is unknowable then).
+   */
+  val damageTaken: Int
 }
 
 data class SpellMissedEvent(
@@ -145,7 +153,7 @@ data class SpellMissedEvent(
   override val target: String,
   val spell: String,
   override val missResult: AvoidanceKind,
-  override val avoidedAmount: Int,
+  override val damageTaken: Int,
 ) : CombatEvent, AvoidanceEvent
 
 data class MeleeMissedEvent(
@@ -154,5 +162,5 @@ data class MeleeMissedEvent(
   override val source: String,
   override val target: String,
   override val missResult: AvoidanceKind,
-  override val avoidedAmount: Int,
+  override val damageTaken: Int,
 ) : CombatEvent, AvoidanceEvent

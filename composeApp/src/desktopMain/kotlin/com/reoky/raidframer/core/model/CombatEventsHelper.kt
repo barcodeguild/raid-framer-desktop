@@ -78,7 +78,43 @@ object CombatEventsHelper {
     return AvoidanceKind.OTHER
   }
 
-  fun firstNonZero(vararg candidates: Int): Int = candidates.firstOrNull { it != 0 } ?: 0
+  // The game's fixed mitigation on partial avoidance (verified from combat logs):
+  // PARRY reduces the hit by 40% so the defender takes 60% of it,
+  // BLOCK reduces it by 60% so the defender takes 40% of it.
+  // We had reok do the calculation and so hopefully everything isn't backwards.
+  private const val PARRY_KEPT_RATIO = 0.6
+  private const val BLOCK_KEPT_RATIO = 0.4
+
+  /**
+   * Reverse-calculates the HP that was prevented by a partial-mitigation result.
+   *
+   * SPELL_MISSED / MELEE_MISSED report the damage the defender ACTUALLY took,
+   * so we reconstruct the original hit (`round(taken / keptRatio)`) and subtract
+   * what landed: parry 55 taken -> original 92 -> 37 prevented; block 55 taken
+   * -> original 138 (137.5 rounds up) -> 83 prevented.
+   *
+   * Divide-first is deliberate: `taken * (1 - ratio) / ratio` hits an IEEE trap
+   * (0.6/0.4 = 1.4999...98, so 55 -> 82 instead of 83), while `taken / ratio`
+   * is tie-free for every Int (taken/0.6 can never land exactly on .5, and
+   * taken/0.4 always lands on the exact representable half).
+   *
+   * DODGE/IMMUNE/MISS report 0 taken, so the original hit size is unknowable
+   * and this returns 0 — those columns stay counts.
+   */
+  fun mitigatedHp(kind: AvoidanceKind, damageTaken: Int): Long = when (kind) {
+    AvoidanceKind.PARRY -> Math.round(damageTaken / PARRY_KEPT_RATIO) - damageTaken
+    AvoidanceKind.BLOCK -> Math.round(damageTaken / BLOCK_KEPT_RATIO) - damageTaken
+    else -> 0L
+  }
+
+  /**
+   * Log suffix like ", prevented 83" for blocks/parries, empty otherwise so
+   * dodge/immune/miss lines don't claim "prevented 0" (unknowable, not zero).
+   */
+  fun mitigationLogInfo(kind: AvoidanceKind, damageTaken: Int): String {
+    val prevented = mitigatedHp(kind, damageTaken)
+    return if (prevented > 0) ", prevented $prevented" else ""
+  }
 
   /**
    * Avoidance credit direction: every kind credits the avoider (target card).

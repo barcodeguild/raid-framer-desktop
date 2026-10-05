@@ -185,10 +185,12 @@ data class PlayerCard(
   val sessionDeependDebuffTotal: Int = 0,
   val sessionBlockTotal: Int = 0, // times this player avoided via BLOCK (target-side)
   val sessionParryTotal: Int = 0, // times via PARRY (target-side)
+  val sessionBlockMitigated: Long = 0L, // HP prevented by blocks (back-calculated from damage taken)
+  val sessionParryMitigated: Long = 0L, // HP prevented by parries (back-calculated from damage taken)
   val sessionEvadeTotal: Int = 0, // times via DODGE (target-side)
   val sessionImmuneTotal: Int = 0, // times this player's spells were IMMUNE (source-side)
   val sessionMissTotal: Int = 0, // true MISS count (source-side)
-  val sessionAbsorbTotal: Long = 0L, // HP absorbed (damage_absorbed + absorb-shield heals)
+  val sessionAbsorbTotal: Long = 0L, // HP absorbed (damage_absorbed + absorb-shield heals + block/parry mitigation)
 
   // Coherence: session time (milliseconds) spent with this player within each distance
   // threshold of the recorder (the user). Held in memory for the session only; not persisted.

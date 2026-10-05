@@ -219,15 +219,32 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
 /**
  * Avoidance counting. Every kind credits the avoider (target card): BLOCK,
  * PARRY, DODGE, IMMUNE and MISS all mean the defender avoided the hit.
+ * BLOCK/PARRY also back-calculate the HP that was prevented (see
+ * [CombatEventsHelper.mitigatedHp]) and credit it toward sessionAbsorbTotal,
+ * the same "mitigation prevented damage" bucket the absorbs ranking shows.
+ * DODGE/IMMUNE/MISS report 0 damage taken, so no HP is recoverable for them.
  * postAvoidanceCaused is kept for callers that still route source-side; it is
  * a no-op record so historical behavior stays visible in recent events.
  */
 fun PlayerCard.postAvoidanceTaken(event: AvoidanceEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(name) && !RFConfig.state.value.allowPVEDamage) return this
   val recent = (recentAvoidanceEvents + event).takeLast(eventHistoryDepth)
+  val mitigated = CombatEventsHelper.mitigatedHp(event.missResult, event.damageTaken)
   return when (event.missResult) {
-    AvoidanceKind.BLOCK -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionBlockTotal = sessionBlockTotal + 1, sessionAbsorbTotal = sessionAbsorbTotal + event.avoidedAmount.coerceAtLeast(0))
-    AvoidanceKind.PARRY -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionParryTotal = sessionParryTotal + 1, sessionAbsorbTotal = sessionAbsorbTotal + event.avoidedAmount.coerceAtLeast(0))
+    AvoidanceKind.BLOCK -> copy(
+      lastEvent = event.timestamp,
+      recentAvoidanceEvents = recent,
+      sessionBlockTotal = sessionBlockTotal + 1,
+      sessionBlockMitigated = sessionBlockMitigated + mitigated,
+      sessionAbsorbTotal = sessionAbsorbTotal + mitigated,
+    )
+    AvoidanceKind.PARRY -> copy(
+      lastEvent = event.timestamp,
+      recentAvoidanceEvents = recent,
+      sessionParryTotal = sessionParryTotal + 1,
+      sessionParryMitigated = sessionParryMitigated + mitigated,
+      sessionAbsorbTotal = sessionAbsorbTotal + mitigated,
+    )
     AvoidanceKind.DODGE -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionEvadeTotal = sessionEvadeTotal + 1)
     AvoidanceKind.IMMUNE -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionImmuneTotal = sessionImmuneTotal + 1)
     AvoidanceKind.MISS -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent, sessionMissTotal = sessionMissTotal + 1)

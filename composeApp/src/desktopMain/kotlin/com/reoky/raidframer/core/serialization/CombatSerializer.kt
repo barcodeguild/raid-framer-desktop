@@ -149,7 +149,7 @@ sealed class CombatEventPayload {
     val spell: String = "",
     val damageType: String = "", // PHYSICAL / FIRE / HOLY
     val result: String = "", // BLOCK / PARRY / DODGE / IMMUNE / MISS
-    val amount: Int = 0, // avoided-amount
+    val amount: Int = 0, // damage actually taken (negative = HP removed; 0 for DODGE/IMMUNE/MISS)
     val f10: Int = 0,
     val f11: Int = 0, // unknown
     val f12: Boolean = false, // unknown
@@ -165,7 +165,7 @@ sealed class CombatEventPayload {
     val source: String = "Unknown Target",
     val target: String = "Unknown Target",
     val result: String = "", // BLOCK / PARRY / DODGE / IMMUNE / MISS
-    val amount: Int, // avoided-amount candidate
+    val amount: Int, // damage actually taken (negative = HP removed; 0 for DODGE/IMMUNE/MISS)
     val f7: Int = 0,
     val f8: Int = 0,
     val f9: Boolean = false,

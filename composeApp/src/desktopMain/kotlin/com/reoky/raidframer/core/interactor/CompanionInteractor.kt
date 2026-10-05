@@ -7,7 +7,6 @@ import com.reoky.raidframer.core.model.CastingEvent
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
-import com.reoky.raidframer.core.model.AvoidanceKind
 import com.reoky.raidframer.core.model.CombatEventsHelper
 import com.reoky.raidframer.core.model.MeleeMissedEvent
 import com.reoky.raidframer.core.model.SpellMissedEvent
@@ -353,9 +352,9 @@ object CompanionInteractor : Interactor() {
                 source = event.source,
                 target = event.target,
                 missResult = event.result.toAvoidanceKind(),
-                avoidedAmount = abs(event.amount),
+                damageTaken = abs(event.amount),
               ).normalize<MeleeMissedEvent>()
-              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s melee attack (${combatEvent.missResult}).")
+              Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s melee attack (${combatEvent.missResult}, took ${combatEvent.damageTaken}${CombatEventsHelper.mitigationLogInfo(combatEvent.missResult, combatEvent.damageTaken)}).")
               PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.SpellMissedPayload -> {
@@ -366,9 +365,10 @@ object CompanionInteractor : Interactor() {
                 target = event.target,
                 spell = event.spell,
                 missResult = event.result.toAvoidanceKind(),
-                avoidedAmount = CombatEventsHelper.firstNonZero(abs(event.amount), abs(event.f10)),
+                // f10 is a confirmed zero int (see parsers.lua), so amount is the sole source
+                damageTaken = abs(event.amount),
               ).normalize<SpellMissedEvent>()
-              Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s ${event.spell} spell (${combatEvent.missResult}).")
+              Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s ${event.spell} spell (${combatEvent.missResult}, took ${combatEvent.damageTaken}${CombatEventsHelper.mitigationLogInfo(combatEvent.missResult, combatEvent.damageTaken)}).")
               PlayerCacheInteractor.postEvent(combatEvent)
             }
             is CombatEventPayload.EnergizePayload -> {

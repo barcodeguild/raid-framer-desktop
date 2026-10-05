@@ -152,9 +152,8 @@ function RF.Parser.ParseSpellMissedEvent(t)
   event.spell         = t[6] -- name of spell
   event.damageType    = t[7] -- PHYSICAL / FIRE / HOLY
   event.result        = t[8] -- BLOCK/PARRY/DODGE/IMMUNE/MISS
-  event.amount        = t[9] -- avoided-amount
-  event.f10           = t[10] -- avoided-amount candidate 2
-  event.f11           = t[11] -- zero int (unknown)
+  event.amount        = t[9] -- damage actually taken (negative = HP removed; 0 for DODGE/IMMUNE/MISS)
+  event.f10           = t[10] -- zero int
   event.f11           = t[11] -- zero int
   event.f12           = t[12] -- bool
   event.f13           = t[13] -- zero int
@@ -174,7 +173,7 @@ function RF.Parser.ParseMeleeMissedEvent(t)
 
   -- specific fields for MELEE_MISSED events
   event.result        = t[5] -- BLOCK/PARRY/DODGE/IMMUNE/MISS
-  event.amount        = t[6] -- avoided-amount
+  event.amount        = t[6] -- damage actually taken (negative = HP removed; 0 for DODGE/IMMUNE/MISS)
   event.f7            = t[7] -- zero int
   event.f8            = t[8] -- zero int
   event.f9            = t[9] -- bool

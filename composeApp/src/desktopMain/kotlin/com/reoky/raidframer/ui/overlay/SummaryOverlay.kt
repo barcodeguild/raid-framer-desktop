@@ -1285,7 +1285,7 @@ private fun AvoidanceTab(
       icon = "\uD83D\uDEE1",
       title = stringResource(Res.string.summary_top_blocks),
       cards = topBlocks,
-      valueExtractor = { it.sessionBlockTotal.toString() },
+      valueExtractor = { "${it.sessionBlockMitigated.humanReadableAbbreviation()} (${it.sessionBlockTotal})" },
       valueColor = RFColors.avoidanceBlockBlue,
       modifier = Modifier.weight(1f)
     ) { card ->
@@ -1295,7 +1295,7 @@ private fun AvoidanceTab(
       icon = "\u2694",
       title = stringResource(Res.string.summary_top_parries),
       cards = topParries,
-      valueExtractor = { it.sessionParryTotal.toString() },
+      valueExtractor = { "${it.sessionParryMitigated.humanReadableAbbreviation()} (${it.sessionParryTotal})" },
       valueColor = RFColors.avoidanceParryAmber,
       modifier = Modifier.weight(1f)
     ) { card ->

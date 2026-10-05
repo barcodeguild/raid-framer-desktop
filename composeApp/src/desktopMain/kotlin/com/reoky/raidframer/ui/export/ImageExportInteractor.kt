@@ -1604,8 +1604,8 @@ val coherenceRecordingMs: Long,
 
     // Avoidance: Blocks, Parries, Evades
     tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_blocks), "\uD83D\uDEE1", ColumnData.CardData(data.topBlocks, { it.sessionBlockTotal.toString() }, BLOCK_COLOR)),
-      Triple(getString(Res.string.summary_top_parries), "\u2694", ColumnData.CardData(data.topParries, { it.sessionParryTotal.toString() }, PARRY_COLOR)),
+      Triple(getString(Res.string.summary_top_blocks), "\uD83D\uDEE1", ColumnData.CardData(data.topBlocks, { "${it.sessionBlockMitigated.humanReadableAbbreviation()} (${it.sessionBlockTotal})" }, BLOCK_COLOR)),
+      Triple(getString(Res.string.summary_top_parries), "\u2694", ColumnData.CardData(data.topParries, { "${it.sessionParryMitigated.humanReadableAbbreviation()} (${it.sessionParryTotal})" }, PARRY_COLOR)),
       Triple(getString(Res.string.summary_top_evades), "\uD83D\uDCA8", ColumnData.CardData(data.topEvades, { it.sessionEvadeTotal.toString() }, EVADE_COLOR)),
     )))
 

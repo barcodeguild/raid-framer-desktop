@@ -1920,11 +1920,11 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topBlocks: StateFlow<List<PlayerCard>> = cardSnapshots
-    .map { it.filter { card -> card.isRealPlayer && card.sessionBlockTotal > 0 }.sortedByDescending { card -> card.sessionBlockTotal }.take(100) }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionBlockTotal > 0 }.sortedWith(compareByDescending<PlayerCard> { it.sessionBlockMitigated }.thenByDescending { it.sessionBlockTotal }).take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topParries: StateFlow<List<PlayerCard>> = cardSnapshots
-    .map { it.filter { card -> card.isRealPlayer && card.sessionParryTotal > 0 }.sortedByDescending { card -> card.sessionParryTotal }.take(100) }
+    .map { it.filter { card -> card.isRealPlayer && card.sessionParryTotal > 0 }.sortedWith(compareByDescending<PlayerCard> { it.sessionParryMitigated }.thenByDescending { it.sessionParryTotal }).take(100) }
     .distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, emptyList())
 
   val topEvades: StateFlow<List<PlayerCard>> = cardSnapshots

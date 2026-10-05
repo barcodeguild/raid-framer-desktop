@@ -30,7 +30,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.io.path.createDirectories
-import kotlin.io.path.exists
 
 object CombatLogInteractor : Interactor() {
 
@@ -283,7 +282,7 @@ object CombatLogInteractor : Interactor() {
         spell = spell,
         damageType = "",
         result = missResult.name,
-        amount = avoidedAmount,
+        amount = damageTaken,
       )
       is MeleeMissedEvent -> CombatEventPayload.MeleeMissedPayload(
         timestamp = timestamp,
@@ -291,7 +290,7 @@ object CombatLogInteractor : Interactor() {
         source = source,
         target = target,
         result = missResult.name,
-        amount = avoidedAmount,
+        amount = damageTaken,
       )
       else -> null
     }

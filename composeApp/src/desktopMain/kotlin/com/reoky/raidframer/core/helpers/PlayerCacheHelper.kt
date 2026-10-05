@@ -226,6 +226,8 @@ fun PlayerCard.resetSession(): PlayerCard {
     sessionDeependDebuffTotal = 0,
     sessionBlockTotal = 0,
     sessionParryTotal = 0,
+    sessionBlockMitigated = 0L,
+    sessionParryMitigated = 0L,
     sessionEvadeTotal = 0,
     sessionImmuneTotal = 0,
     sessionMissTotal = 0,
