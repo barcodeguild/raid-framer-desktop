@@ -24,7 +24,7 @@ import raid_framer_desktop.composeapp.generated.resources.ravenspine_glider
 import raid_framer_desktop.composeapp.generated.resources.rocket_glider
 import raid_framer_desktop.composeapp.generated.resources.sky_emp_glider
 import raid_framer_desktop.composeapp.generated.resources.twt_glider
-import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.database.*
 
 /**
  * Defines glider types that are detected via self-applied buffs (SPELL_AURA_APPLIED with buffType = BUFF).
@@ -47,7 +47,7 @@ enum class GliderSpell(
     iconRes = Res.drawable.twt_glider,
     packedUsageField = { it.lastTWTGlider },
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastTWTGlider = incrementPackedItemUsage(card.cache.lastTWTGlider))
+      cache = card.cache?.withGliders { copy(lastTWTGlider = incrementPackedItemUsage(lastTWTGlider)) }
     )}
   ),
   MOONSHADOW_GLIDER(
@@ -57,7 +57,7 @@ enum class GliderSpell(
     iconRes = Res.drawable.moonshadow_glider,
     packedUsageField = { it.lastMoonshadowGlider },
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastMoonshadowGlider = incrementPackedItemUsage(card.cache.lastMoonshadowGlider))
+      cache = card.cache?.withGliders { copy(lastMoonshadowGlider = incrementPackedItemUsage(lastMoonshadowGlider)) }
     )}
   ),
   CRYSTAL_WINGS(
@@ -67,7 +67,7 @@ enum class GliderSpell(
     iconRes = Res.drawable.crystal_wings,
     packedUsageField = { it.lastCrystalWings },
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastCrystalWings = incrementPackedItemUsage(card.cache.lastCrystalWings))
+      cache = card.cache?.withGliders { copy(lastCrystalWings = incrementPackedItemUsage(lastCrystalWings)) }
     )}
   ),
   LEGENDARY_DRAGON_WINGS(
@@ -77,7 +77,7 @@ enum class GliderSpell(
     iconRes = Res.drawable.bd_glider,
     packedUsageField = { it.lastBDGlider },
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastBDGlider = incrementPackedItemUsage(card.cache.lastBDGlider))
+      cache = card.cache?.withGliders { copy(lastBDGlider = incrementPackedItemUsage(lastBDGlider)) }
     )}
   ),
   ROCKET_WINGS(
@@ -87,7 +87,7 @@ enum class GliderSpell(
     iconRes = Res.drawable.rocket_glider,
     packedUsageField = { it.lastRocketGlider },
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastRocketGlider = incrementPackedItemUsage(card.cache.lastRocketGlider))
+      cache = card.cache?.withGliders { copy(lastRocketGlider = incrementPackedItemUsage(lastRocketGlider)) }
     )}
   ),
   RAVENSPINE_WINGS(
@@ -97,7 +97,7 @@ enum class GliderSpell(
     iconRes = Res.drawable.ravenspine_glider,
     packedUsageField = { it.lastRavenspineWings },
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastRavenspineWings = incrementPackedItemUsage(card.cache.lastRavenspineWings))
+      cache = card.cache?.withGliders { copy(lastRavenspineWings = incrementPackedItemUsage(lastRavenspineWings)) }
     )}
   ),
   FEATHERED_DRAGON_GLIDER(
@@ -107,7 +107,7 @@ enum class GliderSpell(
     iconRes = Res.drawable.kraken_glider,
     packedUsageField = { it.lastKrakenGlider },
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastKrakenGlider = incrementPackedItemUsage(card.cache.lastKrakenGlider))
+      cache = card.cache?.withGliders { copy(lastKrakenGlider = incrementPackedItemUsage(lastKrakenGlider)) }
     )}
   ),
   SKY_EMPEROR(
@@ -117,7 +117,7 @@ enum class GliderSpell(
     iconRes = Res.drawable.sky_emp_glider,
     packedUsageField = { it.lastSkyEmpGlider },
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSkyEmpGlider = incrementPackedItemUsage(card.cache.lastSkyEmpGlider))
+      cache = card.cache?.withGliders { copy(lastSkyEmpGlider = incrementPackedItemUsage(lastSkyEmpGlider)) }
     )}
   );
 
@@ -164,8 +164,10 @@ fun PlayerCard.copiedWithGliderDetectionMiddleWare(event: CombatEvent): PlayerCa
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
-      lastSeen = event.timestamp,
-      lifetimeTotalGliderUses = (card.cache?.lifetimeTotalGliderUses ?: 0L) + 1
+      identity = card.cache.identity.copy(lastSeen = event.timestamp),
+      lifetimeCombat = card.cache.lifetimeCombat.copy(
+        lifetimeTotalGliderUses = card.cache.lifetimeTotalGliderUses + 1
+      )
     ),
     sessionGliderTotal = this.sessionGliderTotal + 1,
     lastGliderUse = now

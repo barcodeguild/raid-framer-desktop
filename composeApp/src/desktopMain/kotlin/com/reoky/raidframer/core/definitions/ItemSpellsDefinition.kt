@@ -1,6 +1,6 @@
 package com.reoky.raidframer.core.definitions
 
-import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.database.*
 import com.reoky.raidframer.core.database.incrementPackedItemUsage
 import com.reoky.raidframer.core.model.PlayerCard
 import org.jetbrains.compose.resources.DrawableResource
@@ -112,7 +112,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastKrakenScepter },
     possibleSpellNames = listOf("Desolate Sea Sovereign"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastKrakenScepter = incrementPackedItemUsage(card.cache.lastKrakenScepter))
+      cache = card.cache?.withUtilityItems { copy(lastKrakenScepter = incrementPackedItemUsage(lastKrakenScepter)) }
     )} // lambda to increment the usage count on the cache because most items won't have a cache update
   ),
   KRAKEN_SPEAR(
@@ -125,7 +125,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastKrakenSpear },
     possibleSpellNames = listOf("Desolate Sea Pillager"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastKrakenSpear = incrementPackedItemUsage(card.cache.lastKrakenSpear))
+      cache = card.cache?.withUtilityItems { copy(lastKrakenSpear = incrementPackedItemUsage(lastKrakenSpear)) }
     )}
   ),
   KRAKEN_SHIELD(
@@ -138,7 +138,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastKrakenShield },
     possibleSpellNames = listOf("Desolate Sea Guardian"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastKrakenShield = incrementPackedItemUsage(card.cache.lastKrakenShield))
+      cache = card.cache?.withUtilityItems { copy(lastKrakenShield = incrementPackedItemUsage(lastKrakenShield)) }
     )}
   ),
   HONOR_NODACHI(
@@ -151,7 +151,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastHonorNodachi },
     possibleSpellNames = listOf("Honor's Mighty Frenzied Nodachi", "Honor's Frenzied Nodachi"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastHonorNodachi = incrementPackedItemUsage(card.cache.lastHonorNodachi))
+      cache = card.cache?.withUtilityItems { copy(lastHonorNodachi = incrementPackedItemUsage(lastHonorNodachi)) }
     )}
   ),
 
@@ -170,7 +170,7 @@ enum class ItemSpell(
     possibleSpellNames = listOf("Jola's Grudge"),
     updateCard = { card -> card.copy(
       sessionCCTotal = card.sessionCCTotal + 1, // I guess this counts as cc
-      cache = card.cache?.copy(lastJolaShield = incrementPackedItemUsage(card.cache.lastJolaShield))
+      cache = card.cache?.withUtilityItems { copy(lastJolaShield = incrementPackedItemUsage(lastJolaShield)) }
     )}
   ),
 
@@ -187,7 +187,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastHalcyNecklace },
     possibleSpellNames = listOf("Halcyon's Spiritual Necklace"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastHalcyNecklace = incrementPackedItemUsage(card.cache.lastHalcyNecklace))
+      cache = card.cache?.withUtilityItems { copy(lastHalcyNecklace = incrementPackedItemUsage(lastHalcyNecklace)) }
     )}
   ),
   SOUL_NECKLACE(
@@ -200,7 +200,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastSoulNecklace },
     possibleSpellNames = listOf("Soulbinder's Necklace"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSoulNecklace = incrementPackedItemUsage(card.cache.lastSoulNecklace))
+      cache = card.cache?.withUtilityItems { copy(lastSoulNecklace = incrementPackedItemUsage(lastSoulNecklace)) }
     )}
   ),
 
@@ -217,7 +217,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastSnakeGreatsword },
     possibleSpellNames = listOf("Soulslake Edge", "Eminent Soulslake Edge"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSnakeGreatsword = incrementPackedItemUsage(card.cache.lastSnakeGreatsword))
+      cache = card.cache?.withSnakeItems { copy(lastSnakeGreatsword = incrementPackedItemUsage(lastSnakeGreatsword)) }
     )}
   ),
   SNAKE_SHIELD(
@@ -230,7 +230,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastSnakeShield },
     possibleSpellNames = listOf("Soulslake Bulwark", "Eminent Soulslake Bulwark"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSnakeShield = incrementPackedItemUsage(card.cache.lastSnakeShield))
+      cache = card.cache?.withSnakeItems { copy(lastSnakeShield = incrementPackedItemUsage(lastSnakeShield)) }
     )}
   ),
   SNAKE_SWORD(
@@ -243,7 +243,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastSnakeSword },
     possibleSpellNames = listOf("Soulslake Razor", "Eminent Soulslake Razor"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSnakeSword = incrementPackedItemUsage(card.cache.lastSnakeSword))
+      cache = card.cache?.withSnakeItems { copy(lastSnakeSword = incrementPackedItemUsage(lastSnakeSword)) }
     )}
   ),
   SNAKE_AXE(
@@ -256,7 +256,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastSnakeAxe },
     possibleSpellNames = listOf("Cleaver Target"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSnakeAxe = incrementPackedItemUsage(card.cache.lastSnakeAxe))
+      cache = card.cache?.withSnakeItems { copy(lastSnakeAxe = incrementPackedItemUsage(lastSnakeAxe)) }
     )}
   ),
   SNAKE_SCEPTER(
@@ -269,7 +269,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastSnakeScepter },
     possibleSpellNames = listOf("Soulslake Leech", "Eminent Soulslake Leech"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSnakeScepter = incrementPackedItemUsage(card.cache.lastSnakeScepter))
+      cache = card.cache?.withSnakeItems { copy(lastSnakeScepter = incrementPackedItemUsage(lastSnakeScepter)) }
     )}
   ),
   SNAKE_GUN(
@@ -282,7 +282,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastSnakeGun },
     possibleSpellNames = listOf("Soulslake Bullet", "Eminent Soulslake Bullet"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSnakeGun = incrementPackedItemUsage(card.cache.lastSnakeGun))
+      cache = card.cache?.withSnakeItems { copy(lastSnakeGun = incrementPackedItemUsage(lastSnakeGun)) }
     )}
   ),
 
@@ -299,7 +299,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastBdShield },
     possibleSpellNames = listOf("Black Dragon's Self-Recovery", "Ferocious Black Dragon's Self-Recovery"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastBdShield = incrementPackedItemUsage(card.cache.lastBdShield))
+      cache = card.cache?.withBlackDragonItems { copy(lastBdShield = incrementPackedItemUsage(lastBdShield)) }
     )}
   ),
   BD_CLUB(
@@ -312,7 +312,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastBdClub },
     possibleSpellNames = listOf("Black Dragon's Serenity", "Ferocious Black Dragon's Serenity"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastBdClub = incrementPackedItemUsage(card.cache.lastBdClub))
+      cache = card.cache?.withBlackDragonItems { copy(lastBdClub = incrementPackedItemUsage(lastBdClub)) }
     )}
   ),
   BD_BOW(
@@ -325,7 +325,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastBdBow },
     possibleSpellNames = listOf("Black Dragon's Windsong", "Ferocious Black Dragon's Wingbeat"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastBdBow = incrementPackedItemUsage(card.cache.lastBdBow))
+      cache = card.cache?.withBlackDragonItems { copy(lastBdBow = incrementPackedItemUsage(lastBdBow)) }
     )}
   ),
   BD_RIFLE(
@@ -338,7 +338,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastBdRifle },
     possibleSpellNames = listOf("Black Dragon's Breath", "Ferocious Black Dragon's Bite"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastBdRifle = incrementPackedItemUsage(card.cache.lastBdRifle))
+      cache = card.cache?.withBlackDragonItems { copy(lastBdRifle = incrementPackedItemUsage(lastBdRifle)) }
     )}
   ),
   BD_STAFF(
@@ -351,7 +351,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastBdStaff },
     possibleSpellNames = listOf("Black Dragon's Meteor Strike"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastBdStaff = incrementPackedItemUsage(card.cache.lastBdStaff))
+      cache = card.cache?.withBlackDragonItems { copy(lastBdStaff = incrementPackedItemUsage(lastBdStaff)) }
     )}
   ),
   BD_SWORD(
@@ -364,7 +364,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastBdSword },
     possibleSpellNames = listOf(),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastBdSword = incrementPackedItemUsage(card.cache.lastBdSword))
+      cache = card.cache?.withBlackDragonItems { copy(lastBdSword = incrementPackedItemUsage(lastBdSword)) }
     )}
   ),
   BD_2H_SWORD(
@@ -377,7 +377,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastBd2hSword },
     possibleSpellNames = listOf("Black Dragon's Fury"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastBd2hSword = incrementPackedItemUsage(card.cache.lastBd2hSword))
+      cache = card.cache?.withBlackDragonItems { copy(lastBd2hSword = incrementPackedItemUsage(lastBd2hSword)) }
     )}
   ),
 
@@ -394,7 +394,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastAnthSetPull },
     possibleSpellNames = listOf("Necromantic Flame"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastAnthSetPull = incrementPackedItemUsage(card.cache.lastAnthSetPull))
+      cache = card.cache?.withDungeonItems { copy(lastAnthSetPull = incrementPackedItemUsage(lastAnthSetPull)) }
     )}
   ),
   GARDEN_ANTH_SET_PULL(
@@ -407,7 +407,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastGardenAnthSetPull },
     possibleSpellNames = listOf("Necromantic Flame"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastGardenAnthSetPull = incrementPackedItemUsage(card.cache.lastGardenAnthSetPull))
+      cache = card.cache?.withDungeonItems { copy(lastGardenAnthSetPull = incrementPackedItemUsage(lastGardenAnthSetPull)) }
     )}
   ),
 
@@ -424,7 +424,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastLibBow },
     possibleSpellNames = listOf("Disciple's Bow", "Radiant Disciple's Bow", "Immortal Warden's Bow"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastLibBow = incrementPackedItemUsage(card.cache.lastLibBow))
+      cache = card.cache?.withDungeonItems { copy(lastLibBow = incrementPackedItemUsage(lastLibBow)) }
     )}
   ),
   LIB_DAGGER(
@@ -437,7 +437,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastLibDagger },
     possibleSpellNames = listOf("Immortal Warden's Dagger"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastLibDagger = incrementPackedItemUsage(card.cache.lastLibDagger))
+      cache = card.cache?.withDungeonItems { copy(lastLibDagger = incrementPackedItemUsage(lastLibDagger)) }
     )}
   ),
   LIB_SHORTSPEAR(
@@ -450,7 +450,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastLibShortspear },
     possibleSpellNames = listOf("Immortal Warden's Shortspear"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastLibShortspear = incrementPackedItemUsage(card.cache.lastLibShortspear))
+      cache = card.cache?.withDungeonItems { copy(lastLibShortspear = incrementPackedItemUsage(lastLibShortspear)) }
     )}
   ),
   LIB_STAFF(
@@ -463,7 +463,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastLibStaff },
     possibleSpellNames = listOf("Immortal Warden's Staff"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastLibStaff = incrementPackedItemUsage(card.cache.lastLibStaff))
+      cache = card.cache?.withDungeonItems { copy(lastLibStaff = incrementPackedItemUsage(lastLibStaff)) }
     )}
   ),
   LIB_GREATCLUB(
@@ -476,7 +476,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastGreatclub },
     possibleSpellNames = listOf("Disciple's Greatclub", "Immortals's Greatclub"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastGreatclub = incrementPackedItemUsage(card.cache.lastGreatclub))
+      cache = card.cache?.withUtilityItems { copy(lastGreatclub = incrementPackedItemUsage(lastGreatclub)) }
     )}
   ),
   LIB_SHIELD(
@@ -490,7 +490,7 @@ enum class ItemSpell(
     possibleSpellNames = listOf("Disciple's Shield", "Immortal Warden's Shield"),
     updateCard = { card -> card.copy(
       sessionCCTotal = card.sessionCCTotal + 1, // allows us to count lib shield as cc points even though there's no visible debuff
-      cache = card.cache?.copy(lastLibShieldPull = incrementPackedItemUsage(card.cache.lastLibShieldPull))
+      cache = card.cache?.withUtilityItems { copy(lastLibShieldPull = incrementPackedItemUsage(lastLibShieldPull)) }
     )} // lambda to increment the usage count on the cache because most items won't have a cache update
   ),
 
@@ -507,7 +507,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastSerpStaff },
     possibleSpellNames = listOf("Corrupted Wit"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSerpStaff = incrementPackedItemUsage(card.cache.lastSerpStaff))
+      cache = card.cache?.withDungeonItems { copy(lastSerpStaff = incrementPackedItemUsage(lastSerpStaff)) }
     )}
   ),
   SERP_SHIELD(
@@ -520,7 +520,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastSerpShield },
     possibleSpellNames = listOf("Corrupted Wit"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastSerpShield = incrementPackedItemUsage(card.cache.lastSerpShield))
+      cache = card.cache?.withDungeonItems { copy(lastSerpShield = incrementPackedItemUsage(lastSerpShield)) }
     )}
   ),
 
@@ -537,7 +537,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastMistNodachi },
     possibleSpellNames = listOf("Pervasive Black Magic", "Amplified Black Magic"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastMistNodachi = incrementPackedItemUsage(card.cache.lastMistNodachi))
+      cache = card.cache?.withDungeonItems { copy(lastMistNodachi = incrementPackedItemUsage(lastMistNodachi)) }
     )}
   ),
   MIST_DAGGER(
@@ -550,7 +550,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastMistDagger },
     possibleSpellNames = listOf("Wicked Whisper Dagger", "Prime Wicked Whisper Dagger", "Supreme Wicked Whisper Dagger "),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastMistDagger = incrementPackedItemUsage(card.cache.lastMistDagger))
+      cache = card.cache?.withDungeonItems { copy(lastMistDagger = incrementPackedItemUsage(lastMistDagger)) }
     )}
   ),
   MIST_SHIELD(
@@ -563,7 +563,7 @@ enum class ItemSpell(
     packedUsageField = { it.lastMistShield },
     possibleSpellNames = listOf("Healing Talisman", "Mistsong Bewitching Talisman"),
     updateCard = { card -> card.copy(
-      cache = card.cache?.copy(lastMistShield = incrementPackedItemUsage(card.cache.lastMistShield))
+      cache = card.cache?.withDungeonItems { copy(lastMistShield = incrementPackedItemUsage(lastMistShield)) }
     )}
   );
 }

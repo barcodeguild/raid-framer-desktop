@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.browser
 
 import androidx.compose.ui.graphics.Color
-import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.database.*
 import com.reoky.raidframer.core.helpers.RFColors
 
 data class BrowserStatDef(

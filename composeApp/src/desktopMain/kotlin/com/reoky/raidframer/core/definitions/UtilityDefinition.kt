@@ -1,6 +1,6 @@
 package com.reoky.raidframer.core.definitions
 
-import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.database.*
 import com.reoky.raidframer.core.model.BuffAppliedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CombatEvent
@@ -82,8 +82,10 @@ fun PlayerCard.copiedWithUtilityItemDetectionMiddleWare(event: CombatEvent): Pla
     lastEvent = now,
     lastItemUse = now,
     cache = updatedCard.cache?.copy(
-      lastSeen = now,
-      lifetimeTotalItemSkillsUsed = (updatedCard.cache?.lifetimeTotalItemSkillsUsed ?: 0L) + newMatches.size,
+      identity = updatedCard.cache.identity.copy(lastSeen = now),
+      lifetimeCombat = updatedCard.cache.lifetimeCombat.copy(
+        lifetimeTotalItemSkillsUsed = updatedCard.cache.lifetimeTotalItemSkillsUsed + newMatches.size
+      ),
     ),
     sessionItemSkillTotal = sessionItemSkillTotal + newMatches.size,
     recentSkillItemUsages = updatedRecentSkillItemUsages

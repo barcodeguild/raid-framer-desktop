@@ -1,5 +1,6 @@
 package com.reoky.raidframer.core.database
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -177,22 +178,26 @@ data class ConfigEntity(
  * player specs, and establish a collection of real players that have been seen in the game to
  * differentiate between real players and NPCs/mobs. When cleared, the app will have to discover
  * players again.
+ *
+ * NOTE (10/05/26): the table grew past the JVM's 255-slot method-descriptor limit for the
+ * generated data-class constructor/copy, so the entity is split into @Embedded groups.
+ * Room flattens embedded fields with identical column names, so the SQLite layout is unchanged
+ * and no migration is required. Each group stays under the limit.
  */
-@Entity(tableName = "player_cache")
-data class PlayerCacheEntity(
-  @PrimaryKey val playerName: String,
+data class PlayerCacheIdentity(
   val lastSeen: Long = System.currentTimeMillis(),
   val lastKnownSpec: String = "",
   val lastKnownLevel: Int = 0,
   val leaderships: Int = LeadershipRole.NONE.value,
-
   // future proofing
   val lastKnownGearScore: Int = 0,
   val lastKnownFaction: String = Faction.UNKNOWN.value,
   val lastKnownFactionStatus: String = FactionStatus.UNKNOWN.value,
   val lastKnownGuild: String = "",
-  val lastKnownRegion: String = "", // unused for now
+  val lastKnownRegion: String = "" // unused for now
+)
 
+data class PlayerCacheGliders(
   // glider usages
   val lastBDGlider: Long = 0L,
   val lastSkyEmpGlider: Long = 0L,
@@ -201,8 +206,10 @@ data class PlayerCacheEntity(
   val lastRocketGlider: Long = 0L,
   val lastRavenspineWings: Long = 0L,
   val lastTWTGlider: Long = 0L,
-  val lastMoonshadowGlider: Long = 0L,
+  val lastMoonshadowGlider: Long = 0L
+)
 
+data class PlayerCacheUtilityItems(
   // utility item usages
   val lastKrakenScepter: Long = 0L,
   val lastKrakenSpear: Long = 0L,
@@ -212,16 +219,20 @@ data class PlayerCacheEntity(
   val lastHalcyNecklace: Long = 0L,
   val lastSoulNecklace: Long = 0L,
   val lastHonorNodachi: Long = 0L,
-  val lastJolaShield: Long = 0L,
+  val lastJolaShield: Long = 0L
+)
 
+data class PlayerCacheSnakeItems(
   // snake weapons and shield usages
   val lastSnakeGreatsword: Long = 0L,
   val lastSnakeShield: Long = 0L,
   val lastSnakeSword: Long = 0L,
   val lastSnakeAxe: Long = 0L,
   val lastSnakeScepter: Long = 0L,
-  val lastSnakeGun: Long = 0L,
+  val lastSnakeGun: Long = 0L
+)
 
+data class PlayerCacheBlackDragonItems(
   // black dragon items usages
   val lastBdShield: Long = 0L,
   val lastBdClub: Long = 0L,
@@ -229,27 +240,28 @@ data class PlayerCacheEntity(
   val lastBdRifle: Long = 0L,
   val lastBdStaff: Long = 0L,
   val lastBdSword: Long = 0L,
-  val lastBd2hSword: Long = 0L,
+  val lastBd2hSword: Long = 0L
+)
 
+data class PlayerCacheDungeonItems(
   // anthalon items usages
   val lastAnthSetPull: Long = 0L,
   val lastGardenAnthSetPull: Long = 0L,
-
   // library dungeon items usages
   val lastLibBow: Long = 0L,
   val lastLibDagger: Long = 0L,
   val lastLibShortspear: Long = 0L,
   val lastLibStaff: Long = 0L,
-
   // serpentis dungeon items usages
   val lastSerpStaff: Long = 0L,
   val lastSerpShield: Long = 0L,
-
   // mistsong dungeon items usages
   val lastMistNodachi: Long = 0L,
   val lastMistDagger: Long = 0L,
-  val lastMistShield: Long = 0L,
+  val lastMistShield: Long = 0L
+)
 
+data class PlayerCachePotions(
   // potion/buff item usages
   val lastMinorHealingPotion: Long = 0L,
   val lastMajorHealingPotion: Long = 0L,
@@ -270,8 +282,10 @@ data class PlayerCacheEntity(
   val lastBlueBerryFruit: Long = 0L,
   val lastSecretGift: Long = 0L,
   val lastHonorElixir: Long = 0L,
-  val lastWonderlandPVEBook: Long = 0L,
+  val lastWonderlandPVEBook: Long = 0L
+)
 
+data class PlayerCacheLifetimeCombat(
   // lifetime stats (could be fun to track over time)
   val lifetimeTotalDamage: Long = 0L,
   val lifetimeTotalHealing: Long = 0L,
@@ -301,7 +315,10 @@ data class PlayerCacheEntity(
   val lifetimeTotalBdGlider: Long = 0L,
   val lifetimeTotalCrystalWings: Long = 0L,
   val lifetimeTotalGliderDisables: Long = 0L,
-  val lifetimeTotalProvoked: Long = 0L,
+  val lifetimeTotalProvoked: Long = 0L
+)
+
+data class PlayerCacheLifetimeDebuffs(
   val lifetimeTotalDefiance: Long = 0L,
   val lifetimeTotalGardenDefiance: Long = 0L,
   val lifetimeTotalPurges: Long = 0L,
@@ -321,8 +338,10 @@ data class PlayerCacheEntity(
   val lifetimeTotalProtectiveWings: Long = 0L,
   val lifetimeTotalCourageousAction: Long = 0L,
   val lifetimeTotalManaBarrier: Long = 0L,
-  val lifetimeTotalRevive: Long = 0L,
+  val lifetimeTotalRevive: Long = 0L
+)
 
+data class PlayerCacheLifetimeAvoidance(
   // avoidance + mitigation lifetime stats (10/05/26)
   val lifetimeTotalBlocks: Long = 0L,
   val lifetimeTotalParries: Long = 0L,
@@ -332,7 +351,22 @@ data class PlayerCacheEntity(
   val lifetimeTotalAbsorbs: Long = 0L, // HP prevented (absorb shields + damage_absorbed + block/parry mitigated)
   val lifetimeTotalBlockMitigated: Long = 0L, // HP prevented specifically by blocks
   val lifetimeTotalParryMitigated: Long = 0L, // HP prevented specifically by parries
-  val lifetimeTotalOdeHeals: Long = 0L, // Ode to Recovery heals cast (session-only semantics, persisted for filtering)
+  val lifetimeTotalOdeHeals: Long = 0L // Ode to Recovery heals cast (session-only semantics, persisted for filtering)
+)
+
+@Entity(tableName = "player_cache")
+data class PlayerCacheEntity(
+  @PrimaryKey val playerName: String,
+  @Embedded val identity: PlayerCacheIdentity = PlayerCacheIdentity(),
+  @Embedded val gliders: PlayerCacheGliders = PlayerCacheGliders(),
+  @Embedded val utilityItems: PlayerCacheUtilityItems = PlayerCacheUtilityItems(),
+  @Embedded val snakeItems: PlayerCacheSnakeItems = PlayerCacheSnakeItems(),
+  @Embedded val blackDragonItems: PlayerCacheBlackDragonItems = PlayerCacheBlackDragonItems(),
+  @Embedded val dungeonItems: PlayerCacheDungeonItems = PlayerCacheDungeonItems(),
+  @Embedded val potions: PlayerCachePotions = PlayerCachePotions(),
+  @Embedded val lifetimeCombat: PlayerCacheLifetimeCombat = PlayerCacheLifetimeCombat(),
+  @Embedded val lifetimeDebuffs: PlayerCacheLifetimeDebuffs = PlayerCacheLifetimeDebuffs(),
+  @Embedded val lifetimeAvoidance: PlayerCacheLifetimeAvoidance = PlayerCacheLifetimeAvoidance()
 )
 
 /*

@@ -10,7 +10,7 @@ import com.reoky.raidframer.core.calc.ArrangementMode
 import com.reoky.raidframer.core.calc.RaidOrganizer
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.RFDao
-import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.database.*
 import com.reoky.raidframer.core.database.PlayerSessionTotalsEntity
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.SpecType
@@ -390,11 +390,13 @@ object PlayerCacheInteractor : Interactor() {
       } else if (seedEntry != null && cached == null) {
         cached = PlayerCacheEntity(
           playerName = playerName,
-          lastSeen = seedEntry.lastSeen,
-          lastKnownSpec = seedEntry.lastKnownSpec,
-          lastKnownFaction = seedEntry.lastKnownFaction,
-          lastKnownGearScore = seedEntry.gearScore,
-          lastKnownGuild = seedEntry.lastKnownGuild
+          identity = PlayerCacheIdentity(
+            lastSeen = seedEntry.lastSeen,
+            lastKnownSpec = seedEntry.lastKnownSpec,
+            lastKnownFaction = seedEntry.lastKnownFaction,
+            lastKnownGearScore = seedEntry.gearScore,
+            lastKnownGuild = seedEntry.lastKnownGuild
+          )
         )
         Log.info(TAG, "Pre-populated cache for $playerName from seed table")
       }
@@ -461,20 +463,24 @@ object PlayerCacheInteractor : Interactor() {
 
   private fun mergeFromSeedTable(cache: PlayerCacheEntity, seed: SeedTableEntry): PlayerCacheEntity {
     return cache.copy(
-      lastSeen = seed.lastSeen,
-      lastKnownSpec = seed.lastKnownSpec,
-      lastKnownFaction = seed.lastKnownFaction,
-      lastKnownGearScore = seed.gearScore,
-      lastKnownGuild = seed.lastKnownGuild
+      identity = cache.identity.copy(
+        lastSeen = seed.lastSeen,
+        lastKnownSpec = seed.lastKnownSpec,
+        lastKnownFaction = seed.lastKnownFaction,
+        lastKnownGearScore = seed.gearScore,
+        lastKnownGuild = seed.lastKnownGuild
+      )
     )
   }
 
   private fun mergeMissingFromSeedTable(cache: PlayerCacheEntity, seed: SeedTableEntry): PlayerCacheEntity {
     return cache.copy(
-      lastKnownSpec = if (cache.lastKnownSpec.isBlank()) seed.lastKnownSpec else cache.lastKnownSpec,
-      lastKnownFaction = if (Faction.fromString(cache.lastKnownFaction) == Faction.UNKNOWN) seed.lastKnownFaction else cache.lastKnownFaction,
-      lastKnownGearScore = if (cache.lastKnownGearScore == 0) seed.gearScore else cache.lastKnownGearScore,
-      lastKnownGuild = if (cache.lastKnownGuild.isBlank()) seed.lastKnownGuild else cache.lastKnownGuild
+      identity = cache.identity.copy(
+        lastKnownSpec = if (cache.lastKnownSpec.isBlank()) seed.lastKnownSpec else cache.lastKnownSpec,
+        lastKnownFaction = if (Faction.fromString(cache.lastKnownFaction) == Faction.UNKNOWN) seed.lastKnownFaction else cache.lastKnownFaction,
+        lastKnownGearScore = if (cache.lastKnownGearScore == 0) seed.gearScore else cache.lastKnownGearScore,
+        lastKnownGuild = if (cache.lastKnownGuild.isBlank()) seed.lastKnownGuild else cache.lastKnownGuild
+      )
     )
   }
 
@@ -1538,18 +1544,24 @@ object PlayerCacheInteractor : Interactor() {
           val updatedCache = card.cache
             // If a DB cache already exists, copy just the small faction fields (cheap)
             ?.copy(
-              lastKnownFaction = if (faction != Faction.UNKNOWN) faction.value else card.lastKnownFaction,
-              lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value,
-              lastKnownGuild = target.guild,
-              lastKnownGearScore = target.gearScore
+              identity = card.cache.identity.copy(
+                lastKnownFaction = if (faction != Faction.UNKNOWN) faction.value else card.lastKnownFaction,
+                lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value,
+                lastKnownGuild = target.guild,
+                lastKnownGearScore = target.gearScore
+              )
             )
           // Otherwise build a full cache object (fills timestamps and defaults) and apply overrides
-            ?: card.createCacheObject().copy(
-              lastKnownFaction = if (faction != Faction.UNKNOWN) faction.value else card.lastKnownFaction,
-              lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value,
-              lastKnownGuild = target.guild,
-              lastKnownGearScore = target.gearScore
-            )
+            ?: card.createCacheObject().let { baseCache ->
+              baseCache.copy(
+                identity = baseCache.identity.copy(
+                lastKnownFaction = if (faction != Faction.UNKNOWN) faction.value else card.lastKnownFaction,
+                lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value,
+                lastKnownGuild = target.guild,
+                lastKnownGearScore = target.gearScore
+                )
+              )
+            }
 
           cards[target.name] = card.copy(
             lastKnownFactionStatus = updatedCache.lastKnownFactionStatus,

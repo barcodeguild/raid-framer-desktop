@@ -1,7 +1,7 @@
 package com.reoky.raidframer.core.model
 
 import com.reoky.raidframer.core.config.RFConfig
-import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.database.*
 import com.reoky.raidframer.core.definitions.charmedDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithUtilityItemDetectionMiddleWare
 import com.reoky.raidframer.core.definitions.distressedDebuffIds
@@ -140,8 +140,10 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
-      lastSeen = event.timestamp,
-      lifetimeTotalDamage = (card.cache?.lifetimeTotalDamage ?: 0L) + event.damage
+      identity = card.cache.identity.copy(lastSeen = event.timestamp),
+      lifetimeCombat = card.cache.lifetimeCombat.copy(
+        lifetimeTotalDamage = card.cache.lifetimeTotalDamage + event.damage
+      )
     ),
     recentDamageEvents = (this.recentDamageEvents + event).takeLast(eventHistoryDepth),
     sessionSpellDamageMap = run {
@@ -175,12 +177,14 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
-      lastSeen = event.timestamp,
-      lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount,
-      lifetimeTotalAbsorbs = if (CombatEventsHelper.isAbsorbShieldSkill(event.spell)) {
-        cache.lifetimeTotalAbsorbs + event.amount.coerceAtLeast(0)
-      } else cache.lifetimeTotalAbsorbs,
-      lifetimeTotalOdeHeals = if (isOde) cache.lifetimeTotalOdeHeals + event.amount else cache.lifetimeTotalOdeHeals
+      identity = cache.identity.copy(lastSeen = event.timestamp),
+      lifetimeCombat = cache.lifetimeCombat.copy(lifetimeTotalHealing = cache.lifetimeTotalHealing + event.amount),
+      lifetimeAvoidance = cache.lifetimeAvoidance.copy(
+        lifetimeTotalAbsorbs = if (CombatEventsHelper.isAbsorbShieldSkill(event.spell)) {
+          cache.lifetimeTotalAbsorbs + event.amount.coerceAtLeast(0)
+        } else cache.lifetimeTotalAbsorbs,
+        lifetimeTotalOdeHeals = if (isOde) cache.lifetimeTotalOdeHeals + event.amount else cache.lifetimeTotalOdeHeals
+      )
     ),
     recentHealEvents = (this.recentHealEvents + event).takeLast(eventHistoryDepth),
     sessionHealTotal = if (isOde && !allowOdeAsHeal) this.sessionHealTotal else this.sessionHealTotal + event.amount,
@@ -242,9 +246,11 @@ fun PlayerCard.postAvoidanceTaken(event: AvoidanceEvent): PlayerCard {
       sessionBlockMitigated = sessionBlockMitigated + mitigated,
       sessionAbsorbTotal = sessionAbsorbTotal + mitigated,
       cache = cache?.copy(
-        lifetimeTotalBlocks = cache.lifetimeTotalBlocks + 1,
-        lifetimeTotalBlockMitigated = cache.lifetimeTotalBlockMitigated + mitigated,
-        lifetimeTotalAbsorbs = cache.lifetimeTotalAbsorbs + mitigated
+        lifetimeAvoidance = cache.lifetimeAvoidance.copy(
+          lifetimeTotalBlocks = cache.lifetimeTotalBlocks + 1,
+          lifetimeTotalBlockMitigated = cache.lifetimeTotalBlockMitigated + mitigated,
+          lifetimeTotalAbsorbs = cache.lifetimeTotalAbsorbs + mitigated
+        )
       ),
     )
     AvoidanceKind.PARRY -> copy(
@@ -254,28 +260,30 @@ fun PlayerCard.postAvoidanceTaken(event: AvoidanceEvent): PlayerCard {
       sessionParryMitigated = sessionParryMitigated + mitigated,
       sessionAbsorbTotal = sessionAbsorbTotal + mitigated,
       cache = cache?.copy(
-        lifetimeTotalParries = cache.lifetimeTotalParries + 1,
-        lifetimeTotalParryMitigated = cache.lifetimeTotalParryMitigated + mitigated,
-        lifetimeTotalAbsorbs = cache.lifetimeTotalAbsorbs + mitigated
+        lifetimeAvoidance = cache.lifetimeAvoidance.copy(
+          lifetimeTotalParries = cache.lifetimeTotalParries + 1,
+          lifetimeTotalParryMitigated = cache.lifetimeTotalParryMitigated + mitigated,
+          lifetimeTotalAbsorbs = cache.lifetimeTotalAbsorbs + mitigated
+        )
       ),
     )
     AvoidanceKind.DODGE -> copy(
       lastEvent = event.timestamp,
       recentAvoidanceEvents = recent,
       sessionEvadeTotal = sessionEvadeTotal + 1,
-      cache = cache?.copy(lifetimeTotalEvades = cache.lifetimeTotalEvades + 1)
+      cache = cache?.copy(lifetimeAvoidance = cache.lifetimeAvoidance.copy(lifetimeTotalEvades = cache.lifetimeTotalEvades + 1))
     )
     AvoidanceKind.IMMUNE -> copy(
       lastEvent = event.timestamp,
       recentAvoidanceEvents = recent,
       sessionImmuneTotal = sessionImmuneTotal + 1,
-      cache = cache?.copy(lifetimeTotalImmunes = cache.lifetimeTotalImmunes + 1)
+      cache = cache?.copy(lifetimeAvoidance = cache.lifetimeAvoidance.copy(lifetimeTotalImmunes = cache.lifetimeTotalImmunes + 1))
     )
     AvoidanceKind.MISS -> copy(
       lastEvent = event.timestamp,
       recentAvoidanceEvents = recent,
       sessionMissTotal = sessionMissTotal + 1,
-      cache = cache?.copy(lifetimeTotalMisses = cache.lifetimeTotalMisses + 1)
+      cache = cache?.copy(lifetimeAvoidance = cache.lifetimeAvoidance.copy(lifetimeTotalMisses = cache.lifetimeTotalMisses + 1))
     )
     else -> copy(lastEvent = event.timestamp, recentAvoidanceEvents = recent)
   }
@@ -299,9 +307,9 @@ fun PlayerCard.postDamageTakenEvent(event: DamageEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
-      lastSeen = event.timestamp,
-      lifetimeTotalDamageTaken = cache.lifetimeTotalDamageTaken + event.damage,
-      lifetimeTotalAbsorbs = cache.lifetimeTotalAbsorbs + absorb
+      identity = cache.identity.copy(lastSeen = event.timestamp),
+      lifetimeCombat = cache.lifetimeCombat.copy(lifetimeTotalDamageTaken = cache.lifetimeTotalDamageTaken + event.damage),
+      lifetimeAvoidance = cache.lifetimeAvoidance.copy(lifetimeTotalAbsorbs = cache.lifetimeTotalAbsorbs + absorb)
     ),
     sessionDamageTakenTotal = this.sessionDamageTakenTotal + event.damage,
     sessionAbsorbTotal = this.sessionAbsorbTotal + absorb, // damage_absorbed credited to target
@@ -323,8 +331,8 @@ fun PlayerCard.postHealsReceivedEvent(event: HealEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
-      lastSeen = event.timestamp,
-      lifetimeTotalHealsReceived = cache.lifetimeTotalHealsReceived + event.amount
+      identity = cache.identity.copy(lastSeen = event.timestamp),
+      lifetimeCombat = cache.lifetimeCombat.copy(lifetimeTotalHealsReceived = cache.lifetimeTotalHealsReceived + event.amount)
     ),
     sessionHealsReceivedTotal = if (isOde && !allowOdeAsHeal) this.sessionHealsReceivedTotal else this.sessionHealsReceivedTotal + event.amount,
     sessionHealFromPlayer = if (!RFConfig.state.value.performanceBattleGraphEnabled) {
@@ -344,7 +352,7 @@ fun PlayerCard.postCastingEvent(event: CastingEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
     cache = cache?.copy(
-      lastSeen = event.timestamp
+      identity = cache.identity.copy(lastSeen = event.timestamp)
     ),
     recentCastEvents = (this.recentCastEvents + event).takeLast(eventHistoryDepth)
   )
@@ -366,13 +374,14 @@ fun PlayerCard.postSuccessfulCastEvent(event: SuccessfulCastEvent): PlayerCard {
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
-      lastSeen = event.timestamp,
-      lifetimeTotalCharms = if (isMarasNineTails) (card.cache?.lifetimeTotalCharms
-        ?: 0) + 1 else (card.cache?.lifetimeTotalCharms ?: 0),
-      lifetimeTotalGardenDefiance = if (isGardenDefiance) (card.cache?.lifetimeTotalGardenDefiance
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalGardenDefiance ?: 0L),
-      lifetimeTotalRevive = if (isRevive) (card.cache?.lifetimeTotalRevive
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalRevive ?: 0L)
+      identity = card.cache.identity.copy(lastSeen = event.timestamp),
+      lifetimeCombat = card.cache.lifetimeCombat.copy(
+        lifetimeTotalCharms = if (isMarasNineTails) card.cache.lifetimeTotalCharms + 1 else card.cache.lifetimeTotalCharms
+      ),
+      lifetimeDebuffs = card.cache.lifetimeDebuffs.copy(
+        lifetimeTotalGardenDefiance = if (isGardenDefiance) card.cache.lifetimeTotalGardenDefiance + 1 else card.cache.lifetimeTotalGardenDefiance,
+        lifetimeTotalRevive = if (isRevive) card.cache.lifetimeTotalRevive + 1 else card.cache.lifetimeTotalRevive
+      )
     ),
     sessionCharmTotal = if (isMarasNineTails) card.sessionCharmTotal + 1 else card.sessionCharmTotal,
     sessionGardenDefianceTotal = if (isGardenDefiance) card.sessionGardenDefianceTotal + 1 else card.sessionGardenDefianceTotal,
@@ -391,7 +400,7 @@ fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
-      lastSeen = event.timestamp,
+      identity = card.cache.identity.copy(lastSeen = event.timestamp),
     ),
     recentBuffGainedEvents = (this.recentBuffGainedEvents + event).takeLast(eventHistoryDepth)
   )
@@ -403,7 +412,7 @@ fun PlayerCard.postBuffGainedEvent(event: BuffGainedEvent): PlayerCard {
 fun PlayerCard.postBuffEndedEvent(event: BuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(lastSeen = event.timestamp),
+    cache = cache?.withIdentity { copy(lastSeen = event.timestamp) },
     recentBuffEndedEvents = (this.recentBuffEndedEvents + event).takeLast(eventHistoryDepth)
   )
 }
@@ -417,7 +426,7 @@ fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
       ?: findDebuffByName(event.debuff)?.consideredCC == true
   return this.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(lastSeen = event.timestamp),
+    cache = cache?.withIdentity { copy(lastSeen = event.timestamp) },
     recentDebuffGainedEvents = (this.recentDebuffGainedEvents + event).takeLast(eventHistoryDepth),
     sessionCCFromPlayer = if (isCC && RFConfig.state.value.performanceBattleGraphEnabled) {
       this.sessionCCFromPlayer + (event.source to ((this.sessionCCFromPlayer[event.source] ?: 0) + 1))
@@ -433,7 +442,7 @@ fun PlayerCard.postDebuffGainedEvent(event: DebuffGainedEvent): PlayerCard {
 fun PlayerCard.postDebuffEndedEvent(event: DebuffEndedEvent): PlayerCard {
   return this.copy(
     lastEvent = event.timestamp,
-    cache = cache?.copy(lastSeen = event.timestamp),
+    cache = cache?.withIdentity { copy(lastSeen = event.timestamp) },
     recentDebuffEndedEvents = (this.recentDebuffEndedEvents + event).takeLast(eventHistoryDepth),
   )
 }
@@ -480,62 +489,39 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
-      lastSeen = event.timestamp,
-      lifetimeTotalDebuffsApplied = (card.cache?.lifetimeTotalDebuffsApplied ?: 0L) + 1,
-      lifetimeTotalCCDelivered = if (isCC) (card.cache?.lifetimeTotalCCDelivered
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
-      lifetimeTotalCharms = if (isCharm) (card.cache?.lifetimeTotalCharms
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalCharms ?: 0L),
-      lifetimeTotalSongs = if (isSongs) (card.cache?.lifetimeTotalSongs ?: 0L) + 1 else (card.cache?.lifetimeTotalSongs
-        ?: 0L),
-      lifetimeTotalGliderUses = if (isGlider) (card.cache?.lifetimeTotalGliderUses
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderUses ?: 0L),
-      lifetimeTotalDistresses = if (isDistress) (card.cache?.lifetimeTotalDistresses
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalDistresses ?: 0L),
-      lifetimeTotalSilences = if (isSilence) (card.cache?.lifetimeTotalSilences
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalSilences ?: 0L),
-      lifetimeTotalTigerStrikes = if (isTigerStrike) (card.cache?.lifetimeTotalTigerStrikes
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalTigerStrikes ?: 0L),
-      lifetimeTotalFreezes = if (isFreeze) (card.cache?.lifetimeTotalFreezes
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalFreezes ?: 0L),
-      lifetimeTotalTrips = if (isTrips) (card.cache?.lifetimeTotalTrips ?: 0L) + 1 else (card.cache?.lifetimeTotalTrips
-        ?: 0L),
-      lifetimeTotalBubbles = if (isBubbles) (card.cache?.lifetimeTotalBubbles
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalBubbles ?: 0L),
-      lifetimeTotalShieldStrip = if (isShieldStrip) (card.cache?.lifetimeTotalShieldStrip
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalShieldStrip ?: 0L),
-      lifetimeTotalWeaponDisables = if (isWeaponDisables) (card.cache?.lifetimeTotalWeaponDisables
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalWeaponDisables ?: 0L),
-      lifetimeTotalPotionDisables = if (isPotionDisables) (card.cache?.lifetimeTotalPotionDisables
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalPotionDisables ?: 0L),
-      lifetimeTotalBdGlider = if (isBdGlider) (card.cache?.lifetimeTotalBdGlider
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalBdGlider ?: 0L),
-      lifetimeTotalCrystalWings = if (isCrystalWings) (card.cache?.lifetimeTotalCrystalWings
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalCrystalWings ?: 0L),
-      lifetimeTotalGliderDisables = if (isGliderDisables) (card.cache?.lifetimeTotalGliderDisables
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalGliderDisables ?: 0L),
-      lifetimeTotalProvoked = if (isProvoked) (card.cache?.lifetimeTotalProvoked
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalProvoked ?: 0L),
-      lifetimeTotalThrowDagger = if (isThrowDagger) (card.cache?.lifetimeTotalThrowDagger
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalThrowDagger ?: 0L),
-      lifetimeTotalStuns = if (isStuns) (card.cache?.lifetimeTotalStuns ?: 0L) + 1 else (card.cache?.lifetimeTotalStuns
-        ?: 0L),
-      lifetimeTotalStaggers = if (isStaggers) (card.cache?.lifetimeTotalStaggers
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalStaggers ?: 0L),
-      lifetimeTotalPetrification = if (isPetrification) (card.cache?.lifetimeTotalPetrification
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalPetrification ?: 0L),
-      lifetimeTotalAbsorbLifeforce = if (isAbsorbLifeforce) (card.cache?.lifetimeTotalAbsorbLifeforce
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalAbsorbLifeforce ?: 0L),
-      lifetimeTotalCorrosiveBarrage = if (isCorrosiveBarrage) (card.cache?.lifetimeTotalCorrosiveBarrage
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalCorrosiveBarrage ?: 0L),
-      lifetimeTotalBlindedByCrows = if (isBlindedByCrows) (card.cache?.lifetimeTotalBlindedByCrows
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalBlindedByCrows ?: 0L),
-      lifetimeTotalMistSunder = if (isMistSunder) (card.cache?.lifetimeTotalMistSunder
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalMistSunder ?: 0L),
-      lifetimeTotalDeependDebuff = if (isDeependDebuff) (card.cache?.lifetimeTotalDeependDebuff
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalDeependDebuff ?: 0L),
-      lifetimeTotalImpaleImmunity = if (isImpale) (card.cache?.lifetimeTotalImpaleImmunity
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalImpaleImmunity ?: 0L),
+      identity = card.cache.identity.copy(lastSeen = event.timestamp),
+      lifetimeCombat = card.cache.lifetimeCombat.copy(
+        lifetimeTotalDebuffsApplied = card.cache.lifetimeTotalDebuffsApplied + 1,
+        lifetimeTotalCCDelivered = card.cache.lifetimeTotalCCDelivered + if (isCC) 1 else 0,
+        lifetimeTotalCharms = card.cache.lifetimeTotalCharms + if (isCharm) 1 else 0,
+        lifetimeTotalSongs = card.cache.lifetimeTotalSongs + if (isSongs) 1 else 0,
+        lifetimeTotalGliderUses = card.cache.lifetimeTotalGliderUses + if (isGlider) 1 else 0,
+        lifetimeTotalDistresses = card.cache.lifetimeTotalDistresses + if (isDistress) 1 else 0,
+        lifetimeTotalSilences = card.cache.lifetimeTotalSilences + if (isSilence) 1 else 0,
+        lifetimeTotalTigerStrikes = card.cache.lifetimeTotalTigerStrikes + if (isTigerStrike) 1 else 0,
+        lifetimeTotalFreezes = card.cache.lifetimeTotalFreezes + if (isFreeze) 1 else 0,
+        lifetimeTotalTrips = card.cache.lifetimeTotalTrips + if (isTrips) 1 else 0,
+        lifetimeTotalBubbles = card.cache.lifetimeTotalBubbles + if (isBubbles) 1 else 0,
+        lifetimeTotalShieldStrip = card.cache.lifetimeTotalShieldStrip + if (isShieldStrip) 1 else 0,
+        lifetimeTotalWeaponDisables = card.cache.lifetimeTotalWeaponDisables + if (isWeaponDisables) 1 else 0,
+        lifetimeTotalPotionDisables = card.cache.lifetimeTotalPotionDisables + if (isPotionDisables) 1 else 0,
+        lifetimeTotalBdGlider = card.cache.lifetimeTotalBdGlider + if (isBdGlider) 1 else 0,
+        lifetimeTotalCrystalWings = card.cache.lifetimeTotalCrystalWings + if (isCrystalWings) 1 else 0,
+        lifetimeTotalGliderDisables = card.cache.lifetimeTotalGliderDisables + if (isGliderDisables) 1 else 0,
+        lifetimeTotalProvoked = card.cache.lifetimeTotalProvoked + if (isProvoked) 1 else 0
+      ),
+      lifetimeDebuffs = card.cache.lifetimeDebuffs.copy(
+        lifetimeTotalThrowDagger = card.cache.lifetimeTotalThrowDagger + if (isThrowDagger) 1 else 0,
+        lifetimeTotalStuns = card.cache.lifetimeTotalStuns + if (isStuns) 1 else 0,
+        lifetimeTotalStaggers = card.cache.lifetimeTotalStaggers + if (isStaggers) 1 else 0,
+        lifetimeTotalPetrification = card.cache.lifetimeTotalPetrification + if (isPetrification) 1 else 0,
+        lifetimeTotalAbsorbLifeforce = card.cache.lifetimeTotalAbsorbLifeforce + if (isAbsorbLifeforce) 1 else 0,
+        lifetimeTotalCorrosiveBarrage = card.cache.lifetimeTotalCorrosiveBarrage + if (isCorrosiveBarrage) 1 else 0,
+        lifetimeTotalBlindedByCrows = card.cache.lifetimeTotalBlindedByCrows + if (isBlindedByCrows) 1 else 0,
+        lifetimeTotalMistSunder = card.cache.lifetimeTotalMistSunder + if (isMistSunder) 1 else 0,
+        lifetimeTotalDeependDebuff = card.cache.lifetimeTotalDeependDebuff + if (isDeependDebuff) 1 else 0,
+        lifetimeTotalImpaleImmunity = card.cache.lifetimeTotalImpaleImmunity + if (isImpale) 1 else 0
+      )
     ),
     recentDebuffAppliedEvents = (this.recentDebuffAppliedEvents + event).takeLast(eventHistoryDepth),
     sessionDebuffTotal = this.sessionDebuffTotal + 1,
@@ -681,30 +667,23 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
-      lastSeen = event.timestamp,
-      lifetimeTotalBuffsApplied = (card.cache?.lifetimeTotalBuffsApplied ?: 0L) + 1,
-      lifetimeTotalCCDelivered = if (isBracingImmunity) (card.cache?.lifetimeTotalCCDelivered
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalCCDelivered ?: 0L),
-      lifetimeTotalBracings = if (isBracingImmunity) (card.cache?.lifetimeTotalBracings
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalBracings ?: 0L),
-      lifetimeTotalDefiance = if (isDefiance) (card.cache?.lifetimeTotalDefiance
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalDefiance ?: 0L),
-      lifetimeTotalSacDances = if (isSacDance) (card.cache?.lifetimeTotalSacDances
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalSacDances ?: 0L),
-      lifetimeTotalPurges = if (isPurge) (card.cache?.lifetimeTotalPurges
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalPurges ?: 0L),
-      lifetimeTotalDeepTranquility = if (isDeepTranquility) (card.cache?.lifetimeTotalDeepTranquility
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalDeepTranquility ?: 0L),
-      lifetimeTotalRegularSunder = if (isRegularSunder) (card.cache?.lifetimeTotalRegularSunder
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalRegularSunder ?: 0L),
-      lifetimeTotalMistSunder = if (isMistSunder) (card.cache?.lifetimeTotalMistSunder
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalMistSunder ?: 0L),
-      lifetimeTotalProtectiveWings = if (isProtectiveWings) (card.cache?.lifetimeTotalProtectiveWings
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalProtectiveWings ?: 0L),
-      lifetimeTotalCourageousAction = if (isCourageousAction) (card.cache?.lifetimeTotalCourageousAction
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalCourageousAction ?: 0L),
-      lifetimeTotalManaBarrier = if (isManaBarrier) (card.cache?.lifetimeTotalManaBarrier
-        ?: 0L) + 1 else (card.cache?.lifetimeTotalManaBarrier ?: 0L),
+      identity = card.cache.identity.copy(lastSeen = event.timestamp),
+      lifetimeCombat = card.cache.lifetimeCombat.copy(
+        lifetimeTotalBuffsApplied = card.cache.lifetimeTotalBuffsApplied + 1,
+        lifetimeTotalCCDelivered = card.cache.lifetimeTotalCCDelivered + if (isBracingImmunity) 1 else 0,
+        lifetimeTotalBracings = card.cache.lifetimeTotalBracings + if (isBracingImmunity) 1 else 0
+      ),
+      lifetimeDebuffs = card.cache.lifetimeDebuffs.copy(
+        lifetimeTotalDefiance = card.cache.lifetimeTotalDefiance + if (isDefiance) 1 else 0,
+        lifetimeTotalSacDances = card.cache.lifetimeTotalSacDances + if (isSacDance) 1 else 0,
+        lifetimeTotalPurges = card.cache.lifetimeTotalPurges + if (isPurge) 1 else 0,
+        lifetimeTotalDeepTranquility = card.cache.lifetimeTotalDeepTranquility + if (isDeepTranquility) 1 else 0,
+        lifetimeTotalRegularSunder = card.cache.lifetimeTotalRegularSunder + if (isRegularSunder) 1 else 0,
+        lifetimeTotalMistSunder = card.cache.lifetimeTotalMistSunder + if (isMistSunder) 1 else 0,
+        lifetimeTotalProtectiveWings = card.cache.lifetimeTotalProtectiveWings + if (isProtectiveWings) 1 else 0,
+        lifetimeTotalCourageousAction = card.cache.lifetimeTotalCourageousAction + if (isCourageousAction) 1 else 0,
+        lifetimeTotalManaBarrier = card.cache.lifetimeTotalManaBarrier + if (isManaBarrier) 1 else 0
+      )
     ),
     recentBuffAppliedEvents = (this.recentBuffAppliedEvents + event).takeLast(eventHistoryDepth),
     sessionBuffTotal = this.sessionBuffTotal + 1,
@@ -752,8 +731,8 @@ fun PlayerCard.postKillEvent(
   return this.copy(
     lastEvent = timestamp,
     cache = cache?.copy(
-      lastSeen = timestamp,
-      lifetimeTotalKills = cache.lifetimeTotalKills + 1
+      identity = cache.identity.copy(lastSeen = timestamp),
+      lifetimeCombat = cache.lifetimeCombat.copy(lifetimeTotalKills = cache.lifetimeTotalKills + 1)
     ),
     // Add to recent kills map (capped to eventHistoryDepth)
     recentKills = (this.recentKills + (timestamp to victimName))
@@ -786,8 +765,8 @@ fun PlayerCard.postKillEventKB(timestamp: Long, victimName: String): PlayerCard 
   return this.copy(
     lastEvent = timestamp,
     cache = cache?.copy(
-      lastSeen = timestamp,
-      lifetimeTotalKillsKB = cache.lifetimeTotalKillsKB + 1
+      identity = cache.identity.copy(lastSeen = timestamp),
+      lifetimeCombat = cache.lifetimeCombat.copy(lifetimeTotalKillsKB = cache.lifetimeTotalKillsKB + 1)
     ),
     recentKillsKB = (this.recentKillsKB + (timestamp to victimName))
       .entries.sortedByDescending { it.key }.take(eventHistoryDepth)
@@ -823,8 +802,8 @@ fun PlayerCard.postDeathEvent(
   return this.copy(
     lastEvent = timestamp,
     cache = cache?.copy(
-      lastSeen = timestamp,
-      lifetimeTotalDeaths = cache.lifetimeTotalDeaths + 1
+      identity = cache.identity.copy(lastSeen = timestamp),
+      lifetimeCombat = cache.lifetimeCombat.copy(lifetimeTotalDeaths = cache.lifetimeTotalDeaths + 1)
     ),
     sessionDeathTotal = this.sessionDeathTotal + 1,
     recentKilledBys = updatedKilledBys,
@@ -838,8 +817,10 @@ fun PlayerCard.updatePlayerLeadership(newLeadership: Int): PlayerCard {
     leaderships = if (newLeadership in 1..5) newLeadership else 0, // zero is regular player
     lastEvent = timestamp,
     cache = this.cache?.copy(
-      leaderships = if (newLeadership in 1..5) newLeadership else 0,
-      lastSeen = timestamp
+      identity = cache.identity.copy(
+        leaderships = if (newLeadership in 1..5) newLeadership else 0,
+        lastSeen = timestamp
+      )
     )
   )
 }
@@ -879,13 +860,17 @@ fun PlayerCard.pvpPerformancePoints(): Int {
 fun PlayerCard.setFaction(faction: Faction, factionStatus: FactionStatus): PlayerCard {
   val updatedCache = cache
     ?.copy(
-      lastKnownFaction = faction.value,
-      lastKnownFactionStatus = factionStatus.value
+      identity = cache.identity.copy(
+        lastKnownFaction = faction.value,
+        lastKnownFactionStatus = factionStatus.value
+      )
     )
     ?: PlayerCacheEntity(
       playerName = this.name,
-      lastKnownFaction = faction.value,
-      lastKnownFactionStatus = factionStatus.value
+      identity = PlayerCacheIdentity(
+        lastKnownFaction = faction.value,
+        lastKnownFactionStatus = factionStatus.value
+      )
     )
 
   return this.copy(

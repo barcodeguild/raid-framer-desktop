@@ -49,7 +49,7 @@ import com.reoky.raidframer.core.browser.parseShorthand
 import com.reoky.raidframer.core.browser.sortBrowser
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.LeadershipRole
-import com.reoky.raidframer.core.database.PlayerCacheEntity
+import com.reoky.raidframer.core.database.*
 import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder

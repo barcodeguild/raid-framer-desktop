@@ -113,8 +113,10 @@ fun PlayerCard.copiedWithPotionDetectionMiddleWare(event: CombatEvent): PlayerCa
   return this.copy(
     lastEvent = eventTs,
     cache = this.cache?.copy(
-      lastSeen = eventTs,
-      lifetimeTotalPotionUsages = this.cache.lifetimeTotalPotionUsages + 1
+      identity = this.cache.identity.copy(lastSeen = eventTs),
+      lifetimeCombat = this.cache.lifetimeCombat.copy(
+        lifetimeTotalPotionUsages = this.cache.lifetimeCombat.lifetimeTotalPotionUsages + 1
+      )
     ),
     sessionPotionTotal = this.sessionPotionTotal + 1,
     recentSkillItemUsages = updatedRecent
