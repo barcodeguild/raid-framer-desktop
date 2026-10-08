@@ -17,7 +17,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 49
+const val SCHEMA_VERSION = 50
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -128,6 +128,8 @@ data class ConfigEntity(
   val exportCustomBackgroundPath: String = "",
   val exportBackgroundColor: Int = 0xFF000000.toInt(),
   val exportBackgroundDimness: Float = 0.20f,
+  // Hide the pirate columns in PNG exports when no pirates rank in the top 50 damage/heals/CC (10/07/26)
+  val exportHidePirateWhenUnranked: Boolean = true,
 
   // Item Use Overlay toggle
   val itemUseOverlayEnabled: Boolean = false,

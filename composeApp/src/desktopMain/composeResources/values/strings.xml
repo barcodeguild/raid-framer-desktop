@@ -676,7 +676,9 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="settings_export_directory_label">Export Directory:</string>
     <string name="settings_export_size_label">Space Used:</string>
     <string name="settings_export_open_folder">Open Folder</string>
+    <string name="settings_export_now">Export Now</string>
     <string name="settings_export_include_raw_json">Export raw JSON logs</string>
+    <string name="settings_export_hide_pirate">Auto-hide pirate columns when no pirates rank in the top 50</string>
     <string name="settings_export_storage_estimate">PNG exports are typically 10-15 MB each; raw JSON logs may use 100-250 MB per session.</string>
     <string name="settings_export_directory_not_found">Directory not found</string>
 

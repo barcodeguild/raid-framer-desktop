@@ -632,7 +632,9 @@
     <string name="settings_export_directory_label">Каталог экспорта:</string>
     <string name="settings_export_size_label">Использовано места:</string>
     <string name="settings_export_open_folder">Открыть папку</string>
+    <string name="settings_export_now">Экспортировать сейчас</string>
     <string name="settings_export_include_raw_json">Экспортировать необработанные логи JSON</string>
+    <string name="settings_export_hide_pirate">Автоматически скрывать колонки пиратов, если пираты не попали в топ-50</string>
     <string name="settings_export_storage_estimate">Экспорт PNG обычно занимает 10-15 МБ на файл; необработанные логи JSON могут занимать 100-250 МБ на сессию.</string>
     <string name="settings_export_directory_not_found">Каталог не найден</string>
 

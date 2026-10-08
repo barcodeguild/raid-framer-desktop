@@ -696,3 +696,11 @@ val MIGRATION_48_49 = object : Migration(48, 49) {
       .use { it.step() }
   }
 }
+
+// Added exportHidePirateWhenUnranked to ConfigEntity (10/07/26)
+val MIGRATION_49_50 = object : Migration(49, 50) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN exportHidePirateWhenUnranked INTEGER NOT NULL DEFAULT 1")
+      .use { it.step() }
+  }
+}

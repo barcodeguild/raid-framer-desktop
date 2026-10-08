@@ -78,6 +78,7 @@ import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.PatchNotesComponent
 import com.reoky.raidframer.ui.component.ColorSliderComponent
 import com.reoky.raidframer.ui.component.DragLockedSlider
+import com.reoky.raidframer.ui.export.ImageExportInteractor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -1555,6 +1556,8 @@ private fun CategoryDropdown(
 @Composable
 private fun ExportSettingsPanel(wm: WindowManager?) {
   val config by RFConfig.state.collectAsState()
+  val scope = rememberCoroutineScope()
+  val exportProgress by ImageExportInteractor.progress.collectAsState()
   val exportDir = getExportDirectory()
   val directorySize = remember(exportDir) {
     if (exportDir != null) getDirectorySizeBytes(exportDir) else 0L
@@ -1564,77 +1567,116 @@ private fun ExportSettingsPanel(wm: WindowManager?) {
     title = stringResource(Res.string.settings_export_title),
     description = stringResource(Res.string.settings_export_description)
   ) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+              text = stringResource(Res.string.settings_export_directory_label),
+              color = RFColors.TextSecondary,
+              fontSize = 13.sp,
+              fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+              text = exportDir ?: stringResource(Res.string.settings_export_directory_not_found),
+              color = if (exportDir != null) RFColors.UpdateGreen else RFColors.AccentRed,
+              fontSize = 13.sp
+            )
+          }
+          Spacer(modifier = Modifier.height(4.dp))
           Text(
-            text = stringResource(Res.string.settings_export_directory_label),
+            text = "${stringResource(Res.string.settings_export_size_label)} ${formatFileSize(directorySize)}",
             color = RFColors.TextSecondary,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = 12.sp
           )
-          Spacer(modifier = Modifier.width(6.dp))
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Button(
+          onClick = {
+            if (exportDir != null) {
+              Desktop.getDesktop().open(java.io.File(exportDir))
+              wm?.closeWindow(OverlayType.SETTINGS)
+            }
+          },
+          colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+          enabled = exportDir != null,
+          modifier = Modifier.width(190.dp)
+        ) {
           Text(
-            text = exportDir ?: stringResource(Res.string.settings_export_directory_not_found),
-            color = if (exportDir != null) RFColors.UpdateGreen else RFColors.AccentRed,
+            text = stringResource(Res.string.settings_export_open_folder),
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
             fontSize = 13.sp
           )
         }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-          text = "${stringResource(Res.string.settings_export_size_label)} ${formatFileSize(directorySize)}",
-          color = RFColors.TextSecondary,
-          fontSize = 12.sp
-        )
       }
-      Spacer(modifier = Modifier.width(12.dp))
-      Button(
-        onClick = {
-          if (exportDir != null) {
-            Desktop.getDesktop().open(java.io.File(exportDir))
-            wm?.closeWindow(OverlayType.SETTINGS)
-          }
-        },
-        colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
-        enabled = exportDir != null
-      ) {
-        Text(
-          text = stringResource(Res.string.settings_export_open_folder),
-          color = Color.White,
-          fontWeight = FontWeight.SemiBold,
-          fontSize = 13.sp
-        )
-      }
-    }
 
-    Spacer(modifier = Modifier.height(12.dp))
+      Spacer(modifier = Modifier.height(8.dp))
 
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
       ) {
-      Box(modifier = Modifier.weight(1f)) {
-        CompactSettingsCheckbox(
-          checked = config.exportPngEnabled,
-          onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportPngEnabled = isChecked) } },
-          label = stringResource(Res.string.settings_export_png),
-          accent = true
-        )
-      }
-      Box(modifier = Modifier.weight(1f)) {
-        CompactSettingsCheckbox(
-          checked = config.exportIncludeRawJsonLogs,
-          onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportIncludeRawJsonLogs = isChecked) } },
-          label = stringResource(Res.string.settings_export_include_raw_json),
-          accent = true
-        )
+        Column(modifier = Modifier.weight(1f)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+          ) {
+            Box(modifier = Modifier.weight(1f)) {
+              CompactSettingsCheckbox(
+                checked = config.exportPngEnabled,
+                onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportPngEnabled = isChecked) } },
+                label = stringResource(Res.string.settings_export_png),
+                accent = true
+              )
+            }
+            Box(modifier = Modifier.weight(1f)) {
+              CompactSettingsCheckbox(
+                checked = config.exportIncludeRawJsonLogs,
+                onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportIncludeRawJsonLogs = isChecked) } },
+                label = stringResource(Res.string.settings_export_include_raw_json),
+                accent = true
+              )
+            }
+          }
+
+          CompactSettingsCheckbox(
+            checked = config.exportHidePirateWhenUnranked,
+            onCheckedChange = { isChecked -> RFConfig.update { it.copy(exportHidePirateWhenUnranked = isChecked) } },
+            label = stringResource(Res.string.settings_export_hide_pirate),
+            accent = true
+          )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Button(
+          onClick = {
+            scope.launch {
+              val data = ImageExportInteractor.captureSnapshot()
+              ImageExportInteractor.exportToPng(data)
+            }
+          },
+          enabled = !exportProgress.isExporting,
+          colors = ButtonDefaults.buttonColors(RFColors.AccentRed),
+          modifier = Modifier.width(190.dp)
+        ) {
+          Text(
+            text = stringResource(Res.string.settings_export_now),
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 13.sp
+          )
+        }
       }
     }
+
+    Spacer(modifier = Modifier.height(12.dp))
 
     Text(
       text = stringResource(Res.string.settings_export_storage_estimate),

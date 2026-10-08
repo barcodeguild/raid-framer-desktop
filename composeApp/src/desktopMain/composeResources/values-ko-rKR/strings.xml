@@ -632,7 +632,9 @@
     <string name="settings_export_directory_label">내보내기 디렉토리:</string>
     <string name="settings_export_size_label">사용된 공간:</string>
     <string name="settings_export_open_folder">폴더 열기</string>
+    <string name="settings_export_now">지금 내보내기</string>
     <string name="settings_export_include_raw_json">원시 JSON 로그 내보내기</string>
+    <string name="settings_export_hide_pirate">상위 50위에 해적이 없으면 해적 열 자동 숨기기</string>
     <string name="settings_export_storage_estimate">PNG 내보내기는 보통 파일당 10-15MB이며, 원시 JSON 로그는 세션당 100-250MB를 사용할 수 있습니다.</string>
     <string name="settings_export_directory_not_found">디렉토리를 찾을 수 없음</string>
 

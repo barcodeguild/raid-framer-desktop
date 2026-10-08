@@ -631,7 +631,9 @@
     <string name="settings_export_directory_label">导出目录:</string>
     <string name="settings_export_size_label">已用空间:</string>
     <string name="settings_export_open_folder">打开文件夹</string>
+    <string name="settings_export_now">立即导出</string>
     <string name="settings_export_include_raw_json">导出原始 JSON 日志</string>
+    <string name="settings_export_hide_pirate">没有海盗进入前50名时自动隐藏海盗栏</string>
     <string name="settings_export_storage_estimate">PNG 导出通常每个文件占用 10-15 MB；原始 JSON 日志每个会话可能占用 100-250 MB。</string>
     <string name="settings_export_directory_not_found">目录未找到</string>
 

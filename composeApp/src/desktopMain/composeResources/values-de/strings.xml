@@ -632,7 +632,9 @@ Die Live-Überwachung ist während der Wiedergabe deaktiviert.</string>
     <string name="settings_export_directory_label">Exportverzeichnis:</string>
     <string name="settings_export_size_label">Genutzter Speicherplatz:</string>
     <string name="settings_export_open_folder">Ordner öffnen</string>
+    <string name="settings_export_now">Jetzt exportieren</string>
     <string name="settings_export_include_raw_json">Rohe JSON-Logs exportieren</string>
+    <string name="settings_export_hide_pirate">Piratenspalten ausblenden, wenn keine Piraten unter den Top 50 sind</string>
     <string name="settings_export_storage_estimate">PNG-Exporte benötigen normalerweise 10-15 MB pro Datei; rohe JSON-Protokolle können 100-250 MB pro Sitzung benötigen.</string>
     <string name="settings_export_directory_not_found">Verzeichnis nicht gefunden</string>
 

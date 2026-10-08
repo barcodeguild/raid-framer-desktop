@@ -375,6 +375,10 @@ object ImageExportInteractor {
     val topDamage: List<PlayerCard>,
     val topHeals: List<PlayerCard>,
     val topCC: List<PlayerCard>,
+    // Snapshot of whether any pirate made the top 50 damage/heals/CC rankings at capture time.
+    // Computed here (not read live from PlayerCacheInteractor at render time) so the pirate
+    // column/pie filtering always matches the ranking data this export was built from.
+    val hasPirateInTop50: Boolean = false,
     val topSilences: List<PlayerCard>,
     val topCharms: List<PlayerCard>,
     val topDistresses: List<PlayerCard>,
@@ -510,6 +514,12 @@ val coherenceRecordingMs: Long,
 
     // take 50 of the main dmg/heals/cc chart and 15 top players of everything else. We can change this to whatever. I just
     // picked what I'd personally been doing in the screenshots.
+    val topDamage50 = PlayerCacheInteractor.topDamage.value.take(50)
+    val topHeals50  = PlayerCacheInteractor.topHeals.value.take(50)
+    val topCC50     = PlayerCacheInteractor.topCC.value.take(50)
+    val hasPirateInTop50 = (topDamage50 + topHeals50 + topCC50)
+      .any { it.lastKnownFaction == Faction.PIRATE.value }
+
     return ExportData(
       sessionTitle        = config.lastSessionTitle.ifBlank { "session" },
       sessionDate         = DateFormat.getDateInstance(DateFormat.SHORT).format(Date()),
@@ -538,9 +548,10 @@ val coherenceRecordingMs: Long,
       combatCCTitle = getString(
         if (config.allowPVEDamage) Res.string.export_combat_pve_cc else Res.string.export_combat_pvp_cc
       ),
-      topDamage           = PlayerCacheInteractor.topDamage.value.take(50),
-      topHeals            = PlayerCacheInteractor.topHeals.value.take(50),
-      topCC               = PlayerCacheInteractor.topCC.value.take(50),
+      topDamage           = topDamage50,
+      topHeals            = topHeals50,
+      topCC               = topCC50,
+      hasPirateInTop50    = hasPirateInTop50,
       topSilences         = PlayerCacheInteractor.topSilences.value.take(25),
       topCharms           = PlayerCacheInteractor.topCharms.value.take(25),
       topDistresses       = PlayerCacheInteractor.topDistresses.value.take(25),
@@ -997,8 +1008,16 @@ val coherenceRecordingMs: Long,
     return (SECTION_HEADER_HEIGHT + (rows * ROW_HEIGHT) + CARD_PADDING * 2).coerceAtLeast(CATEGORY_MIN_HEIGHT)
   }
 
+  /**
+   * True when the user asked for it and no pirate made the top 50 damage/heals/CC rankings
+   * in this export's snapshot. Gates both the pirate ranking columns and the pie legends.
+   */
+  private fun hidePirateColumns(data: ExportData): Boolean =
+    RFConfig.state.value.exportHidePirateWhenUnranked && !data.hasPirateInTop50
+
   private fun makePieChartBlock(data: ExportData, superColWidth: Int): Block {
     val chartH = CHART_HEIGHT + CARD_PADDING * 2
+    val includePirate = !hidePirateColumns(data)
 
     return Block("Charts", chartH) { g2d, x, y, w ->
       drawCardBackgroundTransparent(g2d, x, y, w, chartH)
@@ -1007,9 +1026,9 @@ val coherenceRecordingMs: Long,
       val chartRadius  = 45
       val chartY       = y + CARD_PADDING + 62
 
-      drawPieChart(g2d, "Silences",   data.factionSilenceData,  chartSpacing / 2, chartY, chartRadius, 0)
-      drawPieChart(g2d, "Charms",     data.factionCharmData,    chartSpacing / 2, chartY, chartRadius, chartSpacing)
-      drawPieChart(g2d, "Distresses", data.factionDistressData, chartSpacing / 2, chartY, chartRadius, chartSpacing * 2)
+      drawPieChart(g2d, "Silences",   data.factionSilenceData,  chartSpacing / 2, chartY, chartRadius, 0, includePirate)
+      drawPieChart(g2d, "Charms",     data.factionCharmData,    chartSpacing / 2, chartY, chartRadius, chartSpacing, includePirate)
+      drawPieChart(g2d, "Distresses", data.factionDistressData, chartSpacing / 2, chartY, chartRadius, chartSpacing * 2, includePirate)
     }
   }
 
@@ -1307,7 +1326,16 @@ val coherenceRecordingMs: Long,
     }
   }
 
-  private fun drawPieChart(g2d: Graphics2D, title: String, factionData: Map<String, Float>, centerX: Int, centerY: Int, radius: Int, xOffset: Int) {
+  private fun drawPieChart(
+    g2d: Graphics2D,
+    title: String,
+    factionData: Map<String, Float>,
+    centerX: Int,
+    centerY: Int,
+    radius: Int,
+    xOffset: Int,
+    includePirate: Boolean = true,
+  ) {
     val titleFont = createFont(Font.BOLD,  11f)
     val labelFont = createFont(Font.PLAIN, 10f)
 
@@ -1315,10 +1343,10 @@ val coherenceRecordingMs: Long,
     g2d.color = TEXT_PRIMARY
     g2d.drawString(title, xOffset + centerX - g2d.fontMetrics.stringWidth(title) / 2, centerY - radius - 8)
 
-    val allFactions  = listOf("Haranya", "Nuia", "Pirate")
+    val allFactions  = if (includePirate) listOf("Haranya", "Nuia", "Pirate") else listOf("Haranya", "Nuia")
     val displayData  = allFactions.associateWith { faction -> factionData[faction] ?: 0f }
     val total        = displayData.values.sum()
-    val pieColors    = listOf(HARANYA_COLOR, NUIA_COLOR, PIRATE_COLOR)
+    val pieColors    = if (includePirate) listOf(HARANYA_COLOR, NUIA_COLOR, PIRATE_COLOR) else listOf(HARANYA_COLOR, NUIA_COLOR)
 
     if (total == 0f) {
       g2d.color = Color(50, 50, 60)
@@ -1363,14 +1391,24 @@ val coherenceRecordingMs: Long,
 
   private suspend fun getAllCategoryBlocks(data: ExportData, superColWidth: Int): List<TripletBlock> {
     val tripletBlocks  = mutableListOf<TripletBlock>()
-    val subColWidth    = (superColWidth - COLUMN_GAP * 2) / 3
     val qualityLabels = LifeMendQuality.entries.associateWith { getString(it.labelRes) }
+    val hidePirate = hidePirateColumns(data)
+
+    // Faction triplets drop their pirate column when no pirates ranked in the top 50, leaving a
+    // double that re-fills the same brick width (see the width math in makeTriplet below).
+    fun factionColumns(
+      haranya: Triple<String, String, ColumnData>,
+      nuia: Triple<String, String, ColumnData>,
+      pirate: Triple<String, String, ColumnData>,
+    ): List<Triple<String, String, ColumnData>> = if (hidePirate) listOf(haranya, nuia) else listOf(haranya, nuia, pirate)
 
     val makeTriplet: (List<Triple<String, String, ColumnData>>) -> TripletBlock = { columns ->
       val maxBlockHeight = columns.maxOfOrNull { calculateHeight(it.third) } ?: CATEGORY_MIN_HEIGHT
       val colCount = columns.size.coerceAtLeast(1)
       TripletBlock("", emptyList(), maxBlockHeight) { g2d, x, y, w ->
-        val actualSubColWidth = if (w < superColWidth) (w - COLUMN_GAP * (colCount - 1)) / colCount else subColWidth
+        // Divide the brick width by however many columns this block has, so doubles (2 columns)
+        // fill the same space triplets do instead of leaving the third slot empty.
+        val actualSubColWidth = (w - COLUMN_GAP * (colCount - 1)) / colCount
         val actualAvailW      = actualSubColWidth - CARD_PADDING * 2
         columns.forEachIndexed { index, (title, icon, colData) ->
           val xPos = x + index * (actualSubColWidth + COLUMN_GAP)
@@ -1492,7 +1530,7 @@ val coherenceRecordingMs: Long,
     )))
 
     // 2. Top kills by faction
-    tripletBlocks.add(makeTriplet(listOf(
+    tripletBlocks.add(makeTriplet(factionColumns(
       Triple(getString(Res.string.summary_top_kills_haranya), "\u2694", ColumnData.CardData(data.topKillsHaranya, { it.sessionKillTotal.toString() }, KILLS_HARANYA_COLOR)),
       Triple(getString(Res.string.summary_top_kills_nuia),    "\u2694", ColumnData.CardData(data.topKillsNuia,    { it.sessionKillTotal.toString() }, KILLS_NUIA_COLOR)),
       Triple(getString(Res.string.summary_top_kills_pirate),  "\u2694", ColumnData.CardData(data.topKillsPirate,  { it.sessionKillTotal.toString() }, KILLS_PIRATE_COLOR)),
@@ -1517,14 +1555,14 @@ val coherenceRecordingMs: Long,
     )))
 
     // 4. Spell damage breakdown
-    tripletBlocks.add(makeTriplet(listOf(
+    tripletBlocks.add(makeTriplet(factionColumns(
       Triple(getString(Res.string.summary_top_haranya_spells_damage), "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsHaranya)),
       Triple(getString(Res.string.summary_top_nuia_spells_damage),    "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsNuia)),
       Triple(getString(Res.string.summary_top_pirate_spells_damage),  "\uD83D\uDD25", ColumnData.SpellData(data.topDamageSpellsPirate)),
     )))
 
     // 5. Top performance
-    tripletBlocks.add(makeTriplet(listOf(
+    tripletBlocks.add(makeTriplet(factionColumns(
       Triple(getString(Res.string.summary_top_haranya_performance), "\uD83C\uDFC6", ColumnData.CardData(data.topPerformanceHaranya, { it.pvpPerformancePoints().toString() }, HARANYA_COLOR)),
       Triple(getString(Res.string.summary_top_nuia_performance),    "\uD83C\uDFC6", ColumnData.CardData(data.topPerformanceNuia,    { it.pvpPerformancePoints().toString() }, NUIA_COLOR)),
       Triple(getString(Res.string.summary_top_pirate_performance),  "\uD83C\uDFC6", ColumnData.CardData(data.topPerformancePirate,  { it.pvpPerformancePoints().toString() }, PIRATE_COLOR)),
@@ -1568,14 +1606,14 @@ val coherenceRecordingMs: Long,
     // --- Remaining sections ---
 
     // Ode
-    tripletBlocks.add(makeTriplet(listOf(
+    tripletBlocks.add(makeTriplet(factionColumns(
       Triple(getString(Res.string.summary_top_ode_haranya), "\uD83C\uDFB5", ColumnData.CardData(data.topOdeHaranya, { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
       Triple(getString(Res.string.summary_top_ode_nuia),    "\uD83C\uDFB5", ColumnData.CardData(data.topOdeNuia,    { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
       Triple(getString(Res.string.summary_top_ode_pirate),  "\uD83C\uDFB5", ColumnData.CardData(data.topOdePirate,  { it.sessionOdeHealsTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
     )))
 
     // Items, Utility, Builds
-    tripletBlocks.add(makeTriplet(listOf(
+    tripletBlocks.add(makeTriplet(factionColumns(
       Triple(getString(Res.string.summary_top_haranya_item_uses), "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesHaranya)),
       Triple(getString(Res.string.summary_top_nuia_item_uses),    "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesNuia)),
       Triple(getString(Res.string.summary_top_pirate_item_uses),  "\uD83D\uDCE6", ColumnData.ItemData(data.topItemUsesPirate)),
@@ -1687,7 +1725,7 @@ val coherenceRecordingMs: Long,
       Triple(getString(Res.string.summary_top_buff_count), "\u26A1", ColumnData.CardData(data.topBuffCount, { it.sessionCurrentBuffCount.toString() }, LOOT_BUFF_COLOR)),
     )))
 
-    tripletBlocks.add(makeTriplet(listOf(
+    tripletBlocks.add(makeTriplet(factionColumns(
       Triple(getString(Res.string.summary_haranya_builds), "\u2694", ColumnData.BuildData(data.buildCountsHaranya)),
       Triple(getString(Res.string.summary_nuia_builds),    "\u2694", ColumnData.BuildData(data.buildCountsNuia)),
       Triple(getString(Res.string.summary_pirate_builds),  "\u2694", ColumnData.BuildData(data.buildCountsPirate)),

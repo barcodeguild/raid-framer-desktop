@@ -632,7 +632,9 @@ O monitoramento ao vivo está desativado durante a repetição.</string>
     <string name="settings_export_directory_label">Diretório de Exportação:</string>
     <string name="settings_export_size_label">Espaço Usado:</string>
     <string name="settings_export_open_folder">Abrir Pasta</string>
+    <string name="settings_export_now">Exportar agora</string>
     <string name="settings_export_include_raw_json">Exportar logs JSON brutos</string>
+    <string name="settings_export_hide_pirate">Ocultar colunas de piratas automaticamente quando nenhum pirata entrar no top 50</string>
     <string name="settings_export_storage_estimate">As exportações PNG normalmente usam 10-15 MB cada; os logs JSON brutos podem usar 100-250 MB por sessão.</string>
     <string name="settings_export_directory_not_found">Diretório não encontrado</string>
 
