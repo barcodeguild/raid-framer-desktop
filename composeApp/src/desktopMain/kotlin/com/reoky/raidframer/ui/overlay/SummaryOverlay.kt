@@ -169,6 +169,10 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dances
 import raid_framer_desktop.composeapp.generated.resources.summary_top_silences
 import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_coherence
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_hit_quality
+import raid_framer_desktop.composeapp.generated.resources.summary_top_crits
+import raid_framer_desktop.composeapp.generated.resources.summary_top_max_hit
+import raid_framer_desktop.composeapp.generated.resources.summary_top_average_hit
 import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_render
 import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_raid
 import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_clump
@@ -293,6 +297,9 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val factionCrystalWingsData by PlayerCacheInteractor.factionCrystalWingsComparisonAll.collectAsState()
   val factionGliderDisablesData by PlayerCacheInteractor.factionGliderDisablesComparisonAll.collectAsState()
   val factionProvokedData by PlayerCacheInteractor.factionProvokedComparisonAll.collectAsState()
+  val topCrits by PlayerCacheInteractor.topCrits.collectAsState()
+  val topMaxHits by PlayerCacheInteractor.topMaxHits.collectAsState()
+  val topAverageHits by PlayerCacheInteractor.topAverageHits.collectAsState()
 
   val humanReadableDateString = DateFormat.getDateInstance(DateFormat.SHORT).format(System.currentTimeMillis())
 
@@ -330,7 +337,8 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
     stringResource(Res.string.summary_tab_specs),
     stringResource(Res.string.summary_tab_performance),
     stringResource(Res.string.summary_tab_loot),
-    stringResource(Res.string.summary_tab_coherence)
+    stringResource(Res.string.summary_tab_coherence),
+    stringResource(Res.string.summary_tab_hit_quality)
   )
 
   val scope = rememberCoroutineScope()
@@ -637,6 +645,13 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
           topCoherenceRender = topCoherenceRender,
           topCoherenceRaid = topCoherenceRaid,
           topCoherenceClump = topCoherenceClump,
+          wm = wm
+        )
+
+        26 -> HitQualityTab(
+          topCrits = topCrits,
+          topMaxHits = topMaxHits,
+          topAverageHits = topAverageHits,
           wm = wm
         )
       }
@@ -2226,6 +2241,69 @@ private fun CoherenceTab(
       }
     }
     CoherenceHelp(modifier = Modifier.align(Alignment.TopEnd))
+  }
+}
+
+@Composable
+private fun HitQualityTab(
+  topCrits: List<PlayerCard>,
+  topMaxHits: List<PlayerCard>,
+  topAverageHits: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(
+    modifier = Modifier.fillMaxSize()
+  ) {
+    StatColumn(
+      icon = "\u2605",
+      title = stringResource(Res.string.summary_top_crits),
+      cards = topCrits,
+      valueExtractor = { card ->
+        val totalCrits = card.sessionCritDamageCount + card.sessionCritHealCount
+        val totalEvents = card.sessionDamageEventCount + card.sessionHealEventCount
+        val pct = if (totalEvents > 0) ((totalCrits * 100.0 / totalEvents)).toInt() else 0
+        "$totalCrits (${pct}%)"
+      },
+      valueColor = RFColors.critGold,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+
+    StatColumn(
+      icon = "\u26A1",
+      title = stringResource(Res.string.summary_top_max_hit),
+      cards = topMaxHits,
+      valueExtractor = { card ->
+        val spell = if (card.sessionMaxHitSpell.isNotBlank()) {
+          val truncated = if (card.sessionMaxHitSpell.length > 20) {
+            card.sessionMaxHitSpell.take(17) + "..."
+          } else card.sessionMaxHitSpell
+          " ($truncated)"
+        } else ""
+        "${card.sessionMaxHit.toLong().humanReadableAbbreviation()}$spell"
+      },
+      valueColor = RFColors.maxHitRed,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+
+    StatColumn(
+      icon = "\u223C",
+      title = stringResource(Res.string.summary_top_average_hit),
+      cards = topAverageHits,
+      valueExtractor = { card ->
+        if (card.sessionTotalHitCount > 0) {
+          val avg = (card.sessionDamageTotal + card.sessionHealTotal) / card.sessionTotalHitCount
+          avg.humanReadableAbbreviation()
+        } else "0"
+      },
+      valueColor = RFColors.averageHitTeal,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
   }
 }
 

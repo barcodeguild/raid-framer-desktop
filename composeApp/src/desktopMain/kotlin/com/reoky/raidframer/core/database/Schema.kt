@@ -17,7 +17,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 50
+const val SCHEMA_VERSION = 52
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -356,6 +356,18 @@ data class PlayerCacheLifetimeAvoidance(
   val lifetimeTotalOdeHeals: Long = 0L // Ode to Recovery heals cast (session-only semantics, persisted for filtering)
 )
 
+data class PlayerCacheLifetimeHitQuality(
+  // hit quality lifetime stats (10/11/26)
+  val lifetimeTotalCritDamageCount: Long = 0L,
+  val lifetimeTotalCritHealCount: Long = 0L,
+  val lifetimeTotalDamageEventCount: Long = 0L,
+  val lifetimeTotalHealEventCount: Long = 0L,
+  val lifetimeTotalMaxHit: Int = 0,
+  val lifetimeTotalMaxHitSpell: String = "",
+  val lifetimeTotalHitCount: Long = 0L,
+  val lifetimeTotalDamageForAvg: Long = 0L, // accumulated damage+healing for lifetime average
+)
+
 @Entity(tableName = "player_cache")
 data class PlayerCacheEntity(
   @PrimaryKey val playerName: String,
@@ -368,7 +380,8 @@ data class PlayerCacheEntity(
   @Embedded val potions: PlayerCachePotions = PlayerCachePotions(),
   @Embedded val lifetimeCombat: PlayerCacheLifetimeCombat = PlayerCacheLifetimeCombat(),
   @Embedded val lifetimeDebuffs: PlayerCacheLifetimeDebuffs = PlayerCacheLifetimeDebuffs(),
-  @Embedded val lifetimeAvoidance: PlayerCacheLifetimeAvoidance = PlayerCacheLifetimeAvoidance()
+  @Embedded val lifetimeAvoidance: PlayerCacheLifetimeAvoidance = PlayerCacheLifetimeAvoidance(),
+  @Embedded val lifetimeHitQuality: PlayerCacheLifetimeHitQuality = PlayerCacheLifetimeHitQuality()
 )
 
 /*
@@ -448,7 +461,16 @@ data class PlayerSessionTotalsEntity(
   val totalMisses: Int = 0,
   val totalAbsorbs: Long = 0L, // HP prevented (absorb shields + damage_absorbed + block/parry mitigated)
   val totalBlockMitigated: Long = 0L, // HP prevented specifically by blocks
-  val totalParryMitigated: Long = 0L, // HP prevented specifically by parries
+  val totalParryMitigated: Long = 0L, // HP prevented specifically by parries,
+
+  // Hit quality session totals (10/11/26) — critical hits, max hit, average hit
+  val totalCritDamageCount: Int = 0,
+  val totalCritHealCount: Int = 0,
+  val totalDamageEventCount: Int = 0,
+  val totalHealEventCount: Int = 0,
+  val totalMaxHit: Int = 0,
+  val totalMaxHitSpell: String = "",
+  val totalHitCount: Int = 0,
 )
 
 /** Metadata for a locally persisted Pocket journal entry. */

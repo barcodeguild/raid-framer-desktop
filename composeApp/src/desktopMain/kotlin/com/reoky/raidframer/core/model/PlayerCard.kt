@@ -210,6 +210,15 @@ data class PlayerCard(
   val lifeMendTotal: Int = 0,                              // total Life Mends cast this session
   val lifeMendHealAmounts: List<Int> = listOf(),           // recent heal amounts (capped at 25)
   val lifeMendAverage: Int = 0,                            // computed from amounts
-  val lifeMendQuality: LifeMendQuality = LifeMendQuality.NONE
+  val lifeMendQuality: LifeMendQuality = LifeMendQuality.NONE,
+
+  // Hit quality stats (10/11/26) — critical hits, max hit, average hit
+  val sessionCritDamageCount: Int = 0,       // critical damage hits
+  val sessionCritHealCount: Int = 0,         // critical heal hits
+  val sessionDamageEventCount: Int = 0,      // total damage events (for crit % calc)
+  val sessionHealEventCount: Int = 0,        // total heal events (for crit % calc)
+  val sessionMaxHit: Int = 0,                // max single damage/heal amount
+  val sessionMaxHitSpell: String = "",       // spell name that produced the max hit
+  val sessionTotalHitCount: Int = 0,         // total damage+heal events (for average hit)
 )
 

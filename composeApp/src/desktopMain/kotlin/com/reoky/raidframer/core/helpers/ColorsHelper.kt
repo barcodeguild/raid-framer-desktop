@@ -125,6 +125,11 @@ object RFColors {
   val avoidanceMissGray = Color(0xFF90A4AE)
   val avoidanceAbsorbCyan = Color(0xFF4DD0E1)
 
+  // Hit quality stat colors (10/11/26)
+  val critGold = Color(0xFFFFD54F)
+  val maxHitRed = Color(0xFFFF6E40)
+  val averageHitTeal = Color(0xFF26A69A)
+
   // Overlay background
   val OverlayBackground = Color(0xFF121212)
 

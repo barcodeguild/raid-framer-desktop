@@ -124,6 +124,9 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_regular_su
 import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_render
 import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_raid
 import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_clump
+import raid_framer_desktop.composeapp.generated.resources.summary_top_crits
+import raid_framer_desktop.composeapp.generated.resources.summary_top_max_hit
+import raid_framer_desktop.composeapp.generated.resources.summary_top_average_hit
 import raid_framer_desktop.composeapp.generated.resources.summary_top_impales
 import raid_framer_desktop.composeapp.generated.resources.summary_top_protective_wings
 import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
@@ -464,6 +467,10 @@ val topManaBarrier: List<PlayerCard>,
 val coherenceRecordingMs: Long,
     val coherenceRecorderMs: Long,
     val coherenceHeaderLabel: String,
+    // Hit quality rankings
+    val topCrits: List<PlayerCard>,
+    val topMaxHits: List<PlayerCard>,
+    val topAverageHits: List<PlayerCard>,
     // Editable meta specs indicator (Stock / Custom), localized. Empty string hides the marker.
     val metaSpecsLabel: String = "",
     // New faction comparison data
@@ -647,6 +654,9 @@ val coherenceRecordingMs: Long,
       coherenceRecordingMs = PlayerCacheInteractor.coherenceRecordingMsMs,
       coherenceRecorderMs = PlayerCacheInteractor.coherenceRecorderMsMs,
       coherenceHeaderLabel = getString(Res.string.export_header_coherence),
+      topCrits = PlayerCacheInteractor.topCrits.value.take(25),
+      topMaxHits = PlayerCacheInteractor.topMaxHits.value.take(25),
+      topAverageHits = PlayerCacheInteractor.topAverageHits.value.take(25),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -1572,7 +1582,7 @@ val coherenceRecordingMs: Long,
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_debuffs), "\uD83D\uDD25", ColumnData.CardData(data.topDebuffs, { it.sessionDebuffTotal.toString() }, HARANYA_COLOR)),
       Triple(getString(Res.string.summary_top_songs),   "\u2764", ColumnData.CardData(data.topSongs,   { it.sessionSongsTotal.toString()  }, NUIA_COLOR)),
-      Triple(getString(Res.string.summary_top_buffs),   "\u26A1", ColumnData.CardData(data.topBuffs,   { it.sessionBuffTotal.toString()   }, PIRATE_COLOR)),
+      Triple(getString(Res.string.summary_top_buffs),   "\uD83D\uDD4B", ColumnData.CardData(data.topBuffs,   { it.sessionBuffTotal.toString()   }, PIRATE_COLOR)),
     )))
 
     // 7. Dances: Sac Dances, Deep Tranquility, Deepend Debuff
@@ -1691,7 +1701,7 @@ val coherenceRecordingMs: Long,
 
     // Special Melee: Tiger Strikes, Mist Sunder, Regular Sunder
     tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.summary_top_tiger_strikes), "\u26A1", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
+      Triple(getString(Res.string.summary_top_tiger_strikes), "\uD83D\uDCA5", ColumnData.CardData(data.topTigerStrikes, { it.sessionTigerStrikeTotal.toString() }, TIGER_STRIKE_COLOR)),
       Triple(getString(Res.string.summary_top_mist_sunder), "\u26CF", ColumnData.CardData(data.topMistSunder, { it.sessionMistSunderTotal.toString() }, MIST_SUNDER_COLOR)),
       Triple(getString(Res.string.summary_top_regular_sunder), "\u26CF", ColumnData.CardData(data.topRegularSunder, { it.sessionRegularSunderTotal.toString() }, REGULAR_SUNDER_COLOR)),
     )))
@@ -1718,11 +1728,51 @@ val coherenceRecordingMs: Long,
       )),
     )))
 
+    // Hit Quality: Crits, Max Hit, Average Hit
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_crits), "\uD83C\uDF1F", ColumnData.CardData(
+        data.topCrits,
+        { card ->
+          val totalCrits = card.sessionCritDamageCount + card.sessionCritHealCount
+          val totalEvents = card.sessionDamageEventCount + card.sessionHealEventCount
+          val pct = if (totalEvents > 0) ((totalCrits * 100.0 / totalEvents)).toInt() else 0
+          "$totalCrits (${pct}%)"
+        },
+        toAwtColor(RFColors.critGold),
+        showIcons = false
+      )),
+      Triple(getString(Res.string.summary_top_max_hit), "\uD83D\uDCA5", ColumnData.CardData(
+        data.topMaxHits,
+        { card ->
+          val spell = if (card.sessionMaxHitSpell.isNotBlank()) {
+            val truncated = if (card.sessionMaxHitSpell.length > 20) {
+              card.sessionMaxHitSpell.take(17) + "..."
+            } else card.sessionMaxHitSpell
+            " ($truncated)"
+          } else ""
+          "${card.sessionMaxHit.toLong().humanReadableAbbreviation()}$spell"
+        },
+        toAwtColor(RFColors.maxHitRed),
+        showIcons = false
+      )),
+      Triple(getString(Res.string.summary_top_average_hit), "\uD83D\uDCC8", ColumnData.CardData(
+        data.topAverageHits,
+        { card ->
+          if (card.sessionTotalHitCount > 0) {
+            val avg = (card.sessionDamageTotal + card.sessionHealTotal) / card.sessionTotalHitCount
+            avg.humanReadableAbbreviation()
+          } else "0"
+        },
+        toAwtColor(RFColors.averageHitTeal),
+        showIcons = false
+      )),
+    )))
+
     // Loot buffs: best peak %, worst peak %, most simultaneous buffs (raid-wide)
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_loot_peak), "\uD83C\uDFC6", ColumnData.CardData(data.topLootPeak, { "${it.sessionPeakLootBuffAmount + 100}%" }, LOOT_BUFF_COLOR)),
       Triple(getString(Res.string.summary_worst_loot_peak), "\uD83D\uDD0C", ColumnData.CardData(data.worstLootPeak, { "${it.sessionPeakLootBuffAmount + 100}%" }, LOOT_BUFF_COLOR)),
-      Triple(getString(Res.string.summary_top_buff_count), "\u26A1", ColumnData.CardData(data.topBuffCount, { it.sessionCurrentBuffCount.toString() }, LOOT_BUFF_COLOR)),
+      Triple(getString(Res.string.summary_top_buff_count), "\uD83D\uDCA5", ColumnData.CardData(data.topBuffCount, { it.sessionCurrentBuffCount.toString() }, LOOT_BUFF_COLOR)),
     )))
 
     tripletBlocks.add(makeTriplet(factionColumns(

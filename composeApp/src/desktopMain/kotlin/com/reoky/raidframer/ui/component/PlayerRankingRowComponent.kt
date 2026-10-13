@@ -138,6 +138,7 @@ fun PlayerRankingRow(
       text = valueText,
       color = valueColor,
       maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
       textAlign = TextAlign.End
     )
     if (isOwnCharacter) {

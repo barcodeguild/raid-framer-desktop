@@ -80,6 +80,9 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_defia
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_garden_defiance
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_purges
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_sac_dances
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crits
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_hit
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_hit
 
 // View-model-agnostic shape so the totals card can render either the in-memory
 // session or an aggregated historical one without branching on the source.
@@ -139,7 +142,11 @@ data class SessionTotals(
   val misses: Int = 0,
   val absorbs: Long = 0L,
   val blockMitigated: Long = 0L,
-  val parryMitigated: Long = 0L
+  val parryMitigated: Long = 0L,
+  // Hit quality stats (10/11/26)
+  val crits: Int = 0,
+  val maxHit: Int = 0,
+  val averageHit: Long = 0
 ) {
   companion object {
     fun fromPlayerCard(card: PlayerCard) = SessionTotals(
@@ -197,7 +204,12 @@ data class SessionTotals(
         misses = card.sessionMissTotal,
         absorbs = card.sessionAbsorbTotal,
         blockMitigated = card.sessionBlockMitigated,
-        parryMitigated = card.sessionParryMitigated
+        parryMitigated = card.sessionParryMitigated,
+        crits = card.sessionCritDamageCount + card.sessionCritHealCount,
+        maxHit = card.sessionMaxHit,
+        averageHit = if (card.sessionTotalHitCount > 0) {
+          (card.sessionDamageTotal + card.sessionHealTotal) / card.sessionTotalHitCount
+        } else 0L
        )
 
     fun fromEntity(entity: PlayerSessionTotalsEntity) = SessionTotals(
@@ -255,7 +267,12 @@ data class SessionTotals(
         misses = entity.totalMisses,
         absorbs = entity.totalAbsorbs,
         blockMitigated = entity.totalBlockMitigated,
-        parryMitigated = entity.totalParryMitigated
+        parryMitigated = entity.totalParryMitigated,
+        crits = entity.totalCritDamageCount + entity.totalCritHealCount,
+        maxHit = entity.totalMaxHit,
+        averageHit = if (entity.totalHitCount > 0) {
+          (entity.totalDamage + entity.totalHealing) / entity.totalHitCount
+        } else 0L
     )
   }
 }
@@ -333,6 +350,9 @@ private fun sessionStatEntries(totals: SessionTotals): List<Triple<org.jetbrains
   Triple(Res.string.player_card_stat_immunes, totals.immunes.toLong(), RFColors.avoidanceImmunePurple),
   Triple(Res.string.player_card_stat_misses, totals.misses.toLong(), RFColors.avoidanceMissGray),
   Triple(Res.string.player_card_stat_absorbs, totals.absorbs, RFColors.avoidanceAbsorbCyan),
+  Triple(Res.string.player_card_stat_crits, totals.crits.toLong(), RFColors.critGold),
+  Triple(Res.string.player_card_stat_max_hit, totals.maxHit.toLong(), RFColors.maxHitRed),
+  Triple(Res.string.player_card_stat_average_hit, totals.averageHit, RFColors.averageHitTeal),
   Triple(Res.string.player_card_stat_glider, totals.glider.toLong(), RFColors.gliderBlue),
   Triple(Res.string.player_card_stat_items, totals.items.toLong(), RFColors.itemSkillYellow),
   Triple(Res.string.player_card_stat_potions, totals.potions.toLong(), RFColors.potionTeal),
@@ -430,6 +450,9 @@ fun CompactSessionTotals(
     CompactStatRow(stringResource(Res.string.player_card_stat_immunes), sessionTotals.immunes.toLong(), RFColors.avoidanceImmunePurple)
     CompactStatRow(stringResource(Res.string.player_card_stat_misses), sessionTotals.misses.toLong(), RFColors.avoidanceMissGray)
     CompactStatRow(stringResource(Res.string.player_card_stat_absorbs), sessionTotals.absorbs, RFColors.avoidanceAbsorbCyan)
+    CompactStatRow(stringResource(Res.string.player_card_stat_crits), sessionTotals.crits.toLong(), RFColors.critGold)
+    CompactStatRow(stringResource(Res.string.player_card_stat_max_hit), sessionTotals.maxHit.toLong(), RFColors.maxHitRed)
+    CompactStatRow(stringResource(Res.string.player_card_stat_average_hit), sessionTotals.averageHit, RFColors.averageHitTeal)
     CompactStatRow(stringResource(Res.string.player_card_stat_glider), sessionTotals.glider.toLong(), RFColors.gliderBlue)
     CompactStatRow(stringResource(Res.string.player_card_stat_items), sessionTotals.items.toLong(), RFColors.itemSkillYellow)
     CompactStatRow(stringResource(Res.string.player_card_stat_potions), sessionTotals.potions.toLong(), RFColors.potionTeal)

@@ -704,3 +704,46 @@ val MIGRATION_49_50 = object : Migration(49, 50) {
       .use { it.step() }
   }
 }
+
+// Added hit quality session totals to player_session_totals (10/11/26)
+// Critical hit counts, max hit with spell name, and total hit count for average calculation
+val MIGRATION_50_51 = object : Migration(50, 51) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCritDamageCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCritHealCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDamageEventCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalHealEventCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMaxHit INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMaxHitSpell TEXT NOT NULL DEFAULT ''")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalHitCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+  }
+}
+
+// Added hit quality lifetime totals to player_cache (10/11/26)
+val MIGRATION_51_52 = object : Migration(51, 52) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCritDamageCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCritHealCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDamageEventCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalHealEventCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalMaxHit INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalMaxHitSpell TEXT NOT NULL DEFAULT ''")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalHitCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDamageForAvg INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+  }
+}

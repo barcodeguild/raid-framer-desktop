@@ -199,6 +199,9 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_evade
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_immunes
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_misses
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_absorbs
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crits
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_hit
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_hit
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_blocked
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_parried
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_defiance
@@ -829,6 +832,12 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                   StatRow(stringResource(Res.string.player_card_stat_immunes), cache.lifetimeTotalImmunes, RFColors.avoidanceImmunePurple)
                   StatRow(stringResource(Res.string.player_card_stat_misses), cache.lifetimeTotalMisses, RFColors.avoidanceMissGray)
                   StatRow(stringResource(Res.string.player_card_stat_absorbs), cache.lifetimeTotalAbsorbs, RFColors.avoidanceAbsorbCyan)
+                  StatRow(stringResource(Res.string.player_card_stat_crits), cache.lifetimeHitQuality.lifetimeTotalCritDamageCount + cache.lifetimeHitQuality.lifetimeTotalCritHealCount, RFColors.critGold)
+                  StatRow(stringResource(Res.string.player_card_stat_max_hit), cache.lifetimeHitQuality.lifetimeTotalMaxHit.toLong(), RFColors.maxHitRed)
+                  if (cache.lifetimeHitQuality.lifetimeTotalHitCount > 0) {
+                    val avgHit = cache.lifetimeHitQuality.lifetimeTotalDamageForAvg / cache.lifetimeHitQuality.lifetimeTotalHitCount
+                    StatRow(stringResource(Res.string.player_card_stat_average_hit), avgHit, RFColors.averageHitTeal)
+                  }
                   StatRow(stringResource(Res.string.player_card_stat_glider), cache.lifetimeTotalGliderUses, RFColors.gliderBlue)
                   StatRow(stringResource(Res.string.player_card_stat_items), cache.lifetimeTotalItemSkillsUsed, RFColors.itemSkillYellow)
                   StatRow(stringResource(Res.string.player_card_stat_potions), cache.lifetimeTotalPotionUsages, RFColors.potionTeal)

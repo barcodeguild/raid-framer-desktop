@@ -62,6 +62,9 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_misse
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_absorbs
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_blocked
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_parried
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crits
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_hit
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_hit
 
 enum class CombatRankingCategory(
   val displayNameRes: StringResource,
@@ -365,6 +368,23 @@ enum class CombatRankingCategory(
     displayNameRes = Res.string.player_card_stat_damage_parried,
     valueColor = RFColors.avoidanceParryAmber,
     icon = "\uf04d"
+  ),
+
+  // Hit quality batch (10/11/26)
+  CRITS(
+    displayNameRes = Res.string.player_card_stat_crits,
+    valueColor = RFColors.critGold,
+    icon = "\uD83C\uDF1F"
+  ),
+  MAX_HIT(
+    displayNameRes = Res.string.player_card_stat_max_hit,
+    valueColor = RFColors.maxHitRed,
+    icon = "\uD83D\uDCA5"
+  ),
+  AVERAGE_HIT(
+    displayNameRes = Res.string.player_card_stat_average_hit,
+    valueColor = RFColors.averageHitTeal,
+    icon = "\uD83D\uDCC8"
   );
 
   companion object {

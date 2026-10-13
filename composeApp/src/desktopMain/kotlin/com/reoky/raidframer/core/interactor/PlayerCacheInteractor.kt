@@ -769,6 +769,13 @@ object PlayerCacheInteractor : Interactor() {
            ,totalAbsorbs = card.sessionAbsorbTotal
            ,totalBlockMitigated = card.sessionBlockMitigated
            ,totalParryMitigated = card.sessionParryMitigated
+           ,totalCritDamageCount = card.sessionCritDamageCount
+           ,totalCritHealCount = card.sessionCritHealCount
+           ,totalDamageEventCount = card.sessionDamageEventCount
+           ,totalHealEventCount = card.sessionHealEventCount
+           ,totalMaxHit = card.sessionMaxHit
+           ,totalMaxHitSpell = card.sessionMaxHitSpell
+           ,totalHitCount = card.sessionTotalHitCount
         )
         RFDao.playerSessionDao.insert(entity)
         written++
@@ -2103,6 +2110,38 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
+  // Hit quality rankings (10/11/26) — Critical hits, Max hit, Average hit
+  val topCrits: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && (it.sessionCritDamageCount + it.sessionCritHealCount) > 0 }
+        .sortedByDescending { it.sessionCritDamageCount + it.sessionCritHealCount }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topMaxHits: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionMaxHit > 0 }
+        .sortedByDescending { it.sessionMaxHit }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topAverageHits: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionTotalHitCount > 0 }
+        .sortedByDescending {
+          if (it.sessionTotalHitCount > 0) {
+            (it.sessionDamageTotal + it.sessionHealTotal) / it.sessionTotalHitCount
+          } else 0L
+        }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
   val nearbyNuianRaidParties: StateFlow<List<PlayerCard>> = snapshotFlow {
     val cardList = cards.values.toList()
     val combinedParties = (raids[0] ?: emptyList()) + (raids[1] ?: emptyList())
@@ -2651,6 +2690,10 @@ object PlayerCacheInteractor : Interactor() {
       CombatRankingCategory.ABSORBS -> topAbsorbs
       CombatRankingCategory.DAMAGE_BLOCKED -> topBlocks
       CombatRankingCategory.DAMAGE_PARRIED -> topParries
+      // Hit quality batch (10/11/26)
+      CombatRankingCategory.CRITS -> topCrits
+      CombatRankingCategory.MAX_HIT -> topMaxHits
+      CombatRankingCategory.AVERAGE_HIT -> topAverageHits
     }
   }
 

@@ -88,6 +88,8 @@ fun initialize(): AppDatabase {
     .addMigrations(MIGRATION_47_48) // added Skiko rendering backend selection
     .addMigrations(MIGRATION_48_49) // 10/05/26 added avoidance lifetime + session totals (blocks/parries/evades/immunes/misses/absorbs, block/parry mitigated HP, lifetime ode)
     .addMigrations(MIGRATION_49_50) // 10/07/26 added exportHidePirateWhenUnranked to config
+    .addMigrations(MIGRATION_50_51) // 10/11/26 added hit quality session totals (crits, max hit, average hit)
+    .addMigrations(MIGRATION_51_52) // 10/11/26 added hit quality lifetime totals to player_cache
     .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
     .fallbackToDestructiveMigrationOnDowngrade(true)
