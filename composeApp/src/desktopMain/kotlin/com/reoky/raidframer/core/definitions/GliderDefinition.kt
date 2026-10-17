@@ -161,6 +161,8 @@ fun PlayerCard.copiedWithGliderDetectionMiddleWare(event: CombatEvent): PlayerCa
   if (now - lastUsedDate.time < cooldownMillis) return this
 
   val card = glider.updateCard(this)
+  // Record the glider usage in recentSkillItemUsages so the inventory section can compute session counts
+  val updatedRecentSkillItemUsages = this.recentSkillItemUsages + Triple(event.timestamp, glider.friendlyNameRes, event.target)
   return card.copy(
     lastEvent = event.timestamp,
     cache = card.cache?.copy(
@@ -170,6 +172,7 @@ fun PlayerCard.copiedWithGliderDetectionMiddleWare(event: CombatEvent): PlayerCa
       )
     ),
     sessionGliderTotal = this.sessionGliderTotal + 1,
-    lastGliderUse = now
+    lastGliderUse = now,
+    recentSkillItemUsages = updatedRecentSkillItemUsages
   )
 }

@@ -1281,6 +1281,7 @@ private data class InventoryItem(
   val nameRes: StringResource,
   val iconRes: DrawableResource,
   val usageCount: Long,
+  val sessionUsageCount: Int,
   val lastUsedDate: Date?,
   val usedInSession: Boolean
 )
@@ -1294,14 +1295,26 @@ private fun PlayerInventorySection(card: PlayerCard) {
 
   // Build inventory items from all glider and utility item enum entries
   val allItems = remember(cache, lastSessionStart, previousSessionStart) {
+    // Compute session usage counts from recentSkillItemUsages
+    val sessionStart = if (lastSessionStart > 0L) lastSessionStart else previousSessionStart
+    val sessionUsageByRes = if (sessionStart > 0L) {
+      card.recentSkillItemUsages
+        .filter { it.first >= sessionStart }
+        .groupBy { it.second }
+        .mapValues { it.value.size }
+    } else {
+      emptyMap<StringResource, Int>()
+    }
+
     fun buildItem(nameRes: StringResource, iconRes: DrawableResource, packed: Long): InventoryItem {
       val lastUsed = packed.unpackItemUsageDate()
-      val sessionStart = if (lastSessionStart > 0L) lastSessionStart else previousSessionStart
       val usedInSession = sessionStart > 0L && lastUsed.time >= sessionStart
+      val sessionCount = sessionUsageByRes[nameRes] ?: 0
       return InventoryItem(
         nameRes = nameRes,
         iconRes = iconRes,
         usageCount = packed.unpackItemUsageCounter(),
+        sessionUsageCount = sessionCount,
         lastUsedDate = lastUsed,
         usedInSession = usedInSession
       )
@@ -1396,10 +1409,25 @@ private fun InventoryItemCard(item: InventoryItem, modifier: Modifier = Modifier
       textAlign = TextAlign.Center
     )
 
-    // Usage count
+    // Usage count: session uses in blue, lifetime uses in muted gray
+    val usageText = buildAnnotatedString {
+      if (item.sessionUsageCount > 0) {
+        withStyle(SpanStyle(color = RFColors.graphNodeAllied)) {
+          append("${item.sessionUsageCount} uses")
+        }
+        if (item.usageCount > item.sessionUsageCount) {
+          withStyle(SpanStyle(color = RFColors.TextTertiary)) {
+            append(" · ${item.usageCount} lifetime")
+          }
+        }
+      } else {
+        withStyle(SpanStyle(color = RFColors.TextTertiary)) {
+          append("${item.usageCount} lifetime")
+        }
+      }
+    }
     Text(
-      text = stringResource(Res.string.player_inventory_uses, item.usageCount),
-      color = if (sessionHighlight) RFColors.graphNodeAllied.copy(alpha = 0.8f) else RFColors.TextTertiary,
+      text = usageText,
       fontSize = 9.sp,
       textAlign = TextAlign.Center
     )
