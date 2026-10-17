@@ -65,6 +65,9 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damag
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crits
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_hit
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_hit
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crit_heals
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_heal
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_heal
 
 enum class CombatRankingCategory(
   val displayNameRes: StringResource,
@@ -370,7 +373,7 @@ enum class CombatRankingCategory(
     icon = "\uf04d"
   ),
 
-  // Hit quality batch (10/11/26)
+  // Hit quality batch (10/11/26) — Damage (DPS) stats
   CRITS(
     displayNameRes = Res.string.player_card_stat_crits,
     valueColor = RFColors.critGold,
@@ -383,6 +386,22 @@ enum class CombatRankingCategory(
   ),
   AVERAGE_HIT(
     displayNameRes = Res.string.player_card_stat_average_hit,
+    valueColor = RFColors.averageHitTeal,
+    icon = "\uD83D\uDCC8"
+  ),
+  // Healing hit quality stats (10/13/26) — excludes self-casts
+  CRIT_HEALS(
+    displayNameRes = Res.string.player_card_stat_crit_heals,
+    valueColor = RFColors.critGold,
+    icon = "\uD83C\uDF1F"
+  ),
+  MAX_HEAL(
+    displayNameRes = Res.string.player_card_stat_max_heal,
+    valueColor = RFColors.maxHitRed,
+    icon = "\uD83D\uDCA5"
+  ),
+  AVERAGE_HEAL(
+    displayNameRes = Res.string.player_card_stat_average_heal,
     valueColor = RFColors.averageHitTeal,
     icon = "\uD83D\uDCC8"
   );

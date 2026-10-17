@@ -17,7 +17,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 52
+const val SCHEMA_VERSION = 53
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -357,15 +357,21 @@ data class PlayerCacheLifetimeAvoidance(
 )
 
 data class PlayerCacheLifetimeHitQuality(
-  // hit quality lifetime stats (10/11/26)
+  // hit quality lifetime stats (10/11/26) — separated into damage and healing
   val lifetimeTotalCritDamageCount: Long = 0L,
   val lifetimeTotalCritHealCount: Long = 0L,
   val lifetimeTotalDamageEventCount: Long = 0L,
   val lifetimeTotalHealEventCount: Long = 0L,
-  val lifetimeTotalMaxHit: Int = 0,
-  val lifetimeTotalMaxHitSpell: String = "",
-  val lifetimeTotalHitCount: Long = 0L,
-  val lifetimeTotalDamageForAvg: Long = 0L, // accumulated damage+healing for lifetime average
+  // Damage (DPS) hit quality
+  val lifetimeMaxHitDamage: Int = 0,
+  val lifetimeMaxHitDamageSpell: String = "",
+  val lifetimeDamageHitCount: Long = 0L,
+  val lifetimeDamageTotalForAvg: Long = 0L,
+  // Healing hit quality (excludes self-casts)
+  val lifetimeMaxHitHeal: Int = 0,
+  val lifetimeMaxHitHealSpell: String = "",
+  val lifetimeHealHitCount: Long = 0L,
+  val lifetimeHealTotalForAvg: Long = 0L,
 )
 
 @Entity(tableName = "player_cache")
@@ -463,14 +469,19 @@ data class PlayerSessionTotalsEntity(
   val totalBlockMitigated: Long = 0L, // HP prevented specifically by blocks
   val totalParryMitigated: Long = 0L, // HP prevented specifically by parries,
 
-  // Hit quality session totals (10/11/26) — critical hits, max hit, average hit
+  // Hit quality session totals (10/11/26) — separated into damage and healing
   val totalCritDamageCount: Int = 0,
   val totalCritHealCount: Int = 0,
   val totalDamageEventCount: Int = 0,
   val totalHealEventCount: Int = 0,
-  val totalMaxHit: Int = 0,
-  val totalMaxHitSpell: String = "",
-  val totalHitCount: Int = 0,
+  // Damage (DPS) hit quality
+  val totalMaxHitDamage: Int = 0,
+  val totalMaxHitDamageSpell: String = "",
+  val totalDamageHitCount: Int = 0,
+  // Healing hit quality (excludes self-casts)
+  val totalMaxHitHeal: Int = 0,
+  val totalMaxHitHealSpell: String = "",
+  val totalHealHitCount: Int = 0,
 )
 
 /** Metadata for a locally persisted Pocket journal entry. */

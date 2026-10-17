@@ -747,3 +747,56 @@ val MIGRATION_51_52 = object : Migration(51, 52) {
       .use { it.step() }
   }
 }
+
+// Separated hit quality stats into damage (DPS) and healing categories (10/13/26)
+// Healing stats exclude self-casts (potions, self-heals) by only counting spells on other targets
+val MIGRATION_52_53 = object : Migration(52, 53) {
+  override fun migrate(connection: SQLiteConnection) {
+    // player_cache: replace combined lifetime fields with separate damage/healing fields
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeMaxHitDamage INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeMaxHitDamageSpell TEXT NOT NULL DEFAULT ''")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeDamageHitCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeDamageTotalForAvg INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeMaxHitHeal INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeMaxHitHealSpell TEXT NOT NULL DEFAULT ''")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeHealHitCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeHealTotalForAvg INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    // Drop old combined columns from MIGRATION_51_52 that are no longer in the Kotlin model
+    connection.prepare("ALTER TABLE player_cache DROP COLUMN lifetimeTotalHitCount")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache DROP COLUMN lifetimeTotalMaxHit")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache DROP COLUMN lifetimeTotalMaxHitSpell")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache DROP COLUMN lifetimeTotalDamageForAvg")
+      .use { it.step() }
+    // player_session_totals: replace combined fields with separate damage/healing fields
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMaxHitDamage INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMaxHitDamageSpell TEXT NOT NULL DEFAULT ''")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDamageHitCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMaxHitHeal INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalMaxHitHealSpell TEXT NOT NULL DEFAULT ''")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalHealHitCount INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    // Drop old combined columns from MIGRATION_50_51 that are no longer in the Kotlin model
+    connection.prepare("ALTER TABLE player_session_totals DROP COLUMN totalMaxHit")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals DROP COLUMN totalMaxHitSpell")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals DROP COLUMN totalHitCount")
+      .use { it.step() }
+  }
+}

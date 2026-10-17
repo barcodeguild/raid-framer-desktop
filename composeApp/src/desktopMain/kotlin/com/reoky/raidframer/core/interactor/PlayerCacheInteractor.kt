@@ -773,9 +773,12 @@ object PlayerCacheInteractor : Interactor() {
            ,totalCritHealCount = card.sessionCritHealCount
            ,totalDamageEventCount = card.sessionDamageEventCount
            ,totalHealEventCount = card.sessionHealEventCount
-           ,totalMaxHit = card.sessionMaxHit
-           ,totalMaxHitSpell = card.sessionMaxHitSpell
-           ,totalHitCount = card.sessionTotalHitCount
+           ,totalMaxHitDamage = card.sessionMaxHitDamage
+           ,totalMaxHitDamageSpell = card.sessionMaxHitDamageSpell
+           ,totalDamageHitCount = card.sessionDamageHitCount
+           ,totalMaxHitHeal = card.sessionMaxHitHeal
+           ,totalMaxHitHealSpell = card.sessionMaxHitHealSpell
+           ,totalHealHitCount = card.sessionHealHitCount
         )
         RFDao.playerSessionDao.insert(entity)
         written++
@@ -2110,11 +2113,12 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-  // Hit quality rankings (10/11/26) — Critical hits, Max hit, Average hit
+  // Hit quality rankings (10/11/26) — separated into Damage (DPS) and Healing categories
+  // Damage (DPS) rankings
   val topCrits: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
-      cards.filter { it.isRealPlayer && (it.sessionCritDamageCount + it.sessionCritHealCount) > 0 }
-        .sortedByDescending { it.sessionCritDamageCount + it.sessionCritHealCount }
+      cards.filter { it.isRealPlayer && it.sessionCritDamageCount > 0 }
+        .sortedByDescending { it.sessionCritDamageCount }
         .take(100)
     }
     .distinctUntilChanged()
@@ -2122,8 +2126,8 @@ object PlayerCacheInteractor : Interactor() {
 
   val topMaxHits: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
-      cards.filter { it.isRealPlayer && it.sessionMaxHit > 0 }
-        .sortedByDescending { it.sessionMaxHit }
+      cards.filter { it.isRealPlayer && it.sessionMaxHitDamage > 0 }
+        .sortedByDescending { it.sessionMaxHitDamage }
         .take(100)
     }
     .distinctUntilChanged()
@@ -2131,10 +2135,42 @@ object PlayerCacheInteractor : Interactor() {
 
   val topAverageHits: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
-      cards.filter { it.isRealPlayer && it.sessionTotalHitCount > 0 }
+      cards.filter { it.isRealPlayer && it.sessionDamageHitCount > 0 }
         .sortedByDescending {
-          if (it.sessionTotalHitCount > 0) {
-            (it.sessionDamageTotal + it.sessionHealTotal) / it.sessionTotalHitCount
+          if (it.sessionDamageHitCount > 0) {
+            it.sessionDamageTotal / it.sessionDamageHitCount
+          } else 0L
+        }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  // Healing rankings (excludes self-casts)
+  val topCritHeals: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionCritHealCount > 0 }
+        .sortedByDescending { it.sessionCritHealCount }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topMaxHeals: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionMaxHitHeal > 0 }
+        .sortedByDescending { it.sessionMaxHitHeal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  val topAverageHeals: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionHealHitCount > 0 }
+        .sortedByDescending {
+          if (it.sessionHealHitCount > 0) {
+            it.sessionHealTotal / it.sessionHealHitCount
           } else 0L
         }
         .take(100)
@@ -2690,10 +2726,14 @@ object PlayerCacheInteractor : Interactor() {
       CombatRankingCategory.ABSORBS -> topAbsorbs
       CombatRankingCategory.DAMAGE_BLOCKED -> topBlocks
       CombatRankingCategory.DAMAGE_PARRIED -> topParries
-      // Hit quality batch (10/11/26)
+      // Hit quality batch (10/11/26) — Damage (DPS)
       CombatRankingCategory.CRITS -> topCrits
       CombatRankingCategory.MAX_HIT -> topMaxHits
       CombatRankingCategory.AVERAGE_HIT -> topAverageHits
+      // Healing hit quality (10/13/26) — excludes self-casts
+      CombatRankingCategory.CRIT_HEALS -> topCritHeals
+      CombatRankingCategory.MAX_HEAL -> topMaxHeals
+      CombatRankingCategory.AVERAGE_HEAL -> topAverageHeals
     }
   }
 

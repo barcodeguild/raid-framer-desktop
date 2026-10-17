@@ -127,6 +127,9 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_coherence_
 import raid_framer_desktop.composeapp.generated.resources.summary_top_crits
 import raid_framer_desktop.composeapp.generated.resources.summary_top_max_hit
 import raid_framer_desktop.composeapp.generated.resources.summary_top_average_hit
+import raid_framer_desktop.composeapp.generated.resources.summary_top_crit_heals
+import raid_framer_desktop.composeapp.generated.resources.summary_top_max_heal
+import raid_framer_desktop.composeapp.generated.resources.summary_top_average_heal
 import raid_framer_desktop.composeapp.generated.resources.summary_top_impales
 import raid_framer_desktop.composeapp.generated.resources.summary_top_protective_wings
 import raid_framer_desktop.composeapp.generated.resources.summary_top_courageous_action
@@ -467,10 +470,13 @@ val topManaBarrier: List<PlayerCard>,
 val coherenceRecordingMs: Long,
     val coherenceRecorderMs: Long,
     val coherenceHeaderLabel: String,
-    // Hit quality rankings
+    // Hit quality rankings — separated into damage (DPS) and healing
     val topCrits: List<PlayerCard>,
     val topMaxHits: List<PlayerCard>,
     val topAverageHits: List<PlayerCard>,
+    val topCritHeals: List<PlayerCard>,
+    val topMaxHeals: List<PlayerCard>,
+    val topAverageHeals: List<PlayerCard>,
     // Editable meta specs indicator (Stock / Custom), localized. Empty string hides the marker.
     val metaSpecsLabel: String = "",
     // New faction comparison data
@@ -657,6 +663,9 @@ val coherenceRecordingMs: Long,
       topCrits = PlayerCacheInteractor.topCrits.value.take(25),
       topMaxHits = PlayerCacheInteractor.topMaxHits.value.take(25),
       topAverageHits = PlayerCacheInteractor.topAverageHits.value.take(25),
+      topCritHeals = PlayerCacheInteractor.topCritHeals.value.take(25),
+      topMaxHeals = PlayerCacheInteractor.topMaxHeals.value.take(25),
+      topAverageHeals = PlayerCacheInteractor.topAverageHeals.value.take(25),
       // New faction comparison data
       factionTigerStrikeData   = PlayerCacheInteractor.factionTigerStrikeComparisonAll.value,
       factionFreezeData        = PlayerCacheInteractor.factionFreezeComparisonAll.value,
@@ -1728,13 +1737,13 @@ val coherenceRecordingMs: Long,
       )),
     )))
 
-    // Hit Quality: Crits, Max Hit, Average Hit
+    // Hit Quality (DPS): Crits, Max Hit, Average Hit
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_crits), "\uD83C\uDF1F", ColumnData.CardData(
         data.topCrits,
         { card ->
-          val totalCrits = card.sessionCritDamageCount + card.sessionCritHealCount
-          val totalEvents = card.sessionDamageEventCount + card.sessionHealEventCount
+          val totalCrits = card.sessionCritDamageCount
+          val totalEvents = card.sessionDamageEventCount
           val pct = if (totalEvents > 0) ((totalCrits * 100.0 / totalEvents)).toInt() else 0
           "$totalCrits (${pct}%)"
         },
@@ -1744,13 +1753,13 @@ val coherenceRecordingMs: Long,
       Triple(getString(Res.string.summary_top_max_hit), "\uD83D\uDCA5", ColumnData.CardData(
         data.topMaxHits,
         { card ->
-          val spell = if (card.sessionMaxHitSpell.isNotBlank()) {
-            val truncated = if (card.sessionMaxHitSpell.length > 20) {
-              card.sessionMaxHitSpell.take(17) + "..."
-            } else card.sessionMaxHitSpell
+          val spell = if (card.sessionMaxHitDamageSpell.isNotBlank()) {
+            val truncated = if (card.sessionMaxHitDamageSpell.length > 20) {
+              card.sessionMaxHitDamageSpell.take(17) + "..."
+            } else card.sessionMaxHitDamageSpell
             " ($truncated)"
           } else ""
-          "${card.sessionMaxHit.toLong().humanReadableAbbreviation()}$spell"
+          "${card.sessionMaxHitDamage.toLong().humanReadableAbbreviation()}$spell"
         },
         toAwtColor(RFColors.maxHitRed),
         showIcons = false
@@ -1758,8 +1767,48 @@ val coherenceRecordingMs: Long,
       Triple(getString(Res.string.summary_top_average_hit), "\uD83D\uDCC8", ColumnData.CardData(
         data.topAverageHits,
         { card ->
-          if (card.sessionTotalHitCount > 0) {
-            val avg = (card.sessionDamageTotal + card.sessionHealTotal) / card.sessionTotalHitCount
+          if (card.sessionDamageHitCount > 0) {
+            val avg = card.sessionDamageTotal / card.sessionDamageHitCount
+            avg.humanReadableAbbreviation()
+          } else "0"
+        },
+        toAwtColor(RFColors.averageHitTeal),
+        showIcons = false
+      )),
+    )))
+
+    // Hit Quality (Healing): Crit Heals, Max Heal, Average Heal — excludes self-casts
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_crit_heals), "\uD83C\uDF1F", ColumnData.CardData(
+        data.topCritHeals,
+        { card ->
+          val totalCrits = card.sessionCritHealCount
+          val totalEvents = card.sessionHealEventCount
+          val pct = if (totalEvents > 0) ((totalCrits * 100.0 / totalEvents)).toInt() else 0
+          "$totalCrits (${pct}%)"
+        },
+        toAwtColor(RFColors.critGold),
+        showIcons = false
+      )),
+      Triple(getString(Res.string.summary_top_max_heal), "\uD83D\uDCA5", ColumnData.CardData(
+        data.topMaxHeals,
+        { card ->
+          val spell = if (card.sessionMaxHitHealSpell.isNotBlank()) {
+            val truncated = if (card.sessionMaxHitHealSpell.length > 20) {
+              card.sessionMaxHitHealSpell.take(17) + "..."
+            } else card.sessionMaxHitHealSpell
+            " ($truncated)"
+          } else ""
+          "${card.sessionMaxHitHeal.toLong().humanReadableAbbreviation()}$spell"
+        },
+        toAwtColor(RFColors.maxHitRed),
+        showIcons = false
+      )),
+      Triple(getString(Res.string.summary_top_average_heal), "\uD83D\uDCC8", ColumnData.CardData(
+        data.topAverageHeals,
+        { card ->
+          if (card.sessionHealHitCount > 0) {
+            val avg = card.sessionHealTotal / card.sessionHealHitCount
             avg.humanReadableAbbreviation()
           } else "0"
         },

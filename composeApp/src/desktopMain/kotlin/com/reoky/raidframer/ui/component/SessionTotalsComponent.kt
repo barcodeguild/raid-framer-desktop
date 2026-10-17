@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.reoky.raidframer.core.database.PlayerCacheEntity
 import com.reoky.raidframer.core.database.PlayerSessionTotalsEntity
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
@@ -83,6 +84,9 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_sac_d
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crits
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_hit
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_hit
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crit_heals
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_heal
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_heal
 
 // View-model-agnostic shape so the totals card can render either the in-memory
 // session or an aggregated historical one without branching on the source.
@@ -143,10 +147,13 @@ data class SessionTotals(
   val absorbs: Long = 0L,
   val blockMitigated: Long = 0L,
   val parryMitigated: Long = 0L,
-  // Hit quality stats (10/11/26)
+  // Hit quality stats (10/11/26) — separated into damage and healing
   val crits: Int = 0,
   val maxHit: Int = 0,
-  val averageHit: Long = 0
+  val averageHit: Long = 0,
+  val critHeals: Int = 0,
+  val maxHeal: Int = 0,
+  val averageHeal: Long = 0
 ) {
   companion object {
     fun fromPlayerCard(card: PlayerCard) = SessionTotals(
@@ -205,10 +212,15 @@ data class SessionTotals(
         absorbs = card.sessionAbsorbTotal,
         blockMitigated = card.sessionBlockMitigated,
         parryMitigated = card.sessionParryMitigated,
-        crits = card.sessionCritDamageCount + card.sessionCritHealCount,
-        maxHit = card.sessionMaxHit,
-        averageHit = if (card.sessionTotalHitCount > 0) {
-          (card.sessionDamageTotal + card.sessionHealTotal) / card.sessionTotalHitCount
+        crits = card.sessionCritDamageCount,
+        maxHit = card.sessionMaxHitDamage,
+        averageHit = if (card.sessionDamageHitCount > 0) {
+          card.sessionDamageTotal / card.sessionDamageHitCount
+        } else 0L,
+        critHeals = card.sessionCritHealCount,
+        maxHeal = card.sessionMaxHitHeal,
+        averageHeal = if (card.sessionHealHitCount > 0) {
+          card.sessionHealTotal / card.sessionHealHitCount
         } else 0L
        )
 
@@ -268,11 +280,84 @@ data class SessionTotals(
         absorbs = entity.totalAbsorbs,
         blockMitigated = entity.totalBlockMitigated,
         parryMitigated = entity.totalParryMitigated,
-        crits = entity.totalCritDamageCount + entity.totalCritHealCount,
-        maxHit = entity.totalMaxHit,
-        averageHit = if (entity.totalHitCount > 0) {
-          (entity.totalDamage + entity.totalHealing) / entity.totalHitCount
+        crits = entity.totalCritDamageCount,
+        maxHit = entity.totalMaxHitDamage,
+        averageHit = if (entity.totalDamageHitCount > 0) {
+          entity.totalDamage / entity.totalDamageHitCount
+        } else 0L,
+        critHeals = entity.totalCritHealCount,
+        maxHeal = entity.totalMaxHitHeal,
+        averageHeal = if (entity.totalHealHitCount > 0) {
+          entity.totalHealing / entity.totalHealHitCount
         } else 0L
+    )
+
+    fun fromCache(cache: PlayerCacheEntity) = SessionTotals(
+      damage = cache.lifetimeCombat.lifetimeTotalDamage,
+      healing = cache.lifetimeCombat.lifetimeTotalHealing,
+      cc = cache.lifetimeCombat.lifetimeTotalCCDelivered.toInt(),
+      buffs = cache.lifetimeCombat.lifetimeTotalBuffsApplied.toInt(),
+      debuffs = cache.lifetimeCombat.lifetimeTotalDebuffsApplied.toInt(),
+      charms = cache.lifetimeCombat.lifetimeTotalCharms.toInt(),
+      distress = cache.lifetimeCombat.lifetimeTotalDistresses.toInt(),
+      silence = cache.lifetimeCombat.lifetimeTotalSilences.toInt(),
+      glider = cache.lifetimeCombat.lifetimeTotalGliderUses.toInt(),
+      items = cache.lifetimeCombat.lifetimeTotalItemSkillsUsed.toInt(),
+      potions = cache.lifetimeCombat.lifetimeTotalPotionUsages.toInt(),
+      kills = cache.lifetimeCombat.lifetimeTotalKills.toInt(),
+      killsKB = cache.lifetimeCombat.lifetimeTotalKillsKB.toInt(),
+      damageTaken = cache.lifetimeCombat.lifetimeTotalDamageTaken.toInt(),
+      healsReceived = cache.lifetimeCombat.lifetimeTotalHealsReceived.toInt(),
+      tigerStrikes = cache.lifetimeCombat.lifetimeTotalTigerStrikes.toInt(),
+      freezes = cache.lifetimeCombat.lifetimeTotalFreezes.toInt(),
+      trips = cache.lifetimeCombat.lifetimeTotalTrips.toInt(),
+      bubbles = cache.lifetimeCombat.lifetimeTotalBubbles.toInt(),
+      bracings = cache.lifetimeCombat.lifetimeTotalBracings.toInt(),
+      shieldStrip = cache.lifetimeCombat.lifetimeTotalShieldStrip.toInt(),
+      weaponDisables = cache.lifetimeCombat.lifetimeTotalWeaponDisables.toInt(),
+      potionDisables = cache.lifetimeCombat.lifetimeTotalPotionDisables.toInt(),
+      bdGlider = cache.lifetimeCombat.lifetimeTotalBdGlider.toInt(),
+      crystalWings = cache.lifetimeCombat.lifetimeTotalCrystalWings.toInt(),
+      gliderDisables = cache.lifetimeCombat.lifetimeTotalGliderDisables.toInt(),
+      provoked = cache.lifetimeCombat.lifetimeTotalProvoked.toInt(),
+      defiance = cache.lifetimeDebuffs.lifetimeTotalDefiance.toInt(),
+      gardenDefiance = cache.lifetimeDebuffs.lifetimeTotalGardenDefiance.toInt(),
+      purges = cache.lifetimeDebuffs.lifetimeTotalPurges.toInt(),
+      sacDances = cache.lifetimeDebuffs.lifetimeTotalSacDances.toInt(),
+      deepTranquility = cache.lifetimeDebuffs.lifetimeTotalDeepTranquility.toInt(),
+      deedendDebuff = cache.lifetimeDebuffs.lifetimeTotalDeependDebuff.toInt(),
+      throwDagger = cache.lifetimeDebuffs.lifetimeTotalThrowDagger.toInt(),
+      stuns = cache.lifetimeDebuffs.lifetimeTotalStuns.toInt(),
+      staggers = cache.lifetimeDebuffs.lifetimeTotalStaggers.toInt(),
+      petrification = cache.lifetimeDebuffs.lifetimeTotalPetrification.toInt(),
+      absorbLifeforce = cache.lifetimeDebuffs.lifetimeTotalAbsorbLifeforce.toInt(),
+      corrosiveBarrage = cache.lifetimeDebuffs.lifetimeTotalCorrosiveBarrage.toInt(),
+      blindedByCrows = cache.lifetimeDebuffs.lifetimeTotalBlindedByCrows.toInt(),
+      mistSunder = cache.lifetimeDebuffs.lifetimeTotalMistSunder.toInt(),
+      regularSunder = cache.lifetimeDebuffs.lifetimeTotalRegularSunder.toInt(),
+      impaleImmunity = cache.lifetimeDebuffs.lifetimeTotalImpaleImmunity.toInt(),
+      protectiveWings = cache.lifetimeDebuffs.lifetimeTotalProtectiveWings.toInt(),
+      courageousAction = cache.lifetimeDebuffs.lifetimeTotalCourageousAction.toInt(),
+      manaBarrier = cache.lifetimeDebuffs.lifetimeTotalManaBarrier.toInt(),
+      revive = cache.lifetimeDebuffs.lifetimeTotalRevive.toInt(),
+      blocks = cache.lifetimeAvoidance.lifetimeTotalBlocks.toInt(),
+      parries = cache.lifetimeAvoidance.lifetimeTotalParries.toInt(),
+      evades = cache.lifetimeAvoidance.lifetimeTotalEvades.toInt(),
+      immunes = cache.lifetimeAvoidance.lifetimeTotalImmunes.toInt(),
+      misses = cache.lifetimeAvoidance.lifetimeTotalMisses.toInt(),
+      absorbs = cache.lifetimeAvoidance.lifetimeTotalAbsorbs,
+      blockMitigated = cache.lifetimeAvoidance.lifetimeTotalBlockMitigated,
+      parryMitigated = cache.lifetimeAvoidance.lifetimeTotalParryMitigated,
+      crits = cache.lifetimeHitQuality.lifetimeTotalCritDamageCount.toInt(),
+      maxHit = cache.lifetimeHitQuality.lifetimeMaxHitDamage,
+      averageHit = if (cache.lifetimeHitQuality.lifetimeDamageHitCount > 0) {
+        cache.lifetimeHitQuality.lifetimeDamageTotalForAvg / cache.lifetimeHitQuality.lifetimeDamageHitCount
+      } else 0L,
+      critHeals = cache.lifetimeHitQuality.lifetimeTotalCritHealCount.toInt(),
+      maxHeal = cache.lifetimeHitQuality.lifetimeMaxHitHeal,
+      averageHeal = if (cache.lifetimeHitQuality.lifetimeHealHitCount > 0) {
+        cache.lifetimeHitQuality.lifetimeHealTotalForAvg / cache.lifetimeHitQuality.lifetimeHealHitCount
+      } else 0L
     )
   }
 }
@@ -353,6 +438,9 @@ private fun sessionStatEntries(totals: SessionTotals): List<Triple<org.jetbrains
   Triple(Res.string.player_card_stat_crits, totals.crits.toLong(), RFColors.critGold),
   Triple(Res.string.player_card_stat_max_hit, totals.maxHit.toLong(), RFColors.maxHitRed),
   Triple(Res.string.player_card_stat_average_hit, totals.averageHit, RFColors.averageHitTeal),
+  Triple(Res.string.player_card_stat_crit_heals, totals.critHeals.toLong(), RFColors.critGold),
+  Triple(Res.string.player_card_stat_max_heal, totals.maxHeal.toLong(), RFColors.maxHitRed),
+  Triple(Res.string.player_card_stat_average_heal, totals.averageHeal, RFColors.averageHitTeal),
   Triple(Res.string.player_card_stat_glider, totals.glider.toLong(), RFColors.gliderBlue),
   Triple(Res.string.player_card_stat_items, totals.items.toLong(), RFColors.itemSkillYellow),
   Triple(Res.string.player_card_stat_potions, totals.potions.toLong(), RFColors.potionTeal),
@@ -453,6 +541,9 @@ fun CompactSessionTotals(
     CompactStatRow(stringResource(Res.string.player_card_stat_crits), sessionTotals.crits.toLong(), RFColors.critGold)
     CompactStatRow(stringResource(Res.string.player_card_stat_max_hit), sessionTotals.maxHit.toLong(), RFColors.maxHitRed)
     CompactStatRow(stringResource(Res.string.player_card_stat_average_hit), sessionTotals.averageHit, RFColors.averageHitTeal)
+    CompactStatRow(stringResource(Res.string.player_card_stat_crit_heals), sessionTotals.critHeals.toLong(), RFColors.critGold)
+    CompactStatRow(stringResource(Res.string.player_card_stat_max_heal), sessionTotals.maxHeal.toLong(), RFColors.maxHitRed)
+    CompactStatRow(stringResource(Res.string.player_card_stat_average_heal), sessionTotals.averageHeal, RFColors.averageHitTeal)
     CompactStatRow(stringResource(Res.string.player_card_stat_glider), sessionTotals.glider.toLong(), RFColors.gliderBlue)
     CompactStatRow(stringResource(Res.string.player_card_stat_items), sessionTotals.items.toLong(), RFColors.itemSkillYellow)
     CompactStatRow(stringResource(Res.string.player_card_stat_potions), sessionTotals.potions.toLong(), RFColors.potionTeal)

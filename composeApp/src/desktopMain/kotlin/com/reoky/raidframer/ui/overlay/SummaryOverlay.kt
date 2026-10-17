@@ -169,7 +169,11 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dances
 import raid_framer_desktop.composeapp.generated.resources.summary_top_silences
 import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_coherence
-import raid_framer_desktop.composeapp.generated.resources.summary_tab_hit_quality
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_hit_quality_dps
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_hit_quality_healing
+import raid_framer_desktop.composeapp.generated.resources.summary_top_crit_heals
+import raid_framer_desktop.composeapp.generated.resources.summary_top_max_heal
+import raid_framer_desktop.composeapp.generated.resources.summary_top_average_heal
 import raid_framer_desktop.composeapp.generated.resources.summary_top_crits
 import raid_framer_desktop.composeapp.generated.resources.summary_top_max_hit
 import raid_framer_desktop.composeapp.generated.resources.summary_top_average_hit
@@ -300,6 +304,9 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val topCrits by PlayerCacheInteractor.topCrits.collectAsState()
   val topMaxHits by PlayerCacheInteractor.topMaxHits.collectAsState()
   val topAverageHits by PlayerCacheInteractor.topAverageHits.collectAsState()
+  val topCritHeals by PlayerCacheInteractor.topCritHeals.collectAsState()
+  val topMaxHeals by PlayerCacheInteractor.topMaxHeals.collectAsState()
+  val topAverageHeals by PlayerCacheInteractor.topAverageHeals.collectAsState()
 
   val humanReadableDateString = DateFormat.getDateInstance(DateFormat.SHORT).format(System.currentTimeMillis())
 
@@ -338,7 +345,8 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
     stringResource(Res.string.summary_tab_performance),
     stringResource(Res.string.summary_tab_loot),
     stringResource(Res.string.summary_tab_coherence),
-    stringResource(Res.string.summary_tab_hit_quality)
+    stringResource(Res.string.summary_tab_hit_quality_dps),
+    stringResource(Res.string.summary_tab_hit_quality_healing)
   )
 
   val scope = rememberCoroutineScope()
@@ -648,10 +656,16 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
           wm = wm
         )
 
-        26 -> HitQualityTab(
+        26 -> HitQualityDpsTab(
           topCrits = topCrits,
           topMaxHits = topMaxHits,
           topAverageHits = topAverageHits,
+          wm = wm
+        )
+        27 -> HitQualityHealingTab(
+          topCritHeals = topCritHeals,
+          topMaxHeals = topMaxHeals,
+          topAverageHeals = topAverageHeals,
           wm = wm
         )
       }
@@ -2245,7 +2259,7 @@ private fun CoherenceTab(
 }
 
 @Composable
-private fun HitQualityTab(
+private fun HitQualityDpsTab(
   topCrits: List<PlayerCard>,
   topMaxHits: List<PlayerCard>,
   topAverageHits: List<PlayerCard>,
@@ -2255,12 +2269,12 @@ private fun HitQualityTab(
     modifier = Modifier.fillMaxSize()
   ) {
     StatColumn(
-      icon = "\u2605",
+      icon = "\uD83C\uDF1F",
       title = stringResource(Res.string.summary_top_crits),
       cards = topCrits,
       valueExtractor = { card ->
-        val totalCrits = card.sessionCritDamageCount + card.sessionCritHealCount
-        val totalEvents = card.sessionDamageEventCount + card.sessionHealEventCount
+        val totalCrits = card.sessionCritDamageCount
+        val totalEvents = card.sessionDamageEventCount
         val pct = if (totalEvents > 0) ((totalCrits * 100.0 / totalEvents)).toInt() else 0
         "$totalCrits (${pct}%)"
       },
@@ -2271,17 +2285,17 @@ private fun HitQualityTab(
     }
 
     StatColumn(
-      icon = "\u26A1",
+      icon = "\uD83D\uDCA5",
       title = stringResource(Res.string.summary_top_max_hit),
       cards = topMaxHits,
       valueExtractor = { card ->
-        val spell = if (card.sessionMaxHitSpell.isNotBlank()) {
-          val truncated = if (card.sessionMaxHitSpell.length > 20) {
-            card.sessionMaxHitSpell.take(17) + "..."
-          } else card.sessionMaxHitSpell
+        val spell = if (card.sessionMaxHitDamageSpell.isNotBlank()) {
+          val truncated = if (card.sessionMaxHitDamageSpell.length > 20) {
+            card.sessionMaxHitDamageSpell.take(17) + "..."
+          } else card.sessionMaxHitDamageSpell
           " ($truncated)"
         } else ""
-        "${card.sessionMaxHit.toLong().humanReadableAbbreviation()}$spell"
+        "${card.sessionMaxHitDamage.toLong().humanReadableAbbreviation()}$spell"
       },
       valueColor = RFColors.maxHitRed,
       modifier = Modifier.weight(1f)
@@ -2290,12 +2304,75 @@ private fun HitQualityTab(
     }
 
     StatColumn(
-      icon = "\u223C",
+      icon = "\uD83D\uDCC8",
       title = stringResource(Res.string.summary_top_average_hit),
       cards = topAverageHits,
       valueExtractor = { card ->
-        if (card.sessionTotalHitCount > 0) {
-          val avg = (card.sessionDamageTotal + card.sessionHealTotal) / card.sessionTotalHitCount
+        if (card.sessionDamageHitCount > 0) {
+          val avg = card.sessionDamageTotal / card.sessionDamageHitCount
+          avg.humanReadableAbbreviation()
+        } else "0"
+      },
+      valueColor = RFColors.averageHitTeal,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+  }
+}
+
+@Composable
+private fun HitQualityHealingTab(
+  topCritHeals: List<PlayerCard>,
+  topMaxHeals: List<PlayerCard>,
+  topAverageHeals: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(
+    modifier = Modifier.fillMaxSize()
+  ) {
+    StatColumn(
+      icon = "\uD83C\uDF1F",
+      title = stringResource(Res.string.summary_top_crit_heals),
+      cards = topCritHeals,
+      valueExtractor = { card ->
+        val totalCrits = card.sessionCritHealCount
+        val totalEvents = card.sessionHealEventCount
+        val pct = if (totalEvents > 0) ((totalCrits * 100.0 / totalEvents)).toInt() else 0
+        "$totalCrits (${pct}%)"
+      },
+      valueColor = RFColors.critGold,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+
+    StatColumn(
+      icon = "\uD83D\uDCA5",
+      title = stringResource(Res.string.summary_top_max_heal),
+      cards = topMaxHeals,
+      valueExtractor = { card ->
+        val spell = if (card.sessionMaxHitHealSpell.isNotBlank()) {
+          val truncated = if (card.sessionMaxHitHealSpell.length > 20) {
+            card.sessionMaxHitHealSpell.take(17) + "..."
+          } else card.sessionMaxHitHealSpell
+          " ($truncated)"
+        } else ""
+        "${card.sessionMaxHitHeal.toLong().humanReadableAbbreviation()}$spell"
+      },
+      valueColor = RFColors.maxHitRed,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+
+    StatColumn(
+      icon = "\uD83D\uDCC8",
+      title = stringResource(Res.string.summary_top_average_heal),
+      cards = topAverageHeals,
+      valueExtractor = { card ->
+        if (card.sessionHealHitCount > 0) {
+          val avg = card.sessionHealTotal / card.sessionHealHitCount
           avg.humanReadableAbbreviation()
         } else "0"
       },

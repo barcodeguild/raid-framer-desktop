@@ -138,11 +138,11 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
   //if (event.source == event.target) return this // skip self-damage
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
 
-  // Hit quality stats: crit count, max hit, total hit count
+  // Hit quality stats: crit count, max hit (damage), total hit count (damage)
   val newCritCount = if (event.critical) this.sessionCritDamageCount + 1 else this.sessionCritDamageCount
-  val newMaxHit = maxOf(this.sessionMaxHit, event.damage)
-  val newMaxHitSpell = if (event.damage > this.sessionMaxHit) event.spell.ifBlank { "Unknown" } else this.sessionMaxHitSpell
-  val newTotalHitCount = this.sessionTotalHitCount + 1
+  val newMaxHitDamage = maxOf(this.sessionMaxHitDamage, event.damage)
+  val newMaxHitDamageSpell = if (event.damage > this.sessionMaxHitDamage) event.spell.ifBlank { "Unknown" } else this.sessionMaxHitDamageSpell
+  val newDamageHitCount = this.sessionDamageHitCount + 1
 
   return card.copy(
     lastEvent = event.timestamp,
@@ -155,10 +155,10 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
         lifetimeHitQuality = cache.lifetimeHitQuality.copy(
           lifetimeTotalCritDamageCount = cache.lifetimeHitQuality.lifetimeTotalCritDamageCount + if (event.critical) 1 else 0,
           lifetimeTotalDamageEventCount = cache.lifetimeHitQuality.lifetimeTotalDamageEventCount + 1,
-          lifetimeTotalMaxHit = if (event.damage > cache.lifetimeHitQuality.lifetimeTotalMaxHit) event.damage else cache.lifetimeHitQuality.lifetimeTotalMaxHit,
-          lifetimeTotalMaxHitSpell = if (event.damage > cache.lifetimeHitQuality.lifetimeTotalMaxHit) event.spell.ifBlank { "Unknown" } else cache.lifetimeHitQuality.lifetimeTotalMaxHitSpell,
-          lifetimeTotalHitCount = cache.lifetimeHitQuality.lifetimeTotalHitCount + 1,
-          lifetimeTotalDamageForAvg = cache.lifetimeHitQuality.lifetimeTotalDamageForAvg + event.damage
+          lifetimeMaxHitDamage = if (event.damage > cache.lifetimeHitQuality.lifetimeMaxHitDamage) event.damage else cache.lifetimeHitQuality.lifetimeMaxHitDamage,
+          lifetimeMaxHitDamageSpell = if (event.damage > cache.lifetimeHitQuality.lifetimeMaxHitDamage) event.spell.ifBlank { "Unknown" } else cache.lifetimeHitQuality.lifetimeMaxHitDamageSpell,
+          lifetimeDamageHitCount = cache.lifetimeHitQuality.lifetimeDamageHitCount + 1,
+          lifetimeDamageTotalForAvg = cache.lifetimeHitQuality.lifetimeDamageTotalForAvg + event.damage
         )
       )
     },
@@ -180,17 +180,19 @@ fun PlayerCard.postDamageEvent(event: DamageEvent): PlayerCard {
           .cappedBySpell(battleGraphSpellDepth, MAX_SPELLS_PER_TARGET)
       }
     } else this.sessionDamageToPlayerBySpell,
-    // Hit quality stats
+    // Hit quality stats (damage only)
     sessionCritDamageCount = newCritCount,
     sessionDamageEventCount = this.sessionDamageEventCount + 1,
-    sessionMaxHit = newMaxHit,
-    sessionMaxHitSpell = newMaxHitSpell,
-    sessionTotalHitCount = newTotalHitCount
+    sessionMaxHitDamage = newMaxHitDamage,
+    sessionMaxHitDamageSpell = newMaxHitDamageSpell,
+    sessionDamageHitCount = newDamageHitCount
   )
 }
 
 /**
  * Add a heal event to the PlayerCard, updating recent events and session totals.
+ * Healing hit quality stats exclude self-casts (potions, self-heals) — only counts
+ * spells cast on targets other than oneself.
  */
 fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   if (!PlayerCacheInteractor.isRealPlayer(event.target) && !RFConfig.state.value.allowPVEDamage) return this
@@ -198,11 +200,15 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
   val isOde = isOdeToRecovery(event.spell)
   val allowOdeAsHeal = RFConfig.state.value.allowOdeToRecoveryCountAsHeals
 
-  // Hit quality stats: crit count, max hit, total hit count
-  val newCritCount = if (event.critical) this.sessionCritHealCount + 1 else this.sessionCritHealCount
-  val newMaxHit = maxOf(this.sessionMaxHit, event.amount)
-  val newMaxHitSpell = if (event.amount > this.sessionMaxHit) event.spell.ifBlank { "Unknown" } else this.sessionMaxHitSpell
-  val newTotalHitCount = this.sessionTotalHitCount + 1
+  // Filter self-casts for healing hit quality stats — only count heals on other players
+  val isSelfCast = event.source == event.target
+  val countHealQuality = !isSelfCast
+
+  // Hit quality stats: crit count, max hit (heal), total hit count (heal) — excludes self-casts
+  val newCritCount = if (countHealQuality && event.critical) this.sessionCritHealCount + 1 else this.sessionCritHealCount
+  val newMaxHitHeal = if (countHealQuality) maxOf(this.sessionMaxHitHeal, event.amount) else this.sessionMaxHitHeal
+  val newMaxHitHealSpell = if (countHealQuality && event.amount > this.sessionMaxHitHeal) event.spell.ifBlank { "Unknown" } else this.sessionMaxHitHealSpell
+  val newHealHitCount = if (countHealQuality) this.sessionHealHitCount + 1 else this.sessionHealHitCount
 
   return this.copy(
     lastEvent = event.timestamp,
@@ -217,12 +223,12 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
           lifetimeTotalOdeHeals = if (isOde) c.lifetimeTotalOdeHeals + event.amount else c.lifetimeTotalOdeHeals
         ),
         lifetimeHitQuality = c.lifetimeHitQuality.copy(
-          lifetimeTotalCritHealCount = c.lifetimeHitQuality.lifetimeTotalCritHealCount + if (event.critical) 1 else 0,
-          lifetimeTotalHealEventCount = c.lifetimeHitQuality.lifetimeTotalHealEventCount + 1,
-          lifetimeTotalMaxHit = if (event.amount > c.lifetimeHitQuality.lifetimeTotalMaxHit) event.amount else c.lifetimeHitQuality.lifetimeTotalMaxHit,
-          lifetimeTotalMaxHitSpell = if (event.amount > c.lifetimeHitQuality.lifetimeTotalMaxHit) event.spell.ifBlank { "Unknown" } else c.lifetimeHitQuality.lifetimeTotalMaxHitSpell,
-          lifetimeTotalHitCount = c.lifetimeHitQuality.lifetimeTotalHitCount + 1,
-          lifetimeTotalDamageForAvg = c.lifetimeHitQuality.lifetimeTotalDamageForAvg + event.amount
+          lifetimeTotalCritHealCount = if (countHealQuality) c.lifetimeHitQuality.lifetimeTotalCritHealCount + if (event.critical) 1 else 0 else c.lifetimeHitQuality.lifetimeTotalCritHealCount,
+          lifetimeTotalHealEventCount = if (countHealQuality) c.lifetimeHitQuality.lifetimeTotalHealEventCount + 1 else c.lifetimeHitQuality.lifetimeTotalHealEventCount,
+          lifetimeMaxHitHeal = if (countHealQuality && event.amount > c.lifetimeHitQuality.lifetimeMaxHitHeal) event.amount else c.lifetimeHitQuality.lifetimeMaxHitHeal,
+          lifetimeMaxHitHealSpell = if (countHealQuality && event.amount > c.lifetimeHitQuality.lifetimeMaxHitHeal) event.spell.ifBlank { "Unknown" } else c.lifetimeHitQuality.lifetimeMaxHitHealSpell,
+          lifetimeHealHitCount = if (countHealQuality) c.lifetimeHitQuality.lifetimeHealHitCount + 1 else c.lifetimeHitQuality.lifetimeHealHitCount,
+          lifetimeHealTotalForAvg = if (countHealQuality) c.lifetimeHitQuality.lifetimeHealTotalForAvg + event.amount else c.lifetimeHitQuality.lifetimeHealTotalForAvg
         )
       )
     },
@@ -261,12 +267,12 @@ fun PlayerCard.postHealEvent(event: HealEvent): PlayerCard {
     sessionAbsorbTotal = if (CombatEventsHelper.isAbsorbShieldSkill(event.spell)) {
       this.sessionAbsorbTotal + event.amount.coerceAtLeast(0)
     } else this.sessionAbsorbTotal,
-    // Hit quality stats
+    // Hit quality stats (healing only, excludes self-casts)
     sessionCritHealCount = newCritCount,
-    sessionHealEventCount = this.sessionHealEventCount + 1,
-    sessionMaxHit = newMaxHit,
-    sessionMaxHitSpell = newMaxHitSpell,
-    sessionTotalHitCount = newTotalHitCount
+    sessionHealEventCount = if (countHealQuality) this.sessionHealEventCount + 1 else this.sessionHealEventCount,
+    sessionMaxHitHeal = newMaxHitHeal,
+    sessionMaxHitHealSpell = newMaxHitHealSpell,
+    sessionHealHitCount = newHealHitCount
   )
 }
 

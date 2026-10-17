@@ -212,13 +212,18 @@ data class PlayerCard(
   val lifeMendAverage: Int = 0,                            // computed from amounts
   val lifeMendQuality: LifeMendQuality = LifeMendQuality.NONE,
 
-  // Hit quality stats (10/11/26) — critical hits, max hit, average hit
+  // Hit quality stats (10/11/26) — separated into damage (DPS) and healing categories
   val sessionCritDamageCount: Int = 0,       // critical damage hits
-  val sessionCritHealCount: Int = 0,         // critical heal hits
+  val sessionCritHealCount: Int = 0,         // critical heal hits (excludes self-casts)
   val sessionDamageEventCount: Int = 0,      // total damage events (for crit % calc)
-  val sessionHealEventCount: Int = 0,        // total heal events (for crit % calc)
-  val sessionMaxHit: Int = 0,                // max single damage/heal amount
-  val sessionMaxHitSpell: String = "",       // spell name that produced the max hit
-  val sessionTotalHitCount: Int = 0,         // total damage+heal events (for average hit)
+  val sessionHealEventCount: Int = 0,        // total heal events on others (for crit % calc, excludes self-casts)
+  // Damage (DPS) hit quality
+  val sessionMaxHitDamage: Int = 0,          // max single damage amount
+  val sessionMaxHitDamageSpell: String = "", // spell name that produced the max damage hit
+  val sessionDamageHitCount: Int = 0,        // total damage events (for average damage)
+  // Healing hit quality (excludes self-casts)
+  val sessionMaxHitHeal: Int = 0,            // max single heal amount on others
+  val sessionMaxHitHealSpell: String = "",   // spell name that produced the max heal on others
+  val sessionHealHitCount: Int = 0,          // total heal events on others (for average heal)
 )
 

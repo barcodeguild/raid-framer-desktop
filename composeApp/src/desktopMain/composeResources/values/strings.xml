@@ -433,10 +433,14 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_tab_coherence">Coherence</string>
     <string name="summary_top_coherence_render">Coherence (Render &lt;120m)</string>
     <string name="summary_top_coherence_raid">Coherence (Raid &lt;60m)</string>
-    <string name="summary_tab_hit_quality">Hit Quality</string>
+    <string name="summary_tab_hit_quality_dps">Hit Quality (DPS)</string>
+    <string name="summary_tab_hit_quality_healing">Hit Quality (Healing)</string>
     <string name="summary_top_crits">Top Crits</string>
     <string name="summary_top_max_hit">Max Hit</string>
     <string name="summary_top_average_hit">Average Hit</string>
+    <string name="summary_top_crit_heals">Top Crit Heals</string>
+    <string name="summary_top_max_heal">Max Heal</string>
+    <string name="summary_top_average_heal">Average Heal</string>
     <string name="summary_top_coherence_clump">Coherence (Clump &lt;15m)</string>
     <string name="coherence_help_title">Coherence</string>
     <string name="coherence_help_body">Coherence measures how long each raid member spends within range of the recorder (you). A raid that stays clustered together is more effective at fighting; when players are all over the place the raid struggles to win.
@@ -503,6 +507,9 @@ To reduce bias, the recorder must try to stay in range of the raid at all times.
     <string name="player_card_stat_crits">Crits</string>
     <string name="player_card_stat_max_hit">Max Hit</string>
     <string name="player_card_stat_average_hit">Average Hit</string>
+    <string name="player_card_stat_crit_heals">Crit Heals</string>
+    <string name="player_card_stat_max_heal">Max Heal</string>
+    <string name="player_card_stat_average_heal">Average Heal</string>
     <string name="player_card_stat_ode_heals">Ode Heals</string>
     <string name="player_card_stat_damage_blocked">Damage Blocked</string>
     <string name="player_card_stat_damage_parried">Damage Parried</string>

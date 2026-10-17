@@ -90,6 +90,7 @@ fun initialize(): AppDatabase {
     .addMigrations(MIGRATION_49_50) // 10/07/26 added exportHidePirateWhenUnranked to config
     .addMigrations(MIGRATION_50_51) // 10/11/26 added hit quality session totals (crits, max hit, average hit)
     .addMigrations(MIGRATION_51_52) // 10/11/26 added hit quality lifetime totals to player_cache
+    .addMigrations(MIGRATION_52_53) // 10/13/26 separated hit quality into damage and healing categories
     .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
     .fallbackToDestructiveMigrationOnDowngrade(true)

@@ -72,6 +72,18 @@ Please give honest and constructive feedback on the project. This app has taken 
   - Raid Framer uses a significant amount of memory. It's a Java APP with a GUI under-the-hood. If you know ArcheRage, combat.log files can get rather huge.. often 100MB+.. and that's data kept in-memory between fights. It is recommended to have at least 16GB of RAM (in total) with a high FSB/Memory clock for best performance and enough storage to save logs that on average (after a 100v100 fight will be about 100-200MB per 30 minutes) It's mostly CPU and in-memory transformations on data, and not so much graphical rendering besides the transparency, graphs and the charts (that use recycler-pattern/lazy list view rendering)
   - Why not constantly write-out data to the disk that you don't need to keep in memory, you might ask? There's definitely improvements to be made in this area friends. We could potentially do more in the way of memory offload in the future. However, this app PREFERS using RAM over DISK IO in general. In-memory transforms are fast. Some friends hard-drives are much slower. Too many disk read/writes are likely to produce lag spikes (and this happened while I was testing) as compared to working with that same data in-memory. IE if we copy 100MB to the disk during a PvP that would likely cause a lag spike. No design is final friends. Send ideas.
 
+### Troubleshooting
+
+**Gradle build fails with `KotlinCoroutineJvmDebugArgumentsProvider`**
+
+If you see an error like `Could not load the value of field jvmArgumentProviders` when running the app from IntelliJ IDEA, it's caused by the Kotlin coroutine debugging agent. Disable it in your IDE:
+
+1. Open **Settings** → **Build, Execution, Deployment** → **Debugger**
+2. Under the Kotlin section, **uncheck** "Attach coroutine agent"
+3. Apply and retry your run
+
+Alternatively, run via Gradle instead of the IDE gutter run icon: `./gradlew :composeApp:desktopRun`
+
 # Building The Code
 This is a Kotlin Multiplatform project that targets Windows. It's been tested on Windows 11. It's also worked for at least one person on Windows 10. This code uses the Jetpack Compose framework for the UI. (Similar to a modern Android APP) The Lua companion does not need to be compiled or built. It's a set of scripts that gets copied to the game folder and optionally loaded by the game process. (Be sure to enable it in the character select wrench menu!) The Lua files are copied to the game folder after the first launch of Raid Framer automatically. So, you close game, install RF 2.0, open RF to finalize installation, then open the game. From them on you can open the game before or after launching RF, as the lua addon was already copied over.
   - Some people prefer to build the code themselves, so they can improve the code / see how it works / design their own addons. I tried to make this as easy as I could by providing Gradle build scripts.

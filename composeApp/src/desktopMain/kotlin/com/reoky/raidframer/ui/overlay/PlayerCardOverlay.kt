@@ -71,7 +71,6 @@ import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.SessionStatRows
 import com.reoky.raidframer.ui.component.SessionTotals
-import com.reoky.raidframer.ui.component.StatRow
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.PocketCaptureMenu
 import com.reoky.raidframer.ui.component.PocketEntryThumbnail
@@ -202,6 +201,9 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_absor
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crits
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_hit
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_hit
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crit_heals
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_heal
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_heal
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_blocked
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_damage_parried
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_defiance
@@ -784,67 +786,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               ) {
                 val cache = card.cache
                 if (cache != null) {
-                  StatRow(stringResource(Res.string.player_card_stat_damage), cache.lifetimeTotalDamage, RFColors.dpsOrange)
-                  StatRow(stringResource(Res.string.player_card_stat_healing), cache.lifetimeTotalHealing, RFColors.healsGreen)
-                  StatRow(stringResource(Res.string.player_card_stat_cc), cache.lifetimeTotalCCDelivered, RFColors.ccCyan)
-                  StatRow(stringResource(Res.string.player_card_stat_buffs), cache.lifetimeTotalBuffsApplied, RFColors.itemSkillYellow)
-                  StatRow(stringResource(Res.string.player_card_stat_debuffs), cache.lifetimeTotalDebuffsApplied, Color(0xFFAB47BC))
-                  StatRow(stringResource(Res.string.player_card_stat_charms), cache.lifetimeTotalCharms, RFColors.charmPink)
-                  StatRow(stringResource(Res.string.player_card_stat_distress), cache.lifetimeTotalDistresses, RFColors.distressPurple)
-                  StatRow(stringResource(Res.string.player_card_stat_silence), cache.lifetimeTotalSilences, RFColors.silencePurple)
-                  StatRow(stringResource(Res.string.player_card_stat_tiger_strikes), cache.lifetimeTotalTigerStrikes, RFColors.techNoTigerStrikes)
-                  StatRow(stringResource(Res.string.player_card_stat_freezes), cache.lifetimeTotalFreezes, RFColors.freezeIceBlue)
-                  StatRow(stringResource(Res.string.player_card_stat_trips), cache.lifetimeTotalTrips, RFColors.tripsAmber)
-                  StatRow(stringResource(Res.string.player_card_stat_bubbles), cache.lifetimeTotalBubbles, RFColors.bubblesCyan)
-                  StatRow(stringResource(Res.string.player_card_stat_bracings), cache.lifetimeTotalBracings, RFColors.bracingsGreen)
-                  StatRow(stringResource(Res.string.player_card_stat_shield_strip), cache.lifetimeTotalShieldStrip, RFColors.shieldStripOrange)
-                  StatRow(stringResource(Res.string.player_card_stat_weapon_disables), cache.lifetimeTotalWeaponDisables, RFColors.weaponDisablesRed)
-                  StatRow(stringResource(Res.string.player_card_stat_potion_disables), cache.lifetimeTotalPotionDisables, RFColors.potionDisablesPurple)
-                  StatRow(stringResource(Res.string.player_card_stat_bd_glider), cache.lifetimeTotalBdGlider, RFColors.bdGliderTeal)
-                  StatRow(stringResource(Res.string.player_card_stat_crystal_wings), cache.lifetimeTotalCrystalWings, RFColors.crystalWingsBlue)
-                  StatRow(stringResource(Res.string.player_card_stat_glider_disables), cache.lifetimeTotalGliderDisables, RFColors.gliderDisablesPink)
-                  StatRow(stringResource(Res.string.player_card_stat_provoked), cache.lifetimeTotalProvoked, RFColors.provokesDeepPurple)
-                  StatRow(stringResource(Res.string.player_card_stat_defiance), cache.lifetimeTotalDefiance, RFColors.defianceGold)
-                  StatRow(stringResource(Res.string.player_card_stat_garden_defiance), cache.lifetimeTotalGardenDefiance, RFColors.gardenDefianceBlue)
-                  StatRow(stringResource(Res.string.player_card_stat_purges), cache.lifetimeTotalPurges, RFColors.purgeGreen)
-                  StatRow(stringResource(Res.string.player_card_stat_sac_dances), cache.lifetimeTotalSacDances, RFColors.sacDancePurple)
-                  StatRow(stringResource(Res.string.player_card_stat_deep_tranquility), cache.lifetimeTotalDeepTranquility, RFColors.deepTranquilityTeal)
-                  StatRow(stringResource(Res.string.player_card_stat_deepend_debuff), cache.lifetimeTotalDeependDebuff, RFColors.deedendDebuffRed)
-                  StatRow(stringResource(Res.string.player_card_stat_throw_dagger), cache.lifetimeTotalThrowDagger, RFColors.throwDaggerAmber)
-                  StatRow(stringResource(Res.string.player_card_stat_stuns), cache.lifetimeTotalStuns, RFColors.stunDeepRed)
-                  StatRow(stringResource(Res.string.player_card_stat_staggers), cache.lifetimeTotalStaggers, RFColors.staggerBrown)
-                  StatRow(stringResource(Res.string.player_card_stat_petrification), cache.lifetimeTotalPetrification, RFColors.petrificationGray)
-                  StatRow(stringResource(Res.string.player_card_stat_absorb_lifeforce), cache.lifetimeTotalAbsorbLifeforce, RFColors.absorbLifeforceMagenta)
-                  StatRow(stringResource(Res.string.player_card_stat_corrosive_barrage), cache.lifetimeTotalCorrosiveBarrage, RFColors.corrosiveBarrageLime)
-                  StatRow(stringResource(Res.string.player_card_stat_blinded_by_crows), cache.lifetimeTotalBlindedByCrows, RFColors.blindedByCrowsDark)
-                  StatRow(stringResource(Res.string.player_card_stat_mist_sunder), cache.lifetimeTotalMistSunder, RFColors.mistSunderCyan)
-                  StatRow(stringResource(Res.string.player_card_stat_regular_sunder), cache.lifetimeTotalRegularSunder, RFColors.regularSunderOrange)
-                  StatRow(stringResource(Res.string.player_card_stat_impales), cache.lifetimeTotalImpaleImmunity, RFColors.impaleImmunitySteel)
-                  StatRow(stringResource(Res.string.player_card_stat_protective_wings), cache.lifetimeTotalProtectiveWings, RFColors.protectiveWingsGold)
-                  StatRow(stringResource(Res.string.player_card_stat_courageous_action), cache.lifetimeTotalCourageousAction, RFColors.courageousActionBright)
-                  StatRow(stringResource(Res.string.player_card_stat_mana_barrier), cache.lifetimeTotalManaBarrier, RFColors.manaBarrierBlue)
-                  StatRow(stringResource(Res.string.player_card_stat_revive), cache.lifetimeTotalRevive, RFColors.reviveGhostWhite)
-                  StatRow(stringResource(Res.string.player_card_stat_blocks), cache.lifetimeTotalBlocks, RFColors.avoidanceBlockBlue)
-                  StatRow(stringResource(Res.string.player_card_stat_damage_blocked), cache.lifetimeTotalBlockMitigated, RFColors.avoidanceBlockBlue)
-                  StatRow(stringResource(Res.string.player_card_stat_parries), cache.lifetimeTotalParries, RFColors.avoidanceParryAmber)
-                  StatRow(stringResource(Res.string.player_card_stat_damage_parried), cache.lifetimeTotalParryMitigated, RFColors.avoidanceParryAmber)
-                  StatRow(stringResource(Res.string.player_card_stat_evades), cache.lifetimeTotalEvades, RFColors.avoidanceEvadeGreen)
-                  StatRow(stringResource(Res.string.player_card_stat_immunes), cache.lifetimeTotalImmunes, RFColors.avoidanceImmunePurple)
-                  StatRow(stringResource(Res.string.player_card_stat_misses), cache.lifetimeTotalMisses, RFColors.avoidanceMissGray)
-                  StatRow(stringResource(Res.string.player_card_stat_absorbs), cache.lifetimeTotalAbsorbs, RFColors.avoidanceAbsorbCyan)
-                  StatRow(stringResource(Res.string.player_card_stat_crits), cache.lifetimeHitQuality.lifetimeTotalCritDamageCount + cache.lifetimeHitQuality.lifetimeTotalCritHealCount, RFColors.critGold)
-                  StatRow(stringResource(Res.string.player_card_stat_max_hit), cache.lifetimeHitQuality.lifetimeTotalMaxHit.toLong(), RFColors.maxHitRed)
-                  if (cache.lifetimeHitQuality.lifetimeTotalHitCount > 0) {
-                    val avgHit = cache.lifetimeHitQuality.lifetimeTotalDamageForAvg / cache.lifetimeHitQuality.lifetimeTotalHitCount
-                    StatRow(stringResource(Res.string.player_card_stat_average_hit), avgHit, RFColors.averageHitTeal)
-                  }
-                  StatRow(stringResource(Res.string.player_card_stat_glider), cache.lifetimeTotalGliderUses, RFColors.gliderBlue)
-                  StatRow(stringResource(Res.string.player_card_stat_items), cache.lifetimeTotalItemSkillsUsed, RFColors.itemSkillYellow)
-                  StatRow(stringResource(Res.string.player_card_stat_potions), cache.lifetimeTotalPotionUsages, RFColors.potionTeal)
-                  StatRow(stringResource(Res.string.player_card_stat_kills_most_damage), cache.lifetimeTotalKills, RFColors.dpsOrange)
-                  StatRow(stringResource(Res.string.player_card_stat_kills_killing_blow), cache.lifetimeTotalKillsKB, RFColors.killsHaranyaGreen)
-                  StatRow(stringResource(Res.string.player_card_stat_total_damage_taken), cache.lifetimeTotalDamageTaken, Color(0xFFEF5350))
-                  StatRow(stringResource(Res.string.player_card_stat_total_heals_received), cache.lifetimeTotalHealsReceived, RFColors.healsGreen)
+                  SessionStatRows(SessionTotals.fromCache(cache))
                 } else {
                   Text(stringResource(Res.string.player_card_no_cached_data), color = RFColors.TextDisabled, fontSize = 13.sp)
                 }

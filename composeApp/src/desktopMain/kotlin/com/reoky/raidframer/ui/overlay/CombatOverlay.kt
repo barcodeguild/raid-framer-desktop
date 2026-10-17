@@ -808,12 +808,19 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                           CombatRankingCategory.ABSORBS -> card.sessionAbsorbTotal.humanReadableAbbreviation()
                           CombatRankingCategory.DAMAGE_BLOCKED -> card.sessionBlockMitigated.humanReadableAbbreviation()
                           CombatRankingCategory.DAMAGE_PARRIED -> card.sessionParryMitigated.humanReadableAbbreviation()
-                          CombatRankingCategory.CRITS -> "${card.sessionCritDamageCount + card.sessionCritHealCount}"
-                          CombatRankingCategory.MAX_HIT -> card.sessionMaxHit.toString()
+                          CombatRankingCategory.CRITS -> "${card.sessionCritDamageCount}"
+                          CombatRankingCategory.MAX_HIT -> card.sessionMaxHitDamage.toString()
                           CombatRankingCategory.AVERAGE_HIT -> {
-                            val totalEvents = card.sessionDamageEventCount + card.sessionHealEventCount
-                            if (totalEvents > 0) {
-                              val avg = (card.sessionDamageTotal + card.sessionHealTotal) / totalEvents
+                            if (card.sessionDamageHitCount > 0) {
+                              val avg = card.sessionDamageTotal / card.sessionDamageHitCount
+                              avg.toString()
+                            } else "0"
+                          }
+                          CombatRankingCategory.CRIT_HEALS -> "${card.sessionCritHealCount}"
+                          CombatRankingCategory.MAX_HEAL -> card.sessionMaxHitHeal.toString()
+                          CombatRankingCategory.AVERAGE_HEAL -> {
+                            if (card.sessionHealHitCount > 0) {
+                              val avg = card.sessionHealTotal / card.sessionHealHitCount
                               avg.toString()
                             } else "0"
                           }
