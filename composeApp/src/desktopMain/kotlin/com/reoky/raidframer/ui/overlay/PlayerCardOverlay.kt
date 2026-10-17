@@ -402,159 +402,172 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
             // Spacer(modifier = Modifier.height(8.dp))
 
-            // Recent Damage, Heals, Debuffs
-            Row(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .clip(WellShape)
-                .background(WellColor)
-                .border(1.dp, WellBorder, WellShape)
-                .padding(12.dp)
-                .heightIn(min = 100.dp, max = 300.dp)
+            var recentEventsExpanded by remember { mutableStateOf(false) }
+
+            // Recent Damage, Heals, Debuffs, Buffs, Item Uses, and Recent KD
+            CollapsibleSection(
+              title = "Recent Events",
+              expanded = recentEventsExpanded,
+              onExpandedChange = { recentEventsExpanded = it },
+              accentColor = RFColors.AccentRed
             ) {
-              // Damage
-              SortableEventListColumn(
-                title = stringResource(Res.string.player_card_recent_damage),
-                items = card.recentDamageEvents.sortedByDescending { it.timestamp }.take(500),
-                defaultSortDescending = true,
-                modifier = Modifier.weight(1f)
-              ) { evt ->
-                RowItemWithTime(evt.timestamp) {
-                  append(buildAnnotatedString {
-                    withStyle(SpanStyle(color = Color(0xFF4FC3F7))) { append(evt.spell) }
-                    append(" ")
-                    withStyle(SpanStyle(color = Color(0xFF29B6F6), fontSize = 10.sp)) { append("(${evt.spellId})") }
-                    append(" -> ")
-                    withStyle(SpanStyle(color = Color(0xFFEF5350))) { append(evt.target) }
-                    append(": ")
-                    withStyle(SpanStyle(color = RFColors.TextPrimary, fontWeight = FontWeight.SemiBold)) { append(evt.damage.toString()) }
-                    if (evt.absorbedAmount > 0) {
-                      withStyle(SpanStyle(color = Color(0xFF81D4FA))) { append(" (${evt.absorbedAmount} absorbed)") }
-                    }
-                  })
+              // Row 1: Damage + Heals
+              Row(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(12.dp)
+                  .heightIn(min = 100.dp, max = 300.dp)
+              ) {
+                // Damage
+                SortableEventListColumn(
+                  title = stringResource(Res.string.player_card_recent_damage),
+                  items = card.recentDamageEvents.sortedByDescending { it.timestamp }.take(500),
+                  defaultSortDescending = true,
+                  modifier = Modifier.weight(1f)
+                ) { evt ->
+                  RowItemWithTime(evt.timestamp) {
+                    append(buildAnnotatedString {
+                      withStyle(SpanStyle(color = Color(0xFF4FC3F7))) { append(evt.spell) }
+                      append(" ")
+                      withStyle(SpanStyle(color = Color(0xFF29B6F6), fontSize = 10.sp)) { append("(${evt.spellId})") }
+                      append(" -> ")
+                      withStyle(SpanStyle(color = Color(0xFFEF5350))) { append(evt.target) }
+                      append(": ")
+                      withStyle(SpanStyle(color = RFColors.TextPrimary, fontWeight = FontWeight.SemiBold)) { append(evt.damage.toString()) }
+                      if (evt.absorbedAmount > 0) {
+                        withStyle(SpanStyle(color = Color(0xFF81D4FA))) { append(" (${evt.absorbedAmount} absorbed)") }
+                      }
+                    })
+                  }
+                }
+
+                // Heals
+                SortableEventListColumn(
+                  title = stringResource(Res.string.player_card_recent_heals),
+                  items = card.recentHealEvents.sortedByDescending { it.timestamp }.take(500),
+                  defaultSortDescending = true,
+                  modifier = Modifier.weight(1f)
+                ) { evt ->
+                  RowItemWithTime(evt.timestamp) {
+                    append(buildAnnotatedString {
+                      withStyle(SpanStyle(color = Color(0xFF66BB6A))) { append(evt.spell) }
+                      append(" ")
+                      withStyle(SpanStyle(color = Color(0xFF43A047), fontSize = 10.sp)) { append("(${evt.spellId})") }
+                      append(" -> ")
+                      withStyle(SpanStyle(color = Color(0xFFA5D6A7))) { append(evt.target) }
+                      append(": ")
+                      withStyle(SpanStyle(color = RFColors.TextPrimary, fontWeight = FontWeight.SemiBold)) { append(evt.amount.toString()) }
+                      if (CombatEventsHelper.isAbsorbShieldSkill(evt.spell)) {
+                        withStyle(SpanStyle(color = Color(0xFF81D4FA))) { append(" (absorb)") }
+                      }
+                    })
+                  }
                 }
               }
 
-              // Heals
-              SortableEventListColumn(
-                title = stringResource(Res.string.player_card_recent_heals),
-                items = card.recentHealEvents.sortedByDescending { it.timestamp }.take(500),
-                defaultSortDescending = true,
-                modifier = Modifier.weight(1f)
-              ) { evt ->
-                RowItemWithTime(evt.timestamp) {
-                  append(buildAnnotatedString {
-                    withStyle(SpanStyle(color = Color(0xFF66BB6A))) { append(evt.spell) }
-                    append(" ")
-                    withStyle(SpanStyle(color = Color(0xFF43A047), fontSize = 10.sp)) { append("(${evt.spellId})") }
-                    append(" -> ")
-                    withStyle(SpanStyle(color = Color(0xFFA5D6A7))) { append(evt.target) }
-                    append(": ")
-                    withStyle(SpanStyle(color = RFColors.TextPrimary, fontWeight = FontWeight.SemiBold)) { append(evt.amount.toString()) }
-                    if (CombatEventsHelper.isAbsorbShieldSkill(evt.spell)) {
-                      withStyle(SpanStyle(color = Color(0xFF81D4FA))) { append(" (absorb)") }
-                    }
-                  })
+              Spacer(modifier = Modifier.height(12.dp))
+
+              // Row 2: Buffs + Debuffs
+              Row(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(12.dp)
+                  .heightIn(min = 100.dp, max = 300.dp)
+              ) {
+                // Buffs
+                SortableEventListColumn(
+                  title = stringResource(Res.string.player_card_recent_buffs),
+                  items = card.recentBuffAppliedEvents.sortedByDescending { it.timestamp }.take(500),
+                  defaultSortDescending = true,
+                  modifier = Modifier.weight(1f)
+                ) { evt ->
+                  RowItemWithTime(evt.timestamp) {
+                    append(buildAnnotatedString {
+                      withStyle(SpanStyle(color = Color(0xFFFFCA28))) { append(evt.buff) }
+                      append(" ")
+                      withStyle(SpanStyle(color = Color(0xFFFFA000), fontSize = 10.sp)) { append("(${evt.buffId})") }
+                      append(" -> ")
+                      withStyle(SpanStyle(color = RFColors.TextPrimary)) { append(evt.target) }
+                    })
+                  }
+                }
+
+                // Debuffs
+                SortableEventListColumn(
+                  title = stringResource(Res.string.player_card_recent_debuffs),
+                  items = card.recentDebuffAppliedEvents.sortedByDescending { it.timestamp }.take(500),
+                  defaultSortDescending = true,
+                  modifier = Modifier.weight(1f)
+                ) { evt ->
+                  RowItemWithTime(evt.timestamp) {
+                    append(buildAnnotatedString {
+                      withStyle(SpanStyle(color = Color(0xFFAB47BC))) { append(evt.debuff) }
+                      append(" ")
+                      withStyle(SpanStyle(color = Color(0xFF8E24AA), fontSize = 10.sp)) { append("(${evt.debuffId})") }
+                      append(" -> ")
+                      withStyle(SpanStyle(color = RFColors.TextPrimary)) { append(evt.target) }
+                    })
+                  }
                 }
               }
 
-              // Debuffs
-              SortableEventListColumn(
-                title = stringResource(Res.string.player_card_recent_debuffs),
-                items = card.recentDebuffAppliedEvents.sortedByDescending { it.timestamp }.take(500),
-                defaultSortDescending = true,
-                modifier = Modifier.weight(1f)
-              ) { evt ->
-                RowItemWithTime(evt.timestamp) {
-                  append(buildAnnotatedString {
-                    withStyle(SpanStyle(color = Color(0xFFAB47BC))) { append(evt.debuff) }
-                    append(" ")
-                    withStyle(SpanStyle(color = Color(0xFF8E24AA), fontSize = 10.sp)) { append("(${evt.debuffId})") }
-                    append(" -> ")
-                    withStyle(SpanStyle(color = RFColors.TextPrimary)) { append(evt.target) }
-                  })
-                }
-              }
-            }
+              Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.height(12.dp))
+              // Row 3: Item Uses + K/D
+              Row(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(12.dp)
+                  .heightIn(min = 100.dp, max = 300.dp)
+              ) {
+                // Item Uses
+                val skillsSorted: List<Pair<Long, String>> = card.recentSkillItemUsages
+                  .sortedByDescending { it.first }
+                  .take(50)
+                  .map { triple ->
+                    triple.first to "${stringResource(triple.second)} -> ${triple.third}"
+                  }
 
-            // Buffs, Items, K/D
-            Row(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .clip(WellShape)
-                .background(WellColor)
-                .border(1.dp, WellBorder, WellShape)
-                .padding(12.dp)
-                .heightIn(min = 100.dp, max = 300.dp)
-            ) {
-              SortableEventListColumn(
-                title = stringResource(Res.string.player_card_recent_buffs),
-                items = card.recentBuffAppliedEvents.sortedByDescending { it.timestamp }.take(500),
-                defaultSortDescending = true,
-                modifier = Modifier.weight(1f)
-              ) { evt ->
-                RowItemWithTime(evt.timestamp) {
-                  append(buildAnnotatedString {
-                    withStyle(SpanStyle(color = Color(0xFFFFCA28))) { append(evt.buff) }
-                    append(" ")
-                    withStyle(SpanStyle(color = Color(0xFFFFA000), fontSize = 10.sp)) { append("(${evt.buffId})") }
-                    append(" -> ")
-                    withStyle(SpanStyle(color = RFColors.TextPrimary)) { append(evt.target) }
-                  })
-                }
-              }
-
-              // Item Uses
-              val skillsSorted: List<Pair<Long, String>> = card.recentSkillItemUsages
-                .sortedByDescending { it.first }
-                .take(50)
-                .map { triple ->
-                  triple.first to "${stringResource(triple.second)} -> ${triple.third}"
+                SortableEventListColumn(
+                  title = stringResource(Res.string.player_card_recent_item_uses),
+                  items = skillsSorted,
+                  defaultSortDescending = true,
+                  modifier = Modifier.weight(1f)
+                ) { item ->
+                  RowItemWithTime(item.first) {
+                    append(buildAnnotatedString {
+                      withStyle(SpanStyle(color = Color(0xFF29B6F6))) { append(item.second) }
+                    })
+                  }
                 }
 
-              SortableEventListColumn(
-                title = stringResource(Res.string.player_card_recent_item_uses),
-                items = skillsSorted,
-                defaultSortDescending = true,
-                modifier = Modifier.weight(1f)
-              ) { item ->
-                RowItemWithTime(item.first) {
-                  append(buildAnnotatedString {
-                    withStyle(SpanStyle(color = Color(0xFF29B6F6))) { append(item.second) }
-                  })
+                // K/D
+                val kills: List<Triple<Long, String, String>> = card.recentKills.map {
+                  Triple(it.key, "Killed", it.value)
                 }
-              }
+                val deaths: List<Triple<Long, String, String>> = card.recentKilledBys.map {
+                  Triple(it.key, "Killed By", it.value)
+                }
 
-              // K/D
-              val kills: List<Triple<Long, String, String>> = card.recentKills.map {
-                Triple(it.key, "Killed", it.value)
-              }
-              val deaths: List<Triple<Long, String, String>> = card.recentKilledBys.map {
-                Triple(it.key, "Killed By", it.value)
-              }
+                val kdSorted = (kills + deaths)
+                  .sortedByDescending { it.first }
+                  .take(50)
 
-              val kdSorted = (kills + deaths)
-                .sortedByDescending { it.first }
-                .take(50)
-
-              SortableEventListColumn(
-                title = stringResource(Res.string.player_card_recent_kd_short),
-                items = kdSorted,
-                defaultSortDescending = true,
-                modifier = Modifier.weight(1f)
-              ) { item ->
-                val (timestamp, type, name) = item
-                RowItemWithTime(timestamp) {
-                  append(buildAnnotatedString {
-                    val color = if (type == "Killed") Color.Green else Color.Red
-                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.SemiBold)) { append(type) }
-                    append(" ")
-                    withStyle(SpanStyle(color = RFColors.TextPrimary)) { append(name) }
-                  })
+                SortableEventListColumn(
+                  title = stringResource(Res.string.player_card_recent_kd_short),
+                  items = kdSorted,
+                  defaultSortDescending = true,
+                  modifier = Modifier.weight(1f)
+                ) { item ->
+                  val (timestamp, type, name) = item
+                  RowItemWithTime(timestamp) {
+                    append(buildAnnotatedString {
+                      val color = if (type == "Killed") Color.Green else Color.Red
+                      withStyle(SpanStyle(color = color, fontWeight = FontWeight.SemiBold)) { append(type) }
+                      append(" ")
+                      withStyle(SpanStyle(color = RFColors.TextPrimary)) { append(name) }
+                    })
+                  }
                 }
               }
             }
@@ -668,6 +681,7 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
               journalEntries = PocketDraftCoordinator.getEntriesByTag(playerName, 12)
             }
             if (journalEntries.isNotEmpty()) {
+              var journalExpanded by remember { mutableStateOf(false) }
               // Balanced masonry: estimate each brick's height and always append to
               // the currently shortest column so long journals spread evenly.
               val columns: List<List<com.reoky.raidframer.core.pocket.PocketEntry>> = remember(journalEntries) {
@@ -688,8 +702,10 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                 }
                 buckets.map { it.toList() }
               }
-              SectionCard(
+              CollapsibleSection(
                 title = stringResource(Res.string.player_card_journal_entries),
+                expanded = journalExpanded,
+                onExpandedChange = { journalExpanded = it },
                 accentColor = RFColors.itemSkillYellow
               ) {
                 Row(
@@ -837,6 +853,97 @@ private fun SectionCard(
       )
     }
     content()
+  }
+}
+
+// Collapsible section with a clickable header to toggle visibility
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun CollapsibleSection(
+  title: String,
+  expanded: Boolean,
+  onExpandedChange: (Boolean) -> Unit,
+  accentColor: Color = RFColors.AccentRed,
+  content: @Composable () -> Unit
+) {
+  Column(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(horizontal = 8.dp)
+  ) {
+    if (expanded) {
+      // When expanded, wrap header and content in a single unified well
+      Column(
+        modifier = Modifier
+          .fillMaxWidth()
+          .clip(WellShape)
+          .background(WellColor)
+          .border(1.dp, WellBorder, WellShape)
+      ) {
+        // Clickable header inside the well
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onExpandedChange(!expanded) }
+            .padding(12.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = "\uf078",
+            color = accentColor,
+            fontFamily = FontsHelper.faSolid(),
+            fontSize = 10.sp
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Box(
+            modifier = Modifier
+              .size(3.dp, 16.dp)
+              .background(accentColor, RoundedCornerShape(2.dp))
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Text(
+            text = title,
+            color = RFColors.TextPrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp
+          )
+        }
+        // Content inside the same well
+        content()
+      }
+    } else {
+      // When collapsed, header is a standalone well
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .clip(WellShape)
+          .background(WellColor)
+          .border(1.dp, WellBorder, WellShape)
+          .clickable { onExpandedChange(!expanded) }
+          .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(
+          text = "\uf054",
+          color = accentColor,
+          fontFamily = FontsHelper.faSolid(),
+          fontSize = 10.sp
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Box(
+          modifier = Modifier
+            .size(3.dp, 16.dp)
+            .background(accentColor, RoundedCornerShape(2.dp))
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+          text = title,
+          color = RFColors.TextPrimary,
+          fontWeight = FontWeight.Bold,
+          fontSize = 13.sp
+        )
+      }
+    }
   }
 }
 
