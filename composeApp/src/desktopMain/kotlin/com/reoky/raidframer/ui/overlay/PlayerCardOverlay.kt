@@ -299,20 +299,22 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
       }) - ${metricType.displayName} ${stringResource(Res.string.graphs_trend_graph)} (${currentDateString})",
       onClose = { wm?.closeWindow(OverlayType.PLAYER_CARD) },
       rightActions = {
-        val cardInteractionSource = remember { MutableInteractionSource() }
-        val isCardHovered by cardInteractionSource.collectIsHoveredAsState()
+        val historyInteractionSource = remember { MutableInteractionSource() }
+        val isHistoryHovered by historyInteractionSource.collectIsHoveredAsState()
         IconButton(
           onClick = { wm?.openWindow(OverlayType.SESSION_HISTORY) },
           modifier = Modifier.size(28.dp).padding(end = 2.dp)
         ) {
           Text(
             "\uf1da",
-            color = if (isCardHovered) RFColors.AccentRed else Color.White,
+            color = if (isHistoryHovered) RFColors.AccentRed else Color.White,
             fontFamily = FontsHelper.faSolid(),
             fontSize = 14.sp,
-            modifier = Modifier.hoverable(cardInteractionSource)
+            modifier = Modifier.hoverable(historyInteractionSource)
           )
         }
+        val pocketInteractionSource = remember { MutableInteractionSource() }
+        val isPocketHovered by pocketInteractionSource.collectIsHoveredAsState()
         IconButton(
           onClick = {
             scope.launch {
@@ -329,10 +331,10 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
         ) {
           Text(
             "\uf02d",
-            color = if (isCardHovered) RFColors.AccentRed else Color.White,
+            color = if (isPocketHovered) RFColors.AccentRed else Color.White,
             fontFamily = FontsHelper.faSolid(),
             fontSize = 14.sp,
-            modifier = Modifier.hoverable(cardInteractionSource)
+            modifier = Modifier.hoverable(pocketInteractionSource)
           )
         }
       }
