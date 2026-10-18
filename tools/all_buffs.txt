@@ -1,0 +1,2770 @@
+Found 867 .rf file(s). Calculating total size for progress tracking...
+
+==================================================
+BUFF/DEBUFF IDs BY NAME
+==================================================
+1st Rank Knight: 6603
+1st Rank Soldier: 6600
+2nd Rank Knight: 6602
+2nd Rank Soldier: 6599
+368575 DO NOT TRANSLATE: 15149
+3rd Rank Knight: 6601
+3rd Rank Soldier: 6598
+3급 기사: 6601
+4-Leg Lope: 17184, 22018, 22091, 8000208, 8000611, 8000615
+4th Rank Soldier: 6597
+5th Rank Soldier: 6596
+8년을 함께한: 29202
+A Ladle Bit More: 20630
+Abraca-NOPE: 24200
+Abracadabra: 24287, 24292, 24293, 24294, 24295, 24522, 24523, 24524, 24525, 24526
+Absorb Damage: 23424
+Absorb Lifeforce: 398, 399, 1684, 3175, 4290, 23937, 26092, 29662
+Absorbing lifeforce: 21058
+Abyssal Archaeologist: 16768
+Abyssal Bubble Trap: 28256
+Abyssal Burden: 13789
+Abyssal Curse: 11361
+Abyssal Decay: 27229
+Abyssal Exhaustion: 27838
+Abyssal Fear: 28250, 28252
+Abyssal Iron Armor: 6558, 6559
+Abyssal Phase: 9002283
+Abyssal Poisoning: 13933
+Abyssal Power: 27823, 27896, 27901, 27905, 27909, 28879
+Abyssal Prophet: 6554
+Abyssal Protection: 28938
+Abyssal Steps: 22937
+Abyssal Whisper: 14620
+Acceleration Zone: 21063
+Accept Ensemble: 24164
+Adaptive Plating: 18357
+Advance Signal: 3733, 24265, 24491
+Advancing Hero's Seal: 24136
+Adventurer's Costume: 9000818
+Adventurous Whisper: 9001811
+Aegis Island Harpy's Pull: 21254
+Aerial Charge: 18980
+Aftereffect: 14682, 29908
+Aggro Ape: 20063, 20064
+Akrabe's Mana: 29932
+Alchemy Master's Secrets Rank 3: 8135
+All Spooked Out: 22078, 8000547
+Alliance Soldier's Invincibility: 17034
+Alliance Soldier's Mettle: 17046
+Alliance Soldier's Pull: 17047
+Alliance Soldier's Shackle: 17054
+Alliance Soldier's Shield Block: 17137
+Alliance Soldier's Silence: 17045
+Alliance Soldier's Snare: 17037
+Alliance Soldier's Toughen: 17033
+Ally's Wings: 4340
+Amarendra IV's Intense Blessing: 30764, 9002337
+Amarendra IV's Steadfast Blessing: 30767, 9002338
+Anchored: Move Speed 0: 21950
+Ancient Energy: 15038
+Ancient Library Relic: 2354
+Ancient's Potion: 9000906, 9001797
+Andelph Meister: 32318
+Andrion II's Intense Blessing: 30760, 9002339
+Andrion II's Steadfast Blessing: 30766, 9002340
+Angel Wing Elixir: 25068
+Ant's Diligence: 24337
+Anthalon Crippling Mire: 2343
+Anthalon's Necromantic Flame: 4263, 4273
+Anthalon's Necromantic Flame - Pull: 2307, 4272
+Anthalon's Necromantic Flame Immunity: 6417
+Anthalon's Will - Magic: 26052
+Anthalon's Will - Physical: 26051
+Anyfin is Possible: 20171
+Appearance B: 23824
+Aqua Soulshard: 9000812
+Arachne Predatory Wings: 32740
+Aranzeb's Blessing (Rank 2): 7661
+Aranzeb's Boon (Rank 3): 13790
+Aranzeb's Boon (Rank 4): 13791
+Arc Lightning Immunity: 20929
+Arcadian Sea Keeper Stealth: 4848
+Arcadian Sea Keeper's Curse: 4846
+Arcane Cloth Armor: 6418
+Arcane Leather Armor: 6426
+Arcane Plate Armor: 6434
+Arcane XP Boost Scroll: 21382
+ArcheMaster: 6989
+ArcheRage Adventurer: 8000188
+ArcheRage Thread: 7640
+Arena Queued: 23447
+Aria's Melody: 31419
+Arkana Wings: Diamond: 32253
+Arkana Wings: Heart: 32254
+Arkana Wings: Spade: 32204
+Arm Cramps: 28693
+Aromatic Soup: 20635
+As quiet as a mouse: 9000304, 9000305
+Ascend!: 27636
+Asgar's Human Cannon Protection Ward: 2257
+Ashen Wings: Sky Emperor: 23082
+Assault Shock: 20931
+Astra Wings: 20116, 8000273
+Attack Boost: 3600, 25987, 26444, 26445, 26446, 26448
+Auroria Neutral Zone: 25533
+Auto-Loot Powerstone: 23179, 9001856
+Auto-Loot Saddle: 26387
+Avid Angler: 9000571
+Awakening: 499
+Ayanad Hero's Blessing: 15101
+Backstabbing Ambush: 31764
+Baller Status: 11249
+Balloon Magithopter: 24271
+Banana Milk Effect: 22992
+Bane: 27030
+Banishment: 21977
+Bannerman: 24264
+Banshee Wail: 975, 2278, 21402, 21403, 26309
+Banshee Wail Immunity: 22551
+Bard's Favor: 16125
+Barred from Arena: 22703
+Barter $auce: 20179
+Battle Focus (Rank 1): 404
+Battle Focus (Rank 2): 7651
+Battle Hymn: 6851
+Battle Mage’s Dream: 9001840, 9002007
+Battle Mode: 11952
+Beacon of Power: 28919
+Bear Defense: 6413
+Beast Figurehead: Mythic: 11336
+Beastmaster: 9000032
+Beastsense: 16796
+Befuddling Footsteps: 7523, 7683
+Berserk: 757, 1668, 2113, 2114, 2152, 3164, 4552, 23096
+Bestcargot Racing Snail: 21062
+Big Head: 9001803
+Bite-Sized Cake: 9001919
+Black Dragon Silencer: 23815
+Black Dragon's Breath: 23929, 28873
+Black Dragon's Charge: 23304
+Black Dragon's Curse: 23944
+Black Dragon's Eyesplitter: 25505
+Black Dragon's Fireguard: 25503
+Black Dragon's Gust: 8329, 23960
+Black Dragon's Roar: 25510
+Black Dragon's Self-Recovery: 23931
+Black Dragon's Serenity: 23709
+Black Dragon's Silence: 25511
+Black Dragon's Tail-Reaper: 1981
+Black Dragon's Wing-Reaper: 25508
+Black Dragon’s Protective Scale: 23623
+Black Eagle Glider: 26683
+Black Eagle Glider Companion: 8000780
+Black Tapioca: 25792
+Blackbeard Thieves' Shield: 15492
+Blade Flurry: 24920
+Blade Striker: 9000209
+Blast Echo: 9001149
+Bleak Energy: 32668
+Bleed: 11508, 13747
+Bleed (All): 31319
+Bleeding: 2810, 20642, 22215, 23157, 26200, 26417, 27127, 28679, 8000606
+Bleeding (Rank 1): 242
+Bleeding (Rank 2): 514
+Bleeding (Rank 3): 515
+Bleeding (Rank 4): 516
+Blessed Elixir: 31306
+Blessed Rune: Zena Basta 6: 7638
+Blessing: 552, 27866
+Blessing Energy: 30781
+Blessing of the Ancient: 24080
+Bleu Ribbon: 11253
+Blight: 27309, 27310, 28304
+Blind: 902, 22216, 8000607
+Blinded By Crows: 4807, 20934
+Blinding Flash: 28130
+Blindness: 20498
+Blink: 24610, 24929
+Blink's Stealth: 25694
+Blizzard Soulshard: 9001917
+Blood Frenzy: 17326
+Blood Phase: 9002281
+Blooddrinker Blossom: 6148
+Bloodthirst Rifle: 28860
+Bloodthirst Shock: 877, 1763
+Bloodwind Rank 1: 25825
+Bloodwind Rank 3: 25827
+Bloodwind Rank 4: 25828
+Bloodwind Rank 5: 25829
+Bloodwind Rank 6: 25830
+Bloodwind Rank 7: 25831
+Bloodwind Rank 8: 25832
+Bloody Chantey (Rank 1): 850
+Bloody Chantey (Rank 2): 7663
+Bloody Rage: 9000365, 9000366
+Bloody Soulshard: 9001140
+Blue Arowana: 27811, 27812, 27813
+Blue Erenor Wings: 9002277
+Blue Goblet of Honor (Rank 1): 21796
+Blue Goblet of Honor (Rank 2): 21801
+Blue Goblet of Honor (Rank 3): 21806
+Blue Goblet of Honor (Rank 4): 21811
+Blue Goblet of Honor (Rank 5): 21819
+Blue Salt Manual: Crafting: 21516
+Blue Salt Manual: Harvesting: 21513
+Blue Salt Manual: Miscellaneous: 21518
+Blue Tapioca: 25790
+Boarding Aftereffect: 24485
+Bombard Requested Point: 25421
+Bonesplitting Roar: 27221, 27222
+Boneyard: 5935, 29248
+Bottom Headlights: 29690, 32474
+Bound Batty Butterscotch: 8000021
+Bound Mana Potion: 14777
+Bound Pumpkin Spice Taffy: 8000020
+Bracing Blast Immunity: 7105
+Breakthrough: 3086, 22978, 23729, 28669, 32697, 32698, 9001330
+Breakthrough Shock: 18, 29577
+Breath Remaining: 6516
+Brilliant Erenor Bastion: 32082
+Brisk Dwarven Elixir: 8000024
+Brute Strength: 20722
+Bubble Shield: 24666
+Bubble Trap: 96, 2286, 6639, 6953, 21401, 28254, 8000335
+Bubble Trap Immunity: 2160
+Bubble Trap: Mist Immunity: 22543
+Bubble Trap: Stone: 28253
+Bug-Bounce: 20987
+Building: 8232
+Bull Rush: Aggro Boost: 3532
+Bull Rushed: 3635
+Bulled Over: 20759, 8000343
+Bulwark Ballad (Rank 1): 1000
+Bulwark Ballad (Rank 2): 4389
+Burn: 25516
+Burning: 1403, 3107, 5173, 6062, 6466, 23309, 27994, 28608, 9000856
+Burning Additives: 20584
+Burning Flesh: 28125, 29249
+Burning Revenge: 4562
+Burning Shield: 9001332
+Butterfly Cooling Off: 25185
+Call for Aid: 6872
+Call of the Beyond: 23039
+Calleil's Memory: 5662
+Camouflage: 23043, 23044
+Campfire's Warmth: 5872
+Can play an instrument in front of the campfire.: 5903
+Can't Install Building: 31775
+Candy Cane: 2067, 2074
+Captain's Intuition: 4690
+Captain's Protection: 21369
+Careen: 17162, 8000616
+Cargo Ship Anchored: 21377
+Carrot Blessing: 32028
+Carry Purifying Archeum: 24348
+Casting Delayed: 21158
+Casting Interrupted: 31979
+Castle Valor Boost (Rank 2): 28610
+Casvir's Frenzy: 25975
+Cat Nap: 21618, 8000503
+Catlike Reflexes: 20720
+Celebratory Fireworks: 28926
+Celestial Cloth Armor: 6421
+Celestial Leather Armor: 6429
+Celestial Plate Armor: 6437
+Champion's Might: 21583
+Charge: 25412
+Charge Buff: 22952
+Charging: 26927
+Charm: 5018
+Charmed: 771, 21162, 21432, 21434, 33056
+Charming Dance: 25367
+Chicken's Chosen: 21486
+Chilling Wind: 20570
+Claim Area: 40
+Clear Mind: 5209, 21535
+Cleaver Target: 27972, 27973
+Clinging Flame: 22608
+Clinging Shadow: 21419
+Cloak of Heroism: 28867, 8000838
+Close Protection: 24986
+Cloth Set: 713
+Cloudstrike Panther: 16845
+Coconut Zephyr Glider: 29599
+Cold Wave: 28126
+Collection Breather Bubble: 9000045
+Collision with Summoned Creature: 6179, 20820
+Combat Boost: Experience Grimoire: 14778
+Comforting Sleep: 16789, 8000227
+Commander: 21772
+Commander's Determination: 24318
+Commander's Protection: 24366
+Commander's Will: 24339
+Communication (Ally-Self): 29843
+Communication (Enemy-Self): 29844
+Communication (Self-Ally): 29847
+Communication (Self-Enemy): 29848
+Community Boost: 28618
+Complete Cloth Set: 714
+Complete Leather Set: 716
+Complete Plate Set: 740
+Concentrated Overcharge: 21003
+Condensed Mana: 22572
+Conductive Charge: 21001
+Conflagration: 2287
+Connecting: 2423
+Consuming Flames: 21384
+Container Opened: 16570, 21173, 24887, 24889, 29823
+Containment Tower Rank 1: 21358
+Containment Tower Rank 2: 21526
+Containment Tower Rank 3: 21527
+Contaminated: 23115
+Continual Flame: 28929
+Conversion Shield: 6901, 28209
+Conversion Shield (Rank 3): 855
+Conversion Shield (Rank 5): 857, 21416
+Conversion Shield: Stone: 28187
+Conviction of the Ancient: 24082
+Cooking Pork...: 5868
+Cooling Off: 22465, 24997, 26591, 27292, 29659, 29899, 29931, 32016, 32224, 32629, 9001896
+Copper Sage Taffy: 24159
+Core Cleaver: 20198
+Corrosion: 26722, 28127
+Corrosive Acid: 22614
+Corrupted Mettle: 24967
+Corrupted Soul: 25833
+Corrupted Wit: 6136
+Cow-culating Killer: 20178
+Crash Dummy: 17185
+Crater Cub's Blessing: 8000481
+Crawl: 27377, 30088
+Criminal Mastermind: 11245
+Crimson Lightning Stealth: 7738
+Crimson Rift: 2293
+Crimson Watch: 11017
+Crimson Watch United!: 24794
+Crippling Howl: 27239
+Crippling Mire: 2156, 4291, 16498, 26473, 26512
+Critical Hit: 3933
+Critical Timing: 18909
+Crouching: 20496
+Crow Attack: 470, 1174, 1769, 22961, 28239
+Crows Search: 21984
+Crusader: 9000196
+Crystal Wings: 22123, 8000599
+Crystal Wings: Ascension: 8000603
+Crystal Wings: Cruising: 8000601
+Crystal Wings: Sheering: 8000602
+Crystal Wings: Speed: 8000600
+Culinary Cutthroat: 11247
+Cumulative Damage: 899
+Cumulus Magithopter: 8000559
+Curious Cuckoo: 8303
+Curse: 467
+Curse of Kraken: 4818, 31451
+Curse of the Crow: 23137
+Cursed Area: 2310
+Cursed Erenor Wings: 9002584
+Cursed Flame: 6904
+Cursed Look: 5590
+Cursed Seeds: 18341
+Cursed Thorns: 22548, 28233
+Cursed Thorns Immunity: 22549
+Cursed Thorns: Stone: 28194
+Cutting Hedge Technology: 11252
+Dagger: 6829
+Dagger of Mind: 30112
+Dahuta's Breath: 1366, 6957, 24051, 31626
+Dahuta's Bubble: 6660
+Dahuta's Curse: 4661, 25846
+Daily Labor Stipend: 8000272
+Dance of Seduction: 5612
+Dance: Molang: 32687
+Dancer on Stage: 30046, 30121
+Dances with Spirits: 9002105
+Dancing: 8126
+Daring Swimsuit: 6692
+Dark Watcher's Dagger: 6143
+Dark and Light: 23453, 9001143
+Daru Transformation: 32459, 32643
+Darugon Emotes: 26655
+Dash: 2675, 3523, 16797, 17163, 22007, 22089, 22409, 22973, 23744, 24045, 25700, 8000211, 8000613, 8000630, 9000730
+Dawn Shadow: 9000739, 9000740
+Dazed: 2511, 26415
+Deadeye: 27704
+Deadeye Stance: 27702
+Deadly Concentration: 21795
+Deadly Poison: 2818, 27121, 27589, 29839, 30984
+Death Awaits: 2971
+Death Energy: 20124
+Death's Garden: 20962
+Death's Vengeance: 6961, 23988
+Deathmark Aura: 15010
+Debuff: 29952
+Debuff Immunity: 24442
+Declining Aggro: 1225
+Decreased Received Healing: 32645
+Decreases Defense: 4679
+Decreases Move Speed: 22509, 25230, 26090, 29678
+Deep Freeze: 9000169
+Deep Tranquility: 29951
+Deepened Debuff: 29954
+Defense Boost: 26450, 26451, 26452
+Defenseless: 808
+Defiance: 22968
+Deflect and Retaliate: 2611
+Delicious Candy: 9001918
+Delicious Festival Food: 14771
+Deliverance Shield (Rank 5): 15077
+Deliverance Shield (Rank 6): 15078
+Deliverance Shield (Rank 7): 17361
+Deliverance Shield (Rank 8): 22111
+Delphinad Hero's Blessing: 15100
+Deluxe Sandwich: 20624
+Demon Spears: 29673
+Demon's Heart: 15763
+Demonic Gaze: 9000382, 9000385
+Demoralized Shout: 3189
+Denistrious's Staff: 15404
+Destroyer Cursed Spear: 22953
+Destroyer's Curse: 22943
+Destroyer's Snare Immunity: 22959
+Destroyer's Trip Impact: 22951
+Detection: 20458, 8000315
+Diligent Worker's Scroll: 9000515
+Dimension Guardian’s Dream: 9001839, 9002006
+Disable Instrument: 23353
+Disable Left-Hand Weapon: 23066, 23654, 31837
+Disables Right-Hand weapon: 23107
+Disciple's Discord Cloth Armor: 23229
+Disciple's Greatclub: 23216
+Disciple's Leather Armor: 23231
+Disciple's Plate Armor: 23290
+Disciple's Serenity Cloth Armor: 23245
+Disciplined Performance: 7575
+Discord: 21992, 24061
+Dissipating Nightmare: 5394
+Dissolving Cloud: 21086
+Dissonance: 777, 25669, 25670, 26547, 26548
+Distressed: 828, 6896
+Dive Trap: 22903
+Divine Authority: 26549
+Divine Cloth Armor: 6422
+Divine Leather Armor: 6430
+Divine Plate Armor: 6438
+Divine Power: 26546
+Divine Presence (Rank 1): 29842
+Divine Presence (Rank 2): 30067
+Divine Presence (Rank 3): 30068
+Divine Presence (Rank 4): 30069
+Divine Presence: Wave: 30594
+Divine Protection of the Sky Snake: 30936
+Divine Vision: 26551
+Diving Underwater: 13871
+Dochul's Hatred: 31418
+Dochul's Steps: 8000308
+Dog Bite: 8000369
+Dogeza: 25366
+Doing a Yata Dance: 7271
+Dolphin Dash: 7160
+Dominator's Authority: 2100
+Dominator's Curse: 4844
+Don't Give Up: 25861
+Don't Leave Without Molang: 32788
+Double Hunting XP: 23084
+Double Recurve: 25391, 27673
+Double Recurve (Rank 2): 452
+Double Vocation XP: 23085
+Double XP Elixir: 21730
+Double, Double, Toil and Trouble: 5455
+Double-Time: 21993
+Dragon Expert: 9000699
+Dragon Flight: 22229
+Dragon Herald: 9000689
+Dragon Roar: 22602
+Dragon Slayer's Glider: 24718
+Dragon Ward: 6523
+Dragon's Breath: 27371
+Dragon's Seraph: 15603
+Dragonace: 9002249
+Dragonborn: 9002002
+Dragondancer: 9002001
+Dragonfire: 6670
+Dragonfury: 9001691
+Dragonknight: 9000698
+Dragonmancer: 9002250
+Dragonologist: 9000696
+Dragoon: 9000697
+Dreaming Donkey: 2268
+Dried Up: 24667
+Drink Milk: 14723
+Drive Mode: 25406
+Drop Back: 2727
+Drowning: 6280
+Drowsy: 8302
+Drunken Master: 13748, 8000056
+Drydocks Available: 22047
+Dubira's Dublessing: 8000306
+Dusk Shroud: 24951
+Dust in the eyes: 4673
+Dwarven Artifice: 20721
+Eagle Glider: 22901
+Eagle Glider Companion: 8000682
+Eanna's Regret: 8212
+Ear-Splitter: 972
+Earth Energy: 2596
+Earth's Authority: 24562
+Earth's Fury: 6580
+Earthen Grip: 82, 21397, 21398, 26455
+Ecstatic Dance: 5616
+Elated Dancer on Stage: 30048, 30122
+Electric Blast: 31570
+Electric Shock: 250, 11052, 21067, 22282, 22517, 23162, 23483, 23964, 28940, 28941
+Electric Shock Immunity: 476
+Elegant Dance: 25368
+Elementally Talented: 20176
+Elephant Spirit: 9000309
+Elixir Rank 1: 21591
+Elixir Rank 2: 21592
+Elixir Rank 3: 21593
+Elixir Rank 4: 21594
+Elixir Rank 5: 21595
+Elixir of Greed: 11074, 14783
+Elixir of Honor: 22514
+Elixir of Insatiable Greed: 11075
+Elixir of Vocation: 22515
+Elixir of the Hunt: 22516
+Ellam A: 23819, 23823
+Ellam B: 23820
+Ellam C: 23821, 23825
+Elven Eokad’s Dream: 9001844, 9002011
+Emerald Distortion: 9000736
+Emerald Erenor Wings: 9002276
+Encouragement: 30055
+End Whalesong Harbor Tower Defense Rank 2 (Haranya).: 21215
+Enduring Echo: 20472
+Energy of the Camp: 6156
+Enervate: Lightning: 32646
+Enervated: 101, 2870, 4712, 6955, 26454
+Engage Burst Engine: 6518
+Engine Overheating: 20504
+Engulfed in Flames: 5098
+Enhance Anthalon Shackle: 2342
+Enhance Automatic Cannon: 6583
+Enhanced Black Eagle Glider Companion: 8000781
+Enhanced Black Eagle Glider Companion: Launch Height: 8000785
+Enhanced Cloak of Heroism: Ascension: 8000844
+Enhanced Cloak of Heroism: Cruising: 8000842
+Enhanced Cloak of Heroism: Sheering: 8000843
+Enhanced Crystal Wings: 8000608
+Enhanced Cumulus Magithopter: 8000560
+Enhanced Cumulus Magithopter: Ascension: 8000564
+Enhanced Cumulus Magithopter: Cruising: 8000562
+Enhanced Cumulus Magithopter: Sheering: 8000563
+Enhanced Deadly Concentration: 26582
+Enhanced Eagle Glider Companion: 8000683
+Enhanced Eagle Glider Companion: Gliding: 8000685
+Enhanced Eagle Glider Companion: Launch Height: 8000687
+Enhanced Eagle Glider Companion: Turning: 8000686
+Enhanced Ezi's Glider: Gliding: 8000108
+Enhanced Ezi's Glider: Launch Height: 8000142
+Enhanced Ezi's Glider: Speed: 8000091
+Enhanced Faelight Wings: 8000667
+Enhanced Faelight Wings: Sheering: 8000538
+Enhanced Faelight Wings: Speed: 8000536
+Enhanced Feathered Dragon Glider: Speed: 8000090
+Enhanced Feathered Dragon Glider: Turning: 8000124
+Enhanced Flaming Pinion: 8000247
+Enhanced Furious Titan’s Wings: 8000662
+Enhanced Furious Titan’s Wings: Ascension: 8000666
+Enhanced Furious Titan’s Wings: Speed: 8000663
+Enhanced Goblin Glider: Launch Height: 8000151
+Enhanced Illusion: 29884
+Enhanced Legendary Dragon Wings: 8000157
+Enhanced Legendary Dragon Wings: Launch Height: 8000161
+Enhanced Legendary Dragon Wings: Speed: 8000158
+Enhanced Legendary Dragon Wings: Turning: 8000160
+Enhanced Mercurial Movement: 26581
+Enhanced Nightfire Glider: 8000420
+Enhanced Nightfire Glider: Turning: 8000423
+Enhanced Ravenspine Wings: 8000487
+Enhanced Ravenspine Wings: Ascension: 8000491
+Enhanced Ravenspine Wings: Cruising: 8000489
+Enhanced Ravenspine Wings: Sheering: 8000490
+Enhanced Ravenspine Wings: Speed: 8000488
+Enhanced Red Dragon Glider: Speed: 8000092
+Enhanced Red Dragon Glider: Turning: 8000126
+Enhanced Rocket Wings #2: 8000507
+Enhanced Rocket Wings #2: Air Speed: 8000508
+Enhanced Rocket Wings #2: Ascension: 8000511
+Enhanced Rocket Wings #2: Sheering Speed: 8000510
+Enhanced Sanctuary: 19041
+Enhanced Skywhisper Glider: 8000072
+Enhanced Skywhisper Glider: Gliding: 8000106
+Enhanced Sloth Glider Companion: 8000087
+Enhanced Sloth Glider Companion: Gliding: 8000121
+Enhanced Sloth Glider Companion: Launch Height: 8000155
+Enhanced Sloth Glider Companion: Speed: 8000104
+Enhanced Sloth Glider Companion: Turning: 8000138
+Enhanced Squirrel Glider Companion: 8000088
+Enhanced Titan's Wings: Cruising: 8000477
+Enhanced Twilight Wings: Speed: 8000673
+Enhanced Umbrella Magithopter: Ascension: 8000643
+Enhanced Umbrella Magithopter: Cruising: 8000641
+Enhanced Wings of Immortality: 8000693
+Enhanced «God of War» Glider: Gliding: 9000014
+Enhanced «God of War» Glider: Speed: 9000018
+Enhanced «God of War» Glider: Turning: 9000017
+Enlightened ArcheMaster: 17194
+Ensemble Standby: 24165
+Entangled Skin: 26516
+Enticing Whisper: 7103
+Entropy Shield: 21418
+Epic Andelph Fishing Boat Propellant: 16225
+Epic Cloth Armor: 6423
+Epic Full-Speed Propellant: 16178
+Epic Leather Armor: 6431
+Epic Plate Armor: 6439
+Equip Dive Helmet: 2346, 5908
+Equip Dual Weapons: 4899
+Equip Flame Thrower: 24262
+Equip Lure: 22921
+Equip Misagon's Breath: 28081
+Equip Shield: 8226
+Equip Swimfins: 2416, 5909
+Equip Two-Handed Weapon: 8227
+Erenor Hero's Blessing: 15102
+Escape: 4840
+Established Family: 20539
+Eternal Cloth Armor: 21010
+Eternal Erenor Wings: 9002583
+Eternal Leather Armor: 21011
+Eternal Plate Armor: 21012
+Evasive Maneuvers: 16890
+Excessive Bleeding: 25435
+Exhaustion: 183
+Experimental Glider: 1029
+Expert Cutpurse: 11076
+Explosion: 1506
+Explosive Finale: 21395
+Ezi's Divine Protection: 13816
+Ezi's Ember: 13920
+Ezi's Flame: 14578
+Ezi's Glider: 2098
+Ezi's Sparks: 14577
+Fabulous Invisibility: 9000359, 9000361
+Faelight Wings: 8000531
+Faint Authority of Kyrios: 32385
+Fair Fowl Hat: 6673
+Fairy Dust Immunity: 9001429
+Fairy Dust: Armor: 9001425
+Fairy Dust: Evasion: 9001427
+Fairy Dust: Gliding: 9001422
+Fairy Dust: Health: 9001423
+Fairy Dust: Loot Drop Rate: 9001428
+Fairy Dust: Magic Defense: 9001426
+Fairy Dust: Mana: 9001424
+Fairy Dust: Speed: 9001421
+Fairy Protection: 26764
+Fairy Song: 25013
+Fall Shock: 2376, 26568
+Fall Stun: 1391, 1435
+Falling: 844, 23113
+Family Togetherness: 20979
+Farmer's Blessing Stipend: 9001525
+Fashions Fade; Style is Forever: 5469
+Fast Glide: 9000733
+Fatal Wound: 9001890
+Fatal Wound Immunity: 9001891
+Fatigue: 9000446
+Fear: 156, 1178, 2277, 6954, 23116, 23261, 24375, 25231, 25780, 26623, 26977, 28888, 29304, 29621, 29677, 30703
+Fear Immunity: 2377
+Fearless: 9000244
+Feast of Arcane Grace: 2312
+Feast of Noble Blessings: 2305
+Feather boots: 9001828
+Feathered Dragon Glider: 2097
+Felon: 2167
+Ferocious Black Dragon's Bite: 28890, 28892
+Ferocious Black Dragon's Eyesplitter: 26710
+Ferocious Black Dragon's Fireguard: 26708
+Ferocious Black Dragon's Roar: 26715
+Ferocious Black Dragon's Self-Recovery: 26723
+Ferocious Black Dragon's Serenity: 26726
+Ferocious Black Dragon's Silence: 26716
+Ferocious Black Dragon's Wing-Reaper: 26713
+Ferocious Growl: 8000484
+Ferocity: 22265
+Fiendish Fright: 23034
+Fierce Titan's Wings: 21964
+Fierce War Cry: 24266, 24492
+Fiery Heart: 9000226
+Fight: 23387
+Fighting Fish Spirit!: 32630
+Filthy Mucus: 21383
+Final Attempt: 23723
+Final Strike: 23489, 9001142
+Fire Bomb Equipped: 25418
+Fire Ironclad Siege Mode: 1526
+Fire Lunafrost: 5164, 5165
+Fire-breathing Rosiola: 32556
+First Aid: 9001338
+Fishing Proficiency Increase: 14704, 14705
+Fishing Rod Replaced: 5795
+Fishing for a Compliment: 5461
+Fist of Darkness: 6499
+Flag of Division: 3030
+Flame: 2734, 6057
+Flame Barrier: 1987
+Flame Conversion Shield (Rank 5): 21375
+Flame Double-Time: 23150
+Flame Explosion: 27939
+Flame Fervent Healing: 21493, 21499, 21500, 21501, 21502
+Flame Freerunner: 23146
+Flame Hell Spear: 23361
+Flame Mark: 24583
+Flame Mine: 29247
+Flame Mirror Warp: 23134
+Flame Protective Wings: 21630
+Flame Shield: 14773, 28816
+Flame Veil: 23324
+Flame Vortex: 749
+Flame's Trace: 9001328
+Flamefeather Glider: 20108, 8000280
+Flamelauncher: 27865
+Flaming Pinion: 8000246
+Flaming Pinion Effect: 7107
+Flare Equipped: 25420
+Flatulence: 5874, 6277
+Fledgling Family: 20311
+Flee: 779, 14914
+Fleeting Footsteps: 24001
+Fleeting Footsteps: Gale: 31536
+Flew Away: 25274
+Flies Begone: 14722
+Flight Speed Boost: 21961, 22262, 22289, 22639, 23204, 23206, 23208, 23210, 23712, 24500, 24559, 27020, 27378, 28600, 29619, 29914, 30586, 31707, 31982, 32205, 32256, 32257, 32319, 32815, 8000532, 8000565, 8000609, 8000656, 8000813, 8000845
+Flight Speed Boost Cooldown: 21962, 22263, 22290, 22640, 23205, 23207, 23209, 23211, 23713, 24501, 24560, 27021, 27379, 28601, 29620, 29915, 30587, 31708, 31983, 32206, 32259, 32260, 32320, 32816, 8000533, 8000566, 8000610, 8000657
+Flock of Crows: 31312
+Flooding Magic: 29346
+Floofy: 23626, 23629
+Flower Blessing: 25184
+Flying Squirrel Glider: 16122
+Focal Concussion: 449, 2875
+Focused Glide: 16191, 8000060
+Forbidden Magic: 9000374, 9000375
+Forcibly Awaiting Trial: 3619
+Foremost Forager: 5463
+Forest Boogie: 8254
+Forest's Blessings: 926
+Found You!: 26757
+Fragrant Soup: 20633
+Free Diamond: 32249
+Freerunner (Rank 1): 340
+Freerunner (Rank 2): 13779
+Freeze: 93, 2279, 21990, 22936
+Freeze Immunity: 2280, 22539
+Freeze!: 28660
+Freezing: 22217, 8000605
+Freezing Arrow: 4824
+Frenzy: 6947, 25650, 27849, 29661
+Frenzy (Rank 2): 22690
+Frenzy (Rank 3): 22689
+Friend of Fairies: 26561
+Frigid Tracks: 431
+Frost Dragon's Breath: 22346
+Frost Dragon's Mid-Air Breath: 22404
+Frost Explosion: 29259
+Frost Wall: 26529
+Frostbite: 247, 763, 18183, 22895, 22935, 24032, 24586, 9000373
+Frosty Foot: 25417
+Frozen: 24338, 25502, 26404, 27941, 28014, 28076, 31665, 31666
+Frustration: 30054
+Fuel Injection: 4841, 8335
+Funky Friday Dance: 22912
+Furious Titan’s Wings: 22596
+Furl Caernord Triangular Rig: Eternal: 21090
+Furl Caernord Triangular Rig: Mythic: 15887
+Furl Enoan Double Square Rig: Epic: 15897
+Furl Enoan Triple Square Rig: Legendary: 15909
+Furl Enoan Triple Square Rig: Mythic: 15910
+Furl Eznan Square Mainsail: Legendary: 15853, 15875
+Furl Eznan Square Mainsail: Mythic: 15832, 15876
+Furl Growling Square Foresail: Epic: 15863
+Furl Growling Square Foresail: Legendary: 15864
+Furl Growling Square Foresail: Mythic: 15865
+Furl Lutesong Square Foresail: Mythic: 15843
+Fury: 2548, 6890, 22982
+Gale: 20053
+Gale Lunafrost: 5186, 5188
+Gallant's Blessing: 9002633
+Garbage Throw: 3045
+Gargoyle Guardian Wings: 24853
+General: 6605
+Generous Gift: 9000187
+Get'em!: 29611
+Ghastly Aura: 16762
+Ghost Energy: 9001064
+Ghost Move: 9001065
+Ghost Soulshard: 8000552, 9001820
+Ghost Stealth: 32686
+Ghost Thunder: 9000202
+Gift of Strength: 21490
+Gilded Royal Glider: 6579
+Glacial Fox's Dash: 26513
+Gleeful Destruction: 23080
+Glide: 22170, 23010, 27303, 27360, 29341, 30990, 32047, 8000462
+Glider Acceleration: 11096
+Glider Airshow: 2269
+Glider Companion: Gray Tabby Cat Butler: 31366
+Glider Companion: Panda: 16374
+Glider Companion: Red: 9000046
+Glider Companion: Squirrel: 8000059
+Glider Disabled: 24544
+Gluttonous Gobbler: 8000221
+Go for it, meow!: 9002356
+Goblin Enhanced Mana Recovery: 2581
+Goblin Glider: 5340
+Going Bananas: 25411
+Golden Arowana: 27810
+Golden Astra Wings: 22504
+Golden Corgi's Blessing: 22696
+Golden Sage Taffy: 24157
+Golden Taffy: 23093
+Golden Zone: 32159
+Goldfish Dash: 8000517
+Golem Invincibility: 15067, 15068
+Good Day to Work: 5207
+Grace Soulshard: 9002570
+Grace of the Forest: 122
+Gradual Recovery: 17927
+Grain Reaper: 11238
+Grand Cloth Armor: 22983
+Grand Leather Armor: 22985
+Grand Master: 6604
+Grand Performance: 21433
+Grape Soda: 9001193
+Grasping Void Immunity: 32505
+Gray Goblet of Honor (Rank 1): 21800
+Gray Goblet of Honor (Rank 2): 21805
+Gray Goblet of Honor (Rank 3): 21810
+Great Prairie Protection: 31616
+Great Surveyor: 20718
+Great White: 6615
+Greater Shock: 21557
+Greedy Dwarven Elixir: 8000022
+Greedy Goblin Gummies: 8000016
+Green Tapioca: 25791
+Greenman Dance: 21614
+Greenman Mask: 20927
+Greenman Vine: 16095
+Greenman can't wait!: 31374
+Griffin's Dash: 26505
+Griffin's Snare: 26195
+Grimghast Corps: 5492
+Grimghast Hunter: 5369
+Ground Shackle: 2858, 20961
+Grow Patient: 24267, 24493
+Growing Youngster: 7725
+Guardian Commander: 3735
+Guardian Seal: 3734
+Guardian's Eyes: 21734, 8000540
+Gweonid Elixir: 20050
+Hallowtide Tombstone Energy: 14800
+Hammertime: 5472
+Hand of Salvation (Rank 4): 17383
+Hand of Salvation (Rank 5): 17384
+Hand of Salvation (Rank 6): 17385
+Hand of Salvation (Rank 7): 17386
+Hand of Salvation (Rank 8): 22113
+Handmade Candy: 15542
+Hangover: 13749
+Haphazard Stealth: 6058
+Haradium Boost: 23796
+Haradium Protection: 23797, 24103
+Haradium Shield: 23795
+Hard Bread: 20619
+Headache: 4646
+Headlights: 5828, 14961, 20992, 21170, 25069, 25070, 29681
+Healer's Chalice: 9001810
+Healing Circle: 780, 24599
+Healing Performance: 1267
+Healing Talisman: 16825, 18171
+Health Lift: 29262
+Heartening Flare: 25415
+Heartening Flare Equipped: 25414
+Heartwarming Festival Fireworks: 9001826
+Hearty Meat: 5870
+Hearty Soup: 20634
+Heat of Night: 1758
+Heavenly Hymn: 22576
+Heavenly Wings: 6747, 7076, 15112, 9000732
+Hedgie's Blessing: 27002
+Heightened Security: 16216, 25579
+Hell Spear: 87, 2126, 2304, 18380, 28659, 32647
+Hellhound's Gnaw: 15467
+Hellhounds (Magic Damage): 29665
+Hellhounds (Physical Damage): 29666
+Hello Kitty floating airship: 30059
+Herbs for Fisherman: 22931
+Hereafter Threshold: 26334
+Hero's Guardian Seal: 24137
+Heroic Cloth Armor: 6419
+Heroic Grandeur: 16323, 25338
+Heroic Leather Armor: 6427
+Heroic Plate Armor: 6435
+Hide and Seek: 31318
+High Speed Glide: 23089
+Hiram Mountains' Favor: 18996
+Hiram Mountains' Kindness: 18997
+Hiram Owl's Blessing: 18989
+Hiram Owl's Kindness: 18988
+Hoarfrost: 9000179
+Hocus-pocus: 9002081, 9002082, 9002083, 9002084, 9002085, 9002086, 9002087, 9002088, 9002089, 9002090
+Holding Breath: 9000097, 9000343
+Homecoming Warrior: 24362
+Honor Boost Tonic: 8000007
+Honorable Deadly Concentration: 32382
+Honorable Mercurial Movement: 32381
+Hood Up: 9001600
+Horrorshow: 20125
+Hound of Kyrios's Barrage: 4268
+Hound's Loyalty: 26338
+Hour of Raiders: 26100
+Human Cannon Protection Ward: 2253
+Hunt: 8000372
+Hunt start: 20985
+Hunter's Glory: 18365
+Hunter's Guile: 256
+Hunting the Dead: 17244
+Hurry Up: 26622
+Hyperdash: 21061
+Hypnotize: 21160
+I approve!: 13869
+I love you!: 9000121
+Ice Explosion: 27940
+Ice Fury: 9000181
+Ice Guard's Power: 9000183
+Ice Shard: 94, 2862, 6573, 21449
+Ice Shield: 22396, 8000584, 8000585
+Icebreaker: 9000197
+Icy Heart: 9000180
+Icy earth: 9000178
+Idol's Poison: 15798
+Ignition: 24381
+Immobilized: 1927, 32173
+Immortal: 21774, 23298
+Immortal Titan: 22566
+Immortal Warden's Brawler Leather Armor: 27158
+Immortal Warden's Discord Cloth Armor: 27148
+Immortal Warden's Greatclub Immunity: 27129
+Immortal Warden's Serenity Cloth Armor: 27164
+Immune to Death's Vengeance: 22715
+Immune to Hammer Toss: 22642
+Impale Immunity: 5929, 22550
+Impaled: 18401, 22685, 23642, 23956
+Impenetrable Defense: 6396
+Impenetrable Protection: 9000350
+Imperial Jade Wings: 5635
+Impregnable Will: 9000204
+Incarnation of Fire: 9000230
+Incarnation of Light: 9000240
+Incarnation of Wrath: 9000210
+Incinerate: 27621
+Increase Health (Rank 1): 794
+Increase Health (Rank 3): 796
+Increase Health (Rank 4): 7655
+Increase Melee Attack: 16183
+Increased Attack: 22691
+Increased Move Speed: 30782
+Increases All Attacks: 6948
+Increases Continental Dialect Proficiency: 14743
+Increases Magic Defense: 6956
+Increases Move Speed: 3717, 3771, 21065, 21817, 23801, 27116, 28656, 8000451
+Indomitable Spirit Glider: 11097
+Indomitable power: 9000352
+Inevitable Valor: 24579
+Inflame: 9000228
+Ink Is My Blood: 5466
+Inoch: Gods and Heroes: 22024, 8000576
+Inoch’s Will: 9001653
+Insidious Whisper: 28248
+Insidious Whisper: Stone: 28247
+Insight of the Hawk: 24915
+Inspiration: 30704
+Instance Deactivated: 31554
+Instant Acceleration: 17123, 20114, 8000289
+Instinct: 24879
+Insulating Lens: 95, 28690
+Intense Light: 21116
+Internet Explorer: 20192
+Interruption: 27837
+Intruder: 742
+Intuition: 24350, 27832
+Invasion Ember: 28914
+Invincibility: 131, 1567, 7407, 23636, 25190, 28958, 31943, 9001331
+Invincibility Cooldown: 23637
+Invincibility Limit: 22552, 32653, 8000631
+Invincible: 24597, 24598, 9000250
+Invincible Breakthrough: 32229
+Invincible Breakthrough (Rider): 32230
+Invincible Charge: 30992, 31326
+Invincible Dash: 23730
+Invincible Flight: 3636, 20111, 20999, 31380, 32245, 8000163, 8000164, 8000166, 8000286
+Invincible Flight Disabled: 9001924
+Invincible Protection: 23631
+Invincible Trade Packs: 5130
+Invincible Wings: 9001923
+Invisible Predator: 17165, 17166
+Invisible Sight: 9002280
+Involuntary Flight: 28621
+Invulnerable: 9000248
+Ipnya's Wisdom: 21056
+Ipnya's Wisdom Ready: 21111
+Ipnya's Wisdom: Attack: 21085
+Ipnysh Knowledge: 9001517
+Ipnysh Protection: 27910, 29310, 29541
+Ipnysh Sealstone Aura: 27978
+Iron Dash: 20816, 8000341
+Iron Wall Prison Destruction (Hidden): 6293
+Ironclad Siege Mode: 1864
+It's All Cementics: 20186
+Jinhui's Greatest Wish: 8318
+Jive: 21654
+Jola's Curse: 27330
+Jola's Grudge: 7018
+Jola's Grudge Immunity: 7028
+Jola's Petrify: 6967
+Jola's Petrify Progress: 6968
+Jola's Prey: 27369
+Joust Breakthrough (Rider): 6167
+Jousting Lance Attack: 6180
+Joyous Spirit: 2927
+Juggernaut Charge: 18379, 20819, 8000342
+Juggernaut Form: 20392
+Jungle Tamers: 20717
+Kawaii-Overload: 21156
+Keep Away Immunity: 33057
+Keep Quiet: 23408
+Keep Running!: 21060, 9001329
+Kinetic Shield: 20817, 8000345
+Kingdom's Heart: 674
+Kitsu's Charm: 22431, 8000633
+Kitsu's Fear: 22430, 8000632
+Knocked back and damaged.: 21000
+Kraken Ink: 11058
+Kraken's Gaze: 11063
+Krilling It: 11237
+Kyprosa: Gods and Heroes: 22023, 8000575
+Kyprosa’s Will: 9001650
+Lamar's Protection: 30334
+Language Buff: 9000418, 9000633
+Lapis Fae Wing: 4438
+Lassitude: 114, 2275, 6951
+Lasso Aftereffect: 3773
+Lassoed: 2138, 2777, 4826, 23306, 23817, 26406, 26501, 26826, 28320, 28620
+Last Ditch Effort: 5799
+Leader of the Pack: 16848
+Leader's Spirit: 30536
+Leader's Valor: 30390
+Leaf Me Alone: 20172
+Leap: 23760, 23761, 26197
+Learn Languages: 27617
+Leather Set: 715
+Leech: 4424, 6899
+Legend of Sylvina: 31447
+Legendary Beast Figurehead: 11335
+Legendary Cloth Armor: 6424
+Legendary Dragon Wings: 6575
+Legendary Leather Armor: 6432
+Legendary Plate Armor: 6440
+Lemon Soda: 9001191
+Leomorph Stealth: 2408
+Leomorph's Return: 16793
+Lesser Lucky Elixir: 9000955
+Lethargy (Bloody Chantey): 847, 15040
+Leviathan Front Armor: Epic: 27415
+Leviathan Rear Armor: Epic: 27481
+Leviathan Salvage: 13737
+Leviathan Salvage Celebrations: 13834
+Leviathan Side Armor: Epic: 27448
+Leviathan's Fear: 14596
+Leviathan's Fury: 13840
+Lich King: 9001708
+Life Bloody Chantey (Rank 2): 21446
+Life Bulwark Ballad (Rank 2): 21447
+Life Quickstep (Rank 5): 21444
+Life Tiger Strike: 18447
+Light Footsteps: 4525, 4627
+Lightning Arrow's Target: 23501
+Lightning Fervent Healing: 18390
+Lightning Glide: 20998
+Lightning Mine Explosion: 27943
+Lightning Orb: 29212
+Lightning Shock: 1070
+Lightning Stealth: 7739
+Lightning Strike: 28819
+Lightning Wall: 29253
+Like a flash: 9000062
+Limb Lopper: 20196
+Lion's Eyes: 9001066
+Lithe Flow: 20715
+Loot Drop Powerstone: 23239
+Lost Garden Energy: 16271
+Lotus Magithopter: 26980, 8000804
+Lovely Heart: 32250
+Lover's Boat trip: 4890
+Lowering Anchor: 615
+Lowering the Anchor: 645
+Lucid Dream: 1581
+Lucid Dream Time: 1582
+Lucius: Gods and Heroes: 22022, 8000574
+Lucius’s Will: 9001654
+Lucky Elixir: 8000681
+Lucky Quicksilver Tonic: 8000009
+Lullaby Pajamas: 30561
+Lunar Soulshard: 9000334
+Machine: 26461
+Machine Component Customization: 27618
+Machine in 5mins: 26459
+Magic Carpet Magithopter: 23711
+Magic Circle: 25646, 25647
+Magic Circle (Rank 2): 1249
+Magic Circle (Rank 3): 8075
+Magic Circle Teleport Available: 25850, 25851
+Magic Cloud Glider: 21725
+Magic Protection: 24974
+Magic Shield: 6889
+Magic Shield (Rank 5): 13619
+Magic Soulshard: 9001848
+Magical Bleeding: 9001801
+Malicious Binding: 22995
+Mambo: 21655
+Mana Abyss: 9001805
+Mana Barrier: 16870, 22945
+Mana Chain: 28855, 9001799, 9001800
+Mana Drain: 22920
+Mana Fuel Injection: 20101, 20104
+Mana Poison: 9001798
+Mana Shield: 26084
+Manager's Clairvoyance: 21367
+Marauder's Glider: 17122
+Mark: 26471, 26472
+Mark (Rank 4): 7659
+Mark of the Hunt: 22571
+Marmas's Brand: 15594
+Meatball Kebab: 694
+Mechanical Kraken's Protection: 25703
+Meditating: 21112
+Meditation: 455
+Meditative Echo: 1277
+Melisara: Gods and Heroes: 22025, 8000577
+Member of the Pack: 16850
+Memory Keeper: 13849
+Mend: 25691, 25875
+Merchant's Costume: Basic: 8000301, 9001851
+Merchant's Costume: Fishing: 8000312, 9001853
+Merchant's Costume: Trade: 8000302, 9001852
+Mercurial Movement: 20552
+Mermaid's Breath: 5940
+Meteor Impact: 13, 19979, 20019, 28687, 28688
+Meteor Shower: 29260
+Mettle: 27868
+Milky Protection: 31023
+Milky Shield: 9002069
+Minor Healing Potion Rank 1: 20599
+Minor Healing Potion Rank 2: 20600
+Minor Healing Potion Rank 3: 20601
+Minor Healing Potion Rank 5: 20603
+Minor Healing Potion Rank 6: 20604
+Minor Healing Potion Rank 7: 20605
+Minor Healing Potion Rank 8: 26585
+Miraculous Speed: 9000355, 9000357
+Mirror Warp: 7010
+Mirror's View: 15708
+Mist Flame: 24585
+Mist Sonic Wave: 18956
+Mist Wraith's Curse: 23427
+Mistral Clairvoyance: 14650
+Mock Fight Draw: 3881
+Mock Fight End: 4787
+Mock Fight Lose: 3880
+Mock Fight Win: 3879
+Molang Cooling Off: 32699, 32700
+Molang, Help!: 32663
+Molang, I Love You!: 32664
+Monster Hunter's Dream: 9001842, 9002009
+Moonlight Juice: 23215, 9002077
+Moonshadow Glider: 3583
+Moonwalk Loop: 26869
+Moored: 13817
+Morpheus's Favor: 27032
+Morpheus's Mark: 4957
+Mounted Defense: 389
+Move Buff: 8000524
+Move Speed Reduction: 28565
+Move to Magic Circle: 19037
+Mucus: 25743
+Multigrain Bread: 20620
+Music Box Duration: 9000959
+Mysterious Scroll From the East: 31718
+Mystic Festival Fireworks: 8000356, 9001825
+Mythic Cloth Armor: 6425
+Mythic Leather Armor: 6433
+Mythic Plate Armor: 6441
+Naima’s Will: 9001655
+Napping: 23834
+Near Condensed Archeum: 31935
+Near Gate to the Garden: 32641
+Nebe's Favor Magithopter: 27088
+Necromantic Flame: 26762
+Needs Calf-eine: 20187
+Neops' Taunt: 26719
+Neutral Ground: 21506
+Night Lord's Wings: 30021
+Night Sky's Sacred Will: 6912
+Nightfire Glider: 21054, 8000419
+Nightmare: 5322, 5342
+Nightmare Barrier: 29625
+Nightmare Grinder: 5681, 15141
+Nimbus 2000: 21031, 8000405
+Nimbus 2001: Gliding: 8000408
+Nimbus 2001: Turning: 8000409
+Noble Blossomhoof: 27007
+Noble Sturgeon: 9002261
+Nomad Ferre’s Dream: 9001843, 9002010
+Non-collision after a Teleport: 5764
+Nui Bubble Trap: 1995
+Nui's Blessing: 20712
+Nui's Consolation: 1931, 28641
+Nui's Veil: 16140, 20912, 20914, 8000357, 8000358
+Nuimari Giant's Spin: 15706
+Nui’s Will: 9001651
+Nymph Stealth Flight: 21647, 28770
+Oblivion: 5305
+Oblivious Energy: 5268
+Obscure Vision: 2214
+Oh no, oh no, oh no...: 13818
+Old Hunter’s Dream: 9001838, 9002005
+Ollo's Will: 9001652
+Orange Goblet of Honor (Rank 1): 24469
+Orange Goblet of Honor (Rank 2): 24470
+Orange Goblet of Honor (Rank 3): 24471
+Orange Goblet of Honor (Rank 4): 24472
+Orange Goblet of Honor (Rank 5): 24473
+Orange Soda: 9001192
+Orchidna's Journal Collector: 21171
+Orchidna's Snakeskin Shroud: 21616, 8000504
+Ouch! Hot!: 20023
+Ouch, Hot!: 8000271
+Our Little Secret: 8209
+Outshine the Evil: 9000241
+Over Healing: 23965
+Overburdened: 1454, 6188, 6192, 6193, 6194, 6198, 6201, 17042, 23688
+Overcharge: 20818, 21059, 9000479
+Overcharged: 8000346
+Overpowered: 21181, 22253
+Overpowering Aura: 2104, 25747
+Overwhelming Fear: 9000484
+Owner's Mark: 4867, 5748, 14470
+Owner’s Mark: 24618
+Pack Tactics: 4835
+Pain Harvest (Rank 2): 7657
+Painful Nightmare: 6503
+Painful Recharge: 22540
+Paralyzing Poison: 22610, 28680
+Participant: 26016, 26017
+Participants: 6295
+Passionate Dance: 5049
+Patch F17: 9000039
+Patron: 8000011
+Peace Zone: 2149, 4828, 14754, 21394, 26835, 9002353, 9002619
+Penetrated: 18982
+Penetrating Dark Energy: 23474
+Pep Up: 25779
+Pervasive Black Magic: 16767, 18169
+Petrification: 6975, 23061, 23198, 23430, 24391, 25189, 27124, 27308, 27323
+Petrification Immunity: 18478
+Petrifying: 27637
+Phantasm's Wail: 21404, 21405
+Physical Form: 20127
+Piero's Chocolate: 9001956
+Pink Erenor Wings: 9002278
+Pink Goblet of Honor (Rank 1): 21799
+Pink Goblet of Honor (Rank 2): 21804
+Pink Goblet of Honor (Rank 3): 21809
+Pink Goblet of Honor (Rank 4): 21814
+Pink Goblet of Honor (Rank 5): 21822
+Pirate's Toxic Shot: 2242
+Plate Set: 717
+Play Dead: 649
+Play Instrument: 20753, 31555
+Play Lute: 5073
+Play Pipe Organ: 14580
+Play the Flute: 5108
+Poison: 22207, 23160, 26506, 28689
+Poison: Wave: 24237
+Poisoned: 21999, 27918
+Poisoned Weapons: 22266, 24093, 24235
+Poisoning: 2823, 2828, 5587
+Poisonous Pool: 26429, 27694
+Pole Dance: 21572
+Pole Dance Champion: 21574
+Polluted Light: 23950, 28684
+Portable Siege Launcher: 27848
+Poseidon's Bless: 9000166
+Poseidon's Shield: 9000167
+Poseidon's Totem Bubble: 9000254
+Possessed by the Dead (Rank 4): 30116
+Power Dash: 16911, 21733, 22408, 23639, 30331, 8000172, 8000522
+Power of Crowd: 29716
+Power of Fashion: 28913
+Power of Ice: 9000176
+Power of the Blue Flower: 3075
+Power of the Ipnya: 29238
+Power of the Red Flower: 3076
+Powerful Shock: 29897
+Prepare for Telekinesis: 2260
+Prepared for Launch: 2258
+Preparing Glider: 4622, 20121, 8000279
+Preparing next Trick: 28599
+Presence of the Dead: Wave: 30595
+Prideleader: 8000467
+Primal Strike: Life: 32795
+Primal Strike: Wave: 31544
+Prisoner's Mind: 24813
+Protect: 6389, 23341
+Protected: 6390
+Protection Area: 2221
+Protection of the Hiram: 23106
+Protective Cloud: 23625
+Protective Dash: 16913, 8000174, 9000734
+Protective Magic Circle: 28332
+Protective Seal: 23315
+Protective Shield: 22574
+Protective Shield of Blood: 30330
+Protective Wings: 258, 28212
+Protective Wings: Stone: 28188
+Provoked: 502, 24060, 27281
+Pulled In: 11057
+Pumpkin Punisher: 20272
+Puncture: 2622, 2624, 26966
+Purge: 23347
+Purification Participant: 26507, 26509
+Purifying Archeum Lodestone: 15605, 25562
+Purifying Ember: 31559
+Purple Goblet of Honor (Rank 1): 21798
+Purple Goblet of Honor (Rank 2): 21803
+Purple Goblet of Honor (Rank 3): 21808
+Purple Goblet of Honor (Rank 4): 21813
+Purple Goblet of Honor (Rank 5): 21821
+Pushed: 6897, 27574, 28649
+Pushed Back: 15180
+PvP is undesirable: 9000256
+Pyro Panic: 8253
+Quake Freerunner: 23145, 23180
+Queasy: 14980
+Queen's Blessing: 20666
+Quick Movement: 3565
+Quick Recovery: 559
+Quick Turn: 1438
+Quickstep (Rank 2): 801
+Quickstep (Rank 3): 802
+Quickstep (Rank 4): 803
+Quickstep (Rank 5): 804
+Rabbit Boogie: 29568
+Rabbit Stealth: 25751
+Radiant Disciple's Greatclub: 24395
+Radiant Erenor Bastion: 32080
+Rainbroom: 21034
+Rainstorm: 1917
+Ram: 6178
+Rammidri Cooling Off: 31532
+Rammidri Protection: 31452
+Rampage: 20821, 20822, 8000337, 8000338
+Rampaging: 20823, 8000339
+Ranged Shield Block: 4629
+Rank 1 Minor Mana Potion: 20609
+Rank 2 Minor Mana Potion: 20610
+Rank 3 Minor Mana Potion: 20611
+Rank 5 Minor Mana Potion: 20613
+Rank 6 Minor Mana Potion: 20614
+Rank 7 Minor Mana Potion: 20615
+Rank 8 Minor Mana Potion: 26586
+Rapid: 29671
+Rapid Blows: 1693
+Rare Cloth Armor: 22984
+Rare Leather Armor: 22986
+Rare Plate Armor: 22988
+Ravager: 20682
+Ravenspine Wings: 21573, 8000486
+Ravine of Time and Space: 27998, 31395
+Razor Scales: 18358
+Razor Visage: 29841
+Razorbeak's Curse: 26152
+Ready for Unloading: 5907
+Rear Cover Opened: 6247, 28847, 28849, 9000982
+Rear Wind Winner: Eternal: 21133
+Rear Wind Winner: Legendary: 20879
+Rear Wind Winner: Mythic: 20880
+Rebirth Trauma: 2385
+Received Damage Reduced: 25004
+Received Damage Reduction Disabled: 25005
+Reckless Charge: 7543
+Reckless Dash: 24964, 32553, 32654
+Reckless Sail: Legendary: 20894
+Recovering: 20503
+Red Arowana: 27814, 27815, 27816
+Red Dragon Wing-Reaper: 2099
+Red Dragon's Dignity: 6702
+Red Dragon's Doom Equipped: 6530
+Red Dragon's View: 6876
+Red Erenor Wings: 9002275
+Red Tapioca: 25789
+Redoubt: 6888, 21406, 21407, 26958, 26959, 28206, 28207
+Redoubt (Level 1): 328
+Redoubt (Level 2): 329
+Redoubt (Level 3): 330
+Redoubt: Life: 21372
+Redoubt: Stone: 28116, 28118
+Reduces Received Healing: 23357, 23360
+Refined Erenor Bastion: 32083
+Reflect: 31166
+Reflexes: 4388
+Regenerating Seal Warden: 21119
+Relentless: 22643
+Remaining Health: 21093
+Remove Petrify: 6971
+Renewal: 17925
+Repulsing Darkness: 21176
+Resonance of the Battle: 5931
+Responsibility of the Ancient: 24072
+Resting Ill Tempered Baku: 31864
+Restoring...: 14297
+Resurgence: 220, 6903, 17417
+Resurrection: 2166
+Resurrection (Rank 1): 556
+Retribution: 2923, 4516, 4667, 24066, 24071, 24088
+Returning: 550
+Rev the Engine: 31760
+Reviewing...: 27629
+Revitalizing Cheer: 24987, 25401, 25402, 28208
+Revitalizing Cheer: Stone: 28186
+Reward Level 0: 26196
+Reward Level 1: 25656
+Reward Level 10: 25666
+Reward Level 11: 25667
+Reward Level 12: 25668
+Reward Level 2: 25658
+Reward Level 3: 25659
+Reward Level 4: 25660
+Reward Level 5: 25661
+Reward Level 6: 25662
+Reward Level 7: 25663
+Reward Level 8: 25664
+Reward Level 9: 25665
+Rib Kebab: 697
+Rich Blessed Barbecue: 21792
+Rider’s Stealth: 24989
+Riding Barrel: 20842
+Rift Crevice: 32202
+Rift's Energy: 9000127
+Ringing Ears: 27270
+Ringing in the Ears: 25843
+Rip-Roaring: 17186
+Roar of the Pride: 21228, 23635, 8000468
+Roast Meatballs: 686
+Roast Ribs: 689
+Roast Sirloin: 688
+Roast Tenderloin: 687
+Robotic Revenge: 18151
+Rock: 9000251
+Rock Bottom: 11251
+Rocket Wings #2: 21604, 8000506
+Roll: 6373
+Rolling Rocks: 27924
+Romantic Lovers: 4891
+Room Sweeper: 29300
+Root: 770, 23322, 25974
+Root Ripper: 20274
+Rose Wings: 9001502
+Rosinante's Strength: 4287
+Rosiola's Burning Flames: 32152
+Rosiola's Explosive Flames: 32151
+Rotten Venom: 26630
+Rough Sea Winds: 7743
+Rousing Rabbit Pajamas: 28302
+Rowing: 11388
+Rum Barrels: 27633
+Rum Runner: 8000058
+Run!: 1933, 20216, 20991, 20996, 21076, 21218, 22169, 22681, 22965, 23042, 23557, 23759, 24460, 24463, 24608, 24961, 26143, 27008, 27284, 27359, 28111, 28869, 29343, 29827, 30989, 31947, 32110, 8000293, 8000461, 9000061, 9000311, 9000313, 9001059
+Ruthless Assault: 512
+Sacrifice: 30098, 30137, 30141, 30142
+Sallium Garbs Wings: 29617
+Salvation: 6768, 17379
+Sand Soulshard: 9000336
+Santiago's Revenge: 8000309
+Satiety (Stage 1): 5861
+Satiety (Stage 2): 5862
+Satiety (Stage 3): 5863
+Satiety (Stage 4): 5864
+Satiety (Stage 5): 5865
+Savage: 9000211
+Savory Bread: 20625
+Savory Meatballs: 680
+Savory Ribs: 685
+Savory Sirloin: 684
+Savory Soup: 20629
+Savory Tenderloin: 683
+Scale Defense: 2521
+Scan: 6515
+School of Fish Area: 5767
+Score Memorization: 6010
+Score Memorization: Party Leader: 24140
+Score Memorization: Party Member: 24141
+Scout: 9000216
+Scouting: 4648
+Scratch: 9001892
+Sea Lion's Wave: 21541
+Sea Soulshard: 9000473
+Seaknight: 32021
+Seal Destroyer's Dignity: 21350
+Seal Warden Barrier: 21081
+Searing Rain: 23367
+Seastorm Clairvoyance: 14651
+Seastorm Fish Finder: 11496
+Seastorm Sea Monster Finder: 14256
+Seismic Impact: 20043
+Self Destruct: 28030
+Self Medicator: 8000057
+Self-Destruct: 3637
+Self-Recovery: 6624, 8331
+Serpent Fanatic: 27247
+Serpent Glare: 22958
+Severe Cold: 26526, 31668
+Shackle: 206, 6946, 21159, 26963, 27219, 29302
+Shackled: 22511
+Shadow Cannon (Cannon Mode): 21351
+Shadow Cannon (Inactive): 21353
+Shadow Cloak: 22964, 22980, 22981
+Shadow Flight: 3625
+Shadow Trick: 9001060, 9001061
+Shadow Vortex: 28971
+Shadowhawk's Truce: 26432
+Shadowsong: 15146
+Shaken: 3761
+Shaken (Rank 3): 2766
+Shaken (Rank 4): 2767
+Shaken (Rank 5): 2768
+Shaken (Rank 6): 7654
+Sharp Illusion: 9000208
+Sharp Thorn: 20598, 28232
+Sharp Weapons: 28615
+Sharpshooter: 9000221
+Shatigon's Authority: 26829
+Shattered Soul: 9000908
+Shattering Curse (Rank 6): 21374
+Sheep Shearer: 20269
+Shell Reflection: 27287, 27944
+Shield Charge Impact: 18428
+Shield Domination: 2316
+Shield Endurance: 3780
+Shield Slam: 21960
+Shield Stance: 18375
+Shield of Deliverance (Rank 1): 6764
+Shield of Deliverance (Rank 2): 6765
+Shield of Deliverance (Rank 3): 6766
+Shield of Deliverance (Rank 4): 6767
+Shield of Steel: 22006
+Shining Brightly: 9000239
+Ship Component Customization Enabled: 13926
+Ship Pull/Push Immunity: 14409
+Shock: 2153, 25432, 29664, 29845, 30700, 31561, 32496
+Shock Absorption: 16885, 16887
+Shocking Smell: 3684, 14986, 9001382
+Shockstep Effect: 21066
+Shockwave: 2795, 4550, 21138, 9001067, 9001849
+Shot Precisely: 16792
+Shout: 30729
+Sickened: 3023, 23816
+Siege Commander: 3727
+Siege Shock: 14939
+Siege: Thunderbolt Glider: 24995
+Silence: 245, 266, 2743, 6893, 15721, 21161, 21987, 22013, 22520, 23358, 23523, 23524, 26965, 28595, 28676, 28682, 28683, 29667, 29668, 31862
+Silver Erenor Wings: 9002343
+Silver Sage Taffy: 24158
+Silver Taffy: 23094
+Simple Sandwich: 20623
+Sirloin Kebab: 696
+Skewer: 439, 6911, 18396, 18420
+Sky Emperor’s High Speed Glide: 23088
+Sky Erenor Wings: 9002344
+Skydash: 7102, 15113, 9000731
+Skywhisper Glider: 16305, 8000071
+Slayer of Gods: 9000113
+Sleep: 523, 2276, 6952, 22065, 23959, 28251
+Sleep Immunity: 400
+Slightly Sticky: 6654
+Sloth Glider: 7206, 8000033
+Slow: 1755, 2131, 2132, 2309, 2723, 2778, 4693, 5784, 6793, 6950, 15123, 16368, 16387, 17182, 18147, 18173, 20997, 21087, 21461, 21462, 22944, 23128, 23149, 23307, 23962, 24584, 24587, 24633, 26932, 27192, 27706, 28677, 28678, 28685, 28686, 28701, 28821, 29303, 32066, 8000206, 8000370
+Slow Meatball: 28872
+Slowed: 23092, 32741, 33012
+Small Luck: 5933
+Smell the Scent of the Dawn: 4907
+Smell the Scent of the Fog: 4908
+Smell the Scent of the Wind: 4902
+Smoke Shroud: 28865
+Smoked Meatballs: 690
+Smoked Ribs: 693
+Smoked Sirloin: 692
+Smoked Tenderloin: 691
+Smokin' Waves: 8322
+Snare: 883, 2458, 3186, 3719, 4843, 6905, 22627, 24494, 24634, 24928, 27339, 27730
+Snare Immunity: 3672
+Snared: 27307
+Snipe: 31406
+Snipe Target: 6819
+Sniper: 9000220
+Snowflake Fireworks: 28925
+Snowflake Flight: 30570
+Snowflake Wings: 30300
+So Basalty: 20184
+Soar: 20513
+Soaring Impact: 18367
+Sobbing: 8269
+Sojung's Grudge: 31417
+Solar Soulshard: 8000500, 9001818
+Sonic Wave: 18950
+Soul Absorption: 9000386
+Soulbound Edge: 22977
+Soulmare: 16146
+Soulslake Bullet: 28878
+Soulslake Bulwark: 27892, 27894
+Soulslake Cleaver: 27904
+Soulslake Edge: 27822
+Soulslake Leech: 27908
+Soulslake Razor: 27900
+Spade Sword: 32207
+Special Forces Army Commander: 31714
+Special Forces Commander: 31711
+Special Forces General: 31713
+Special Forces Supreme Commander: 31712
+Specter Spectacular: 21971, 8000546
+Speedy Experience: 8202
+Spellbook: Unstoppable Force: 7478
+Spicy Blessed Barbecue: 21791
+Spirit Form: 20128
+Spirited Accuracy: 23854
+Spirited Defense: 23852
+Spirited Regeneration: 23853
+Spiritual Incarnation: 9000238
+Splendid Festival Fireworks: 9001827
+Stabilizing vehicle: 23808
+Stabilizing vehicle...: 21554
+Stag's Dash: 25364
+Stagger: 1449, 22900
+Stainless Steal: 20175
+Stalker's Mark: 6794
+Stalker's Mark (Rank 2): 2445
+Stand Strong: 16847
+Standby: 27993
+Star Wings: 6866
+Star's Divine Protection: 13739
+Start Whalesong Harbor Tower Defense Rank 2 (Haranya): 21211
+Start Whalesong Harbor Tower Defense Rank 3 (Haranya): 21212
+Start Whalesong Siege Jakar Appearance (Harani): 21213
+Startling Strain: 173
+Statue of Evil Spirit: 21429
+Steady Shooting: 27701
+Stealth: 896, 1089, 1652, 21346, 22095, 23539, 23540, 23752, 23753, 24640, 25702, 26654, 27076, 28654, 28870, 30017, 30109, 30332, 30333, 9000020, 9000021, 9000024, 9000025, 9001893
+Stealth (Rank 2): 600
+Stealth (Rank 3): 601
+Stealth (Rank 4): 8225
+Stealth Flight: 24507, 8000535
+Stealth Move: 2405, 24965, 25752
+Stealthy Sweeper: 21033, 8000412
+Stepping on a Landmine: 28112
+Stew Chef: 20277
+Stew Stoker: 20275
+Sticky Poison: 24097
+Stiffening: 1012
+Stone Corrosion: 29645
+Stone Crippling Mire: 23076
+Stone Mirror Warp: 23135
+Stop Encroaching Darkness: 23502
+Storm: 28596
+Stout Heart: 9000026
+Strada Catapult: 24663
+Strange place: 9001699
+Strength of the Faction: 23717
+Strength of the Faction Active: 23720
+Strike: 20052
+Strong Attack: 22963
+Strong Claws: 4385, 20719
+Strong Communication (Ally-Self): 29909
+Strong Communication (Enemy-Self): 29910
+Strong Communication (Self-Ally): 29912
+Strong Communication (Self-Enemy): 29911
+Strong Smell: 24334
+Strong Telekinesis: 2261
+Strong as a Mountain: 9000246
+Stubborn Dash: 20471
+Studious Dwarven Elixir: 8000023
+Stuffy nose: 9002244
+Stun: 416, 501, 1786, 2244, 2510, 2846, 3127, 3601, 4825, 4827, 6873, 6892, 18470, 20815, 20825, 21361, 22519, 22532, 23710, 23958, 23961, 24196, 24411, 26964, 27279, 27575, 27707, 29273, 30915, 31372, 8000340, 8000344
+Stun Immunity: 2371
+Stunned: 20936, 23166
+Sturdy Body: 28616
+Sub Zero: 26407
+Succubus' Cry: 25554
+Succulent Blessed Barbecue: 21794
+Sudden Ambush: 29828
+Sudden Death: 21649, 8000516, 9001470
+Summon Crows: 28238
+Summon Crows: Stone: 28237
+Summon Neops: 26702
+Summon Sentry Orb: 28584
+Sun God's Protection: 30945
+Sunflower Magithopter: 27019
+Sunlight Juice: 23254, 9002078
+Supplemental Block: 813
+Supreme Bloodthirst Rifle: 28861
+Supreme Silvertongue: 5486
+Surging Vitality: 22573
+Survival: 24380, 24382
+Sweet Bread: 20622
+Sweet Soup: 20632
+Swift Soulshard: 9002572
+Swim Speed Increase: 5752
+THAT'S SO METAL: 5465
+Tactical Roll: 28597
+Tahyang's Lunastone: 22000, 8000648
+Tailwind: 3768, 16214, 20663
+Tangy Liquor: 1895
+Tangy Soda: 701
+Target Locked: 20402
+Taste Tester: 20276
+Tasty Chicken: 8000514
+Taunt: 171, 2111, 5547
+Tempest Wings: 22230
+Temple Priestess's Dream: 9001841, 9002008
+Temporal Armor: 20668
+Temptation: 4676
+Tender Blessed Barbecue: 21793
+Tenderloin Kebab: 695
+Terrifying Roar: 6115, 16766
+Territory Workshop Manager: 25313
+Terror: 3611
+The Black Dragon's Threat: 32460
+The Moon's Burden: 23732
+The Order of Nui Adept: 9000147
+The Professional: 8296
+The Sun's Offering: 23645
+Thiol's Protection: 25355, 26239, 26385, 26527, 26680
+Thirsty for Blood: 9000218
+Threat Detection - Rear: Legendary: 28811
+Threat Detection - Rear: Mythic: 28812
+Three Red Moons: 24975
+Thriving Family: 20540
+Throwing Flames: 21164
+Thumbs Up: 31611
+Thunder Dash: 6174
+Thunder Pace: 9000973
+Thunder Spirit: 22291
+Thunderbolt Glider: 3584
+Thunderbreath Aftershock: 21015
+Thunderwing's Armor: 22270
+Thunderwing's Blessing: 20848
+Thunderwing's Curse: 20450
+Thunderwing's Dash: 20840, 20971
+Thunderwing's Wound: 20855
+Thunderwings’s Irresistible Force: 22299
+Tide of the Nymphs: 2625
+Time Limit: 18370
+Time of Nightmares: 5341
+Time to Relax: 25304
+Tipsy: 22077
+Tired Snowflake: 28674
+Titan Feather: 22567
+Titan Scar: 20854
+Titan's Armor: 20972
+Titan's Vitality: 20828
+Titan's Wings: 20928
+Title Level 1: 23139
+Title Level 2: 23140
+Title Level 3: 23141
+Title Level 4: 23142
+Title Level 5: 23143
+Title Level 6: 25109
+Title Level 7: 25330
+To the arena!: 5700
+Today I'm the Cook: 5877
+Together Forever: 29202, 9001957
+Torn Wound: 1083
+Tortoise Bubble: 28000
+Totem Gaze: 25874
+Totem's Energy.: 31623
+Tough (Rank 4): 7650
+Tough Turkey: 8000219
+Toughened: 4535, 25358
+Toughened (Rank 2): 446
+Toughened (Rank 4): 448
+Towering Sandwich: 26588
+Track: 8000368
+Trance: 1756
+Tranquility: 29949
+Transform: 9001112, 9001232, 9001430
+Transformation: 28900
+Transparent Daru Costume: Good Night's Sleep: 32673, 32679
+Transparent Daru Costume: Production: 32682, 32683, 32684, 32791
+Travel Protection: 6237, 32642
+Traveler's Blessing: 9001807
+Traveling Farmer's Blessing: 9001809
+Treasure Hunter's Dream: 9001837, 9002004
+Tremor: 23468
+Trigger Mine: 27938
+Triggers Hunter's Guile: 24242, 25783
+Trip Immunity: 2374
+Trip Impact: 23029, 23305
+Triple Engine Airship: 24863
+Tripped: 7, 21, 138, 141, 505, 518, 1445, 1771, 2029, 5410, 5675, 5875, 6894, 11350, 17423, 20062, 20369, 21080, 21381, 22035, 22890, 22899, 22939, 25438, 26133, 26161, 26416, 26616, 26699, 27248, 27631, 27632, 28114, 28647
+Tripped Shock: 23127
+True Magic Gardener: 9000912
+Truly Cathletic: 21619, 8000502
+Trunk Chopper: 20197
+Trunks Up: 25437
+Trusting Wanderer: 9000480
+Turbulence: 4838, 7742, 9001661
+Twilight Phase: 9002282
+Twilight Stealth: 22706, 30779
+Twilight Stealth Cooldown: 22713, 30780
+Twilight Wings: 22630, 8000678
+Twin Shadow Slash: 24953
+Twisted Contract Activated: 26662
+Twisted Flesh: 26791
+Typhoon Clairvoyance: 11354, 14652
+Tyranos's Chores: 8000307
+Ultimate Elixir of the Hunt: 22941
+Ultimate Glider: 3530
+Ultrasonic Waves: 21209
+Ultrasonic Waves Effect: 13915
+Umbrella Magithopter: 22638, 8000638
+Unable to use Potions: 24543
+Unassailable: 2786
+Unbreakable Will: 22970
+Underwater Breathing Device: 2218, 5020
+Unfurl Enoan Double Square Rig: Epic: 14021
+Unfurl Eznan Square Mainsail: Mythic: 13957
+Unfurl Growling Square Foresail: Epic: 13988
+Unfurl Growling Square Foresail: Legendary: 13989
+Unfurl Growling Square Foresail: Mythic: 13990
+Unfurl Growling Square Mainsail: Legendary: 14000
+Unfurl Growling Square Mainsail: Mythic: 14001
+Unguarded: 853
+Unguarded (Bulwark Ballad): 21995
+Uninvited Stranger: 2966
+Unique Cloth Armor: 6420
+Unique Leather Armor: 6428
+Unique Plate Armor: 6436
+Unpleasant Sensation (Quickstep): 772, 21994
+Unstoppable Breakthrough: 24464
+Unstoppable Race: 20439
+Untargetable: 23086, 23715, 28598
+Untargetable Cooldown: 23087
+Untouchable: 815, 25715
+Urgent Battle: 6703, 21370, 22475, 26413
+Use Guild Flare: 16274
+Use Raid Flare: 23368
+Valor Boost (Rank 1): 24710
+Valor Boost (Rank 2): 24709
+Vegetable Bread: 20621
+Vegetable Soup: 20631
+Venomous Strike: 29241
+Verdant Breakthrough: 20218
+Vicious Implosion: 24056
+Vicious Implosion Immunity: 5932
+Vicious Rebuke: 27224
+Vigorous: 9000247
+Vine Breakthrough: 8000297
+Vine Obstruction: 20221
+Visual effect: 9000189
+Vivacious Mariner Uniform: 20312
+Vocation Expertise Tonic: 31434, 8000010
+Vocation Hastener Scroll: 11021
+Void Corps: 32039
+Void Field: 26405
+Volcanic Breath: 20042
+Vulnerability: 16576
+Vulnerable to Core Cleaving: 20207
+Vulnerable to Limb Lopping: 20205
+Vulnerable to Trunk Chopping: 20206
+Vyrava's Burning Seed: 25307
+Vyrava’s Ember: 25040
+Vyrava’s Enraged Ember: 25041
+Wanted: 3710
+War Cry: 20443
+War Drum Duration: 21839
+War Drum: Art-official Intelligence: 32239
+War Drum: Artistry Master: 32238
+War Drum: Artistry Master Stage 1: 32233
+War Drum: Artistry Master Stage 2: 32234
+War Drum: Artistry Master Stage 3: 32235
+War Drum: Artistry Master Stage 4: 32236
+War Drum: Artistry Master Stage 5: 32237
+War Preparations: 32024
+War Time: 32025
+Warding Light: 127
+Warding Mist: 22060
+Wargod Blessing: 9000495
+Warlord: 21773
+Warmth of Cannon: 4686
+Warning of War: 4087, 14818
+Water Guard: 31916
+Waterlogger: 20273
+Watermelon: 21818
+Wave Double-Time: 23151
+Wave Drop Back: 21376
+Wave Lunafrost: 5187, 5189
+Weak: 20933
+Weak (Rank 4): 7649
+Weaken Invader: 31892
+Weakened Body: 1128, 28642
+Weakened Energy: 15039, 31367
+Weakening Bubble: 20782
+Wedding Blessings: 16133
+Welling Health: 5542
+Werewolf's Delirium: 21182
+Werewolf's Stealth: 21179
+Wheeled Mortar Siege Mode: 1863
+Whirlwind: 1923
+Whirlwind Immunity: 22671
+White Arden Healer: 24478
+Wiggle: 22141
+Wild Fire: 9000307
+Wild Horror: 9000182
+Wild Trout Clout: 5923
+Willpower: 20511
+Willpower of the Ancient: 24081
+Wind Gust: 6455, 23452
+Wind Shield: 24094
+Wind Soulshard: 9000335
+Wind Winner Disabled: 20793
+Wind Winner: Epic: 20867
+Wind Winner: Eternal: 21128
+Wind Winner: Legendary: 20868, 30518
+Wind Winner: Mythic: 20869, 30519
+Wingbeat: 26166
+Wings of Immortality: 23199, 8000692
+Wings of Nymph Ibayne: 21641
+Wings of Protection: 23201, 8000705
+Wings of Revenge: 23202
+Wings of Terror: 23200, 8000698
+Wispy Stealth: 9001895
+Witch's Ally: 9000191
+Withdraw!: 2241
+Wonders Fisher: 9001388
+Wonders Restaurateur: 9001390
+Wonders Sommelier: 9001391
+Wonders Worker: 9001389
+Workman's Haste: Chest: 11424
+Workman's Haste: Feet: 11427
+Workman's Haste: Hands: 11426
+Workman's Haste: Head: 11383
+Workman's Haste: Legs: 11425
+Workman's Haste: Waist: 11429
+Workman's Haste: Wrists: 11428
+Worship the Akasch: 27252
+Worshipping: 27368
+Wraith Rooted: 2348
+Wraith's Curse: 477, 2347, 18388
+Wraithwall (Rank 4): 20131
+Wrathful Black Dragon's Bite: 28874
+Wrathful Impact: 23812
+Wyvern Flight: 20015
+XP Boost Potion: 8000034
+Yam Effect: 5884
+Yata Mask: 20926
+Yata's Charm: 7297, 7317
+Yatarena: 21615
+Yellow Goblet of Honor (Rank 1): 21797
+Yellow Goblet of Honor (Rank 2): 21802
+Yellow Goblet of Honor (Rank 3): 21807
+Yellow Goblet of Honor (Rank 4): 21812
+Yellow Goblet of Honor (Rank 5): 21820
+Yin-Yang Magithopter: 30149
+Ynystere Coastal Whirlpool: 2252
+You Damn Hedgehog!: 20500
+Yummy Carrots!: 16051
+Zeal: 495
+Zephyr Clairvoyance: 11349, 14648
+Zephyr Fish Finder: 11487
+Zzz......: 8000485
+«God of War» Glider: 9000012, 9001922
+Сover of Phantom Arden: 9000079, 9000080
+가르침: 예언신의 심안: 26551
+가벼운 손놀림 (2단계): 7651
+가시: 22548
+가시 면역: 22549
+가시부리새의 저주: 26152
+가죽 옷 착용: 715
+가호의 보호막: 23315
+각성: 499
+각인: 22265
+갈망하는 안식의 천 방어구: 27164
+감염: 28304
+감전: 250, 21067, 21557, 22517, 23483
+감전 면역: 476
+갑옷 착용: 717
+강력한 도발: 502, 24060
+강력한 위축: 828
+강력한 화염: 2287
+강림 (4단계): 30069
+강림: 파도: 30594
+강습 충격: 20931
+강인한 육체 (4단계): 448
+강인함 (4단계): 7650
+강철의 방패: 22006
+강한 교감 중 (우호-자신): 29909
+강한 교감 중 (자신-우호): 29912
+강한 교감 중 (자신-적대): 29911
+강한 교감 중 (적대-자신): 29910
+강한 충격: 29897
+강한 탐욕의 비약: 11075
+강화된 근두운 : 출발: 8000564
+강화된 날틀 친구: 나무늘보: 8000087
+강화된 날틀 친구: 나무늘보 : 선회: 8000138
+강화된 날틀 친구: 나무늘보 : 출발: 8000155
+강화된 날틀 친구: 나무늘보 : 활공: 8000121
+강화된 불타는 꽁지깃: 8000247
+강화된 비탈리스의 날개 : 비행: 8000488
+강화된 비탈리스의 날개 : 출발: 8000491
+강화된 순백의 날개: 8000693
+강화된 에크로아의 날개: 8000608
+강화된 이베인의 요정 날개: 8000667
+강화된 이베인의 요정 날개 : 비행: 8000536
+강화된 이지 여신의 날틀 : 비행: 8000091
+강화된 전설의 용날개 : 출발: 8000161
+강화된 전율하는 뇌신의 날개: 8000662
+강화된 제트붐 2호: 8000507
+강화된 제트붐 2호 : 선회: 8000510
+강화된 플루낙스의 날틀 : 활공: 8000685
+강화탄 착용중: 25414
+강화탄 효과: 25415
+개미의 근면함: 24337
+거울의 분신: 바위: 23135
+거울의 분신: 불꽃: 23134
+건축의 대가: 20186
+검은 밤의 그림자 망토: 28867, 8000838
+검은 수염 도적단의 방패: 15492
+검은 용의 자가수복: 23931
+검은 용의 힘: 불길막이: 25503
+검은 용의 힘: 울음: 25510
+검은 용의 힘: 침묵: 25511
+검은 칼라니 휴식중: 26591
+검은 칼라니의 보호: 26084
+검은빛 플루낙스의 날틀: 26683
+검은용의 평온: 23709
+격노의 낙인: 27972
+격노한 검은 용의 숨결: 28890
+격노한 검은 용의 자가수복: 26723
+격노한 검은 용의 힘: 날개수집가: 26713
+격노한 검은 용의 힘: 불길막이: 26708
+격노한 검은 용의 힘: 숨결: 28892
+격노한 검은 용의 힘: 울음: 26715
+격노한 검은 용의 힘: 침묵: 26716
+격노한 검은용의 평온: 26726
+격려: 30055
+경이의 가죽옷: 6430
+경이의 천 옷: 6422
+경직: 770, 1449, 22900
+경쾌한 발걸음: 8000208
+경쾌한 행진곡 (5단계): 804
+경험치 비약: 14778
+경험치 추가 획득 물약: 8000034
+계승자: 17194
+고귀한 축복의 요리: 2305
+고급의 가죽옷: 22985
+고기의 기운: 5870
+고대의 천 옷: 6418
+고소하고 향긋한 빵: 20625
+고소하고 향긋한 수프: 20635
+고소한 수프: 20629
+고요한 바다의 수호자의 은신: 4848
+고요한 바다의 수호자의 저주: 4846
+고요함: 29949
+고통 억제: 2786
+골렘 무적: 15068
+공격 불가: 815
+공격력 증가: 6948
+공명: 21992, 24061
+공포: 156, 1178, 2277, 6954, 29304
+공포 괴물의 외침: 21404, 21405
+공포 면역: 2377
+공포의 속삭임: 바위: 28248
+공포의 외침: 975, 2278, 21402, 21403
+공포의 외침 면역: 22551
+과부하 충격: 21066
+과잉 치료: 23965
+광기의 탄환: 29300
+광폭: 3164
+광폭화: 2113, 2114
+교감 중 (우호-자신): 29843
+교감 중 (자신-우호): 29847
+교감 중 (자신-적대): 29848
+교감 중 (적대-자신): 29844
+구원: 6851
+구원된 영혼: 6768, 17379
+구원의 방패 (3단계): 6766
+구원의 방패 (4단계): 6767
+구원의 방패 (5단계): 15077
+구원의 방패 (7단계): 17361
+구원의 방패 (8단계): 22111
+구원의 손길 (8단계): 22113
+귀울림: 972
+그로아의 마력 구슬: 대지: 8000500
+그로아의 마력 구슬: 불꽃: 8000552
+그로아의 마력 구슬: 수집: 23179
+그림자 노래: 15146
+극심한 추위: 28126
+근두운: 21725, 8000559
+급습: 24610
+급습 은신: 25694
+기다림의 기운: 2385
+기사단장: 6604
+기선 제압: 바위 (6단계): 21374
+기절: 501, 2846, 3127, 3601, 6892, 20815, 20825, 22519, 22532, 23958, 23961, 24196, 26964, 27707, 8000340, 8000344
+기절 면역: 2371
+깊은 고요함: 29951
+까마귀떼: 31312
+까마귀의 공격: 470
+까마귀의 방해: 4807, 20934
+까마귀의 탐색: 21984
+깨어난 이프니르의 가호: 32080
+꾸삐에르의 해바라기 날개: 27019
+끈기: 22643
+나무늘보 날틀: 7206, 8000033
+나약함: 20933
+나약함 (4단계): 7649
+나이아스 휴식중: 24667
+나팔소리: 18950
+나팔소리: 안개: 18956
+낙하 기절: 1391, 1435
+낙하중: 844, 23113
+낚싯대 교체: 5795
+난기류: 7742
+날개 정비중: 20121, 8000279
+날카로운 가시: 28232
+날틀 정비중: 4622
+날틀 친구: 회색태비 냥냥 집사: 31366
+날틀(날개)  사용 불가: 24544
+남겨진 서고의 가죽 방어구: 23231
+남겨진 서고의 양손둔기: 23216
+남겨진 서고의 천 방어구: 23229
+넌 강해졌다냥!: 21619, 8000502
+넘어짐: 21, 138, 141, 505, 6894, 17423, 21381, 27631, 27632
+넘어짐 면역: 2374
+노란빛 명예의 잔 (1단계): 21797
+노란빛 명예의 잔 (2단계): 21802
+노란빛 명예의 잔 (3단계): 21807
+노란빛 명예의 잔 (4단계): 21812
+노란빛 명예의 잔 (5단계): 21820
+누이 여신의 위로 : 1931
+누이 여신의 축복: 20712
+누이방울: 1995
+누적 피해: 899
+눈꽃송이 날개: 30300
+눈이 아려오는 섬광: 28130
+느려짐: 2309, 4693, 5784, 6793, 15123, 21461, 21462, 23149, 23962, 24669, 26932, 27706, 28677, 28686, 28701, 28821, 29303
+다루 변신: 32459
+다이아의 자유: 32249
+다후타의 숨결: 6957, 31626
+다후타의 숨결: 지진: 24051
+달려!: 1933, 22965, 23557, 23759
+달빛 담은 과즙 음료: 23215
+달빛산책: 26869
+당겨짐: 2138
+당겨짐 후유증: 3773
+대상 지정 불가: 23086, 28598
+대상 지정 불가 비행 억제: 23087
+대장군: 21774
+대지의 권능: 24562
+대지의 기운: 2596
+대지의 손아귀: 82, 21397, 21398, 26455
+대지의 찬가 (2단계): 4389
+데니스트리오스의 지팡이: 15404
+델피나드 영웅의 가호: 15100
+도발: 171, 2111
+도약: 23761
+독: 21999
+독 바르기: 22266
+독 바르기: 불꽃: 24093
+독 바르기: 파도: 24235
+독: 파도: 24237
+돋보이는 자의 힘: 28913
+돌진 중: 26927
+돌파: 3086, 22978
+돌파충격: 18, 29577
+동결: 93, 2279, 21990
+동결 면역: 2280
+동력: 8000346
+동력 기관 냉각: 8000339
+동방의 신비한 족자: 31718
+동상: 247, 18183
+두려운 마음: 27221
+두번째 문장: 23820, 23824
+뒤틀린 사령의 불길: 26762
+든든한 기운 (4단계): 5864
+든든한 기운 (5단계): 5865
+든든한 붉은 등심살 꼬치구이 : 696
+든든한 숙성 갈빗살 꼬치구이 : 697
+든든한 축복의 통돼지 요리: 21792
+등짐 무적: 5130
+따뜻한 기운: 8000307
+따봉도치 휴식중: 27292
+따봉도치의 축복: 27002
+뜨거운 숙성 갈빗살 구이: 685
+뜨거운 축복의 통돼지 요리: 21791
+뜨거운 황금빛 등심살 구이: 684
+로지올라의 폭발 화염: 32151
+로타네브 휴식중: 32016
+루키우스: 신과 영웅: 22022, 8000574
+마법 감쇄: 7575
+마법 방어: 6889
+마법 방어 (5단계): 13619
+마법서: 멈출 수 없는 힘: 7478
+마법진 (3단계): 8075
+마법진 (불꽃): 25647
+마법진 (지진): 25646
+마법진 이동 가능: 19037
+마법진: 불꽃 이동 가능: 25850
+마법진: 지진 이동 가능: 25851
+마비독: 28680
+막고 반격: 2611
+맑은 정신: 5209
+매의 발톱 (2단계): 452
+매의 발톱: 불꽃: 25391
+매의 발톱: 생명: 27673
+매혹됨: 771, 21432, 21434, 22431, 8000633
+맹독: 29839, 30984
+맹렬한 돌진: 32654
+멍해짐: 2511
+멜리사라: 신과 영웅: 22025, 8000577
+명상: 455
+명상의 메아리: 1277
+명예의 비약: 22514
+명인 낚시꾼: 11237
+명인 장사꾼: 11249
+모닥불의 온기: 5872
+모두 치유: 생명: 25875
+모르페우스의 후예: 27032
+모의전 무승부: 3881
+모의전 승리: 3879
+모의전 종료: 4787
+모의전 패배: 3880
+몰랑아 살려줘!: 32663
+몰랑이 휴식중: 32700
+몰랑이를 두고 떠나지 마: 32788
+무겁다: 1454
+무관절: 22077
+무대 위의 황홀한 무희: 30048, 30122
+무력한 기운: 847, 15040
+무리의 우두머리: 16848
+무모한 돌진: 7543
+무아의 움직임: 20552
+무적: 131, 31943
+무적 돌파(탑승자): 32230
+무적 비행: 3636, 20111, 31380, 8000163, 8000286
+무적 억제: 22552, 32653, 8000631
+물갈퀴 착용: 2416, 5909
+물결의 달그림자: 5187, 5189
+물러서기: 2727
+물러서기: 파도: 21376
+물리 관통: 2622, 2624, 26966
+물리 기술 봉쇄: 206, 6946, 22511, 26963, 27219, 29302
+물방울 보호막: 24666
+물약 사용 불가: 24543
+물의 수호: 31916
+미약한 도약의 시간: 28618
+밀착 방어: 6888, 26958
+밀착 방어 (3단계): 330
+밀착 방어: 돌풍: 21407
+밀착 방어: 바위: 28206, 28207
+밀착 방어: 생명: 21372, 26959
+밀착 보호: 24986
+밀쳐남: 28649
+바람의 달그림자: 5186, 5188
+받는 치유량 감소: 23357, 23360, 32645
+발묶음: 24928
+발묶임: 883, 2458, 3719, 4843, 6905, 22627, 28303, 30817
+발묶임 면역: 3672
+발톱 세우기: 20719
+발현된 불굴의 집중: 26582
+밤그림자의 날개: 23200
+밤의 군주 날개: 30021
+밤의 열기: 1758
+방심: 853, 21995
+방울방울: 96, 6953, 21401
+방울방울 면역: 2160
+방울방울: 안개 면역: 22543
+방출된 힘: 20822, 8000337, 8000338
+방패 방어: 813, 21960
+방패 착용: 8226
+방패의 인내: 3780
+방황: 22430, 8000632
+배후 덮치기: 18909
+뱀의 눈: 22958
+번개 은신: 7738, 7739
+벼락 숨결의 여파: 21015
+별똥별 충격: 28688
+별의 가호: 13739
+별의 날개: 6866
+보관함 열림: 21173
+보랏빛 명예의 잔 (1단계): 21798
+보랏빛 명예의 잔 (2단계): 21803
+보랏빛 명예의 잔 (3단계): 21808
+보랏빛 명예의 잔 (4단계): 21813
+보랏빛 명예의 잔 (5단계): 21821
+보복 사격: 27224
+보이지 않는 포식자: 17166
+보호막: 95
+보호의 날개: 258
+보호의 날개: 바위: 28212
+보호의 질주: 8000174
+복수의 갑옷: 2923
+복수의 갑옷: 불꽃: 24071
+복수의 갑옷: 불꽃 폭발: 24088
+복수의 갑옷: 안개: 24066
+부드러운 숙성 갈빗살 직화구이: 689
+부드러운 완자 직화구이: 686
+부드러운 축복의 통돼지 요리: 21793
+부식: 26722, 28127
+부식: 바위: 29645
+부활: 2166
+분노: 6890, 22982
+분노의 벼락 면역: 20929
+분노의 집착: 23080
+분홍빛 명예의 잔 (1단계): 21799
+분홍빛 명예의 잔 (2단계): 21804
+분홍빛 명예의 잔 (3단계): 21809
+분홍빛 명예의 잔 (4단계): 21814
+분홍빛 명예의 잔 (5단계): 21822
+불 붙음: 1403, 3107, 5173
+불굴의 집중: 21795
+불규칙한 바닷바람: 7743
+불길: 21384
+불꽃의 달그림자: 5164, 5165
+불멸의 날갯짓: 20108
+불의 비: 23367
+불쾌한 기분: 772, 21994
+불타는 금요일 춤: 22912
+불타는 꽁지깃: 8000246
+불타는 꽁지깃의 효과: 7107
+불타는 복수심: 4562
+불협 화음: 777, 25669, 25670, 26547, 26548
+붉은 용 날개: 2099
+붙잡힘: 22903
+비무장 지대: 21506
+비수: 6829
+비약 효과 1단계: 21591
+비약 효과 2단계: 21592
+비약 효과 3단계: 21593
+비약 효과 4단계: 21594
+비약 효과 5단계: 21595
+비탈리스의 날개: 21573, 8000486
+비행 속도 증가: 21961, 22262, 22289, 22639, 23204, 23206, 23208, 23712, 24559, 27020, 28600, 29619, 29914, 30586, 31982, 32205, 32256, 32257, 32319, 8000532, 8000565, 8000609, 8000845
+비행 속도 증가 불가: 21962, 22263, 22290, 22640, 23205, 23207, 23209, 23211, 23713, 24501, 24560, 27021, 28601, 29620, 29915, 30587, 31983, 32206, 32259, 32260, 32320, 8000533, 8000566, 8000610
+빙결: 26404, 31665, 31666
+빛나는 왕국의 심장: 674
+빠른 움직임: 3565
+빨간 타피오카: 25789
+삐에루루의 선물 꾸러미: 27088
+사랑하는 마음: 2927
+사령관: 21772
+사신: 22964, 22980, 22981
+산들바람 날틀: 16305
+살기 충격: 877, 1763
+살기 폭발: 17326
+살리움 왕가의 원혼 날개: 29617
+살을 태우는 화염: 28125
+삼단 가르기: 24920
+상쾌한 기운: 8000308
+상큼한 호박 사탕: 8000016
+샘솟는 생명력: 220, 6903
+생명의 경쾌한 행진곡 (5단계): 21444
+생명의 기운 (4단계): 7655
+생명의 대지의 찬가 (2단계): 21447
+생명의 활기찬 광시곡 (2단계): 21446
+생존 본능: 256
+생존 본능 발동: 24242
+생활 경험치 2배 비약: 23085
+생활 꾸밈옷: 일반형: 8000301
+생활 시간 감소 주문서: 11021
+생활의 순발력: 가슴: 11424
+생활의 순발력: 다리: 11425
+생활의 순발력: 머리: 11383
+생활의 순발력: 발: 11427
+생활의 순발력: 손: 11426
+생활의 순발력: 손목: 11428
+생활의 순발력: 허리: 11429
+샤크라의 원한: 7018
+샤크라의 원한 면역: 7028
+서사의 가죽옷: 6431
+서사의 갑옷: 6439
+서사의 천 옷: 6423
+석화: 23061, 23198, 27124
+석화 면역: 18478
+선박 건조 가능: 22047
+선장의 통찰력: 4690
+세공 미끼 장착: 22921
+세번째 문장: 23821, 23825
+소드락질: 6899
+소환수와 충격: 20759, 20820, 8000343
+송어의 기운: 5923
+쇠약한 기운: 15039, 31367
+쇠약한 육신: 1128
+수면: 523, 6952, 23959, 28251
+수호자의 시선: 21734, 8000540
+숙주: 27309, 27310
+숙취: 13749
+순간 가속: 17123, 20114
+순풍에 돛단 듯..: 3768
+숨죽인 살기: 28860
+스며드는 부식: 22614
+스페이드의 검: 32207
+습격의 그림자: 23044
+습격의 여파: 17185
+시력 저하: 2214
+신명: 495
+신성한 대지의 보호막: 23645
+신속한 회복: 559
+신의 방패: 11017
+신의 축복 (3단계): 13790
+신의 축복 (4단계): 13791
+신화의 가죽옷: 6433
+신화의 천 옷: 6425
+실명: 22216, 8000607
+심연의 공포: 28250
+심취: 21433
+심판의 창: 439, 6911, 18396, 18420
+싸우세요: 23387
+싸우지 마세요: 2149, 4828, 14754
+쌍수 무기 착용: 4899
+아군의 고속 비행 : 23089
+아르카나의 날개: 다이아: 32253
+아르카나의 날개: 스페이드: 32204
+아르카나의 날개: 하트: 32254
+아마렌드라 4세의 강렬한 은총: 30764, 9002337
+아마렌드라 4세의 굳건한 은총: 30767, 9002338
+아스트라의 날개: 20116, 8000273
+아이템 드랍률 증가 물약: 8000009
+아크니스의 양탄자: 23711
+악마의 검: 22977
+악마의 꼭두각시: 22995
+악마의 부름 면역: 32505
+악보 암기: 6010
+안델프의 마이스터: 32318
+안탈론 사령의 불길 당기기: 4272
+안탈론 사령의 불길 면역: 6417
+알모람의 망치 면역: 22642
+암살자의 분노: 24915
+압도: 22253
+앗 다 죽었다: 29380
+야수의 감: 16796
+약점 간파: 512
+양손 무기 착용: 8227
+어둠 주시자의 비수: 6143
+어둠이 깃든 플루낙스의 날틀: 8000780
+얼어붙는중: 22217, 8000605
+얼음 파편: 94, 21449
+에아나드 영웅의 가호: 15101
+에크로아의 날개: 22123, 8000599
+에크로아의 날개: 선회: 8000602
+에크로아의 날개: 출발: 8000603
+엘람 휴식중: 23834
+역장 생성: 20817, 8000345
+연속 회복: 번개 사용중: 18390
+연속 회복: 불꽃: 21493, 21502
+연합 병사에게 당겨짐: 17047
+연합 병사에게 발묶임: 17037
+연합 병사의 물리 기술 봉쇄: 17054
+연합 병사의 침묵: 17045
+열망하는 안식의 가죽 방어구: 27158
+열망하는 안식의 양손둔기: 27129
+열망하는 안식의 천 방어구: 27148
+열정의 춤: 5049
+염원의 흔적 결정을 뱉어!: 31624
+영웅의 가죽옷: 6427
+영웅의 위엄: 16323
+영혼의 피바람: 6단계: 25830
+영혼의 피바람: 7단계: 25831
+영혼의 피바람: 8단계: 25832
+예고: 27030
+오늘은 내가 요리사: 5877
+오래된 도서관의 잔영: 2354
+완벽한 취권(밀): 8000057
+완벽한 취권(보리): 8000056
+완성된 판: 제나 반다 6단계: 7638
+완성형 날틀: 3530
+완전한 가죽 옷 착용: 716
+완전한 갑옷 착용: 740
+완전한 천 옷 착용: 714
+외침: 30729
+용 사냥꾼의 날틀: 24718
+용오름 날개: 2097
+용의 눈물: 6670
+우두머리의 기백: 30536
+우루리 휴식중: 24200
+우루리의 장난: 24287, 24293, 24295
+우리만의 비밀: 8209
+웅크리기 중: 20496
+원거리 방패 막기: 4629
+원기회복 씨앗 빵: 20624
+원기회복 씨앗 수프: 20634
+원혼 저주: 477, 18388
+원혼 저주: 안개: 23427
+위압감: 2104
+위축: 3761
+위축 (6단계): 7654
+위협 감소: 1225
+유물의 가죽옷: 6429
+유물의 천 옷: 6421
+유연한 착지: 20720
+은신: 22095, 24640, 26654, 30333
+은신 (4단계): 8225
+은신 비행: 21647, 28770, 30779, 8000535
+은신 비행 불가: 22713, 30780
+은신 이동: 23540, 23752, 23753, 28655, 30109
+의기 충전: 127
+의기 충전: 안개: 22060
+이녹: 신과 영웅: 22024, 8000576
+이동 보호: 6237, 32642
+이동 사격: 27704
+이동 사격 태세: 27702
+이동 속도 감소: 2723, 2778, 24633
+이동 속도 증가: 3717, 3771, 21065, 21817, 23801, 25442, 27116, 8000524
+이동 중: 28597
+이동속도 감소: 25230
+이르코의 검무: 24953
+이베인의 요정 날개: 21641, 8000531
+이지 여신의 날개: 2098
+이프니르 영웅의 가호: 15102
+인내의 보상: 22540
+인스턴스 참여자: 6295
+인어의 숨결: 5940
+일하기 좋은 날: 5207
+자각몽: 1581
+자각몽의 시간: 1582
+자유의 날개: 6579
+자폭: 3637
+작은 명상 물약 6단계: 20614
+작은 명상 물약 7단계: 20615
+작은 명상 물약 8단계: 26586
+작은 치유 물약 6단계: 20604
+작은 치유 물약 7단계: 20605
+작은 치유 물약 8단계: 26585
+잠옷의 편안함: 16789
+잠재된 힘: 공포의 속삭임: 28247
+잠재된 힘: 까마귀 소환: 28237
+잠재된 힘: 밀착 방어: 28116, 28118
+잠재된 힘: 보호의 날개: 28188
+잠재된 힘: 저주의 가시: 28194
+잠재된 힘: 치유의 외침: 28186
+잠재된 힘: 활력 방패: 28187
+잡담 금지: 23408
+장군: 6605
+장비 해제(악기): 23353
+장비 해제(오른손): 23107
+장비 해제(왼손): 23066, 23654, 31837
+장사의 대가: 20179
+장인의 통찰력 물약: 8000010
+재빠른 몸놀림 (2단계): 13779
+재빠른 몸놀림: 불꽃: 23146
+재빠른 몸놀림: 지진: 23145, 23180
+잿빛 날개: 하늘의 제왕: 23082
+저격: 31406
+저격 대상: 6819
+저승의 불꽃 사용: 16274
+저주: 467, 6904
+저주의 가시: 바위: 28233
+저주의 씨앗: 18341
+전설의 가죽옷: 6432
+전설의 갑옷: 6440
+전설의 용날개: 6575
+전설의 천 옷: 6424
+전율하는 뇌신의 날개: 22596
+전장 대기중: 23447
+전장 자격 박탈: 22703
+전장으로: 5700
+전장으로: 예술의 대가: 32239
+전장으로: 예술의 명인: 32238
+전장으로: 예술의 장인 3단계: 32235
+전장의 망령: 4424
+전쟁의 예고: 4087
+전투 소환수의 수집 장식: 26387
+접속 중: 2423
+정련된 이프니르의 가호: 32083
+정령의 보호: 26764
+정령의 친구: 26561
+정신 파괴: 101, 4712
+정신 파괴: 돌풍: 26454
+정신 파괴: 번개: 32646
+정화: 23347
+제압: 위협 증가: 3532
+제왕의 고속 비행 : 23088
+제트붐 2호: 21604, 8000506
+조급한 마음: 20717
+조준 사격: 27701
+좌절: 30054
+주인 각인: 4867
+주인의 체취: 14470
+주차 중...: 24618
+주황빛 명예의 잔 (1단계): 24469
+주황빛 명예의 잔 (2단계): 24470
+주황빛 명예의 잔 (3단계): 24471
+주황빛 명예의 잔 (5단계): 24473
+죽은 자의 주문 (2단계): 7657
+죽은자의 강림 (4단계): 30116
+죽은척 하기: 649
+죽음의 낙인: 15010
+죽음의 속박: 16498, 26473
+죽음의 속박: 불꽃: 26512
+증오의 여왕 오키드나: 신과 영웅: 21616, 8000504
+지롱드의 날틀: 4438
+지뢰 밟음: 28112
+지배자의 위엄: 2100
+지배자의 저주: 4844
+지속 회복: 17927
+지옥의 창: 87, 18380, 22685
+지옥의 창 : 28659
+지옥의 창 면역: 22550
+지옥의 창: 불꽃: 23361
+지옥의 창: 지진: 32647
+진공 폭발 면역: 5932
+진설휘의 염원: 8318
+질주: 2675, 3523, 16797, 17163, 22409, 22973, 23730, 8000613, 8000630
+차가운 발걸음: 431
+차가운 발걸음 면역: 22539
+창 꽂힘: 18401, 23642, 23956
+창 꽂힘 면역: 5929
+창공의 무법자 날틀: 17122
+채광의 대가: 20184
+천 옷 착용: 713
+천둥 질주: 6174
+천사의 날개 비약: 25068
+철옹성 면역: 7105
+첫번째 문장: 23819, 23823
+청염의 날갯짓: 21054, 8000419
+초원의 수호자 타양: 신과 영웅: 22000, 8000648
+초원의 혼: 30319, 30596
+촉촉한 숙성 갈빗살 훈제구이: 693
+촉촉한 조림 등심살 훈제구이: 692
+촉촉한 축복의 통돼지 요리: 21794
+촐랑방구: 21654
+총사령관: 21773
+최후의 저항: 6961, 20936
+최후의 저항 면역: 22715
+추격: 21993
+추격: 불꽃: 23150
+축복: 552
+축복의 영약: 31306
+축소판에서 추방 발동 하리하라: 32758
+출혈: 22215, 8000606
+출혈 (1단계): 242
+출혈 (2단계): 514
+춤: 몰랑몰랑: 32687
+충격: 25432, 29845
+치명타: 3933
+치유의 샘: 780
+치유의 샘: 파도: 24599
+치유의 외침: 24987
+치유의 외침: 바위: 28208
+치유의 외침: 생명: 25401
+치유의 외침: 파도: 25402
+치유하는 부적술: 16825, 18171
+침략자 약화: 31892
+침묵: 245, 266, 6893, 21987, 22013, 22520, 23358, 23523, 23524, 26965, 28595, 29667, 29668
+칭호 수집 효과: 1단계: 23139
+칭호 수집 효과: 2단계: 23140
+칭호 수집 효과: 5단계: 23143
+칭호 수집 효과: 6단계: 25109
+캐스버 휴식중: 22078, 8000547
+캣닛 휴식중: 21618, 8000503
+코끼리의 격려: 25437
+키리오스의 희미한 권능: 32385
+타락한 영혼: 25833
+타레 은신: 2408
+타레의 보은: 16793
+타워방어 시작npc: 27717
+탈출: 4840
+태양신의 의지: 30944
+태초의 가죽옷: 21011
+태초의 갑옷: 21012
+태초의 천 옷: 21010
+토템의 기운: 31623
+톡 쏘는 거품 술 : 1895
+톡 쏘는 거품 음료 : 701
+투명한 다루 의상: 생산: 32791
+특전 군단장: 31714
+특전 대장군: 31713
+특전 총사령관: 31712
+티티의 회오리날개: 22638
+파란 타피오카: 25790
+패기: 22968
+펌킨스 휴식중: 28599
+페피 가면: 20927
+포복: 30088
+포옹의 날개: 23201
+포효의 여파: 22602
+폭발하는 씨앗: 22608
+폭주: 6947
+폭풍 가르기: 생명: 18447
+폭풍 소진: 27838
+표식: 6794, 26471, 26472
+표식 (4단계): 7659
+표적: 24879
+푸른 소금 상회의 비법서: 특별 : 21518
+푸른빛 명예의 잔 (1단계): 21796
+푸른빛 명예의 잔 (2단계): 21801
+푸른빛 명예의 잔 (3단계): 21806
+푸른빛 명예의 잔 (4단계): 21811
+푸른빛 명예의 잔 (5단계): 21819
+플루낙스의 날틀: 22901, 8000682
+피로 그린 꽃: 6148
+피해 흡수: 23424
+필멸자 강력한 공격: 22963
+하늘을 나는 빗자루: 21031
+하트의 사랑스러움: 32250
+해방된 뇌신의 날개: 20928
+해방된 이프니르의 가호: 32082
+해풍 응용 전방: 서사: 20867
+해풍 응용 전방: 전설: 20868
+향연의 만개하는 살기: 28861
+현기증: 114, 6951
+현란한 손재주꾼: 20175
+호박 묘비의 으스스한 기운: 14800
+혹한: 31668
+혼자먹는 매콤한 호박 사탕: 8000020
+화염: 1987
+환영 기류: 개안: 28878
+환영 기류: 개화: 27822
+환영 기류: 격노: 27904
+환영 역류: 27837
+환영 폭풍: 개안: 28879
+환영 폭풍: 격노: 27905
+활강 중: 22229
+활기찬 광시곡 (2단계): 7663
+활력 방패: 6901
+활력 방패 (5단계): 857, 21416
+활력 방패: 바위: 28209
+활력 방패: 불꽃 (5단계): 21375
+활력 보호막: 16870
+황천 건너기: 8000358
+황천으로: 21977
+황홀한 기운: 8000306
+회귀 상태: 550
+회복의 씨앗: 17925
+회색빛 명예의 잔 (1단계): 21800
+후유증: 29908
+흑마법의 잠식: 16767, 18169
+희귀의 가죽옷: 22986
+희생: 30098, 30137, 30141, 30142
+힘을 내 우오오!: 21971, 8000546
+힘차게 달려!: 21733, 23639, 8000172, 8000522
+==================================================
+Total unique buff names found: 2762
+Total unique buff/debuff IDs found: 2896
