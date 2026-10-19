@@ -79,6 +79,16 @@ val stunDebuffIds = listOf(243, 416, 501, 1786, 2510, 2846, 3127, 3601, 4825, 48
 val staggerDebuffIds = listOf(26097, 1449, 22900, 26351, 22375, 29903)
 val petrificationDebuffIds = listOf(24391, 23198, 27124, 23061)
 
+// ODE (Offensive Debuff Enhancement) stats — Songcraft triplet tracking (10/18/26)
+// AoE triplet: Dissonance Quake, Critical Discord AoE, Shackle
+val dissonanceQuakeDebuffIds = listOf(25670)
+val criticalDiscordAoEDebuffIds = listOf(21992)
+val shackleDebuffIds = listOf(206, 6946, 21159, 26963, 27219, 29302, 22511)
+// Non-AoE triplet: Dissonance (non-AoE), Critical Discord (non-AoE), Battle Hymn
+val dissonanceNonAoEDebuffIds = listOf(777, 26547, 25669, 26548)
+val criticalDiscordNonAoEDebuffIds = listOf(21992, 25061)
+val battleHymnBuffIds = listOf(6851)
+
 /**
  * Configuration for area-effect spells where the buff/debuff source is an NPC area object
  * rather than the player who cast the spell. The attributor correlates SPELL_DAMAGE events

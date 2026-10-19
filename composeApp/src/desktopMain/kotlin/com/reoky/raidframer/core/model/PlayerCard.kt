@@ -183,6 +183,15 @@ data class PlayerCard(
   val sessionManaBarrierTotal: Int = 0,
   val sessionReviveTotal: Int = 0,
   val sessionDeependDebuffTotal: Int = 0,
+  // Songcraft triplet tracking (10/18/26)
+  // AoE triplet
+  val sessionDissonanceQuakeTotal: Int = 0,
+  val sessionCriticalDiscordAoETotal: Int = 0,
+  val sessionShackleTotal: Int = 0,
+  // Non-AoE triplet
+  val sessionDissonanceNonAoETotal: Int = 0,
+  val sessionCriticalDiscordNonAoETotal: Int = 0,
+  val sessionBattleHymnTotal: Int = 0,
   val sessionBlockTotal: Int = 0, // times this player avoided via BLOCK (target-side)
   val sessionParryTotal: Int = 0, // times via PARRY (target-side)
   val sessionBlockMitigated: Long = 0L, // HP prevented by blocks (back-calculated from damage taken)

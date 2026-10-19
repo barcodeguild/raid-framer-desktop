@@ -800,3 +800,37 @@ val MIGRATION_52_53 = object : Migration(52, 53) {
       .use { it.step() }
   }
 }
+
+// Added Songcraft triplet stats (10/18/26)
+// AoE triplet: Dissonance Quake, Critical Discord AoE, Shackle
+// Non-AoE triplet: Dissonance (non-AoE), Critical Discord (non-AoE), Battle Hymn
+val MIGRATION_53_54 = object : Migration(53, 54) {
+  override fun migrate(connection: SQLiteConnection) {
+    // player_cache lifetime totals
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDissonanceQuake INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCriticalDiscordAoE INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalShackle INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalDissonanceNonAoE INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalCriticalDiscordNonAoE INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeTotalBattleHymn INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    // player_session_totals
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDissonanceQuake INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCriticalDiscordAoE INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalShackle INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDissonanceNonAoE INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalCriticalDiscordNonAoE INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalBattleHymn INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+  }
+}

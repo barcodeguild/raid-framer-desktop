@@ -94,6 +94,7 @@ import raid_framer_desktop.composeapp.generated.resources.summary_cc_by_faction
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_new_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_debuffs_continued
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_debuffs_extended
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_songs
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_special_buffs_continued
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_special_heals
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_special_melee
@@ -110,6 +111,12 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_dis
 import raid_framer_desktop.composeapp.generated.resources.summary_top_provokes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_tiger_strikes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_freezes
+import raid_framer_desktop.composeapp.generated.resources.summary_top_dissonance_quake
+import raid_framer_desktop.composeapp.generated.resources.summary_top_critical_discord_aoe
+import raid_framer_desktop.composeapp.generated.resources.summary_top_shackle
+import raid_framer_desktop.composeapp.generated.resources.summary_top_dissonance_non_aoe
+import raid_framer_desktop.composeapp.generated.resources.summary_top_critical_discord_non_aoe
+import raid_framer_desktop.composeapp.generated.resources.summary_top_battle_hymn
 import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_loot_peak
 import raid_framer_desktop.composeapp.generated.resources.summary_worst_loot_peak
@@ -264,6 +271,12 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val topAbsorbLifeforce by PlayerCacheInteractor.topAbsorbLifeforce.collectAsState()
   val topCorrosiveBarrage by PlayerCacheInteractor.topCorrosiveBarrage.collectAsState()
   val topBlindedByCrows by PlayerCacheInteractor.topBlindedByCrows.collectAsState()
+  val topDissonanceQuake by PlayerCacheInteractor.topDissonanceQuake.collectAsState()
+  val topCriticalDiscordAoE by PlayerCacheInteractor.topCriticalDiscordAoE.collectAsState()
+  val topShackle by PlayerCacheInteractor.topShackle.collectAsState()
+  val topDissonanceNonAoE by PlayerCacheInteractor.topDissonanceNonAoE.collectAsState()
+  val topCriticalDiscordNonAoE by PlayerCacheInteractor.topCriticalDiscordNonAoE.collectAsState()
+  val topBattleHymn by PlayerCacheInteractor.topBattleHymn.collectAsState()
   val topMistSunder by PlayerCacheInteractor.topMistSunder.collectAsState()
   val topRegularSunder by PlayerCacheInteractor.topRegularSunder.collectAsState()
   val topImpaleImmunity by PlayerCacheInteractor.topImpaleImmunity.collectAsState()
@@ -327,6 +340,7 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
     stringResource(Res.string.summary_tab_special_debuffs),
     stringResource(Res.string.summary_tab_debuffs_continued),
     stringResource(Res.string.summary_tab_debuffs_extended),
+    stringResource(Res.string.summary_tab_songs),
     stringResource(Res.string.summary_tab_new_buffs),
     stringResource(Res.string.summary_tab_special_buffs_continued),
     stringResource(Res.string.summary_tab_special_heals),
@@ -537,132 +551,142 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
           wm = wm
         )
 
-        8 -> SpecialBuffsTab(topDefiance, topGardenDefiance, topPurges, wm)
-        9 -> SpecialBuffsContinuedTab(
+        8 -> SongsTab(
+          topDissonanceQuake = topDissonanceQuake,
+          topCriticalDiscordAoE = topCriticalDiscordAoE,
+          topShackle = topShackle,
+          topDissonanceNonAoE = topDissonanceNonAoE,
+          topCriticalDiscordNonAoE = topCriticalDiscordNonAoE,
+          topBattleHymn = topBattleHymn,
+          wm = wm
+        )
+
+        9 -> SpecialBuffsTab(topDefiance, topGardenDefiance, topPurges, wm)
+        10 -> SpecialBuffsContinuedTab(
           topImpaleImmunity = topImpaleImmunity,
           topProtectiveWings = topProtectiveWings,
           topCourageousAction = topCourageousAction,
           wm = wm
         )
 
-        10 -> SpecialHealsTab(
+        11 -> SpecialHealsTab(
           topManaBarrier = topManaBarrier,
           topRevive = topRevive,
           topLifeMenders = topLifeMenders,
           wm = wm
         )
 
-        11 -> SpecialMeleeTab(
+        12 -> SpecialMeleeTab(
           topTigerStrikes = topTigerStrikes,
           topMistSunder = topMistSunder,
           topRegularSunder = topRegularSunder,
           wm = wm
         )
 
-        12 -> SpecialDancesTab(
+        13 -> SpecialDancesTab(
           topSacDances = topSacDances,
           topDeepTranquility = topDeepTranquility,
           topDeependDebuff = topDeependDebuff,
           wm = wm
         )
 
-        13 -> AvoidanceTab(
+        14 -> AvoidanceTab(
           topBlocks = topBlocks,
           topParries = topParries,
           topEvades = topEvades,
           wm = wm
         )
 
-        14 -> MitigationTab(
+        15 -> MitigationTab(
           topImmunes = topImmunes,
           topMisses = topMisses,
           topAbsorbs = topAbsorbs,
           wm = wm
         )
 
-        15 -> SpellDamageByFaction(
+        16 -> SpellDamageByFaction(
           topDamageSpellsHaranya = topDamageSpellsHaranya,
           topDamageSpellsNuia = topDamageSpellsNuia,
           topDamageSpellsPirate = topDamageSpellsPirate,
           wm = wm
         )
 
-        16 -> BuffsDebuffsTab(
+        17 -> BuffsDebuffsTab(
           topDebuffs = topDebuffs,
           topSongs = topSongs,
           topBuffers = topBuffers,
           wm = wm
         )
 
-        17 -> OdeTab(
+        18 -> OdeTab(
           topOdeHaranya = topOdeHaranya,
           topOdeNuia = topOdeNuia,
           topOdePirate = topOdePirate,
           wm = wm
         )
 
-        18 -> KillsDeathsTab(
+        19 -> KillsDeathsTab(
           topKillsHaranya = topKillsHaranya,
           topKillsNuia = topKillsNuia,
           topKillsPirate = topKillsPirate,
           wm = wm
         )
 
-        19 -> DamageTakenHealsReceived(
+        20 -> DamageTakenHealsReceived(
           topDamageTaken = topDamageTaken,
           topHealsReceived = tophealsReceived,
           wm = wm
         )
 
-        20 -> UtilityItemsByFaction(
+        21 -> UtilityItemsByFaction(
           topItemUsesHaranya = topItemUsesHaranya,
           topItemUsesNuia = topItemUsesNuia,
           topItemUsesPirate = topItemUsesPirate,
           wm = wm
         )
 
-        21 -> UtilityItemsTab(
+        22 -> UtilityItemsTab(
           topPotters = topPotters,
           topGliderGamers = topGliderGamers,
           topItemSkillCasters = topItemSkillCasters,
           wm = wm
         )
 
-        22 -> PlayerBuildsTab(
+        23 -> PlayerBuildsTab(
           buildCountsHaranya = buildCountsHaranya,
           buildCountsNuia = buildCountsNuia,
           buildCountsPirate = buildCountsPirate,
           wm = wm
         )
 
-        23 -> PerformanceTab(
+        24 -> PerformanceTab(
           topPerformanceHaranya = topPerformanceHaranya,
           topPerformanceNuia = topPerformanceNuia,
           topPerformancePirate = topPerformancePirate,
           wm = wm
         )
 
-        24 -> LootBuffTab(
+        25 -> LootBuffTab(
           topLootPeak = topLootPeak,
           worstLootPeak = worstLootPeak,
           topBuffCount = topBuffCount,
           wm = wm
         )
 
-        25 -> CoherenceTab(
+        26 -> CoherenceTab(
           topCoherenceRender = topCoherenceRender,
           topCoherenceRaid = topCoherenceRaid,
           topCoherenceClump = topCoherenceClump,
           wm = wm
         )
 
-        26 -> HitQualityDpsTab(
+        27 -> HitQualityDpsTab(
           topCrits = topCrits,
           topMaxHits = topMaxHits,
           topAverageHits = topAverageHits,
           wm = wm
         )
-        27 -> HitQualityHealingTab(
+        28 -> HitQualityHealingTab(
           topCritHeals = topCritHeals,
           topMaxHeals = topMaxHeals,
           topAverageHeals = topAverageHeals,
@@ -1211,6 +1235,86 @@ private fun DebuffsExtendedTab(
       modifier = Modifier.weight(1f)
     ) { card ->
       togglePlayerCard(wm, card.name)
+    }
+  }
+}
+
+@Composable
+private fun SongsTab(
+  topDissonanceQuake: List<PlayerCard>,
+  topCriticalDiscordAoE: List<PlayerCard>,
+  topShackle: List<PlayerCard>,
+  topDissonanceNonAoE: List<PlayerCard>,
+  topCriticalDiscordNonAoE: List<PlayerCard>,
+  topBattleHymn: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Column(modifier = Modifier.fillMaxSize()) {
+    // AoE triplet
+    Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+      StatColumn(
+        icon = "\uD83D\uDD25",
+        title = stringResource(Res.string.summary_top_dissonance_quake),
+        cards = topDissonanceQuake,
+        valueExtractor = { it.sessionDissonanceQuakeTotal.toString() },
+        valueColor = RFColors.dissonanceQuakeRed,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uD83D\uDD16",
+        title = stringResource(Res.string.summary_top_critical_discord_aoe),
+        cards = topCriticalDiscordAoE,
+        valueExtractor = { it.sessionCriticalDiscordAoETotal.toString() },
+        valueColor = RFColors.criticalDiscordAoEPurple,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uD83D\uDD12",
+        title = stringResource(Res.string.summary_top_shackle),
+        cards = topShackle,
+        valueExtractor = { it.sessionShackleTotal.toString() },
+        valueColor = RFColors.shackleOrange,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+    }
+    // Non-AoE triplet
+    Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+      StatColumn(
+        icon = "\uD83D\uDD14",
+        title = stringResource(Res.string.summary_top_dissonance_non_aoe),
+        cards = topDissonanceNonAoE,
+        valueExtractor = { it.sessionDissonanceNonAoETotal.toString() },
+        valueColor = RFColors.dissonanceNonAoEYellow,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uD83D\uDD16",
+        title = stringResource(Res.string.summary_top_critical_discord_non_aoe),
+        cards = topCriticalDiscordNonAoE,
+        valueExtractor = { it.sessionCriticalDiscordNonAoETotal.toString() },
+        valueColor = RFColors.criticalDiscordNonAoEPink,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uD83C\uDFB5",
+        title = stringResource(Res.string.summary_top_battle_hymn),
+        cards = topBattleHymn,
+        valueExtractor = { it.sessionBattleHymnTotal.toString() },
+        valueColor = RFColors.battleHymnGold,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
     }
   }
 }

@@ -747,6 +747,12 @@ object PlayerCacheInteractor : Interactor() {
            ,totalSacDances = card.sessionSacDanceTotal
            ,totalDeepTranquility = card.sessionDeepTranquilityTotal
            ,totalDeependDebuff = card.sessionDeependDebuffTotal
+           ,totalDissonanceQuake = card.sessionDissonanceQuakeTotal
+           ,totalCriticalDiscordAoE = card.sessionCriticalDiscordAoETotal
+           ,totalShackle = card.sessionShackleTotal
+           ,totalDissonanceNonAoE = card.sessionDissonanceNonAoETotal
+           ,totalCriticalDiscordNonAoE = card.sessionCriticalDiscordNonAoETotal
+           ,totalBattleHymn = card.sessionBattleHymnTotal
            ,totalThrowDagger = card.sessionThrowDaggerTotal
            ,totalStuns = card.sessionStunsTotal
            ,totalStaggers = card.sessionStaggersTotal
@@ -1787,6 +1793,50 @@ object PlayerCacheInteractor : Interactor() {
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
+  // Songcraft triplet tracking (10/18/26)
+  val topDissonanceQuake: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionDissonanceQuakeTotal > 0 }.sortedByDescending { it.sessionDissonanceQuakeTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topCriticalDiscordAoE: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionCriticalDiscordAoETotal > 0 }.sortedByDescending { it.sessionCriticalDiscordAoETotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topShackle: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionShackleTotal > 0 }.sortedByDescending { it.sessionShackleTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topDissonanceNonAoE: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionDissonanceNonAoETotal > 0 }.sortedByDescending { it.sessionDissonanceNonAoETotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topCriticalDiscordNonAoE: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionCriticalDiscordNonAoETotal > 0 }.sortedByDescending { it.sessionCriticalDiscordNonAoETotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topBattleHymn: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionBattleHymnTotal > 0 }.sortedByDescending { it.sessionBattleHymnTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
   val topTigerStrikes: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionTigerStrikeTotal > 0 }.sortedByDescending { it.sessionTigerStrikeTotal }
@@ -2734,6 +2784,13 @@ object PlayerCacheInteractor : Interactor() {
       CombatRankingCategory.CRIT_HEALS -> topCritHeals
       CombatRankingCategory.MAX_HEAL -> topMaxHeals
       CombatRankingCategory.AVERAGE_HEAL -> topAverageHeals
+      // ODE (Offensive Debuff Enhancement) stats — Songcraft triplet tracking (10/18/26)
+      CombatRankingCategory.DISSONANCE_QUAKE -> topDissonanceQuake
+      CombatRankingCategory.CRITICAL_DISCORD_AOE -> topCriticalDiscordAoE
+      CombatRankingCategory.SHACKLE -> topShackle
+      CombatRankingCategory.DISSONANCE_NON_AOE -> topDissonanceNonAoE
+      CombatRankingCategory.CRITICAL_DISCORD_NON_AOE -> topCriticalDiscordNonAoE
+      CombatRankingCategory.BATTLE_HYMN -> topBattleHymn
     }
   }
 

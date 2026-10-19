@@ -510,6 +510,12 @@ To reduce bias, the recorder must try to stay in range of the raid at all times.
     <string name="player_card_stat_crit_heals">Crit Heals</string>
     <string name="player_card_stat_max_heal">Max Heal</string>
     <string name="player_card_stat_average_heal">Average Heal</string>
+    <string name="player_card_stat_dissonance_quake">Dissonance AoE</string>
+    <string name="player_card_stat_critical_discord_aoe">Critical Discord AoE</string>
+    <string name="player_card_stat_shackle">Shackle</string>
+    <string name="player_card_stat_dissonance_non_aoe">Dissonance</string>
+    <string name="player_card_stat_critical_discord_non_aoe">Critical Discord</string>
+    <string name="player_card_stat_battle_hymn">Battle Hymn</string>
     <string name="player_card_stat_ode_heals">Ode Heals</string>
     <string name="player_card_stat_damage_blocked">Damage Blocked</string>
     <string name="player_card_stat_damage_parried">Damage Parried</string>
@@ -525,6 +531,12 @@ To reduce bias, the recorder must try to stay in range of the raid at all times.
     <string name="summary_top_absorb_lifeforce">Top Absorb Lifeforce</string>
     <string name="summary_top_corrosive_barrage">Top Corrosive Barrage</string>
     <string name="summary_top_blinded_by_crows">Top Crows</string>
+    <string name="summary_top_dissonance_quake">Top Dissonance AoE</string>
+    <string name="summary_top_critical_discord_aoe">Top Critical Discord AoE</string>
+    <string name="summary_top_shackle">Top Shackle</string>
+    <string name="summary_top_dissonance_non_aoe">Top Dissonance</string>
+    <string name="summary_top_critical_discord_non_aoe">Top Critical Discord</string>
+    <string name="summary_top_battle_hymn">Top Battle Hymn</string>
     <string name="summary_top_mist_sunder">Top Mist Sunder</string>
     <string name="summary_top_regular_sunder">Top Regular Sunder</string>
     <string name="summary_top_impales">Top Impales</string>
@@ -553,6 +565,7 @@ To reduce bias, the recorder must try to stay in range of the raid at all times.
     <string name="summary_tab_life_mend">Life Mend</string>
     <string name="summary_tab_debuffs_continued">Debuffs Continued</string>
     <string name="summary_tab_debuffs_extended">Debuffs Extended</string>
+    <string name="summary_tab_songs">Special Songcraft</string>
     <string name="summary_tab_special_buffs_continued">Special Buffs Continued</string>
     <string name="summary_tab_special_heals">Special Heals</string>
     <string name="summary_tab_special_melee">Special Melee</string>

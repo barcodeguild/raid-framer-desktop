@@ -824,6 +824,13 @@ fun CombatOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                               avg.toString()
                             } else "0"
                           }
+                          // Songcraft triplet tracking (10/18/26)
+                          CombatRankingCategory.DISSONANCE_QUAKE -> card.sessionDissonanceQuakeTotal.toString()
+                          CombatRankingCategory.CRITICAL_DISCORD_AOE -> card.sessionCriticalDiscordAoETotal.toString()
+                          CombatRankingCategory.SHACKLE -> card.sessionShackleTotal.toString()
+                          CombatRankingCategory.DISSONANCE_NON_AOE -> card.sessionDissonanceNonAoETotal.toString()
+                          CombatRankingCategory.CRITICAL_DISCORD_NON_AOE -> card.sessionCriticalDiscordNonAoETotal.toString()
+                          CombatRankingCategory.BATTLE_HYMN -> card.sessionBattleHymnTotal.toString()
                         },
                         valueColor = category.valueColor,
                         isRetribution = card.isBuildingAggression,

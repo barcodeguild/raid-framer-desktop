@@ -2,9 +2,15 @@ package com.reoky.raidframer.core.model
 
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.*
+import com.reoky.raidframer.core.definitions.battleHymnBuffIds
 import com.reoky.raidframer.core.definitions.charmedDebuffIds
 import com.reoky.raidframer.core.definitions.copiedWithUtilityItemDetectionMiddleWare
+import com.reoky.raidframer.core.definitions.criticalDiscordAoEDebuffIds
+import com.reoky.raidframer.core.definitions.criticalDiscordNonAoEDebuffIds
+import com.reoky.raidframer.core.definitions.dissonanceNonAoEDebuffIds
+import com.reoky.raidframer.core.definitions.dissonanceQuakeDebuffIds
 import com.reoky.raidframer.core.definitions.distressedDebuffIds
+import com.reoky.raidframer.core.definitions.shackleDebuffIds
 import com.reoky.raidframer.core.definitions.findDebuffByName
 import com.reoky.raidframer.core.definitions.findDebuffById
 import com.reoky.raidframer.core.definitions.gliderUsageDebuffIds
@@ -537,6 +543,11 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isMistSunder = event.debuffId in mistSunderDebuffIds
   val isDeependDebuff = event.debuffId in deedendDebuffIds
   val isImpale = event.debuffId in impaleDebuffIds
+  val isDissonanceQuake = event.debuffId in dissonanceQuakeDebuffIds
+  val isCriticalDiscordAoE = event.debuffId in criticalDiscordAoEDebuffIds
+  val isShackle = event.debuffId in shackleDebuffIds
+  val isDissonanceNonAoE = event.debuffId in dissonanceNonAoEDebuffIds
+  val isCriticalDiscordNonAoE = event.debuffId in criticalDiscordNonAoEDebuffIds
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
@@ -560,7 +571,13 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
         lifetimeTotalBdGlider = card.cache.lifetimeTotalBdGlider + if (isBdGlider) 1 else 0,
         lifetimeTotalCrystalWings = card.cache.lifetimeTotalCrystalWings + if (isCrystalWings) 1 else 0,
         lifetimeTotalGliderDisables = card.cache.lifetimeTotalGliderDisables + if (isGliderDisables) 1 else 0,
-        lifetimeTotalProvoked = card.cache.lifetimeTotalProvoked + if (isProvoked) 1 else 0
+        lifetimeTotalProvoked = card.cache.lifetimeTotalProvoked + if (isProvoked) 1 else 0,
+        // ODE stats — Songcraft triplet tracking (10/18/26)
+        lifetimeTotalDissonanceQuake = card.cache.lifetimeTotalDissonanceQuake + if (isDissonanceQuake) 1 else 0,
+        lifetimeTotalCriticalDiscordAoE = card.cache.lifetimeTotalCriticalDiscordAoE + if (isCriticalDiscordAoE) 1 else 0,
+        lifetimeTotalShackle = card.cache.lifetimeTotalShackle + if (isShackle) 1 else 0,
+        lifetimeTotalDissonanceNonAoE = card.cache.lifetimeTotalDissonanceNonAoE + if (isDissonanceNonAoE) 1 else 0,
+        lifetimeTotalCriticalDiscordNonAoE = card.cache.lifetimeTotalCriticalDiscordNonAoE + if (isCriticalDiscordNonAoE) 1 else 0
       ),
       lifetimeDebuffs = card.cache.lifetimeDebuffs.copy(
         lifetimeTotalThrowDagger = card.cache.lifetimeTotalThrowDagger + if (isThrowDagger) 1 else 0,
@@ -603,6 +620,12 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
     sessionMistSunderTotal = if (isMistSunder) sessionMistSunderTotal + 1 else sessionMistSunderTotal,
     sessionDeependDebuffTotal = if (isDeependDebuff) sessionDeependDebuffTotal + 1 else sessionDeependDebuffTotal,
     sessionImpaleImmunityTotal = if (isImpale) sessionImpaleImmunityTotal + 1 else sessionImpaleImmunityTotal,
+    // ODE stats — Songcraft triplet tracking (10/18/26)
+    sessionDissonanceQuakeTotal = if (isDissonanceQuake) sessionDissonanceQuakeTotal + 1 else sessionDissonanceQuakeTotal,
+    sessionCriticalDiscordAoETotal = if (isCriticalDiscordAoE) sessionCriticalDiscordAoETotal + 1 else sessionCriticalDiscordAoETotal,
+    sessionShackleTotal = if (isShackle) sessionShackleTotal + 1 else sessionShackleTotal,
+    sessionDissonanceNonAoETotal = if (isDissonanceNonAoE) sessionDissonanceNonAoETotal + 1 else sessionDissonanceNonAoETotal,
+    sessionCriticalDiscordNonAoETotal = if (isCriticalDiscordNonAoE) sessionCriticalDiscordNonAoETotal + 1 else sessionCriticalDiscordNonAoETotal,
     sessionCCTotal = if (isCC) card.sessionCCTotal + 1 else card.sessionCCTotal,
     sessionSpellCCMap = if (isCC) {
       val debuffKey = event.debuff.ifBlank { "Unknown" }
@@ -715,6 +738,8 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
   val isProtectiveWings = event.buffId in protectiveWingsBuffIds
   val isCourageousAction = event.buffId in courageousActionBuffIds
   val isManaBarrier = event.buffId in manaBarrierBuffIds
+  // ODE stats — Battle Hymn (buff, not debuff) (10/18/26)
+  val isBattleHymn = event.buffId in battleHymnBuffIds
   val card = this.copiedWithUtilityItemDetectionMiddleWare(event)
   return card.copy(
     lastEvent = event.timestamp,
@@ -723,7 +748,9 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
       lifetimeCombat = card.cache.lifetimeCombat.copy(
         lifetimeTotalBuffsApplied = card.cache.lifetimeTotalBuffsApplied + 1,
         lifetimeTotalCCDelivered = card.cache.lifetimeTotalCCDelivered + if (isBracingImmunity) 1 else 0,
-        lifetimeTotalBracings = card.cache.lifetimeTotalBracings + if (isBracingImmunity) 1 else 0
+        lifetimeTotalBracings = card.cache.lifetimeTotalBracings + if (isBracingImmunity) 1 else 0,
+        // ODE stats — Battle Hymn (buff) (10/18/26)
+        lifetimeTotalBattleHymn = card.cache.lifetimeTotalBattleHymn + if (isBattleHymn) 1 else 0
       ),
       lifetimeDebuffs = card.cache.lifetimeDebuffs.copy(
         lifetimeTotalDefiance = card.cache.lifetimeTotalDefiance + if (isDefiance) 1 else 0,
@@ -749,6 +776,8 @@ fun PlayerCard.postBuffAppliedEvent(event: BuffAppliedEvent): PlayerCard {
     sessionCourageousActionTotal = if (isCourageousAction) sessionCourageousActionTotal + 1 else sessionCourageousActionTotal,
     sessionManaBarrierTotal = if (isManaBarrier) sessionManaBarrierTotal + 1 else sessionManaBarrierTotal,
     sessionBracingsTotal = if (isBracingImmunity) sessionBracingsTotal + 1 else sessionBracingsTotal,
+    // ODE stats — Battle Hymn (buff) (10/18/26)
+    sessionBattleHymnTotal = if (isBattleHymn) sessionBattleHymnTotal + 1 else sessionBattleHymnTotal,
     sessionCCTotal = if (isBracingImmunity) card.sessionCCTotal + 1 else card.sessionCCTotal,
     // --- Buff adjacency ---
     sessionBuffToPlayer = if (RFConfig.state.value.performanceBattleGraphEnabled) {

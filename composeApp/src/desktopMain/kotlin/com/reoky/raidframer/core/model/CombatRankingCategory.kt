@@ -68,6 +68,12 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_avera
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_crit_heals
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_max_heal
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_average_heal
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_dissonance_quake
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_critical_discord_aoe
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_shackle
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_dissonance_non_aoe
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_critical_discord_non_aoe
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_battle_hymn
 
 enum class CombatRankingCategory(
   val displayNameRes: StringResource,
@@ -404,6 +410,40 @@ enum class CombatRankingCategory(
     displayNameRes = Res.string.player_card_stat_average_heal,
     valueColor = RFColors.averageHitTeal,
     icon = "\uD83D\uDCC8"
+  ),
+
+  // Songcraft triplet tracking (10/18/26)
+  // AoE triplet
+  DISSONANCE_QUAKE(
+    displayNameRes = Res.string.player_card_stat_dissonance_quake,
+    valueColor = RFColors.dissonanceQuakeRed,
+    icon = "\uD83D\uDD25"
+  ),
+  CRITICAL_DISCORD_AOE(
+    displayNameRes = Res.string.player_card_stat_critical_discord_aoe,
+    valueColor = RFColors.criticalDiscordAoEPurple,
+    icon = "\uD83D\uDD16"
+  ),
+  SHACKLE(
+    displayNameRes = Res.string.player_card_stat_shackle,
+    valueColor = RFColors.shackleOrange,
+    icon = "\uD83D\uDD12"
+  ),
+  // Non-AoE triplet
+  DISSONANCE_NON_AOE(
+    displayNameRes = Res.string.player_card_stat_dissonance_non_aoe,
+    valueColor = RFColors.dissonanceNonAoEYellow,
+    icon = "\uD83D\uDD14"
+  ),
+  CRITICAL_DISCORD_NON_AOE(
+    displayNameRes = Res.string.player_card_stat_critical_discord_non_aoe,
+    valueColor = RFColors.criticalDiscordNonAoEPink,
+    icon = "\uD83D\uDD16"
+  ),
+  BATTLE_HYMN(
+    displayNameRes = Res.string.player_card_stat_battle_hymn,
+    valueColor = RFColors.battleHymnGold,
+    icon = "\uD83C\uDFB5"
   );
 
   companion object {

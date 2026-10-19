@@ -111,6 +111,12 @@ val PlayerCacheEntity.lifetimeTotalBdGlider get() = lifetimeCombat.lifetimeTotal
 val PlayerCacheEntity.lifetimeTotalCrystalWings get() = lifetimeCombat.lifetimeTotalCrystalWings
 val PlayerCacheEntity.lifetimeTotalGliderDisables get() = lifetimeCombat.lifetimeTotalGliderDisables
 val PlayerCacheEntity.lifetimeTotalProvoked get() = lifetimeCombat.lifetimeTotalProvoked
+val PlayerCacheEntity.lifetimeTotalDissonanceQuake get() = lifetimeCombat.lifetimeTotalDissonanceQuake
+val PlayerCacheEntity.lifetimeTotalCriticalDiscordAoE get() = lifetimeCombat.lifetimeTotalCriticalDiscordAoE
+val PlayerCacheEntity.lifetimeTotalShackle get() = lifetimeCombat.lifetimeTotalShackle
+val PlayerCacheEntity.lifetimeTotalDissonanceNonAoE get() = lifetimeCombat.lifetimeTotalDissonanceNonAoE
+val PlayerCacheEntity.lifetimeTotalCriticalDiscordNonAoE get() = lifetimeCombat.lifetimeTotalCriticalDiscordNonAoE
+val PlayerCacheEntity.lifetimeTotalBattleHymn get() = lifetimeCombat.lifetimeTotalBattleHymn
 
 val PlayerCacheEntity.lifetimeTotalDefiance get() = lifetimeDebuffs.lifetimeTotalDefiance
 val PlayerCacheEntity.lifetimeTotalGardenDefiance get() = lifetimeDebuffs.lifetimeTotalGardenDefiance

@@ -60,6 +60,12 @@ import raid_framer_desktop.composeapp.generated.resources.player_card_stat_petri
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_absorb_lifeforce
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_corrosive_barrage
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_blinded_by_crows
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_dissonance_quake
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_critical_discord_aoe
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_shackle
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_dissonance_non_aoe
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_critical_discord_non_aoe
+import raid_framer_desktop.composeapp.generated.resources.player_card_stat_battle_hymn
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_mist_sunder
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_regular_sunder
 import raid_framer_desktop.composeapp.generated.resources.player_card_stat_impales
@@ -131,6 +137,13 @@ data class SessionTotals(
   val absorbLifeforce: Int,
   val corrosiveBarrage: Int,
   val blindedByCrows: Int,
+  // Songcraft triplet tracking (10/18/26)
+  val dissonanceQuake: Int = 0,
+  val criticalDiscordAoE: Int = 0,
+  val shackle: Int = 0,
+  val dissonanceNonAoE: Int = 0,
+  val criticalDiscordNonAoE: Int = 0,
+  val battleHymn: Int = 0,
   val mistSunder: Int,
   val regularSunder: Int,
   val impaleImmunity: Int,
@@ -197,6 +210,12 @@ data class SessionTotals(
        absorbLifeforce = card.sessionAbsorbLifeforceTotal,
        corrosiveBarrage = card.sessionCorrosiveBarrageTotal,
        blindedByCrows = card.sessionBlindedByCrowsTotal,
+       dissonanceQuake = card.sessionDissonanceQuakeTotal,
+       criticalDiscordAoE = card.sessionCriticalDiscordAoETotal,
+       shackle = card.sessionShackleTotal,
+       dissonanceNonAoE = card.sessionDissonanceNonAoETotal,
+       criticalDiscordNonAoE = card.sessionCriticalDiscordNonAoETotal,
+       battleHymn = card.sessionBattleHymnTotal,
        mistSunder = card.sessionMistSunderTotal,
        regularSunder = card.sessionRegularSunderTotal,
        impaleImmunity = card.sessionImpaleImmunityTotal,
@@ -265,6 +284,12 @@ data class SessionTotals(
        absorbLifeforce = entity.totalAbsorbLifeforce,
        corrosiveBarrage = entity.totalCorrosiveBarrage,
        blindedByCrows = entity.totalBlindedByCrows,
+       dissonanceQuake = entity.totalDissonanceQuake,
+       criticalDiscordAoE = entity.totalCriticalDiscordAoE,
+       shackle = entity.totalShackle,
+       dissonanceNonAoE = entity.totalDissonanceNonAoE,
+       criticalDiscordNonAoE = entity.totalCriticalDiscordNonAoE,
+       battleHymn = entity.totalBattleHymn,
        mistSunder = entity.totalMistSunder,
        regularSunder = entity.totalRegularSunder,
        impaleImmunity = entity.totalImpaleImmunity,
@@ -333,6 +358,12 @@ data class SessionTotals(
       absorbLifeforce = cache.lifetimeDebuffs.lifetimeTotalAbsorbLifeforce.toInt(),
       corrosiveBarrage = cache.lifetimeDebuffs.lifetimeTotalCorrosiveBarrage.toInt(),
       blindedByCrows = cache.lifetimeDebuffs.lifetimeTotalBlindedByCrows.toInt(),
+      dissonanceQuake = cache.lifetimeCombat.lifetimeTotalDissonanceQuake.toInt(),
+      criticalDiscordAoE = cache.lifetimeCombat.lifetimeTotalCriticalDiscordAoE.toInt(),
+      shackle = cache.lifetimeCombat.lifetimeTotalShackle.toInt(),
+      dissonanceNonAoE = cache.lifetimeCombat.lifetimeTotalDissonanceNonAoE.toInt(),
+      criticalDiscordNonAoE = cache.lifetimeCombat.lifetimeTotalCriticalDiscordNonAoE.toInt(),
+      battleHymn = cache.lifetimeCombat.lifetimeTotalBattleHymn.toInt(),
       mistSunder = cache.lifetimeDebuffs.lifetimeTotalMistSunder.toInt(),
       regularSunder = cache.lifetimeDebuffs.lifetimeTotalRegularSunder.toInt(),
       impaleImmunity = cache.lifetimeDebuffs.lifetimeTotalImpaleImmunity.toInt(),
@@ -420,6 +451,12 @@ private fun sessionStatEntries(totals: SessionTotals): List<Triple<org.jetbrains
   Triple(Res.string.player_card_stat_absorb_lifeforce, totals.absorbLifeforce.toLong(), RFColors.absorbLifeforceMagenta),
   Triple(Res.string.player_card_stat_corrosive_barrage, totals.corrosiveBarrage.toLong(), RFColors.corrosiveBarrageLime),
   Triple(Res.string.player_card_stat_blinded_by_crows, totals.blindedByCrows.toLong(), RFColors.blindedByCrowsDark),
+  Triple(Res.string.player_card_stat_dissonance_quake, totals.dissonanceQuake.toLong(), RFColors.dissonanceQuakeRed),
+  Triple(Res.string.player_card_stat_critical_discord_aoe, totals.criticalDiscordAoE.toLong(), RFColors.criticalDiscordAoEPurple),
+  Triple(Res.string.player_card_stat_shackle, totals.shackle.toLong(), RFColors.shackleOrange),
+  Triple(Res.string.player_card_stat_dissonance_non_aoe, totals.dissonanceNonAoE.toLong(), RFColors.dissonanceNonAoEYellow),
+  Triple(Res.string.player_card_stat_critical_discord_non_aoe, totals.criticalDiscordNonAoE.toLong(), RFColors.criticalDiscordNonAoEPink),
+  Triple(Res.string.player_card_stat_battle_hymn, totals.battleHymn.toLong(), RFColors.battleHymnGold),
   Triple(Res.string.player_card_stat_mist_sunder, totals.mistSunder.toLong(), RFColors.mistSunderCyan),
   Triple(Res.string.player_card_stat_regular_sunder, totals.regularSunder.toLong(), RFColors.regularSunderOrange),
   Triple(Res.string.player_card_stat_impales, totals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel),
@@ -523,6 +560,12 @@ fun CompactSessionTotals(
     CompactStatRow(stringResource(Res.string.player_card_stat_absorb_lifeforce), sessionTotals.absorbLifeforce.toLong(), RFColors.absorbLifeforceMagenta)
     CompactStatRow(stringResource(Res.string.player_card_stat_corrosive_barrage), sessionTotals.corrosiveBarrage.toLong(), RFColors.corrosiveBarrageLime)
     CompactStatRow(stringResource(Res.string.player_card_stat_blinded_by_crows), sessionTotals.blindedByCrows.toLong(), RFColors.blindedByCrowsDark)
+    CompactStatRow(stringResource(Res.string.player_card_stat_dissonance_quake), sessionTotals.dissonanceQuake.toLong(), RFColors.dissonanceQuakeRed)
+    CompactStatRow(stringResource(Res.string.player_card_stat_critical_discord_aoe), sessionTotals.criticalDiscordAoE.toLong(), RFColors.criticalDiscordAoEPurple)
+    CompactStatRow(stringResource(Res.string.player_card_stat_shackle), sessionTotals.shackle.toLong(), RFColors.shackleOrange)
+    CompactStatRow(stringResource(Res.string.player_card_stat_dissonance_non_aoe), sessionTotals.dissonanceNonAoE.toLong(), RFColors.dissonanceNonAoEYellow)
+    CompactStatRow(stringResource(Res.string.player_card_stat_critical_discord_non_aoe), sessionTotals.criticalDiscordNonAoE.toLong(), RFColors.criticalDiscordNonAoEPink)
+    CompactStatRow(stringResource(Res.string.player_card_stat_battle_hymn), sessionTotals.battleHymn.toLong(), RFColors.battleHymnGold)
     CompactStatRow(stringResource(Res.string.player_card_stat_mist_sunder), sessionTotals.mistSunder.toLong(), RFColors.mistSunderCyan)
     CompactStatRow(stringResource(Res.string.player_card_stat_regular_sunder), sessionTotals.regularSunder.toLong(), RFColors.regularSunderOrange)
     CompactStatRow(stringResource(Res.string.player_card_stat_impales), sessionTotals.impaleImmunity.toLong(), RFColors.impaleImmunitySteel)

@@ -49,7 +49,16 @@ val blacklistedDebuffIds: Set<Int> = setOf(
   4844, // Dominator's Curse
   13789, 14620, // Abyssal Burden, Abyssal Whisper
   9001158, // PvP is undesirable
-  31318, // Hide and Seek debuff
+  31318, // Hide and Seek debuff,
+
+  // ODE (Offensive Debuff Enhancement) stats — Songcraft triplet tracking (10/18/26)
+  // AoE triplet: Dissonance Quake, Critical Discord AoE, Shackle
+  25670, // Dissonance Quake
+  21992, // Critical Discord AoE
+  206, 6946, 21159, 26963, 27219, 29302, 22511, // Shackle variants
+  // Non-AoE triplet: Dissonance (non-AoE), Critical Discord (non-AoE)
+  777, 26547, 25669, 26548, // Dissonance non-AoE variants
+  25061, // Critical Discord non-AoE (21992 already blacklisted above)
 )
 
 // Buffs that are not useful for the battle graph dropdown
@@ -61,6 +70,8 @@ val blacklistedBuffIds: Set<Int> = setOf(
   7105, // Bracing blast immunity
   20929, // Arc lightning immunity
   794, 795, 796, 7655, // Increase health lift buffs
+  // ODE stats — Battle Hymn (buff) (10/18/26)
+  6851, // Battle Hymn
 )
 
 // Names of debuffs to blacklist (fallback for when IDs aren't available)

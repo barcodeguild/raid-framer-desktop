@@ -130,6 +130,16 @@ object RFColors {
   val maxHitRed = Color(0xFFFF6E40)
   val averageHitTeal = Color(0xFF26A69A)
 
+  // Songcraft triplet tracking (10/18/26)
+  // AoE triplet
+  val dissonanceQuakeRed = Color(0xFFD32F2F)
+  val criticalDiscordAoEPurple = Color(0xFF8E24AA)
+  val shackleOrange = Color(0xFFFF6D00)
+  // Non-AoE triplet
+  val dissonanceNonAoEYellow = Color(0xFFFFC107)
+  val criticalDiscordNonAoEPink = Color(0xFFF06292)
+  val battleHymnGold = Color(0xFFFFAB00)
+
   // Overlay background
   val OverlayBackground = Color(0xFF121212)
 

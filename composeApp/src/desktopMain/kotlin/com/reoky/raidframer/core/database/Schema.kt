@@ -17,7 +17,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 53
+const val SCHEMA_VERSION = 54
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -317,7 +317,13 @@ data class PlayerCacheLifetimeCombat(
   val lifetimeTotalBdGlider: Long = 0L,
   val lifetimeTotalCrystalWings: Long = 0L,
   val lifetimeTotalGliderDisables: Long = 0L,
-  val lifetimeTotalProvoked: Long = 0L
+  val lifetimeTotalProvoked: Long = 0L,
+  val lifetimeTotalDissonanceQuake: Long = 0L,
+  val lifetimeTotalCriticalDiscordAoE: Long = 0L,
+  val lifetimeTotalShackle: Long = 0L,
+  val lifetimeTotalDissonanceNonAoE: Long = 0L,
+  val lifetimeTotalCriticalDiscordNonAoE: Long = 0L,
+  val lifetimeTotalBattleHymn: Long = 0L
 )
 
 data class PlayerCacheLifetimeDebuffs(
@@ -458,6 +464,12 @@ data class PlayerSessionTotalsEntity(
   val totalCourageousAction: Int = 0,
   val totalManaBarrier: Int = 0,
   val totalRevive: Int = 0,
+  val totalDissonanceQuake: Int = 0,
+  val totalCriticalDiscordAoE: Int = 0,
+  val totalShackle: Int = 0,
+  val totalDissonanceNonAoE: Int = 0,
+  val totalCriticalDiscordNonAoE: Int = 0,
+  val totalBattleHymn: Int = 0,
 
   // avoidance + mitigation session totals (10/05/26)
   val totalBlocks: Int = 0,

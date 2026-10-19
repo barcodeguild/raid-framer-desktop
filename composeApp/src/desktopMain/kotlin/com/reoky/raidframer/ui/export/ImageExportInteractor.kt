@@ -90,6 +90,12 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_dis
 import raid_framer_desktop.composeapp.generated.resources.summary_top_provokes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_tiger_strikes
 import raid_framer_desktop.composeapp.generated.resources.summary_top_freezes
+import raid_framer_desktop.composeapp.generated.resources.summary_top_dissonance_quake
+import raid_framer_desktop.composeapp.generated.resources.summary_top_critical_discord_aoe
+import raid_framer_desktop.composeapp.generated.resources.summary_top_shackle
+import raid_framer_desktop.composeapp.generated.resources.summary_top_dissonance_non_aoe
+import raid_framer_desktop.composeapp.generated.resources.summary_top_critical_discord_non_aoe
+import raid_framer_desktop.composeapp.generated.resources.summary_top_battle_hymn
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Font
@@ -240,6 +246,13 @@ object ImageExportInteractor {
   private val MISS_COLOR = toAwtColor(RFColors.avoidanceMissGray)
   private val ABSORB_COLOR = toAwtColor(RFColors.avoidanceAbsorbCyan)
   private val LOOT_BUFF_COLOR = toAwtColor(RFColors.lootBuffColor)
+  // ODE (Offensive Debuff Enhancement) stats — Songcraft triplet tracking (10/18/26)
+  private val DISSONANCE_QUAKE_COLOR = toAwtColor(RFColors.dissonanceQuakeRed)
+  private val CRITICAL_DISCORD_AOE_COLOR = toAwtColor(RFColors.criticalDiscordAoEPurple)
+  private val SHACKLE_COLOR = toAwtColor(RFColors.shackleOrange)
+  private val DISSONANCE_NON_AOE_COLOR = toAwtColor(RFColors.dissonanceNonAoEYellow)
+  private val CRITICAL_DISCORD_NON_AOE_COLOR = toAwtColor(RFColors.criticalDiscordNonAoEPink)
+  private val BATTLE_HYMN_COLOR = toAwtColor(RFColors.battleHymnGold)
 
   /**
    * Maps a heal ratio (0.0 = 0% healed, 1.0 = 100% healed) to a color gradient:
@@ -446,6 +459,12 @@ object ImageExportInteractor {
       val topAbsorbLifeforce: List<PlayerCard>,
       val topCorrosiveBarrage: List<PlayerCard>,
       val topBlindedByCrows: List<PlayerCard>,
+      val topDissonanceQuake: List<PlayerCard>,
+      val topCriticalDiscordAoE: List<PlayerCard>,
+      val topShackle: List<PlayerCard>,
+      val topDissonanceNonAoE: List<PlayerCard>,
+      val topCriticalDiscordNonAoE: List<PlayerCard>,
+      val topBattleHymn: List<PlayerCard>,
       val topMistSunder: List<PlayerCard>,
       val topRegularSunder: List<PlayerCard>,
       val topImpaleImmunity: List<PlayerCard>,
@@ -638,6 +657,13 @@ val coherenceRecordingMs: Long,
       topAbsorbLifeforce = PlayerCacheInteractor.topAbsorbLifeforce.value.take(25),
       topCorrosiveBarrage = PlayerCacheInteractor.topCorrosiveBarrage.value.take(25),
       topBlindedByCrows = PlayerCacheInteractor.topBlindedByCrows.value.take(25),
+      // ODE (Offensive Debuff Enhancement) stats — Songcraft triplet tracking (10/18/26)
+      topDissonanceQuake = PlayerCacheInteractor.topDissonanceQuake.value.take(25),
+      topCriticalDiscordAoE = PlayerCacheInteractor.topCriticalDiscordAoE.value.take(25),
+      topShackle = PlayerCacheInteractor.topShackle.value.take(25),
+      topDissonanceNonAoE = PlayerCacheInteractor.topDissonanceNonAoE.value.take(25),
+      topCriticalDiscordNonAoE = PlayerCacheInteractor.topCriticalDiscordNonAoE.value.take(25),
+      topBattleHymn = PlayerCacheInteractor.topBattleHymn.value.take(25),
       topMistSunder = PlayerCacheInteractor.topMistSunder.value.take(25),
       topRegularSunder = PlayerCacheInteractor.topRegularSunder.value.take(25),
       topImpaleImmunity = PlayerCacheInteractor.topImpaleImmunity.value.take(25),
@@ -1615,7 +1641,21 @@ val coherenceRecordingMs: Long,
       Triple(getString(Res.string.summary_top_blinded_by_crows), "\uD83E\uDD85", ColumnData.CardData(data.topBlindedByCrows, { it.sessionBlindedByCrowsTotal.toString() }, BLINDED_BY_CROWS_COLOR)),
     )))
 
-    // 10. Provokes, Petrification, Freezes
+    // 10. ODE Songcraft AoE Triplet: Dissonance Quake, Critical Discord AoE, Shackle
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_dissonance_quake), "\uD83D\uDD25", ColumnData.CardData(data.topDissonanceQuake, { it.sessionDissonanceQuakeTotal.toString() }, DISSONANCE_QUAKE_COLOR)),
+      Triple(getString(Res.string.summary_top_critical_discord_aoe), "\uD83D\uDD16", ColumnData.CardData(data.topCriticalDiscordAoE, { it.sessionCriticalDiscordAoETotal.toString() }, CRITICAL_DISCORD_AOE_COLOR)),
+      Triple(getString(Res.string.summary_top_shackle), "\uD83D\uDD12", ColumnData.CardData(data.topShackle, { it.sessionShackleTotal.toString() }, SHACKLE_COLOR)),
+    )))
+
+    // 11. ODE Songcraft Non-AoE Triplet: Dissonance, Critical Discord, Battle Hymn
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_dissonance_non_aoe), "\uD83D\uDD14", ColumnData.CardData(data.topDissonanceNonAoE, { it.sessionDissonanceNonAoETotal.toString() }, DISSONANCE_NON_AOE_COLOR)),
+      Triple(getString(Res.string.summary_top_critical_discord_non_aoe), "\uD83D\uDD16", ColumnData.CardData(data.topCriticalDiscordNonAoE, { it.sessionCriticalDiscordNonAoETotal.toString() }, CRITICAL_DISCORD_NON_AOE_COLOR)),
+      Triple(getString(Res.string.summary_top_battle_hymn), "\uD83C\uDFB5", ColumnData.CardData(data.topBattleHymn, { it.sessionBattleHymnTotal.toString() }, BATTLE_HYMN_COLOR)),
+    )))
+
+    // 12. Provokes, Petrification, Freezes
     tripletBlocks.add(makeTriplet(listOf(
       Triple(getString(Res.string.summary_top_provokes), "\u2757", ColumnData.CardData(data.topProvoked, { it.sessionProvokedTotal.toString() }, PROVOKED_COLOR)),
       Triple(getString(Res.string.summary_top_petrification), "\u26CF", ColumnData.CardData(data.topPetrification, { it.sessionPetrificationTotal.toString() }, PETRIFICATION_COLOR)),
