@@ -8,20 +8,33 @@ import com.reoky.raidframer.core.model.PetCard
 /**
  * Build a PlayerCacheEntity from this PlayerCard while preserving any previously persisted
  * cache fields. Optionally override the spec to write (`specOverride`).
+ * Optional overrides for faction, guild, and gear score allow external sources (e.g., PlayerInfo
+ * payloads) to update identity data even when a cached entity already exists.
  */
-fun PlayerCard.createCacheObject(specOverride: String? = null): PlayerCacheEntity {
+fun PlayerCard.createCacheObject(
+  specOverride: String? = null,
+  factionOverride: com.reoky.raidframer.core.model.Faction? = null,
+  guildOverride: String? = null,
+  gearScoreOverride: Int? = null
+): PlayerCacheEntity {
   val c = this.cache
+  val resolvedFaction = when {
+    factionOverride != null && factionOverride != com.reoky.raidframer.core.model.Faction.UNKNOWN -> factionOverride.value
+    else -> c?.lastKnownFaction ?: this.lastKnownFaction
+  }
+  val resolvedGuild = guildOverride ?: c?.lastKnownGuild ?: this.lastKnownGuild
+  val resolvedGearScore = gearScoreOverride ?: if (this.lastKnownGearScore > 0) this.lastKnownGearScore else (c?.lastKnownGearScore ?: 0)
   return PlayerCacheEntity(
     playerName = this.name,
     identity = PlayerCacheIdentity(
       lastSeen = this.lastEvent,
       lastKnownSpec = specOverride ?: (c?.lastKnownSpec ?: this.currentBuild),
       lastKnownLevel = c?.lastKnownLevel ?: 0,
-      lastKnownGearScore = if (this.lastKnownGearScore > 0) this.lastKnownGearScore else (c?.lastKnownGearScore ?: 0),
+      lastKnownGearScore = resolvedGearScore,
       leaderships = this.leaderships,
-      lastKnownFaction = c?.lastKnownFaction ?: this.lastKnownFaction,
+      lastKnownFaction = resolvedFaction,
       lastKnownFactionStatus = c?.lastKnownFactionStatus ?: this.lastKnownFactionStatus,
-      lastKnownGuild = c?.lastKnownGuild ?: this.lastKnownGuild,
+      lastKnownGuild = resolvedGuild,
       lastKnownRegion = c?.lastKnownRegion ?: ""
     ),
     gliders = c?.gliders ?: PlayerCacheGliders(),

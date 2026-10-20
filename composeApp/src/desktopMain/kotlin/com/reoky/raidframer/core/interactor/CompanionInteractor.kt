@@ -181,7 +181,16 @@ object CompanionInteractor : Interactor() {
             is PlayerInfoPayload.Character -> {
               val playerName = payload.name
               if (playerName.isBlank() || playerName.contains(" ")) return
-              PlayerCacheInteractor.stronglyAssertIsPlayer(payload.cid, payload.name, payload.classMap)
+              // Filter out API error messages that leak through as guild names (e.g., "Error404 Family not found")
+              val guild = if (payload.familyName.isNotBlank() && !payload.familyName.startsWith("Error")) payload.familyName else ""
+              PlayerCacheInteractor.stronglyAssertIsPlayer(
+                cid = null, // PlayerInfo doesn't carry CID
+                name = payload.name,
+                classMap = payload.classMap,
+                faction = payload.faction,
+                guild = guild,
+                gearScore = 0 // PlayerInfo doesn't carry gearScore
+              )
             }
             is PlayerInfoPayload.Npc -> {
               //println("Metadata for NPC ${payload.name} ${payload.isPortal} received.")

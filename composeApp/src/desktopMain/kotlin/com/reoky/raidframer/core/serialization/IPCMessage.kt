@@ -9,9 +9,14 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonTransformingSerializer
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 //@Serializable
 //enum class IPCMessageType {
@@ -195,5 +200,34 @@ object SecondsToMillisSerializer : KSerializer<Long> {
   // from ms to seconds
   override fun serialize(encoder: Encoder, value: Long) {
     encoder.encodeLong(value / 1000)
+  }
+}
+
+/**
+ * Handles gearScore values that may be sent as comma-formatted strings (e.g., "15,485")
+ * or as plain integers. The game sometimes formats large numbers with thousand separators,
+ * which would fail standard Int deserialization.
+ */
+object CommaIntSerializer : KSerializer<Int> {
+  override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("CommaInt", PrimitiveKind.INT)
+
+  override fun deserialize(decoder: Decoder): Int {
+    val jsonDecoder = decoder as? JsonDecoder ?: throw IllegalStateException("CommaIntSerializer requires a JSON decoder")
+    val element = jsonDecoder.decodeJsonElement()
+    return when (element) {
+      is JsonPrimitive -> {
+        if (element.isString) {
+          // Strip commas and parse as integer
+          element.content.replace(",", "").toInt()
+        } else {
+          element.int
+        }
+      }
+      else -> throw IllegalStateException("Expected a JsonPrimitive for CommaInt, got ${element::class.simpleName}")
+    }
+  }
+
+  override fun serialize(encoder: Encoder, value: Int) {
+    encoder.encodeInt(value)
   }
 }

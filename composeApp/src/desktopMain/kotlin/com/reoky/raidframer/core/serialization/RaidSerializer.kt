@@ -30,6 +30,7 @@ data class BuffPayload(
 data class RaidFramePayload(
   val slot: Int = 0,
   val playerName: String = "",
+  @Serializable(with = CommaIntSerializer::class)
   val gearScore: Int = 0,
   val role: Int = 0,
   val characterBuild: String = "",

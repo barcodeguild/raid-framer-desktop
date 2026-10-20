@@ -936,23 +936,43 @@ fun PlayerCard.pvpPerformancePoints(): Int {
 
 /**
  * Sets the faction and faction status on a PlayerCard, updating both the card fields and the cache entity.
- * If the cache exists, it copies the new values. If not, it creates a new cache object with the faction data.
+ * If the cache exists, it copies the new values. If not, it creates a new cache object preserving
+ * all identity data (spec, guild, gear score, etc.) from the card to avoid data loss.
  */
 fun PlayerCard.setFaction(faction: Faction, factionStatus: FactionStatus): PlayerCard {
-  val updatedCache = cache
-    ?.copy(
+  val updatedCache = if (cache != null) {
+    cache.copy(
       identity = cache.identity.copy(
         lastKnownFaction = faction.value,
         lastKnownFactionStatus = factionStatus.value
       )
     )
-    ?: PlayerCacheEntity(
+  } else {
+    // No existing cache — create one that preserves all identity data from the card
+    PlayerCacheEntity(
       playerName = this.name,
       identity = PlayerCacheIdentity(
+        lastSeen = this.lastEvent,
+        lastKnownSpec = this.currentBuild,
+        lastKnownLevel = 0,
+        lastKnownGearScore = this.lastKnownGearScore,
+        leaderships = this.leaderships,
         lastKnownFaction = faction.value,
-        lastKnownFactionStatus = factionStatus.value
-      )
+        lastKnownFactionStatus = factionStatus.value,
+        lastKnownGuild = this.lastKnownGuild,
+        lastKnownRegion = ""
+      ),
+      gliders = PlayerCacheGliders(),
+      utilityItems = PlayerCacheUtilityItems(),
+      snakeItems = PlayerCacheSnakeItems(),
+      blackDragonItems = PlayerCacheBlackDragonItems(),
+      dungeonItems = PlayerCacheDungeonItems(),
+      potions = PlayerCachePotions(),
+      lifetimeCombat = PlayerCacheLifetimeCombat(),
+      lifetimeDebuffs = PlayerCacheLifetimeDebuffs(),
+      lifetimeAvoidance = PlayerCacheLifetimeAvoidance()
     )
+  }
 
   return this.copy(
     lastKnownFaction = faction.value,

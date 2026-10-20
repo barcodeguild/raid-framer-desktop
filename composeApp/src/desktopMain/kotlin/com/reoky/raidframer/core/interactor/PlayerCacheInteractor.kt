@@ -64,6 +64,12 @@ object PlayerCacheInteractor : Interactor() {
   // Damage spell IDs that result from guided missiles
   private val GUIDED_MISSILES_DAMAGE_SPELL_IDS = setOf(46055) // Guided Missiles (non-rider damage)
 
+  // Statue buff IDs used to detect player faction from raid roster buff scans.
+  // These are the allied statue buffs that indicate a player's true faction, even in cross-faction instances.
+  private val HARANYA_STATUE_BUFF_IDS = setOf(30767, 30764, 9002338, 9002337, 30773, 30772)
+  private val NUIA_STATUE_BUFF_IDS = setOf(30766, 9002340, 30760, 9002339, 30770, 30771)
+  private val PIRATE_STATUE_BUFF_IDS = setOf(30768, 30765, 9002342, 9002341)
+
   private val raids = mutableStateMapOf<Int, List<Party>>()
   private val raidAttendance = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidDepartures = mutableStateMapOf<Int, MutableSet<String>>()
@@ -245,6 +251,10 @@ object PlayerCacheInteractor : Interactor() {
 
   /*
    * Builds parties of five from the ordered list of raid members and stores them under the raid ID.
+   * Also opportunistically updates player metadata from raid roster data:
+   * - Faction from statue buffs detected in buff scans (works in cross-faction instances)
+   * - Class/role from raid roster characterBuild/role fields
+   * - Gear score from raid roster data
    */
   suspend fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
     mutex.withLock {
@@ -278,25 +288,72 @@ object PlayerCacheInteractor : Interactor() {
 
   }
           }
-          // Sum the loot buffs a player currently has and track the session peak. An empty
-          // (out-of-range / failed) scan is intentionally ignored so we don't overwrite the
-          // last known loot buff total with nothing. The total active buff count is tracked
-          // separately whenever a fresh scan actually reports one.
-          if (member.buffs.isNotEmpty()) {
-            cards[member.playerName]?.let { card ->
-              cards[member.playerName] = card.updateLootBuffStats(
-                member.buffs.map { it.buff_id }.toSet(),
-                member.buffCount
-              )
+
+          // Opportunistically update player metadata from raid roster data
+          cards[member.playerName]?.let { card ->
+            var updatedCard = card
+
+            // Detect faction from statue buffs in the buff scan
+            if (member.buffs.isNotEmpty()) {
+              val buffIds = member.buffs.map { it.buff_id }.toSet()
+              val detectedFaction = detectFactionFromStatueBuffs(buffIds)
+              if (detectedFaction != null) {
+                val currentFaction = Faction.fromString(card.lastKnownFaction)
+                // Always update faction from statue buffs - this is the most reliable source
+                // and works even in cross-faction instances
+                if (currentFaction != detectedFaction) {
+                  updatedCard = updatedCard.setFaction(detectedFaction, FactionStatus.FRIENDLY)
+                  Log.info(TAG, "Updated faction for ${member.playerName} to $detectedFaction from statue buff scan.")
+                }
+              }
             }
-          } else if (member.buffCount > 0) {
-            cards[member.playerName]?.let { card ->
-              cards[member.playerName] = card.copy(sessionCurrentBuffCount = member.buffCount)
+
+            // Update class/role from raid roster data if available
+            if (member.characterBuild.isNotBlank() && member.characterBuild != SpecType.UNKNOWN.name) {
+              if (updatedCard.currentBuild == SpecType.UNKNOWN.name || updatedCard.currentBuild.isBlank()) {
+                val role = SpecType.fromName(member.characterBuild)?.guessPlayerRole()
+                updatedCard = updatedCard.copy(
+                  currentBuild = member.characterBuild,
+                  currentRole = role?.value ?: updatedCard.currentRole
+                )
+              }
+            }
+
+            // Update gear score from raid roster if available and non-zero
+            if (member.gearScore > 0 && updatedCard.lastKnownGearScore == 0) {
+              updatedCard = updatedCard.copy(lastKnownGearScore = member.gearScore)
+            }
+
+            // Only persist if something changed
+            if (updatedCard !== card) {
+              cards[member.playerName] = updatedCard
+              updatedCard.cache?.let { cacheEntity ->
+                RFDao.playerCacheDao.insert(cacheEntity)
+              }
+            }
+
+            // Sum the loot buffs a player currently has and track the session peak. An empty
+            // (out-of-range / failed) scan is intentionally ignored so we don't overwrite the
+            // last known loot buff total with nothing. The total active buff count is tracked
+            // separately whenever a fresh scan actually reports one.
+            if (member.buffs.isNotEmpty()) {
+              cards[member.playerName]?.let { c ->
+                cards[member.playerName] = c.updateLootBuffStats(
+                  member.buffs.map { it.buff_id }.toSet(),
+                  member.buffCount
+                )
+              }
+            } else if (member.buffCount > 0) {
+              cards[member.playerName]?.let { c ->
+                cards[member.playerName] = c.copy(sessionCurrentBuffCount = member.buffCount)
+              }
             }
           }
         }
       }
     }
+    updateRaidAttendance()
+    inferAndPersistFactionForRaidMembers()
   }
 
   /**
@@ -353,6 +410,19 @@ object PlayerCacheInteractor : Interactor() {
       raidBuffHistory.entries.removeIf { it.value.observedAt < cutoff }
       lastRaidBuffHistoryCleanupAt = now
     }
+  }
+
+  /**
+   * Detects a player's faction from their active statue buffs.
+   * Returns the detected Faction or null if no statue buff is found.
+   * This is used opportunistically from raid roster buff scans to learn faction
+   * even in cross-faction instances where raid membership doesn't imply faction.
+   */
+  private fun detectFactionFromStatueBuffs(buffIds: Set<Int>): Faction? {
+    if (buffIds.intersect(HARANYA_STATUE_BUFF_IDS).isNotEmpty()) return Faction.HARANYA
+    if (buffIds.intersect(NUIA_STATUE_BUFF_IDS).isNotEmpty()) return Faction.NUIA
+    if (buffIds.intersect(PIRATE_STATUE_BUFF_IDS).isNotEmpty()) return Faction.PIRATE
+    return null
   }
 
   fun resolveRaidBuffObservation(member: RaidFramePayload, gracePeriod: RaidBuffGracePeriod): RaidBuffObservation {
@@ -963,7 +1033,9 @@ object PlayerCacheInteractor : Interactor() {
 
   /**
    * Infers faction for real players in the same raid who have unknown faction.
-   * Assumes all same-raid real players share the same faction, and persists the update to cache.
+   * Only infers when all known-faction members agree on the same faction.
+   * In cross-faction instances where multiple factions are present, no inference is made
+   * to avoid incorrectly assigning faction.
    */
   private suspend fun inferAndPersistFactionForRaidMembers() {
     mutex.withLock {
@@ -971,13 +1043,24 @@ object PlayerCacheInteractor : Interactor() {
         val raidMemberNames = parties.flatten().map { it.playerName }.toSet()
         val raidCards = cards.values.filter { it.name in raidMemberNames && it.isRealPlayer }
 
-        val knownFactionCard = raidCards.find {
-          val f = Faction.fromString(it.lastKnownFaction)
-          f != Faction.UNKNOWN
-        } ?: return@forEach
+        // Collect all known factions in this raid
+        val knownFactions = raidCards.mapNotNull { card ->
+          val f = Faction.fromString(card.lastKnownFaction)
+          if (f != Faction.UNKNOWN) f else null
+        }.toSet()
 
-        val inferredFaction = Faction.fromString(knownFactionCard.lastKnownFaction)
-        val inferredStatus = FactionStatus.fromString(knownFactionCard.lastKnownFactionStatus)
+        // Only infer if all known factions agree (single faction) or if no factions are known
+        // In cross-faction instances with multiple known factions, don't infer
+        val inferredFaction = when {
+          knownFactions.size == 1 -> knownFactions.single()
+          knownFactions.isEmpty() -> return@forEach // No known faction to infer from
+          else -> return@forEach // Mixed factions - can't safely infer
+        }
+
+        // Find the faction status from any known-faction card
+        val inferredStatus = raidCards.find { Faction.fromString(it.lastKnownFaction) == inferredFaction }
+          ?.let { FactionStatus.fromString(it.lastKnownFactionStatus) }
+          ?: FactionStatus.FRIENDLY
 
         raidCards.forEach { card ->
           if (Faction.fromString(card.lastKnownFaction) == Faction.UNKNOWN) {
@@ -1065,20 +1148,43 @@ object PlayerCacheInteractor : Interactor() {
     /**
    * Helps upgrade an NPC card to a real player card immediately based on metadata from the game proving it's a player.
    * Also persists the updated cache to the database right away. (which we didn't use to do and records got lost eek!)
-   **/
-  fun stronglyAssertIsPlayer(cid: String?, name: String, classMap: Map<String, Int>) {
+   *
+   * @param cid The player's current CID (ephemeral session identifier).
+   * @param name The player's character name.
+   * @param classMap The player's class/skill tree map.
+   * @param faction The player's faction from PlayerInfo (e.g., "Haranya", "Nuia", "Pirate"). May be empty.
+   * @param guild The player's guild/expedition name from PlayerInfo. May be empty.
+   * @param gearScore The player's gear score from PlayerInfo. 0 if unknown.
+   */
+  fun stronglyAssertIsPlayer(
+    cid: String?,
+    name: String,
+    classMap: Map<String, Int>,
+    faction: String = "",
+    guild: String = "",
+    gearScore: Int = 0
+  ) {
     val spec = SpecType.fromTrees(classMap.values.mapNotNull { gameId -> SkillTreeType.fromGameId(gameId) }.toSet())
-    Log.debug(TAG, "Strongly asserting $name is a real player with spec $spec and recent cid of $cid.")
+    val parsedFaction = Faction.fromString(faction)
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(cid, name)
         cards[name]?.let { card ->
+          // Resolve metadata: only update when we have actual new data
+          val resolvedFaction = if (parsedFaction != Faction.UNKNOWN) parsedFaction.value else card.lastKnownFaction
+          val resolvedGuild = if (guild.isNotBlank()) guild else card.lastKnownGuild
+          val resolvedGearScore = if (gearScore > 0) gearScore else card.lastKnownGearScore
+          Log.debug(TAG, "Strongly asserting $name is a real player with spec $spec, faction $resolvedFaction, guild $resolvedGuild, gearScore $resolvedGearScore and recent cid of $cid.")
+          // Build the updated card with all available metadata
           val updated = card.copy(
             isRealPlayer = true,
             currentBuild = if (spec != SpecType.UNKNOWN) spec.name else card.currentBuild,
             currentRole = if (spec != SpecType.UNKNOWN) spec.guessPlayerRole().value else card.currentRole,
             recentCids = cid?.let { (card.recentCids + it).distinct().takeLast(50) } ?: card.recentCids,
-            cache = card.createCacheObject(specOverride = spec.name)
+            lastKnownFaction = resolvedFaction,
+            lastKnownGuild = resolvedGuild,
+            lastKnownGearScore = resolvedGearScore,
+            cache = card.createCacheObject(specOverride = spec.name, factionOverride = parsedFaction, guildOverride = guild, gearScoreOverride = gearScore.takeIf { it > 0 })
           )
           cards[name] = updated
 
@@ -1553,28 +1659,34 @@ object PlayerCacheInteractor : Interactor() {
     if (target.name.isBlank()) return // don't switch to non-targets
     AppState.selectTarget(target.name)
     val faction = Faction.fromString(target.faction)
+    val hasStatueBuff = faction != Faction.UNKNOWN
     scope.launch {
       mutex.withLock {
         createCardIfNoneExists(playerName = target.name)
         cards[target.name]?.let { card ->
+          // Preserve cached values when target payload has empty/zero data
+          val resolvedFaction = if (faction != Faction.UNKNOWN) faction.value else card.lastKnownFaction
+          val resolvedGuild = if (target.guild.isNotBlank()) target.guild else card.lastKnownGuild
+          val resolvedGearScore = if (target.gearScore > 0) target.gearScore else card.lastKnownGearScore
+
           val updatedCache = card.cache
             // If a DB cache already exists, copy just the small faction fields (cheap)
             ?.copy(
               identity = card.cache.identity.copy(
-                lastKnownFaction = if (faction != Faction.UNKNOWN) faction.value else card.lastKnownFaction,
+                lastKnownFaction = resolvedFaction,
                 lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value,
-                lastKnownGuild = target.guild,
-                lastKnownGearScore = target.gearScore
+                lastKnownGuild = resolvedGuild,
+                lastKnownGearScore = resolvedGearScore
               )
             )
           // Otherwise build a full cache object (fills timestamps and defaults) and apply overrides
             ?: card.createCacheObject().let { baseCache ->
               baseCache.copy(
                 identity = baseCache.identity.copy(
-                lastKnownFaction = if (faction != Faction.UNKNOWN) faction.value else card.lastKnownFaction,
+                lastKnownFaction = resolvedFaction,
                 lastKnownFactionStatus = FactionStatus.fromString(target.factionStatus).value,
-                lastKnownGuild = target.guild,
-                lastKnownGearScore = target.gearScore
+                lastKnownGuild = resolvedGuild,
+                lastKnownGearScore = resolvedGearScore
                 )
               )
             }
@@ -1590,9 +1702,20 @@ object PlayerCacheInteractor : Interactor() {
       }
     }
     if (target.type == "character") {
-      stronglyAssertIsPlayer(cid = null, name = target.name, classMap = target.classMap)
+      stronglyAssertIsPlayer(
+        cid = null,
+        name = target.name,
+        classMap = target.classMap,
+        faction = target.faction,
+        guild = target.guild,
+        gearScore = target.gearScore
+      )
     }
-    Log.info(TAG, "Player's tab-target switched to ${target.name} with faction $faction and gear score of ${target.gearScore}.")
+    if (hasStatueBuff) {
+      Log.info(TAG, "Player's tab-target switched to ${target.name} with faction $faction (from statue buff) and gear score of ${target.gearScore}.")
+    } else {
+      Log.info(TAG, "Player's tab-target switched to ${target.name} with faction UNKNOWN (no statue buff detected) and gear score of ${target.gearScore}.")
+    }
   }
 
   /*
