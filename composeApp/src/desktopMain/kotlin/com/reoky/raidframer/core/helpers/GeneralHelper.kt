@@ -8,8 +8,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.reoky.raidframer.AppState
 import com.reoky.raidframer.OverlayNav
+import com.reoky.raidframer.core.interactor.CompanionInteractor
 import com.reoky.raidframer.core.model.DamageEvent
 import com.reoky.raidframer.core.model.HealEvent
+import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
 import com.reoky.raidframer.ui.component.graphs.GraphMetricType
@@ -442,3 +444,4 @@ fun togglePocketJournal(wm: WindowManager?) {
     wm?.openWindow(OverlayType.POCKET_JOURNAL)
   }
 }
+

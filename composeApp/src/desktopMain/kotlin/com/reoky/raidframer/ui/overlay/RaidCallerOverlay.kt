@@ -5,8 +5,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -21,11 +23,13 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -53,6 +57,8 @@ import com.reoky.raidframer.core.helpers.openSettingsGeneral
 import com.reoky.raidframer.core.helpers.openMetaSpecs
 import com.reoky.raidframer.core.helpers.openSummaryTab
 import com.reoky.raidframer.core.helpers.rememberSectionPulse
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import com.reoky.raidframer.core.helpers.togglePokemon
 import com.reoky.raidframer.core.interactor.CombatLogInteractor
 import com.reoky.raidframer.core.interactor.CompanionInteractor
@@ -191,12 +197,42 @@ private fun MiniPieChart(
   centerBottomColor: Color = Color.White,
   centerMiddle: String? = null,
   centerMiddleColor: Color = RFColors.TextSecondary,
-  centerMiddleContent: (@Composable () -> Unit)? = null
+  centerMiddleContent: (@Composable () -> Unit)? = null,
+  copyMessage: String? = null
 ) {
+  val copyInteraction = remember { MutableInteractionSource() }
+  val isCopyHovered by copyInteraction.collectIsHoveredAsState()
+
+  // "Copied!" feedback state — shows briefly after click
+  var showCopied by remember { mutableStateOf(false) }
+  LaunchedEffect(showCopied) {
+    if (showCopied) {
+      delay(1500)
+      showCopied = false
+    }
+  }
+
+  // Fade animation for the overlay
+  val overlayAlpha by animateFloatAsState(
+    targetValue = if (copyMessage != null && isCopyHovered) 1f else 0f,
+    animationSpec = tween(durationMillis = 200)
+  )
+
   Box(
-    modifier = Modifier.size(size),
+    modifier = Modifier
+      .size(size)
+      .then(if (copyMessage != null) Modifier
+        .hoverable(copyInteraction)
+        .clickable(interactionSource = copyInteraction, indication = null) {
+          if (!showCopied) {
+            Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(copyMessage), null)
+            showCopied = true
+          }
+        }
+      else Modifier),
     contentAlignment = Alignment.Center
   ) {
+    // The pie chart ring
     Canvas(
       modifier = Modifier
         .fillMaxSize()
@@ -216,21 +252,62 @@ private fun MiniPieChart(
           sweepAngle = arcSweep,
           useCenter = false,
           topLeft = Offset(inset, inset),
-          size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2),
+          size = Size(radius * 2, radius * 2),
           style = stroke
         )
         sweep += arcSweep
       }
     }
+    // Center text — inverts color when overlay is active
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-      Text(centerTop, color = centerTopColor, fontSize = 7.sp, maxLines = 1)
+      val invertedTopColor = if (copyMessage != null && isCopyHovered) Color.White else centerTopColor
+      val invertedBottomColor = if (copyMessage != null && isCopyHovered) Color.White else centerBottomColor
+      val invertedMiddleColor = if (copyMessage != null && isCopyHovered) Color.White else centerMiddleColor
+      Text(centerTop, color = invertedTopColor, fontSize = 7.sp, maxLines = 1)
       if (centerMiddleContent != null) {
         centerMiddleContent()
       } else if (centerMiddle != null) {
-        Text(centerMiddle, color = centerMiddleColor, fontSize = 8.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+        Text(centerMiddle, color = invertedMiddleColor, fontSize = 8.sp, fontWeight = FontWeight.Bold, maxLines = 1)
       }
       Spacer(modifier = Modifier.height(2.dp))
-      Text(centerBottom, color = centerBottomColor, fontSize = 8.sp, maxLines = 1)
+      Text(centerBottom, color = invertedBottomColor, fontSize = 8.sp, maxLines = 1)
+    }
+    // Modal-style overlay — dims background and shows copy prompt
+    if (copyMessage != null) {
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .graphicsLayer(alpha = overlayAlpha)
+          .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(size / 2)),
+        contentAlignment = Alignment.Center
+      ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+          if (showCopied) {
+            // "Copied!" feedback in green
+            Text(
+              text = "✓ Copied!",
+              color = Color(0xFF4CAF50),
+              fontSize = 10.sp,
+              fontWeight = FontWeight.Bold
+            )
+          } else {
+            // Large speech bubble icon
+            Text(
+              text = "🗫",
+              color = Color.White,
+              fontSize = 18.sp
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            // "Copy" label in white (inverted against dark overlay)
+            Text(
+              text = "Copy",
+              color = Color.White,
+              fontSize = 9.sp,
+              fontWeight = FontWeight.Bold
+            )
+          }
+        }
+      }
     }
   }
 }
@@ -650,12 +727,21 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
         modifier = Modifier.weight(1f),
         horizontalArrangement = Arrangement.spacedBy(20.dp)
       ) {
+        val rebirthAvgTextCopy = if (rebirthCount == 0) {
+          "0 min and 0 seconds"
+        } else {
+          val totalSeconds = rebirthAvg / 1000
+          val minutes = totalSeconds / 60
+          val seconds = totalSeconds % 60
+          "$minutes min and $seconds seconds"
+        }
         MiniPieChart(
           slices = rebirthSlices,
           size = 56.dp,
           centerTop = stringResource(Res.string.raid_caller_rebirth),
           centerMiddleContent = { TraumaCount("$rebirthCount/${allMembers.size}", traumaColor, traumaCritical) },
-          centerBottom = rebirthAvgText
+          centerBottom = rebirthAvgText,
+          copyMessage = "${rebirthCount}/${allMembers.size} players have rebirth with an average of $rebirthAvgTextCopy."
         )
         MiniPieChart(
           slices = lootSlices,
@@ -664,7 +750,8 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
           centerMiddle = "$lootBuffedCount/${lootSums.size}",
           centerMiddleColor = Color.White,
           centerBottom = "${lootAvg}%",
-          centerBottomColor = RFColors.dpsOrange
+          centerBottomColor = RFColors.dpsOrange,
+          copyMessage = "${lootBuffedCount}/${lootSums.size} players are currently loot buffed to the ${lootAvg}% level."
         )
         MiniPieChart(
           slices = minBuffedSlices,
@@ -673,7 +760,8 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
           centerMiddle = "$minBuffedCount/$minBuffedTotal",
           centerMiddleColor = Color.White,
           centerBottom = "${(minBuffedCount / minBuffedTotalF * 100).toInt()}%",
-          centerBottomColor = RFColors.healsGreen
+          centerBottomColor = RFColors.healsGreen,
+          copyMessage = "${minBuffedCount}/${minBuffedTotal} players are currently buffed to the ${buffModeLabel} level."
         )
       }
       Column(
