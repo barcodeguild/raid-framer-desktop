@@ -302,6 +302,12 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val topCoherenceClump by PlayerCacheInteractor.topCoherenceClump.collectAsState()
 
   // New faction comparison flows
+  val factionSilenceData by PlayerCacheInteractor.factionSilenceComparisonAll.collectAsState()
+  val factionDamageData by PlayerCacheInteractor.factionDamageComparisonAll.collectAsState()
+  val factionHealsData by PlayerCacheInteractor.factionHealsComparisonAll.collectAsState()
+  val factionCCData by PlayerCacheInteractor.factionCCComparisonAll.collectAsState()
+  val factionCharmData by PlayerCacheInteractor.factionCharmComparisonAll.collectAsState()
+  val factionDistressData by PlayerCacheInteractor.factionDistressComparisonAll.collectAsState()
   val factionTigerStrikeData by PlayerCacheInteractor.factionTigerStrikeComparisonAll.collectAsState()
   val factionFreezeData by PlayerCacheInteractor.factionFreezeComparisonAll.collectAsState()
   val factionTripsData by PlayerCacheInteractor.factionTripsComparisonAll.collectAsState()
@@ -488,6 +494,12 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
     ) {
       when (selectedTabIndex) {
         0 -> FactionChartsTab(
+          factionSilenceData = factionSilenceData,
+          factionDamageData = factionDamageData,
+          factionHealsData = factionHealsData,
+          factionCCData = factionCCData,
+          factionCharmData = factionCharmData,
+          factionDistressData = factionDistressData,
           factionTripsData = factionTripsData,
           factionBubblesData = factionBubblesData,
           factionBracingsData = factionBracingsData,
@@ -699,6 +711,12 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
 
 @Composable
 private fun FactionChartsTab(
+  factionSilenceData: Map<String, Float>,
+  factionDamageData: Map<String, Float>,
+  factionHealsData: Map<String, Float>,
+  factionCCData: Map<String, Float>,
+  factionCharmData: Map<String, Float>,
+  factionDistressData: Map<String, Float>,
   factionTripsData: Map<String, Float>,
   factionBubblesData: Map<String, Float>,
   factionBracingsData: Map<String, Float>,
@@ -735,21 +753,24 @@ private fun FactionChartsTab(
           icon = "\u2694",
           dataFlow = PlayerCacheInteractor.factionDamageComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Damage", factionDamageData)
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_heals_by_faction),
           icon = "\u271A",
           dataFlow = PlayerCacheInteractor.factionHealsComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Heals", factionHealsData)
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_cc_by_faction),
           icon = "\u26A1",
           dataFlow = PlayerCacheInteractor.factionCCComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("CC points", factionCCData, suffix = " points respectively")
         )
       }
     }
@@ -764,21 +785,24 @@ private fun FactionChartsTab(
           icon = "\uf57f",
           dataFlow = PlayerCacheInteractor.factionSilenceComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Silences", factionSilenceData, unit = "stacks")
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_charms_by_faction),
           icon = "\uf004",
           dataFlow = PlayerCacheInteractor.factionCharmComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Charms", factionCharmData)
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_distresses_by_faction),
           icon = "\uf567",
           dataFlow = PlayerCacheInteractor.factionDistressComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Distresses", factionDistressData)
         )
       }
     }
@@ -793,21 +817,24 @@ private fun FactionChartsTab(
           icon = "\u2193",
           dataFlow = PlayerCacheInteractor.factionTripsComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Trips", factionTripsData)
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_bubbles_by_faction),
           icon = "\u25CF",
           dataFlow = PlayerCacheInteractor.factionBubblesComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Bubbles", factionBubblesData)
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_bracings_by_faction),
           icon = "\u27A1",
           dataFlow = PlayerCacheInteractor.factionBracingsComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Bracings", factionBracingsData)
         )
       }
     }
@@ -822,21 +849,24 @@ private fun FactionChartsTab(
           icon = "\u2694",
           dataFlow = PlayerCacheInteractor.factionShieldStripComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Shield Strips", factionShieldStripData)
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_weapon_disables_by_faction),
           icon = "\u2620",
           dataFlow = PlayerCacheInteractor.factionWeaponDisablesComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Weapon Disables", factionWeaponDisablesData)
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_potion_disables_by_faction),
           icon = "\u2697",
           dataFlow = PlayerCacheInteractor.factionPotionDisablesComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Potion Disables", factionPotionDisablesData)
         )
       }
     }
@@ -851,21 +881,24 @@ private fun FactionChartsTab(
           icon = "\u2708",
           dataFlow = PlayerCacheInteractor.factionBdGliderComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("BD Glider Usages", factionBdGliderData, unit = "times")
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_crystal_wings_by_faction),
           icon = "\u2708",
           dataFlow = PlayerCacheInteractor.factionCrystalWingsComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Crystal Wings", factionCrystalWingsData, unit = "times")
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_glider_disables_by_faction),
           icon = "\u2708",
           dataFlow = PlayerCacheInteractor.factionGliderDisablesComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Glider Disables", factionGliderDisablesData)
         )
       }
     }
@@ -880,21 +913,24 @@ private fun FactionChartsTab(
           icon = "\u2757",
           dataFlow = PlayerCacheInteractor.factionProvokedComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Provokes", factionProvokedData)
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_tiger_strikes_by_faction),
           icon = "\u26A1",
           dataFlow = PlayerCacheInteractor.factionTigerStrikeComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Tiger Strikes", factionTigerStrikeData)
         )
         RaidComparisonPieChart(
           title = stringResource(Res.string.summary_freezes_by_faction),
           icon = "\u2744",
           dataFlow = PlayerCacheInteractor.factionFreezeComparisonAll,
           modifier = Modifier.weight(1f),
-          factionColors = factionColors
+          factionColors = factionColors,
+          copyMessage = factionStatCopy("Freezes", factionFreezeData)
         )
       }
     }
@@ -2533,4 +2569,29 @@ private fun CoherenceHelp(modifier: Modifier = Modifier) {
       }
     }
   }
+}
+
+/**
+ * Builds a copy-to-clipboard message for faction comparison pie charts.
+ * Example: "Damage in this PvP so far: Haranya 130k (35%), Nuia 240k (65%), and Pirate 0 (0%)."
+ */
+private fun factionStatCopy(
+  statName: String,
+  factionData: Map<String, Float>,
+  unit: String? = null,
+  suffix: String = ""
+): String {
+  val factions = listOf("Haranya", "Nuia", "Pirate")
+  val total = factionData.values.fold(0f) { acc, v -> acc + v }
+  val parts = factions.map { faction ->
+    val value: Float = factionData[faction] ?: 0f
+    val pct = if (total > 0f) ((value / total * 100f).toInt()) else 0
+    val abbreviated = value.toLong().humanReadableAbbreviation()
+    val unitPart = if (unit != null && value > 0f) " $unit" else ""
+    "$faction $abbreviated${unitPart} ($pct%)"
+  }
+  val joined = parts.joinToString(", ") { entry ->
+    if (entry == parts.last()) "and $entry" else entry
+  }
+  return "$statName in this PvP so far: $joined.$suffix"
 }
