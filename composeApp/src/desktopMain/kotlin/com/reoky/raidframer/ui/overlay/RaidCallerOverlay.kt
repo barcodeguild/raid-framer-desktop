@@ -16,6 +16,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
@@ -222,6 +223,7 @@ private fun MiniPieChart(
   Box(
     modifier = Modifier
       .size(size)
+      .clip(CircleShape)
       .then(if (copyMessage != null) Modifier
         .hoverable(copyInteraction)
         .clickable(interactionSource = copyInteraction, indication = null) {
@@ -259,8 +261,11 @@ private fun MiniPieChart(
         sweep += arcSweep
       }
     }
-    // Center text — inverts color when overlay is active
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    // Center text — inverts color when overlay is active — clipped to circle bounds
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier.padding(horizontal = 6.dp)
+    ) {
       val invertedTopColor = if (copyMessage != null && isCopyHovered) Color.White else centerTopColor
       val invertedBottomColor = if (copyMessage != null && isCopyHovered) Color.White else centerBottomColor
       val invertedMiddleColor = if (copyMessage != null && isCopyHovered) Color.White else centerMiddleColor
@@ -786,8 +791,10 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
             LabeledValue("${stringResource(Res.string.raid_caller_recording)}:", formatMinutesSeconds(recordingMs), RFColors.AccentRed, SectionTitleColor)
           }
         }
-        GameSnippingButton(wm)
-        RecordingControlButton(wm, isRecording)
+        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+          GameSnippingButton(wm)
+          RecordingControlButton(wm, isRecording)
+        }
       }
 
       Divider(color = Color.White.copy(alpha = 0.12f), thickness = 0.5.dp)
@@ -871,7 +878,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
       modifier = Modifier
         .fillMaxWidth()
         .verticalScroll(rememberScrollState())
-        .padding(horizontal = 8.dp, vertical = 8.dp),
+        .padding(start = 8.dp, end = 8.dp, bottom = 4.dp),
       verticalArrangement = Arrangement.spacedBy(1.dp),
       horizontalAlignment = Alignment.Start
     ) {
@@ -969,7 +976,7 @@ private fun GameSnippingButton(wm: WindowManager?) {
         wm?.openWindow(OverlayType.SCREENSHOT_PREVIEW)
       }
     },
-    modifier = Modifier.size(32.dp)
+    modifier = Modifier.size(24.dp)
   ) {
     Text(
       text = "\uf03e",
@@ -990,7 +997,7 @@ private fun RecordingControlButton(wm: WindowManager?, isRecording: Boolean) {
     val isHovered by interactionSource.collectIsHoveredAsState()
     IconButton(
       onClick = { wm?.openWindow(OverlayType.NEW_SESSION) },
-      modifier = Modifier.size(32.dp)
+      modifier = Modifier.size(24.dp)
     ) {
       Text(
         text = "\uf067",
@@ -1009,7 +1016,7 @@ private fun RecordingStopButton() {
 
   IconButton(
     onClick = { showStopPopup = !showStopPopup },
-    modifier = Modifier.size(32.dp)
+    modifier = Modifier.size(24.dp)
   ) {
     Text(
       text = "\uf04d",
