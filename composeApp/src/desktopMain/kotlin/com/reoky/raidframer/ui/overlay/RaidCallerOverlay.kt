@@ -848,7 +848,7 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
             centerMiddleColor = Color.White,
             centerBottom = "${lootAvg}%",
             centerBottomColor = RFColors.dpsOrange,
-            copyMessage = "${lootBuffedCount}/${lootSums.size} players are currently loot buffed to the ${lootAvg}% level."
+            copyMessage = RaidCallerCopyMessages.lootBuffed(lootBuffedCount, lootSums.size, lootThreshold, lootAvg)
           )
           MiniPieChart(
             slices = minBuffedSlices,

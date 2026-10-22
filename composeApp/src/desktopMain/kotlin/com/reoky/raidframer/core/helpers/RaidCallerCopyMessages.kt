@@ -96,7 +96,7 @@ object RaidCallerCopyMessages {
             val damage = damages[faction] ?: 0L
             val breathLabel = if (count == 1) "1 breath" else "$count breaths"
             val dmgLabel = if (damage > 0) " (${damage.humanReadableAbbreviation()} dmg)" else " for 0 dmg"
-            "${faction.name.decapitalize()} $breathLabel$dmgLabel"
+            "${faction.value} $breathLabel$dmgLabel"
         }
         return "Dragon Usage in this PvP so far: ${parts.joinToString(", ") { part ->
             // Fix the last item with "and"
@@ -125,7 +125,7 @@ object RaidCallerCopyMessages {
             val damage = damages[faction] ?: 0L
             val useLabel = if (count == 1) "1 use" else "$count uses"
             val dmgLabel = if (damage > 0) " (${damage.humanReadableAbbreviation()} dmg)" else ""
-            "${faction.name.decapitalize()} $useLabel$dmgLabel"
+            "${faction.value} $useLabel$dmgLabel"
         }
         val joined = parts.joinToString(", ")
         val lastComma = joined.lastIndexOf(',')
@@ -205,10 +205,10 @@ object RaidCallerCopyMessages {
 
     /**
      * Loot buffed copy message (for pie chart).
-     * Example: "15/52 players are currently loot buffed to the 170% level."
+     * Example: "16/16 players are currently loot buffed to the 100% level with a raid average loot buff percentage of 101%."
      */
-    fun lootBuffed(count: Int, total: Int, avgPercent: Int): String {
-        return "$count/$total players are currently loot buffed to the ${avgPercent}% level."
+    fun lootBuffed(count: Int, total: Int, thresholdPercent: Int, avgPercent: Int): String {
+        return "$count/$total players are currently loot buffed to the ${thresholdPercent}% level with a raid average loot buff percentage of ${avgPercent}%."
     }
 
     /**
