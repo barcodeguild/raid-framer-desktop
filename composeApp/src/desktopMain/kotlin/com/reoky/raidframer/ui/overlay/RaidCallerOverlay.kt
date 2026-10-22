@@ -611,10 +611,14 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val lootBuffedCount = lootSums.count { it >= lootThreshold }
   val lootTotal = lootSums.size.toFloat().coerceAtLeast(1f)
   val lootSlices = remember(lootBuffedCount, lootTotal) {
-    listOf(
-      Slice(RFColors.dpsOrange, lootBuffedCount / lootTotal),
-      Slice(RFColors.lootBuffColor, (lootSums.size - lootBuffedCount) / lootTotal)
-    )
+    if (lootSums.isEmpty()) {
+      listOf(Slice(RFColors.lootBuffColor, 1f))
+    } else {
+      listOf(
+        Slice(RFColors.dpsOrange, lootBuffedCount / lootTotal),
+        Slice(RFColors.lootBuffColor, (lootSums.size - lootBuffedCount) / lootTotal)
+      )
+    }
   }
 
   // --- Min buffed % (requirements from config + grace) ---
@@ -637,10 +641,14 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val minBuffedTotal = allMembers.size
   val minBuffedTotalF = minBuffedTotal.toFloat().coerceAtLeast(1f)
   val minBuffedSlices = remember(minBuffedCount, minBuffedTotal) {
-    listOf(
-      Slice(RFColors.healsGreen, minBuffedCount / minBuffedTotalF),
-      Slice(RFColors.TextTertiary.copy(alpha = 0.35f), (minBuffedTotal - minBuffedCount) / minBuffedTotalF)
-    )
+    if (minBuffedTotal <= 0) {
+      listOf(Slice(RFColors.TextTertiary.copy(alpha = 0.35f), 1f))
+    } else {
+      listOf(
+        Slice(RFColors.healsGreen, minBuffedCount / minBuffedTotalF),
+        Slice(RFColors.TextTertiary.copy(alpha = 0.35f), (minBuffedTotal - minBuffedCount) / minBuffedTotalF)
+      )
+    }
   }
 
   // --- Has SoTF / War Time (Faction War Time buff) ---
