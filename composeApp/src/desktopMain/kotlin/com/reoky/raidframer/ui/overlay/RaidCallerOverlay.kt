@@ -48,6 +48,7 @@ import com.reoky.raidframer.core.definitions.lootBuffTotalForIds
 import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.parseRaidBuffRequirements
 import com.reoky.raidframer.core.definitions.serialize
+import com.reoky.raidframer.core.helpers.RaidCallerCopyMessages
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.helpers.factionHighlightColor
@@ -312,6 +313,64 @@ private fun MiniPieChart(
   }
 }
 
+/**
+ * Tiny inline copy icon placed directly after a line of text.
+ * On hover shows a speech bubble icon; on click copies the message to clipboard
+ * and briefly displays "✓ Copied!" in green text over the icon.
+ */
+@Composable
+fun InlineCopyIcon(copyMessage: String) {
+  val copyInteraction = remember { MutableInteractionSource() }
+  val isCopyHovered by copyInteraction.collectIsHoveredAsState()
+
+  var showCopied by remember { mutableStateOf(false) }
+  LaunchedEffect(showCopied) {
+    if (showCopied) {
+      delay(1500)
+      showCopied = false
+    }
+  }
+
+  Box(
+    modifier = Modifier
+      .size(16.dp)
+      .hoverable(copyInteraction)
+      .clickable(interactionSource = copyInteraction, indication = null) {
+        if (!showCopied) {
+          Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(copyMessage), null)
+          showCopied = true
+        }
+      },
+    contentAlignment = Alignment.Center
+  ) {
+    if (showCopied) {
+      // "Copied!" feedback overlay — appears directly over the icon
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .background(Color.Black.copy(alpha = 0.8f), RoundedCornerShape(4.dp)),
+        contentAlignment = Alignment.Center
+      ) {
+        Text(
+          text = "✓",
+          color = Color(0xFF4CAF50),
+          fontSize = 12.sp,
+          fontWeight = FontWeight.Bold
+        )
+      }
+    } else {
+      Text(
+        text = "🗫",
+        color = if (isCopyHovered) Color.White else RFColors.TextSecondary.copy(alpha = 0.8f),
+        fontSize = if (isCopyHovered) 10.sp else 8.sp,
+        modifier = Modifier.graphicsLayer(
+          alpha = if (isCopyHovered) 1f else 0.7f
+        )
+      )
+    }
+  }
+}
+
 @Composable
 private fun TraumaCount(
   text: String,
@@ -512,6 +571,13 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val avgGs = if (knownGs.isEmpty()) 0 else knownGs.sum() / knownGs.size
   val lowestGs = knownGs.minOrNull() ?: 0
   val highestGs = knownGs.maxOrNull() ?: 0
+  // Find player names for highest/lowest GS
+  val highestGsPlayer = remember(memberCards, highestGs) {
+    if (highestGs > 0) memberCards.maxByOrNull { it.lastKnownGearScore }?.name else null
+  }
+  val lowestGsPlayer = remember(memberCards, lowestGs) {
+    if (lowestGs > 0) memberCards.minByOrNull { it.lastKnownGearScore }?.name else null
+  }
 
   // --- Rebirth trauma pie + average ---
   val rebirthCount = rebirthEstimates.size
@@ -662,167 +728,224 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
   val mainCount = mainRaid.flatten().count { it.playerName.isNotBlank() }
   val coCount = coRaid.flatten().count { it.playerName.isNotBlank() }
 
-  Column(
-    modifier = Modifier
-      .fillMaxSize()
-      .verticalScroll(rememberScrollState())
-      .padding(horizontal = 8.dp, vertical = 2.dp),
-    verticalArrangement = Arrangement.spacedBy(2.dp)
-  ) {
-    // Header row: title + raid counts + recording control pinned to the top-right.
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      verticalAlignment = Alignment.CenterVertically
+  Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+    // === TOP SECTION: Header, divider ===
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 8.dp, vertical = 4.dp),
+      verticalArrangement = Arrangement.spacedBy(1.dp)
     ) {
-      FlowRow(
-        modifier = Modifier.weight(1f),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        itemVerticalAlignment = Alignment.CenterVertically
+      // Header row: close button + title + raid counts + recording control.
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
       ) {
-        val titleInteraction = remember { MutableInteractionSource() }
-        val titleHovered by titleInteraction.collectIsHoveredAsState()
+        // Close button
+        val closeInteraction = remember { MutableInteractionSource() }
+        val closeHovered by closeInteraction.collectIsHoveredAsState()
         Text(
-          stringResource(Res.string.raid_caller_title),
-          color = if (titleHovered) Color.White else CallerTitleColor,
-          fontSize = 11.sp,
+          text = "✕",
+          color = Color.White.copy(alpha = if (closeHovered) 0.8f else 0.4f),
+          fontSize = 12.sp,
           fontWeight = FontWeight.Bold,
           modifier = Modifier
-            .hoverable(titleInteraction)
+            .padding(end = 4.dp)
+            .size(16.dp)
+            .hoverable(closeInteraction)
             .clip(RoundedCornerShape(4.dp))
-            .clickable(interactionSource = titleInteraction, indication = null) { openSettingsGeneral(wm) }
+            .clickable(interactionSource = closeInteraction, indication = null) {
+              wm?.closeWindow(OverlayType.RAID_CALLER)
+            }
+            .graphicsLayer {
+              alpha = if (closeHovered) 1f else 0.7f
+            }
         )
-        LabeledValue("${stringResource(Res.string.raid_caller_main_raid)}:", mainCount.toString(), RFColors.callerMainRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.ATTENDANCE) })
-        LabeledValue("${stringResource(Res.string.raid_caller_co_raid)}:", coCount.toString(), RFColors.callerCoRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.ATTENDANCE) })
-        if (isRecording) {
-          LabeledValue("${stringResource(Res.string.raid_caller_recording)}:", formatMinutesSeconds(recordingMs), RFColors.AccentRed, SectionTitleColor)
+        FlowRow(
+          modifier = Modifier.weight(1f),
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalArrangement = Arrangement.spacedBy(1.dp),
+          itemVerticalAlignment = Alignment.CenterVertically
+        ) {
+          val titleInteraction = remember { MutableInteractionSource() }
+          val titleHovered by titleInteraction.collectIsHoveredAsState()
+          Text(
+            stringResource(Res.string.raid_caller_title),
+            color = if (titleHovered) Color.White else CallerTitleColor,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+              .hoverable(titleInteraction)
+              .clip(RoundedCornerShape(4.dp))
+              .clickable(interactionSource = titleInteraction, indication = null) { openSettingsGeneral(wm) }
+          )
+          LabeledValue("${stringResource(Res.string.raid_caller_main_raid)}:", mainCount.toString(), RFColors.callerMainRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.ATTENDANCE) })
+          LabeledValue("${stringResource(Res.string.raid_caller_co_raid)}:", coCount.toString(), RFColors.callerCoRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.ATTENDANCE) })
+          InlineCopyIcon(RaidCallerCopyMessages.raidCounts(mainCount, coCount))
+          if (isRecording) {
+            LabeledValue("${stringResource(Res.string.raid_caller_recording)}:", formatMinutesSeconds(recordingMs), RFColors.AccentRed, SectionTitleColor)
+          }
         }
+        GameSnippingButton(wm)
+        RecordingControlButton(wm, isRecording)
       }
-      GameSnippingButton(wm)
-      RecordingControlButton(wm, isRecording)
+
+      Divider(color = Color.White.copy(alpha = 0.12f), thickness = 0.5.dp)
     }
 
-    Divider(color = Color.White.copy(alpha = 0.12f), thickness = 0.5.dp)
-
-    // Gear score + SoTF (flow).
-    FlowRow(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(10.dp),
-      verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-      LabeledValue("${stringResource(Res.string.raid_caller_avg_gs)}:", "$avgGs", RFColors.callerAvgGs, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.NEARBY_GEAR) })
-      LabeledValue("${stringResource(Res.string.raid_caller_lowest_gs)}:", "$lowestGs", RFColors.callerLowestGs, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.NEARBY_GEAR) })
-      LabeledValue("${stringResource(Res.string.raid_caller_highest_gs)}:", "$highestGs", RFColors.callerHighestGs, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.NEARBY_GEAR) })
-      SectionTitle("${stringResource(Res.string.raid_caller_so_tf)}:")
-      Text("$soTfCount/${allMembers.size} ($soTfPct%)", color = RFColors.TextTertiary, fontSize = 9.sp)
-    }
-
-    // Pie charts row + mode settings stack to the right.
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
-      verticalAlignment = Alignment.CenterVertically
+    // === MIDDLE SECTION: Pie charts centered in remaining space between top and bottom ===
+    Box(
+      modifier = Modifier
+        .weight(1f)
+        .fillMaxWidth()
+        .padding(horizontal = 8.dp),
+      contentAlignment = Alignment.Center
     ) {
       Row(
-        modifier = Modifier.weight(1f),
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
       ) {
-        val rebirthAvgTextCopy = if (rebirthCount == 0) {
-          "0 min and 0 seconds"
-        } else {
-          val totalSeconds = rebirthAvg / 1000
-          val minutes = totalSeconds / 60
-          val seconds = totalSeconds % 60
-          "$minutes min and $seconds seconds"
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+          val rebirthAvgTextCopy = if (rebirthCount == 0) {
+            "0 min and 0 seconds"
+          } else {
+            val totalSeconds = rebirthAvg / 1000
+            val minutes = totalSeconds / 60
+            val seconds = totalSeconds % 60
+            "$minutes min and $seconds seconds"
+          }
+          MiniPieChart(
+            slices = rebirthSlices,
+            size = 56.dp,
+            centerTop = stringResource(Res.string.raid_caller_rebirth),
+            centerMiddleContent = { TraumaCount("$rebirthCount/${allMembers.size}", traumaColor, traumaCritical) },
+            centerBottom = rebirthAvgText,
+            copyMessage = "${rebirthCount}/${allMembers.size} players have rebirth with an average of $rebirthAvgTextCopy."
+          )
+          MiniPieChart(
+            slices = lootSlices,
+            size = 56.dp,
+            centerTop = stringResource(Res.string.raid_caller_loot),
+            centerMiddle = "$lootBuffedCount/${lootSums.size}",
+            centerMiddleColor = Color.White,
+            centerBottom = "${lootAvg}%",
+            centerBottomColor = RFColors.dpsOrange,
+            copyMessage = "${lootBuffedCount}/${lootSums.size} players are currently loot buffed to the ${lootAvg}% level."
+          )
+          MiniPieChart(
+            slices = minBuffedSlices,
+            size = 56.dp,
+            centerTop = stringResource(Res.string.raid_caller_min_buffed),
+            centerMiddle = "$minBuffedCount/$minBuffedTotal",
+            centerMiddleColor = Color.White,
+            centerBottom = "${(minBuffedCount / minBuffedTotalF * 100).toInt()}%",
+            centerBottomColor = RFColors.healsGreen,
+            copyMessage = "${minBuffedCount}/${minBuffedTotal} players are currently buffed to the ${buffModeLabel} level."
+          )
         }
-        MiniPieChart(
-          slices = rebirthSlices,
-          size = 56.dp,
-          centerTop = stringResource(Res.string.raid_caller_rebirth),
-          centerMiddleContent = { TraumaCount("$rebirthCount/${allMembers.size}", traumaColor, traumaCritical) },
-          centerBottom = rebirthAvgText,
-          copyMessage = "${rebirthCount}/${allMembers.size} players have rebirth with an average of $rebirthAvgTextCopy."
-        )
-        MiniPieChart(
-          slices = lootSlices,
-          size = 56.dp,
-          centerTop = stringResource(Res.string.raid_caller_loot),
-          centerMiddle = "$lootBuffedCount/${lootSums.size}",
-          centerMiddleColor = Color.White,
-          centerBottom = "${lootAvg}%",
-          centerBottomColor = RFColors.dpsOrange,
-          copyMessage = "${lootBuffedCount}/${lootSums.size} players are currently loot buffed to the ${lootAvg}% level."
-        )
-        MiniPieChart(
-          slices = minBuffedSlices,
-          size = 56.dp,
-          centerTop = stringResource(Res.string.raid_caller_min_buffed),
-          centerMiddle = "$minBuffedCount/$minBuffedTotal",
-          centerMiddleColor = Color.White,
-          centerBottom = "${(minBuffedCount / minBuffedTotalF * 100).toInt()}%",
-          centerBottomColor = RFColors.healsGreen,
-          copyMessage = "${minBuffedCount}/${minBuffedTotal} players are currently buffed to the ${buffModeLabel} level."
-        )
+        Column(
+          verticalArrangement = Arrangement.spacedBy(1.dp),
+          horizontalAlignment = Alignment.End
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            LabeledValue("${stringResource(Res.string.raid_caller_loot_threshold)}:", "$lootThreshold%", RFColors.dpsOrange, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.BUFFS, highlightBuffSelect = true) })
+            InlineCopyIcon(RaidCallerCopyMessages.lootThreshold(lootThreshold))
+          }
+          Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            LabeledValue("${stringResource(Res.string.raid_caller_buff_mode)}:", buffModeLabel, RFColors.callerMetaMage, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.BUFFS, highlightBuffSelect = true) })
+            InlineCopyIcon(RaidCallerCopyMessages.buffMode(requirements))
+          }
+          Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            LabeledValue("${stringResource(Res.string.raid_caller_buff_grace)}:", gracePeriod.label(), RFColors.itemSkillYellow, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.BUFFS, highlightBuffSelect = true) })
+            InlineCopyIcon(RaidCallerCopyMessages.buffGrace(gracePeriod))
+          }
+        }
       }
-      Column(
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        horizontalAlignment = Alignment.End
+    }
+
+    // === BOTTOM SECTION: GS, Dragon, Riso, Coherence, Meta ===
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .verticalScroll(rememberScrollState())
+        .padding(horizontal = 8.dp, vertical = 8.dp),
+      verticalArrangement = Arrangement.spacedBy(1.dp),
+      horizontalAlignment = Alignment.Start
+    ) {
+      // Gear score + SoTF (flow).
+      FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(1.dp),
+        itemVerticalAlignment = Alignment.CenterVertically
       ) {
-        LabeledValue("${stringResource(Res.string.raid_caller_loot_threshold)}:", "$lootThreshold%", RFColors.dpsOrange, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.BUFFS, highlightBuffSelect = true) })
-        LabeledValue("${stringResource(Res.string.raid_caller_buff_mode)}:", buffModeLabel, RFColors.callerMetaMage, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.BUFFS, highlightBuffSelect = true) })
-        LabeledValue("${stringResource(Res.string.raid_caller_buff_grace)}:", gracePeriod.label(), RFColors.itemSkillYellow, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.BUFFS, highlightBuffSelect = true) })
+        LabeledValue("${stringResource(Res.string.raid_caller_avg_gs)}:", "$avgGs", RFColors.callerAvgGs, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.NEARBY_GEAR) })
+        LabeledValue("${stringResource(Res.string.raid_caller_lowest_gs)}:", "$lowestGs", RFColors.callerLowestGs, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.NEARBY_GEAR) })
+        LabeledValue("${stringResource(Res.string.raid_caller_highest_gs)}:", "$highestGs", RFColors.callerHighestGs, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.NEARBY_GEAR) })
+        InlineCopyIcon(RaidCallerCopyMessages.gearScore(avgGs, lowestGs, highestGs, lowestGsPlayer, highestGsPlayer))
+        SectionTitle("${stringResource(Res.string.raid_caller_so_tf)}:")
+        Text("$soTfCount/${allMembers.size} ($soTfPct%)", color = RFColors.TextTertiary, fontSize = 9.sp)
+        InlineCopyIcon(RaidCallerCopyMessages.soTf(soTfCount, allMembers.size))
       }
-    }
 
-    // Dragon + Riso rows (flow so the faction groups wrap instead of clipping).
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-      SectionTitle("${stringResource(Res.string.raid_caller_dragon)}:", onClick = { togglePokemon(wm) })
-      FactionDamageRow(dragonCounts, dragonDamages, dragonFlash, nowTick, Modifier.weight(1f))
-    }
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-      SectionTitle("${stringResource(Res.string.raid_caller_riso)}:", onClick = { togglePokemon(wm) })
-      FactionDamageRow(risoCounts, risoDamages, risoFlash, nowTick, Modifier.weight(1f))
-    }
+      // Dragon row — copy icon inline after faction data.
+      Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        SectionTitle("${stringResource(Res.string.raid_caller_dragon)}:", onClick = { togglePokemon(wm) })
+        FactionDamageRow(dragonCounts, dragonDamages, dragonFlash, nowTick, Modifier.wrapContentWidth())
+        InlineCopyIcon(RaidCallerCopyMessages.dragon(dragonCounts, dragonDamages))
+      }
+      // Riso row — copy icon inline after faction data.
+      Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        SectionTitle("${stringResource(Res.string.raid_caller_riso)}:", onClick = { togglePokemon(wm) })
+        FactionDamageRow(risoCounts, risoDamages, risoFlash, nowTick, Modifier.wrapContentWidth())
+        InlineCopyIcon(RaidCallerCopyMessages.riso(risoCounts, risoDamages))
+      }
 
-    // Coherence (flow).
-    FlowRow(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(10.dp),
-      verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-      SectionTitle("${stringResource(Res.string.raid_caller_coherence)}:", onClick = { openSummaryTab(wm, SUMMARY_COHERENCE_TAB_INDEX) })
-      LabeledValue("${stringResource(Res.string.raid_caller_render)}:", "${coherenceRender.toInt()}%", RFColors.callerCoherenceRender)
-      LabeledValue("${stringResource(Res.string.raid_caller_raid)}:", "${coherenceRaid.toInt()}%", RFColors.callerCoherenceRaid)
-      LabeledValue("${stringResource(Res.string.raid_caller_clump)}:", "${coherenceClump.toInt()}%", RFColors.callerCoherenceClump)
-    }
+      // Coherence (flow).
+      FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(1.dp),
+        itemVerticalAlignment = Alignment.CenterVertically
+      ) {
+        SectionTitle("${stringResource(Res.string.raid_caller_coherence)}:", onClick = { openSummaryTab(wm, SUMMARY_COHERENCE_TAB_INDEX) })
+        LabeledValue("${stringResource(Res.string.raid_caller_render)}:", "${coherenceRender.toInt()}%", RFColors.callerCoherenceRender)
+        LabeledValue("${stringResource(Res.string.raid_caller_raid)}:", "${coherenceRaid.toInt()}%", RFColors.callerCoherenceRaid)
+        LabeledValue("${stringResource(Res.string.raid_caller_clump)}:", "${coherenceClump.toInt()}%", RFColors.callerCoherenceClump)
+        InlineCopyIcon(RaidCallerCopyMessages.coherence(coherenceRender.toInt(), coherenceRaid.toInt(), coherenceClump.toInt()))
+      }
 
-    // Meta breakdown (flow).
-    FlowRow(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(10.dp),
-      verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-      SectionTitle("${stringResource(Res.string.raid_caller_meta)}:", onClick = { openRaidTab(wm, RaidTab.COMPOSITION) })
-      LabeledValue("${stringResource(Res.string.raid_caller_cc)}:", metaCc.toString(), RFColors.ccCyan)
-      LabeledValue("${stringResource(Res.string.raid_caller_healer)}:", metaHealer.toString(), RFColors.healsGreen)
-      LabeledValue("${stringResource(Res.string.raid_caller_melee)}:", metaMelee.toString(), RFColors.callerMetaMelee)
-      LabeledValue("${stringResource(Res.string.raid_caller_mage)}:", metaMage.toString(), RFColors.callerMetaMage)
-      LabeledValue("${stringResource(Res.string.raid_caller_dancer)}:", metaDancer.toString(), RFColors.callerMetaDancer)
-      LabeledValue("${stringResource(Res.string.raid_caller_ranged)}:", metaRanged.toString(), RFColors.callerMetaRanged)
-      LabeledValue("${stringResource(Res.string.raid_caller_non_meta)}:", metaNonMeta.toString(), RFColors.callerMetaNonMeta)
-      val pencilInteraction = androidx.compose.foundation.interaction.MutableInteractionSource()
-      val pencilHovered by pencilInteraction.collectIsHoveredAsState()
-      Text(
-        text = "✎",
-        color = if (pencilHovered) Color.White else RFColors.TextSecondary,
-        fontSize = 11.sp,
-        modifier = Modifier
-          .offset(x = (-2).dp, y = (-1).dp)
-          .hoverable(pencilInteraction)
-          .clip(RoundedCornerShape(4.dp))
-          .clickable(interactionSource = pencilInteraction, indication = null) { openMetaSpecs(wm) }
-          .padding(horizontal = 0.dp)
-      )
+      // Meta breakdown (flow).
+      FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(1.dp),
+        itemVerticalAlignment = Alignment.CenterVertically
+      ) {
+        SectionTitle("${stringResource(Res.string.raid_caller_meta)}:", onClick = { openRaidTab(wm, RaidTab.COMPOSITION) })
+        LabeledValue("${stringResource(Res.string.raid_caller_cc)}:", metaCc.toString(), RFColors.ccCyan)
+        LabeledValue("${stringResource(Res.string.raid_caller_healer)}:", metaHealer.toString(), RFColors.healsGreen)
+        LabeledValue("${stringResource(Res.string.raid_caller_melee)}:", metaMelee.toString(), RFColors.callerMetaMelee)
+        LabeledValue("${stringResource(Res.string.raid_caller_mage)}:", metaMage.toString(), RFColors.callerMetaMage)
+        LabeledValue("${stringResource(Res.string.raid_caller_dancer)}:", metaDancer.toString(), RFColors.callerMetaDancer)
+        LabeledValue("${stringResource(Res.string.raid_caller_ranged)}:", metaRanged.toString(), RFColors.callerMetaRanged)
+        LabeledValue("${stringResource(Res.string.raid_caller_non_meta)}:", metaNonMeta.toString(), RFColors.callerMetaNonMeta)
+        InlineCopyIcon(RaidCallerCopyMessages.meta(metaCc, metaHealer, metaMelee, metaMage, metaDancer, metaRanged, metaNonMeta, allMembers.size))
+        val pencilInteraction = androidx.compose.foundation.interaction.MutableInteractionSource()
+        val pencilHovered by pencilInteraction.collectIsHoveredAsState()
+        Text(
+          text = "✎",
+          color = if (pencilHovered) Color.White else RFColors.TextSecondary,
+          fontSize = 11.sp,
+          modifier = Modifier
+            .hoverable(pencilInteraction)
+            .clip(RoundedCornerShape(4.dp))
+            .clickable(interactionSource = pencilInteraction, indication = null) { openMetaSpecs(wm) }
+        )
+      }
     }
   }
 }

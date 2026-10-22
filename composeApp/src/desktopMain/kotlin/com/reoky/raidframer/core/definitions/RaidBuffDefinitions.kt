@@ -192,3 +192,73 @@ fun parseRaidBuffRequirements(serialized: String): RaidBuffRequirements {
     requireEnhancedLonging = "enhanced" in flags
   )
 }
+
+/**
+ * Short abbreviations for buff names used in compact copy-to-clipboard strings.
+ * Designed to fit within the 160-character chat paste limit.
+ */
+private val buffAbbreviations = mapOf(
+  RaidBuffKey.GOBLET to "Gob",
+  RaidBuffKey.FEAST_RIBS to "Feast",
+  RaidBuffKey.LONGING to "Book",
+  RaidBuffKey.WHISPER to "Whisp",
+  RaidBuffKey.BLESSED_ELIXIR to "Bless",
+  RaidBuffKey.ANCIENTS_POTION to "AncPot",
+  RaidBuffKey.JINHUI_WISH to "Jinhui",
+  RaidBuffKey.SECRET_GIFT to "SecGift",
+  RaidBuffKey.FAIRY_PROTECTION to "Fairy",
+  RaidBuffKey.COOKFIRE to "Cook",
+  RaidBuffKey.WAR_DRUM to "Drum",
+  RaidBuffKey.DAHUTAS_BUBBLE to "Bubble",
+  RaidBuffKey.MONSTER_HUNTERS_DREAM to "MHD",
+  RaidBuffKey.RED_FLOWER_FRUIT to "RFF",
+  RaidBuffKey.BLUE_FLOWER_FRUIT to "BFF",
+  RaidBuffKey.STATUE_BUFF to "Statue",
+  RaidBuffKey.FACTION_WAR_TIME to "Faction",
+  RaidBuffKey.GALLANTS_BLESSING to "Guild",
+  RaidBuffKey.MOONLIGHT_JUICE to "MoonJ",
+  RaidBuffKey.HUNTING_ELIXIR to "HuntElx",
+  RaidBuffKey.CHOCOLATE to "Choco",
+  RaidBuffKey.LOOT_CAKE to "LCake",
+  RaidBuffKey.SHORTBREAD_COOKIE to "Shortb",
+  RaidBuffKey.GOLDEN_TAFFY to "Taffy",
+  RaidBuffKey.EGG_OF_FORTUNE to "Egg"
+)
+
+/**
+ * Builds a compact buff criteria summary string for copy-to-clipboard, suitable for
+ * pasting into game chat (max 160 characters).
+ *
+ * Example output: "Buffs: Gob, Feast, Statue, Drum | Loot: 170%"
+ * Example with flags: "Buffs: Gob(Or), Feast(Ribs), Book(Enh), Statue, Drum | Loot: 200%"
+ */
+fun RaidBuffRequirements.toCopyString(): String {
+  if (selected.isEmpty() && lootThreshold <= 0) return "No buffs required."
+
+  val parts = mutableListOf<String>()
+
+  // Main buffs section
+  val mainBuffs = selected.filter { definitionsByKey[it]?.section == RaidBuffSection.MAIN }
+  if (mainBuffs.isNotEmpty()) {
+    val buffLabels = mainBuffs.mapNotNull { key ->
+      val def = definitionsByKey[key] ?: return@mapNotNull null
+      val abbr = buffAbbreviations[key] ?: def.labelKey
+      val suffix = when {
+        key == RaidBuffKey.GOBLET && requireOrangeGoblet -> "(Or)"
+        key == RaidBuffKey.FEAST_RIBS && !allowMeatballs -> ""
+        key == RaidBuffKey.FEAST_RIBS && allowMeatballs -> "(Meat)"
+        key == RaidBuffKey.LONGING && requireEnhancedLonging -> "(Enh)"
+        else -> ""
+      }
+      if (suffix.isNotBlank()) "$abbr$suffix" else abbr
+    }
+    parts.add("Buffs: ${buffLabels.joinToString(", ")}")
+  }
+
+  // Loot threshold section
+  if (lootThreshold > 0) {
+    parts.add("Loot: ${lootThreshold}%")
+  }
+
+  return parts.joinToString(" | ")
+}
