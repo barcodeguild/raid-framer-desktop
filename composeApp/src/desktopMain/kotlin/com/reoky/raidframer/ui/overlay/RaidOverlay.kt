@@ -159,6 +159,7 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val nearbyHaranya = PlayerCacheInteractor.nearbyHaraniRaidParties.collectAsState()
   val nearbyPirate = PlayerCacheInteractor.nearbyPirateRaidParties.collectAsState()
   val raidDepartures = PlayerCacheInteractor.raidDeparturesFlow.collectAsState()
+  val raidMemberNames = PlayerCacheInteractor.combinedRaidMemberNames.collectAsState()
   var selectedTab by remember { mutableStateOf(RaidTab.ATTENDANCE) }
   // Consume any cross-overlay tab request (e.g. from the Raid Caller overlay) and select it.
   LaunchedEffect(OverlayNav.pendingRaidTab.value) {
@@ -183,16 +184,17 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
         slidingWindowMinutes = config.nearbySlidingWindowMinutes,
         participationStage = config.nearbyParticipationStage,
         behaviorSensitivity = config.nearbyBehaviorSensitivity,
+        showInRaidOnly = config.nearbyShowInRaidOnly,
       )
     )
   }
-  // Sync filter state changes back to RFConfig
   LaunchedEffect(filterState) {
     RFConfig.update {
       it.copy(
         nearbySlidingWindowMinutes = filterState.slidingWindowMinutes,
         nearbyParticipationStage = filterState.participationStage,
         nearbyBehaviorSensitivity = filterState.behaviorSensitivity,
+        nearbyShowInRaidOnly = filterState.showInRaidOnly,
       )
     }
   }
@@ -283,7 +285,6 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
             .padding(horizontal = 8.dp, vertical = 8.dp),
           verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-          // RaidHeaderStrip() I might want something like this in the future
           Box(
             modifier = Modifier
               .fillMaxWidth()
@@ -348,14 +349,18 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
-              filterState = filterState
+              playerFaction = playerFaction,
+              filterState = filterState,
+              raidMemberNames = raidMemberNames.value
             )
 
             RaidTab.NEARBY_GEAR -> NearbyGearTab(
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
               nearbyPirate = nearbyPirate.value,
-              filterState = filterState
+              playerFaction = playerFaction,
+              filterState = filterState,
+              raidMemberNames = raidMemberNames.value
             )
 
             RaidTab.COMPOSITION -> CompositionTab(
@@ -364,6 +369,7 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
               nearbyPirate = nearbyPirate.value,
               playerFaction = playerFaction,
               filterState = filterState,
+              raidMemberNames = raidMemberNames.value,
               wm = wm
             )
           }
@@ -380,11 +386,26 @@ private fun CompositionTab(
   nearbyPirate: List<PlayerCard>,
   playerFaction: Faction = Faction.UNKNOWN,
   filterState: NearbyFilterState,
+  raidMemberNames: Set<String>,
   wm: WindowManager? = null,
 ) {
-  val filteredHaranya = filterNearbyPlayers(nearbyHaranya, filterState)
-  val filteredNuia = filterNearbyPlayers(nearbyNuia, filterState)
-  val filteredPirate = filterNearbyPlayers(nearbyPirate, filterState)
+  val inRaidOnly = filterState.showInRaidOnly
+  val inRaidIndicator = stringResource(Res.string.nearby_in_raid_only_indicator)
+  fun filterFaction(players: List<PlayerCard>, faction: Faction): List<PlayerCard> {
+    val filtered = if (inRaidOnly && faction == playerFaction) {
+      players.filter { it.name in raidMemberNames }
+    } else {
+      players
+    }
+    return filterNearbyPlayers(filtered, filterState)
+  }
+  val filteredHaranya = filterFaction(nearbyHaranya, Faction.HARANYA)
+  val filteredNuia = filterFaction(nearbyNuia, Faction.NUIA)
+  val filteredPirate = filterFaction(nearbyPirate, Faction.PIRATE)
+  fun factionLabelWithIndicator(label: String, faction: Faction): String {
+    if (inRaidOnly && faction == playerFaction) return "$label $inRaidIndicator"
+    return label
+  }
 
   val haranyaFormat = stringResource(Res.string.raid_haranya_faction)
   val nuiaFormat = stringResource(Res.string.raid_nuian_faction)
@@ -392,26 +413,21 @@ private fun CompositionTab(
   val haranyaLabel = haranyaFormat.substringBefore("(").trimEnd()
   val nuiaLabel = nuiaFormat.substringBefore("(").trimEnd()
   val pirateLabel = pirateFormat.substringBefore("(").trimEnd()
-  fun chart(label: String, players: List<PlayerCard>, color: Color): FactionComposition {
-    val chartFaction = when (label) {
-      haranyaLabel -> Faction.HARANYA
-      nuiaLabel -> Faction.NUIA
-      pirateLabel -> Faction.PIRATE
-      else -> Faction.UNKNOWN
-    }
+  fun chart(label: String, players: List<PlayerCard>, color: Color, faction: Faction): FactionComposition {
+    val displayLabel = factionLabelWithIndicator(label, faction)
     val counts = mutableMapOf<SkillTreeType, Int>()
     players.forEach { card ->
       SpecType.fromName(card.currentBuild)?.trees?.forEach { tree -> counts[tree] = (counts[tree] ?: 0) + 1 }
     }
     val chartColor =
-      playerFaction.getFactionHighlightColor(chartFaction).takeUnless { it == Color.Transparent } ?: color
-    return FactionComposition(label, players.size, counts, chartColor)
+      playerFaction.getFactionHighlightColor(faction).takeUnless { it == Color.Transparent } ?: color
+    return FactionComposition(displayLabel, players.size, counts, chartColor)
   }
 
   val charts = listOf(
-    chart(haranyaLabel, filteredHaranya, factionHighlightColor(Faction.HARANYA)),
-    chart(nuiaLabel, filteredNuia, factionHighlightColor(Faction.NUIA)),
-    chart(pirateLabel, filteredPirate, factionHighlightColor(Faction.PIRATE))
+    chart(haranyaLabel, filteredHaranya, factionHighlightColor(Faction.HARANYA), Faction.HARANYA),
+    chart(nuiaLabel, filteredNuia, factionHighlightColor(Faction.NUIA), Faction.NUIA),
+    chart(pirateLabel, filteredPirate, factionHighlightColor(Faction.PIRATE), Faction.PIRATE)
   )
   val factionPlayers = listOf(
     charts[0].factionLabel to filteredHaranya,
@@ -2110,14 +2126,49 @@ private fun NearbyTab(
   nearbyNuia: List<PlayerCard>,
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
-  filterState: NearbyFilterState
+  playerFaction: Faction = Faction.UNKNOWN,
+  filterState: NearbyFilterState,
+  raidMemberNames: Set<String>
 ) {
   val scrollState = rememberScrollState()
+  val inRaidOnly = filterState.showInRaidOnly
+  val inRaidIndicator = stringResource(Res.string.nearby_in_raid_only_indicator)
+  fun filterFaction(players: List<PlayerCard>, faction: Faction): List<PlayerCard> {
+    val filtered = if (inRaidOnly && faction == playerFaction) {
+      players.filter { it.name in raidMemberNames }
+    } else {
+      players
+    }
+    return filterNearbyPlayers(filtered, filterState)
+  }
+  fun factionLabelWithIndicator(faction: Faction): String {
+    if (inRaidOnly && faction == playerFaction) return inRaidIndicator
+    return ""
+  }
+  val filteredHaranya = filterFaction(nearbyHaranya, Faction.HARANYA)
+  val filteredNuia = filterFaction(nearbyNuia, Faction.NUIA)
+  val filteredPirate = filterFaction(nearbyPirate, Faction.PIRATE)
 
-  val filteredHaranya = filterNearbyPlayers(nearbyHaranya, filterState)
-  val filteredNuia = filterNearbyPlayers(nearbyNuia, filterState)
-  val filteredPirate = filterNearbyPlayers(nearbyPirate, filterState)
-
+  @Composable
+  fun factionHeader(faction: Faction, count: Int, formatRes: org.jetbrains.compose.resources.StringResource) {
+    val indicator = factionLabelWithIndicator(faction)
+    val base = String.format(stringResource(formatRes), count)
+    val fullText = if (indicator.isNotBlank()) "$base $indicator" else base
+    val indicatorColor = RFColors.IndicatorAmber
+    if (indicator.isNotBlank()) {
+      val annotated = buildAnnotatedString {
+        withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
+          append(base)
+        }
+        withStyle(SpanStyle(color = indicatorColor, fontWeight = FontWeight.Bold)) {
+          append(" $indicator")
+        }
+      }
+      Text(text = annotated, fontSize = 13.sp)
+    } else {
+      Text(text = fullText, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    }
+  }
   Column(
     modifier = Modifier
       .fillMaxSize()
@@ -2135,12 +2186,7 @@ private fun NearbyTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
-        Text(
-          text = String.format(stringResource(Res.string.raid_haranya_faction), filteredHaranya.size),
-          color = Color.White,
-          fontWeight = FontWeight.Bold,
-          fontSize = 13.sp
-        )
+        factionHeader(Faction.HARANYA, filteredHaranya.size, Res.string.raid_haranya_faction)
         RaidComponent(
           parties = filteredHaranya.mapIndexed { index, card ->
             RaidFramePayload(
@@ -2160,12 +2206,7 @@ private fun NearbyTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
-        Text(
-          text = String.format(stringResource(Res.string.raid_nuian_faction), filteredNuia.size),
-          color = Color.White,
-          fontWeight = FontWeight.Bold,
-          fontSize = 13.sp
-        )
+        factionHeader(Faction.NUIA, filteredNuia.size, Res.string.raid_nuian_faction)
         RaidComponent(
           parties = filteredNuia.mapIndexed { index, card ->
             RaidFramePayload(
@@ -2185,12 +2226,7 @@ private fun NearbyTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
-        Text(
-          text = String.format(stringResource(Res.string.raid_pirate_faction), filteredPirate.size),
-          color = Color.White,
-          fontWeight = FontWeight.Bold,
-          fontSize = 13.sp
-        )
+        factionHeader(Faction.PIRATE, filteredPirate.size, Res.string.raid_pirate_faction)
         RaidComponent(
           parties = filteredPirate.mapIndexed { index, card ->
             RaidFramePayload(
@@ -2224,13 +2260,28 @@ private fun NearbyGearTab(
   nearbyNuia: List<PlayerCard>,
   nearbyHaranya: List<PlayerCard>,
   nearbyPirate: List<PlayerCard>,
-  filterState: NearbyFilterState
+  playerFaction: Faction = Faction.UNKNOWN,
+  filterState: NearbyFilterState,
+  raidMemberNames: Set<String>
 ) {
   val scrollState = rememberScrollState()
-
-  val filteredHaranya = filterNearbyPlayers(nearbyHaranya, filterState)
-  val filteredNuia = filterNearbyPlayers(nearbyNuia, filterState)
-  val filteredPirate = filterNearbyPlayers(nearbyPirate, filterState)
+  val inRaidOnly = filterState.showInRaidOnly
+  val inRaidIndicator = stringResource(Res.string.nearby_in_raid_only_indicator)
+  fun filterFaction(players: List<PlayerCard>, faction: Faction): List<PlayerCard> {
+    val filtered = if (inRaidOnly && faction == playerFaction) {
+      players.filter { it.name in raidMemberNames }
+    } else {
+      players
+    }
+    return filterNearbyPlayers(filtered, filterState)
+  }
+  fun factionLabelWithIndicator(faction: Faction): String {
+    if (inRaidOnly && faction == playerFaction) return inRaidIndicator
+    return ""
+  }
+  val filteredHaranya = filterFaction(nearbyHaranya, Faction.HARANYA)
+  val filteredNuia = filterFaction(nearbyNuia, Faction.NUIA)
+  val filteredPirate = filterFaction(nearbyPirate, Faction.PIRATE)
 
   val avgHaranya = averageGearScore(filteredHaranya)
   val avgNuia = averageGearScore(filteredNuia)
@@ -2245,6 +2296,25 @@ private fun NearbyGearTab(
       .verticalScroll(scrollState),
     verticalArrangement = Arrangement.spacedBy(8.dp)
   ) {
+    @Composable
+    fun gearFactionHeader(faction: Faction, count: Int, formatRes: org.jetbrains.compose.resources.StringResource) {
+      val indicator = factionLabelWithIndicator(faction)
+      val base = String.format(stringResource(formatRes), count)
+      val indicatorColor = Color(0xFFE8B868)
+      if (indicator.isNotBlank()) {
+        val annotated = buildAnnotatedString {
+          withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
+            append(base)
+          }
+          withStyle(SpanStyle(color = indicatorColor, fontWeight = FontWeight.Bold)) {
+            append(" $indicator")
+          }
+        }
+        Text(text = annotated, fontSize = 13.sp)
+      } else {
+        Text(text = base, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+      }
+    }
     Row(
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -2256,12 +2326,7 @@ private fun NearbyGearTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
-        Text(
-          text = String.format(stringResource(Res.string.raid_haranya_faction), filteredHaranya.size),
-          color = Color.White,
-          fontWeight = FontWeight.Bold,
-          fontSize = 13.sp
-        )
+        gearFactionHeader(Faction.HARANYA, filteredHaranya.size, Res.string.raid_haranya_faction)
         Text(
           text = String.format(
             stringResource(Res.string.nearby_avg_gs_format),
@@ -2282,12 +2347,7 @@ private fun NearbyGearTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
-        Text(
-          text = String.format(stringResource(Res.string.raid_nuian_faction), filteredNuia.size),
-          color = Color.White,
-          fontWeight = FontWeight.Bold,
-          fontSize = 13.sp
-        )
+        gearFactionHeader(Faction.NUIA, filteredNuia.size, Res.string.raid_nuian_faction)
         Text(
           text = String.format(
             stringResource(Res.string.nearby_avg_gs_format),
@@ -2308,12 +2368,7 @@ private fun NearbyGearTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
       ) {
-        Text(
-          text = String.format(stringResource(Res.string.raid_pirate_faction), filteredPirate.size),
-          color = Color.White,
-          fontWeight = FontWeight.Bold,
-          fontSize = 13.sp
-        )
+        gearFactionHeader(Faction.PIRATE, filteredPirate.size, Res.string.raid_pirate_faction)
         Text(
           text = String.format(
             stringResource(Res.string.nearby_avg_gs_format),

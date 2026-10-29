@@ -834,3 +834,11 @@ val MIGRATION_53_54 = object : Migration(53, 54) {
       .use { it.step() }
   }
 }
+
+// Added nearbyShowInRaidOnly to filter nearby sections to in-raid same-faction players only (10/28/26)
+val MIGRATION_54_55 = object : Migration(54, 55) {
+  override fun migrate(connection: SQLiteConnection) {
+    connection.prepare("ALTER TABLE config ADD COLUMN nearbyShowInRaidOnly INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+  }
+}

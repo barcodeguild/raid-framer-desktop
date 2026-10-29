@@ -309,14 +309,13 @@ object PlayerCacheInteractor : Interactor() {
             }
 
             // Update class/role from raid roster data if available
+            // Always update from fresh IPC data — players can switch classes mid-session
             if (member.characterBuild.isNotBlank() && member.characterBuild != SpecType.UNKNOWN.name) {
-              if (updatedCard.currentBuild == SpecType.UNKNOWN.name || updatedCard.currentBuild.isBlank()) {
-                val role = SpecType.fromName(member.characterBuild)?.guessPlayerRole()
-                updatedCard = updatedCard.copy(
-                  currentBuild = member.characterBuild,
-                  currentRole = role?.value ?: updatedCard.currentRole
-                )
-              }
+              val role = SpecType.fromName(member.characterBuild)?.guessPlayerRole()
+              updatedCard = updatedCard.copy(
+                currentBuild = member.characterBuild,
+                currentRole = role?.value ?: updatedCard.currentRole
+              )
             }
 
             // Update gear score from raid roster if available and non-zero
@@ -2394,6 +2393,17 @@ object PlayerCacheInteractor : Interactor() {
     }
     .distinctUntilChanged()
     .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  /**
+   * Combined set of player names currently in the main raid (0) and co-raid (1).
+   * Used by the Composition tab to offer a "show only in-raid" filter.
+   */
+  val combinedRaidMemberNames: StateFlow<Set<String>> = snapshotFlow {
+    val combined = (raids[0] ?: emptyList()) + (raids[1] ?: emptyList())
+    combined.flatten().map { it.playerName }.filter { it.isNotBlank() }.toSet()
+  }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptySet())
 
   /////////////////////////
   // Faction Comparisons //

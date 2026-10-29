@@ -92,6 +92,7 @@ fun initialize(): AppDatabase {
     .addMigrations(MIGRATION_51_52) // 10/11/26 added hit quality lifetime totals to player_cache
     .addMigrations(MIGRATION_52_53) // 10/13/26 separated hit quality into damage and healing categories
     .addMigrations(MIGRATION_53_54) // 10/18/26 added ODE Songcraft triplet stats (Dissonance Quake, Critical Discord AoE, Shackle, Dissonance non-AoE, Critical Discord non-AoE, Battle Hymn)
+    .addMigrations(MIGRATION_54_55) // 10/28/26 added nearbyShowInRaidOnly filter toggle
     .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
     .fallbackToDestructiveMigrationOnDowngrade(true)

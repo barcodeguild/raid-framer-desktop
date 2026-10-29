@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.ui.text.withStyle
 import com.reoky.raidframer.core.definitions.SKILL_TREE_DISPLAY_ORDER
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.helpers.RFColors
@@ -69,15 +70,34 @@ fun CompositionBreakdownListComponent(
   sortByCount: Boolean = true,
   modifier: Modifier = Modifier
 ) {
+  val indicatorSuffix = " " + stringResource(Res.string.nearby_in_raid_only_indicator)
   Column(modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-    Text(
-      title,
-      color = headingColor,
-      fontWeight = FontWeight.Bold,
-      fontSize = 13.sp,
-      modifier = Modifier.fillMaxWidth(),
-      textAlign = androidx.compose.ui.text.style.TextAlign.Center
-    )
+    if (title.endsWith(indicatorSuffix)) {
+      val baseLabel = title.substring(0, title.length - indicatorSuffix.length)
+      val annotated = androidx.compose.ui.text.buildAnnotatedString {
+        withStyle(androidx.compose.ui.text.SpanStyle(color = headingColor, fontWeight = FontWeight.Bold)) {
+          append(baseLabel)
+        }
+        withStyle(androidx.compose.ui.text.SpanStyle(color = RFColors.IndicatorAmber, fontWeight = FontWeight.Bold)) {
+          append(indicatorSuffix)
+        }
+      }
+      Text(
+        text = annotated,
+        fontSize = 13.sp,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+      )
+    } else {
+      Text(
+        title,
+        color = headingColor,
+        fontWeight = FontWeight.Bold,
+        fontSize = 13.sp,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+      )
+    }
     androidx.compose.material.Divider(
       color = RFColors.CardBorder.copy(alpha = 0.55f),
       thickness = 1.dp,
@@ -145,7 +165,22 @@ fun CompositionChartComponent(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(6.dp)
   ) {
-    Text(composition.factionLabel, color = composition.color, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    val indicatorColor = RFColors.IndicatorAmber
+    val indicatorSuffix = " " + stringResource(Res.string.nearby_in_raid_only_indicator)
+    if (composition.factionLabel.endsWith(indicatorSuffix)) {
+      val baseLabel = composition.factionLabel.substring(0, composition.factionLabel.length - indicatorSuffix.length)
+      val annotated = androidx.compose.ui.text.buildAnnotatedString {
+        withStyle(androidx.compose.ui.text.SpanStyle(color = composition.color, fontWeight = FontWeight.Bold)) {
+          append(baseLabel)
+        }
+        withStyle(androidx.compose.ui.text.SpanStyle(color = indicatorColor, fontWeight = FontWeight.Bold)) {
+          append(indicatorSuffix)
+        }
+      }
+      Text(text = annotated, fontSize = 14.sp)
+    } else {
+      Text(composition.factionLabel, color = composition.color, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    }
     Text("${composition.playerCount}", color = RFColors.TextSecondary, fontSize = 12.sp)
     BoxWithConstraints(Modifier.fillMaxWidth().height(290.dp)) {
       val density = LocalDensity.current

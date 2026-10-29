@@ -16,6 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -36,6 +39,7 @@ import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.nearby_filter_behavior
 import raid_framer_desktop.composeapp.generated.resources.nearby_filter_disabled
+import raid_framer_desktop.composeapp.generated.resources.nearby_filter_in_raid_only
 import raid_framer_desktop.composeapp.generated.resources.nearby_filter_minutes_format
 import raid_framer_desktop.composeapp.generated.resources.nearby_filter_participation
 import raid_framer_desktop.composeapp.generated.resources.nearby_filter_seen_within
@@ -44,19 +48,13 @@ import raid_framer_desktop.composeapp.generated.resources.nearby_participation_2
 import raid_framer_desktop.composeapp.generated.resources.nearby_participation_50k
 import raid_framer_desktop.composeapp.generated.resources.nearby_participation_disabled
 
-/**
- * Holds the state for all nearby-player filters used on the Nearby, Nearby Gear, and Composition tabs.
- * Persisted via ConfigEntity so it survives app restarts.
- */
 data class NearbyFilterState(
-  val slidingWindowMinutes: Int = 15,   // 0 = disabled, 1..60
-  val participationStage: Int = 1,      // 0=disabled, 1=25k, 2=50k, 3=100k
-  val behaviorSensitivity: Int = 0,     // 0=disabled, 1..25
+  val slidingWindowMinutes: Int = 15,
+  val participationStage: Int = 1,
+  val behaviorSensitivity: Int = 0,
+  val showInRaidOnly: Boolean = false
 )
 
-/**
- * The four participation stage labels for display in the UI.
- */
 @Composable
 fun participationStageLabels(): List<String> = listOf(
   stringResource(Res.string.nearby_participation_disabled),
@@ -65,10 +63,6 @@ fun participationStageLabels(): List<String> = listOf(
   stringResource(Res.string.nearby_participation_100k),
 )
 
-/**
- * Applies the [NearbyFilterState] to a list of nearby players.
- * This is the single shared filter function used by all three tabs.
- */
 fun filterNearbyPlayers(
   players: List<PlayerCard>,
   filterState: NearbyFilterState
@@ -88,10 +82,7 @@ fun filterNearbyPlayers(
   }
 }
 
-/**
- * A Material3 slider that updates in real-time via [onValueChange],
- * and toggles [LocalDragLock] during drag to prevent window movement.
- */
+
 @Composable
 private fun FilterSlider(
   value: Int,
@@ -125,9 +116,6 @@ private fun FilterSlider(
   )
 }
 
-/**
- * Well-styled container that matches the SettingsSection card pattern.
- */
 @Composable
 private fun FilterWell(
   modifier: Modifier = Modifier,
@@ -141,10 +129,6 @@ private fun FilterWell(
   )
 }
 
-/**
- * Standardized filter controls for the Nearby, Nearby Gear, and Composition tabs.
- * Encapsulates the sliding window, participation, and behavior sensitivity filters.
- */
 @Composable
 fun NearbyFilterControls(
   state: NearbyFilterState,
@@ -153,7 +137,6 @@ fun NearbyFilterControls(
   textColor: Color = Color.White,
 ) {
   FilterWell(modifier = modifier) {
-    // --- Sliding Window ---
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -175,7 +158,6 @@ fun NearbyFilterControls(
       )
     }
 
-    // --- Participation Stage ---
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
       Text(stringResource(Res.string.nearby_filter_participation), color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
       @OptIn(ExperimentalLayoutApi::class)
@@ -210,7 +192,6 @@ fun NearbyFilterControls(
       }
     }
 
-    // --- Behavior Sensitivity ---
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -229,6 +210,31 @@ fun NearbyFilterControls(
         onValueChange = { onStateChange(state.copy(behaviorSensitivity = it)) },
         valueRange = 0..25,
         modifier = Modifier.fillMaxWidth()
+      )
+    }
+
+    Divider(color = Color.White.copy(alpha = 0.1f))
+
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onStateChange(state.copy(showInRaidOnly = !state.showInRaidOnly)) },
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Checkbox(
+        checked = state.showInRaidOnly,
+        onCheckedChange = { onStateChange(state.copy(showInRaidOnly = it)) },
+        colors = CheckboxDefaults.colors(
+          checkedColor = Color(0xFFDC143C),
+          uncheckedColor = Color.White,
+          checkmarkColor = Color.White
+        )
+      )
+      Text(
+        text = stringResource(Res.string.nearby_filter_in_raid_only),
+        color = textColor,
+        fontSize = 12.sp,
+        modifier = Modifier.padding(start = 4.dp)
       )
     }
   }

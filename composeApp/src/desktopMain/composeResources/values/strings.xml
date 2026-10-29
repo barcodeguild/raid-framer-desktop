@@ -1495,6 +1495,8 @@ This will allow the app to use this seed table as a reference for player data.</
     <string name="nearby_participation_25k">25k DMG/Heals or 25 CC</string>
     <string name="nearby_participation_50k">50k DMG/Heals or 50 CC</string>
     <string name="nearby_participation_100k">100k DMG/Heals or 100 CC</string>
+    <string name="nearby_filter_in_raid_only">Show only in-raid (same faction)</string>
+    <string name="nearby_in_raid_only_indicator">(in-raid only)</string>
 
     <!-- Screenshot Preview -->
     <string name="screenshot_preview_title">Screenshot Preview</string>    <string name="screenshot_copied_feedback">Copied to clipboard</string>
