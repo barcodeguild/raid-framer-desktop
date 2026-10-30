@@ -1360,6 +1360,8 @@ anwenden? Dies ermöglicht der App, diese Seed-Tabelle als Referenz für Spieler
     <string name="nearby_participation_25k">25k Schaden/Heilung oder 25 CC</string>
     <string name="nearby_participation_50k">50k Schaden/Heilung oder 50 CC</string>
     <string name="nearby_participation_100k">100k Schaden/Heilung oder 100 CC</string>
+     <string name="nearby_filter_in_raid_only">Nur im Raid (gleiche Fraktion)</string>
+     <string name="nearby_in_raid_only_indicator">(nur im Raid)</string>
 
     <!-- Screenshot Preview -->
     <string name="screenshot_preview_title">Screenshot-Vorschau</string>

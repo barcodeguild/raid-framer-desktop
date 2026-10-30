@@ -1423,6 +1423,8 @@
     <string name="nearby_participation_25k">25k 伤害/治疗或 25 CC</string>
     <string name="nearby_participation_50k">50k 伤害/治疗或 50 CC</string>
     <string name="nearby_participation_100k">100k 伤害/治疗或 100 CC</string>
+     <string name="nearby_filter_in_raid_only">仅显示团队内（同阵营）</string>
+     <string name="nearby_in_raid_only_indicator">（仅团队内）</string>
 
     <!-- Screenshot Preview -->
     <string name="screenshot_preview_title">截图预览</string>
