@@ -1,6 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-
-    <!-- Graphs Strings -->
     <string name="graphs_trend_graph">추세 그래프</string>
     <string name="graphs_no_recent_data">최근 데이터 없음</string>
     <string name="graphs_player_metric_format">%1$s의 %2$s</string>
@@ -22,8 +21,6 @@
     <string name="help_resetting_body">다른 방법이 모두 실패하면 Raid Framer를 종료하고 다음 폴더를 삭제하여 로컬 설정과 데이터베이스를 초기화하세요:\nC:\\Users\\&lt;Windows사용자이름&gt;\\.RaidFramer\\\n&lt;Windows사용자이름&gt;을 자신의 Windows 계정 이름으로 바꾸세요. 이 폴더를 삭제하면 저장된 로컬 설정과 데이터베이스가 제거됩니다.</string>
     <string name="help_performance_title">성능 및 FPS</string>
     <string name="help_performance_body">주변에 플레이어가 많으면 100미터 메시지 거리가 성능을 저하시킬 수 있습니다. 거리 슬라이더를 낮추면 성능 저하를 줄일 수 있지만 기록되는 이벤트의 최대 거리도 줄어듭니다. 성능 문제가 계속되면 ALL 대신 SELF, PARTY, RAID 또는 GUILD처럼 더 좁은 메시지 범위를 선택하세요.</string>
-
-    <!-- Companion Addon Settings Strings -->
     <string name="companion_description">Lua 애드온은 게임에서 전투 데이터를 가져옵니다. 타겟 기반 디버프 추적, 공격대 관리, 게임 내 시각/청각 효과 등 네이티브 기능만을 가능하게 합니다. lua 애드온을 게임에서 제거하면 기능이 의도대로 작동하지 않습니다.</string>
     <string name="companion_toggle_raid_status">플레이어가 공격대에 참여하거나 떠날 때 메인/공동 공격대 인원 수를 표시합니다.</string>
     <string name="companion_toggle_display_charmed">게임 채팅 창에 '매혹' 대상 표시.</string>
@@ -36,8 +33,6 @@
     <string name="companion_toggle_display_mark_charmed_targets">플레이어 머리 위에 [보라색 점]을 표시하여 매혹되었음을 나타냅니다.</string>
     <string name="companion_toggle_display_mark_silenced_targets">플레이어 머리 위에 [검은 점]을 표시하여 침묵되었음을 나타냅니다.</string>
     <string name="companion_toggle_display_mark_distressed_targets">플레이어 머리 위에 [파란 점]을 표시하여 강위축 중임을 나타냅니다.</string>
-
-    <!-- New Session Overlay -->
     <string name="new_session_title">새 녹화 세션</string>
     <string name="new_session_event_type_label">이벤트 유형</string>
     <string name="new_session_custom_name_label">사용자 정의 세션 이름</string>
@@ -47,10 +42,8 @@
     <string name="new_session_allow_pve">PvE 피해 허용</string>
     <string name="new_session_file_name_label">세션 파일 이름</string>
     <string name="new_session_start_recording">녹화 시작</string>
-    <string name="new_session_cancel">싫어요</string>
+    <string name="new_session_cancel">취소</string>
     <string name="new_session_allow_ode_to_recovery_count_as_heals">치유의 무곡이 치유로 계산되도록 허용</string>
-
-    <!-- Settings Overlay -->
     <string name="settings_title">Raid Framer Desktop 설정</string>
     <string name="settings_export_background_title">내보내기 배경</string>
     <string name="settings_export_background_description">PNG 리더보드 내보내기에 사용할 배경을 선택하세요.</string>
@@ -90,7 +83,7 @@
         Windows 제어판에서 "Raid Framer"를 제거하여 메인 애플리케이션 제거를 완료해야 합니다. (이 앱입니다) 제거하지 않고 앱을 다시 열면 애드온이 여전히 작동하도록 Lua 애드온이 게임 폴더에 다시 복사됩니다. (원하는 대로) 감사합니다! 지금 종료합니다!</string>
     <string name="settings_mini_graph_description">DPS/HEALS/CC 미니 그래프 활성화. 시간에 따른 성능 표시.</string>
     <string name="settings_show_heals_column">치유량 표시</string>
-    <string name="settings_show_cc_column">cc횟수 표시</string>
+    <string name="settings_show_cc_column">CC 횟수 표시</string>
     <string name="settings_show_damage_column">피해량 표시</string>
     <string name="settings_combat_custom_categories_title">커스텀 카테고리</string>
     <string name="settings_combat_custom_categories_description">전투 오버레이에 열로 표시할 추가 카테고리를 최대 3개까지 선택하세요. 피해, 힐, CC와 함께 표시됩니다.</string>
@@ -116,7 +109,7 @@
     <string name="settings_uninstall_confirm_title">제거 확인</string>
     <string name="settings_uninstall_confirm_text">Lua 애드온을 제거하시겠습니까? 게임 통합이 제거됩니다.
 
-앱이 파일을 제거하기 전에 인게임 애드온에 종료를 알립니다.</string>
+        앱이 파일을 제거하기 전에 인게임 애드온에 종료를 알립니다.</string>
     <string name="settings_uninstall_confirm_button">제거</string>
     <string name="settings_uninstall_shutting_down">Lua 애드온 종료 중 및 파일 잠금 해제 중...</string>
     <string name="settings_uninstall_button">Lua 애드온 및 앱 제거</string>
@@ -132,28 +125,20 @@
     <string name="settings_general_overlay_description">일부 친구는 오버레이의 투명도와 색상을 조정하고 싶을 수 있습니다.</string>
     <string name="settings_language_label">언어</string>
     <string name="settings_language_restart_notice">참고: 언어 변경이 완전히 적용되려면 앱을 다시 시작하세요.</string>
-
-    <!-- Recording Session Panel (shown when a session is active in Settings) -->
     <string name="settings_recording_session_title">녹화 세션</string>
     <string name="settings_recording_session_description_format">전투 이벤트가 %1$s에 기록 중입니다</string>
     <string name="settings_recording_session_type_format">유형: %1$s (%2$s)</string>
     <string name="settings_recording_session_duration_format">지속 시간: %1$s</string>
     <string name="settings_recording_session_stop">녹화 중지</string>
-
-    <!-- Crash Recovery Banner (shown when a stale session was cleared on launch) -->
     <string name="settings_crash_recovery_title">세션 중단됨</string>
     <string name="settings_crash_recovery_message">이전 녹화 세션이 중단되어 삭제되었습니다.</string>
-
-    <!-- Abort Session -->
     <string name="combat_stop_and_save">저장 후 중지</string>
-    <string name="combat_abort_and_discard">중 취소 및 삭제</string>
+    <string name="combat_abort_and_discard">중단하고 삭제</string>
     <string name="combat_save_and_exit_tooltip">저장 후 종료</string>
-    <string name="settings_recording_session_abort">세션 중 취소</string>
-    <string name="session_abort_confirm_title">세션을 중 취소하시겠습니까?</string>
+    <string name="settings_recording_session_abort">세션 중단</string>
+    <string name="session_abort_confirm_title">세션을 중단하시겠습니까?</string>
     <string name="session_abort_confirm_text">이 세션의 모든 녹화 데이터가 저장 없이 삭제됩니다. 누적 총합이 세션 시작 전 값으로 복원됩니다.</string>
-    <string name="session_abort_confirm_button">중 취소</string>
-
-    <!-- About Overlay Strings -->
+    <string name="session_abort_confirm_button">중단</string>
     <string name="about_app_title">Raid Framer Desktop</string>
     <string name="about_version_label">버전:</string>
     <string name="about_package_label">패키지:</string>
@@ -169,8 +154,6 @@
     <string name="about_staff_dedication">ArcheRage 스태프의 헌신과 노고에 감사드립니다. ~</string>
     <string name="about_dev_dedication">ArcheRage 개발자의 지속적인 지원과 업데이트에 감사드립니다. ~</string>
     <string name="about_special_thanks">특별히 감사드립니다 %1$s, %2$s, %3$s, %4$s!</string>
-
-    <!-- Player Card -->
     <string name="player_card_no_cached_data">사용 가능한 캐시 데이터가 없습니다.</string>
     <string name="player_card_title_format">%1$s 플레이어 카드</string>
     <string name="player_card_recent_item_uses">아이템 사용</string>
@@ -185,10 +168,8 @@
     <string name="player_card_heals_by_skill">스킬별 치유</string>
     <string name="player_card_cc_by_skill">스킬별 cc</string>
     <string name="player_card_session_totals">세션 총계</string>
-    <string name="player_card_lifetime_totals">생애 총계</string>
-    <string name="player_card_lifetime_totals_sessions">생애 총계 (%1$d세션)</string>
-
-    <!-- Session scope dropdown -->
+    <string name="player_card_lifetime_totals">전체 누적 기록</string>
+    <string name="player_card_lifetime_totals_sessions">전체 누적 기록 (%1$d개 세션)</string>
     <string name="player_card_totals_scope_label">보기</string>
     <string name="player_card_session_scope_current">현재 세션</string>
     <string name="player_card_session_scope_previous">이전 세션</string>
@@ -196,11 +177,9 @@
     <string name="player_card_session_scope_all">모든 세션</string>
     <string name="player_card_no_historical_data">이 플레이어에 대해 보관된 세션이 없습니다.</string>
     <string name="player_inventory_time_ago">%1$s</string>
-
-    <!-- More specific stat labels used in totals -->
     <string name="player_card_stat_damage">총 피해량</string>
-    <string name="player_card_stat_healing">총 힐량</string>
-    <string name="player_card_stat_cc">CC 전달</string>
+    <string name="player_card_stat_healing">총 치유량</string>
+    <string name="player_card_stat_cc">CC 적용</string>
     <string name="player_card_stat_buffs">버프</string>
     <string name="player_card_stat_debuffs">디버프</string>
     <string name="player_card_stat_charms">매혹</string>
@@ -211,43 +190,33 @@
     <string name="player_card_stat_potions">물약</string>
     <string name="player_card_stat_kills">킬</string>
     <string name="player_card_stat_deaths">데스</string>
-    <string name="player_card_stat_kills_most_damage">최대 피해량</string>
-    <string name="player_card_stat_kills_killing_blow">킬수</string>
+    <string name="player_card_stat_kills_most_damage">최다 피해 기여 킬</string>
+    <string name="player_card_stat_kills_killing_blow">결정타 킬</string>
     <string name="player_card_stat_total_damage_taken">총 받은 피해량</string>
     <string name="player_card_stat_total_heals_received">총 받은 힐량</string>
     <string name="player_card_stat_tiger_strikes">폭풍 가르기</string>
     <string name="player_card_stat_freezes">동결</string>
     <string name="player_card_stat_trips">넘어짐</string>
     <string name="player_card_stat_bubbles">버블 트랩</string>
-    <string name="player_card_stat_bracings">브레이싱 블래스트</string>
+    <string name="player_card_stat_bracings">철옹성</string>
     <string name="player_card_stat_shield_strip">방패 박탈</string>
     <string name="player_card_stat_weapon_disables">무기 무력화</string>
     <string name="player_card_stat_potion_disables">물약 무력화</string>
-    <string name="player_card_stat_bd_glider">BD 날틀</string>
-    <string name="player_card_stat_crystal_wings">크리스탈 윙스</string>
+    <string name="player_card_stat_bd_glider">전설의 용날개</string>
+    <string name="player_card_stat_crystal_wings">에크로아의 날개</string>
     <string name="player_card_stat_glider_disables">날틀 무력화</string>
     <string name="player_card_stat_provoked">도발</string>
-
-    <!-- Player Details Section -->
     <string name="player_details_title">플레이어 상세</string>
     <string name="player_details_leadership_role">리더 역할</string>
-
-    <!-- Pet List Item -->
     <string name="pet_icon_desc_format">%1$s 아이콘</string>
     <string name="pet_debuffs_label">디버프:</string>
     <string name="pet_companion_dmg_label">동반자 피해</string>
     <string name="pet_cast_fallback_format">시전 #%1$d</string>
     <string name="pet_damage_label_format">피해: %1$s</string>
     <string name="pet_cast_overflow_format">+%1$d개 더</string>
-
-    <!-- Pokemon / Companions Overlay -->
     <string name="pokemon_title">드래곤 브레스</string>
     <string name="pokemon_no_companions">아직 드래곤 브레스나 리소포디아 유도 미사일이 감지되지 않았습니다...</string>
-
-    <!-- Thumbnails Helper -->
     <string name="thumbnail_unknown_format">알 수 없음: %1$s</string>
-
-    <!-- Filters Overlay -->
     <string name="filters_subscriptions_title">구독</string>
     <string name="filters_subscriptions_description">구독을 통해 사용자 지정 캐릭터 이름 재매핑을 만들 수 있습니다. 필터와 유사하지만 다른 모든 소스보다 우선합니다. 전투 로그의 주문 이름, NPC 이름 또는 기타 텍스트를 재정의하는 데 사용하세요.</string>
     <string name="filters_see_example_csv">CSV 예제 보기</string>
@@ -260,12 +229,8 @@
     <string name="filters_original_placeholder">원본</string>
     <string name="filters_replacement_placeholder">대체</string>
     <string name="filters_add_button">필터에 추가</string>
-    
-    <!-- File Selection Dialog -->
     <string name="file_selection_title">전투 로그 파일 선택</string>
     <string name="file_selection_searching">유효한 전투 로그 검색 중.. 결과가 여기에 표시됩니다..</string>
-
-    <!-- Combat Overlay -->
     <string name="combat_press_plus_to_record">'+' 키를 눌러 새 녹화 세션을 시작하세요</string>
     <string name="combat_column_pvp_damage">🔥 PvP 피해 🔥</string>
     <string name="combat_column_pvp_heals">💉 PvP 힐 💉</string>
@@ -273,7 +238,6 @@
     <string name="combat_column_pve_damage">⚔️ PvE 피해 ⚔️</string>
     <string name="combat_column_pve_heals">💉 PvE 힐 💉</string>
     <string name="combat_column_pve_cc">⛨ PvE CC ⛨</string>
-    <!-- Export combat titles (plain-text, no emojis — for PNG export rendering) -->
     <string name="export_combat_pvp_damage">PvP 피해</string>
     <string name="export_combat_pvp_heals">PvP 힐</string>
     <string name="export_combat_pvp_cc">PvP CC</string>
@@ -282,8 +246,6 @@
     <string name="export_combat_pve_cc">PvE CC</string>
     <string name="combat_no_columns_message">형님들.. 적어도 하나의 카테고리는 추가해보세요..</string>
     <string name="combat_open_settings">설정 열기</string>
-
-    <!-- Battle Graph Edge Tooltip -->
     <string name="battle_graph_edge_source_target_format">%1$s → %2$s</string>
     <string name="battle_graph_edge_and_n_more">+%1$d개 더</string>
     <string name="battle_graph_resume">▶  재개</string>
@@ -349,8 +311,6 @@
     <string name="battle_graph_focused_charms">매혹 분포</string>
     <string name="battle_graph_focused_distress">강위축 분포</string>
     <string name="battle_graph_focused_silence">침묵 분포</string>
-
-    <!-- 기술 분석 휴리스틱 라벨 -->
     <string name="tech_heal_loop">치유 순환</string>
     <string name="tech_heal_focus">치유 집중</string>
     <string name="tech_needs_heals">치유 필요</string>
@@ -366,23 +326,21 @@
     <string name="tech_no_silences">침묵 없음?</string>
     <string name="tech_no_tiger_strikes">폭풍가르기 (폭가) 없음</string>
     <string name="tech_no_defiance">패기 없음</string>
-
-    <!-- Battle Summary Overlay -->
     <string name="summary_battle_summary_title_format">전투 요약 (%1$s)</string>
     <string name="summary_silences_by_faction">진영별 침묵</string>
     <string name="summary_charms_by_faction">진영별 매혹</string>
     <string name="summary_distresses_by_faction">진영별 강위축</string>
     <string name="summary_trips_by_faction">진영별 넘어짐</string>
     <string name="summary_bubbles_by_faction">진영별 버블 트랩</string>
-    <string name="summary_bracings_by_faction">진영별 브레이싱 블래스트</string>
+    <string name="summary_bracings_by_faction">진영별 철옹성</string>
     <string name="summary_shield_strip_by_faction">진영별 방패 박탈</string>
     <string name="summary_weapon_disables_by_faction">진영별 무기 무력화</string>
     <string name="summary_potion_disables_by_faction">진영별 물약 무력화</string>
-    <string name="summary_bd_glider_by_faction">진영별 BD 날틀</string>
-    <string name="summary_crystal_wings_by_faction">진영별 크리스탈 윙스</string>
+    <string name="summary_bd_glider_by_faction">진영별 전설의 용날개</string>
+    <string name="summary_crystal_wings_by_faction">진영별 에크로아의 날개</string>
     <string name="summary_glider_disables_by_faction">진영별 날틀 무력화</string>
     <string name="summary_provokes_by_faction">진영별 도발</string>
-    <string name="summary_tiger_strikes_by_faction">진영별 호랑이 타격</string>
+    <string name="summary_tiger_strikes_by_faction">진영별 폭풍 가르기</string>
     <string name="summary_freezes_by_faction">진영별 동결</string>
     <string name="summary_damage_by_faction">진영별 딜</string>
     <string name="summary_heals_by_faction">진영별 힐</string>
@@ -392,21 +350,21 @@
     <string name="summary_top_distresses">강위축 순위</string>
     <string name="summary_top_trips">넘어짐 순위</string>
     <string name="summary_top_bubbles">버블 트랩 순위</string>
-    <string name="summary_top_bracings">브레이싱 블래스트 순위</string>
+    <string name="summary_top_bracings">철옹성 순위</string>
     <string name="summary_top_shield_strip">방패 박탈 순위</string>
     <string name="summary_top_weapon_disables">무기 무력화 순위</string>
     <string name="summary_top_potion_disables">물약 무력화 순위</string>
-    <string name="summary_top_bd_glider">BD 날틀 순위</string>
-    <string name="summary_top_crystal_wings">크리스탈 윙스 순위</string>
+    <string name="summary_top_bd_glider">전설의 용날개 순위</string>
+    <string name="summary_top_crystal_wings">에크로아의 날개 순위</string>
     <string name="summary_top_glider_disables">날틀 무력화 순위</string>
     <string name="summary_top_provokes">도발 순위</string>
-    <string name="summary_top_tiger_strikes">호랑이 타격 순위</string>
+    <string name="summary_top_tiger_strikes">폭풍 가르기 순위</string>
     <string name="summary_top_freezes">동결 순위</string>
-    <string name="summary_top_haranya_spells_damage">동대륙 주문 피해 순위</string>
-    <string name="summary_top_nuia_spells_damage">서대륙 주문 피해 순위</string>
-    <string name="summary_top_pirate_spells_damage">해적 주문 피해 순위</string>
+    <string name="summary_top_haranya_spells_damage">동대륙 스킬 피해 순위</string>
+    <string name="summary_top_nuia_spells_damage">서대륙 스킬 피해 순위</string>
+    <string name="summary_top_pirate_spells_damage">해적 스킬 피해 순위</string>
     <string name="summary_top_debuffs">디버프 순위</string>
-    <string name="summary_top_songs">피리 순위</string>
+    <string name="summary_top_songs">노래 사용 순위</string>
     <string name="summary_top_buffs">버프 순위</string>
     <string name="summary_top_loot_peak">최대 피크 루트 버프 %</string>
     <string name="summary_worst_loot_peak">최악 피크 루트 버프 %</string>
@@ -433,8 +391,6 @@
     <string name="summary_top_haranya_performance">동대륙 mvp 순위</string>
     <string name="summary_top_nuia_performance">서대륙 mvp 순위</string>
     <string name="summary_top_pirate_performance">해적 mvp 순위</string>
-
-    <!-- Summary Tab Labels -->
     <string name="summary_tab_debuffs">디버프</string>
     <string name="summary_tab_faction_charts">진영 차트</string>
     <string name="summary_tab_cc_debuffs">CC 디버프</string>
@@ -462,15 +418,15 @@
     <string name="player_card_stat_courageous_action">각성</string>
     <string name="player_card_stat_mana_barrier">활력 보호막</string>
     <string name="player_card_stat_revive">부활</string>
-    <string name="summary_top_defiance">패기 상위</string>
+    <string name="summary_top_defiance">패기 사용 순위</string>
     <string name="summary_top_garden_defiance">반신의 가르침 상위</string>
-    <string name="summary_top_purges">정화 상위</string>
-    <string name="summary_top_sac_dances">희생의 춤 상위</string>
-    <string name="summary_top_deep_tranquility">깊은 고요 상위</string>
+    <string name="summary_top_purges">정화 사용 순위</string>
+    <string name="summary_top_sac_dances">희생의 춤 사용 순위</string>
+    <string name="summary_top_deep_tranquility">깊은 고요 사용 순위</string>
     <string name="summary_top_deepend_debuff">깊어진 약화 상위</string>
     <string name="summary_top_throw_dagger">비수 던지기 상위</string>
-    <string name="summary_top_stuns">기절 상위</string>
-    <string name="summary_top_staggers">경직 상위</string>
+    <string name="summary_top_stuns">기절 적용 순위</string>
+    <string name="summary_top_staggers">경직 적용 순위</string>
     <string name="summary_top_absorb_lifeforce">생명력 흡수 상위</string>
     <string name="summary_top_corrosive_barrage">부식 상위</string>
     <string name="summary_top_blinded_by_crows">까마귀의 방해 상위</string>
@@ -486,15 +442,15 @@
     <string name="summary_tab_buffs">버프</string>
     <string name="summary_tab_ode">치무</string>
     <string name="summary_tab_kd">K/D</string>
-    <string name="summary_tab_received">받은 피해/회복</string>
+    <string name="summary_tab_received">받은 피해/치유</string>
     <string name="summary_tab_items">아이템</string>
     <string name="summary_tab_utility">유틸리티</string>
     <string name="summary_tab_specs">직업</string>
     <string name="summary_tab_performance">성과</string>
     <string name="summary_tab_life_mend">모두 치유: 생명</string>
-    <string name="summary_tab_debuffs_continued">약화 Continued</string>
-    <string name="summary_tab_debuffs_extended">약화 Extended</string>
-    <string name="summary_tab_special_buffs_continued">특수 버프 Continued</string>
+    <string name="summary_tab_debuffs_continued">디버프 (계속)</string>
+    <string name="summary_tab_debuffs_extended">디버프 (추가)</string>
+    <string name="summary_tab_special_buffs_continued">특수 버프 (계속)</string>
     <string name="summary_tab_special_heals">특수 회복</string>
     <string name="summary_tab_special_melee">특수 근접</string>
     <string name="summary_tab_special_dances">특수 춤</string>
@@ -507,23 +463,19 @@
     <string name="coherence_help_title">응집력</string>
     <string name="coherence_help_body">응집력은 각 레이드 멤버가 기록자(당신)의 범위 내에 머문 시간을 측정합니다. 뭉쳐 있는 레이드는 전투에서 더 효과적이며, 플레이어가 여기저기 흩어져 있으면 레이드가 이기기 어렵습니다.
 
-시간은 120m(렌더), 60m(레이드), 15m(밀집) 임계값에서 레이드 명단 거리 업데이트를 기준으로 집계됩니다. 표시되는 값은 범위 내 시간(초)과 레이드 조정 기록 시간의 백분율입니다.
+        시간은 120m(렌더), 60m(레이드), 15m(밀집) 임계값에서 레이드 명단 거리 업데이트를 기준으로 집계됩니다. 표시되는 값은 범위 내 시간(초)과 레이드 조정 기록 시간의 백분율입니다.
 
-편향을 줄이기 위해 기록자는 항상 레이드 범위 내에 머무르도록 노력해야 합니다. 기록자 자신의 범위 내 시간은 내보낸 이미지에 표시되어 레이드가 응집력 순위의 신뢰도를 판단할 수 있습니다.</string>
+        편향을 줄이기 위해 기록자는 항상 레이드 범위 내에 머무르도록 노력해야 합니다. 기록자 자신의 범위 내 시간은 내보낸 이미지에 표시되어 레이드가 응집력 순위의 신뢰도를 판단할 수 있습니다.</string>
     <string name="life_mend_quality_hurting">공격대에 해로움</string>
     <string name="life_mend_quality_poor">낮은 품질</string>
     <string name="life_mend_quality_good">좋음</string>
     <string name="life_mend_quality_excellent">우수</string>
-
-    <!-- General Strings -->
     <string name="general_about">정보</string>
     <string name="general_cancel">취소</string>
     <string name="general_exit">종료</string>
     <string name="general_settings">설정</string>
     <string name="general_ok">확인</string>
     <string name="general_instructions_dragging_overlays">Shift + 클릭으로 오버레이 드래그</string>
-
-    <!-- App / Tray Menu -->
     <string name="app_tray_title">.: Raid Framer :.</string>
     <string name="app_tray_reset_positions">창 위치 재설정</string>
     <string name="app_replay_viewing_format">다음 위치의 전투 데이터를 재생 중입니다: %1$s
@@ -532,23 +484,17 @@
     <string name="general_metric_type_cc">군중 제어</string>
     <string name="general_metric_type_cc_short">CC</string>
     <string name="general_metric_type_damage">피해</string>
-    <string name="general_metric_type_damage_short">DMG</string>
+    <string name="general_metric_type_damage_short">피해</string>
     <string name="general_metric_type_healing">힐</string>
-    <string name="general_metric_type_healing_short">HEALS</string>
+    <string name="general_metric_type_healing_short">치유</string>
     <string name="general_no_data_available">데이터 없음</string>
-
-    <!-- Help Strings -->
     <string name="general_help_window_postions_reset">모든 창 위치가 재설정되었습니다! 기억하세요: alt-tab 감지가 활성화되어 있으면 오버레이(제목 표시줄 없는 것)는 게임 창으로 다시 전환할 때까지 표시되지 않을 수 있습니다.</string>
-
-    <!-- Leadership Roles -->
     <string name="leadership_none">없음</string>
     <string name="leadership_raid_lead">공격대장</string>
     <string name="leadership_guild_lead">길드장</string>
     <string name="leadership_faction_hero">진영 영웅</string>
     <string name="leadership_shot_caller">지휘자</string>
     <string name="leadership_gm">GM</string>
-
-    <!-- Game Utility Items -->
     <string name="item_name_kraken_scepter">크지</string>
     <string name="item_name_kraken_spear">크창</string>
     <string name="item_name_kraken_shield">크방</string>
@@ -582,8 +528,6 @@
     <string name="item_name_serp_shield">피 마시는 꽃 (나차 방패)</string>
     <string name="item_name_mist_dagger">향뜰단검</string>
     <string name="item_name_mist_shield">향뜰방패</string>
-
-    <!-- Game Potions -->
     <string name="potion_name_minor_healing_rank_one">장막의 불꽃 (하급 치유 물약)</string>
     <string name="potion_name_minor_healing_rank_two">고요한 별 (하급 치유 물약)</string>
     <string name="potion_name_minor_healing_rank_three">오후의 태양 (하급 치유 물약)</string>
@@ -592,13 +536,10 @@
     <string name="potion_name_minor_healing_rank_six">사막의 불꽃 (하급 치유 물약)</string>
     <string name="potion_name_minor_healing_rank_seven">달콤한 별빛 (하급 치유 물약)</string>
     <string name="potion_name_minor_healing_rank_eight">타오르는 혜성 (하급 치유 물약)</string>
-
     <string name="potion_name_healing_guild_courage">길드의 용기 (37% 치유 물약)</string>
-
     <string name="potion_name_healing_rank_one_through_six">치유 물약 (상급 치유 물약 등급 1-7)</string>
     <string name="potion_name_healing_rank_seven">충적의 사랑 (상급 치유 물약 등급 7)</string>
     <string name="potion_name_healing_rank_eight">타오르는 욕망 (상급 치유 물약 등급 8)</string>
-
     <string name="potion_name_minor_mana_rank_one">마법사의 수증기 (하급 마나 등급 1)</string>
     <string name="potion_name_minor_mana_rank_two">안개 낀 기억 (하급 마나 등급 2)</string>
     <string name="potion_name_minor_mana_rank_three">아침 이슬 (하급 마나 등급 3)</string>
@@ -607,14 +548,10 @@
     <string name="potion_name_minor_mana_rank_six">이끼 연못 (하급 마나 등급 6)</string>
     <string name="potion_name_minor_mana_rank_seven">희미한 기억 (하급 마나 등급 7)</string>
     <string name="potion_name_minor_mana_rank_eight">흐린 반사 (하급 마나 등급 8)</string>
-
     <string name="potion_name_minor_healing_titan">타이탄의 치유 물약 (하급 치유 물약)</string>
     <string name="potion_name_minor_mana_titan">타이탄의 마나 물약 (하급 마나 물약)</string>
-
     <string name="potion_name_phoenix_tears_tincture">불사조 눈물 팅크</string>
     <string name="potion_name_wild_ginseng">산삼</string>
-
-    <!-- PNG Export -->
     <string name="export_title_battle_summary">전투 요약</string>
     <string name="export_no_data">데이터 없음</string>
     <string name="export_header_on"> 켜짐</string>
@@ -624,9 +561,7 @@
     <string name="export_header_kills_label">처치</string>
     <string name="export_header_most_damage">최대 피해</string>
     <string name="export_header_killing_blow">결정타</string>
-
     <string name="export_header_coherence">기록자 범위 내</string>
-    <!-- Export Settings -->
     <string name="settings_export_title">내보내기 설정</string>
     <string name="settings_export_description">내보내기 출력 디렉토리 및 옵션 관리.</string>
     <string name="settings_export_directory_label">내보내기 디렉토리:</string>
@@ -637,8 +572,6 @@
     <string name="settings_export_hide_pirate">상위 50위에 해적이 없으면 해적 열 자동 숨기기</string>
     <string name="settings_export_storage_estimate">PNG 내보내기는 보통 파일당 10-15MB이며, 원시 JSON 로그는 세션당 100-250MB를 사용할 수 있습니다.</string>
     <string name="settings_export_directory_not_found">디렉토리를 찾을 수 없음</string>
-
-    <!-- About / Update Strings -->
     <string name="settings_about_title">정보</string>
     <string name="settings_about_version_label">현재 버전:</string>
     <string name="settings_about_check_updates_button">업데이트 확인</string>
@@ -657,37 +590,35 @@
     <string name="settings_update_cancelled">다운로드가 취소되었습니다.</string>
     <string name="combat_update_tooltip">버전 %1$s 업데이트 가능</string>
     <string name="update_dialog_title">업데이트 가능</string>
-    <string name="update_dialog_message">새 버전(%1$s)이 available합니다.\n현재 버전은 %2$s입니다.\n\n앱이 종료되고 다시 설치 및 재시작됩니다. 이후 게임을 다시 시작해야 할 수 있습니다.</string>
+    <string name="update_dialog_message">새 버전(%1$s)이 있습니다.\n현재 버전은 %2$s입니다.\n\n앱이 종료되고 다시 설치 및 재시작됩니다. 이후 게임을 다시 시작해야 할 수 있습니다.</string>
     <string name="update_dialog_install">다운로드 및 설치</string>
     <string name="update_dialog_later">나중에</string>
     <string name="settings_update_whats_new">새로운 기능</string>
-
-    <!-- Raid / Attendance Overlay -->
-    <string name="raid_attendance_title">공격대 관리 및 출석</string>
+    <string name="raid_attendance_title">공격대 관리 및 참여 현황</string>
     <string name="raid_refresh_button">새로 고침</string>
     <string name="raid_control_deck_title">공격대 컨트롤 패널</string>
     <string name="raid_control_deck_subtitle">왼쪽은 공격대 명단, 오른쪽은 컨트롤, 아래쪽에 근처 정보를 깔끔하게 배치했습니다.</string>
-    <string name="raid_tab_attendance">출석</string>
+    <string name="raid_tab_attendance">참여 현황</string>
     <string name="raid_tab_nearby">근처</string>
     <string name="raid_tab_nearby_gear">근처 장비</string>
     <string name="raid_tab_composition">구성</string>
-    <string name="raid_composition_require_pvp">참여 요구 (25k 피해, 25k 힐 또는 25+ CC)</string>
+    <string name="raid_composition_require_pvp">참여 조건 (피해 25k, 치유 25k 또는 CC 25회 이상)</string>
     <string name="raid_composition_gear_over_15k">장비 15k 초과</string>
-    <string name="raid_composition_skill_trees">스킬 트리</string>
+    <string name="raid_composition_skill_trees">특성</string>
     <string name="raid_composition_statistics">구성 통계</string>
-    <string name="raid_composition_meta_spec_breakdown">메타 특성 분류</string>
-    <string name="raid_composition_shadowplay_vitalism">그림자 춤 + 활력</string>
-    <string name="raid_composition_shadowplay_without_vitalism">활력 없는 그림자 춤</string>
-    <string name="raid_composition_battlerage_occultism_witchcraft">격투 + 의지 또는 마법진</string>
-    <string name="raid_composition_battlerage_without_either">둘 다 없는 격투</string>
-    <string name="raid_composition_battlerage_occultism">격투 + 의지</string>
-    <string name="raid_composition_battlerage_witchcraft">격투 + 마법진</string>
-    <string name="raid_composition_dps_auramancy">DPS + 사랑</string>
-    <string name="raid_composition_dps_without_auramancy">사랑 없는 DPS</string>
-    <string name="raid_composition_vitalism_confessor">활력: 고해사제</string>
-    <string name="raid_composition_vitalism_assassin">활력: 암살자</string>
-    <string name="raid_composition_vitalism_soothsayer">활력: 예언자</string>
-    <string name="raid_composition_vitalism_other">활력: 기타</string>
+    <string name="raid_composition_meta_spec_breakdown">메타 직업 구성</string>
+    <string name="raid_composition_shadowplay_vitalism">사명 + 사랑</string>
+    <string name="raid_composition_shadowplay_without_vitalism">사랑 없는 사명</string>
+    <string name="raid_composition_battlerage_occultism_witchcraft">격투 + 죽음 또는 환술</string>
+    <string name="raid_composition_battlerage_without_either">죽음/환술 없는 격투</string>
+    <string name="raid_composition_battlerage_occultism">격투 + 죽음</string>
+    <string name="raid_composition_battlerage_witchcraft">격투 + 환술</string>
+    <string name="raid_composition_dps_auramancy">DPS + 의지</string>
+    <string name="raid_composition_dps_without_auramancy">의지 없는 DPS</string>
+    <string name="raid_composition_vitalism_confessor">사랑: 악사</string>
+    <string name="raid_composition_vitalism_assassin">사랑: 보호자</string>
+    <string name="raid_composition_vitalism_soothsayer">사랑: 예언가</string>
+    <string name="raid_composition_vitalism_other">사랑: 기타</string>
     <string name="raid_composition_dancer_comedian">춤꾼: 코미디언</string>
     <string name="raid_composition_dancer_seal_resolver">춤꾼: 봉인 해결사</string>
     <string name="raid_composition_dancer_tough_dancer">춤꾼: 강인한 춤꾼</string>
@@ -703,16 +634,16 @@
     <string name="raid_composition_none">없음</string>
     <string name="raid_composition_more_players">...외 %d명</string>
     <string name="raid_no_raid_detected">공격대 관리 기능을 사용하려면 공격대에 참여하세요. Lua 애드온이 설치되어 있어야 합니다. 제목 표시줄 있는 창은 오버레이가 아니므로 게임 UI를 가리지 않도록 다른 모니터에 배치하세요.</string>
-    <string name="raid_join_raid_hint">공격대에 참여하여 레이드 관련 기능을 사용하세요…</string>
+    <string name="raid_join_raid_hint">공격대에 참여하여 관련 기능을 사용하세요…</string>
     <string name="raid_main_raid_label">메인 공격대</string>
     <string name="raid_coraid_label">서브 공격대</string>
     <string name="raid_include_main_raid">메인 공격대 포함</string>
     <string name="raid_include_coraid">서브 공격대 포함</string>
     <string name="raid_include_nearby_same_faction">근처 같은 진영 플레이어 포함</string>
     <string name="raid_include_nearby_opposite_faction">근처 반대 진영 플레이어 포함</string>
-    <string name="raid_require_pvp_filter">최소한의 참여 요구. (25k 피해, 25k 힐 또는 25+ CC 포인트)</string>
+    <string name="raid_require_pvp_filter">최소 참여 조건 (피해 25k, 치유 25k 또는 CC 25점 이상)</string>
     <string name="raid_include_departed">공격대를 탈퇴한 유저 포함</string>
-    <string name="raid_copy_attendance">출석 복사</string>
+    <string name="raid_copy_attendance">참여 명단 복사</string>
     <string name="raid_tab_buffs">버프</string>
     <string name="raid_buff_preset">프리셋</string>
     <string name="raid_preset_no_buffs">버프 없음</string>
@@ -768,8 +699,8 @@
     <string name="raid_buff_egg_of_fortune">행복이 담긴 달걀</string>
     <string name="raid_buff_gallants_blessing">Gallant's Blessing</string>
     <string name="raid_buff_allow_guild_buff">길드 버프（페르디타의 권능）를 완전한 버프로 인정</string>
-    <string name="raid_buff_guild_buff">Guild Buff</string>
-    <string name="raid_buff_guild_buff_covers_all">None — Guild Buff covers all requirements</string>
+    <string name="raid_buff_guild_buff">길드 버프</string>
+    <string name="raid_buff_guild_buff_covers_all">없음 — 길드 버프로 모든 조건 충족</string>
     <string name="raid_copy_not_buffed">버프 없음 복사</string>
     <string name="raid_copy_not_buffed_title">버프 없음</string>
     <string name="raid_copy_buffed">버프 있음 복사</string>
@@ -785,7 +716,7 @@
     <string name="raid_pirate_faction">해적 (%d)</string>
     <string name="raid_close">닫기</string>
     <string name="raid_nearby_disclaimer">근처에서 전투 이벤트를 생성한 플레이어만 표시합니다. 은신한 플레이어는 감지하지 못합니다.</string>
-    <string name="raid_nearby_require_pvp">참여 요구 (25k 피해, 25k 힐 또는 25+ CC)</string>
+    <string name="raid_nearby_require_pvp">참여 조건 (피해 25k, 치유 25k 또는 CC 25회 이상)</string>
     <string name="histogram_no_data">데이터 없음</string>
     <string name="histogram_unknown_label">알 수 없음</string>
     <string name="histogram_under_10k">&lt;10k</string>
@@ -793,8 +724,6 @@
     <string name="histogram_more_players">...외 %d명</string>
     <string name="nearby_avg_gs_format">평균 GS: %d (%d 추적됨)</string>
     <string name="app_already_running">Raid Framer가 이미 실행 중입니다.</string>
-
-    <!-- Seed Table Strings -->
     <string name="settings_seed_table_title">시드 테이블</string>
     <string name="settings_seed_table_description">시드 테이블을 내보내거나 가져와 다른 설치와 플레이어 데이터를 공유하세요. 이는 플레이어 진영 상태, 장비 점수, 클래스, 길드 이름을 미리 채워 정확도를 높이는 데 도움이 됩니다. 플레이어 이름은 개인 정보 보호를 위해 해시됩니다.</string>
     <string name="settings_seed_table_none">적용된 시드 테이블이 없습니다.</string>
@@ -810,8 +739,6 @@
     <string name="seed_table_apply_title">시드 테이블 적용</string>
     <string name="seed_table_file_not_found">지정된 시드 테이블 파일을 찾을 수 없습니다: %s</string>
     <string name="seed_table_applied_success">시드 테이블이 성공적으로 적용되었습니다!</string>
-
-    <!-- Skill Trees (alphabetical) -->
     <string name="skill_tree_archery">야성</string>
     <string name="skill_tree_auramancy">의지</string>
     <string name="skill_tree_battlerage">격투</string>
@@ -826,9 +753,7 @@
     <string name="skill_tree_swiftblade">암투</string>
     <string name="skill_tree_vitalism">사랑</string>
     <string name="skill_tree_witchcraft">환술</string>
-
-    <!-- Spec Types (alphabetical) -->
-    <string name="spec_type_abolisher">Abolisher 전사</string>
+    <string name="spec_type_abolisher">전사</string>
     <string name="spec_type_absolver">Absolver</string>
     <string name="spec_type_activist">Activist</string>
     <string name="spec_type_adept">Adept</string>
@@ -840,12 +765,12 @@
     <string name="spec_type_apostate">Apostate</string>
     <string name="spec_type_arachnomancer">Arachnomancer</string>
     <string name="spec_type_arcane_hunter">Arcane Hunter</string>
-    <string name="spec_type_arcanist">Arcanist 마법사</string>
+    <string name="spec_type_arcanist">마법사</string>
     <string name="spec_type_archon">Archon</string>
     <string name="spec_type_argent">Argent</string>
-    <string name="spec_type_assassin">Assassin 보호자</string>
+    <string name="spec_type_assassin">보호자</string>
     <string name="spec_type_astral_ranger">Astral Ranger</string>
-    <string name="spec_type_athame">Athame 조율사</string>
+    <string name="spec_type_athame">조율사</string>
     <string name="spec_type_augmentor">Augmentor</string>
     <string name="spec_type_augurer">Augurer</string>
     <string name="spec_type_avatar">Avatar</string>
@@ -854,13 +779,13 @@
     <string name="spec_type_banshee">Banshee</string>
     <string name="spec_type_barrelace">Barrelace</string>
     <string name="spec_type_barricade">Barricade</string>
-    <string name="spec_type_bastion">Bastion 감시원</string>
+    <string name="spec_type_bastion">감시원</string>
     <string name="spec_type_battlemage">Battlemage</string>
     <string name="spec_type_battlepriest">Battlepriest</string>
     <string name="spec_type_beguiler">Beguiler</string>
     <string name="spec_type_beguiling_dancer">Beguiling Dancer</string>
     <string name="spec_type_blackguard">Blackguard</string>
-    <string name="spec_type_blade_dancer">Blade Dancer 검의 춤꾼</string>
+    <string name="spec_type_blade_dancer">검의 춤꾼</string>
     <string name="spec_type_bladechanter">Bladechanter</string>
     <string name="spec_type_blademage">Blademage</string>
     <string name="spec_type_bladespell">Bladespell</string>
@@ -889,7 +814,7 @@
     <string name="spec_type_clairvoyer">Clairvoyer</string>
     <string name="spec_type_cleric">Cleric</string>
     <string name="spec_type_comedian">Comedian 환사철</string>
-    <string name="spec_type_confessor">Confessor 악사</string>
+    <string name="spec_type_confessor">악사</string>
     <string name="spec_type_confutator">Confutator</string>
     <string name="spec_type_conjuror">Conjuror</string>
     <string name="spec_type_corruptor">Corruptor</string>
@@ -910,7 +835,7 @@
     <string name="spec_type_darkness_resolver">Darkness Resolver</string>
     <string name="spec_type_darkness_revolutionist">Darkness Revolutionist</string>
     <string name="spec_type_darkness_savior">Darkness Savior</string>
-    <string name="spec_type_darkrunner">Darkrunner 첩자</string>
+    <string name="spec_type_darkrunner">첩자</string>
     <string name="spec_type_darkseer">Darkseer</string>
     <string name="spec_type_dawncaller">Dawncaller</string>
     <string name="spec_type_death_prophet">Death Prophet</string>
@@ -943,7 +868,7 @@
     <string name="spec_type_dreadnaught">Dreadnaught</string>
     <string name="spec_type_dreadrunner">Dreadrunner</string>
     <string name="spec_type_dreadstone">Dreadstone</string>
-    <string name="spec_type_dreambreaker">Dreambreaker 교란꾼</string>
+    <string name="spec_type_dreambreaker">교란꾼</string>
     <string name="spec_type_dreamspinner">Dreamspinner</string>
     <string name="spec_type_druid">Druid</string>
     <string name="spec_type_dusk_dancer">Dusk Dancer</string>
@@ -951,14 +876,14 @@
     <string name="spec_type_duskraider">Duskraider</string>
     <string name="spec_type_earthsinger">Earthsinger</string>
     <string name="spec_type_ebonshield">Ebonshield</string>
-    <string name="spec_type_ebonsong">Ebonsong 그림자춤꾼</string>
+    <string name="spec_type_ebonsong">그림자 춤꾼</string>
     <string name="spec_type_edgeripper">Edgeripper</string>
     <string name="spec_type_edgewalker">Edgewalker</string>
     <string name="spec_type_eidolon">Eidolon</string>
     <string name="spec_type_emissary">Emissary</string>
     <string name="spec_type_enchantrix">Enchantrix</string>
     <string name="spec_type_enforcer">Enforcer</string>
-    <string name="spec_type_enigmatist">Enigmatist 유령용사</string>
+    <string name="spec_type_enigmatist">유령 용사</string>
     <string name="spec_type_equalizer">Equalizer</string>
     <string name="spec_type_evangelist">Evangelist</string>
     <string name="spec_type_eviscerator">Eviscerator</string>
@@ -1003,7 +928,7 @@
     <string name="spec_type_heartsbane">Heartsbane</string>
     <string name="spec_type_hellshield">Hellshield</string>
     <string name="spec_type_hellweaver">Hellweaver</string>
-    <string name="spec_type_herald">Herald 수호자</string>
+    <string name="spec_type_herald">수호자</string>
     <string name="spec_type_hereafter_artist">Hereafter Artist</string>
     <string name="spec_type_hereafter_avenger">Hereafter Avenger</string>
     <string name="spec_type_hereafter_controller">Hereafter Controller</string>
@@ -1012,8 +937,8 @@
     <string name="spec_type_hereafter_revolutionist">Hereafter Revolutionist</string>
     <string name="spec_type_hereafter_savior">Hereafter Savior</string>
     <string name="spec_type_hex_ranger">Hex Ranger</string>
-    <string name="spec_type_hex_warden">hex warden 선인</string>
-    <string name="spec_type_hexblade">Hexblade 정파자</string>
+    <string name="spec_type_hex_warden">선인</string>
+    <string name="spec_type_hexblade">정신 파괴자</string>
     <string name="spec_type_hexbolt">Hexbolt</string>
     <string name="spec_type_hexdancer">Hexdancer</string>
     <string name="spec_type_hexsniper">Hexsniper 광환의</string>
@@ -1046,7 +971,7 @@
     <string name="spec_type_immortalist">Immortalist</string>
     <string name="spec_type_incantator">Incantator</string>
     <string name="spec_type_infiltrator">Infiltrator</string>
-    <string name="spec_type_inquisitor">Inquisitor</string>
+    <string name="spec_type_inquisitor">심문관</string>
     <string name="spec_type_instigator">Instigator 증낭의</string>
     <string name="spec_type_invader">Invader</string>
     <string name="spec_type_invoker">Invoker</string>
@@ -1140,7 +1065,7 @@
     <string name="spec_type_skullknight">Skullknight</string>
     <string name="spec_type_song_controller">Song Controller</string>
     <string name="spec_type_song_fanatic">Song Fanatic</string>
-    <string name="spec_type_soothsayer">Soothsayer</string>
+    <string name="spec_type_soothsayer">예언가</string>
     <string name="spec_type_sorrowsong">Sorrowsong</string>
     <string name="spec_type_soulbow">Soulbow</string>
     <string name="spec_type_soulleech">Soulleech</string>
@@ -1172,7 +1097,7 @@
     <string name="spec_type_tragedy_dancer">Tragedy Dancer</string>
     <string name="spec_type_trickster">Trickster</string>
     <string name="spec_type_twistedshot">Twistedshot</string>
-    <string name="spec_type_unknown">Unknown</string>
+    <string name="spec_type_unknown">알 수 없음</string>
     <string name="spec_type_vanguard">Vanguard</string>
     <string name="spec_type_venombite">Venombite</string>
     <string name="spec_type_vicious_choreographer">Vicious Choreographer</string>
@@ -1193,22 +1118,18 @@
     <string name="spec_type_wrathslayer">Wrathslayer</string>
     <string name="spec_type_zealot">Zealot</string>
     <string name="spec_type_zephyr">Zephyr</string>
-
-    <!-- Glider Names -->
-    <string name="glider_name_twt">Furious Titan's Wings</string>
-    <string name="glider_name_moonshadow">Moonshadow Glider</string>
-    <string name="glider_name_crystal_wings">Crystal Wings</string>
-    <string name="glider_name_bd_glider">Legendary Dragon Wings</string>
-    <string name="glider_name_rocket_wings">Rocket Wings</string>
-    <string name="glider_name_ravenspine">Ravenspine Wings</string>
-    <string name="glider_name_feathered_dragon">Feathered Dragon Glider</string>
-    <string name="glider_name_sky_emperor">Sky Emperor</string>
-
-    <!-- Player Inventory -->
-    <string name="player_inventory_title">Player Inventory</string>
-    <string name="player_inventory_last_used">Last Used: %1$s</string>
-    <string name="player_inventory_uses">%1$d uses</string>
-    <string name="player_inventory_never">Never</string>
+    <string name="glider_name_twt">삼족오 날틀</string>
+    <string name="glider_name_moonshadow">달빛 그림자 날틀</string>
+    <string name="glider_name_crystal_wings">에크로아의 날개</string>
+    <string name="glider_name_bd_glider">전설의 용날개</string>
+    <string name="glider_name_rocket_wings">제트붐</string>
+    <string name="glider_name_ravenspine">비탈리스의 날개</string>
+    <string name="glider_name_feathered_dragon">용오름 날틀</string>
+    <string name="glider_name_sky_emperor">하늘의 제왕</string>
+    <string name="player_inventory_title">플레이어 보유 아이템</string>
+    <string name="player_inventory_last_used">마지막 사용: %1$s</string>
+    <string name="player_inventory_uses">%1$d회 사용</string>
+    <string name="player_inventory_never">사용 기록 없음</string>
     <string name="time_ago_just_now">방금</string>
     <string name="time_ago_minutes_one">%1$d분 전</string>
     <string name="time_ago_minutes_other">%1$d분 전</string>
@@ -1220,9 +1141,7 @@
     <string name="time_ago_weeks_other">%1$d주 전</string>
     <string name="time_ago_months_one">%1$d개월 전</string>
     <string name="time_ago_months_other">%1$d개월 전</string>
-    <string name="player_inventory_controls_hint">Controls the session totals below</string>
-
-    <!-- Export Progress -->
+    <string name="player_inventory_controls_hint">아래에 표시되는 세션 합계에 영향을 줍니다</string>
     <string name="settings_export_png">세션 요약을 PNG로 내보내기</string>
     <string name="settings_export_languages_label">PNG 내보내기 언어</string>
     <string name="settings_export_languages_description">현재 언어는 항상 내보냅니다. 추가 PNG 파일을 만들 언어를 선택하세요.</string>
@@ -1230,12 +1149,8 @@
     <string name="settings_export_language_current">현재 언어</string>
     <string name="combat_export_saving_session">세션 저장 중 %1$d/%2$d</string>
     <string name="combat_export_saving_language">%1$s 내보내기 저장 중 %2$d/%3$d</string>
-
-    <!-- RAM Usage -->
     <string name="settings_ram_usage_title">RAM 사용량</string>
     <string name="settings_ram_usage_description">실시간 JVM 힙 메모리 사용량 그래프.</string>
-
-    <!-- Performance Settings -->
     <string name="settings_performance_title">성능</string>
     <string name="settings_performance_description">대규모 전투에서 FPS를 향상시키기 위해 활성화된 기능을 제어합니다. 기능을 비활성화하면 전투 이벤트당 처리되는 데이터량이 줄어듭니다.</string>
     <string name="settings_performance_tip_label">팁:</string>
@@ -1261,10 +1176,10 @@
     <string name="settings_performance_event_history_depth">이벤트 기록 깊이</string>
     <string name="settings_performance_event_history_depth_desc">이벤트 타임라인을 위한 플레이어 카드당 최대 저장 이벤트 수. 낮은 값은 적은 메모리를 사용합니다.</string>
     <string name="settings_performance_event_history_estimate">~%1$s 플레이어당 이벤트 \u00D7 %2$d 추적됨 \u2248 ~%3$s 합계</string>
-    <string name="settings_performance_battle_graph_spell_depth">Battle Graph Spell Depth</string>
-    <string name="settings_performance_battle_graph_spell_depth_desc">Maximum targets tracked per player for spell breakdowns in the battle graph. Lower values use significantly less memory.</string>
+    <string name="settings_performance_battle_graph_spell_depth">전투 그래프 기술 분석 대상 수</string>
+    <string name="settings_performance_battle_graph_spell_depth_desc">전투 그래프에서 플레이어별 기술 사용 내역을 분석할 최대 대상 수입니다. 값을 낮추면 메모리 사용량이 크게 줄어듭니다.</string>
     <string name="settings_performance_battle_graph_estimate">~%1$d targets × 10 spells × 9 maps × %2$d players ≈ ~%3$s for spell breakdowns</string>
-    <string name="settings_performance_app_memory">App Memory: ~%1$dMB</string>
+    <string name="settings_performance_app_memory">앱 메모리: 약 %1$dMB</string>
     <string name="settings_performance_distance_help">? 거리</string>
     <string name="settings_performance_impact_label">영향:</string>
     <string name="combat_ranking_disabled">이 순위는 비활성화되었습니다</string>
@@ -1276,10 +1191,8 @@
     <string name="performance_buff_debuff_tracking_disabled_banner">버프 및 디버프 추적이 성능 설정에서 비활성화되었습니다. 버프, 디버프, 매혹, 침묵, 강위축 및 노래 순위가 업데이트되지 않습니다.</string>
     <string name="performance_distance_help_title">거리 및 정보 필터링</string>
     <string name="performance_distance_help_body">인게임 전투 설정(ESC \u2192 옵션 \u2192 게임 정보)은 애드온으로 흐르는 데이터를 제어합니다.\n\n\u201C전투 메시지 표시\u201D 체크박스: 게임에서 피해/치유 히트스플랫의 시각적 표시를 전환하지만, 애드온으로의 데이터 흐름에는 영향을 미치지 않습니다. 켜거나 끌 수 있습니다.\n\n정보 필터(SELF / PARTY / RAID / GUILD / ALL): 이것이 데이터 흐름에 영향을 미칩니다. 필터를 변경하면 애드온이 받는 전투 이벤트가 제한됩니다.\n\n거리 슬라이더: 이것이 데이터 흐름에 영향을 미칩니다. 범위를 줄이면 전투 이벤트 감지 거리가 제한됩니다.\n\n예시:\n\u2022 SELF \u2014 본인 캐릭터의 이벤트만. 거리 슬라이더는 관련이 없어 자동으로 비활성화됩니다.\n\u2022 PARTY \u2014 5명 파티. ArcheAge에서는 공격대 열의 모든 사람이 \u201C파티\u201D로 간주됩니다. 예를 들어, \u201C모든 파티원에게서 부정적 효과를 제거\u201D하는 소닉 웨이브 같은 스킬은 전체 공격대가 아닌 5명 열에 영향을 미칩니다.\n\u2022 RAID \u2014 공격대의 모든 파티(모든 열).\n\u2022 GUILD \u2014 길드 태그가 일치하는 플레이어만. 두 번째 길드 태그는 기술적으로 다른 길드이므로 표시되지 않습니다.\n\n이 인게임 필터를 조정하는 것은 앱에서 기능을 비활성화하는 것보다 바람직할 수 있으며, 어떤 데이터가 처리되는지 더 세밀한 제어를 제공합니다.</string>
-
-    <!-- Tray Menu Labels -->
     <string name="tray_dragon_breaths">드래곤 브레스</string>
-    <string name="tray_raid_management">레이드 관리</string>
+    <string name="tray_raid_management">공격대 관리</string>
     <string name="tray_battle_summary">전투 요약</string>
     <string name="tray_battle_graph">전투 그래프</string>
     <string name="tray_new_session">새 세션</string>
@@ -1287,12 +1200,10 @@
     <string name="tray_abort_session">세션 중단</string>
     <string name="tray_lua_options">루아 옵션</string>
     <string name="tray_close">닫기</string>
-
-<!-- Raid Caller / Leader Overlay -->
     <string name="raid_caller_title">레이드 콜러</string>
     <string name="raid_caller_no_raid">레이드에 참여하면 콜러 통계를 볼 수 있습니다</string>
     <string name="raid_caller_position_hint">Shift+클릭+드래그로 위치 조정</string>
-    <string name="raid_caller_show_anyways">어쨌든 표시</string>
+    <string name="raid_caller_show_anyways">그래도 표시</string>
     <string name="raid_caller_avg_gs">평균 GS</string>
     <string name="raid_caller_lowest_gs">최저 GS</string>
     <string name="raid_caller_highest_gs">최고 GS</string>
@@ -1339,8 +1250,6 @@
     <string name="raid_caller_loot_threshold">전리품 임계값</string>
     <string name="raid_caller_buff_mode">버프 모드</string>
     <string name="raid_caller_buff_grace">버프 유예 기간</string>
-
-    <!-- Editable Meta Specs Editor (08/25/26) -->
     <string name="meta_specs_cc">CC</string>
     <string name="meta_specs_melee">근접</string>
     <string name="meta_specs_healer">힐러</string>
@@ -1365,8 +1274,6 @@
     <string name="settings_meta_specs_state">현재 메타 스펙 상태: %1$s</string>
     <string name="settings_meta_specs_description">구성, 레이드 콜러 및 기술 분석에서 메타로 취급할 스펙을 재정의합니다. 사용자 지정 스펙은 흰색 굵은 글씨로 표시됩니다.</string>
     <string name="meta_specs_edit_icon">메타 스펙 편집</string>
-
-    <!-- Pocket Journal -->
     <string name="pocket_journal_title">포켓 저널</string>
     <string name="pocket_journal_search_placeholder">제목 또는 태그 검색</string>
     <string name="pocket_journal_filter_by_day">날짜별 필터</string>
@@ -1379,8 +1286,6 @@
     <string name="pocket_journal_entry_title_format">저널 항목 %1$s</string>
     <string name="pocket_journal_created_format">생성됨 %1$s</string>
     <string name="pocket_journal_last_edited_format">마지막 편집 %1$s</string>
-
-    <!-- Pocket Editor -->
     <string name="pocket_editor_title">포켓 편집기</string>
     <string name="pocket_editor_tab_edit">편집</string>
     <string name="pocket_editor_tab_preview">미리 보기</string>
@@ -1403,30 +1308,22 @@
     <string name="pocket_editor_toolbar_raid">레이드</string>
     <string name="pocket_editor_event_search_hint">이벤트 검색…</string>
     <string name="pocket_attachment_content_desc">포켓 첨부 파일</string>
-
-    <!-- Pocket Thumbnail -->
     <string name="pocket_thumbnail_untitled">제목 없는 항목</string>
-
-    <!-- Pocket Capture Menus -->
     <string name="pocket_menu_save_to_pocket">포켓에 저장</string>
     <string name="pocket_menu_reference_in_pocket">포켓에서 참조</string>
     <string name="pocket_menu_export_png">PNG 내보내기</string>
     <string name="pocket_menu_copy_to_clipboard">클립보드에 복사</string>
-
-    <!-- Nearby Filter Controls -->
-    <string name="nearby_filter_seen_within">다음 시간 내 확인됨</string>
+    <string name="nearby_filter_seen_within">최근 확인 시간</string>
     <string name="nearby_filter_disabled">비활성화</string>
     <string name="nearby_filter_minutes_format">%1$s분</string>
     <string name="nearby_filter_participation">PvP 참여</string>
-    <string name="nearby_filter_behavior">플레이어 전용 행동</string>
+    <string name="nearby_filter_behavior">플레이어 행동만 표시</string>
     <string name="nearby_participation_disabled">비활성화</string>
     <string name="nearby_participation_25k">25k 피해/치유 또는 25 CC</string>
     <string name="nearby_participation_50k">50k 피해/치유 또는 50 CC</string>
     <string name="nearby_participation_100k">100k 피해/치유 또는 100 CC</string>
-     <string name="nearby_filter_in_raid_only">공격대원만 표시 (동일 세력)</string>
-     <string name="nearby_in_raid_only_indicator">(공격대원만)</string>
-
-    <!-- Screenshot Preview -->
+    <string name="nearby_filter_in_raid_only">공격대원만 표시 (동일 세력)</string>
+    <string name="nearby_in_raid_only_indicator">(공격대원만)</string>
     <string name="screenshot_preview_title">스크린샷 미리 보기</string>
     <string name="screenshot_copied_feedback">클립보드에 복사됨</string>
     <string name="screenshot_discard">버리기</string>
@@ -1436,8 +1333,6 @@
     <string name="screenshot_game_title">게임 스크린샷</string>
     <string name="screenshot_content_desc">스크린샷 미리 보기</string>
     <string name="screenshot_ctrl_c_hint">복사하려면 Ctrl+C</string>
-
-    <!-- Missing UI Strings -->
     <string name="settings_help_button">도움말 및 설치 가이드 열기</string>
     <string name="about_help_button">? 도움말</string>
     <string name="player_card_journal_entries">포켓 저널</string>
@@ -1450,7 +1345,6 @@
     <string name="tray_copy_screenshot_to_clipboard">스크린샷 클립보드에 복사</string>
     <string name="pocket_editor_toolbar_current_target">대상</string>
     <string name="pocket_editor_toolbar_target_guild">길드</string>
-    <!-- Player Browser -->
     <string name="player_browser_title">플레이어 브라우저 (누적 기록)</string>
     <string name="player_browser_search_placeholder">플레이어 또는 길드 검색...</string>
     <string name="player_browser_hint">플레이어별 누적 기록 — 세션별 통계는 세션 기록에서 내보내세요.</string>
@@ -1480,7 +1374,6 @@
     <string name="player_browser_desc">내림차순</string>
     <string name="player_browser_asc">오름차순</string>
     <string name="player_search_placeholder">플레이어 이름 입력...</string>
-    <!-- Session History -->
     <string name="session_history_title_format">세션 기록 — %1$s (%2$s)</string>
     <string name="session_history_filter_by_day">날짜별 필터</string>
     <string name="session_history_clear">지우기</string>
@@ -1519,12 +1412,55 @@
     <string name="session_history_top_dmg_format">최고 딜: %1$s (%2$s)</string>
     <string name="session_history_top_charms_format">최고 부적: %1$s (%2$s)</string>
     <string name="session_history_section_totals">세션 합계</string>
-    <!-- Settings -->
     <string name="settings_rendering_backend_title">렌더링 백엔드</string>
     <string name="settings_rendering_backend_description">Skiko 그래픽 백엔드를 선택하세요. 선택한 백엔드는 Raid Framer를 다시 시작하면 적용됩니다.</string>
     <string name="settings_rendering_backend_current_format">현재 백엔드: %1$s</string>
     <string name="settings_rendering_backend_label">백엔드</string>
     <string name="settings_ram_graph_jvm_heap">JVM 힙</string>
     <string name="settings_ram_graph_process_memory">프로세스 메모리</string>
+    <string name="player_card_stat_absorbs">피해 흡수</string>
+    <string name="player_card_stat_average_heal">평균 치유량</string>
+    <string name="player_card_stat_average_hit">평균 타격 피해</string>
+    <string name="player_card_stat_battle_hymn">구원의 노래</string>
+    <string name="player_card_stat_blocks">방패 막기</string>
+    <string name="player_card_stat_crit_heals">치명타 치유</string>
+    <string name="player_card_stat_critical_discord_aoe">칼의 화음 (광역)</string>
+    <string name="player_card_stat_critical_discord_non_aoe">칼의 화음 (일반)</string>
+    <string name="player_card_stat_crits">치명타</string>
+    <string name="player_card_stat_damage_blocked">막은 피해량</string>
+    <string name="player_card_stat_damage_parried">무기 막기로 방어한 피해량</string>
+    <string name="player_card_stat_dissonance_non_aoe">불협화음 (일반)</string>
+    <string name="player_card_stat_dissonance_quake">불협화음 (광역)</string>
+    <string name="player_card_stat_evades">회피</string>
+    <string name="player_card_stat_immunes">면역</string>
+    <string name="player_card_stat_max_heal">최대 치유량</string>
+    <string name="player_card_stat_max_hit">최대 타격 피해</string>
+    <string name="player_card_stat_misses">빗나감</string>
+    <string name="player_card_stat_ode_heals">치유의 무곡 치유량</string>
+    <string name="player_card_stat_parries">무기 막기</string>
+    <string name="player_card_stat_shackle">속박</string>
+    <string name="pocket_editor_title_format">%1$s의 메모 편집</string>
+    <string name="summary_tab_avoidance">회피/방어</string>
+    <string name="summary_tab_hit_quality_dps">피해 적중 분석</string>
+    <string name="summary_tab_hit_quality_healing">치유 적중 분석</string>
+    <string name="summary_tab_mitigation">피해 감소</string>
+    <string name="summary_tab_songs">노래</string>
+    <string name="summary_top_absorbs">피해 흡수 순위</string>
+    <string name="summary_top_average_heal">평균 치유량 순위</string>
+    <string name="summary_top_average_hit">평균 타격 피해 순위</string>
+    <string name="summary_top_battle_hymn">구원의 노래 순위</string>
+    <string name="summary_top_blocks">방패 막기 순위</string>
+    <string name="summary_top_crit_heals">치명타 치유 순위</string>
+    <string name="summary_top_critical_discord_aoe">칼의 화음 (광역) 순위</string>
+    <string name="summary_top_critical_discord_non_aoe">칼의 화음 (일반) 순위</string>
+    <string name="summary_top_crits">치명타 순위</string>
+    <string name="summary_top_dissonance_non_aoe">불협화음 (일반) 순위</string>
+    <string name="summary_top_dissonance_quake">불협화음 (광역) 순위</string>
+    <string name="summary_top_evades">회피 순위</string>
+    <string name="summary_top_immunes">면역 순위</string>
+    <string name="summary_top_max_heal">최대 치유량 순위</string>
+    <string name="summary_top_max_hit">최대 타격 피해 순위</string>
+    <string name="summary_top_misses">빗나감 순위</string>
+    <string name="summary_top_parries">무기 막기 순위</string>
+    <string name="summary_top_shackle">속박 순위</string>
 </resources>
-
