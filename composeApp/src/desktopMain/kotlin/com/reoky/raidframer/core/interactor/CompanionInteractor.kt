@@ -182,7 +182,7 @@ object CompanionInteractor : Interactor() {
               val playerName = payload.name
               if (playerName.isBlank() || playerName.contains(" ")) return
               // Filter out API error messages that leak through as guild names (e.g., "Error404 Family not found")
-              val guild = if (payload.familyName.isNotBlank() && !payload.familyName.startsWith("Error")) payload.familyName else ""
+              val guild = if (payload.expeditionName.isNotBlank() && !payload.expeditionName.startsWith("Error")) payload.expeditionName else ""
               PlayerCacheInteractor.stronglyAssertIsPlayer(
                 cid = null, // PlayerInfo doesn't carry CID
                 name = payload.name,
