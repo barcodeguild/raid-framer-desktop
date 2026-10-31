@@ -5,6 +5,7 @@ import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.BuffGainedEvent
 import com.reoky.raidframer.core.model.CastingEvent
 import com.reoky.raidframer.core.model.DamageEvent
+import com.reoky.raidframer.core.model.DebuffAppliedEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
 import com.reoky.raidframer.core.model.HealEvent
 import com.reoky.raidframer.core.model.CombatEventsHelper
@@ -19,6 +20,7 @@ import com.reoky.raidframer.core.serialization.CombatEventPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
 import com.reoky.raidframer.core.serialization.PlayerInfoPayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
+import com.reoky.raidframer.core.model.CombatEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -245,7 +247,7 @@ object CompanionInteractor : Interactor() {
               ).normalize<CastingEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} began casting ${combatEvent.spell} (id:${combatEvent.spellId}) on ${combatEvent.target} (${combatEvent.cid}).")
               ProtectiveWingsAttributorInteractor.onCast(combatEvent)
-              PlayerCacheInteractor.postEvent(combatEvent)
+              postEventOrIntercept(combatEvent)
             }
 
             is CombatEventPayload.SpellCastSuccessPayload -> {
@@ -257,7 +259,7 @@ object CompanionInteractor : Interactor() {
                 spell = event.spellName,
                 spellId = event.spellId
               ).normalize<SuccessfulCastEvent>()
-              PlayerCacheInteractor.postEvent(combatEvent)
+              postEventOrIntercept(combatEvent)
             }
 
             is CombatEventPayload.DamagePayload -> {
@@ -274,7 +276,7 @@ object CompanionInteractor : Interactor() {
               ).normalize<DamageEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} damaged ${combatEvent.target} (${combatEvent.cid}) for ${combatEvent.damage} using ${combatEvent.spell}.")
               AreaEffectAttributorInteractor.onDamageEvent(combatEvent)
-              PlayerCacheInteractor.postEvent(combatEvent)
+              postEventOrIntercept(combatEvent)
             }
 
             is CombatEventPayload.HealPayload -> {
@@ -289,7 +291,7 @@ object CompanionInteractor : Interactor() {
                 spellId = 0
               ).normalize<HealEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} healed ${combatEvent.target} (${combatEvent.cid}) for ${combatEvent.amount} using ${combatEvent.spell}.")
-              PlayerCacheInteractor.postEvent(combatEvent)
+              postEventOrIntercept(combatEvent)
             }
 
             is CombatEventPayload.BuffGainedPayload -> {
@@ -313,7 +315,12 @@ object CompanionInteractor : Interactor() {
                 if (AreaEffectAttributorInteractor.isAreaEffectAura(debuffEvent)) {
                   AreaEffectAttributorInteractor.onAuraEvent(debuffEvent)
                 } else {
-                  PlayerCacheInteractor.postEvent(debuffEvent)
+                  val patternKey = PatternAnalysisInteractor.findMatchingRegistration(debuffEvent)
+                  if (patternKey != null) {
+                    PatternAnalysisInteractor.queueEvent(patternKey, debuffEvent)
+                  } else {
+                    PlayerCacheInteractor.postEvent(debuffEvent)
+                  }
                 }
                 Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} applied debuff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target} with CID ${combatEvent.cid}.")
               } else {
@@ -322,7 +329,12 @@ object CompanionInteractor : Interactor() {
                 } else if (AreaEffectAttributorInteractor.isAreaEffectAura(combatEvent)) {
                   AreaEffectAttributorInteractor.onAuraEvent(combatEvent)
                 } else {
-                  PlayerCacheInteractor.postEvent(combatEvent)
+                  val patternKey = PatternAnalysisInteractor.findMatchingRegistration(combatEvent)
+                  if (patternKey != null) {
+                    PatternAnalysisInteractor.queueEvent(patternKey, combatEvent)
+                  } else {
+                    PlayerCacheInteractor.postEvent(combatEvent)
+                  }
                 }
                 Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} applied buff (${combatEvent.buff}:${combatEvent.buffId}) to ${combatEvent.target} with CID ${combatEvent.cid}.")
               }
@@ -336,7 +348,7 @@ object CompanionInteractor : Interactor() {
                 buff = event.buffName,
                 buffId = event.buffId
               ).normalize<BuffEndedEvent>()
-              PlayerCacheInteractor.postEvent(combatEvent)
+              postEventOrIntercept(combatEvent)
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target}'s (${combatEvent.cid}) (${combatEvent.buff}:${combatEvent.buffId}) de/buff applied by ${combatEvent.source} was removed.")
             }
             is CombatEventPayload.MeleeDamagePayload -> {
@@ -352,7 +364,7 @@ object CompanionInteractor : Interactor() {
                 absorbedAmount = 0,
               ).normalize<DamageEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.source} melee damaged ${combatEvent.target} for ${combatEvent.damage} damage.")
-              PlayerCacheInteractor.postEvent(combatEvent)
+              postEventOrIntercept(combatEvent)
             }
             is CombatEventPayload.MeleeMissedPayload -> {
               val combatEvent = MeleeMissedEvent(
@@ -364,7 +376,7 @@ object CompanionInteractor : Interactor() {
                 damageTaken = abs(event.amount),
               ).normalize<MeleeMissedEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s melee attack (${combatEvent.missResult}, took ${combatEvent.damageTaken}${CombatEventsHelper.mitigationLogInfo(combatEvent.missResult, combatEvent.damageTaken)}).")
-              PlayerCacheInteractor.postEvent(combatEvent)
+              postEventOrIntercept(combatEvent)
             }
             is CombatEventPayload.SpellMissedPayload -> {
               val combatEvent = SpellMissedEvent(
@@ -378,7 +390,7 @@ object CompanionInteractor : Interactor() {
                 damageTaken = abs(event.amount),
               ).normalize<SpellMissedEvent>()
               Log.info(TAG, "At ${event.timestamp} ${combatEvent.target} avoided ${combatEvent.source}'s ${event.spell} spell (${combatEvent.missResult}, took ${combatEvent.damageTaken}${CombatEventsHelper.mitigationLogInfo(combatEvent.missResult, combatEvent.damageTaken)}).")
-              PlayerCacheInteractor.postEvent(combatEvent)
+              postEventOrIntercept(combatEvent)
             }
             is CombatEventPayload.EnergizePayload -> {
               Log.info(TAG, "At ${event.timestamp} ${event.target} energized after a duel healing ${event.amount} health.")
@@ -399,7 +411,7 @@ object CompanionInteractor : Interactor() {
                 absorbedAmount = abs(event.absorbedAmount),
               ).normalize<DamageEvent>()
               Log.info(TAG, "At ${combatEvent.timestamp} ${combatEvent.target} suffered ${combatEvent.damage} damage to their ${event.pool} because of ${combatEvent.source}'s ${combatEvent.spell} spell.")
-              PlayerCacheInteractor.postEvent(combatEvent)
+              postEventOrIntercept(combatEvent)
             }
           }
         }
@@ -416,6 +428,20 @@ object CompanionInteractor : Interactor() {
       // Lua write and Kotlin read). Log at WARN level with a truncated snippet for debugging.
       val preview = rawJson.take(120)
       Log.warn(TAG, "Skipping incomplete IPC message ($preview…): ${e.message}")
+    }
+  }
+
+  /**
+   * Middleware: check if a combat event matches any registered pattern in PatternAnalysisInteractor.
+   * If it does, queue it for pattern analysis; otherwise post it directly to PlayerCacheInteractor.
+   * This allows patterns to intercept any type of combat event, not just debuffs.
+   */
+  private fun postEventOrIntercept(event: CombatEvent) {
+    val patternKey = PatternAnalysisInteractor.findMatchingRegistration(event)
+    if (patternKey != null) {
+      PatternAnalysisInteractor.queueEvent(patternKey, event)
+    } else {
+      PlayerCacheInteractor.postEvent(event)
     }
   }
 

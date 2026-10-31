@@ -30,6 +30,7 @@ import com.reoky.raidframer.core.interactor.PetAccumulatorInteractor
 import com.reoky.raidframer.core.interactor.ProtectiveWingsAttributorInteractor
 import com.reoky.raidframer.core.interactor.AreaEffectAttributorInteractor
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
+import com.reoky.raidframer.core.interactor.PatternAnalysisInteractor
 import com.reoky.raidframer.core.seedtable.SeedTableInteractor
 import com.reoky.raidframer.ui.OverlayContainer
 import com.reoky.raidframer.ui.OverlayType
@@ -111,6 +112,7 @@ fun main(args: Array<String>) {
     PetAccumulatorInteractor.start()
     AreaEffectAttributorInteractor.start(delay = 1000L)
     ProtectiveWingsAttributorInteractor.start()
+    PatternAnalysisInteractor.start(delay = 1000L)
     CombatLogInteractor.start(delay = 3000L)
     SeedTableInteractor.start(delay = 2000L)
     BattleGraphInteractor.start()
@@ -267,6 +269,7 @@ fun quit() {
   PlayerCacheInteractor.stop()
   GameMonitorInteractor.stop()
   DeathAccumulatorInteractor.stop()
+  PatternAnalysisInteractor.stop()
   CompanionInteractor.stop()
   InstallationInteractor.stop()
   CombatLogInteractor.stop()

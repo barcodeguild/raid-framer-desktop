@@ -82,11 +82,15 @@ val petrificationDebuffIds = listOf(24391, 23198, 27124, 23061)
 // ODE (Offensive Debuff Enhancement) stats — Songcraft triplet tracking (10/18/26)
 // AoE triplet: Dissonance Quake, Critical Discord AoE, Shackle
 val dissonanceQuakeDebuffIds = listOf(25670)
-val criticalDiscordAoEDebuffIds = listOf(21992)
+// Synthetic ID -10001 is assigned by PatternAnalysisDefinition when debuff 21992
+// is classified as AoE (multiple targets in the same time window). The real game ID 21992
+// is used for both AoE and non-AoE, so we intercept and reclassify before counting.
+// All synthetic IDs use negative numbers to avoid any collision with real game IDs.
+val criticalDiscordAoEDebuffIds = listOf(-10001)
 val shackleDebuffIds = listOf(206, 6946, 21159, 26963, 27219, 29302, 22511)
 // Non-AoE triplet: Dissonance (non-AoE), Critical Discord (non-AoE), Battle Hymn
 val dissonanceNonAoEDebuffIds = listOf(777, 26547, 25669, 26548)
-val criticalDiscordNonAoEDebuffIds = listOf(21992, 25061)
+val criticalDiscordNonAoEDebuffIds = listOf(21992, 24061)
 val battleHymnBuffIds = listOf(6851)
 
 /**
