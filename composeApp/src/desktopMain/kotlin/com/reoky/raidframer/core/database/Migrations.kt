@@ -842,3 +842,50 @@ val MIGRATION_54_55 = object : Migration(54, 55) {
       .use { it.step() }
   }
 }
+
+// Added Stillness tracking, kill damage tracking, and Sacred Dance placeholder (11/03/26)
+val MIGRATION_55_56 = object : Migration(55, 56) {
+  override fun migrate(connection: SQLiteConnection) {
+    // player_cache: Stillness lifetime stats (new embedded group PlayerCacheLifetimeStillness)
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeStillnessCleanses INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeStillnessDispels INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeStillnessCharmsCleansed INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeStillnessMostAffectedEnemies INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeStillnessAverageAffectedEnemies INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeStillnessLeastAffectedEnemies INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeSacDanceLivesSaved INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    // player_cache: Kill damage lifetime stats (added to PlayerCacheLifetimeCombat)
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeDamageTowardsKillsMD INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_cache ADD COLUMN lifetimeDamageTowardsKillsKB INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    // player_session_totals: Stillness session totals
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStillnessCleanses INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStillnessDispels INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStillnessCharmsCleansed INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStillnessMostAffectedEnemies INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStillnessAverageAffectedEnemies INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalStillnessLeastAffectedEnemies INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    // player_session_totals: Kill damage session totals
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDamageTowardsKillsMD INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalDamageTowardsKillsKB INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+    // player_session_totals: Sacred Dance placeholder
+    connection.prepare("ALTER TABLE player_session_totals ADD COLUMN totalSacDanceLivesSaved INTEGER NOT NULL DEFAULT 0")
+      .use { it.step() }
+  }
+}

@@ -117,6 +117,15 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_shackle
 import raid_framer_desktop.composeapp.generated.resources.summary_top_dissonance_non_aoe
 import raid_framer_desktop.composeapp.generated.resources.summary_top_critical_discord_non_aoe
 import raid_framer_desktop.composeapp.generated.resources.summary_top_battle_hymn
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_cleanses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_dispels
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_charms_cleansed
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_most_affected
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_avg_affected
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_least_affected
+import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_towards_kills_md
+import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_towards_kills_kb
+import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dance_lives_saved
 import raid_framer_desktop.composeapp.generated.resources.summary_top_buffs
 import raid_framer_desktop.composeapp.generated.resources.summary_top_loot_peak
 import raid_framer_desktop.composeapp.generated.resources.summary_worst_loot_peak
@@ -178,6 +187,8 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_songs
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_coherence
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_hit_quality_dps
 import raid_framer_desktop.composeapp.generated.resources.summary_tab_hit_quality_healing
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_stillness
+import raid_framer_desktop.composeapp.generated.resources.summary_tab_kill_damage
 import raid_framer_desktop.composeapp.generated.resources.summary_top_crit_heals
 import raid_framer_desktop.composeapp.generated.resources.summary_top_max_heal
 import raid_framer_desktop.composeapp.generated.resources.summary_top_average_heal
@@ -277,6 +288,15 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val topDissonanceNonAoE by PlayerCacheInteractor.topDissonanceNonAoE.collectAsState()
   val topCriticalDiscordNonAoE by PlayerCacheInteractor.topCriticalDiscordNonAoE.collectAsState()
   val topBattleHymn by PlayerCacheInteractor.topBattleHymn.collectAsState()
+  val topStillnessCleanses by PlayerCacheInteractor.topStillnessCleanses.collectAsState()
+  val topStillnessDispels by PlayerCacheInteractor.topStillnessDispels.collectAsState()
+  val topStillnessCharmsCleansed by PlayerCacheInteractor.topStillnessCharmsCleansed.collectAsState()
+  val topStillnessMostAffected by PlayerCacheInteractor.topStillnessMostAffected.collectAsState()
+  val topStillnessAverageAffected by PlayerCacheInteractor.topStillnessAverageAffected.collectAsState()
+  val topStillnessLeastAffected by PlayerCacheInteractor.topStillnessLeastAffected.collectAsState()
+  val topDamageTowardsKillsMD by PlayerCacheInteractor.topDamageTowardsKillsMD.collectAsState()
+  val topDamageTowardsKillsKB by PlayerCacheInteractor.topDamageTowardsKillsKB.collectAsState()
+  val topSacDanceLivesSaved by PlayerCacheInteractor.topSacDanceLivesSaved.collectAsState()
   val topMistSunder by PlayerCacheInteractor.topMistSunder.collectAsState()
   val topRegularSunder by PlayerCacheInteractor.topRegularSunder.collectAsState()
   val topImpaleImmunity by PlayerCacheInteractor.topImpaleImmunity.collectAsState()
@@ -366,7 +386,9 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
     stringResource(Res.string.summary_tab_loot),
     stringResource(Res.string.summary_tab_coherence),
     stringResource(Res.string.summary_tab_hit_quality_dps),
-    stringResource(Res.string.summary_tab_hit_quality_healing)
+    stringResource(Res.string.summary_tab_hit_quality_healing),
+    stringResource(Res.string.summary_tab_stillness),
+    stringResource(Res.string.summary_tab_kill_damage)
   )
 
   val scope = rememberCoroutineScope()
@@ -702,6 +724,23 @@ fun SummaryOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
           topCritHeals = topCritHeals,
           topMaxHeals = topMaxHeals,
           topAverageHeals = topAverageHeals,
+          wm = wm
+        )
+
+        29 -> StillnessTab(
+          topStillnessCleanses = topStillnessCleanses,
+          topStillnessDispels = topStillnessDispels,
+          topStillnessCharmsCleansed = topStillnessCharmsCleansed,
+          topStillnessMostAffected = topStillnessMostAffected,
+          topStillnessAverageAffected = topStillnessAverageAffected,
+          topStillnessLeastAffected = topStillnessLeastAffected,
+          wm = wm
+        )
+
+        30 -> KillDamageTab(
+          topDamageTowardsKillsMD = topDamageTowardsKillsMD,
+          topDamageTowardsKillsKB = topDamageTowardsKillsKB,
+          topSacDanceLivesSaved = topSacDanceLivesSaved,
           wm = wm
         )
       }
@@ -1351,6 +1390,127 @@ private fun SongsTab(
       ) { card ->
         togglePlayerCard(wm, card.name)
       }
+    }
+  }
+}
+
+@Composable
+private fun StillnessTab(
+  topStillnessCleanses: List<PlayerCard>,
+  topStillnessDispels: List<PlayerCard>,
+  topStillnessCharmsCleansed: List<PlayerCard>,
+  topStillnessMostAffected: List<PlayerCard>,
+  topStillnessAverageAffected: List<PlayerCard>,
+  topStillnessLeastAffected: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Column(modifier = Modifier.fillMaxSize()) {
+    // Row 1: Cleanses, Dispels, Charms Cleansed
+    Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+      StatColumn(
+        icon = "\uD83D\uDC9A",
+        title = stringResource(Res.string.summary_top_stillness_cleanses),
+        cards = topStillnessCleanses,
+        valueExtractor = { it.sessionStillnessCleanses.toString() },
+        valueColor = RFColors.stillnessCleanses,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uD83D\uDCA5",
+        title = stringResource(Res.string.summary_top_stillness_dispels),
+        cards = topStillnessDispels,
+        valueExtractor = { it.sessionStillnessDispels.toString() },
+        valueColor = RFColors.stillnessDispels,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uD83D\uDC82",
+        title = stringResource(Res.string.summary_top_stillness_charms_cleansed),
+        cards = topStillnessCharmsCleansed,
+        valueExtractor = { it.sessionStillnessCharmsCleansed.toString() },
+        valueColor = RFColors.stillnessCharmsCleansed,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+    }
+    // Row 2: Most Affected, Average Affected, Least Affected
+    Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+      StatColumn(
+        icon = "\uD83C\uDF8A",
+        title = stringResource(Res.string.summary_top_stillness_most_affected),
+        cards = topStillnessMostAffected,
+        valueExtractor = { it.sessionStillnessMostAffectedEnemies.toString() },
+        valueColor = RFColors.stillnessMostAffected,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uD83D\uDCC8",
+        title = stringResource(Res.string.summary_top_stillness_avg_affected),
+        cards = topStillnessAverageAffected,
+        valueExtractor = { it.sessionStillnessAverageAffectedEnemies.toString() },
+        valueColor = RFColors.stillnessAvgAffected,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+      StatColumn(
+        icon = "\uD83D\uDCC9",
+        title = stringResource(Res.string.summary_top_stillness_least_affected),
+        cards = topStillnessLeastAffected,
+        valueExtractor = { it.sessionStillnessLeastAffectedEnemies.toString() },
+        valueColor = RFColors.stillnessLeastAffected,
+        modifier = Modifier.weight(1f)
+      ) { card ->
+        togglePlayerCard(wm, card.name)
+      }
+    }
+  }
+}
+
+@Composable
+private fun KillDamageTab(
+  topDamageTowardsKillsMD: List<PlayerCard>,
+  topDamageTowardsKillsKB: List<PlayerCard>,
+  topSacDanceLivesSaved: List<PlayerCard>,
+  wm: WindowManager?
+) {
+  Row(modifier = Modifier.fillMaxSize()) {
+    StatColumn(
+      icon = "\u2694",
+      title = stringResource(Res.string.summary_top_damage_towards_kills_md),
+      cards = topDamageTowardsKillsMD,
+      valueExtractor = { it.sessionDamageTowardsKillsMD.humanReadableAbbreviation() },
+      valueColor = RFColors.damageTowardsKillsMD,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+    StatColumn(
+      icon = "\uD83D\uDCA5",
+      title = stringResource(Res.string.summary_top_damage_towards_kills_kb),
+      cards = topDamageTowardsKillsKB,
+      valueExtractor = { it.sessionDamageTowardsKillsKB.humanReadableAbbreviation() },
+      valueColor = RFColors.damageTowardsKillsKB,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
+    }
+    StatColumn(
+      icon = "\uD83D\uDC83",
+      title = stringResource(Res.string.summary_top_sac_dance_lives_saved),
+      cards = topSacDanceLivesSaved,
+      valueExtractor = { it.sessionSacDanceLivesSaved.toString() },
+      valueColor = RFColors.sacDanceLivesSaved,
+      modifier = Modifier.weight(1f)
+    ) { card ->
+      togglePlayerCard(wm, card.name)
     }
   }
 }

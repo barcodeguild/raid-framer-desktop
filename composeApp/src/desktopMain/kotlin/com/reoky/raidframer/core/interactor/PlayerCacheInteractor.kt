@@ -822,6 +822,15 @@ object PlayerCacheInteractor : Interactor() {
            ,totalDissonanceNonAoE = card.sessionDissonanceNonAoETotal
            ,totalCriticalDiscordNonAoE = card.sessionCriticalDiscordNonAoETotal
            ,totalBattleHymn = card.sessionBattleHymnTotal
+           ,totalStillnessCleanses = card.sessionStillnessCleanses
+           ,totalStillnessDispels = card.sessionStillnessDispels
+           ,totalStillnessCharmsCleansed = card.sessionStillnessCharmsCleansed
+           ,totalStillnessMostAffectedEnemies = card.sessionStillnessMostAffectedEnemies
+           ,totalStillnessAverageAffectedEnemies = card.sessionStillnessAverageAffectedEnemies
+           ,totalStillnessLeastAffectedEnemies = card.sessionStillnessLeastAffectedEnemies
+           ,totalDamageTowardsKillsMD = card.sessionDamageTowardsKillsMD
+           ,totalDamageTowardsKillsKB = card.sessionDamageTowardsKillsKB
+           ,totalSacDanceLivesSaved = card.sessionSacDanceLivesSaved
            ,totalThrowDagger = card.sessionThrowDaggerTotal
            ,totalStuns = card.sessionStunsTotal
            ,totalStaggers = card.sessionStaggersTotal
@@ -1243,6 +1252,57 @@ object PlayerCacheInteractor : Interactor() {
     // basically whitelisting event types to put in the final rf report for now
     if (shouldRecordEvent(event)) {
       CombatLogInteractor.recordEvent(event)
+    }
+  }
+
+  // --- Stillness helper methods (11/03/26) ---
+  // Called from PatternAnalysisDefinition correlators to update Stillness counters.
+
+  fun postStillnessCleansed(caster: String, count: Int) {
+    if (count <= 0) return
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(playerName = caster)
+        cards[caster]?.let { card ->
+          cards[caster] = card.postStillnessCleansed(count)
+        }
+      }
+    }
+  }
+
+  fun postStillnessDispelled(caster: String, count: Int) {
+    if (count <= 0) return
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(playerName = caster)
+        cards[caster]?.let { card ->
+          cards[caster] = card.postStillnessDispelled(count)
+        }
+      }
+    }
+  }
+
+  fun postStillnessCharmsCleansed(caster: String, count: Int) {
+    if (count <= 0) return
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(playerName = caster)
+        cards[caster]?.let { card ->
+          cards[caster] = card.postStillnessCharmsCleansed(count)
+        }
+      }
+    }
+  }
+
+  fun postStillnessAffectedEnemies(caster: String, targetCount: Int) {
+    if (targetCount <= 0) return
+    scope.launch {
+      mutex.withLock {
+        createCardIfNoneExists(playerName = caster)
+        cards[caster]?.let { card ->
+          cards[caster] = card.postStillnessAffectedEnemies(targetCount)
+        }
+      }
     }
   }
 
@@ -1747,21 +1807,31 @@ object PlayerCacheInteractor : Interactor() {
           // 2. Update Killer (Most Damage method)
           attribution.killerMostDamage?.let { killerName ->
             cards[killerName]?.let { killer ->
-              cards[killerName] = killer.postKillEvent(
+              var updatedKiller = killer.postKillEvent(
                 timestamp = attribution.timestamp,
                 victimName = attribution.victimName,
                 preDeathSpells = attribution.killerMostDamageSpells
               )
+              // Credit damage towards kill (Most Damage method)
+              if (attribution.killerMostDamageAmount > 0L) {
+                updatedKiller = updatedKiller.postDamageTowardsKillMD(attribution.killerMostDamageAmount)
+              }
+              cards[killerName] = updatedKiller
             }
           }
 
           // 3. Update Killer (Killing Blow method)
           attribution.killerKillingBlow?.let { killerName ->
             cards[killerName]?.let { killer ->
-              cards[killerName] = killer.postKillEventKB(
+              var updatedKiller = killer.postKillEventKB(
                 timestamp = attribution.timestamp,
                 victimName = attribution.victimName
               )
+              // Credit damage towards kill (Killing Blow method)
+              if (attribution.killerKillingBlowDamage > 0L) {
+                updatedKiller = updatedKiller.postDamageTowardsKillKB(attribution.killerKillingBlowDamage)
+              }
+              cards[killerName] = updatedKiller
             }
           }
         }
@@ -1959,6 +2029,73 @@ object PlayerCacheInteractor : Interactor() {
   val topBattleHymn: StateFlow<List<PlayerCard>> = cardSnapshots
     .map { cards ->
       cards.filter { it.isRealPlayer && it.sessionBattleHymnTotal > 0 }.sortedByDescending { it.sessionBattleHymnTotal }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  // Stillness tracking StateFlows (11/03/26)
+  val topStillnessCleanses: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionStillnessCleanses > 0 }.sortedByDescending { it.sessionStillnessCleanses }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topStillnessDispels: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionStillnessDispels > 0 }.sortedByDescending { it.sessionStillnessDispels }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topStillnessCharmsCleansed: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionStillnessCharmsCleansed > 0 }.sortedByDescending { it.sessionStillnessCharmsCleansed }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topStillnessMostAffected: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionStillnessMostAffectedEnemies > 0 }.sortedByDescending { it.sessionStillnessMostAffectedEnemies }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topStillnessAverageAffected: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionStillnessAverageAffectedEnemies > 0 }.sortedByDescending { it.sessionStillnessAverageAffectedEnemies }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topStillnessLeastAffected: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionStillnessLeastAffectedEnemies > 0 }.sortedByDescending { it.sessionStillnessLeastAffectedEnemies }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+  // Kill damage tracking StateFlows (11/03/26)
+  val topDamageTowardsKillsMD: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionDamageTowardsKillsMD > 0L }.sortedByDescending { it.sessionDamageTowardsKillsMD }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topDamageTowardsKillsKB: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionDamageTowardsKillsKB > 0L }.sortedByDescending { it.sessionDamageTowardsKillsKB }
+        .take(100)
+    }
+    .distinctUntilChanged()
+    .stateIn(scope, SharingStarted.Eagerly, emptyList())
+  val topSacDanceLivesSaved: StateFlow<List<PlayerCard>> = cardSnapshots
+    .map { cards ->
+      cards.filter { it.isRealPlayer && it.sessionSacDanceLivesSaved > 0 }.sortedByDescending { it.sessionSacDanceLivesSaved }
         .take(100)
     }
     .distinctUntilChanged()

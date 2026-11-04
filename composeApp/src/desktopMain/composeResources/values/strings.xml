@@ -435,6 +435,8 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="summary_top_coherence_raid">Coherence (Raid &lt;60m)</string>
     <string name="summary_tab_hit_quality_dps">Hit Quality (DPS)</string>
     <string name="summary_tab_hit_quality_healing">Hit Quality (Healing)</string>
+    <string name="summary_tab_stillness">Stillness</string>
+    <string name="summary_tab_kill_damage">Kill Damage</string>
     <string name="summary_top_crits">Top Crits</string>
     <string name="summary_top_max_hit">Max Hit</string>
     <string name="summary_top_average_hit">Average Hit</string>
@@ -537,6 +539,15 @@ To reduce bias, the recorder must try to stay in range of the raid at all times.
     <string name="summary_top_dissonance_non_aoe">Top Dissonance</string>
     <string name="summary_top_critical_discord_non_aoe">Top Critical Discord</string>
     <string name="summary_top_battle_hymn">Top Battle Hymn</string>
+    <string name="summary_top_stillness_cleanses">Top Stillness Cleanses</string>
+    <string name="summary_top_stillness_dispels">Top Stillness Dispels</string>
+    <string name="summary_top_stillness_charms_cleansed">Top Charms Cleansed</string>
+    <string name="summary_top_stillness_most_affected">Top Stillness Most Hit</string>
+    <string name="summary_top_stillness_avg_affected">Top Stillness Avg Hit</string>
+    <string name="summary_top_stillness_least_affected">Top Stillness Least Hit</string>
+    <string name="summary_top_damage_towards_kills_md">Top Kill Damage (MD)</string>
+    <string name="summary_top_damage_towards_kills_kb">Top Kill Damage (KB)</string>
+    <string name="summary_top_sac_dance_lives_saved">Top Sacrifice Dance Saves</string>
     <string name="summary_top_mist_sunder">Top Mist Sunder</string>
     <string name="summary_top_regular_sunder">Top Regular Sunder</string>
     <string name="summary_top_impales">Top Impales</string>

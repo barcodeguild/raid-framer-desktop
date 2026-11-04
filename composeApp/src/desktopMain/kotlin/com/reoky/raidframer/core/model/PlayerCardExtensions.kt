@@ -1042,3 +1042,111 @@ fun PlayerCard.accumulateCoherence(renderMs: Long, raidMs: Long, clumpMs: Long):
   )
 }
 
+// --- Stillness tracking (11/03/26) ---
+
+/**
+ * Increment the Stillness cleanse counter by the given amount.
+ * Called when a Stillness cast removes song debuffs from same-faction allies.
+ */
+fun PlayerCard.postStillnessCleansed(count: Int): PlayerCard {
+  if (count <= 0) return this
+  return copy(
+    sessionStillnessCleanses = sessionStillnessCleanses + count,
+    cache = cache?.copy(
+      lifetimeStillness = cache.lifetimeStillness.copy(
+        lifetimeStillnessCleanses = cache.lifetimeStillness.lifetimeStillnessCleanses + count
+      )
+    )
+  )
+}
+
+/**
+ * Increment the Stillness dispel counter by the given amount.
+ * Called when a Stillness cast removes song buffs from opposite-faction targets.
+ */
+fun PlayerCard.postStillnessDispelled(count: Int): PlayerCard {
+  if (count <= 0) return this
+  return copy(
+    sessionStillnessDispels = sessionStillnessDispels + count,
+    cache = cache?.copy(
+      lifetimeStillness = cache.lifetimeStillness.copy(
+        lifetimeStillnessDispels = cache.lifetimeStillness.lifetimeStillnessDispels + count
+      )
+    )
+  )
+}
+
+/**
+ * Increment the Stillness charms cleansed counter by the given amount.
+ * Called when a Stillness cast removes Charmed debuffs from same-faction allies.
+ */
+fun PlayerCard.postStillnessCharmsCleansed(count: Int): PlayerCard {
+  if (count <= 0) return this
+  return copy(
+    sessionStillnessCharmsCleansed = sessionStillnessCharmsCleansed + count,
+    cache = cache?.copy(
+      lifetimeStillness = cache.lifetimeStillness.copy(
+        lifetimeStillnessCharmsCleansed = cache.lifetimeStillness.lifetimeStillnessCharmsCleansed + count
+      )
+    )
+  )
+}
+
+/**
+ * Update the Stillness affected-enemy stats (most/average/least) for a single cast.
+ * Only casts that hit ≥1 target affect the running average.
+ */
+fun PlayerCard.postStillnessAffectedEnemies(targetCount: Int): PlayerCard {
+  if (targetCount <= 0) return this
+  val newMost = maxOf(sessionStillnessMostAffectedEnemies, targetCount)
+  val newLeast = if (sessionStillnessLeastAffectedEnemies == 0) targetCount else minOf(sessionStillnessLeastAffectedEnemies, targetCount)
+  val newCastCount = sessionStillnessCastCount + 1
+  // Running average: (previousAvg * previousCount + newTargetCount) / newCount
+  val newAvg = ((sessionStillnessAverageAffectedEnemies * sessionStillnessCastCount + targetCount) / newCastCount)
+  return copy(
+    sessionStillnessCastCount = newCastCount,
+    sessionStillnessMostAffectedEnemies = newMost,
+    sessionStillnessLeastAffectedEnemies = newLeast,
+    sessionStillnessAverageAffectedEnemies = newAvg,
+    cache = cache?.copy(
+      lifetimeStillness = cache.lifetimeStillness.copy(
+        lifetimeStillnessMostAffectedEnemies = maxOf(cache.lifetimeStillness.lifetimeStillnessMostAffectedEnemies, newMost),
+        lifetimeStillnessAverageAffectedEnemies = newAvg,
+        lifetimeStillnessLeastAffectedEnemies = if (cache.lifetimeStillness.lifetimeStillnessLeastAffectedEnemies == 0) newLeast else minOf(cache.lifetimeStillness.lifetimeStillnessLeastAffectedEnemies, newLeast)
+      )
+    )
+  )
+}
+
+// --- Kill damage tracking (11/03/26) ---
+
+/**
+ * Credit damage dealt towards a kill using the Most Damage method.
+ */
+fun PlayerCard.postDamageTowardsKillMD(amount: Long): PlayerCard {
+  if (amount <= 0L) return this
+  return copy(
+    sessionDamageTowardsKillsMD = sessionDamageTowardsKillsMD + amount,
+    cache = cache?.copy(
+      lifetimeCombat = cache.lifetimeCombat.copy(
+        lifetimeDamageTowardsKillsMD = cache.lifetimeCombat.lifetimeDamageTowardsKillsMD + amount
+      )
+    )
+  )
+}
+
+/**
+ * Credit damage dealt towards a kill using the Killing Blow method.
+ */
+fun PlayerCard.postDamageTowardsKillKB(amount: Long): PlayerCard {
+  if (amount <= 0L) return this
+  return copy(
+    sessionDamageTowardsKillsKB = sessionDamageTowardsKillsKB + amount,
+    cache = cache?.copy(
+      lifetimeCombat = cache.lifetimeCombat.copy(
+        lifetimeDamageTowardsKillsKB = cache.lifetimeCombat.lifetimeDamageTowardsKillsKB + amount
+      )
+    )
+  )
+}
+

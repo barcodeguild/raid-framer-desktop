@@ -26,7 +26,9 @@ object DeathAccumulatorInteractor : Interactor() {
     val timestamp: Long,
     val killerMostDamage: String?,
     val killerKillingBlow: String?,
-    val killerMostDamageSpells: Map<String, Long> = emptyMap() // spell -> damage in pre-death window
+    val killerMostDamageSpells: Map<String, Long> = emptyMap(), // spell -> damage in pre-death window
+    val killerMostDamageAmount: Long = 0L, // total damage dealt by the most-damage killer
+    val killerKillingBlowDamage: Long = 0L // damage of the killing blow hit
   )
 
   private val pendingDeaths = mutableListOf<PendingDeath>()
@@ -67,10 +69,12 @@ object DeathAccumulatorInteractor : Interactor() {
     val mostDamageMatches = findMostDamage(candidatesSnapshot, victimLookup, deathsToProcess)
 
     val results = deathsToProcess.map { death ->
-      val killerKB = killingBlowMatches[death]?.name
+      val killerKB = killingBlowMatches[death]?.first?.name
+      val killerKBDamage = killingBlowMatches[death]?.second ?: 0L
       val killerMDResult = mostDamageMatches[death]
       val killerMD = killerMDResult?.first?.name
       val killerMDSpells = killerMDResult?.second ?: emptyMap()
+      val killerMDAmount = killerMDResult?.third ?: 0L
 
       if (killerKB != null || killerMD != null) {
         Log.info(TAG, "Death of ${death.playerName}: KB=${killerKB ?: "none"}, MD=${killerMD ?: "none"}")
@@ -78,7 +82,15 @@ object DeathAccumulatorInteractor : Interactor() {
         Log.debug(TAG, "Death of ${death.playerName} was unattributed by both methods.")
       }
 
-      DeathAttribution(death.playerName, death.timestamp, killerMD, killerKB, killerMDSpells)
+      DeathAttribution(
+        victimName = death.playerName,
+        timestamp = death.timestamp,
+        killerMostDamage = killerMD,
+        killerKillingBlow = killerKB,
+        killerMostDamageSpells = killerMDSpells,
+        killerMostDamageAmount = killerMDAmount,
+        killerKillingBlowDamage = killerKBDamage
+      )
     }
 
     PlayerCacheInteractor.processDeathBatch(results)
@@ -88,8 +100,8 @@ object DeathAccumulatorInteractor : Interactor() {
     candidates: List<PlayerCard>,
     victimLookup: Map<String, List<PendingDeath>>,
     deaths: List<PendingDeath>
-  ): Map<PendingDeath, PlayerCard> {
-    val matches = mutableMapOf<PendingDeath, Pair<PlayerCard, Long>>()
+  ): Map<PendingDeath, Pair<PlayerCard, Long>> {
+    val matches = mutableMapOf<PendingDeath, Triple<PlayerCard, Long, Int>>()
 
     candidates.forEach { potentialKiller ->
       potentialKiller.recentDamageEvents.forEach { event ->
@@ -99,21 +111,21 @@ object DeathAccumulatorInteractor : Interactor() {
           if (timeDiff <= LOOK_AHEAD_MS && event.timestamp <= death.timestamp) {
             val existingMatch = matches[death]
             if (existingMatch == null || timeDiff < existingMatch.second) {
-              matches[death] = Pair(potentialKiller, timeDiff)
+              matches[death] = Triple(potentialKiller, timeDiff, event.damage)
             }
           }
         }
       }
     }
 
-    return matches.mapValues { it.value.first }
+    return matches.mapValues { Pair(it.value.first, it.value.third.toLong()) }
   }
 
   private fun findMostDamage(
     candidates: List<PlayerCard>,
     victimLookup: Map<String, List<PendingDeath>>,
     deaths: List<PendingDeath>
-  ): Map<PendingDeath, Pair<PlayerCard, Map<String, Long>>> {
+  ): Map<PendingDeath, Triple<PlayerCard, Map<String, Long>, Long>> {
     val damageAccumulator = mutableMapOf<PendingDeath, MutableMap<PlayerCard, Long>>()
     val spellAccumulator = mutableMapOf<PendingDeath, MutableMap<String, Long>>()
 
@@ -138,9 +150,10 @@ object DeathAccumulatorInteractor : Interactor() {
 
     return damageAccumulator.mapValues { (death, damageMap) ->
       val killer = damageMap.maxByOrNull { it.value }?.key
+      val totalDamage = killer?.let { damageMap[it] } ?: 0L
       val spells = if (killer != null) spellAccumulator[death] ?: emptyMap() else emptyMap()
-      Log.debug(TAG, "Most damage to ${death.playerName}: ${killer?.name} with ${damageMap[killer]} total")
-      killer?.let { Pair(it, spells) }
+      Log.debug(TAG, "Most damage to ${death.playerName}: ${killer?.name} with $totalDamage total")
+      killer?.let { Triple(it, spells, totalDamage) }
     }.filterValues { it != null }.mapValues { it.value!! }
   }
 

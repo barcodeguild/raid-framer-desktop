@@ -143,6 +143,19 @@ object RFColors {
   val criticalDiscordNonAoEPink = Color(0xFFF06292)
   val battleHymnGold = Color(0xFFFFAB00)
 
+  // Stillness tracking colors (11/03/26)
+  val stillnessCleanses = Color(0xFF64B5F6) // Light blue
+  val stillnessDispels = Color(0xFFEF5350) // Red
+  val stillnessCharmsCleansed = Color(0xFFAB47BC) // Purple
+  val stillnessMostAffected = Color(0xFF26A69A) // Teal
+  val stillnessAvgAffected = Color(0xFF7E57C2) // Deep purple
+  val stillnessLeastAffected = Color(0xFFD4E157) // Lime
+
+  // Kill damage tracking colors (11/03/26)
+  val damageTowardsKillsMD = Color(0xFFFF7043) // Deep orange
+  val damageTowardsKillsKB = Color(0xFFEC407A) // Pink
+  val sacDanceLivesSaved = Color(0xFF29B6F6) // Sky blue
+
   // Overlay background
   val OverlayBackground = Color(0xFF121212)
 

@@ -1463,4 +1463,7 @@
     <string name="summary_top_misses">빗나감 순위</string>
     <string name="summary_top_parries">무기 막기 순위</string>
     <string name="summary_top_shackle">속박 순위</string>
+    <string name="summary_tab_stillness">정적</string>
+    <string name="summary_tab_kill_damage">킬 피해</string>
+    <string name="summary_top_sac_dance_lives_saved">희생의 무곡 구조 순위</string>
 </resources>

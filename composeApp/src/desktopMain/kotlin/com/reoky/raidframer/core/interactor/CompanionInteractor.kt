@@ -315,9 +315,11 @@ object CompanionInteractor : Interactor() {
                 if (AreaEffectAttributorInteractor.isAreaEffectAura(debuffEvent)) {
                   AreaEffectAttributorInteractor.onAuraEvent(debuffEvent)
                 } else {
-                  val patternKey = PatternAnalysisInteractor.findMatchingRegistration(debuffEvent)
-                  if (patternKey != null) {
-                    PatternAnalysisInteractor.queueEvent(patternKey, debuffEvent)
+                  val patternKeys = PatternAnalysisInteractor.findMatchingRegistrations(debuffEvent)
+                  if (patternKeys.isNotEmpty()) {
+                    for (key in patternKeys) {
+                      PatternAnalysisInteractor.queueEvent(key, debuffEvent)
+                    }
                   } else {
                     PlayerCacheInteractor.postEvent(debuffEvent)
                   }
@@ -329,9 +331,11 @@ object CompanionInteractor : Interactor() {
                 } else if (AreaEffectAttributorInteractor.isAreaEffectAura(combatEvent)) {
                   AreaEffectAttributorInteractor.onAuraEvent(combatEvent)
                 } else {
-                  val patternKey = PatternAnalysisInteractor.findMatchingRegistration(combatEvent)
-                  if (patternKey != null) {
-                    PatternAnalysisInteractor.queueEvent(patternKey, combatEvent)
+                  val patternKeys = PatternAnalysisInteractor.findMatchingRegistrations(combatEvent)
+                  if (patternKeys.isNotEmpty()) {
+                    for (key in patternKeys) {
+                      PatternAnalysisInteractor.queueEvent(key, combatEvent)
+                    }
                   } else {
                     PlayerCacheInteractor.postEvent(combatEvent)
                   }
@@ -434,12 +438,15 @@ object CompanionInteractor : Interactor() {
   /**
    * Middleware: check if a combat event matches any registered pattern in PatternAnalysisInteractor.
    * If it does, queue it for pattern analysis; otherwise post it directly to PlayerCacheInteractor.
-   * This allows patterns to intercept any type of combat event, not just debuffs.
+   * An event can match multiple patterns (e.g., Silence DebuffGainedEvent matches both
+   * stillness_dispels and stillness_affected_enemies), so we queue to all matching registrations.
    */
   private fun postEventOrIntercept(event: CombatEvent) {
-    val patternKey = PatternAnalysisInteractor.findMatchingRegistration(event)
-    if (patternKey != null) {
-      PatternAnalysisInteractor.queueEvent(patternKey, event)
+    val patternKeys = PatternAnalysisInteractor.findMatchingRegistrations(event)
+    if (patternKeys.isNotEmpty()) {
+      for (key in patternKeys) {
+        PatternAnalysisInteractor.queueEvent(key, event)
+      }
     } else {
       PlayerCacheInteractor.postEvent(event)
     }

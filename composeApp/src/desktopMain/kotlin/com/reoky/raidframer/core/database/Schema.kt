@@ -17,7 +17,7 @@ import raid_framer_desktop.composeapp.generated.resources.leadership_none
 import raid_framer_desktop.composeapp.generated.resources.leadership_raid_lead
 import raid_framer_desktop.composeapp.generated.resources.leadership_shot_caller
 
-const val SCHEMA_VERSION = 55
+const val SCHEMA_VERSION = 56
 
 const val MAX_EXPORT_BACKGROUND_DIMNESS = 0.70f
 
@@ -324,7 +324,10 @@ data class PlayerCacheLifetimeCombat(
   val lifetimeTotalShackle: Long = 0L,
   val lifetimeTotalDissonanceNonAoE: Long = 0L,
   val lifetimeTotalCriticalDiscordNonAoE: Long = 0L,
-  val lifetimeTotalBattleHymn: Long = 0L
+  val lifetimeTotalBattleHymn: Long = 0L,
+  // Kill damage tracking (11/03/26)
+  val lifetimeDamageTowardsKillsMD: Long = 0L,
+  val lifetimeDamageTowardsKillsKB: Long = 0L
 )
 
 data class PlayerCacheLifetimeDebuffs(
@@ -381,6 +384,17 @@ data class PlayerCacheLifetimeHitQuality(
   val lifetimeHealTotalForAvg: Long = 0L,
 )
 
+data class PlayerCacheLifetimeStillness(
+  // Stillness tracking lifetime stats (11/03/26)
+  val lifetimeStillnessCleanses: Long = 0L,
+  val lifetimeStillnessDispels: Long = 0L,
+  val lifetimeStillnessCharmsCleansed: Long = 0L,
+  val lifetimeStillnessMostAffectedEnemies: Int = 0,
+  val lifetimeStillnessAverageAffectedEnemies: Int = 0,
+  val lifetimeStillnessLeastAffectedEnemies: Int = 0,
+  val lifetimeSacDanceLivesSaved: Int = 0,
+)
+
 @Entity(tableName = "player_cache")
 data class PlayerCacheEntity(
   @PrimaryKey val playerName: String,
@@ -394,7 +408,8 @@ data class PlayerCacheEntity(
   @Embedded val lifetimeCombat: PlayerCacheLifetimeCombat = PlayerCacheLifetimeCombat(),
   @Embedded val lifetimeDebuffs: PlayerCacheLifetimeDebuffs = PlayerCacheLifetimeDebuffs(),
   @Embedded val lifetimeAvoidance: PlayerCacheLifetimeAvoidance = PlayerCacheLifetimeAvoidance(),
-  @Embedded val lifetimeHitQuality: PlayerCacheLifetimeHitQuality = PlayerCacheLifetimeHitQuality()
+  @Embedded val lifetimeHitQuality: PlayerCacheLifetimeHitQuality = PlayerCacheLifetimeHitQuality(),
+  @Embedded val lifetimeStillness: PlayerCacheLifetimeStillness = PlayerCacheLifetimeStillness()
 )
 
 /*
@@ -471,6 +486,18 @@ data class PlayerSessionTotalsEntity(
   val totalDissonanceNonAoE: Int = 0,
   val totalCriticalDiscordNonAoE: Int = 0,
   val totalBattleHymn: Int = 0,
+  // Stillness session totals (11/03/26)
+  val totalStillnessCleanses: Int = 0,
+  val totalStillnessDispels: Int = 0,
+  val totalStillnessCharmsCleansed: Int = 0,
+  val totalStillnessMostAffectedEnemies: Int = 0,
+  val totalStillnessAverageAffectedEnemies: Int = 0,
+  val totalStillnessLeastAffectedEnemies: Int = 0,
+  // Kill damage session totals (11/03/26)
+  val totalDamageTowardsKillsMD: Long = 0L,
+  val totalDamageTowardsKillsKB: Long = 0L,
+  // Sacred Dance placeholder (11/03/26)
+  val totalSacDanceLivesSaved: Int = 0,
 
   // avoidance + mitigation session totals (10/05/26)
   val totalBlocks: Int = 0,

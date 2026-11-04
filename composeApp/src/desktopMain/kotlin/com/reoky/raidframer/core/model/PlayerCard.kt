@@ -192,6 +192,19 @@ data class PlayerCard(
   val sessionDissonanceNonAoETotal: Int = 0,
   val sessionCriticalDiscordNonAoETotal: Int = 0,
   val sessionBattleHymnTotal: Int = 0,
+  // Stillness tracking (11/03/26) — cleanses, dispels, charms, and affected enemy counts
+  val sessionStillnessCleanses: Int = 0,
+  val sessionStillnessDispels: Int = 0,
+  val sessionStillnessCharmsCleansed: Int = 0,
+  val sessionStillnessCastCount: Int = 0, // number of successful Stillness casts (hit ≥1 target)
+  val sessionStillnessMostAffectedEnemies: Int = 0,
+  val sessionStillnessAverageAffectedEnemies: Int = 0,
+  val sessionStillnessLeastAffectedEnemies: Int = 0,
+  // Kill damage tracking (11/03/26) — damage credited towards kills
+  val sessionDamageTowardsKillsMD: Long = 0L,
+  val sessionDamageTowardsKillsKB: Long = 0L,
+  // Sacred Dance placeholder (11/03/26) — logic to be implemented later
+  val sessionSacDanceLivesSaved: Int = 0,
   val sessionBlockTotal: Int = 0, // times this player avoided via BLOCK (target-side)
   val sessionParryTotal: Int = 0, // times via PARRY (target-side)
   val sessionBlockMitigated: Long = 0L, // HP prevented by blocks (back-calculated from damage taken)

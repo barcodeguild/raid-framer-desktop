@@ -2,7 +2,13 @@ package com.reoky.raidframer.core.definitions
 
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.interactor.PatternAnalysisInteractor
+import com.reoky.raidframer.core.model.BuffEndedEvent
 import com.reoky.raidframer.core.model.DebuffGainedEvent
+import com.reoky.raidframer.core.model.SuccessfulCastEvent
+import com.reoky.raidframer.core.model.postStillnessAffectedEnemies
+import com.reoky.raidframer.core.model.postStillnessCharmsCleansed
+import com.reoky.raidframer.core.model.postStillnessCleansed
+import com.reoky.raidframer.core.model.postStillnessDispelled
 
 /**
  * All pattern registrations for PatternAnalysisInteractor live here.
@@ -22,12 +28,19 @@ private const val SYNTHETIC_AOE_DISCORD_ID = SYNTHETIC_ID_OFFSET - 1
 // Debuff IDs that should be intercepted for time-window classification
 private val criticalDiscordDebuffIds = setOf(21992)
 
+// Stillness spell ID (11/03/26)
+private const val stillnessSpellId = 10665
+
 /**
  * Register all pattern analysis rules.
  * Called automatically by PatternAnalysisInteractor when start() is invoked.
  */
 fun initializePatternAnalysis() {
   registerCriticalDiscordClassification()
+  registerStillnessCleanses()
+  registerStillnessDispels()
+  registerStillnessCharmsCleansed()
+  registerStillnessAffectedEnemies()
 }
 
 /**
@@ -78,6 +91,165 @@ private fun registerCriticalDiscordClassification() {
           // Non-AoE: single target — post the original event unchanged
           val event = events.first() as DebuffGainedEvent
           PlayerCacheInteractor.postEventInternal(event)
+        }
+      }
+    )
+  )
+}
+
+// --- Stillness pattern registrations (11/03/26) ---
+
+/**
+ * Counts song debuff removals on same-faction targets in the same Lua second as a Stillness cast.
+ * Friendly initiator's successful cast of Stillness → same-faction players lose song debuffs.
+ * No Silence confirmation needed for same-faction targets.
+ */
+private fun registerStillnessCleanses() {
+  PatternAnalysisInteractor.register(
+    PatternAnalysisInteractor.PatternRegistration(
+      key = "stillness_cleanses",
+      filter = { false }, // unused for multi-stage
+      windowMs = 5000L, // 5s quiet period for multi-stage initiator expiration
+      groupKey = { "" }, // unused for multi-stage
+      onResult = { _, _ -> }, // unused for multi-stage
+      initiatorFilter = { event ->
+        event is SuccessfulCastEvent && event.spellId == stillnessSpellId
+      },
+      collectorFilter = { event ->
+        event is BuffEndedEvent && event.buffId in songsDebuffIds
+      },
+      correlator = { initiator, collected ->
+        val caster = (initiator as SuccessfulCastEvent).source
+        val casterCard = PlayerCacheInteractor.getCard(caster)
+        val casterFaction = casterCard?.lastKnownFaction
+        if (casterFaction != null) {
+          // Count unique same-faction targets that lost song debuffs
+          val uniqueTargets = collected.filterIsInstance<BuffEndedEvent>().filter { event ->
+            val targetCard = PlayerCacheInteractor.getCard(event.target)
+            val targetFaction = targetCard?.lastKnownFaction
+            targetFaction != null && targetFaction == casterFaction
+          }.map { it.target }.toSet().size
+
+          if (uniqueTargets > 0) {
+            PlayerCacheInteractor.postStillnessCleansed(caster, uniqueTargets)
+          }
+        }
+      }
+    )
+  )
+}
+
+/**
+ * Counts song buff removals on opposite-faction targets only when Silence was applied by the initiator.
+ * Opposite faction → confirm Silence (debuff 245) was applied by the initiator → count song buff removals.
+ * Collects both BuffEndedEvent (song buff removals) and DebuffGainedEvent (Silence applications)
+ * so the correlator can match silenced targets with their dispelled buffs.
+ */
+private fun registerStillnessDispels() {
+  PatternAnalysisInteractor.register(
+    PatternAnalysisInteractor.PatternRegistration(
+      key = "stillness_dispels",
+      filter = { false },
+      windowMs = 5000L,
+      groupKey = { "" },
+      onResult = { _, _ -> },
+      initiatorFilter = { event ->
+        event is SuccessfulCastEvent && event.spellId == stillnessSpellId
+      },
+      collectorFilter = { event ->
+        // Collect both song buff removals AND Silence applications
+        (event is BuffEndedEvent && event.buffId in songsBuffIds) ||
+        (event is DebuffGainedEvent && event.debuffId in silencedDebuffIds)
+      },
+      correlator = { initiator, collected ->
+        val caster = (initiator as SuccessfulCastEvent).source
+        val casterCard = PlayerCacheInteractor.getCard(caster)
+        val casterFaction = casterCard?.lastKnownFaction
+        if (casterFaction != null) {
+          // Find targets that were silenced by the initiator (DebuffGainedEvent for silence)
+          val silencedTargets = collected.filterIsInstance<DebuffGainedEvent>()
+            .filter { it.debuffId in silencedDebuffIds && it.source == caster }
+            .map { it.target }.toSet()
+
+          // Count unique opposite-faction targets that lost song buffs AND were silenced
+          val uniqueTargets = collected.filterIsInstance<BuffEndedEvent>().filter { event ->
+            event.target in silencedTargets
+          }.map { it.target }.toSet().size
+
+          if (uniqueTargets > 0) {
+            PlayerCacheInteractor.postStillnessDispelled(caster, uniqueTargets)
+          }
+        }
+      }
+    )
+  )
+}
+
+/**
+ * Counts only Charmed debuff removals (subset of cleanses).
+ * Same logic as cleanses but filtered to charmedDebuffIds only.
+ */
+private fun registerStillnessCharmsCleansed() {
+  PatternAnalysisInteractor.register(
+    PatternAnalysisInteractor.PatternRegistration(
+      key = "stillness_charms_cleansed",
+      filter = { false },
+      windowMs = 5000L,
+      groupKey = { "" },
+      onResult = { _, _ -> },
+      initiatorFilter = { event ->
+        event is SuccessfulCastEvent && event.spellId == stillnessSpellId
+      },
+      collectorFilter = { event ->
+        event is BuffEndedEvent && event.buffId in charmedDebuffIds
+      },
+      correlator = { initiator, collected ->
+        val caster = (initiator as SuccessfulCastEvent).source
+        val casterCard = PlayerCacheInteractor.getCard(caster)
+        val casterFaction = casterCard?.lastKnownFaction
+        if (casterFaction != null) {
+          val uniqueTargets = collected.filterIsInstance<BuffEndedEvent>().filter { event ->
+            val targetCard = PlayerCacheInteractor.getCard(event.target)
+            val targetFaction = targetCard?.lastKnownFaction
+            targetFaction != null && targetFaction == casterFaction
+          }.map { it.target }.toSet().size
+
+          if (uniqueTargets > 0) {
+            PlayerCacheInteractor.postStillnessCharmsCleansed(caster, uniqueTargets)
+          }
+        }
+      }
+    )
+  )
+}
+
+/**
+ * Tracks the number of unique targets hit per Stillness cast (Silence applications).
+ * Updates most/average/least affected enemies stats.
+ */
+private fun registerStillnessAffectedEnemies() {
+  PatternAnalysisInteractor.register(
+    PatternAnalysisInteractor.PatternRegistration(
+      key = "stillness_affected_enemies",
+      filter = { false },
+      windowMs = 5000L,
+      groupKey = { "" },
+      onResult = { _, _ -> },
+      initiatorFilter = { event ->
+        event is SuccessfulCastEvent && event.spellId == stillnessSpellId
+      },
+      collectorFilter = { event ->
+        event is DebuffGainedEvent && event.debuffId in silencedDebuffIds
+      },
+      correlator = { initiator, collected ->
+        val caster = (initiator as SuccessfulCastEvent).source
+        // Count unique targets that received Silence from the initiator
+        val uniqueTargets = collected.filterIsInstance<DebuffGainedEvent>()
+          .filter { it.source == caster }
+          .map { it.target }.toSet().size
+
+        if (uniqueTargets > 0) {
+          PlayerCacheInteractor.postStillnessAffectedEnemies(caster, uniqueTargets)
         }
       }
     )

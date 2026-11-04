@@ -96,6 +96,15 @@ import raid_framer_desktop.composeapp.generated.resources.summary_top_shackle
 import raid_framer_desktop.composeapp.generated.resources.summary_top_dissonance_non_aoe
 import raid_framer_desktop.composeapp.generated.resources.summary_top_critical_discord_non_aoe
 import raid_framer_desktop.composeapp.generated.resources.summary_top_battle_hymn
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_cleanses
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_dispels
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_charms_cleansed
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_most_affected
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_avg_affected
+import raid_framer_desktop.composeapp.generated.resources.summary_top_stillness_least_affected
+import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_towards_kills_md
+import raid_framer_desktop.composeapp.generated.resources.summary_top_damage_towards_kills_kb
+import raid_framer_desktop.composeapp.generated.resources.summary_top_sac_dance_lives_saved
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Font
@@ -253,6 +262,17 @@ object ImageExportInteractor {
   private val DISSONANCE_NON_AOE_COLOR = toAwtColor(RFColors.dissonanceNonAoEYellow)
   private val CRITICAL_DISCORD_NON_AOE_COLOR = toAwtColor(RFColors.criticalDiscordNonAoEPink)
   private val BATTLE_HYMN_COLOR = toAwtColor(RFColors.battleHymnGold)
+  // Stillness tracking colors (11/03/26)
+  private val STILLNESS_CLEANSSES_COLOR = toAwtColor(RFColors.stillnessCleanses)
+  private val STILLNESS_DISPELS_COLOR = toAwtColor(RFColors.stillnessDispels)
+  private val STILLNESS_CHARMS_CLEANSSED_COLOR = toAwtColor(RFColors.stillnessCharmsCleansed)
+  private val STILLNESS_MOST_AFFECTED_COLOR = toAwtColor(RFColors.stillnessMostAffected)
+  private val STILLNESS_AVG_AFFECTED_COLOR = toAwtColor(RFColors.stillnessAvgAffected)
+  private val STILLNESS_LEAST_AFFECTED_COLOR = toAwtColor(RFColors.stillnessLeastAffected)
+  // Kill damage tracking colors (11/03/26)
+  private val DAMAGE_TOWARDS_KILLS_MD_COLOR = toAwtColor(RFColors.damageTowardsKillsMD)
+  private val DAMAGE_TOWARDS_KILLS_KB_COLOR = toAwtColor(RFColors.damageTowardsKillsKB)
+  private val SAC_DANCE_LIVES_SAVED_COLOR = toAwtColor(RFColors.sacDanceLivesSaved)
 
   /**
    * Maps a heal ratio (0.0 = 0% healed, 1.0 = 100% healed) to a color gradient:
@@ -465,6 +485,17 @@ object ImageExportInteractor {
       val topDissonanceNonAoE: List<PlayerCard>,
       val topCriticalDiscordNonAoE: List<PlayerCard>,
       val topBattleHymn: List<PlayerCard>,
+      // Stillness tracking (11/03/26)
+      val topStillnessCleanses: List<PlayerCard>,
+      val topStillnessDispels: List<PlayerCard>,
+      val topStillnessCharmsCleansed: List<PlayerCard>,
+      val topStillnessMostAffected: List<PlayerCard>,
+      val topStillnessAverageAffected: List<PlayerCard>,
+      val topStillnessLeastAffected: List<PlayerCard>,
+      // Kill damage tracking (11/03/26)
+      val topDamageTowardsKillsMD: List<PlayerCard>,
+      val topDamageTowardsKillsKB: List<PlayerCard>,
+      val topSacDanceLivesSaved: List<PlayerCard>,
       val topMistSunder: List<PlayerCard>,
       val topRegularSunder: List<PlayerCard>,
       val topImpaleImmunity: List<PlayerCard>,
@@ -664,6 +695,17 @@ val coherenceRecordingMs: Long,
       topDissonanceNonAoE = PlayerCacheInteractor.topDissonanceNonAoE.value.take(25),
       topCriticalDiscordNonAoE = PlayerCacheInteractor.topCriticalDiscordNonAoE.value.take(25),
       topBattleHymn = PlayerCacheInteractor.topBattleHymn.value.take(25),
+      // Stillness tracking (11/03/26)
+      topStillnessCleanses = PlayerCacheInteractor.topStillnessCleanses.value.take(25),
+      topStillnessDispels = PlayerCacheInteractor.topStillnessDispels.value.take(25),
+      topStillnessCharmsCleansed = PlayerCacheInteractor.topStillnessCharmsCleansed.value.take(25),
+      topStillnessMostAffected = PlayerCacheInteractor.topStillnessMostAffected.value.take(25),
+      topStillnessAverageAffected = PlayerCacheInteractor.topStillnessAverageAffected.value.take(25),
+      topStillnessLeastAffected = PlayerCacheInteractor.topStillnessLeastAffected.value.take(25),
+      // Kill damage tracking (11/03/26)
+      topDamageTowardsKillsMD = PlayerCacheInteractor.topDamageTowardsKillsMD.value.take(25),
+      topDamageTowardsKillsKB = PlayerCacheInteractor.topDamageTowardsKillsKB.value.take(25),
+      topSacDanceLivesSaved = PlayerCacheInteractor.topSacDanceLivesSaved.value.take(25),
       topMistSunder = PlayerCacheInteractor.topMistSunder.value.take(25),
       topRegularSunder = PlayerCacheInteractor.topRegularSunder.value.take(25),
       topImpaleImmunity = PlayerCacheInteractor.topImpaleImmunity.value.take(25),
@@ -1653,6 +1695,27 @@ val coherenceRecordingMs: Long,
       Triple(getString(Res.string.summary_top_dissonance_non_aoe), "\uD83D\uDD14", ColumnData.CardData(data.topDissonanceNonAoE, { it.sessionDissonanceNonAoETotal.toString() }, DISSONANCE_NON_AOE_COLOR)),
       Triple(getString(Res.string.summary_top_critical_discord_non_aoe), "\uD83D\uDD16", ColumnData.CardData(data.topCriticalDiscordNonAoE, { it.sessionCriticalDiscordNonAoETotal.toString() }, CRITICAL_DISCORD_NON_AOE_COLOR)),
       Triple(getString(Res.string.summary_top_battle_hymn), "\uD83C\uDFB5", ColumnData.CardData(data.topBattleHymn, { it.sessionBattleHymnTotal.toString() }, BATTLE_HYMN_COLOR)),
+    )))
+
+    // 12. Stillness Triplet: Cleanses, Dispels, Charms Cleansed
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_stillness_cleanses), "\uD83D\uDC9A", ColumnData.CardData(data.topStillnessCleanses, { it.sessionStillnessCleanses.toString() }, STILLNESS_CLEANSSES_COLOR)),
+      Triple(getString(Res.string.summary_top_stillness_dispels), "\uD83D\uDCA5", ColumnData.CardData(data.topStillnessDispels, { it.sessionStillnessDispels.toString() }, STILLNESS_DISPELS_COLOR)),
+      Triple(getString(Res.string.summary_top_stillness_charms_cleansed), "\uD83D\uDC82", ColumnData.CardData(data.topStillnessCharmsCleansed, { it.sessionStillnessCharmsCleansed.toString() }, STILLNESS_CHARMS_CLEANSSED_COLOR)),
+    )))
+
+    // 13. Stillness Continued: Most Hit, Avg Hit, Least Hit
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_stillness_most_affected), "\uD83C\uDF8A", ColumnData.CardData(data.topStillnessMostAffected, { it.sessionStillnessMostAffectedEnemies.toString() }, STILLNESS_MOST_AFFECTED_COLOR)),
+      Triple(getString(Res.string.summary_top_stillness_avg_affected), "\uD83D\uDCC8", ColumnData.CardData(data.topStillnessAverageAffected, { it.sessionStillnessAverageAffectedEnemies.toString() }, STILLNESS_AVG_AFFECTED_COLOR)),
+      Triple(getString(Res.string.summary_top_stillness_least_affected), "\uD83D\uDCC9", ColumnData.CardData(data.topStillnessLeastAffected, { it.sessionStillnessLeastAffectedEnemies.toString() }, STILLNESS_LEAST_AFFECTED_COLOR)),
+    )))
+
+    // 14. Kill Damage: MD, KB, Sacred Dance Saves
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.summary_top_damage_towards_kills_md), "\u2694", ColumnData.CardData(data.topDamageTowardsKillsMD, { it.sessionDamageTowardsKillsMD.humanReadableAbbreviation() }, DAMAGE_TOWARDS_KILLS_MD_COLOR)),
+      Triple(getString(Res.string.summary_top_damage_towards_kills_kb), "\uD83D\uDCA5", ColumnData.CardData(data.topDamageTowardsKillsKB, { it.sessionDamageTowardsKillsKB.humanReadableAbbreviation() }, DAMAGE_TOWARDS_KILLS_KB_COLOR)),
+      Triple(getString(Res.string.summary_top_sac_dance_lives_saved), "\uD83D\uDC83", ColumnData.CardData(data.topSacDanceLivesSaved, { it.sessionSacDanceLivesSaved.toString() }, SAC_DANCE_LIVES_SAVED_COLOR)),
     )))
 
     // 12. Provokes, Petrification, Freezes

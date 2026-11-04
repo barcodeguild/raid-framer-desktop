@@ -11,14 +11,20 @@ object PatternAnalysisInteractor : Interactor() {
   private const val TAG = "PatternAnalysis"
 
   /**
-   * Registration configuration for a single pattern analysis rule.
+   * Registration configuration for a pattern analysis rule.
+   * Supports two modes:
+   * 1. Single-filter (existing): filter + windowMs + groupKey + onResult
+   * 2. Multi-stage (new): initiatorFilter + collectorFilter + windowMs + onResult
    *
    * @param key Unique identifier for this registration (e.g., "critical_discord_aoe")
-   * @param filter Predicate to determine which events to capture
+   * @param filter Predicate for single-filter patterns (ignored if initiatorFilter is set)
    * @param windowMs Quiet period in milliseconds after the last event arrives before processing.
    *                 Accounts for IPC lag — events arriving within this window stay grouped.
-   * @param groupKey Extractor to group events (e.g., caster name, target CID)
+   * @param groupKey Extractor to group events (e.g., caster name, target CID) — for single-filter patterns
    * @param onResult Handler invoked when a group expires, receiving the group key and events
+   * @param initiatorFilter Optional: for multi-stage patterns, predicate to match the initiator event
+   * @param collectorFilter Optional: for multi-stage patterns, predicate to match collector events
+   * @param correlator Optional: for multi-stage patterns, handler receiving initiator + collected events
    */
   data class PatternRegistration(
     val key: String,
@@ -26,16 +32,42 @@ object PatternAnalysisInteractor : Interactor() {
     val windowMs: Long,
     val groupKey: (CombatEvent) -> String,
     val onResult: (String, List<CombatEvent>) -> Unit,
+    // Multi-stage pattern fields (optional)
+    val initiatorFilter: ((CombatEvent) -> Boolean)? = null,
+    val collectorFilter: ((CombatEvent) -> Boolean)? = null,
+    val correlator: ((CombatEvent, List<CombatEvent>) -> Unit)? = null,
   )
 
   private val mutex = Mutex()
 
   private val registrations = mutableListOf<PatternRegistration>()
 
-  /** Buffered events waiting to be processed, paired with their registration key and arrival time. */
+  /** Buffered events for single-filter patterns, paired with their registration key and arrival time. */
   private val pendingEvents = mutableListOf<PendingEvent>()
 
   private data class PendingEvent(
+    val registrationKey: String,
+    val event: CombatEvent,
+    val arrivalTime: Long,
+  )
+
+  // --- Multi-stage pattern state ---
+
+  /** Active initiators for multi-stage patterns, keyed by (registrationKey, initiatorKey). */
+  private val activeInitiators = mutableMapOf<String, InitiatorBucket>()
+
+  /** Mutable holder for an initiator event and its collected events for multi-stage patterns. */
+  private class InitiatorBucket(
+    val registrationKey: String,
+    val initiatorEvent: CombatEvent,
+    val collectorEvents: MutableList<CombatEvent> = mutableListOf(),
+    var lastArrivalTime: Long,
+  )
+
+  /** Buffered collector events for multi-stage patterns, paired with their registration key and arrival time. */
+  private val pendingCollectorEvents = mutableListOf<PendingCollectorEvent>()
+
+  private data class PendingCollectorEvent(
     val registrationKey: String,
     val event: CombatEvent,
     val arrivalTime: Long,
@@ -55,22 +87,61 @@ object PatternAnalysisInteractor : Interactor() {
 
   /**
    * Queue an event for processing. Called by interceptors (e.g., CompanionInteractor)
-   * when an event matches a registered filter.
+   * when an event matches a registered filter. For multi-stage patterns, this method
+   * determines whether the event is an initiator or a collector.
    */
   fun queueEvent(registrationKey: String, event: CombatEvent) {
     scope.launch {
       mutex.withLock {
-        pendingEvents.add(PendingEvent(registrationKey, event, System.currentTimeMillis()))
+        val registration = registrations.find { it.key == registrationKey }
+        if (registration == null) {
+          Log.debug(TAG, "Dropping event for unknown registration: $registrationKey")
+          return@withLock
+        }
+
+        val now = System.currentTimeMillis()
+
+        // Multi-stage pattern: check if this is an initiator or collector event
+        if (registration.initiatorFilter != null && registration.collectorFilter != null) {
+          if (registration.initiatorFilter(event)) {
+            // This is an initiator event — open a new collection bucket
+            val initiatorKey = "${registrationKey}::${event.source}::${event.timestamp}"
+            activeInitiators[initiatorKey] = InitiatorBucket(
+              registrationKey = registrationKey,
+              initiatorEvent = event,
+              lastArrivalTime = now
+            )
+            Log.debug(TAG, "Initiator matched [$registrationKey] by ${event.source} at timestamp ${event.timestamp}")
+          } else if (registration.collectorFilter(event)) {
+            // This is a collector event — buffer it for correlation
+            pendingCollectorEvents.add(PendingCollectorEvent(registrationKey, event, now))
+          }
+        } else {
+          // Single-filter pattern — use existing logic
+          pendingEvents.add(PendingEvent(registrationKey, event, now))
+        }
       }
     }
   }
 
   /**
    * Check if an event should be intercepted by any registered pattern.
-   * Returns the registration key if a match is found, null otherwise.
+   * Returns all matching registration keys. For multi-stage patterns, checks both
+   * initiatorFilter and collectorFilter. An event can match multiple registrations
+   * (e.g., a Silence DebuffGainedEvent can match both stillness_dispels and stillness_affected_enemies).
    */
-  fun findMatchingRegistration(event: CombatEvent): String? {
-    return registrations.find { it.filter(event) }?.key
+  fun findMatchingRegistrations(event: CombatEvent): List<String> {
+    val matched = mutableListOf<String>()
+    for (reg in registrations) {
+      if (reg.initiatorFilter != null && reg.initiatorFilter(event)) {
+        matched.add(reg.key)
+      } else if (reg.collectorFilter != null && reg.collectorFilter(event)) {
+        matched.add(reg.key)
+      } else if (reg.filter(event)) {
+        matched.add(reg.key)
+      }
+    }
+    return matched
   }
 
   /**
@@ -90,6 +161,8 @@ object PatternAnalysisInteractor : Interactor() {
       mutex.withLock {
         registrations.clear()
         pendingEvents.clear()
+        activeInitiators.clear()
+        pendingCollectorEvents.clear()
         Log.info(TAG, "Cleared all pattern registrations and pending events")
       }
     }
@@ -98,6 +171,7 @@ object PatternAnalysisInteractor : Interactor() {
 
   override suspend fun interact() {
     processExpiredGroups()
+    processMultiStagePatterns()
   }
 
   private suspend fun processExpiredGroups() {
@@ -156,6 +230,68 @@ object PatternAnalysisInteractor : Interactor() {
       // Keep only still-pending events
       pendingEvents.clear()
       pendingEvents.addAll(stillPending)
+    }
+  }
+
+  /**
+   * Process multi-stage patterns: correlate collector events with their initiators
+   * using Lua timestamp matching, then invoke the correlator handler.
+   */
+  private suspend fun processMultiStagePatterns() {
+    mutex.withLock {
+      if (pendingCollectorEvents.isEmpty() && activeInitiators.isEmpty()) return
+
+      val now = System.currentTimeMillis()
+
+      // Match pending collector events to active initiators by Lua timestamp
+      val matchedCollectors = mutableListOf<PendingCollectorEvent>()
+
+      for (pending in pendingCollectorEvents) {
+        val collectorEvent = pending.event
+        // Find active initiators with matching Lua timestamp
+        for ((initiatorKey, bucket) in activeInitiators) {
+          if (bucket.registrationKey == pending.registrationKey &&
+              bucket.initiatorEvent.timestamp == collectorEvent.timestamp) {
+            bucket.collectorEvents.add(collectorEvent)
+            bucket.lastArrivalTime = pending.arrivalTime
+            matchedCollectors.add(pending)
+            break // Only match to the first matching initiator
+          }
+        }
+      }
+
+      // Remove matched collectors from pending
+      for (matched in matchedCollectors) {
+        pendingCollectorEvents.remove(matched)
+      }
+
+      // Process expired initiators (quiet for longer than windowMs)
+      val expiredInitiators = mutableListOf<String>()
+      for ((initiatorKey, bucket) in activeInitiators) {
+        val registration = registrations.find { it.key == bucket.registrationKey }
+        if (registration == null) {
+          expiredInitiators.add(initiatorKey)
+          continue
+        }
+
+        if (now - bucket.lastArrivalTime > registration.windowMs) {
+          // Expired — invoke correlator if present
+          if (registration.correlator != null && bucket.collectorEvents.isNotEmpty()) {
+            registration.correlator(bucket.initiatorEvent, bucket.collectorEvents.toList())
+            Log.debug(TAG, "Multi-stage result [$bucket.registrationKey] initiator=${bucket.initiatorEvent.source}, collectors=${bucket.collectorEvents.size}")
+          }
+          expiredInitiators.add(initiatorKey)
+        }
+      }
+
+      // Remove expired initiators
+      for (key in expiredInitiators) {
+        activeInitiators.remove(key)
+      }
+
+      // Clean up old pending collector events that have been sitting too long
+      val maxCollectorAge = registrations.maxOfOrNull { it.windowMs } ?: 5000L
+      pendingCollectorEvents.removeAll { now - it.arrivalTime > maxCollectorAge * 2 }
     }
   }
 
