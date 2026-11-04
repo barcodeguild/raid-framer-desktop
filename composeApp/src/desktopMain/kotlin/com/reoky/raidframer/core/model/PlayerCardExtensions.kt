@@ -59,6 +59,7 @@ import com.reoky.raidframer.core.definitions.ItemSpell
 import com.reoky.raidframer.core.definitions.PotionDefinition
 import com.reoky.raidframer.core.definitions.GliderSpell
 import com.reoky.raidframer.core.definitions.isPlayerBehaviorSpell
+import com.reoky.raidframer.core.definitions.songsDebuffIds
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 
 // Performance: configurable event history depth from settings
@@ -520,8 +521,7 @@ fun PlayerCard.postDebuffAppliedEvent(event: DebuffAppliedEvent): PlayerCard {
   val isSilence = event.debuffId in silencedDebuffIds
   val isGlider =
     event.debuffId in gliderUsageDebuffIds && System.currentTimeMillis() - this.lastGliderUse > 5000L // glider debuff applied, but only count if more than 5 second since last use to avoid double-counting from game bug
-  val isSongs =
-    event.debuffId == 853 || event.debuffId == 847 || event.debuffId == 31367 || event.debuffId == 772 // Unguarded, Lethargy, Weakened Energy, Unpleasant Sensation
+  val isSongs = event.debuffId in songsDebuffIds // Unguarded, Lethargy, Weakened Energy, Unpleasant Sensation
   val isTigerStrike = event.debuffId in tigerStrikeDebuffIds
   val isFreeze = event.debuffId in freezeDebuffIds
   val isTrips = event.debuffId in trippedDebuffIds

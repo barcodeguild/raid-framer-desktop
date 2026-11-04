@@ -92,6 +92,30 @@ val shackleDebuffIds = listOf(206, 6946, 21159, 26963, 27219, 29302, 22511)
 val dissonanceNonAoEDebuffIds = listOf(777, 26547, 25669, 26548)
 val criticalDiscordNonAoEDebuffIds = listOf(21992, 24061)
 val battleHymnBuffIds = listOf(6851)
+val grandPerformanceBuffIds = listOf(21433)
+val songsDebuffIds = listOf(853, 847, 31367, 772) // Unguarded, Lethargy, Weakened Energy, Unpleasant Sensation (and charmed)
+val songsBuffIds = listOf(
+  656, 657, 658, 659, 660, // Quickstep Ranks 1-5 Old?
+  800, 801, 802, 803, 804, // Quickstep Ranks 1-5 New?
+  2183, 2184, 2185, 2186, 2187, // Quickstep Ranks 1-5 Alt
+  23371, 23374, 23376, 23378, // Other quicksteps Jesus
+  21444, 21470, 21471, 21472, 21473, // Life Quickstep Old
+  23370, 23372, 23375, 23377, 23379, // Life Quickstep New
+  18502, // Abyssal Quickstep (Rank 2)
+  20322, // Quickstep of the Abyss
+
+  778, 1000, 2199, 4386, 4387, 4389, 17277, 17278, // Bulwark Ballad Ranks
+  18505, // Abyssal Bulwark Ballad
+  20324, // Bulwark Ballad of the Abyss
+  21447, 21474, // Life Bulwark Ballad Rank 2 an 1
+
+  667, 850, 2196, 7662, 7663, 7664, // Bloody Chantey
+  18504, // Abyssal Bloody Chantey
+  20321, // Bloody Chantey of the Abyss
+  21446, 21469 // Life Bloody Chantey
+).union(battleHymnBuffIds).union(grandPerformanceBuffIds)
+
+
 
 /**
  * Configuration for area-effect spells where the buff/debuff source is an NPC area object
