@@ -554,7 +554,7 @@ fun BattleGraphOverlay(wm: WindowManager?, window: ComposeWindow? = null) {
           modifier = Modifier
             .align(Alignment.BottomStart)
             .padding(8.dp)
-            .widthIn(max = 200.dp)
+            .widthIn(min = 420.dp, max = 520.dp)
         )
       }
 

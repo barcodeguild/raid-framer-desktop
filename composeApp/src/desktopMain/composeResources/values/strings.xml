@@ -518,6 +518,15 @@ To reduce bias, the recorder must try to stay in range of the raid at all times.
     <string name="player_card_stat_dissonance_non_aoe">Dissonance</string>
     <string name="player_card_stat_critical_discord_non_aoe">Critical Discord</string>
     <string name="player_card_stat_battle_hymn">Battle Hymn</string>
+    <string name="player_card_stat_stillness_cleanses">Stillness Cleanses</string>
+    <string name="player_card_stat_stillness_dispels">Stillness Dispels</string>
+    <string name="player_card_stat_stillness_charms_cleansed">Charms Cleansed</string>
+    <string name="player_card_stat_stillness_most_affected">Stillness Most Hit</string>
+    <string name="player_card_stat_stillness_avg_affected">Stillness Avg Hit</string>
+    <string name="player_card_stat_stillness_least_affected">Stillness Least Hit</string>
+    <string name="player_card_stat_damage_towards_kills_md">Kill Damage (MD)</string>
+    <string name="player_card_stat_damage_towards_kills_kb">Kill Damage (KB)</string>
+    <string name="player_card_stat_sacrifice_dance_saves">Sacrifice Dance Saves</string>
     <string name="player_card_stat_ode_heals">Ode Heals</string>
     <string name="player_card_stat_damage_blocked">Damage Blocked</string>
     <string name="player_card_stat_damage_parried">Damage Parried</string>

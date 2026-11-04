@@ -69,7 +69,7 @@ import com.reoky.raidframer.core.model.CombatEventsHelper
 import com.reoky.raidframer.core.model.PlayerCard
 import com.reoky.raidframer.ui.OverlayType
 import com.reoky.raidframer.ui.WindowManager
-import com.reoky.raidframer.ui.component.SessionStatRows
+import com.reoky.raidframer.ui.component.SessionStatGrid
 import com.reoky.raidframer.ui.component.SessionTotals
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.PocketCaptureMenu
@@ -774,13 +774,13 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
-              // Manipulated (left) totals card. Title is dynamic so the user can tell
+              // Session totals card (top). Title is dynamic so the user can tell
               // which scope they're looking at without the dropdown being inside the card.
               SectionCard(
                 title = sessionScopeLabel(selectedScope),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 accentColor = RFColors.AccentRed
               ) {
                 if (sessionTotals == null) {
@@ -790,21 +790,19 @@ fun PlayerCardOverlay(wm: WindowManager? = null) {
                     fontSize = 13.sp
                   )
                 } else {
-                  SessionStatRows(sessionTotals)
+                  SessionStatGrid(sessionTotals)
                 }
               }
 
-              Spacer(modifier = Modifier.width(16.dp))
-
-              // Lifetime Totals
+              // Lifetime Totals (below session totals)
               SectionCard(
                 title = stringResource(Res.string.player_card_lifetime_totals_sessions, playerSessionCount),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 accentColor = RFColors.AccentRed
               ) {
                 val cache = card.cache
                 if (cache != null) {
-                  SessionStatRows(SessionTotals.fromCache(cache))
+                  SessionStatGrid(SessionTotals.fromCache(cache))
                 } else {
                   Text(stringResource(Res.string.player_card_no_cached_data), color = RFColors.TextDisabled, fontSize = 13.sp)
                 }
