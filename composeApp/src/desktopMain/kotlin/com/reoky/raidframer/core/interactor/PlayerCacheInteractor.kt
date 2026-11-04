@@ -1249,7 +1249,12 @@ object PlayerCacheInteractor : Interactor() {
   private fun shouldRecordEvent(event: CombatEvent): Boolean {
     if (!CombatLogInteractor.isRecording.value) return false
     val allowPvE = RFConfig.state.value.allowPVEDamage
-    return isRealPlayer(event.target) || allowPvE
+    // For cast events, check the source (caster) instead of the target —
+    // if the player casted they casted regardless of whether it's a PvP or a PvE event
+    return when (event) {
+      is CastingEvent, is SuccessfulCastEvent -> isRealPlayer(event.source) || allowPvE
+      else -> isRealPlayer(event.target) || allowPvE
+    }
   }
 
   /**
