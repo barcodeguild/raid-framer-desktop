@@ -715,21 +715,13 @@ fun CompactSessionTotals(
       maxLines = 1
     )
 
-    val sections = getStatSections(sessionTotals)
-    sections.forEach { (title, entries) ->
-      Text(
-        text = title,
-        color = RFColors.TextPrimary,
-        fontSize = 9.sp,
-        fontWeight = FontWeight.Bold
-      )
-      val perCol = (entries.size + columns - 1) / columns
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        for (c in 0 until columns) {
-          Column(modifier = Modifier.weight(1f)) {
-            entries.drop(c * perCol).take(perCol).forEach { (labelRes, value, color) ->
-              CompactStatRow(stringResource(labelRes), value, color)
-            }
+    val entries = sessionStatEntries(sessionTotals)
+    val perCol = (entries.size + columns - 1) / columns
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+      for (c in 0 until columns) {
+        Column(modifier = Modifier.weight(1f)) {
+          entries.drop(c * perCol).take(perCol).forEach { (labelRes, value, color) ->
+            CompactStatRow(stringResource(labelRes), value, color)
           }
         }
       }
