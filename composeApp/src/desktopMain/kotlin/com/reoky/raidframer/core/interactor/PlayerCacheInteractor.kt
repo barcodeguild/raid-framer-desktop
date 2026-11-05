@@ -931,7 +931,24 @@ object PlayerCacheInteractor : Interactor() {
          || card.sessionImmuneTotal != 0
          || card.sessionMissTotal != 0
          || card.sessionAbsorbTotal != 0L
-  }
+         || card.sessionDissonanceQuakeTotal != 0
+         || card.sessionCriticalDiscordAoETotal != 0
+         || card.sessionShackleTotal != 0
+         || card.sessionDissonanceNonAoETotal != 0
+         || card.sessionCriticalDiscordNonAoETotal != 0
+         || card.sessionBattleHymnTotal != 0
+         || card.sessionStillnessCleanses != 0
+         || card.sessionStillnessDispels != 0
+         || card.sessionStillnessCharmsCleansed != 0
+         || card.sessionStillnessMostAffectedEnemies != 0
+         || card.sessionDamageTowardsKillsMD != 0L
+         || card.sessionDamageTowardsKillsKB != 0L
+         || card.sessionSacDanceLivesSaved != 0
+         || card.sessionCritDamageCount != 0
+         || card.sessionCritHealCount != 0
+         || card.sessionMaxHitDamage != 0
+         || card.sessionMaxHitHeal != 0
+   }
 
   /**
    * Fetches the [limit] most recently archived sessions for [playerName] (newest first by
@@ -1012,8 +1029,38 @@ object PlayerCacheInteractor : Interactor() {
        totalMisses = sessions.sumOf { it.totalMisses },
        totalAbsorbs = sessions.sumOf { it.totalAbsorbs },
        totalBlockMitigated = sessions.sumOf { it.totalBlockMitigated },
-       totalParryMitigated = sessions.sumOf { it.totalParryMitigated }
-    )
+       totalParryMitigated = sessions.sumOf { it.totalParryMitigated },
+       // Hit quality session totals
+       totalCritDamageCount = sessions.sumOf { it.totalCritDamageCount },
+       totalCritHealCount = sessions.sumOf { it.totalCritHealCount },
+       totalDamageEventCount = sessions.sumOf { it.totalDamageEventCount },
+       totalHealEventCount = sessions.sumOf { it.totalHealEventCount },
+       totalMaxHitDamage = sessions.maxOf { it.totalMaxHitDamage },
+       totalMaxHitDamageSpell = sessions.firstOrNull { it.totalMaxHitDamageSpell.isNotBlank() }?.totalMaxHitDamageSpell ?: "",
+       totalDamageHitCount = sessions.sumOf { it.totalDamageHitCount },
+       totalMaxHitHeal = sessions.maxOf { it.totalMaxHitHeal },
+       totalMaxHitHealSpell = sessions.firstOrNull { it.totalMaxHitHealSpell.isNotBlank() }?.totalMaxHitHealSpell ?: "",
+       totalHealHitCount = sessions.sumOf { it.totalHealHitCount },
+       // Songcraft triplet tracking
+       totalDissonanceQuake = sessions.sumOf { it.totalDissonanceQuake },
+       totalCriticalDiscordAoE = sessions.sumOf { it.totalCriticalDiscordAoE },
+       totalShackle = sessions.sumOf { it.totalShackle },
+       totalDissonanceNonAoE = sessions.sumOf { it.totalDissonanceNonAoE },
+       totalCriticalDiscordNonAoE = sessions.sumOf { it.totalCriticalDiscordNonAoE },
+       totalBattleHymn = sessions.sumOf { it.totalBattleHymn },
+       // Stillness session totals
+       totalStillnessCleanses = sessions.sumOf { it.totalStillnessCleanses },
+       totalStillnessDispels = sessions.sumOf { it.totalStillnessDispels },
+       totalStillnessCharmsCleansed = sessions.sumOf { it.totalStillnessCharmsCleansed },
+       totalStillnessMostAffectedEnemies = sessions.maxOf { it.totalStillnessMostAffectedEnemies },
+       totalStillnessAverageAffectedEnemies = (sessions.sumOf { it.totalStillnessAverageAffectedEnemies } / sessions.size),
+       totalStillnessLeastAffectedEnemies = sessions.minOf { it.totalStillnessLeastAffectedEnemies },
+       // Kill damage session totals
+       totalDamageTowardsKillsMD = sessions.sumOf { it.totalDamageTowardsKillsMD },
+       totalDamageTowardsKillsKB = sessions.sumOf { it.totalDamageTowardsKillsKB },
+       // Sacred Dance placeholder
+       totalSacDanceLivesSaved = sessions.sumOf { it.totalSacDanceLivesSaved }
+     )
   }
 
   // filter pve damage by checking if the target is a real player

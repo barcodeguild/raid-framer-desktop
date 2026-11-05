@@ -970,7 +970,9 @@ fun PlayerCard.setFaction(faction: Faction, factionStatus: FactionStatus): Playe
       potions = PlayerCachePotions(),
       lifetimeCombat = PlayerCacheLifetimeCombat(),
       lifetimeDebuffs = PlayerCacheLifetimeDebuffs(),
-      lifetimeAvoidance = PlayerCacheLifetimeAvoidance()
+      lifetimeAvoidance = PlayerCacheLifetimeAvoidance(),
+      lifetimeHitQuality = PlayerCacheLifetimeHitQuality(),
+      lifetimeStillness = PlayerCacheLifetimeStillness()
     )
   }
 

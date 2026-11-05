@@ -45,7 +45,9 @@ fun PlayerCard.createCacheObject(
     potions = c?.potions ?: PlayerCachePotions(),
     lifetimeCombat = c?.lifetimeCombat ?: PlayerCacheLifetimeCombat(),
     lifetimeDebuffs = c?.lifetimeDebuffs ?: PlayerCacheLifetimeDebuffs(),
-    lifetimeAvoidance = c?.lifetimeAvoidance ?: PlayerCacheLifetimeAvoidance()
+    lifetimeAvoidance = c?.lifetimeAvoidance ?: PlayerCacheLifetimeAvoidance(),
+    lifetimeHitQuality = c?.lifetimeHitQuality ?: PlayerCacheLifetimeHitQuality(),
+    lifetimeStillness = c?.lifetimeStillness ?: PlayerCacheLifetimeStillness()
   )
 }
 
@@ -136,6 +138,44 @@ fun PlayerCard.resetSession(): PlayerCard {
     sessionImmuneTotal = 0,
     sessionMissTotal = 0,
     sessionAbsorbTotal = 0L,
+
+    // Hit quality stats (10/11/26)
+    sessionCritDamageCount = 0,
+    sessionCritHealCount = 0,
+    sessionDamageEventCount = 0,
+    sessionHealEventCount = 0,
+    sessionMaxHitDamage = 0,
+    sessionMaxHitDamageSpell = "",
+    sessionDamageHitCount = 0,
+    sessionMaxHitHeal = 0,
+    sessionMaxHitHealSpell = "",
+    sessionHealHitCount = 0,
+
+    // Stillness tracking (11/03/26)
+    sessionStillnessCleanses = 0,
+    sessionStillnessDispels = 0,
+    sessionStillnessCharmsCleansed = 0,
+    sessionStillnessCastCount = 0,
+    sessionStillnessMostAffectedEnemies = 0,
+    sessionStillnessAverageAffectedEnemies = 0,
+    sessionStillnessLeastAffectedEnemies = 0,
+
+    // Kill damage tracking (11/03/26)
+    sessionDamageTowardsKillsMD = 0L,
+    sessionDamageTowardsKillsKB = 0L,
+
+    // Sacred Dance placeholder (11/03/26)
+    sessionSacDanceLivesSaved = 0,
+
+    // Coherence tracking
+    sessionCoherenceRenderMs = 0L,
+    sessionCoherenceRaidMs = 0L,
+    sessionCoherenceClumpMs = 0L,
+
+    // Loot buff tracking
+    sessionCurrentLootBuffAmount = 0,
+    sessionPeakLootBuffAmount = 0,
+    sessionCurrentBuffCount = 0,
 
     // Life Mend tracking
     lifeMendTotal = 0,
