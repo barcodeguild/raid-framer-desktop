@@ -1466,13 +1466,13 @@
     <string name="summary_tab_stillness">정적</string>
     <string name="summary_tab_kill_damage">킬 피해</string>
     <string name="summary_top_sac_dance_lives_saved">희생의 무곡 구조 순위</string>
-    <string name="player_card_stat_stillness_cleanses">정적 정화</string>
-    <string name="player_card_stat_stillness_dispels">정적 해제</string>
-    <string name="player_card_stat_stillness_charms_cleansed">매혹 정화</string>
-    <string name="player_card_stat_stillness_most_affected">정적 최대 타격</string>
-    <string name="player_card_stat_stillness_avg_affected">정적 평균 타격</string>
-    <string name="player_card_stat_stillness_least_affected">정적 최소 타격</string>
-    <string name="player_card_stat_damage_towards_kills_md">킬 피해 (최대)</string>
-    <string name="player_card_stat_damage_towards_kills_kb">킬 피해 (마지막)</string>
-    <string name="player_card_stat_sacrifice_dance_saves">희생의 무곡 구조</string>
+    <string name="player_card_stat_stillness_cleanses">모두 쉿 아군 낭만 효과 해제 수</string>
+    <string name="player_card_stat_stillness_dispels">모두 쉿 적 낭만 효과 제거 수</string>
+    <string name="player_card_stat_stillness_charms_cleansed">매혹 해제 수</string>
+    <string name="player_card_stat_stillness_most_affected">모두 쉿 최대 적중 인원</string>
+    <string name="player_card_stat_stillness_avg_affected">모두 쉿 평균 적중 인원</string>
+    <string name="player_card_stat_stillness_least_affected">모두 쉿 최소 적중 인원</string>
+    <string name="player_card_stat_damage_towards_kills_md">처치 기여 피해량 (최다 피해)</string>
+    <string name="player_card_stat_damage_towards_kills_kb">처치 기여 피해량 (막타)</string>
+    <string name="player_card_stat_sacrifice_dance_saves">희생의 춤 생존 기여 수</string>
 </resources>
