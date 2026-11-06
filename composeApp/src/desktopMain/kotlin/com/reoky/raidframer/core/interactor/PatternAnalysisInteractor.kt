@@ -145,6 +145,26 @@ object PatternAnalysisInteractor : Interactor() {
   }
 
   /**
+   * Returns true if the event should pass through directly to PlayerCacheInteractor.
+   * Multi-stage patterns (initiatorFilter + collectorFilter) only correlate and update counters —
+   * they do not repost events, so the caller should post directly.
+   * Single-filter patterns repost events from their onResult handler, so the caller should
+   * skip posting directly when a single-filter pattern matches.
+   */
+  fun shouldPassthrough(event: CombatEvent, matchedKeys: List<String>): Boolean {
+    if (matchedKeys.isEmpty()) return true
+    for (key in matchedKeys) {
+      val reg = registrations.find { it.key == key }
+      if (reg == null) continue
+      // If this registration is a single-filter pattern (no initiatorFilter), it will repost from onResult
+      if (reg.initiatorFilter == null && reg.filter(event)) {
+        return false
+      }
+    }
+    return true
+  }
+
+  /**
    * Self-initialize by loading all pattern registrations from the definitions package.
    * Called automatically when start() is invoked.
    */

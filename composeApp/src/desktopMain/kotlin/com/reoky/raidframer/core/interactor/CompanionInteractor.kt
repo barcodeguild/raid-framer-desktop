@@ -320,6 +320,12 @@ object CompanionInteractor : Interactor() {
                     for (key in patternKeys) {
                       PatternAnalysisInteractor.queueEvent(key, debuffEvent)
                     }
+                    // Check if the event should pass through directly to PlayerCacheInteractor.
+                    // Single-filter patterns (e.g. critical_discord_aoe) repost from onResult, so skip here.
+                    val shouldPassthrough = PatternAnalysisInteractor.shouldPassthrough(debuffEvent, patternKeys)
+                    if (shouldPassthrough) {
+                      PlayerCacheInteractor.postEvent(debuffEvent)
+                    }
                   } else {
                     PlayerCacheInteractor.postEvent(debuffEvent)
                   }
@@ -335,6 +341,12 @@ object CompanionInteractor : Interactor() {
                   if (patternKeys.isNotEmpty()) {
                     for (key in patternKeys) {
                       PatternAnalysisInteractor.queueEvent(key, combatEvent)
+                    }
+                    // Check if the event should pass through directly to PlayerCacheInteractor.
+                    // Single-filter patterns (e.g. critical_discord_aoe) repost from onResult, so skip here.
+                    val shouldPassthrough = PatternAnalysisInteractor.shouldPassthrough(combatEvent, patternKeys)
+                    if (shouldPassthrough) {
+                      PlayerCacheInteractor.postEvent(combatEvent)
                     }
                   } else {
                     PlayerCacheInteractor.postEvent(combatEvent)
@@ -437,9 +449,10 @@ object CompanionInteractor : Interactor() {
 
   /**
    * Middleware: check if a combat event matches any registered pattern in PatternAnalysisInteractor.
-   * If it does, queue it for pattern analysis; otherwise post it directly to PlayerCacheInteractor.
-   * An event can match multiple patterns (e.g., Silence DebuffGainedEvent matches both
-   * stillness_dispels and stillness_affected_enemies), so we queue to all matching registrations.
+   * If it matches, queue it for pattern analysis and check if it should pass through directly
+   * to PlayerCacheInteractor. Single-filter patterns (e.g. critical_discord_aoe) repost from
+   * their onResult handler, so we skip posting here. Multi-stage patterns pass through directly.
+   * An event can match multiple patterns, so we queue to all matching registrations.
    */
   private fun postEventOrIntercept(event: CombatEvent) {
     val patternKeys = PatternAnalysisInteractor.findMatchingRegistrations(event)
@@ -447,9 +460,15 @@ object CompanionInteractor : Interactor() {
       for (key in patternKeys) {
         PatternAnalysisInteractor.queueEvent(key, event)
       }
-    } else {
-      PlayerCacheInteractor.postEvent(event)
+      // Check if the event should pass through directly to PlayerCacheInteractor.
+      // Single-filter patterns (e.g. critical_discord_aoe) repost from onResult, so skip here.
+      val shouldPassthrough = PatternAnalysisInteractor.shouldPassthrough(event, patternKeys)
+      if (!shouldPassthrough) {
+        // Single-filter pattern matched — onResult will repost, so don't post here
+        return
+      }
     }
+    PlayerCacheInteractor.postEvent(event)
   }
 
   /**
