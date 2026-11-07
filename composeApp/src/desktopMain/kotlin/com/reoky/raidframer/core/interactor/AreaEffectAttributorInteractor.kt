@@ -180,7 +180,11 @@ object AreaEffectAttributorInteractor : Interactor() {
           if (singleCaster != null && knownTypes[singleCaster]?.buffId == aura.buffId) {
             postAttributedEvent(aura, singleCaster)
           } else {
-            Log.debug(TAG, "Giving up on aura ${aura.buffId} on ${aura.targetName} (CID:${aura.targetCID}) — ambiguous attribution")
+            // Attribution failed — post the original event to ensure it passes through to RF logs.
+            // The event retains the original NPC source rather than a player caster, but this preserves
+            // the log record for analysis and ensures REMOVED events have matching APPLIED events.
+            Log.debug(TAG, "Giving up on aura ${aura.buffId} on ${aura.targetName} (CID:${aura.targetCID}) — ambiguous attribution, posting original event")
+            PlayerCacheInteractor.postEvent(aura.event)
           }
         }
       }

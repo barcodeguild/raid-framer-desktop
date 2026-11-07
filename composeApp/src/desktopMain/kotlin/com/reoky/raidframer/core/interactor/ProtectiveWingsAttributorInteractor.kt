@@ -76,7 +76,11 @@ object ProtectiveWingsAttributorInteractor : Interactor() {
           if (now - pendingAura.receivedAt < RETENTION_MS) {
             pendingAuras.add(pendingAura)
           } else {
-            Log.debug(TAG, "Skipping ambiguous Protective Wings aura ${aura.buffId} on ${aura.target}")
+            // Attribution failed — post the original event to ensure it passes through to RF logs.
+            // The event retains the original NPC source rather than a player caster, but this preserves
+            // the log record for analysis and ensures REMOVED events have matching APPLIED events.
+            Log.debug(TAG, "Skipping ambiguous Protective Wings aura ${aura.buffId} on ${aura.target}, posting original event")
+            PlayerCacheInteractor.postEvent(aura)
           }
           return@forEach
         }
