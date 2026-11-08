@@ -508,7 +508,11 @@ object PlayerCacheInteractor : Interactor() {
         lastKnownGearScore = cached?.lastKnownGearScore ?: 0,
         leaderships = cached?.leaderships ?: 0,
         isLoaded = true,
-        isRealPlayer = cached != null,
+        // A cached DB row / seed-table entry only makes someone a player if their name
+        // can actually be a player name. Mobs (e.g. "Crimson Army Soldier") can end up
+        // with a cache row, and trusting it here would drop them straight into every
+        // ranking flow, all of which filter on isRealPlayer.
+        isRealPlayer = cached != null && isPlayerName(playerName),
         cache = cached,
         currentBuild = previousSpec,
         currentRole = SpecType.fromName(previousSpec)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value
@@ -544,7 +548,9 @@ object PlayerCacheInteractor : Interactor() {
       lastKnownGearScore = cached.lastKnownGearScore,
       leaderships = cached.leaderships,
       isLoaded = true,
-      isRealPlayer = true,
+      // Same guard as createCardIfNoneExists: a DB row for a mob name must not
+      // promote it to a real player (it would then appear in rankings).
+      isRealPlayer = isPlayerName(playerName),
       cache = cached,
       currentBuild = previousSpec,
       currentRole = SpecType.fromName(previousSpec)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value
@@ -1242,6 +1248,13 @@ object PlayerCacheInteractor : Interactor() {
     guild: String = "",
     gearScore: Int = 0
   ) {
+    // Defense in depth: callers already filter NPC unit types / spaced names, but a mob
+    // must never reach the strong assert — it permanently promotes the card to a player
+    // and persists it, which is how mobs leak into the rankings.
+    if (!isPlayerName(name)) {
+      Log.debug(TAG, "Skipping strong player assertion for '$name' — names with spaces are NPCs")
+      return
+    }
     val spec = SpecType.fromTrees(classMap.values.mapNotNull { gameId -> SkillTreeType.fromGameId(gameId) }.toSet())
     val parsedFaction = Faction.fromString(faction)
     scope.launch {

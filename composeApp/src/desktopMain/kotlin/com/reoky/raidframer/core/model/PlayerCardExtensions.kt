@@ -92,12 +92,23 @@ private fun <T : Number> Map<String, Map<String, T>>.cappedBySpell(
 }
 
 /**
+ * Player character names never contain spaces — only NPC/mob names do. (The game
+ * gives players a single word for their name; "Crimson Army Soldier" is a mob.)
+ *
+ * Shared by [shouldUpgradeToPlayer] and the player-cache loaders so a stale
+ * `player_cache` row or a seed-table entry can never promote a mob into the
+ * rankings. Events still pass through to the .RF logs either way — this only
+ * decides whether the card counts as a *player*.
+ */
+fun isPlayerName(name: String): Boolean = name.isNotBlank() && !name.contains(" ")
+
+/**
  * Determine if the PlayerCard should be upgraded to a real player based on heuristics. (oh eek!)
  * The upgrade is permanent and cannot be undone. Also, the actual flag is changed outside this method
  * because the cache needs to be saved back to the database and the UI updated.
  */
 fun PlayerCard.shouldUpgradeToPlayer(): Boolean {
-  if (this.name.contains(" ")) return false // only NPCs can have spaces in their names, auto-non-player
+  if (!isPlayerName(this.name)) return false // only NPCs can have spaces in their names, auto-non-player
   this.recentDebuffGainedEvents.takeLast(100).let {
     return it.map { event -> event.debuff }.contains("Preparing Glider") // NPCs can't open their gliders
   }
