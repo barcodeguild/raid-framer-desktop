@@ -214,6 +214,12 @@ object RFColors {
 
   // "Well" background used for inset content surfaces (e.g. PlayerCard wells).
   val WellColor = CardBackground.copy(alpha = 0.72f)
+
+  // Buff History graph colors
+  val buffHistoryBuffed = Color(0xFF36F1CC)        // Same-faction cyan — buffed players
+  val buffHistoryNotScannable = Color(0xFF8B8B8B)  // Grey — not scannable players
+  val buffHistoryLootBuff = Color(0xFFAB47BC)      // Purple — loot percentage (same as lootBuffColor)
+  val buffHistoryUnbuffed = Color(0xFFFF7777)      // Light red — unbuffed players (total - buffed - not scannable)
 }
 
 /** Per-skill-tree accent color, shared by the spec-type picker and composition rendering. */

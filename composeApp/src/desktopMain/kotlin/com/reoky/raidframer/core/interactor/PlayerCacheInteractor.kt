@@ -74,8 +74,24 @@ object PlayerCacheInteractor : Interactor() {
   private val raidAttendance = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidDepartures = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidBuffHistory = mutableMapOf<String, RaidBuffSnapshot>()
+  /** Full timeline of buff snapshots per player for the Buff History graph. */
+  private val raidBuffTimeline = mutableMapOf<String, MutableList<RaidBuffSnapshot>>()
   private const val RAID_BUFF_HISTORY_RETENTION_MS = 6L * 60L * 60L * 1000L
   private var lastRaidBuffHistoryCleanupAt = 0L
+
+  /**
+   * Returns a snapshot of all recorded buff history entries for use by the Buff History tab.
+   * Each entry is a single [RaidBuffSnapshot] per player (the most recent one).
+   * For the history graph, we need all historical snapshots, so we expose the full map.
+   */
+  fun getRaidBuffHistory(): Map<String, RaidBuffSnapshot> = raidBuffHistory.toMap()
+
+  /**
+   * Returns the full timeline of buff snapshots per player for the Buff History graph.
+   * Each player maps to a list of [RaidBuffSnapshot] ordered by [RaidBuffSnapshot.observedAt].
+   */
+  fun getRaidBuffTimeline(): Map<String, List<RaidBuffSnapshot>> =
+    raidBuffTimeline.mapValues { it.value.toList() }.toMap()
 
   // --- Coherence tracking (time-in-range metric) ---
   // Distances (meters) for the coherence thresholds. Distances are delivered from the recorder's
@@ -402,11 +418,18 @@ object PlayerCacheInteractor : Interactor() {
     // The addon emits an empty list both for a confirmed empty read and for a player it could not
     // inspect. Preserve that distinction: an empty read is not evidence that buffs are missing.
     if (buffIds.isNotEmpty()) {
-      raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, buffIds, member.distance)
+      val snapshot = RaidBuffSnapshot(now, buffIds, member.distance)
+      raidBuffHistory[member.playerName] = snapshot
+      // Also append to the timeline for the Buff History graph
+      raidBuffTimeline.getOrPut(member.playerName) { mutableListOf() }.add(snapshot)
     }
     if (now - lastRaidBuffHistoryCleanupAt >= 60_000L) {
       val cutoff = now - RAID_BUFF_HISTORY_RETENTION_MS
       raidBuffHistory.entries.removeIf { it.value.observedAt < cutoff }
+      raidBuffTimeline.values.forEach { list ->
+        list.removeAll { it.observedAt < cutoff }
+      }
+      raidBuffTimeline.entries.removeAll { it.value.isEmpty() }
       lastRaidBuffHistoryCleanupAt = now
     }
   }

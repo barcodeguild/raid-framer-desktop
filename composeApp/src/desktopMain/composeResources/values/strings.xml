@@ -762,6 +762,7 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_tab_nearby">Nearby</string>
     <string name="raid_tab_nearby_gear">Nearby Gear</string>
     <string name="raid_tab_composition">Composition</string>
+    <string name="raid_tab_buff_history">Buff History</string>
     <string name="raid_composition_require_pvp">Require participation (25k damage, 25k heals, or 25+ CC)</string>
     <string name="raid_no_raid_detected">Please join a raid to use raid management features. You must have the Lua Addon installed. Windows with title bars are not overlays, consider placing on another monitor to avoid covering the game UI.</string>
     <string name="raid_join_raid_hint">Join a raid to use raid-related features…</string>
@@ -860,6 +861,28 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_egg_of_fortune">Egg of Fortune</string>
     <string name="raid_buff_gallants_blessing">Gallant's Blessing</string>
     <string name="raid_buff_allow_guild_buff">Allow Guild Buff (Gallant's Blessing) to count as fully-buffed</string>
+
+    <!-- Buff History Tab -->
+    <string name="raid_buff_history_title">Buff Uptime Over Time</string>
+    <string name="raid_buff_history_buffed">Buffed</string>
+    <string name="raid_buff_history_not_scannable">Not Scannable</string>
+    <string name="raid_buff_history_loot_percent">Loot %</string>
+    <string name="raid_buff_history_session_start">Session Start</string>
+    <string name="raid_buff_history_session_end">Session End</string>
+    <string name="raid_buff_history_snapshot">Snapshot at %1$s</string>
+    <string name="raid_buff_history_player_had">Had buff</string>
+    <string name="raid_buff_history_player_missing">Missing buff</string>
+    <string name="raid_buff_history_player_not_scannable">Not scannable</string>
+    <string name="raid_buff_history_no_data">No buff history data yet. Buff scans are recorded as the raid progresses.</string>
+    <string name="raid_buff_history_select_criteria">Select Criteria</string>
+    <string name="raid_buff_history_individual_buff">Individual Buff</string>
+    <string name="raid_buff_history_loot_percentage">Loot Percentage</string>
+    <string name="raid_buff_history_all_buffs">All Selected Buffs</string>
+    <string name="raid_buff_history_unbuffed">Unbuffed</string>
+    <string name="raid_buff_history_raid_total">Raid Total</string>
+    <string name="raid_buff_history_snapshot_stats">%1$d buffed · %2$d unbuffed · %3$d not scanned</string>
+    <string name="raid_buff_history_snapshot_uptime">Uptime: %1$.1f%%</string>
+    <string name="raid_preset_custom">Custom</string>
     <string name="raid_buff_guild_buff">Guild Buff</string>
     <string name="raid_buff_guild_buff_covers_all">None — Guild Buff covers all requirements</string>
     <string name="raid_copy_not_buffed">Copy Not Buffed</string>

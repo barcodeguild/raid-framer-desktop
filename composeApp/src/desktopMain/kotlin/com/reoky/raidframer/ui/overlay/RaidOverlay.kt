@@ -140,6 +140,7 @@ import raid_framer_desktop.composeapp.generated.resources.raid_tab_attendance
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_nearby
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_nearby_gear
 import raid_framer_desktop.composeapp.generated.resources.raid_tab_composition
+import raid_framer_desktop.composeapp.generated.resources.raid_tab_buff_history
 import raid_framer_desktop.composeapp.generated.resources.raid_composition_require_pvp
 import raid_framer_desktop.composeapp.generated.resources.*
 import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_subtitle
@@ -148,7 +149,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import kotlin.time.Duration.Companion.milliseconds
 
-enum class RaidTab { ATTENDANCE, BUFFS, NEARBY, NEARBY_GEAR, COMPOSITION }
+enum class RaidTab { ATTENDANCE, BUFFS, BUFF_HISTORY, NEARBY, NEARBY_GEAR, COMPOSITION }
 
 @Composable
 fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
@@ -303,6 +304,7 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
               val tabs = listOf(
                 RaidTab.ATTENDANCE to Res.string.raid_tab_attendance,
                 RaidTab.BUFFS to Res.string.raid_tab_buffs,
+                RaidTab.BUFF_HISTORY to Res.string.raid_tab_buff_history,
                 RaidTab.NEARBY to Res.string.raid_tab_nearby,
                 RaidTab.NEARBY_GEAR to Res.string.raid_tab_nearby_gear,
                 RaidTab.COMPOSITION to Res.string.raid_tab_composition
@@ -345,6 +347,7 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
             )
 
             RaidTab.BUFFS -> BuffsTab(mainRaid.value, coRaid.value, buffSelectBorder)
+            RaidTab.BUFF_HISTORY -> BuffHistoryTab(mainRaid.value, coRaid.value, wm)
             RaidTab.NEARBY -> NearbyTab(
               nearbyNuia = nearbyNuia.value,
               nearbyHaranya = nearbyHaranya.value,
@@ -1161,9 +1164,10 @@ private fun BuffsTab(
 
   var selectedPlayer by remember { mutableStateOf<RaidFramePayload?>(null) }
   var selectedPlayerPopupOffset by remember { mutableStateOf(IntOffset.Zero) }
-  val selectedPreset by remember(baseRequirements) {
-    mutableStateOf(BUFF_PRESETS.firstOrNull { it.requirements.serialize() == baseRequirements.serialize() }
-      ?: BUFF_PRESETS.first())
+  val customLabel = stringResource(Res.string.raid_preset_custom)
+  val selectedPreset = remember(baseRequirements, customLabel) {
+    BUFF_PRESETS.firstOrNull { it.requirements.serialize() == baseRequirements.serialize() }
+      ?: BuffPreset(customLabel, baseRequirements)
   }
   var presetExpanded by remember { mutableStateOf(false) }
   val allMembers = (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
@@ -2253,6 +2257,408 @@ private fun NearbyTab(
 private fun averageGearScore(players: List<PlayerCard>): Int {
   val known = players.filter { it.lastKnownGearScore > 0 }
   return if (known.isEmpty()) 0 else known.map { it.lastKnownGearScore }.average().toInt()
+}
+
+@Composable
+private fun BuffHistoryTab(
+  mainRaid: List<List<RaidFramePayload>>,
+  coRaid: List<List<RaidFramePayload>>,
+  wm: WindowManager? = null
+) {
+  val config by RFConfig.state.collectAsState()
+  val sessionStart = config.lastSessionStart
+  val sessionEnd = System.currentTimeMillis()
+
+  // Get all raid member names
+  val allMembers = (mainRaid.flatten() + coRaid.flatten()).filter { it.playerName.isNotBlank() }
+  val allPlayerNames = allMembers.map { it.playerName }
+
+  // Get timeline data from PlayerCacheInteractor
+  val timeline = remember(config.raidCallerBuffRequirements) {
+    PlayerCacheInteractor.getRaidBuffTimeline()
+  }
+
+  // Buff selection state (local, not persisted)
+  val baseRequirements = remember(config.raidCallerBuffRequirements) {
+    parseRaidBuffRequirements(config.raidCallerBuffRequirements)
+  }
+  var localRequirements by remember { mutableStateOf(baseRequirements) }
+  var mode by remember { mutableStateOf(com.reoky.raidframer.ui.component.graphs.BuffHistoryMode.ALL_BUFFS) }
+  var selectedBuffKey by remember { mutableStateOf<RaidBuffKey?>(null) }
+
+  // Compute data points
+  val dataPoints = remember(timeline, localRequirements, selectedBuffKey, mode, allPlayerNames, sessionStart) {
+    com.reoky.raidframer.ui.component.graphs.computeBuffHistoryDataPoints(
+      timeline = timeline,
+      sessionStart = sessionStart,
+      allPlayerNames = allPlayerNames,
+      requirements = localRequirements,
+      individualBuffKey = selectedBuffKey,
+      mode = mode,
+      bucketSizeMs = 5 * 60_000L
+    )
+  }
+
+  // Compute snapshot cards
+  val snapshotCards = remember(timeline, localRequirements, selectedBuffKey, mode, allPlayerNames, sessionStart) {
+    com.reoky.raidframer.ui.component.graphs.computeSnapshotCards(
+      timeline = timeline,
+      sessionStart = sessionStart,
+      allPlayerNames = allPlayerNames,
+      requirements = localRequirements,
+      individualBuffKey = selectedBuffKey,
+      mode = mode,
+      bucketSizeMs = 5 * 60_000L
+    )
+  }
+
+  // Get player cards for faction info
+  val allPlayerCards = PlayerCacheInteractor.getGroupCards { true }
+  val playerCards = allPlayerCards.associateBy { it.name }
+
+  val scrollState = rememberScrollState()
+
+  if (dataPoints.isEmpty()) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      Text(
+        text = stringResource(Res.string.raid_buff_history_no_data),
+        color = Color.LightGray,
+        fontSize = 14.sp
+      )
+    }
+  } else {
+    Column(modifier = Modifier.fillMaxSize()) {
+      // Top half: Graph + controls
+      BoxWithConstraints(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.fillMaxSize()) {
+          // Controls row
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(4.dp),
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          // Mode selector
+          Box {
+            var modeExpanded by remember { mutableStateOf(false) }
+            Button(
+              onClick = { modeExpanded = !modeExpanded },
+              colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+              modifier = Modifier.widthIn(max = 160.dp)
+            ) {
+              Text(
+                text = when (mode) {
+                  com.reoky.raidframer.ui.component.graphs.BuffHistoryMode.ALL_BUFFS -> stringResource(Res.string.raid_buff_history_all_buffs)
+                  com.reoky.raidframer.ui.component.graphs.BuffHistoryMode.INDIVIDUAL_BUFF -> stringResource(Res.string.raid_buff_history_individual_buff)
+                  com.reoky.raidframer.ui.component.graphs.BuffHistoryMode.LOOT_PERCENTAGE -> stringResource(Res.string.raid_buff_history_loot_percentage)
+                },
+                color = Color.Black,
+                maxLines = 1,
+                fontSize = 11.sp
+              )
+            }
+            DropdownMenu(expanded = modeExpanded, onDismissRequest = { modeExpanded = false }) {
+              com.reoky.raidframer.ui.component.graphs.BuffHistoryMode.entries.forEach { m ->
+                DropdownMenuItem(onClick = { mode = m; modeExpanded = false }) {
+                  Text(text = stringResource(m.labelRes))
+                }
+              }
+            }
+          }
+
+          // Preset selector
+          Box {
+            var presetExpanded by remember { mutableStateOf(false) }
+            val currentPreset = BUFF_PRESETS.firstOrNull { it.requirements.serialize() == localRequirements.serialize() }
+              ?: BuffPreset(stringResource(Res.string.raid_preset_custom), localRequirements)
+            Button(
+              onClick = { presetExpanded = !presetExpanded },
+              colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+              modifier = Modifier.widthIn(max = 140.dp)
+            ) {
+              Text(text = currentPreset.label, color = Color.Black, maxLines = 1, fontSize = 11.sp)
+            }
+            DropdownMenu(expanded = presetExpanded, onDismissRequest = { presetExpanded = false }) {
+              BUFF_PRESETS.forEach { preset ->
+                DropdownMenuItem(onClick = {
+                  localRequirements = preset.requirements
+                  presetExpanded = false
+                }) {
+                  Text(text = preset.label)
+                }
+              }
+            }
+          }
+
+          // Individual buff selector (only for INDIVIDUAL_BUFF mode)
+          if (mode == com.reoky.raidframer.ui.component.graphs.BuffHistoryMode.INDIVIDUAL_BUFF) {
+            Box {
+              var buffExpanded by remember { mutableStateOf(false) }
+              val selectedLabel = selectedBuffKey?.let { key ->
+                RAID_BUFF_DEFINITIONS.find { it.key == key }?.let { def ->
+                  when (def.key) {
+                    RaidBuffKey.GOBLET -> stringResource(Res.string.raid_buff_goblet)
+                    RaidBuffKey.FEAST_RIBS -> stringResource(Res.string.raid_buff_feast_ribs)
+                    RaidBuffKey.LONGING -> stringResource(Res.string.raid_buff_longing)
+                    RaidBuffKey.WHISPER -> stringResource(Res.string.raid_buff_whisper)
+                    RaidBuffKey.BLESSED_ELIXIR -> stringResource(Res.string.raid_buff_blessed_elixir)
+                    RaidBuffKey.ANCIENTS_POTION -> stringResource(Res.string.raid_buff_ancients_potion)
+                    RaidBuffKey.JINHUI_WISH -> stringResource(Res.string.raid_buff_jinhui_wish)
+                    RaidBuffKey.SECRET_GIFT -> stringResource(Res.string.raid_buff_secret_gift)
+                    RaidBuffKey.FAIRY_PROTECTION -> stringResource(Res.string.raid_buff_fairy_protection)
+                    RaidBuffKey.COOKFIRE -> stringResource(Res.string.raid_buff_cookfire)
+                    RaidBuffKey.WAR_DRUM -> stringResource(Res.string.raid_buff_war_drum)
+                    RaidBuffKey.DAHUTAS_BUBBLE -> stringResource(Res.string.raid_buff_dahutas_bubble)
+                    RaidBuffKey.MONSTER_HUNTERS_DREAM -> stringResource(Res.string.raid_buff_monster_hunters_dream)
+                    RaidBuffKey.RED_FLOWER_FRUIT -> stringResource(Res.string.raid_buff_red_flower_fruit)
+                    RaidBuffKey.BLUE_FLOWER_FRUIT -> stringResource(Res.string.raid_buff_blue_flower_fruit)
+                    RaidBuffKey.STATUE_BUFF -> stringResource(Res.string.raid_buff_statue)
+                    RaidBuffKey.FACTION_WAR_TIME -> stringResource(Res.string.raid_buff_faction_war_time)
+                    RaidBuffKey.GALLANTS_BLESSING -> stringResource(Res.string.raid_buff_gallants_blessing)
+                    RaidBuffKey.MOONLIGHT_JUICE -> stringResource(Res.string.raid_buff_moonlight_juice)
+                    RaidBuffKey.HUNTING_ELIXIR -> stringResource(Res.string.raid_buff_hunting_elixir)
+                    RaidBuffKey.CHOCOLATE -> stringResource(Res.string.raid_buff_chocolate)
+                    RaidBuffKey.LOOT_CAKE -> stringResource(Res.string.raid_buff_loot_cake)
+                    RaidBuffKey.SHORTBREAD_COOKIE -> stringResource(Res.string.raid_buff_shortbread_cookie)
+                    RaidBuffKey.GOLDEN_TAFFY -> stringResource(Res.string.raid_buff_golden_taffy)
+                    RaidBuffKey.EGG_OF_FORTUNE -> stringResource(Res.string.raid_buff_egg_of_fortune)
+                  }
+                }
+              } ?: stringResource(Res.string.raid_buff_history_select_criteria)
+              Button(
+                onClick = { buffExpanded = !buffExpanded },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
+                modifier = Modifier.widthIn(max = 160.dp)
+              ) {
+                Text(text = selectedLabel, color = Color.Black, maxLines = 1, fontSize = 11.sp)
+              }
+              DropdownMenu(expanded = buffExpanded, onDismissRequest = { buffExpanded = false }) {
+                RAID_BUFF_DEFINITIONS.filter { it.section == com.reoky.raidframer.core.definitions.RaidBuffSection.MAIN }
+                  .forEach { def ->
+                    val label = when (def.key) {
+                      RaidBuffKey.GOBLET -> stringResource(Res.string.raid_buff_goblet)
+                      RaidBuffKey.FEAST_RIBS -> stringResource(Res.string.raid_buff_feast_ribs)
+                      RaidBuffKey.LONGING -> stringResource(Res.string.raid_buff_longing)
+                      RaidBuffKey.WHISPER -> stringResource(Res.string.raid_buff_whisper)
+                      RaidBuffKey.BLESSED_ELIXIR -> stringResource(Res.string.raid_buff_blessed_elixir)
+                      RaidBuffKey.ANCIENTS_POTION -> stringResource(Res.string.raid_buff_ancients_potion)
+                      RaidBuffKey.JINHUI_WISH -> stringResource(Res.string.raid_buff_jinhui_wish)
+                      RaidBuffKey.SECRET_GIFT -> stringResource(Res.string.raid_buff_secret_gift)
+                      RaidBuffKey.FAIRY_PROTECTION -> stringResource(Res.string.raid_buff_fairy_protection)
+                      RaidBuffKey.COOKFIRE -> stringResource(Res.string.raid_buff_cookfire)
+                      RaidBuffKey.WAR_DRUM -> stringResource(Res.string.raid_buff_war_drum)
+                      RaidBuffKey.DAHUTAS_BUBBLE -> stringResource(Res.string.raid_buff_dahutas_bubble)
+                      RaidBuffKey.MONSTER_HUNTERS_DREAM -> stringResource(Res.string.raid_buff_monster_hunters_dream)
+                      RaidBuffKey.RED_FLOWER_FRUIT -> stringResource(Res.string.raid_buff_red_flower_fruit)
+                      RaidBuffKey.BLUE_FLOWER_FRUIT -> stringResource(Res.string.raid_buff_blue_flower_fruit)
+                      RaidBuffKey.STATUE_BUFF -> stringResource(Res.string.raid_buff_statue)
+                      RaidBuffKey.FACTION_WAR_TIME -> stringResource(Res.string.raid_buff_faction_war_time)
+                      RaidBuffKey.GALLANTS_BLESSING -> stringResource(Res.string.raid_buff_gallants_blessing)
+                      else -> def.labelKey
+                    }
+                    DropdownMenuItem(onClick = {
+                      selectedBuffKey = def.key
+                      buffExpanded = false
+                    }) {
+                      Text(text = label)
+                    }
+                  }
+              }
+            }
+          }
+        }
+
+        // Graph
+        com.reoky.raidframer.ui.component.graphs.BuffHistoryGraph(
+          dataPoints = dataPoints,
+          sessionStart = sessionStart,
+          sessionEnd = sessionEnd,
+          mode = mode,
+          modifier = Modifier.fillMaxSize()
+        )
+      }
+    }
+
+    // Bottom half: Snapshot cards with infinite scroll
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .weight(1f)
+        .verticalScroll(scrollState)
+        .padding(4.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+      // Show cards in reverse order (newest first)
+      snapshotCards.asReversed().forEach { card ->
+        val relSeconds = (card.timestamp - sessionStart) / 1000L
+        val timeLabel = com.reoky.raidframer.ui.component.graphs.formatBuffHistoryTime(relSeconds)
+
+        // Compute statistics for this snapshot
+        val buffedCount = card.playerNameToStatus.values.count { it == com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.BUFFED }
+        val notBuffedCount = card.playerNameToStatus.values.count { it == com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.NOT_BUFFED }
+        val notScannableCount = card.playerNameToStatus.values.count { it == com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.NOT_SCANNABLE }
+        val totalScanned = buffedCount + notBuffedCount
+        val uptimePercent = if (totalScanned > 0) (buffedCount * 100f / totalScanned) else 0f
+
+        Surface(
+          color = RFColors.CardBackground.copy(alpha = 0.9f),
+          shape = RoundedCornerShape(8.dp),
+          border = BorderStroke(1.dp, RFColors.CardBorder),
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            // Styled header with timestamp and statistics
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Text(
+                  text = stringResource(Res.string.raid_buff_history_snapshot, timeLabel),
+                  color = RFColors.TextPrimary,
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 12.sp
+                )
+                Text(
+                  text = stringResource(Res.string.raid_buff_history_snapshot_uptime, uptimePercent),
+                  color = Color(0xFF7CFF8A),
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 11.sp
+                )
+              }
+              // Statistics bar
+              Text(
+                text = stringResource(
+                  Res.string.raid_buff_history_snapshot_stats,
+                  buffedCount,
+                  notBuffedCount,
+                  notScannableCount
+                ),
+                color = RFColors.TextSecondary,
+                fontSize = 10.sp
+              )
+            }
+
+            // Player flow layout — wraps players into chip-like items that fill available width
+            val players = allPlayerNames.sorted()
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+              val playerItems = players.map { playerName ->
+                playerName to (card.playerNameToStatus[playerName] ?: com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.NOT_SCANNABLE)
+              }
+
+              // Flow wrapping: estimate item width and wrap into rows
+              var rowItems = mutableListOf<Pair<String, com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus>>()
+              var rowWidthEstimate = 0
+
+              playerItems.forEach { (playerName, status) ->
+                val nameWidth = playerName.length * 8 + 40 // rough char-width estimate in dp
+                if (rowWidthEstimate + nameWidth > 600 && rowItems.isNotEmpty()) {
+                  // Flush current row
+                  Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    rowItems.forEach { (pn, st) ->
+                      val pc = playerCards[pn]
+                      val faction = pc?.let { Faction.fromString(it.lastKnownFaction) } ?: Faction.UNKNOWN
+                      val fc = factionHighlightColor(faction)
+                      val sc = when (st) {
+                        com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.BUFFED -> Color(0xFF7CFF8A)
+                        com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.NOT_BUFFED -> Color(0xFFFF7777)
+                        else -> RFColors.TextTertiary
+                      }
+                      val si = when (st) {
+                        com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.BUFFED -> "✓"
+                        com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.NOT_BUFFED -> "✗"
+                        else -> "?"
+                      }
+                      Row(
+                        modifier = Modifier
+                          .clickable {
+                            com.reoky.raidframer.core.helpers.togglePlayerCard(wm, pn)
+                          }
+                          .background(RFColors.CardBorder.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                          .padding(horizontal = 6.dp, vertical = 3.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                      ) {
+                        Text(si, color = sc, fontSize = 9.sp)
+                        Text(
+                          text = pn,
+                          color = sc,
+                          fontSize = 10.sp,
+                          maxLines = 1
+                        )
+                        Box(
+                          modifier = Modifier
+                            .size(5.dp)
+                            .background(fc, RoundedCornerShape(2.dp))
+                        )
+                      }
+                    }
+                  }
+                  rowItems.clear()
+                  rowWidthEstimate = 0
+                }
+                rowItems.add(playerName to status)
+                rowWidthEstimate += nameWidth
+              }
+              // Flush remaining items
+              if (rowItems.isNotEmpty()) {
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  rowItems.forEach { (pn, st) ->
+                    val pc = playerCards[pn]
+                    val faction = pc?.let { Faction.fromString(it.lastKnownFaction) } ?: Faction.UNKNOWN
+                    val fc = factionHighlightColor(faction)
+                    val sc = when (st) {
+                      com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.BUFFED -> Color(0xFF7CFF8A)
+                      com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.NOT_BUFFED -> Color(0xFFFF7777)
+                      else -> RFColors.TextTertiary
+                    }
+                    val si = when (st) {
+                      com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.BUFFED -> "✓"
+                      com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus.NOT_BUFFED -> "✗"
+                      else -> "?"
+                    }
+                    Row(
+                      modifier = Modifier
+                        .clickable {
+                          com.reoky.raidframer.core.helpers.togglePlayerCard(wm, pn)
+                        }
+                        .background(RFColors.CardBorder.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                        .padding(horizontal = 6.dp, vertical = 3.dp),
+                      horizontalArrangement = Arrangement.spacedBy(4.dp),
+                      verticalAlignment = Alignment.CenterVertically
+                    ) {
+                      Text(si, color = sc, fontSize = 9.sp)
+                      Text(
+                        text = pn,
+                        color = sc,
+                        fontSize = 10.sp,
+                        maxLines = 1
+                      )
+                      Box(
+                        modifier = Modifier
+                          .size(5.dp)
+                          .background(fc, RoundedCornerShape(2.dp))
+                      )
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+    }
+  }
+  }
 }
 
 @Composable
