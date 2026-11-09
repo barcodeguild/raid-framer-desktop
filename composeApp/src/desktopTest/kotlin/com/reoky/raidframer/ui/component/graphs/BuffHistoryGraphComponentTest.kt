@@ -101,4 +101,21 @@ class BuffHistoryGraphComponentTest {
     assertTrue(points[1].timestamp > points[0].timestamp)
     assertEquals(1, points[1].buffedCount)
   }
+
+  @Test
+  fun scannedPlayerWithoutWhitelistedBuffsIsUnbuffedNotMissing() {
+    // The addon only transmits whitelisted buffs, so a successful scan of a player with no raid
+    // buffs is recorded with an empty set: they are scanned and unbuffed, never "not scannable".
+    val timeline = mapOf(
+      "A" to listOf(snapshot(t0, gobletId)),
+      "B" to listOf(snapshot(t0))
+    )
+
+    val points = computeBuffHistoryDataPoints(cards(timeline, listOf("A", "B")))
+
+    assertEquals(1, points[0].buffedCount)
+    assertEquals(1, points[0].unbuffedCount)
+    assertEquals(0, points[0].notScannableCount)
+    assertEquals(2, points[0].totalPlayers)
+  }
 }

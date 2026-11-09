@@ -43,6 +43,18 @@ import kotlinx.coroutines.sync.withLock
 import org.jetbrains.compose.resources.StringResource
 
 /**
+ * True when a roster frame carries a buff scan we can actually trust.
+ *
+ * The Lua addon only transmits buffs whose ID is on `INTERESTING_BUFF_IDS`, so a player it *did*
+ * inspect arrives with an empty `buffs` list whenever none of their buffs are whitelisted. A
+ * positive [RaidFramePayload.buffCount] is the addon's signal that `UnitBuffCount` answered, i.e.
+ * the scan returned data for that unit (the same signal the loot-buff tracking uses). An empty
+ * list with no buff count is an out-of-range / failed read and must stay "not scannable".
+ */
+internal fun RaidFramePayload.hasConfirmedBuffScan(): Boolean =
+  buffs.isNotEmpty() || buffCount > 0
+
+/**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
  * from the database (if it exists) or created new (if it doesn't). Cards are held in memory, and continually written
  * back to the database for persistence. This allows the app to remember that a player is real vs an NPC across sessions,
@@ -415,9 +427,13 @@ object PlayerCacheInteractor : Interactor() {
   private fun recordRaidBuffSnapshot(member: RaidFramePayload) {
     val now = System.currentTimeMillis()
     val buffIds = member.buffs.map { it.buff_id }.toSet()
-    // The addon emits an empty list both for a confirmed empty read and for a player it could not
-    // inspect. Preserve that distinction: an empty read is not evidence that buffs are missing.
-    if (buffIds.isNotEmpty()) {
+    // The addon filters the transmitted list down to INTERESTING_BUFF_IDS, so a player it scanned
+    // can arrive with an empty list. Record that as a confirmed read with zero matching buffs
+    // (see hasConfirmedBuffScan) — otherwise every player without a raid buff is skipped here and
+    // stays permanently "not scannable" in the Buff History graph even though the scan succeeded.
+    // A frame with no buff data at all is still an out-of-range/failed read and is not recorded:
+    // an empty read is not evidence that buffs are missing.
+    if (member.hasConfirmedBuffScan()) {
       val snapshot = RaidBuffSnapshot(now, buffIds, member.distance)
       raidBuffHistory[member.playerName] = snapshot
       // Also append to the timeline for the Buff History graph

@@ -2,6 +2,7 @@ package com.reoky.raidframer.ui.component.graphs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -9,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.definitions.RAID_BUFF_DEFINITIONS
@@ -39,6 +41,7 @@ import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_loot
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_loot_percentage
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_not_scannable
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_session_start
+import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_title
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_unbuffed
 import kotlin.math.max
 
@@ -47,6 +50,9 @@ private const val TARGET_TIME_LABELS = 8
 
 /** Smallest bucket (used when a session is so short only a single bucket fits). */
 private const val MIN_BUCKET_MS = 30_000L
+
+/** Recessed plotting surface: a darker, slightly translucent well the grid and series sit on. */
+private val BuffHistoryPlotWell = Color(0xFF05090B).copy(alpha = 0.35f)
 
 enum class BuffHistoryMode(
   val labelRes: org.jetbrains.compose.resources.StringResource
@@ -260,7 +266,53 @@ fun BuffHistoryGraph(
   val graphColor = if (mode == BuffHistoryMode.LOOT_PERCENTAGE) RFColors.buffHistoryLootBuff else RFColors.buffHistoryBuffed
 
   Column(modifier = modifier) {
-    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+    // Section header: the graph's title on the left, the series legend kept clear on the right.
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, top = 5.dp, bottom = 4.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        text = (if (mode == BuffHistoryMode.LOOT_PERCENTAGE) {
+          stringResource(Res.string.raid_buff_history_loot_percentage)
+        } else {
+          stringResource(Res.string.raid_buff_history_title)
+        }).uppercase(),
+        color = RFColors.TextSecondary,
+        fontSize = 9.sp,
+        letterSpacing = 1.sp,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(1f)
+      )
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        BuffHistoryLegendItem(
+          color = graphColor,
+          label = if (mode == BuffHistoryMode.LOOT_PERCENTAGE) {
+            stringResource(Res.string.raid_buff_history_loot_percent)
+          } else {
+            stringResource(Res.string.raid_buff_history_buffed)
+          }
+        )
+        if (mode != BuffHistoryMode.LOOT_PERCENTAGE) {
+          BuffHistoryLegendItem(
+            color = RFColors.buffHistoryUnbuffed,
+            label = stringResource(Res.string.raid_buff_history_unbuffed)
+          )
+          BuffHistoryLegendItem(
+            color = RFColors.buffHistoryNotScannable,
+            label = stringResource(Res.string.raid_buff_history_not_scannable)
+          )
+        }
+      }
+    }
+    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.06f)))
+
+    // Plotting well: a darker, slightly translucent surface the grid and series sit on.
+    Box(modifier = Modifier.fillMaxWidth().weight(1f).background(BuffHistoryPlotWell)) {
       XYGraph<Float, Float>(
         xAxisModel = rememberFloatLinearAxisModel(
           range = 0f..maxX,
@@ -275,21 +327,33 @@ fun BuffHistoryGraph(
           minimumMajorTickSpacing = 40.dp,
           minorTickCount = 0
         ),
-        horizontalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.15f),
-        verticalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.15f),
-        xAxisStyle = rememberAxisStyle(color = Color.White, tickPosition = TickPosition.Outside),
-        yAxisStyle = rememberAxisStyle(color = Color.White, tickPosition = TickPosition.Outside),
+        horizontalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.07f),
+        verticalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.07f),
+        xAxisStyle = rememberAxisStyle(color = Color.White.copy(alpha = 0.40f), tickPosition = TickPosition.Outside),
+        yAxisStyle = rememberAxisStyle(color = Color.White.copy(alpha = 0.40f), tickPosition = TickPosition.Outside),
         xAxisLabels = @Composable { xVal ->
           val idx = xVal.toInt().coerceIn(0, count - 1)
           val relSecs = (dataPoints[idx].timestamp - firstTs) / 1000L
-          Text(text = formatBuffHistoryTime(relSecs), style = typography.caption, color = Color.LightGray)
+          Text(
+            text = formatBuffHistoryTime(relSecs),
+            style = typography.caption,
+            fontSize = 10.sp,
+            lineHeight = 12.sp,
+            color = RFColors.TextSecondary
+          )
         },
         yAxisLabels = @Composable { yVal ->
           val label = when (mode) {
             BuffHistoryMode.LOOT_PERCENTAGE -> "${yVal.toInt()}%"
             else -> yVal.toInt().toString()
           }
-          Text(text = label, style = typography.caption, color = Color.LightGray)
+          Text(
+            text = label,
+            style = typography.caption,
+            fontSize = 10.sp,
+            lineHeight = 12.sp,
+            color = RFColors.TextSecondary
+          )
         }
       ) {
         if (mode != BuffHistoryMode.LOOT_PERCENTAGE) {
@@ -343,48 +407,29 @@ fun BuffHistoryGraph(
           )
         }
       }
-
-      // Legend in top-right
-      Column(
-        modifier = Modifier
-          .align(Alignment.TopEnd)
-          .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-      ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-          Box(modifier = Modifier.size(8.dp).background(graphColor))
-          Text(
-            text = if (mode == BuffHistoryMode.LOOT_PERCENTAGE) stringResource(Res.string.raid_buff_history_loot_percent)
-            else stringResource(Res.string.raid_buff_history_buffed),
-            color = Color.White,
-            fontSize = 10.sp
-          )
-        }
-        if (mode != BuffHistoryMode.LOOT_PERCENTAGE) {
-          Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(8.dp).background(RFColors.buffHistoryUnbuffed))
-            Text(text = stringResource(Res.string.raid_buff_history_unbuffed), color = Color.White, fontSize = 10.sp)
-          }
-          Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(8.dp).background(RFColors.buffHistoryNotScannable))
-            Text(text = stringResource(Res.string.raid_buff_history_not_scannable), color = Color.White, fontSize = 10.sp)
-          }
-        }
-      }
     }
 
     // Session start marker: sits below the graph at the left, pointing up at the 0 marker.
     Row(
-      modifier = Modifier.fillMaxWidth().padding(start = 34.dp, top = 2.dp),
+      modifier = Modifier.fillMaxWidth().padding(start = 34.dp, top = 3.dp, bottom = 4.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Text(text = "▲", color = Color.White.copy(alpha = 0.5f), fontSize = 8.sp)
+      Text(text = "▲", color = RFColors.TextTertiary, fontSize = 8.sp)
       Spacer(modifier = Modifier.width(4.dp))
       Text(
         text = stringResource(Res.string.raid_buff_history_session_start),
-        color = Color.White.copy(alpha = 0.5f),
+        color = RFColors.TextTertiary,
         fontSize = 9.sp
       )
     }
+  }
+}
+
+/** One entry of the graph legend: a small colour swatch and its label. */
+@Composable
+private fun BuffHistoryLegendItem(color: Color, label: String) {
+  Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Box(modifier = Modifier.size(6.dp).background(color, RoundedCornerShape(1.dp)))
+    Text(text = label, color = RFColors.TextSecondary, fontSize = 9.sp, maxLines = 1)
   }
 }
