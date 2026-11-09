@@ -3,6 +3,7 @@ package com.reoky.raidframer.ui.component.graphs
 import com.reoky.raidframer.core.definitions.RaidBuffKey
 import com.reoky.raidframer.core.definitions.RaidBuffRequirements
 import com.reoky.raidframer.core.model.RaidBuffSnapshot
+import com.reoky.raidframer.core.model.RaidRosterFrame
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -117,5 +118,58 @@ class BuffHistoryGraphComponentTest {
     assertEquals(1, points[0].unbuffedCount)
     assertEquals(0, points[0].notScannableCount)
     assertEquals(2, points[0].totalPlayers)
+  }
+
+  private fun rosterFrame(at: Long, vararg names: String) = RaidRosterFrame(at, names.toSet())
+
+  @Test
+  fun bucketTotalsFollowTheHistoricalRoster() {
+    // A..D at t0, D leaves at t0+60s: early buckets total 4, later buckets total 3 — no ghosts.
+    val timeline = mapOf(
+      "A" to listOf(snapshot(t0, gobletId), snapshot(t0 + 60_000, gobletId), snapshot(t0 + 120_000, gobletId)),
+      "B" to listOf(snapshot(t0, gobletId), snapshot(t0 + 60_000), snapshot(t0 + 120_000, gobletId)),
+      "C" to listOf(snapshot(t0 + 120_000, gobletId)),
+      "D" to listOf(snapshot(t0, 200))
+    )
+    val rosters = mapOf(
+      0 to listOf(rosterFrame(t0, "A", "B", "C", "D"), rosterFrame(t0 + 60_000, "A", "B", "C"))
+    )
+
+    val cards = computeSnapshotCards(
+      timeline = timeline,
+      sessionStart = t0,
+      allPlayerNames = listOf("A", "B", "C"),
+      requirements = requirements,
+      individualBuffKey = null,
+      mode = BuffHistoryMode.ALL_BUFFS,
+      rosterTimeline = rosters
+    )
+
+    // 120s session → 30s buckets evaluated at +15/+45/+75/+105/+135s.
+    assertEquals(listOf(4, 4, 3, 3, 3), cards.map { it.playerNameToStatus.size })
+    assertTrue(cards.takeLast(3).all { "D" !in it.playerNameToStatus })
+    // B had no whitelisted buffs at t0+60s yet still counts as scanned (unbuffed, not missing).
+    assertEquals(BuffHistoryPlayerStatus.NOT_BUFFED, cards[2].playerNameToStatus["B"])
+    assertEquals(BuffHistoryPlayerStatus.NOT_SCANNABLE, cards[2].playerNameToStatus["C"])
+  }
+
+  @Test
+  fun bucketsWithAnEmptyRosterAreSkipped() {
+    val timeline = mapOf("A" to listOf(snapshot(t0, gobletId), snapshot(t0 + 120_000, gobletId)))
+    val rosters = mapOf(0 to listOf(rosterFrame(t0, "A"), rosterFrame(t0 + 60_000)))
+
+    val cards = computeSnapshotCards(
+      timeline = timeline,
+      sessionStart = t0,
+      allPlayerNames = emptyList(),
+      requirements = requirements,
+      individualBuffKey = null,
+      mode = BuffHistoryMode.ALL_BUFFS,
+      rosterTimeline = rosters
+    )
+
+    // 30s buckets evaluated at t0+15s … t0+135s; the last three fall after everyone left.
+    assertEquals(2, cards.size)
+    assertTrue(cards.all { it.playerNameToStatus.size == 1 })
   }
 }

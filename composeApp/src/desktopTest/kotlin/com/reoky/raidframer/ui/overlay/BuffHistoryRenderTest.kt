@@ -40,7 +40,6 @@ import com.reoky.raidframer.ui.component.graphs.BuffHistoryGraph
 import com.reoky.raidframer.ui.component.graphs.BuffHistoryMode
 import com.reoky.raidframer.ui.component.graphs.BuffHistoryPlayerStatus
 import com.reoky.raidframer.ui.component.graphs.BuffHistorySnapshotCard
-import com.reoky.raidframer.ui.component.graphs.formatBuffHistoryTime
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_section_snapshots
@@ -161,7 +160,7 @@ private fun BuffHistoryHarness() {
       )
     }
 
-    Box(modifier = Modifier.fillMaxWidth().weight(2f)) {
+    Box(modifier = Modifier.fillMaxWidth().weight(3f)) {
       Column(
         modifier = Modifier
           .fillMaxSize()
@@ -194,23 +193,18 @@ private fun BuffHistoryHarness() {
     Column(
       modifier = Modifier
         .fillMaxWidth()
-        .weight(3f)
+        .weight(4f)
         .verticalScroll(rememberScrollState())
-        .padding(bottom = 4.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp)
+        .padding(bottom = 4.dp)
     ) {
-      cards.asReversed().forEach { card ->
-        val timeLabel = formatBuffHistoryTime((card.timestamp - refStart) / 1000L)
-        BuffHistorySnapshotCardView(
-          card = card,
-          timeLabel = timeLabel,
-          playerNames = roster,
-          playerCards = playerCards,
-          showSpecIcons = true,
-          onPlayerClick = {},
-          modifier = Modifier.fillMaxWidth()
-        )
-      }
+      BuffHistorySnapshotList(
+        cards = cards,
+        refStart = refStart,
+        playerCards = playerCards,
+        showSpecIcons = true,
+        onPlayerClick = {},
+        modifier = Modifier.fillMaxWidth()
+      )
     }
   }
 }

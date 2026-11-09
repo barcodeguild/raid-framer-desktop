@@ -18,6 +18,16 @@ data class RaidBuffSnapshot(
   val confirmed: Boolean = true
 )
 
+/**
+ * Who was in a raid at a moment in time. Recorded on every roster update, but only kept when
+ * membership actually changes, so the Buff History graph and snapshot cards can resolve each
+ * bucket's roster instead of applying the current roster to all of history.
+ */
+data class RaidRosterFrame(
+  val observedAt: Long,
+  val playerNames: Set<String>
+)
+
 data class RaidBuffObservation(
   val member: RaidFramePayload,
   val snapshot: RaidBuffSnapshot?,

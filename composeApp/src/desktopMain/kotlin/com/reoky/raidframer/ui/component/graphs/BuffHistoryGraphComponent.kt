@@ -21,6 +21,7 @@ import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.raidBuffDefinition
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.model.RaidBuffSnapshot
+import com.reoky.raidframer.core.model.RaidRosterFrame
 import com.reoky.raidframer.core.serialization.BuffPayload
 import com.reoky.raidframer.core.serialization.RaidFramePayload
 import io.github.koalaplot.core.line.AreaBaseline
@@ -146,6 +147,22 @@ enum class BuffHistoryPlayerStatus {
   NOT_SCANNABLE
 }
 
+/**
+ * Roster that was present at [atMs]: the latest recorded roster frame at or before that moment per
+ * raid (falling back to each log's first frame for buckets that predate recording). Null when no
+ * roster was ever recorded, so callers fall back to the current roster.
+ */
+private fun resolveBuffHistoryRoster(
+  rosterTimeline: Map<Int, List<RaidRosterFrame>>,
+  atMs: Long
+): Set<String>? {
+  if (rosterTimeline.values.all { it.isEmpty() }) return null
+  return rosterTimeline.values.mapNotNull { frames ->
+    frames.lastOrNull { it.observedAt <= atMs }?.playerNames
+      ?: frames.firstOrNull()?.playerNames
+  }.flatMapTo(LinkedHashSet()) { it }
+}
+
 /** Computes a card per bucket recording each player's buff status and buffs at that point in time. */
 fun computeSnapshotCards(
   timeline: Map<String, List<RaidBuffSnapshot>>,
@@ -154,9 +171,11 @@ fun computeSnapshotCards(
   requirements: RaidBuffRequirements,
   individualBuffKey: RaidBuffKey?,
   mode: BuffHistoryMode,
-  allowGuildBuff: Boolean = true
+  allowGuildBuff: Boolean = true,
+  /** Recorded raid rosters; each bucket uses the roster that was present instead of [allPlayerNames]. */
+  rosterTimeline: Map<Int, List<RaidRosterFrame>> = emptyMap()
 ): List<BuffHistorySnapshotCard> {
-  if (timeline.isEmpty() || allPlayerNames.isEmpty()) return emptyList()
+  if (timeline.isEmpty() && rosterTimeline.values.all { it.isEmpty() }) return emptyList()
   val buckets = buffHistoryBuckets(timeline, sessionStart) ?: return emptyList()
 
   fun isBuffed(buffIds: Set<Int>): Boolean = when (mode) {
@@ -169,12 +188,17 @@ fun computeSnapshotCards(
     BuffHistoryMode.LOOT_PERCENTAGE -> lootBuffTotalForIds(buffIds) > 100
   }
 
-  return buckets.starts.map { bucketStart ->
+  return buckets.starts.mapNotNull { bucketStart ->
     val evaluatedAt = bucketStart + buckets.bucketMs / 2
+    // The bucket's roster is whoever was actually in the raid then: departed players are excluded
+    // (no ghosts) and newcomers only appear from the bucket they joined. Empty-roster buckets
+    // (everyone had left) carry no card; the graph line simply ends at the last populated bucket.
+    val roster = resolveBuffHistoryRoster(rosterTimeline, evaluatedAt) ?: allPlayerNames
+    if (roster.isEmpty()) return@mapNotNull null
     val playerNameToStatus = mutableMapOf<String, BuffHistoryPlayerStatus>()
     val playerNameToBuffIds = mutableMapOf<String, Set<Int>>()
 
-    allPlayerNames.forEach { playerName ->
+    roster.forEach { playerName ->
       val latest = timeline[playerName]?.let { latestSnapshotAt(it, evaluatedAt) }
       if (latest == null) {
         playerNameToStatus[playerName] = BuffHistoryPlayerStatus.NOT_SCANNABLE

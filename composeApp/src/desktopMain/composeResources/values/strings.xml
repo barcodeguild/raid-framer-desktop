@@ -881,7 +881,8 @@ Live monitoring is disabled while viewing replays.</string>
     <string name="raid_buff_history_unbuffed">Unbuffed</string>
     <string name="raid_buff_history_raid_total">Raid Total</string>
     <string name="raid_buff_history_snapshot_stats">%1$d buffed · %2$d unbuffed · %3$d not scanned</string>
-    <string name="raid_buff_history_snapshot_uptime">Uptime: %1$.1f%%</string>
+    <string name="raid_buff_history_buffed_share">%1$.1f%% buffed</string>
+    <string name="raid_buff_history_most_recent">Most Recent</string>
     <string name="raid_buff_history_section_snapshots">Snapshot History</string>
     <string name="raid_preset_custom">Custom</string>
     <string name="raid_buff_guild_buff">Guild Buff</string>

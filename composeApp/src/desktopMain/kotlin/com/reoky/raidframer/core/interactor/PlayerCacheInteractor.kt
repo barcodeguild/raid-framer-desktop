@@ -90,6 +90,11 @@ object PlayerCacheInteractor : Interactor() {
   private val raidBuffTimeline = mutableMapOf<String, MutableList<RaidBuffSnapshot>>()
   private const val RAID_BUFF_HISTORY_RETENTION_MS = 6L * 60L * 60L * 1000L
   private var lastRaidBuffHistoryCleanupAt = 0L
+  /** Roster snapshots per raid id, only appended when membership actually changes. */
+  private val raidRosterTimeline = mutableMapOf<Int, MutableList<RaidRosterFrame>>()
+  private var lastNonEmptyRosterAt = System.currentTimeMillis()
+  /** How long both raids must stay empty before recorded buff history is dropped. */
+  private const val EMPTY_ROSTER_CLEAR_DELAY_MS = 60_000L
 
   /**
    * Returns a snapshot of all recorded buff history entries for use by the Buff History tab.
@@ -104,6 +109,46 @@ object PlayerCacheInteractor : Interactor() {
    */
   fun getRaidBuffTimeline(): Map<String, List<RaidBuffSnapshot>> =
     raidBuffTimeline.mapValues { it.value.toList() }.toMap()
+
+  /**
+   * Roster frames per raid id, newest last. The Buff History graph and snapshot cards resolve each
+   * bucket's roster from this log so totals follow the raid as players join and leave instead of
+   * applying the current roster to all of history.
+   */
+  fun getRaidRosterTimeline(): Map<Int, List<RaidRosterFrame>> =
+    raidRosterTimeline.mapValues { it.value.toList() }.toMap()
+
+  /**
+   * Records the raid roster over time (only appended when membership actually changes) and drops
+   * all recorded buff history once the player has been out of any raid for a sustained stretch, so
+   * leaving and rejoining a raid starts from a clean slate instead of showing stale snapshots.
+   * Must be called with the mutex held.
+   */
+  private fun trackRaidRoster(raidId: Int, members: List<RaidFramePayload>) {
+    val now = System.currentTimeMillis()
+    val names = members.mapNotNullTo(LinkedHashSet()) { it.playerName.takeIf { n -> n.isNotBlank() } }
+    val log = raidRosterTimeline.getOrPut(raidId) { mutableListOf() }
+    if (log.isEmpty() || log.last().playerNames != names) {
+      log.add(RaidRosterFrame(now, names))
+    }
+    val anyRealPlayers = (raids[0].orEmpty() + raids[1].orEmpty()).flatten().any { it.playerName.isNotBlank() }
+    if (anyRealPlayers) {
+      lastNonEmptyRosterAt = now
+    } else if (now - lastNonEmptyRosterAt >= EMPTY_ROSTER_CLEAR_DELAY_MS &&
+      (raidBuffHistory.isNotEmpty() || raidBuffTimeline.isNotEmpty() || raidRosterTimeline.values.any { it.isNotEmpty() })
+    ) {
+      Log.info(TAG, "Raid roster empty for ${EMPTY_ROSTER_CLEAR_DELAY_MS / 1000}s, clearing buff history")
+      clearBuffHistoryData()
+    }
+  }
+
+  /** Drops all recorded buff history, the buff timeline and the roster log. */
+  private fun clearBuffHistoryData() {
+    raidBuffHistory.clear()
+    raidBuffTimeline.clear()
+    raidRosterTimeline.clear()
+    lastRaidBuffHistoryCleanupAt = System.currentTimeMillis()
+  }
 
   // --- Coherence tracking (time-in-range metric) ---
   // Distances (meters) for the coherence thresholds. Distances are delivered from the recorder's
@@ -289,6 +334,7 @@ object PlayerCacheInteractor : Interactor() {
       // improvement to the code where if the first raid is empty we clear all raids (because the player left the raid)
       if (raidId == 0 && members.isEmpty()) {
         raids.clear()
+        clearBuffHistoryData()
         return@withLock
       }
       raids[raidId] = members.chunked(5).take(20)
@@ -296,6 +342,7 @@ object PlayerCacheInteractor : Interactor() {
       if (raidId == 0 && members.all { it.playerName.isBlank() }) {
         raids.remove(1)
       }
+      trackRaidRoster(raidId, members)
       members.forEach { member ->
         if (member.playerName.isNotBlank()) {
           recordRaidBuffSnapshot(member)
@@ -446,6 +493,10 @@ object PlayerCacheInteractor : Interactor() {
         list.removeAll { it.observedAt < cutoff }
       }
       raidBuffTimeline.entries.removeAll { it.value.isEmpty() }
+      raidRosterTimeline.values.forEach { frames ->
+        frames.removeAll { it.observedAt < cutoff }
+      }
+      raidRosterTimeline.entries.removeAll { it.value.isEmpty() }
       lastRaidBuffHistoryCleanupAt = now
     }
   }
