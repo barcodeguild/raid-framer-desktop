@@ -78,7 +78,9 @@ data class BuffHistoryPlayerDetail(
 /**
  * Snapshot cards in a responsive masonry: a single column on narrow windows, up to
  * [BuffHistoryCardMaxColumns] side by side when there is room. Cards flow newest-first so the
- * first column always starts with the most recent snapshot; column heights may stagger.
+ * first column always starts with the most recent snapshot. An expanded card leaves the masonry
+ * flow and takes a full-width row, so its whole roster is visible at once; the cards around it
+ * reflow into the remaining rows.
  */
 @Composable
 fun BuffHistorySnapshotList(
@@ -90,29 +92,70 @@ fun BuffHistorySnapshotList(
   modifier: Modifier = Modifier,
   newestExpanded: Boolean = false
 ) {
+  val newest = cards.lastOrNull()
+  // Expansion lives here, keyed by timestamp (stable across the periodic snapshot recompute),
+  // so the layout can reflow when a card expands or collapses.
+  var expandedIds by remember {
+    mutableStateOf(if (newestExpanded && newest != null) setOf(newest.timestamp) else emptySet<Long>())
+  }
+  val toggleExpanded: (Long) -> Unit = { id ->
+    expandedIds = if (id in expandedIds) expandedIds - id else expandedIds + id
+  }
   BoxWithConstraints(modifier) {
     val columnCount = (maxWidth / BuffHistoryCardIdealWidth).toInt().coerceIn(1, BuffHistoryCardMaxColumns)
-    val columns = List(columnCount) { mutableListOf<BuffHistorySnapshotCard>() }
-    // Oldest snapshot data arrives ascending; reverse so the most recent card leads the list,
-    // flowing newest-first across columns then down from the top left.
-    cards.asReversed().forEachIndexed { index, card ->
-      columns[index % columnCount].add(card)
+    // Newest first. Each expanded card becomes its own full-width segment; the collapsed cards
+    // between two expanded ones form a round-robin masonry chunk.
+    val segments = mutableListOf<List<BuffHistorySnapshotCard>>()
+    var chunk = mutableListOf<BuffHistorySnapshotCard>()
+    cards.asReversed().forEach { card ->
+      if (card.timestamp in expandedIds) {
+        if (chunk.isNotEmpty()) {
+          segments += chunk
+          chunk = mutableListOf()
+        }
+        segments += listOf(card)
+      } else {
+        chunk += card
+      }
     }
-    val newest = cards.lastOrNull()
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      columns.forEach { column ->
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          column.forEach { card ->
-            BuffHistorySnapshotCardView(
-              card = card,
-              timeLabel = formatBuffHistoryTime((card.timestamp - refStart) / 1000L),
-              isNewest = newest != null && card === newest,
-              playerCards = playerCards,
-              showSpecIcons = showSpecIcons,
-              onPlayerClick = onPlayerClick,
-              startExpanded = newestExpanded && newest != null && card === newest,
-              modifier = Modifier.fillMaxWidth()
-            )
+    if (chunk.isNotEmpty()) segments += chunk
+
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      segments.forEach { segment ->
+        if (segment.size == 1 && segment[0].timestamp in expandedIds) {
+          val card = segment[0]
+          BuffHistorySnapshotCardView(
+            card = card,
+            timeLabel = formatBuffHistoryTime((card.timestamp - refStart) / 1000L),
+            isNewest = newest != null && card === newest,
+            playerCards = playerCards,
+            showSpecIcons = showSpecIcons,
+            expanded = true,
+            onToggleExpanded = { toggleExpanded(card.timestamp) },
+            onPlayerClick = onPlayerClick,
+            modifier = Modifier.fillMaxWidth()
+          )
+        } else {
+          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val columns = List(columnCount) { mutableListOf<BuffHistorySnapshotCard>() }
+            segment.forEachIndexed { index, card -> columns[index % columnCount].add(card) }
+            columns.forEach { column ->
+              Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                column.forEach { card ->
+                  BuffHistorySnapshotCardView(
+                    card = card,
+                    timeLabel = formatBuffHistoryTime((card.timestamp - refStart) / 1000L),
+                    isNewest = newest != null && card === newest,
+                    playerCards = playerCards,
+                    showSpecIcons = showSpecIcons,
+                    expanded = card.timestamp in expandedIds,
+                    onToggleExpanded = { toggleExpanded(card.timestamp) },
+                    onPlayerClick = onPlayerClick,
+                    modifier = Modifier.fillMaxWidth()
+                  )
+                }
+              }
+            }
           }
         }
       }
@@ -123,7 +166,8 @@ fun BuffHistorySnapshotList(
 /**
  * One snapshot of the roster: the timestamp heading, the compact buff counts, the buffed-share
  * badge and the aligned player rows - one cohesive surface rather than a card per player. Cards
- * start collapsed to their summary; clicking the header expands the roster grid below.
+ * start collapsed to their summary; [onToggleExpanded] flips the roster grid, which the list
+ * lays out full-width so every member stays visible at once.
  */
 @Composable
 fun BuffHistorySnapshotCardView(
@@ -133,8 +177,9 @@ fun BuffHistorySnapshotCardView(
   playerCards: Map<String, PlayerCard>,
   showSpecIcons: Boolean,
   onPlayerClick: (BuffHistoryPlayerDetail) -> Unit,
-  modifier: Modifier = Modifier,
-  startExpanded: Boolean = false
+  expanded: Boolean,
+  onToggleExpanded: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   val buffedCount = card.playerNameToStatus.values.count { it == BuffHistoryPlayerStatus.BUFFED }
   val notBuffedCount = card.playerNameToStatus.values.count { it == BuffHistoryPlayerStatus.NOT_BUFFED }
@@ -142,7 +187,6 @@ fun BuffHistorySnapshotCardView(
   val totalScanned = buffedCount + notBuffedCount
   val uptimePercent = if (totalScanned > 0) (buffedCount * 100f / totalScanned) else 0f
 
-  var expanded by remember { mutableStateOf(startExpanded) }
   val interaction = remember { MutableInteractionSource() }
   val hovered by interaction.collectIsHoveredAsState()
 
@@ -163,7 +207,7 @@ fun BuffHistorySnapshotCardView(
           .fillMaxWidth()
           .background(if (hovered) Color.White.copy(alpha = 0.06f) else RFColors.buffHistoryHeaderTint)
           .hoverable(interaction)
-          .clickable(interactionSource = interaction, indication = null) { expanded = !expanded }
+          .clickable(interactionSource = interaction, indication = null) { onToggleExpanded() }
           .padding(start = 10.dp, end = 8.dp, top = 8.dp, bottom = 7.dp)
       ) {
         Row(

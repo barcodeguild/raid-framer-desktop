@@ -95,6 +95,10 @@ object PlayerCacheInteractor : Interactor() {
   private var lastNonEmptyRosterAt = System.currentTimeMillis()
   /** How long both raids must stay empty before recorded buff history is dropped. */
   private const val EMPTY_ROSTER_CLEAR_DELAY_MS = 60_000L
+  /** Minimum roster size for a frame to count as a real raid when detecting raid replacement. */
+  private const val RAID_REPLACEMENT_MIN_MEMBERS = 5
+  /** A new roster carrying under 1/denominator of the previous raid's players is a new raid. */
+  private const val RAID_REPLACEMENT_CARRYOVER_DENOM = 2
 
   /**
    * Returns a snapshot of all recorded buff history entries for use by the Buff History tab.
@@ -122,6 +126,7 @@ object PlayerCacheInteractor : Interactor() {
    * Records the raid roster over time (only appended when membership actually changes) and drops
    * all recorded buff history once the player has been out of any raid for a sustained stretch, so
    * leaving and rejoining a raid starts from a clean slate instead of showing stale snapshots.
+   * A wholesale roster swap (left one raid, joined another between scans) resets history too.
    * Must be called with the mutex held.
    */
   private fun trackRaidRoster(raidId: Int, members: List<RaidFramePayload>) {
@@ -129,7 +134,20 @@ object PlayerCacheInteractor : Interactor() {
     val names = members.mapNotNullTo(LinkedHashSet()) { it.playerName.takeIf { n -> n.isNotBlank() } }
     val log = raidRosterTimeline.getOrPut(raidId) { mutableListOf() }
     if (log.isEmpty() || log.last().playerNames != names) {
-      log.add(RaidRosterFrame(now, names))
+      if (names.isNotEmpty() && raidWasReplaced(log, names)) {
+        if (raidId == 0) {
+          // The main raid was replaced; keep the co-raid's current roster so its ongoing
+          // history still resolves while the main raid starts fresh.
+          val coRaidFrame = raidRosterTimeline[1]?.lastOrNull()
+          clearBuffHistoryData()
+          coRaidFrame?.let { raidRosterTimeline.getOrPut(1) { mutableListOf() }.add(it) }
+        } else {
+          // A replaced co-raid only invalidates its own recorded roster.
+          raidRosterTimeline.remove(raidId)
+        }
+      }
+      // clearBuffHistoryData detaches the log instance, so re-resolve before appending.
+      raidRosterTimeline.getOrPut(raidId) { mutableListOf() }.add(RaidRosterFrame(now, names))
     }
     val anyRealPlayers = (raids[0].orEmpty() + raids[1].orEmpty()).flatten().any { it.playerName.isNotBlank() }
     if (anyRealPlayers) {
@@ -140,6 +158,18 @@ object PlayerCacheInteractor : Interactor() {
       Log.info(TAG, "Raid roster empty for ${EMPTY_ROSTER_CLEAR_DELAY_MS / 1000}s, clearing buff history")
       clearBuffHistoryData()
     }
+  }
+
+  /**
+   * True when [names] takes over a slot whose most recent real raid shares fewer than half of
+   * its players — the signature of leaving one raid and joining a different one. Gradual
+   * membership churn never comes close to this, and shrinking raids only ever overlap fully.
+   */
+  private fun raidWasReplaced(log: List<RaidRosterFrame>, names: Set<String>): Boolean {
+    val previousRaid = log.lastOrNull { it.playerNames.size >= RAID_REPLACEMENT_MIN_MEMBERS }?.playerNames
+      ?: return false
+    val carriedOver = names.count { it in previousRaid }
+    return carriedOver * RAID_REPLACEMENT_CARRYOVER_DENOM < previousRaid.size
   }
 
   /** Drops all recorded buff history, the buff timeline and the roster log. */
@@ -331,17 +361,15 @@ object PlayerCacheInteractor : Interactor() {
    */
   suspend fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
     mutex.withLock {
-      // improvement to the code where if the first raid is empty we clear all raids (because the player left the raid)
-      if (raidId == 0 && members.isEmpty()) {
+      // An all-blank main raid is the addon's explicit "left the raid" signal: it resets its
+      // roster and sends one final empty frame before going quiet, so no later frame would
+      // arrive to complete the 60s empty-roster countdown. Clear everything right away.
+      if (raidId == 0 && members.all { it.playerName.isBlank() }) {
         raids.clear()
         clearBuffHistoryData()
         return@withLock
       }
       raids[raidId] = members.chunked(5).take(20)
-      // Guard: if main raid has zero real players, also clear co-raid data (ghost raid)
-      if (raidId == 0 && members.all { it.playerName.isBlank() }) {
-        raids.remove(1)
-      }
       trackRaidRoster(raidId, members)
       members.forEach { member ->
         if (member.playerName.isNotBlank()) {
