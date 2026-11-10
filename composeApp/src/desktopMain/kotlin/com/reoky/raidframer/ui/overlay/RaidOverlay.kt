@@ -1,6 +1,5 @@
 ﻿package com.reoky.raidframer.ui.overlay
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
@@ -9,7 +8,6 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.offset
@@ -42,9 +40,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -82,17 +77,16 @@ import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.MetaSpecs
 import com.reoky.raidframer.core.definitions.rememberMetaSpecs
 import com.reoky.raidframer.core.definitions.localizedDisplayNameRes
-import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.FontsHelper
+import com.reoky.raidframer.core.helpers.RFTypography
 import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.rememberSectionPulse
 import com.reoky.raidframer.core.helpers.timeAgo
 import com.reoky.raidframer.core.helpers.resolveLocalizedString
 import com.reoky.raidframer.core.helpers.openMetaSpecs
-import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
 import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.core.serialization.BuffPayload
 import com.reoky.raidframer.core.serialization.IPCMessagePayload
@@ -114,6 +108,8 @@ import com.reoky.raidframer.ui.component.OverlaidGearScoreChart
 import com.reoky.raidframer.ui.component.RaidComponent
 import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
+import com.reoky.raidframer.ui.component.BuffHistoryPlayerDetail
+import com.reoky.raidframer.ui.component.BuffHistorySnapshotList
 import com.reoky.raidframer.ui.component.BuffPlayerDetailPane
 import com.reoky.raidframer.ui.component.buffDetailPopupPositionProvider
 import com.reoky.raidframer.ui.component.localizedBuffLabels
@@ -160,7 +156,6 @@ import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_subt
 import raid_framer_desktop.composeapp.generated.resources.raid_control_deck_title
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
-import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 enum class RaidTab { ATTENDANCE, BUFFS, BUFF_HISTORY, NEARBY, NEARBY_GEAR, COMPOSITION }
@@ -297,8 +292,9 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
         Column(
           modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp)
+            // Top padding separates the tab strip from the title bar; the content box below
+            // supplies the single gap between the strip and the tab's own first row.
+            .padding(start = 8.dp, top = 8.dp, end = 8.dp)
         ) {
           Box(
             modifier = Modifier
@@ -2112,17 +2108,6 @@ private fun averageGearScore(players: List<PlayerCard>): Int {
  * Buff History surfaces: dark and deliberately translucent so the game world stays faintly
  * visible behind them, with hairline borders instead of heavy frames.
  */
-internal val BuffHistoryPanelColor = Color(0xFF0A0F11).copy(alpha = 0.45f)
-internal val BuffHistoryCardColor = Color(0xFF0E1315).copy(alpha = 0.72f)
-internal val BuffHistoryHeaderTint = Color.White.copy(alpha = 0.03f)
-internal val BuffHistoryRowTint = Color.White.copy(alpha = 0.025f)
-internal val BuffHistoryHairline = Color.White.copy(alpha = 0.07f)
-internal val BuffHistoryMenuColor = Color(0xFF14181A)
-internal val BuffHistoryUptimeColor = Color(0xFF7CFF8A)
-/** Ideal snapshot-card width for the masonry; columns range from 1 up to [BuffHistoryCardMaxColumns]. */
-internal val BuffHistoryCardIdealWidth = 340.dp
-private const val BuffHistoryCardMaxColumns = 3
-
 /**
  * Compact dark select used by the Buff History filter bar. [active] marks a filter that is
  * currently narrowing the view and [expanded] an open menu; both light the control up in teal so
@@ -2189,44 +2174,16 @@ internal fun BuffHistoryMenu(
   onDismiss: () -> Unit,
   content: @Composable ColumnScope.() -> Unit
 ) {
-  MaterialTheme(colors = MaterialTheme.colors.copy(surface = BuffHistoryMenuColor)) {
+  MaterialTheme(colors = MaterialTheme.colors.copy(surface = RFColors.buffHistoryMenu)) {
     DropdownMenu(
       expanded = expanded,
       onDismissRequest = onDismiss,
       modifier = Modifier
-        .background(BuffHistoryMenuColor, RoundedCornerShape(4.dp))
+        .background(RFColors.buffHistoryMenu, RoundedCornerShape(4.dp))
         .border(1.dp, RFColors.CardBorder, RoundedCornerShape(4.dp))
     ) {
       content()
     }
-  }
-}
-
-/** Compact count + label pair used for the secondary buff statistics in a snapshot header. */
-@Composable
-internal fun BuffHistoryStat(color: Color, value: Int, label: String) {
-  Row(
-    modifier = Modifier.height(12.dp),
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Box(modifier = Modifier.size(6.dp).background(color, RoundedCornerShape(1.dp)))
-    Text(
-      text = "$value",
-      color = color,
-      fontSize = 10.sp,
-      lineHeight = 10.sp,
-      fontWeight = FontWeight.SemiBold,
-      maxLines = 1
-    )
-    Text(
-      text = label,
-      color = RFColors.TextTertiary,
-      fontSize = 10.sp,
-      lineHeight = 10.sp,
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis
-    )
   }
 }
 
@@ -2293,9 +2250,10 @@ private fun BuffHistoryTab(
     }
   } else {
     Column(modifier = Modifier.fillMaxSize()) {
-      // Filter bar — understated dark selects; an engaged filter lights up in teal.
+      // Filter bar — understated dark selects; an engaged filter lights up in teal. The tab host
+      // already pads the top, so only the bottom gap is added here to balance it against the graph.
       Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
@@ -2386,13 +2344,13 @@ private fun BuffHistoryTab(
         }
       }
 
-      // Graph surface: one dark, translucent panel carrying its own title and legend.
-      Box(modifier = Modifier.fillMaxWidth().weight(3f)) {
+      // Graph surface: one dark, translucent panel carrying its own title, metrics and legend.
+      Box(modifier = Modifier.fillMaxWidth().weight(3.6f)) {
         Column(
           modifier = Modifier
             .fillMaxSize()
-            .background(BuffHistoryPanelColor, RoundedCornerShape(4.dp))
-            .border(1.dp, BuffHistoryHairline, RoundedCornerShape(4.dp))
+            .background(RFColors.buffHistoryPanel, RoundedCornerShape(5.dp))
+            .border(1.dp, RFColors.buffHistoryHairline, RoundedCornerShape(5.dp))
         ) {
           BuffHistoryGraph(
             dataPoints = dataPoints,
@@ -2404,25 +2362,24 @@ private fun BuffHistoryTab(
 
       // Snapshot history section label — pinned above the scrolling list.
       Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 3.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 5.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
         Text(
           text = stringResource(Res.string.raid_buff_history_section_snapshots).uppercase(),
-          color = RFColors.TextTertiary,
-          fontSize = 9.sp,
-          letterSpacing = 1.sp,
+          style = RFTypography.SectionLabel,
+          color = RFColors.TextSecondary,
           maxLines = 1
         )
-        Box(modifier = Modifier.weight(1f).height(1.dp).background(BuffHistoryHairline))
+        Box(modifier = Modifier.weight(1f).height(1.dp).background(RFColors.buffHistoryHairline))
       }
 
       // Snapshot history — newest first, flowing into a responsive masonry of cards.
       Column(
         modifier = Modifier
           .fillMaxWidth()
-          .weight(4f)
+          .weight(3.4f)
           .verticalScroll(scrollState)
           .padding(bottom = 4.dp)
       ) {
@@ -2464,301 +2421,6 @@ private fun BuffHistoryTab(
         )
       }
     }
-  }
-}
-
-/**
- * Snapshot cards in a responsive masonry: a single column on narrow windows, up to
- * [BuffHistoryCardMaxColumns] side by side when there is room. Cards flow newest-first so the
- * first column always starts with the most recent snapshot; column heights may stagger.
- */
-@Composable
-internal fun BuffHistorySnapshotList(
-  cards: List<BuffHistorySnapshotCard>,
-  refStart: Long,
-  playerCards: Map<String, PlayerCard>,
-  showSpecIcons: Boolean,
-  onPlayerClick: (BuffHistoryPlayerDetail) -> Unit,
-  modifier: Modifier = Modifier
-) {
-  BoxWithConstraints(modifier) {
-    val columnCount = (maxWidth / BuffHistoryCardIdealWidth).toInt().coerceIn(1, BuffHistoryCardMaxColumns)
-    val columns = List(columnCount) { mutableListOf<BuffHistorySnapshotCard>() }
-    // Newest first, round-robin: the overall-newest card always lands on top of the first column.
-    cards.asReversed().forEachIndexed { index, card ->
-      columns[index % columnCount].add(card)
-    }
-    val newest = cards.lastOrNull()
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-      columns.forEach { column ->
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-          column.forEach { card ->
-            BuffHistorySnapshotCardView(
-              card = card,
-              timeLabel = formatBuffHistoryTime((card.timestamp - refStart) / 1000L),
-              isNewest = newest != null && card === newest,
-              playerCards = playerCards,
-              showSpecIcons = showSpecIcons,
-              onPlayerClick = onPlayerClick,
-              modifier = Modifier.fillMaxWidth()
-            )
-          }
-        }
-      }
-    }
-  }
-}
-
-/**
- * One snapshot of the roster: the timestamp heading, the compact buff counts, the buffed-share
- * badge and the aligned player rows - one cohesive surface rather than a card per player.
- */
-@Composable
-internal fun BuffHistorySnapshotCardView(
-  card: BuffHistorySnapshotCard,
-  timeLabel: String,
-  isNewest: Boolean,
-  playerCards: Map<String, PlayerCard>,
-  showSpecIcons: Boolean,
-  onPlayerClick: (BuffHistoryPlayerDetail) -> Unit,
-  modifier: Modifier = Modifier
-) {
-  val buffedCount = card.playerNameToStatus.values.count { it == BuffHistoryPlayerStatus.BUFFED }
-  val notBuffedCount = card.playerNameToStatus.values.count { it == BuffHistoryPlayerStatus.NOT_BUFFED }
-  val notScannableCount = card.playerNameToStatus.values.count { it == BuffHistoryPlayerStatus.NOT_SCANNABLE }
-  val totalScanned = buffedCount + notBuffedCount
-  val uptimePercent = if (totalScanned > 0) (buffedCount * 100f / totalScanned) else 0f
-
-  Surface(
-    color = BuffHistoryCardColor,
-    shape = RoundedCornerShape(4.dp),
-    border = BorderStroke(1.dp, BuffHistoryHairline),
-    modifier = modifier
-  ) {
-    Column {
-      // Header: the timestamp is the heading, the buff counts sit below it, and the buffed
-      // share sits right. Stats flow to a second line on narrow cards instead of clipping.
-      Column(modifier = Modifier.fillMaxWidth().background(BuffHistoryHeaderTint)) {
-        Column(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
-          verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Row(
-              modifier = Modifier.weight(1f),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              Text(
-                text = stringResource(Res.string.raid_buff_history_snapshot, "").trim().uppercase(),
-                color = RFColors.TextTertiary,
-                fontSize = 8.sp,
-                letterSpacing = 1.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.alignBy(FirstBaseline)
-              )
-              Spacer(modifier = Modifier.width(6.dp))
-              Text(
-                text = timeLabel,
-                color = RFColors.TextPrimary,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.alignBy(FirstBaseline)
-              )
-              if (isNewest) {
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                  text = "(${stringResource(Res.string.raid_buff_history_most_recent)})",
-                  color = RFColors.TextTertiary,
-                  fontSize = 9.sp,
-                  maxLines = 1,
-                  overflow = TextOverflow.Ellipsis,
-                  modifier = Modifier.alignBy(FirstBaseline)
-                )
-              }
-            }
-            Text(
-              text = String.format(stringResource(Res.string.raid_buff_history_buffed_share), uptimePercent),
-              color = BuffHistoryUptimeColor,
-              fontWeight = FontWeight.SemiBold,
-              fontSize = 11.sp,
-              maxLines = 1,
-              modifier = Modifier
-                .background(BuffHistoryUptimeColor.copy(alpha = 0.10f), RoundedCornerShape(3.dp))
-                .border(1.dp, BuffHistoryUptimeColor.copy(alpha = 0.28f), RoundedCornerShape(3.dp))
-                .padding(horizontal = 6.dp, vertical = 3.dp)
-            )
-          }
-          FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.Center
-          ) {
-            BuffHistoryStat(
-              color = Color(0xFF7CFF8A),
-              value = buffedCount,
-              label = stringResource(Res.string.raid_buff_history_buffed)
-            )
-            BuffHistoryStat(
-              color = RFColors.buffHistoryUnbuffed,
-              value = notBuffedCount,
-              label = stringResource(Res.string.raid_buff_history_unbuffed)
-            )
-            BuffHistoryStat(
-              color = RFColors.buffHistoryNotScannable,
-              value = notScannableCount,
-              label = stringResource(Res.string.raid_buff_history_not_scannable)
-            )
-          }
-        }
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BuffHistoryHairline))
-      }
-
-      // Roster: aligned columns and fixed-height rows instead of a card per player. The
-      // roster is whatever the card's bucket recorded, so departed players never linger here.
-      BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val columns = (maxWidth.value / 155f).toInt().coerceIn(2, 8)
-        val players = card.playerNameToStatus.keys.sorted()
-        Column(modifier = Modifier.fillMaxWidth()) {
-          players.chunked(columns).forEachIndexed { rowIndex, rowPlayers ->
-            Row(
-              modifier = Modifier
-                .fillMaxWidth()
-                .height(18.dp)
-                .background(if (rowIndex % 2 == 1) BuffHistoryRowTint else Color.Transparent),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              rowPlayers.forEachIndexed { columnIndex, playerName ->
-                val status = card.playerNameToStatus[playerName] ?: BuffHistoryPlayerStatus.NOT_SCANNABLE
-                BuffHistoryPlayerCell(
-                  playerName = playerName,
-                  status = status,
-                  playerCard = playerCards[playerName],
-                  showSpecIcons = showSpecIcons,
-                  showColumnDivider = columnIndex > 0,
-                  onClick = { anchor ->
-                    onPlayerClick(BuffHistoryPlayerDetail(
-                      playerName = playerName,
-                      status = status,
-                      buffIds = card.playerNameToBuffIds[playerName].orEmpty(),
-                      timeLabel = timeLabel,
-                      anchor = anchor
-                    ))
-                  },
-                  modifier = Modifier.weight(1f).fillMaxHeight()
-                )
-              }
-              // Pad out the last row so its columns line up with the rows above
-              repeat(columns - rowPlayers.size) {
-                Spacer(modifier = Modifier.weight(1f))
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-/** A clicked player in a Buff History snapshot, plus the popup anchor in window coordinates. */
-internal data class BuffHistoryPlayerDetail(
-  val playerName: String,
-  val status: BuffHistoryPlayerStatus,
-  val buffIds: Set<Int>,
-  val timeLabel: String,
-  val anchor: IntOffset
-)
-
-/**
- * One player line inside a snapshot roster: fixed-width status mark, spec icons, name (coloured by
- * buff state, as before) and the faction dot pinned to the right edge so columns stay aligned.
- */
-@Composable
-internal fun BuffHistoryPlayerCell(
-  playerName: String,
-  status: BuffHistoryPlayerStatus,
-  playerCard: PlayerCard?,
-  showSpecIcons: Boolean,
-  showColumnDivider: Boolean,
-  onClick: (IntOffset) -> Unit,
-  modifier: Modifier = Modifier
-) {
-  val spec = remember(playerCard?.currentBuild) { playerCard?.currentBuild?.let { SpecType.fromName(it) } }
-  val statusColor = when (status) {
-    BuffHistoryPlayerStatus.BUFFED -> Color(0xFF7CFF8A)
-    BuffHistoryPlayerStatus.NOT_BUFFED -> Color(0xFFFF7777)
-    BuffHistoryPlayerStatus.NOT_SCANNABLE -> RFColors.TextTertiary
-  }
-  val statusMark = when (status) {
-    BuffHistoryPlayerStatus.BUFFED -> "✓"
-    BuffHistoryPlayerStatus.NOT_BUFFED -> "✗"
-    BuffHistoryPlayerStatus.NOT_SCANNABLE -> "?"
-  }
-  val faction = playerCard?.let { Faction.fromString(it.lastKnownFaction) } ?: Faction.UNKNOWN
-  var anchor by remember { mutableStateOf(IntOffset.Zero) }
-  val interactionSource = remember { MutableInteractionSource() }
-  val hovered by interactionSource.collectIsHoveredAsState()
-
-  Row(
-    modifier = modifier
-      .onGloballyPositioned { coords ->
-        val pos = coords.positionInWindow()
-        anchor = IntOffset((pos.x + coords.size.width).roundToInt(), pos.y.roundToInt())
-      }
-      .hoverable(interactionSource)
-      .clickable { onClick(anchor) }
-      .background(if (hovered) Color.White.copy(alpha = 0.07f) else Color.Transparent, RoundedCornerShape(2.dp))
-      .then(
-        if (showColumnDivider) {
-          Modifier.drawBehind {
-            val stroke = 1.dp.toPx()
-            val x = stroke / 2f
-            drawLine(
-              color = BuffHistoryHairline,
-              start = Offset(x, 0f),
-              end = Offset(x, size.height),
-              strokeWidth = stroke
-            )
-          }
-        } else {
-          Modifier
-        }
-      )
-      .padding(horizontal = 8.dp),
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Box(modifier = Modifier.width(9.dp), contentAlignment = Alignment.Center) {
-      Text(statusMark, color = statusColor, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
-    }
-    if (showSpecIcons && spec != null && spec != SpecType.UNKNOWN) {
-      spec.trees.sortedByDisplayOrder().forEach { tree ->
-        Image(
-          painter = skillTreeIconPainterFor(tree),
-          contentDescription = null,
-          modifier = Modifier.size(11.dp)
-        )
-      }
-    }
-    Text(
-      text = playerName,
-      color = statusColor,
-      fontSize = 10.sp,
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-      modifier = Modifier.weight(1f)
-    )
-    Box(
-      modifier = Modifier
-        .size(4.dp)
-        .background(factionHighlightColor(faction), RoundedCornerShape(2.dp))
-    )
   }
 }
 

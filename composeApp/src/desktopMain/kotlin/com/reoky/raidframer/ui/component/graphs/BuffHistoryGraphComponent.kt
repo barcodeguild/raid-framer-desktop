@@ -1,9 +1,10 @@
 package com.reoky.raidframer.ui.component.graphs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,7 +20,9 @@ import com.reoky.raidframer.core.definitions.RaidBuffRequirements
 import com.reoky.raidframer.core.definitions.lootBuffTotalForIds
 import com.reoky.raidframer.core.definitions.matches
 import com.reoky.raidframer.core.definitions.raidBuffDefinition
+import com.reoky.raidframer.core.helpers.RFTypography
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.verticalBandBrush
 import com.reoky.raidframer.core.model.RaidBuffSnapshot
 import com.reoky.raidframer.core.model.RaidRosterFrame
 import com.reoky.raidframer.core.serialization.BuffPayload
@@ -37,9 +40,13 @@ import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_all_buffs
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_buffed
+import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_buffed_share_value
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_individual_buff
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_loot_percent
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_loot_percentage
+import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_metric_interval
+import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_metric_peak
+import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_metric_share
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_not_scannable
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_session_start
 import raid_framer_desktop.composeapp.generated.resources.raid_buff_history_title
@@ -52,8 +59,13 @@ private const val TARGET_TIME_LABELS = 8
 /** Smallest bucket (used when a session is so short only a single bucket fits). */
 private const val MIN_BUCKET_MS = 30_000L
 
-/** Recessed plotting surface: a darker, slightly translucent well the grid and series sit on. */
-private val BuffHistoryPlotWell = Color(0xFF05090B).copy(alpha = 0.35f)
+/** Band fill alpha at a band's top edge and at its baseline, per series. */
+private data class BandFill(val topAlpha: Float, val bottomAlpha: Float)
+
+private val BuffedFill = BandFill(topAlpha = 0.40f, bottomAlpha = 0.10f)
+private val UnbuffedFill = BandFill(topAlpha = 0.30f, bottomAlpha = 0.07f)
+private val NotScannableFill = BandFill(topAlpha = 0.20f, bottomAlpha = 0.04f)
+private val LootFill = BandFill(topAlpha = 0.40f, bottomAlpha = 0.06f)
 
 enum class BuffHistoryMode(
   val labelRes: org.jetbrains.compose.resources.StringResource
@@ -88,7 +100,7 @@ fun formatBuffHistoryTime(seconds: Long): String {
     seconds < 86400 -> {
       val h = seconds / 3600
       val m = (seconds % 3600) / 60
-      if (m > 0) "${h}h ${m}m" else "${h}h"
+      if (h > 0) "${h}h ${m}m" else "${h}h"
     }
     else -> {
       val d = seconds / 86400
@@ -256,6 +268,56 @@ fun computeBuffHistoryDataPoints(cards: List<BuffHistorySnapshotCard>): List<Buf
   return if (points.size == 1) points + points[0].copy(timestamp = points[0].timestamp + MIN_BUCKET_MS) else points
 }
 
+/** Session summary for the graph's metrics strip, derived purely from the plotted points. */
+data class BuffHistoryMetrics(
+  val buffedCount: Int,
+  val totalPlayers: Int,
+  val buffedShare: Float,
+  val currentBuffed: Int,
+  val currentLootPercent: Int,
+  val peakValue: Int,
+  val peakSeconds: Long,
+  val intervalSeconds: Long
+)
+
+/** Summarises the latest, peak and interval state of [points] for [mode]. */
+fun computeBuffHistoryMetrics(
+  points: List<BuffHistoryDataPoint>,
+  mode: BuffHistoryMode
+): BuffHistoryMetrics? {
+  if (points.isEmpty()) return null
+  val first = points.first()
+  val last = points.last()
+
+  fun lootAvg(dp: BuffHistoryDataPoint): Int =
+    if (dp.lootPercentCount > 0) dp.lootPercentSum / dp.lootPercentCount else 0
+
+  val peak = when (mode) {
+    BuffHistoryMode.LOOT_PERCENTAGE -> points.maxByOrNull { lootAvg(it) }
+    else -> points.maxByOrNull { it.buffedCount }
+  } ?: last
+
+  return BuffHistoryMetrics(
+    buffedCount = last.buffedCount,
+    totalPlayers = last.totalPlayers,
+    buffedShare = if (last.buffedCount + last.unbuffedCount > 0) {
+      last.buffedCount * 100f / (last.buffedCount + last.unbuffedCount)
+    } else 0f,
+    currentBuffed = last.buffedCount,
+    currentLootPercent = lootAvg(last),
+    peakValue = when (mode) {
+      BuffHistoryMode.LOOT_PERCENTAGE -> lootAvg(peak)
+      else -> peak.buffedCount
+    },
+    peakSeconds = (peak.timestamp - first.timestamp) / 1000L,
+    intervalSeconds = if (points.size > 1) {
+      (last.timestamp - first.timestamp) / 1000L / (points.size - 1)
+    } else 0L
+  )
+}
+
+private data class BuffHistoryMetricSpec(val label: String, val value: String, val sub: String?, val color: Color)
+
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 fun BuffHistoryGraph(
@@ -268,6 +330,7 @@ fun BuffHistoryGraph(
   val maxX = (count - 1).toFloat().coerceAtLeast(1f)
   val firstTs = dataPoints.first().timestamp
   val lastTs = dataPoints.last().timestamp
+  val metrics = remember(dataPoints, mode) { computeBuffHistoryMetrics(dataPoints, mode) }
 
   val maxY = when (mode) {
     BuffHistoryMode.LOOT_PERCENTAGE -> {
@@ -287,173 +350,296 @@ fun BuffHistoryGraph(
     .coerceAtMost(max(count - 1, 1).toLong())
     .toInt()
 
-  val graphColor = if (mode == BuffHistoryMode.LOOT_PERCENTAGE) RFColors.buffHistoryLootBuff else RFColors.buffHistoryBuffed
+  val isLoot = mode == BuffHistoryMode.LOOT_PERCENTAGE
+  val graphColor = if (isLoot) RFColors.buffHistoryLootBuff else RFColors.buffHistoryBuffed
+
+  // Per-band gradient fill: bright under each band's top edge, fading toward its baseline. Bands
+  // are stacked and disjoint, so every gradient samples only its own span of the plot surface.
+  fun bandBrush(color: Color, fill: BandFill, topValue: Float, bottomValue: Float) =
+    color.verticalBandBrush(
+      topFraction = 1f - (topValue / maxY).coerceIn(0f, 1f),
+      bottomFraction = 1f - (bottomValue / maxY).coerceIn(0f, 1f),
+      topAlpha = fill.topAlpha,
+      bottomAlpha = fill.bottomAlpha
+    )
 
   Column(modifier = modifier) {
-    // Section header: the graph's title on the left, the series legend kept clear on the right.
+    // Panel title: accent-ticked heading on the left, series legend kept clear on the right.
     Row(
-      modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, top = 5.dp, bottom = 4.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, top = 9.dp, bottom = 7.dp),
+      horizontalArrangement = Arrangement.spacedBy(7.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
+      Box(modifier = Modifier.size(width = 3.dp, height = 11.dp).background(graphColor, RoundedCornerShape(1.dp)))
       Text(
-        text = (if (mode == BuffHistoryMode.LOOT_PERCENTAGE) {
+        text = (if (isLoot) {
           stringResource(Res.string.raid_buff_history_loot_percentage)
         } else {
           stringResource(Res.string.raid_buff_history_title)
         }).uppercase(),
-        color = RFColors.TextSecondary,
-        fontSize = 9.sp,
-        letterSpacing = 1.sp,
+        style = RFTypography.SectionTitle,
+        color = RFColors.TextPrimary,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.weight(1f)
       )
       Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
         BuffHistoryLegendItem(
           color = graphColor,
-          label = if (mode == BuffHistoryMode.LOOT_PERCENTAGE) {
+          label = if (isLoot) {
             stringResource(Res.string.raid_buff_history_loot_percent)
           } else {
             stringResource(Res.string.raid_buff_history_buffed)
           }
         )
-        if (mode != BuffHistoryMode.LOOT_PERCENTAGE) {
-          BuffHistoryLegendItem(
-            color = RFColors.buffHistoryUnbuffed,
-            label = stringResource(Res.string.raid_buff_history_unbuffed)
-          )
-          BuffHistoryLegendItem(
-            color = RFColors.buffHistoryNotScannable,
-            label = stringResource(Res.string.raid_buff_history_not_scannable)
-          )
+        if (!isLoot) {
+          BuffHistoryLegendItem(color = RFColors.buffHistoryUnbuffed, label = stringResource(Res.string.raid_buff_history_unbuffed))
+          BuffHistoryLegendItem(color = RFColors.buffHistoryNotScannable, label = stringResource(Res.string.raid_buff_history_not_scannable))
         }
       }
     }
-    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.06f)))
 
-    // Plotting well: a darker, slightly translucent surface the grid and series sit on.
-    Box(modifier = Modifier.fillMaxWidth().weight(1f).background(BuffHistoryPlotWell)) {
-      XYGraph<Float, Float>(
-        xAxisModel = rememberFloatLinearAxisModel(
-          range = 0f..maxX,
-          minViewExtent = maxX,
-          maxViewExtent = maxX,
-          minimumMajorTickIncrement = labelStep.toFloat(),
-          minimumMajorTickSpacing = 60.dp,
-          minorTickCount = 0
-        ),
-        yAxisModel = rememberFloatLinearAxisModel(
-          range = 0f..maxY,
-          minimumMajorTickSpacing = 40.dp,
-          minorTickCount = 0
-        ),
-        horizontalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.07f),
-        verticalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.07f),
-        xAxisStyle = rememberAxisStyle(color = Color.White.copy(alpha = 0.40f), tickPosition = TickPosition.Outside),
-        yAxisStyle = rememberAxisStyle(color = Color.White.copy(alpha = 0.40f), tickPosition = TickPosition.Outside),
-        xAxisLabels = @Composable { xVal ->
-          val idx = xVal.toInt().coerceIn(0, count - 1)
-          val relSecs = (dataPoints[idx].timestamp - firstTs) / 1000L
-          Text(
-            text = formatBuffHistoryTime(relSecs),
-            style = typography.caption,
-            fontSize = 10.sp,
-            lineHeight = 12.sp,
-            color = RFColors.TextSecondary
+    // Metrics strip: the session's headline numbers, derived from the same data as the series.
+    metrics?.let { m ->
+      val specs = if (isLoot) {
+        listOf(
+          BuffHistoryMetricSpec(
+            label = stringResource(Res.string.raid_buff_history_loot_percent),
+            value = "${m.currentLootPercent}%",
+            sub = null,
+            color = RFColors.buffHistoryLootBuff
+          ),
+          BuffHistoryMetricSpec(
+            label = stringResource(Res.string.raid_buff_history_metric_peak),
+            value = "${m.peakValue}%",
+            sub = formatBuffHistoryTime(m.peakSeconds).ifEmpty { null },
+            color = RFColors.TextPrimary
           )
-        },
-        yAxisLabels = @Composable { yVal ->
-          val label = when (mode) {
-            BuffHistoryMode.LOOT_PERCENTAGE -> "${yVal.toInt()}%"
-            else -> yVal.toInt().toString()
-          }
-          Text(
-            text = label,
-            style = typography.caption,
-            fontSize = 10.sp,
-            lineHeight = 12.sp,
-            color = RFColors.TextSecondary
+        )
+      } else {
+        listOf(
+          BuffHistoryMetricSpec(
+            label = stringResource(Res.string.raid_buff_history_buffed),
+            value = "${m.currentBuffed}",
+            sub = "/ ${m.totalPlayers}",
+            color = RFColors.buffHistoryBuffed
+          ),
+          BuffHistoryMetricSpec(
+            label = stringResource(Res.string.raid_buff_history_metric_share),
+            value = String.format(stringResource(Res.string.raid_buff_history_buffed_share_value), m.buffedShare),
+            sub = null,
+            color = RFColors.buffHistoryUptime
+          ),
+          BuffHistoryMetricSpec(
+            label = stringResource(Res.string.raid_buff_history_metric_peak),
+            value = "${m.peakValue}",
+            sub = formatBuffHistoryTime(m.peakSeconds).ifEmpty { null },
+            color = RFColors.TextPrimary
           )
-        }
+        )
+      }
+      val allSpecs = if (m.intervalSeconds > 0) {
+        specs + BuffHistoryMetricSpec(
+          label = stringResource(Res.string.raid_buff_history_metric_interval),
+          value = formatBuffHistoryTime(m.intervalSeconds),
+          sub = null,
+          color = RFColors.TextPrimary
+        )
+      } else {
+        specs
+      }
+
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
       ) {
-        if (mode != BuffHistoryMode.LOOT_PERCENTAGE) {
-          // Stacked bands: buffed (bottom) → unbuffed → not scannable, so the cyan edge reads the
-          // buffed player count straight off the y-axis and every band keeps its own visible fill.
-          val buffedSeries = dataPoints.mapIndexed { idx, dp ->
-            DefaultPoint(idx.toFloat(), dp.buffedCount.toFloat())
+        allSpecs.forEachIndexed { index, spec ->
+          if (index > 0) {
+            Box(modifier = Modifier.width(1.dp).height(26.dp).background(RFColors.buffHistoryHairline))
           }
-          val scannedSeries = dataPoints.mapIndexed { idx, dp ->
-            DefaultPoint(idx.toFloat(), (dp.buffedCount + dp.unbuffedCount).toFloat())
-          }
-          val totalSeries = dataPoints.mapIndexed { idx, dp ->
-            DefaultPoint(idx.toFloat(), (dp.buffedCount + dp.unbuffedCount + dp.notScannableCount).toFloat())
-          }
-          StackedAreaPlot(
-            stacks = listOf(
-              StackArea.LinearStackArea<Float, Float>(
-                buffedSeries,
-                StackedAreaStyle(
-                  lineStyle = LineStyle(SolidColor(RFColors.buffHistoryBuffed), strokeWidth = 2.dp),
-                  areaStyle = AreaStyle(SolidColor(RFColors.buffHistoryBuffed.copy(alpha = 0.5f)))
-                )
-              ),
-              StackArea.LinearStackArea<Float, Float>(
-                scannedSeries,
-                StackedAreaStyle(
-                  lineStyle = LineStyle(SolidColor(RFColors.buffHistoryUnbuffed), strokeWidth = 1.5.dp),
-                  areaStyle = AreaStyle(SolidColor(RFColors.buffHistoryUnbuffed.copy(alpha = 0.6f)))
-                )
-              ),
-              StackArea.LinearStackArea<Float, Float>(
-                totalSeries,
-                StackedAreaStyle(
-                  lineStyle = LineStyle(SolidColor(RFColors.buffHistoryNotScannable), strokeWidth = 1.dp),
-                  areaStyle = AreaStyle(SolidColor(RFColors.buffHistoryNotScannable.copy(alpha = 0.45f)))
-                )
-              )
-            ),
-            baseline = AreaBaseline.HorizontalLine(0f)
-          )
-        } else {
-          val lootSeries = dataPoints.mapIndexed { idx, dp ->
-            val avg = if (dp.lootPercentCount > 0) (dp.lootPercentSum / dp.lootPercentCount).toFloat() else 0f
-            DefaultPoint(idx.toFloat(), avg)
-          }
-          AreaPlot2(
-            data = lootSeries,
-            areaBaseline = AreaBaseline.HorizontalLine(0f),
-            areaStyle = AreaStyle(SolidColor(graphColor.copy(alpha = 0.5f))),
-            lineStyle = LineStyle(SolidColor(graphColor), strokeWidth = 1.5.dp)
+          BuffHistoryMetric(
+            label = spec.label,
+            value = spec.value,
+            sub = spec.sub,
+            color = spec.color,
+            modifier = Modifier.weight(1f)
           )
         }
       }
     }
 
-    // Session start marker: sits below the graph at the left, pointing up at the 0 marker.
+    // Plot well: a recessed, bordered inset surface the grid and series sit on.
+    Box(modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 8.dp)) {
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .background(RFColors.buffHistoryPlotWell, RoundedCornerShape(4.dp))
+          .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(4.dp))
+          .padding(start = 4.dp, top = 2.dp, end = 4.dp, bottom = 2.dp)
+      ) {
+        XYGraph<Float, Float>(
+          xAxisModel = rememberFloatLinearAxisModel(
+            range = 0f..maxX,
+            minViewExtent = maxX,
+            maxViewExtent = maxX,
+            minimumMajorTickIncrement = labelStep.toFloat(),
+            minimumMajorTickSpacing = 60.dp,
+            minorTickCount = 0
+          ),
+          yAxisModel = rememberFloatLinearAxisModel(
+            range = 0f..maxY,
+            minimumMajorTickSpacing = 40.dp,
+            minorTickCount = 0
+          ),
+          horizontalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.05f),
+          verticalMajorGridLineStyle = LineStyle(SolidColor(Color.White), strokeWidth = 0.5.dp, alpha = 0.04f),
+          xAxisStyle = rememberAxisStyle(
+            color = Color.White.copy(alpha = 0.30f),
+            tickPosition = TickPosition.Outside,
+            majorTickSize = 3.dp
+          ),
+          yAxisStyle = rememberAxisStyle(
+            color = Color.White.copy(alpha = 0.30f),
+            tickPosition = TickPosition.Outside,
+            majorTickSize = 3.dp
+          ),
+          xAxisLabels = @Composable { xVal ->
+            val idx = xVal.toInt().coerceIn(0, count - 1)
+            val relSecs = (dataPoints[idx].timestamp - firstTs) / 1000L
+            Text(
+              text = formatBuffHistoryTime(relSecs),
+              style = RFTypography.Meta,
+              color = RFColors.TextSecondary
+            )
+          },
+          yAxisLabels = @Composable { yVal ->
+            val label = if (isLoot) "${yVal.toInt()}%" else yVal.toInt().toString()
+            Text(text = label, style = RFTypography.Meta, color = RFColors.TextSecondary)
+          }
+        ) {
+          if (isLoot) {
+            val lootSeries = dataPoints.mapIndexed { idx, dp ->
+              val avg = if (dp.lootPercentCount > 0) (dp.lootPercentSum / dp.lootPercentCount).toFloat() else 0f
+              DefaultPoint(idx.toFloat(), avg)
+            }
+            val maxLoot = dataPoints.maxOf {
+              if (it.lootPercentCount > 0) (it.lootPercentSum / it.lootPercentCount).toFloat() else 0f
+            }
+            AreaPlot2(
+              data = lootSeries,
+              areaBaseline = AreaBaseline.HorizontalLine(0f),
+              areaStyle = AreaStyle(bandBrush(graphColor, LootFill, maxLoot, 0f)),
+              lineStyle = LineStyle(SolidColor(graphColor), strokeWidth = 1.5.dp)
+            )
+          } else {
+            // Stacked bands: buffed (bottom) → unbuffed → not scannable, so the cyan edge reads the
+            // buffed player count straight off the y-axis and every band keeps its own visible fill.
+            val buffedSeries = dataPoints.mapIndexed { idx, dp -> DefaultPoint(idx.toFloat(), dp.buffedCount.toFloat()) }
+            val scannedSeries = dataPoints.mapIndexed { idx, dp ->
+              DefaultPoint(idx.toFloat(), (dp.buffedCount + dp.unbuffedCount).toFloat())
+            }
+            val totalSeries = dataPoints.mapIndexed { idx, dp ->
+              DefaultPoint(idx.toFloat(), (dp.buffedCount + dp.unbuffedCount + dp.notScannableCount).toFloat())
+            }
+            StackedAreaPlot(
+              stacks = listOf(
+                StackArea.LinearStackArea(
+                  buffedSeries,
+                  StackedAreaStyle(
+                    lineStyle = LineStyle(SolidColor(RFColors.buffHistoryBuffed), strokeWidth = 2.dp),
+                    areaStyle = AreaStyle(bandBrush(RFColors.buffHistoryBuffed, BuffedFill, dataPoints.maxOf { it.buffedCount.toFloat() }, 0f))
+                  )
+                ),
+                StackArea.LinearStackArea(
+                  scannedSeries,
+                  StackedAreaStyle(
+                    lineStyle = LineStyle(SolidColor(RFColors.buffHistoryUnbuffed), strokeWidth = 1.5.dp),
+                    areaStyle = AreaStyle(
+                      bandBrush(RFColors.buffHistoryUnbuffed, UnbuffedFill, dataPoints.maxOf { (it.buffedCount + it.unbuffedCount).toFloat() }, 0f)
+                    )
+                  )
+                ),
+                StackArea.LinearStackArea(
+                  totalSeries,
+                  StackedAreaStyle(
+                    lineStyle = LineStyle(SolidColor(RFColors.buffHistoryNotScannable), strokeWidth = 1.25.dp),
+                    areaStyle = AreaStyle(
+                      bandBrush(
+                        RFColors.buffHistoryNotScannable,
+                        NotScannableFill,
+                        dataPoints.maxOf { (it.buffedCount + it.unbuffedCount + it.notScannableCount).toFloat() },
+                        0f
+                      )
+                    )
+                  )
+                )
+              ),
+              baseline = AreaBaseline.HorizontalLine(0f)
+            )
+          }
+        }
+      }
+    }
+
+    // Session start marker: sits below the well, pointing up at the 0s label.
     Row(
-      modifier = Modifier.fillMaxWidth().padding(start = 34.dp, top = 3.dp, bottom = 4.dp),
+      modifier = Modifier.fillMaxWidth().padding(start = 34.dp, top = 4.dp, bottom = 6.dp),
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Text(text = "▲", color = RFColors.TextTertiary, fontSize = 8.sp)
-      Spacer(modifier = Modifier.width(4.dp))
+      Text(text = "▲", color = RFColors.TextTertiary.copy(alpha = 0.7f), fontSize = 7.sp)
       Text(
         text = stringResource(Res.string.raid_buff_history_session_start),
-        color = RFColors.TextTertiary,
-        fontSize = 9.sp
+        style = RFTypography.Meta,
+        color = RFColors.TextTertiary
       )
     }
   }
 }
 
-/** One entry of the graph legend: a small colour swatch and its label. */
+/** One entry of the graph legend: a series-coloured swatch bar and its label. */
 @Composable
 private fun BuffHistoryLegendItem(color: Color, label: String) {
-  Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-    Box(modifier = Modifier.size(6.dp).background(color, RoundedCornerShape(1.dp)))
-    Text(text = label, color = RFColors.TextSecondary, fontSize = 9.sp, maxLines = 1)
+  Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+    // Same nudge as the card stat swatch so both align to the text's visual midline.
+    Box(
+      modifier = Modifier
+        .offset(y = 1.dp)
+        .size(width = 8.dp, height = 3.dp)
+        .background(color, RoundedCornerShape(1.5.dp))
+    )
+    Text(text = label, style = RFTypography.Meta, color = RFColors.TextSecondary, maxLines = 1)
+  }
+}
+
+/** One metrics-strip block: an uppercase kicker over a value with an optional trailing sub-value. */
+@Composable
+private fun BuffHistoryMetric(
+  label: String,
+  value: String,
+  sub: String?,
+  color: Color,
+  modifier: Modifier = Modifier
+) {
+  Column(
+    modifier = modifier.padding(horizontal = 2.dp),
+    verticalArrangement = Arrangement.spacedBy(2.dp)
+  ) {
+    Text(text = label.uppercase(), style = RFTypography.Kicker, color = RFColors.TextTertiary, maxLines = 1)
+    Row(horizontalArrangement = Arrangement.spacedBy(3.dp), verticalAlignment = Alignment.Bottom) {
+      Text(text = value, style = RFTypography.Metric, color = color, maxLines = 1)
+      if (sub != null) {
+        Text(
+          text = sub,
+          style = RFTypography.Meta,
+          color = RFColors.TextTertiary,
+          maxLines = 1,
+          modifier = Modifier.padding(bottom = 1.dp)
+        )
+      }
+    }
   }
 }

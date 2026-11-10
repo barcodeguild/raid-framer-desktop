@@ -746,6 +746,8 @@ object PlayerCacheInteractor : Interactor() {
         lastCoherenceFrameAtMs = 0L
         coherenceRecordingMs.longValue = 0L
         coherenceRecorderMs.longValue = 0L
+        // Buff history belongs to the session that recorded it; a new session starts clean.
+        clearBuffHistoryData()
       }
       GraphDataInteractor.clearForSession()
       logSessionMemoryCensus("new session")
@@ -802,6 +804,8 @@ object PlayerCacheInteractor : Interactor() {
         lastCoherenceFrameAtMs = 0L
         coherenceRecordingMs.longValue = 0L
         coherenceRecorderMs.longValue = 0L
+        // Aborted sessions are reverted wholesale, so their buff history goes with them.
+        clearBuffHistoryData()
       }
       GraphDataInteractor.clearForSession()
       logSessionMemoryCensus("aborted session")

@@ -30,11 +30,13 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.ConfigDao
 import com.reoky.raidframer.core.database.ConfigEntity
+import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.core.helpers.RFTypography
 import com.reoky.raidframer.core.model.PlayerCard
+import com.reoky.raidframer.ui.component.BuffHistorySnapshotList
 import com.reoky.raidframer.ui.component.graphs.BuffHistoryDataPoint
 import com.reoky.raidframer.ui.component.graphs.BuffHistoryGraph
 import com.reoky.raidframer.ui.component.graphs.BuffHistoryMode
@@ -89,6 +91,22 @@ private val graphPoints: List<BuffHistoryDataPoint> = (0 until 34).map { i ->
     totalPlayers = PLAYER_COUNT,
     lootPercentSum = 0,
     lootPercentCount = 0,
+    individualBuffCounts = emptyMap()
+  )
+}
+
+/** Loot-percentage variant of the same session: each scanned player carries some loot buffs. */
+private val lootGraphPoints: List<BuffHistoryDataPoint> = (0 until 34).map { i ->
+  val scanned = PLAYER_COUNT - if (i % 7 == 0) 3 else 1
+  val avgLoot = 120 + (i % 5) * 15
+  BuffHistoryDataPoint(
+    timestamp = START_MS + i * 60_000L,
+    buffedCount = 0,
+    notScannableCount = PLAYER_COUNT - scanned,
+    unbuffedCount = scanned,
+    totalPlayers = PLAYER_COUNT,
+    lootPercentSum = avgLoot * scanned,
+    lootPercentCount = scanned,
     individualBuffCounts = emptyMap()
   )
 }
@@ -160,12 +178,12 @@ private fun BuffHistoryHarness() {
       )
     }
 
-    Box(modifier = Modifier.fillMaxWidth().weight(3f)) {
+    Box(modifier = Modifier.fillMaxWidth().weight(3.6f)) {
       Column(
         modifier = Modifier
           .fillMaxSize()
-          .background(BuffHistoryPanelColor, RoundedCornerShape(4.dp))
-          .border(1.dp, BuffHistoryHairline, RoundedCornerShape(4.dp))
+          .background(RFColors.buffHistoryPanel, RoundedCornerShape(5.dp))
+          .border(1.dp, RFColors.buffHistoryHairline, RoundedCornerShape(5.dp))
       ) {
         BuffHistoryGraph(
           dataPoints = graphPoints,
@@ -176,24 +194,23 @@ private fun BuffHistoryHarness() {
     }
 
     Row(
-      modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 3.dp),
+      modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 5.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
       Text(
         text = stringResource(Res.string.raid_buff_history_section_snapshots).uppercase(),
-        color = Color(0xFF8B8B8B),
-        fontSize = 9.sp,
-        letterSpacing = 1.sp,
+        style = RFTypography.SectionLabel,
+        color = RFColors.TextSecondary,
         maxLines = 1
       )
-      Box(modifier = Modifier.weight(1f).height(1.dp).background(BuffHistoryHairline))
+      Box(modifier = Modifier.weight(1f).height(1.dp).background(RFColors.buffHistoryHairline))
     }
 
     Column(
       modifier = Modifier
         .fillMaxWidth()
-        .weight(4f)
+        .weight(3.4f)
         .verticalScroll(rememberScrollState())
         .padding(bottom = 4.dp)
     ) {
@@ -203,6 +220,7 @@ private fun BuffHistoryHarness() {
         playerCards = playerCards,
         showSpecIcons = true,
         onPlayerClick = {},
+        newestExpanded = true,
         modifier = Modifier.fillMaxWidth()
       )
     }
@@ -232,6 +250,31 @@ class BuffHistoryRenderTest {
     renderTo("build/review/buff_history_render_narrow.png") {
       Box(modifier = Modifier.requiredSize(700.dp, 768.dp).background(Color(0xCC121212))) {
         BuffHistoryHarness()
+      }
+    }
+  }
+
+  /** Loot-percentage mode: purple single series with its own metrics set. */
+  @Test
+  fun renderBuffHistoryLootMode() {
+    renderTo("build/review/buff_history_render_loot.png") {
+      Box(modifier = Modifier.fillMaxSize().background(Color(0xCC121212))) {
+        Column(modifier = Modifier.fillMaxSize()) {
+          Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            Column(
+              modifier = Modifier
+                .fillMaxSize()
+                .background(RFColors.buffHistoryPanel, RoundedCornerShape(5.dp))
+                .border(1.dp, RFColors.buffHistoryHairline, RoundedCornerShape(5.dp))
+            ) {
+              BuffHistoryGraph(
+                dataPoints = lootGraphPoints,
+                mode = BuffHistoryMode.LOOT_PERCENTAGE,
+                modifier = Modifier.fillMaxSize()
+              )
+            }
+          }
+        }
       }
     }
   }
