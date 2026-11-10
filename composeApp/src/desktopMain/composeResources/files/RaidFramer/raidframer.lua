@@ -3,7 +3,7 @@
 -- https://github.com/barcodeguild/raid-framer-desktop
 -- Author: Reoky
 RF = RF or {}
-RF.TAG = "Raid Framer 2.4.8"
+RF.TAG = "Raid Framer 2.4.9"
 
 RF.PLAYER_NAME = ""
 RF.FACTION = ""

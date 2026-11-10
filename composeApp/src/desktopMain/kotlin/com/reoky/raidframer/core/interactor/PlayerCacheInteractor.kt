@@ -43,6 +43,18 @@ import kotlinx.coroutines.sync.withLock
 import org.jetbrains.compose.resources.StringResource
 
 /**
+ * True when a roster frame carries a buff scan we can actually trust.
+ *
+ * The Lua addon only transmits buffs whose ID is on `INTERESTING_BUFF_IDS`, so a player it *did*
+ * inspect arrives with an empty `buffs` list whenever none of their buffs are whitelisted. A
+ * positive [RaidFramePayload.buffCount] is the addon's signal that `UnitBuffCount` answered, i.e.
+ * the scan returned data for that unit (the same signal the loot-buff tracking uses). An empty
+ * list with no buff count is an out-of-range / failed read and must stay "not scannable".
+ */
+internal fun RaidFramePayload.hasConfirmedBuffScan(): Boolean =
+  buffs.isNotEmpty() || buffCount > 0
+
+/**
  * Keeps a cache of players and NPCs seen in the log. When a player is first detected their player card is loaded
  * from the database (if it exists) or created new (if it doesn't). Cards are held in memory, and continually written
  * back to the database for persistence. This allows the app to remember that a player is real vs an NPC across sessions,
@@ -74,8 +86,99 @@ object PlayerCacheInteractor : Interactor() {
   private val raidAttendance = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidDepartures = mutableStateMapOf<Int, MutableSet<String>>()
   private val raidBuffHistory = mutableMapOf<String, RaidBuffSnapshot>()
+  /** Full timeline of buff snapshots per player for the Buff History graph. */
+  private val raidBuffTimeline = mutableMapOf<String, MutableList<RaidBuffSnapshot>>()
   private const val RAID_BUFF_HISTORY_RETENTION_MS = 6L * 60L * 60L * 1000L
   private var lastRaidBuffHistoryCleanupAt = 0L
+  /** Roster snapshots per raid id, only appended when membership actually changes. */
+  private val raidRosterTimeline = mutableMapOf<Int, MutableList<RaidRosterFrame>>()
+  private var lastNonEmptyRosterAt = System.currentTimeMillis()
+  /** How long both raids must stay empty before recorded buff history is dropped. */
+  private const val EMPTY_ROSTER_CLEAR_DELAY_MS = 60_000L
+  /** Minimum roster size for a frame to count as a real raid when detecting raid replacement. */
+  private const val RAID_REPLACEMENT_MIN_MEMBERS = 5
+  /** A new roster carrying under 1/denominator of the previous raid's players is a new raid. */
+  private const val RAID_REPLACEMENT_CARRYOVER_DENOM = 2
+
+  /**
+   * Returns a snapshot of all recorded buff history entries for use by the Buff History tab.
+   * Each entry is a single [RaidBuffSnapshot] per player (the most recent one).
+   * For the history graph, we need all historical snapshots, so we expose the full map.
+   */
+  fun getRaidBuffHistory(): Map<String, RaidBuffSnapshot> = raidBuffHistory.toMap()
+
+  /**
+   * Returns the full timeline of buff snapshots per player for the Buff History graph.
+   * Each player maps to a list of [RaidBuffSnapshot] ordered by [RaidBuffSnapshot.observedAt].
+   */
+  fun getRaidBuffTimeline(): Map<String, List<RaidBuffSnapshot>> =
+    raidBuffTimeline.mapValues { it.value.toList() }.toMap()
+
+  /**
+   * Roster frames per raid id, newest last. The Buff History graph and snapshot cards resolve each
+   * bucket's roster from this log so totals follow the raid as players join and leave instead of
+   * applying the current roster to all of history.
+   */
+  fun getRaidRosterTimeline(): Map<Int, List<RaidRosterFrame>> =
+    raidRosterTimeline.mapValues { it.value.toList() }.toMap()
+
+  /**
+   * Records the raid roster over time (only appended when membership actually changes) and drops
+   * all recorded buff history once the player has been out of any raid for a sustained stretch, so
+   * leaving and rejoining a raid starts from a clean slate instead of showing stale snapshots.
+   * A wholesale roster swap (left one raid, joined another between scans) resets history too.
+   * Must be called with the mutex held.
+   */
+  private fun trackRaidRoster(raidId: Int, members: List<RaidFramePayload>) {
+    val now = System.currentTimeMillis()
+    val names = members.mapNotNullTo(LinkedHashSet()) { it.playerName.takeIf { n -> n.isNotBlank() } }
+    val log = raidRosterTimeline.getOrPut(raidId) { mutableListOf() }
+    if (log.isEmpty() || log.last().playerNames != names) {
+      if (names.isNotEmpty() && raidWasReplaced(log, names)) {
+        if (raidId == 0) {
+          // The main raid was replaced; keep the co-raid's current roster so its ongoing
+          // history still resolves while the main raid starts fresh.
+          val coRaidFrame = raidRosterTimeline[1]?.lastOrNull()
+          clearBuffHistoryData()
+          coRaidFrame?.let { raidRosterTimeline.getOrPut(1) { mutableListOf() }.add(it) }
+        } else {
+          // A replaced co-raid only invalidates its own recorded roster.
+          raidRosterTimeline.remove(raidId)
+        }
+      }
+      // clearBuffHistoryData detaches the log instance, so re-resolve before appending.
+      raidRosterTimeline.getOrPut(raidId) { mutableListOf() }.add(RaidRosterFrame(now, names))
+    }
+    val anyRealPlayers = (raids[0].orEmpty() + raids[1].orEmpty()).flatten().any { it.playerName.isNotBlank() }
+    if (anyRealPlayers) {
+      lastNonEmptyRosterAt = now
+    } else if (now - lastNonEmptyRosterAt >= EMPTY_ROSTER_CLEAR_DELAY_MS &&
+      (raidBuffHistory.isNotEmpty() || raidBuffTimeline.isNotEmpty() || raidRosterTimeline.values.any { it.isNotEmpty() })
+    ) {
+      Log.info(TAG, "Raid roster empty for ${EMPTY_ROSTER_CLEAR_DELAY_MS / 1000}s, clearing buff history")
+      clearBuffHistoryData()
+    }
+  }
+
+  /**
+   * True when [names] takes over a slot whose most recent real raid shares fewer than half of
+   * its players — the signature of leaving one raid and joining a different one. Gradual
+   * membership churn never comes close to this, and shrinking raids only ever overlap fully.
+   */
+  private fun raidWasReplaced(log: List<RaidRosterFrame>, names: Set<String>): Boolean {
+    val previousRaid = log.lastOrNull { it.playerNames.size >= RAID_REPLACEMENT_MIN_MEMBERS }?.playerNames
+      ?: return false
+    val carriedOver = names.count { it in previousRaid }
+    return carriedOver * RAID_REPLACEMENT_CARRYOVER_DENOM < previousRaid.size
+  }
+
+  /** Drops all recorded buff history, the buff timeline and the roster log. */
+  private fun clearBuffHistoryData() {
+    raidBuffHistory.clear()
+    raidBuffTimeline.clear()
+    raidRosterTimeline.clear()
+    lastRaidBuffHistoryCleanupAt = System.currentTimeMillis()
+  }
 
   // --- Coherence tracking (time-in-range metric) ---
   // Distances (meters) for the coherence thresholds. Distances are delivered from the recorder's
@@ -258,16 +361,16 @@ object PlayerCacheInteractor : Interactor() {
    */
   suspend fun updatePlayersForRaidById(raidId: Int, members: List<RaidFramePayload>) {
     mutex.withLock {
-      // improvement to the code where if the first raid is empty we clear all raids (because the player left the raid)
-      if (raidId == 0 && members.isEmpty()) {
+      // An all-blank main raid is the addon's explicit "left the raid" signal: it resets its
+      // roster and sends one final empty frame before going quiet, so no later frame would
+      // arrive to complete the 60s empty-roster countdown. Clear everything right away.
+      if (raidId == 0 && members.all { it.playerName.isBlank() }) {
         raids.clear()
+        clearBuffHistoryData()
         return@withLock
       }
       raids[raidId] = members.chunked(5).take(20)
-      // Guard: if main raid has zero real players, also clear co-raid data (ghost raid)
-      if (raidId == 0 && members.all { it.playerName.isBlank() }) {
-        raids.remove(1)
-      }
+      trackRaidRoster(raidId, members)
       members.forEach { member ->
         if (member.playerName.isNotBlank()) {
           recordRaidBuffSnapshot(member)
@@ -399,14 +502,29 @@ object PlayerCacheInteractor : Interactor() {
   private fun recordRaidBuffSnapshot(member: RaidFramePayload) {
     val now = System.currentTimeMillis()
     val buffIds = member.buffs.map { it.buff_id }.toSet()
-    // The addon emits an empty list both for a confirmed empty read and for a player it could not
-    // inspect. Preserve that distinction: an empty read is not evidence that buffs are missing.
-    if (buffIds.isNotEmpty()) {
-      raidBuffHistory[member.playerName] = RaidBuffSnapshot(now, buffIds, member.distance)
+    // The addon filters the transmitted list down to INTERESTING_BUFF_IDS, so a player it scanned
+    // can arrive with an empty list. Record that as a confirmed read with zero matching buffs
+    // (see hasConfirmedBuffScan) — otherwise every player without a raid buff is skipped here and
+    // stays permanently "not scannable" in the Buff History graph even though the scan succeeded.
+    // A frame with no buff data at all is still an out-of-range/failed read and is not recorded:
+    // an empty read is not evidence that buffs are missing.
+    if (member.hasConfirmedBuffScan()) {
+      val snapshot = RaidBuffSnapshot(now, buffIds, member.distance)
+      raidBuffHistory[member.playerName] = snapshot
+      // Also append to the timeline for the Buff History graph
+      raidBuffTimeline.getOrPut(member.playerName) { mutableListOf() }.add(snapshot)
     }
     if (now - lastRaidBuffHistoryCleanupAt >= 60_000L) {
       val cutoff = now - RAID_BUFF_HISTORY_RETENTION_MS
       raidBuffHistory.entries.removeIf { it.value.observedAt < cutoff }
+      raidBuffTimeline.values.forEach { list ->
+        list.removeAll { it.observedAt < cutoff }
+      }
+      raidBuffTimeline.entries.removeAll { it.value.isEmpty() }
+      raidRosterTimeline.values.forEach { frames ->
+        frames.removeAll { it.observedAt < cutoff }
+      }
+      raidRosterTimeline.entries.removeAll { it.value.isEmpty() }
       lastRaidBuffHistoryCleanupAt = now
     }
   }
@@ -485,7 +603,11 @@ object PlayerCacheInteractor : Interactor() {
         lastKnownGearScore = cached?.lastKnownGearScore ?: 0,
         leaderships = cached?.leaderships ?: 0,
         isLoaded = true,
-        isRealPlayer = cached != null,
+        // A cached DB row / seed-table entry only makes someone a player if their name
+        // can actually be a player name. Mobs (e.g. "Crimson Army Soldier") can end up
+        // with a cache row, and trusting it here would drop them straight into every
+        // ranking flow, all of which filter on isRealPlayer.
+        isRealPlayer = cached != null && isPlayerName(playerName),
         cache = cached,
         currentBuild = previousSpec,
         currentRole = SpecType.fromName(previousSpec)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value
@@ -521,7 +643,9 @@ object PlayerCacheInteractor : Interactor() {
       lastKnownGearScore = cached.lastKnownGearScore,
       leaderships = cached.leaderships,
       isLoaded = true,
-      isRealPlayer = true,
+      // Same guard as createCardIfNoneExists: a DB row for a mob name must not
+      // promote it to a real player (it would then appear in rankings).
+      isRealPlayer = isPlayerName(playerName),
       cache = cached,
       currentBuild = previousSpec,
       currentRole = SpecType.fromName(previousSpec)?.guessPlayerRole()?.value ?: PlayerRole.BLUE.value
@@ -650,6 +774,8 @@ object PlayerCacheInteractor : Interactor() {
         lastCoherenceFrameAtMs = 0L
         coherenceRecordingMs.longValue = 0L
         coherenceRecorderMs.longValue = 0L
+        // Buff history belongs to the session that recorded it; a new session starts clean.
+        clearBuffHistoryData()
       }
       GraphDataInteractor.clearForSession()
       logSessionMemoryCensus("new session")
@@ -706,6 +832,8 @@ object PlayerCacheInteractor : Interactor() {
         lastCoherenceFrameAtMs = 0L
         coherenceRecordingMs.longValue = 0L
         coherenceRecorderMs.longValue = 0L
+        // Aborted sessions are reverted wholesale, so their buff history goes with them.
+        clearBuffHistoryData()
       }
       GraphDataInteractor.clearForSession()
       logSessionMemoryCensus("aborted session")
@@ -1219,6 +1347,13 @@ object PlayerCacheInteractor : Interactor() {
     guild: String = "",
     gearScore: Int = 0
   ) {
+    // Defense in depth: callers already filter NPC unit types / spaced names, but a mob
+    // must never reach the strong assert — it permanently promotes the card to a player
+    // and persists it, which is how mobs leak into the rankings.
+    if (!isPlayerName(name)) {
+      Log.debug(TAG, "Skipping strong player assertion for '$name' — names with spaces are NPCs")
+      return
+    }
     val spec = SpecType.fromTrees(classMap.values.mapNotNull { gameId -> SkillTreeType.fromGameId(gameId) }.toSet())
     val parsedFaction = Faction.fromString(faction)
     scope.launch {

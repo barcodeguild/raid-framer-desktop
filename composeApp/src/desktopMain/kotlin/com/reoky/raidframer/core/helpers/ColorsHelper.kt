@@ -1,5 +1,6 @@
 package com.reoky.raidframer.core.helpers
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.reoky.raidframer.core.config.RFConfig
@@ -214,6 +215,22 @@ object RFColors {
 
   // "Well" background used for inset content surfaces (e.g. PlayerCard wells).
   val WellColor = CardBackground.copy(alpha = 0.72f)
+
+  // Buff History graph colors
+  val buffHistoryBuffed = Color(0xFF36F1CC)        // Same-faction cyan — buffed players
+  val buffHistoryNotScannable = Color(0xFF8B8B8B)  // Grey — not scannable players
+  val buffHistoryLootBuff = Color(0xFFAB47BC)      // Purple — loot percentage (same as lootBuffColor)
+  val buffHistoryUnbuffed = Color(0xFFFF7777)      // Light red — unbuffed players (total - buffed - not scannable)
+  val buffHistoryUptime = Color(0xFF7CFF8A)        // Green — buffed share badge and ✓ marks (same as callerAvgGs)
+
+  // Buff History surfaces, layered panel > card > header tint > inset plot well
+  val buffHistoryPanel = Color(0xFF0A0F11).copy(alpha = 0.45f)
+  val buffHistoryCard = Color(0xFF0E1315).copy(alpha = 0.72f)
+  val buffHistoryHeaderTint = Color.White.copy(alpha = 0.04f)
+  val buffHistoryRowTint = Color.White.copy(alpha = 0.025f)
+  val buffHistoryHairline = Color.White.copy(alpha = 0.07f)
+  val buffHistoryMenu = Color(0xFF14181A)
+  val buffHistoryPlotWell = Color(0xFF05090B).copy(alpha = 0.35f)
 }
 
 /** Per-skill-tree accent color, shared by the spec-type picker and composition rendering. */
@@ -314,6 +331,29 @@ fun Color.contrastTextColor(): Color {
   // Compute perceived luminance (ITU-R BT.601)
   val luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0
   return if (luminance > 0.5) Color.Black else Color.White
+}
+
+/**
+ * Vertical gradient that lives only within a chart band's own span of the drawing surface: bright
+ * under the band's top edge, fading out toward its baseline. The gradient spans the full drawing
+ * area it is applied to, so [topFraction]/[bottomFraction] (0..1 of that surface) map exactly onto
+ * it. Stacked bands stay visually disjoint because each fill samples only its own fraction range
+ * and never overlaps a neighbouring fill.
+ */
+fun Color.verticalBandBrush(
+  topFraction: Float,
+  bottomFraction: Float,
+  topAlpha: Float,
+  bottomAlpha: Float
+): Brush {
+  val top = topFraction.coerceIn(0f, 1f)
+  val bottom = bottomFraction.coerceIn(top, 1f)
+  return Brush.verticalGradient(
+    colorStops = arrayOf(
+      top to copy(alpha = topAlpha),
+      bottom to copy(alpha = bottomAlpha)
+    )
+  )
 }
 
 /*
