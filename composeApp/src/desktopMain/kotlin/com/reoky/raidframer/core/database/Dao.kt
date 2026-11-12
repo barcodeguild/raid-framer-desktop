@@ -114,14 +114,18 @@ interface PlayerSessionDao {
   @Query("SELECT playerName, COUNT(DISTINCT sessionStart) AS sessionCount, SUM(totalDamage) AS totalDamage, SUM(totalHealing) AS totalHealing, SUM(totalCC) AS totalCC FROM player_session_totals WHERE sessionStart >= :startMs AND sessionStart < :endMs GROUP BY playerName ORDER BY sessionCount DESC")
   suspend fun getPlayerAttendanceStatsInRange(startMs: Long, endMs: Long): List<PlayerAttendanceStats>
 
-  // Lifetime attendance ranking with each player's faction joined in a single round-trip.
-  // The faction lives on player_cache (which is deliberately NOT loaded wholesale into
-  // memory), so the join keeps the ranking list self-sufficient.
+  // Lifetime attendance ranking with each player's faction and spec joined in a single
+  // round-trip. The faction and spec live on player_cache (which is deliberately NOT loaded
+  // wholesale into memory), so the join keeps the ranking list self-sufficient.
   // When :activeOnly, only players whose average per-session contribution reaches at least
   // one of the given thresholds are returned — filters out members who attended but
   // never engaged (no damage, no heals, no CC).
-  @Query("SELECT ps.playerName AS playerName, COUNT(DISTINCT ps.sessionStart) AS sessionCount, SUM(ps.totalDamage) AS totalDamage, SUM(ps.totalHealing) AS totalHealing, SUM(ps.totalCC) AS totalCC, COALESCE(MAX(pc.lastKnownFaction), '') AS lastKnownFaction FROM player_session_totals ps LEFT JOIN player_cache pc ON pc.playerName = ps.playerName GROUP BY ps.playerName HAVING (:activeOnly = 0 OR SUM(ps.totalDamage) / COUNT(DISTINCT ps.sessionStart) >= :minDamage OR SUM(ps.totalHealing) / COUNT(DISTINCT ps.sessionStart) >= :minHeals OR SUM(ps.totalCC) / COUNT(DISTINCT ps.sessionStart) >= :minCC) ORDER BY sessionCount DESC")
+  @Query("SELECT ps.playerName AS playerName, COUNT(DISTINCT ps.sessionStart) AS sessionCount, SUM(ps.totalDamage) AS totalDamage, SUM(ps.totalHealing) AS totalHealing, SUM(ps.totalCC) AS totalCC, COALESCE(MAX(pc.lastKnownFaction), '') AS lastKnownFaction, COALESCE(MAX(pc.lastKnownSpec), '') AS lastKnownSpec FROM player_session_totals ps LEFT JOIN player_cache pc ON pc.playerName = ps.playerName GROUP BY ps.playerName HAVING (:activeOnly = 0 OR SUM(ps.totalDamage) / COUNT(DISTINCT ps.sessionStart) >= :minDamage OR SUM(ps.totalHealing) / COUNT(DISTINCT ps.sessionStart) >= :minHeals OR SUM(ps.totalCC) / COUNT(DISTINCT ps.sessionStart) >= :minCC) ORDER BY sessionCount DESC")
   suspend fun getPlayerLifetimeAttendanceStats(activeOnly: Boolean, minDamage: Long, minHeals: Long, minCC: Int): List<PlayerAttendanceRank>
+
+  // Total distinct sessions ever recorded (denominator for attendance rankings)
+  @Query("SELECT COUNT(DISTINCT sessionStart) FROM player_session_totals")
+  suspend fun getDistinctSessionCount(): Int
 }
 
 data class PlayerAttendanceStats(
@@ -132,14 +136,15 @@ data class PlayerAttendanceStats(
   val totalCC: Int = 0
 )
 
-// PlayerAttendanceStats + the faction from player_cache, for ranked displays
+// PlayerAttendanceStats + the faction and spec from player_cache, for ranked displays
 data class PlayerAttendanceRank(
   val playerName: String,
   val sessionCount: Int,
   val totalDamage: Long = 0L,
   val totalHealing: Long = 0L,
   val totalCC: Int = 0,
-  val lastKnownFaction: String = ""
+  val lastKnownFaction: String = "",
+  val lastKnownSpec: String = ""
 )
 
 data class SessionSummary(

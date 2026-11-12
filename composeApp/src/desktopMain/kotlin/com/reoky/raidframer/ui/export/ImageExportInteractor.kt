@@ -4,6 +4,8 @@ import androidx.compose.ui.graphics.Color as ComposeColor
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.MAX_EXPORT_BACKGROUND_DIMNESS
+import com.reoky.raidframer.core.database.PlayerAttendanceRank
+import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.definitions.SkillTreeType
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.definitions.SpecType
@@ -14,6 +16,11 @@ import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.getDocumentsDirectory
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.AttendanceRole
+import com.reoky.raidframer.core.helpers.rankedForRole
+import com.reoky.raidframer.ui.component.ACTIVE_MIN_CC
+import com.reoky.raidframer.ui.component.ACTIVE_MIN_DAMAGE
+import com.reoky.raidframer.ui.component.ACTIVE_MIN_HEALS
 import com.reoky.raidframer.core.helpers.toHumanDuration
 import com.reoky.raidframer.core.interactor.PlayerCacheInteractor
 import com.reoky.raidframer.core.interactor.Log
@@ -58,6 +65,7 @@ import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_dama
 import raid_framer_desktop.composeapp.generated.resources.attendance_best_cc
 import raid_framer_desktop.composeapp.generated.resources.attendance_best_dmg
 import raid_framer_desktop.composeapp.generated.resources.attendance_best_heals
+import raid_framer_desktop.composeapp.generated.resources.attendance_sessions_count
 import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_heals
 import raid_framer_desktop.composeapp.generated.resources.summary_top_distresses
 import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_gamers
@@ -545,10 +553,11 @@ val coherenceRecordingMs: Long,
     val factionCrystalWingsData: Map<String, Float>,
     val factionGliderDisablesData: Map<String, Float>,
     val factionProvokedData: Map<String, Float>,
-    // Best Attendance rankings (lifetime)
-    val bestAttendanceDmg: List<PlayerCard>,
-    val bestAttendanceHeals: List<PlayerCard>,
-    val bestAttendanceCC: List<PlayerCard>,
+    // Best Attendance rankings (lifetime, participation-filtered — see captureSnapshot)
+    val bestAttendanceDmg: List<PlayerAttendanceRank>,
+    val bestAttendanceHeals: List<PlayerAttendanceRank>,
+    val bestAttendanceCC: List<PlayerAttendanceRank>,
+    val totalSessions: Int,
   )
 
   data class SpellDamage(val spell: String, val total: Double)
@@ -589,6 +598,22 @@ val coherenceRecordingMs: Long,
     val topCC50     = PlayerCacheInteractor.topCC.value.take(50)
     val hasPirateInTop50 = (topDamage50 + topHeals50 + topCC50)
       .any { it.lastKnownFaction == Faction.PIRATE.value }
+
+    // Best Attendance source data: lifetime ranking, participation-filtered (same floors as
+    // the calendar's checkbox), plus the total session count for the "X/Y" display.
+    val attendanceRanking = try {
+      withContext(Dispatchers.IO) {
+        RFDao.playerSessionDao.getPlayerLifetimeAttendanceStats(
+          activeOnly = true,
+          minDamage = ACTIVE_MIN_DAMAGE,
+          minHeals = ACTIVE_MIN_HEALS,
+          minCC = ACTIVE_MIN_CC
+        )
+      }
+    } catch (e: Exception) { emptyList<PlayerAttendanceRank>() }
+    val totalSessionCount = try {
+      withContext(Dispatchers.IO) { RFDao.playerSessionDao.getDistinctSessionCount() }
+    } catch (e: Exception) { 0 }
 
     return ExportData(
       sessionTitle        = config.lastSessionTitle.ifBlank { "session" },
@@ -754,10 +779,14 @@ val coherenceRecordingMs: Long,
       factionCrystalWingsData  = PlayerCacheInteractor.factionCrystalWingsComparisonAll.value,
       factionGliderDisablesData = PlayerCacheInteractor.factionGliderDisablesComparisonAll.value,
       factionProvokedData      = PlayerCacheInteractor.factionProvokedComparisonAll.value,
-      // Best Attendance: top players by lifetime session count, sorted by stat
-      bestAttendanceDmg   = PlayerCacheInteractor.topDamage.value.take(25),
-      bestAttendanceHeals = PlayerCacheInteractor.topHeals.value.take(25),
-      bestAttendanceCC    = PlayerCacheInteractor.topCC.value.take(25),
+      // Best Attendance: lifetime rankings with the participation filter ON (the same
+      // 25k dmg / 25k heals / 25 CC floors as the calendar) so the export shows real
+      // contributors, split by meta-spec role — healers under heals, cc/tanks under CC,
+      // melee/mage/ranged under DPS. One query, filtered and re-sorted per stat.
+      bestAttendanceDmg   = attendanceRanking.rankedForRole(AttendanceRole.DPS) { it.totalDamage }.take(MAX_ROWS),
+      bestAttendanceHeals = attendanceRanking.rankedForRole(AttendanceRole.HEALER) { it.totalHealing }.take(MAX_ROWS),
+      bestAttendanceCC    = attendanceRanking.rankedForRole(AttendanceRole.CC_TANK) { it.totalCC.toLong() }.take(MAX_ROWS),
+      totalSessions       = totalSessionCount,
     )
   }
 
@@ -1059,6 +1088,14 @@ val coherenceRecordingMs: Long,
       val getColor: ((PlayerCard) -> Color)? = null, // Optional dynamic color per card
       val showIcons: Boolean = true // Skip skill-tree icons for sections where they waste space
     ) : ColumnData()
+
+    // Attendance rankings (PlayerAttendanceRank from the session archive), rendered as
+    // "sessions/total" via the shared ranking-row style (name + faction dot, no icons).
+    data class AttendanceData(
+      val rows: List<PlayerAttendanceRank>,
+      val totalSessions: Int,
+      val valueColor: Color
+    ) : ColumnData()
   }
 
 
@@ -1101,6 +1138,7 @@ val coherenceRecordingMs: Long,
       is ColumnData.ItemData  -> data.items.size
       is ColumnData.BuildData -> data.builds.size
       is ColumnData.CardData  -> data.cards.size
+      is ColumnData.AttendanceData -> data.rows.size
     }
     val rows = numRows.coerceAtLeast(5).coerceAtMost(MAX_ROWS)
     return (SECTION_HEADER_HEIGHT + (rows * ROW_HEIGHT) + CARD_PADDING * 2).coerceAtLeast(CATEGORY_MIN_HEIGHT)
@@ -1615,6 +1653,35 @@ val coherenceRecordingMs: Long,
                 }
               }
             }
+            is ColumnData.AttendanceData -> {
+              if (d.rows.isEmpty()) {
+                g2d.font  = labelFont
+                g2d.color = toAwtColor(RFColors.TextSecondary)
+                g2d.drawString(data.noDataText, xPos + CARD_PADDING + 8, rowY + 14)
+              } else {
+                // Stand-in PlayerCards so the shared ranking row (name, faction dot, own-
+                // character asterisk) renders identically to every other ranking table.
+                for (i in 0 until minOf(d.rows.size, MAX_ROWS)) {
+                  val row = d.rows[i]
+                  drawRankingRow(
+                    g2d, i,
+                    PlayerCard(
+                      name = row.playerName,
+                      recentCids = emptyList(),
+                      lastEvent = 0L,
+                      lastKnownFaction = row.lastKnownFaction,
+                      currentBuild = "",
+                      cache = null
+                    ),
+                    "${row.sessionCount}/${d.totalSessions}", d.valueColor,
+                    xPos + CARD_PADDING, rowY,
+                    actualAvailW,
+                    showIcons = false
+                  )
+                  rowY += ROW_HEIGHT
+                }
+              }
+            }
           }
         }
       }
@@ -1944,11 +2011,13 @@ val coherenceRecordingMs: Long,
       Triple(getString(Res.string.summary_pirate_builds),  "\u2694", ColumnData.BuildData(data.buildCountsPirate)),
     )))
 
-    // Best Attendance: top players by session count, sorted by dmg/heals/cc
+    // Best Attendance: lifetime rankings with participation filtering, headed with the total
+    // session count so every value reads as "attended/total" (e.g. 114/255).
+    val sessionsLabel = getString(Res.string.attendance_sessions_count, data.totalSessions)
     tripletBlocks.add(makeTriplet(listOf(
-      Triple(getString(Res.string.attendance_best_dmg), "\uD83C\uDFC6", ColumnData.CardData(data.bestAttendanceDmg, { it.sessionDamageTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.dpsOrange))),
-      Triple(getString(Res.string.attendance_best_heals), "\uD83C\uDFC6", ColumnData.CardData(data.bestAttendanceHeals, { it.sessionHealTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
-      Triple(getString(Res.string.attendance_best_cc), "\uD83C\uDFC6", ColumnData.CardData(data.bestAttendanceCC, { it.sessionCCTotal.toString() }, toAwtColor(RFColors.ccCyan)))
+      Triple("${getString(Res.string.attendance_best_dmg)} ($sessionsLabel)", "\uD83C\uDFC6", ColumnData.AttendanceData(data.bestAttendanceDmg, data.totalSessions, toAwtColor(RFColors.dpsOrange))),
+      Triple("${getString(Res.string.attendance_best_heals)} ($sessionsLabel)", "\uD83C\uDFC6", ColumnData.AttendanceData(data.bestAttendanceHeals, data.totalSessions, toAwtColor(RFColors.healsGreen))),
+      Triple("${getString(Res.string.attendance_best_cc)} ($sessionsLabel)", "\uD83C\uDFC6", ColumnData.AttendanceData(data.bestAttendanceCC, data.totalSessions, toAwtColor(RFColors.ccCyan)))
     )))
 
     return tripletBlocks

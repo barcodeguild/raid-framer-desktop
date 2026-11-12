@@ -197,9 +197,10 @@ fun PlayerSearchBox(
       val matches = allPlayers.filter {
         it.playerName.contains(query, true) || it.lastKnownGuild.contains(query, true)
       }.take(8)
-      // Exclude the already-selected player so typing never offers a
-      // one-item self-match (whose pick() resets the field mid-typing).
-      matches.filterNot { it.playerName.equals(currentName, ignoreCase = true) && currentName.isNotBlank() }
+      // The already-selected player (usually the user's own character) stays in the list:
+      // re-picking it is the explicit way to get back to yourself — the ✕ button reads as
+      // "clear", not "reset to my character", so relying on it alone is confusing.
+      matches
     }
   }
 

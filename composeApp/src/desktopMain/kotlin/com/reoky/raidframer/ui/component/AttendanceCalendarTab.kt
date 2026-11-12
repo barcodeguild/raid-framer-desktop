@@ -58,9 +58,12 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.database.*
+import com.reoky.raidframer.core.definitions.rememberMetaSpecs
+import com.reoky.raidframer.core.helpers.AttendanceRole
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.factionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.rankedForRole
 import com.reoky.raidframer.core.model.Faction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -91,19 +94,16 @@ import raid_framer_desktop.composeapp.generated.resources.attendance_no_player_s
 import raid_framer_desktop.composeapp.generated.resources.attendance_player_select
 import raid_framer_desktop.composeapp.generated.resources.attendance_pvp_only
 
-// Event types that count as "content" when the calendar is filtered down.
-private val CONTENT_EVENT_TYPES = setOf(
-  "Black Dragon", "Charbydis", "Kraken", "Garden Anthalon",
-  "Delphinad Ghost Ship (DGS)", "Jola, Meina, Glenn (JMG)",
-  "Siege Calmlands", "Siege Nuimari", "Siege Heedmar", "Siege Marcala",
-  "Snake (Nehliya)", "Scrims", "World Bosses"
-)
-
 // "Active participation" floors: a session only counts when the player dealt damage,
 // healed, or landed CC above these amounts — filters out idle attendees.
-private const val ACTIVE_MIN_DAMAGE = 25_000L
-private const val ACTIVE_MIN_HEALS = 25_000L
-private const val ACTIVE_MIN_CC = 25
+// Public so the PNG exporter can apply the same filter and stay consistent with the calendar.
+const val ACTIVE_MIN_DAMAGE = 25_000L
+const val ACTIVE_MIN_HEALS = 25_000L
+const val ACTIVE_MIN_CC = 25
+
+/** True when [sessionType] counts as a content event (blank types pass, matching the calendar). */
+fun isContentEvent(sessionType: String): Boolean =
+  sessionType.isBlank() || CONTENT_EVENT_TYPES.any { sessionType.contains(it, ignoreCase = true) }
 
 enum class AttendancePvpFilter { PVP_ONLY, ALLOW_PVE }
 
@@ -130,8 +130,8 @@ fun AttendanceCalendarTab() {
   var viewYear by remember { mutableStateOf(now.year) }
   var viewMonth by remember { mutableStateOf(now.monthValue) }
   var bestOpen by remember { mutableStateOf(false) }
-  var bestMode by remember { mutableStateOf(0) } // 0=dmg, 1=heals, 2=cc
   var bestData by remember { mutableStateOf<List<PlayerAttendanceRank>>(emptyList()) }
+  var bestTotalSessions by remember { mutableStateOf(0) }
 
   val month = YearMonth.of(viewYear, viewMonth)
   val monthStart = month.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
@@ -150,29 +150,37 @@ fun AttendanceCalendarTab() {
     } catch (e: Exception) { emptyList() }
   }
 
-  // Distinct session starts across all players (denominator for attendance %)
-  val monthSessions by produceState<List<SessionSummary>>(
+  // Distinct session starts across all players (denominator for attendance %, tooltip listings).
+  // Honors the content-events filter so tooltips and percentages only consider matching events.
+  val monthEvents by produceState<List<SessionSummary>>(
     initialValue = emptyList(), key1 = viewYear, key2 = viewMonth
   ) {
     value = try {
       withContext(Dispatchers.IO) { RFDao.playerSessionDao.getDistinctSessionsInRange(monthStart, monthEnd) }
     } catch (e: Exception) { emptyList() }
   }
+  val filteredMonthEvents = remember(monthEvents, contentOnly) {
+    if (!contentOnly) monthEvents else monthEvents.filter { isContentEvent(it.sessionType) }
+  }
 
   val filteredSessions = remember(playerSessions, contentOnly, pvpFilter, activeOnly) {
     playerSessions.filter { s ->
-      (!contentOnly || s.sessionType.isBlank() || CONTENT_EVENT_TYPES.any { s.sessionType.contains(it, ignoreCase = true) }) &&
+      (!contentOnly || isContentEvent(s.sessionType)) &&
         (pvpFilter == AttendancePvpFilter.ALLOW_PVE || s.totalDamage > 0 || s.totalHealing > 0 || s.totalCC > 0) &&
         (!activeOnly || s.totalDamage >= ACTIVE_MIN_DAMAGE || s.totalHealing >= ACTIVE_MIN_HEALS || s.totalCC >= ACTIVE_MIN_CC)
     }
   }
 
-  val dayData = remember(playerSessions, filteredSessions, monthSessions, month) {
+  val dayData = remember(playerSessions, filteredSessions, filteredMonthEvents, contentOnly, month) {
     val zone = ZoneId.systemDefault()
     val dayOf: (Long) -> Int = { Instant.ofEpochMilli(it).atZone(zone).dayOfMonth }
     val attendedByDay = filteredSessions.groupBy { dayOf(it.sessionStart) }
-    val rawAttendedByDay = playerSessions.groupBy { dayOf(it.sessionStart) }
-    val eventsByDay = monthSessions.groupBy { dayOf(it.sessionStart) }
+    // Attendance truth for the tooltip: raw (not participation-filtered), but honoring the
+    // content filter — an attended session of a filtered-out event can't count as "attended"
+    // against an event list that no longer contains it (that's how "7/4 sessions" happened).
+    val shownAttended = if (contentOnly) playerSessions.filter { isContentEvent(it.sessionType) } else playerSessions
+    val rawAttendedByDay = shownAttended.groupBy { dayOf(it.sessionStart) }
+    val eventsByDay = filteredMonthEvents.groupBy { dayOf(it.sessionStart) }
     List(month.lengthOfMonth()) { d ->
       val attended = attendedByDay[d + 1].orEmpty()
       AttendanceDayData(
@@ -185,13 +193,13 @@ fun AttendanceCalendarTab() {
     }
   }
 
-  val attendancePct = if (monthSessions.isEmpty()) 0 else filteredSessions.size * 100 / monthSessions.size
-  val sortedBest = remember(bestData, bestMode) {
-    bestData.sortedWith(
-      compareByDescending<PlayerAttendanceRank> { it.sessionCount }
-        .thenByDescending { if (bestMode == 1) it.totalHealing else if (bestMode == 2) it.totalCC.toLong() else it.totalDamage }
-    ).take(25)
-  }
+  val attendancePct = if (filteredMonthEvents.isEmpty()) 0 else filteredSessions.size * 100 / filteredMonthEvents.size
+  // All three rankings come from one query, split by meta-spec role — healers under heals,
+  // cc/tanks under CC, melee/mage/ranged under DPS. Re-sorted if the user edits meta specs.
+  val metaSpecs = rememberMetaSpecs()
+  val sortedBestDmg = remember(bestData, metaSpecs) { bestData.rankedForRole(AttendanceRole.DPS) { it.totalDamage }.take(25) }
+  val sortedBestHeals = remember(bestData, metaSpecs) { bestData.rankedForRole(AttendanceRole.HEALER) { it.totalHealing }.take(25) }
+  val sortedBestCC = remember(bestData, metaSpecs) { bestData.rankedForRole(AttendanceRole.CC_TANK) { it.totalCC.toLong() }.take(25) }
 
   LaunchedEffect(bestOpen, activeOnly) {
     if (bestOpen) {
@@ -200,6 +208,9 @@ fun AttendanceCalendarTab() {
           RFDao.playerSessionDao.getPlayerLifetimeAttendanceStats(activeOnly, ACTIVE_MIN_DAMAGE, ACTIVE_MIN_HEALS, ACTIVE_MIN_CC)
         }
       } catch (e: Exception) { emptyList() }
+      bestTotalSessions = try {
+        withContext(Dispatchers.IO) { RFDao.playerSessionDao.getDistinctSessionCount() }
+      } catch (e: Exception) { 0 }
     }
   }
 
@@ -268,7 +279,9 @@ fun AttendanceCalendarTab() {
         Column {
           Text(monthLabel, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
           Text(
-            stringResource(Res.string.attendance_events_summary, filteredSessions.size, monthSessions.size, attendancePct),
+            // String.format on purpose: compose's resource formatter only understands
+            // %N$d/%N$s and passes a literal %% through unescaped (renders as "%%").
+            String.format(stringResource(Res.string.attendance_events_summary), filteredSessions.size, filteredMonthEvents.size, attendancePct),
             color = RFColors.TextSecondary,
             fontSize = 12.sp
           )
@@ -302,18 +315,7 @@ fun AttendanceCalendarTab() {
 
     if (bestOpen) {
       Spacer(Modifier.height(8.dp))
-      AttendanceSegmentedToggle(
-        options = listOf(
-          stringResource(Res.string.attendance_best_dmg) to 0,
-          stringResource(Res.string.attendance_best_heals) to 1,
-          stringResource(Res.string.attendance_best_cc) to 2
-        ),
-        selected = bestMode,
-        onSelect = { bestMode = it },
-        modifier = Modifier.width(360.dp)
-      )
-      Spacer(Modifier.height(6.dp))
-      BestAttendancePanel(sortedBest, bestMode)
+      BestAttendancePanel(sortedBestDmg, sortedBestHeals, sortedBestCC, bestTotalSessions)
       Spacer(Modifier.height(8.dp))
     }
 
@@ -398,47 +400,70 @@ private fun AttendanceStatItem(label: String, value: String, color: Color) {
   }
 }
 
+/** Shared ranking sort helper lives in RaidHelper.kt ([rankedForRole]) so the PNG exporter matches the panel. */
+
+/**
+ * Best Attendance slide-down: all three rankings side by side (they share one query and
+ * differ only in sort order), each row showing "attended/total" sessions.
+ */
 @Composable
-private fun BestAttendancePanel(stats: List<PlayerAttendanceRank>, mode: Int) {
+private fun BestAttendancePanel(
+  dmg: List<PlayerAttendanceRank>,
+  heals: List<PlayerAttendanceRank>,
+  cc: List<PlayerAttendanceRank>,
+  totalSessions: Int
+) {
   Card(
     modifier = Modifier.fillMaxWidth().height(220.dp),
     backgroundColor = Color(0xFF141414),
     shape = RoundedCornerShape(8.dp)
   ) {
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp)) {
-      if (stats.isEmpty()) {
-        item {
-          Text(stringResource(Res.string.attendance_no_player_selected), color = RFColors.TextTertiary, fontSize = 12.sp, modifier = Modifier.padding(16.dp))
-        }
+    if (dmg.isEmpty() && heals.isEmpty() && cc.isEmpty()) {
+      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(stringResource(Res.string.attendance_no_player_selected), color = RFColors.TextTertiary, fontSize = 12.sp)
       }
-      itemsIndexed(stats) { index, entry ->
-        val valueText = when (mode) {
-          1 -> entry.totalHealing.humanReadableAbbreviation()
-          2 -> entry.totalCC.toLong().humanReadableAbbreviation()
-          else -> entry.totalDamage.humanReadableAbbreviation()
-        }
-        val statColor = when (mode) {
-          1 -> RFColors.healsGreen
-          2 -> RFColors.ccCyan
-          else -> RFColors.dpsOrange
-        }
+    } else {
+      Row(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+      ) {
+        AttendanceRankColumn(stringResource(Res.string.attendance_best_dmg), RFColors.dpsOrange, dmg, totalSessions, Modifier.weight(1f))
+        AttendanceRankColumn(stringResource(Res.string.attendance_best_heals), RFColors.healsGreen, heals, totalSessions, Modifier.weight(1f))
+        AttendanceRankColumn(stringResource(Res.string.attendance_best_cc), RFColors.ccCyan, cc, totalSessions, Modifier.weight(1f))
+      }
+    }
+  }
+}
+
+@Composable
+private fun AttendanceRankColumn(
+  title: String,
+  titleColor: Color,
+  rows: List<PlayerAttendanceRank>,
+  totalSessions: Int,
+  modifier: Modifier = Modifier
+) {
+  Column(modifier.padding(horizontal = 8.dp)) {
+    Text(title, color = titleColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    Spacer(Modifier.height(4.dp))
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+      itemsIndexed(rows) { index, entry ->
         val faction = Faction.fromString(entry.lastKnownFaction)
         val factionColor = if (faction == Faction.UNKNOWN) Color.Transparent else factionHighlightColor(faction)
         Row(
           modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Text("#${index + 1}", color = RFColors.TextTertiary, fontSize = 10.sp, modifier = Modifier.width(24.dp))
+          Text("#${index + 1}", color = RFColors.TextTertiary, fontSize = 9.sp, modifier = Modifier.width(22.dp))
           Box(
             modifier = Modifier
               .padding(end = 4.dp)
-              .height(8.dp).width(8.dp)
+              .height(7.dp).width(7.dp)
               .background(factionColor, RoundedCornerShape(4.dp))
           )
-          Text(entry.playerName, color = RFColors.TextPrimary, fontSize = 11.sp, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-          Text("${entry.sessionCount}", color = RFColors.TextSecondary, fontSize = 9.sp, modifier = Modifier.width(30.dp))
-          Spacer(Modifier.width(10.dp))
-          Text(valueText, color = statColor, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(80.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
+          Text(entry.playerName, color = RFColors.TextPrimary, fontSize = 10.sp, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+          Spacer(Modifier.width(6.dp))
+          Text("${entry.sessionCount}/${totalSessions}", color = RFColors.TextSecondary, fontSize = 9.sp)
         }
       }
     }
@@ -549,7 +574,7 @@ private fun CalendarDayCell(day: AttendanceDayData, monthShort: String, cellHeig
   }
 }
 
-private const val MAX_TOOLTIP_EVENTS = 5
+private const val MAX_TOOLTIP_EVENTS = 8
 
 /**
  * Day briefing popup: every event that day, attended ones with the player's stats,
