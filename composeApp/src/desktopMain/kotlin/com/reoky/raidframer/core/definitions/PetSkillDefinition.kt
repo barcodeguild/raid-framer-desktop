@@ -113,30 +113,30 @@ val petSkillWhitelist = listOf(
   ),
 
   // Typhoon Drake (Used for testing the app and breaths!)
-  Skill(
-    id = 35787,
-    name = "Thunderbreath (Rider)",
-    castTime = 0.0,
-    cooldown = 60.0,
-    possibleNames = listOf("Thunderbreath (Rider)", "천둥의 숨결 (탑승자)"),
-    isPetInitiator = true,
-    allowedPetTypes = setOf("Typhoon Drake"),
-    relatedDamageIds = setOf(35786, 21015)
-  ),
-  Skill(
-    id = 35786,
-    name = "Thunderbreath",
-    castTime = 0.0,
-    cooldown = 60.0,
-    possibleNames = listOf("Thunderbreath", "천둥의 숨결"),
-    allowedPetTypes = setOf("Typhoon Drake")
-  ),
-  Skill(
-    id = 21015,
-    name = "Thunderbreath Aftershock",
-    castTime = 0.0,
-    cooldown = 0.0,
-    possibleNames = listOf("Thunderbreath Aftershock", "천둥의 숨결 여파"),
-    allowedPetTypes = setOf("Typhoon Drake")
-  ),
+//  Skill(
+//    id = 35787,
+//    name = "Thunderbreath (Rider)",
+//    castTime = 0.0,
+//    cooldown = 60.0,
+//    possibleNames = listOf("Thunderbreath (Rider)", "천둥의 숨결 (탑승자)"),
+//    isPetInitiator = true,
+//    allowedPetTypes = setOf("Typhoon Drake"),
+//    relatedDamageIds = setOf(35786, 21015)
+//  ),
+//  Skill(
+//    id = 35786,
+//    name = "Thunderbreath",
+//    castTime = 0.0,
+//    cooldown = 60.0,
+//    possibleNames = listOf("Thunderbreath", "천둥의 숨결"),
+//    allowedPetTypes = setOf("Typhoon Drake")
+//  ),
+//  Skill(
+//    id = 21015,
+//    name = "Thunderbreath Aftershock",
+//    castTime = 0.0,
+//    cooldown = 0.0,
+//    possibleNames = listOf("Thunderbreath Aftershock", "천둥의 숨결 여파"),
+//    allowedPetTypes = setOf("Typhoon Drake")
+//  ),
 )

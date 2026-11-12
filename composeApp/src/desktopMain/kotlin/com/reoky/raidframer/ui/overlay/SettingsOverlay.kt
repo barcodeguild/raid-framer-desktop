@@ -1863,7 +1863,9 @@ private fun VersionPanel() {
               val downloadedStr = formatFileSize(ds.bytesDownloaded)
               val totalStr = if (ds.totalBytes > 0) formatFileSize(ds.totalBytes) else "?"
               Text(
-                text = stringResource(Res.string.settings_update_downloading, ds.percent.toInt(), downloadedStr, totalStr),
+                // String.format on purpose: compose's resource formatter only handles
+                // %N$d/%N$s and passes a literal %% through unescaped (would render "%%").
+                text = String.format(stringResource(Res.string.settings_update_downloading), ds.percent.toInt(), downloadedStr, totalStr),
                 color = RFColors.TextSecondary,
                 fontSize = 11.sp
               )

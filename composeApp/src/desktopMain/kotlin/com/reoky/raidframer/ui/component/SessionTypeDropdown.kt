@@ -55,7 +55,6 @@ val SESSION_TYPES = listOf(
   "Garden",
   "GM Dragon",
   "Gladiator Arena",
-  "Glenn",
   "Grimghast Rift",
   "Halcy (Golden Plains Battle)",
   "Hasla Zombie",
@@ -66,7 +65,7 @@ val SESSION_TYPES = listOf(
   "Kraken",
   "Land Packs",
   "Malestorm Arena",
-  "Meina",
+  "Morpheus",
   "Noryette Challenge",
   "Ocean Packs",
   "Player Duels",
@@ -79,6 +78,7 @@ val SESSION_TYPES = listOf(
   "Siege Heedmar",
   "Siege Marcala",
   "Siege Nuimari",
+  "Snake (Nehliya)",
   "Sparring Arena",
   "Sungold CR",
   "Thunderwing Titan",
@@ -89,6 +89,18 @@ val SESSION_TYPES = listOf(
   "Yny War",
   "Custom"
 )
+
+// Event types that count as "content" for attendance tracking. Declared beside
+// SESSION_TYPES and validated against it so the two lists can't drift apart.
+val CONTENT_EVENT_TYPES: Set<String> = setOf(
+  "Black Dragon", "Charbydis", "Kraken", "Garden Anthalon",
+  "Delphinad Ghost Ship (DGS)", "Jola, Meina, Glenn (JMG)",
+  "Siege Calmlands", "Siege Heedmar", "Siege Marcala", "Siege Nuimari",
+  "Snake (Nehliya)", "Scrims", "World Bosses"
+).also { types ->
+  val missing = types.filterNot { it in SESSION_TYPES }
+  check(missing.isEmpty()) { "Content event types missing from SESSION_TYPES: $missing" }
+}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

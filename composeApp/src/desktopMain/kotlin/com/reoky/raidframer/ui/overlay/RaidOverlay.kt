@@ -110,6 +110,7 @@ import com.reoky.raidframer.ui.component.SelectableTextField
 import com.reoky.raidframer.ui.component.TitleBarComponent
 import com.reoky.raidframer.ui.component.BuffHistoryPlayerDetail
 import com.reoky.raidframer.ui.component.BuffHistorySnapshotList
+import com.reoky.raidframer.ui.component.AttendanceCalendarTab
 import com.reoky.raidframer.ui.component.BuffPlayerDetailPane
 import com.reoky.raidframer.ui.component.buffDetailPopupPositionProvider
 import com.reoky.raidframer.ui.component.localizedBuffLabels
@@ -158,7 +159,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import kotlin.time.Duration.Companion.milliseconds
 
-enum class RaidTab { ATTENDANCE, BUFFS, BUFF_HISTORY, NEARBY, NEARBY_GEAR, COMPOSITION }
+enum class RaidTab { RAID, ATTENDANCE, BUFFS, BUFF_HISTORY, NEARBY, NEARBY_GEAR, COMPOSITION }
 
 @Composable
 fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
@@ -170,7 +171,7 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
   val nearbyPirate = PlayerCacheInteractor.nearbyPirateRaidParties.collectAsState()
   val raidDepartures = PlayerCacheInteractor.raidDeparturesFlow.collectAsState()
   val raidMemberNames = PlayerCacheInteractor.combinedRaidMemberNames.collectAsState()
-  var selectedTab by remember { mutableStateOf(RaidTab.ATTENDANCE) }
+  var selectedTab by remember { mutableStateOf(RaidTab.RAID) }
   // Consume any cross-overlay tab request (e.g. from the Raid Caller overlay) and select it.
   LaunchedEffect(OverlayNav.pendingRaidTab.value) {
     OverlayNav.pendingRaidTab.value?.let { requested ->
@@ -312,6 +313,7 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
               modifier = Modifier.fillMaxWidth()
             ) {
               val tabs = listOf(
+                RaidTab.RAID to Res.string.raid_tab_raid,
                 RaidTab.ATTENDANCE to Res.string.raid_tab_attendance,
                 RaidTab.BUFFS to Res.string.raid_tab_buffs,
                 RaidTab.BUFF_HISTORY to Res.string.raid_tab_buff_history,
@@ -342,7 +344,7 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
           contentAlignment = Alignment.TopStart
         ) {
           when (selectedTab) {
-            RaidTab.ATTENDANCE -> AttendanceTab(
+            RaidTab.RAID -> AttendanceTab(
               mainRaid = mainRaid.value,
               coRaid = coRaid.value,
               nearbyNuia = nearbyNuia.value,
@@ -355,6 +357,8 @@ fun RaidOverlay(wm: WindowManager? = null, window: ComposeWindow? = null) {
                 filterState = filterState.copy(participationStage = if (it) 1 else 0)
               }
             )
+
+            RaidTab.ATTENDANCE -> AttendanceCalendarTab()
 
             RaidTab.BUFFS -> BuffsTab(mainRaid.value, coRaid.value, buffSelectBorder)
             RaidTab.BUFF_HISTORY -> BuffHistoryTab(mainRaid.value, coRaid.value)
