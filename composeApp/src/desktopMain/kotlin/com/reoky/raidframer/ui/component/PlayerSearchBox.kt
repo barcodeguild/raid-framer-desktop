@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -217,12 +218,20 @@ fun PlayerSearchBox(
     syncDragLock()
   }
 
+  // Release the drag lock if this box leaves composition while it still holds
+  // it (e.g. a tab switch mid-edit) — otherwise the window can never be dragged again.
+  DisposableEffect(Unit) {
+    onDispose {
+      if (isFocused || dropdownVisible) dragLock.value = false
+    }
+  }
+
   // Clamp the keyboard highlight whenever the list changes.
   LaunchedEffect(suggestions) {
     if (activeIndex >= suggestions.size) activeIndex = suggestions.size - 1
   }
 
-  Column(modifier = modifier) {
+  Column(modifier = modifier.fillMaxWidth()) {
     // One-shot pulse on every fresh composition (i.e. every window open).
     // NOTE: gating rememberSectionPulse on `currentName.isBlank()` looks right but
     // fails in practice: when opened from the Player Card a player is already
@@ -243,7 +252,7 @@ fun PlayerSearchBox(
     // BasicTextField instead of Material TextField: zero internal padding, so the
     // 32.dp compact height fits the text exactly with no clipping.
     // Box overlays the ✕ clear pill on top of the field (field drawn first).
-    Box(modifier = Modifier.width(220.dp).height(32.dp)) {
+    Box(modifier = Modifier.fillMaxWidth().height(32.dp)) {
     BasicTextField(
       value = search,
       onValueChange = { search = it; dropdownVisible = true; activeIndex = -1 },

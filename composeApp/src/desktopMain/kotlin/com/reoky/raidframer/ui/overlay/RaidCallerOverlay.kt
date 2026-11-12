@@ -792,8 +792,8 @@ private fun RaidCallerOverlayContent(wm: WindowManager?, nowTick: Long) {
               .clip(RoundedCornerShape(4.dp))
               .clickable(interactionSource = titleInteraction, indication = null) { openSettingsGeneral(wm) }
           )
-          LabeledValue("${stringResource(Res.string.raid_caller_main_raid)}:", mainCount.toString(), RFColors.callerMainRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.ATTENDANCE) })
-          LabeledValue("${stringResource(Res.string.raid_caller_co_raid)}:", coCount.toString(), RFColors.callerCoRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.ATTENDANCE) })
+          LabeledValue("${stringResource(Res.string.raid_caller_main_raid)}:", mainCount.toString(), RFColors.callerMainRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.RAID) })
+          LabeledValue("${stringResource(Res.string.raid_caller_co_raid)}:", coCount.toString(), RFColors.callerCoRaid, SectionTitleColor, onClick = { openRaidTab(wm, RaidTab.RAID) })
           InlineCopyIcon(RaidCallerCopyMessages.raidCounts(mainCount, coCount))
           if (isRecording) {
             LabeledValue("${stringResource(Res.string.raid_caller_recording)}:", formatMinutesSeconds(recordingMs), RFColors.AccentRed, SectionTitleColor)

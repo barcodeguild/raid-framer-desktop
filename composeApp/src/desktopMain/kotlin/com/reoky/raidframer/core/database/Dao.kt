@@ -101,7 +101,46 @@ interface PlayerSessionDao {
   // is a no-op rather than a duplicate row. Cheaper than a defensive DELETE-then-INSERT.
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(session: PlayerSessionTotalsEntity)
+
+  // Sessions for a player within a date range (attendance calendar)
+  @Query("SELECT * FROM player_session_totals WHERE playerName = :playerName AND sessionStart >= :startMs AND sessionStart < :endMs ORDER BY sessionStart ASC")
+  suspend fun getSessionsForPlayerInRange(playerName: String, startMs: Long, endMs: Long): List<PlayerSessionTotalsEntity>
+
+  // All distinct session starts in a date range (total events for a month)
+  @Query("SELECT sessionStart, MAX(sessionEnd) AS sessionEnd, MAX(sessionType) AS sessionType, MAX(sessionTitle) AS sessionTitle, COUNT(*) AS playerCount FROM player_session_totals WHERE sessionStart >= :startMs AND sessionStart < :endMs GROUP BY sessionStart ORDER BY sessionStart ASC")
+  suspend fun getDistinctSessionsInRange(startMs: Long, endMs: Long): List<SessionSummary>
+
+  // All players' session counts for a date range (best attendance ranking)
+  @Query("SELECT playerName, COUNT(DISTINCT sessionStart) AS sessionCount, SUM(totalDamage) AS totalDamage, SUM(totalHealing) AS totalHealing, SUM(totalCC) AS totalCC FROM player_session_totals WHERE sessionStart >= :startMs AND sessionStart < :endMs GROUP BY playerName ORDER BY sessionCount DESC")
+  suspend fun getPlayerAttendanceStatsInRange(startMs: Long, endMs: Long): List<PlayerAttendanceStats>
+
+  // Lifetime attendance ranking with each player's faction joined in a single round-trip.
+  // The faction lives on player_cache (which is deliberately NOT loaded wholesale into
+  // memory), so the join keeps the ranking list self-sufficient.
+  // When :activeOnly, only players whose average per-session contribution reaches at least
+  // one of the given thresholds are returned — filters out members who attended but
+  // never engaged (no damage, no heals, no CC).
+  @Query("SELECT ps.playerName AS playerName, COUNT(DISTINCT ps.sessionStart) AS sessionCount, SUM(ps.totalDamage) AS totalDamage, SUM(ps.totalHealing) AS totalHealing, SUM(ps.totalCC) AS totalCC, COALESCE(MAX(pc.lastKnownFaction), '') AS lastKnownFaction FROM player_session_totals ps LEFT JOIN player_cache pc ON pc.playerName = ps.playerName GROUP BY ps.playerName HAVING (:activeOnly = 0 OR SUM(ps.totalDamage) / COUNT(DISTINCT ps.sessionStart) >= :minDamage OR SUM(ps.totalHealing) / COUNT(DISTINCT ps.sessionStart) >= :minHeals OR SUM(ps.totalCC) / COUNT(DISTINCT ps.sessionStart) >= :minCC) ORDER BY sessionCount DESC")
+  suspend fun getPlayerLifetimeAttendanceStats(activeOnly: Boolean, minDamage: Long, minHeals: Long, minCC: Int): List<PlayerAttendanceRank>
 }
+
+data class PlayerAttendanceStats(
+  val playerName: String,
+  val sessionCount: Int,
+  val totalDamage: Long = 0L,
+  val totalHealing: Long = 0L,
+  val totalCC: Int = 0
+)
+
+// PlayerAttendanceStats + the faction from player_cache, for ranked displays
+data class PlayerAttendanceRank(
+  val playerName: String,
+  val sessionCount: Int,
+  val totalDamage: Long = 0L,
+  val totalHealing: Long = 0L,
+  val totalCC: Int = 0,
+  val lastKnownFaction: String = ""
+)
 
 data class SessionSummary(
   val sessionStart: Long,

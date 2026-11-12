@@ -55,6 +55,9 @@ import raid_framer_desktop.composeapp.generated.resources.export_combat_pve_dama
 import raid_framer_desktop.composeapp.generated.resources.export_combat_pve_heals
 import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_cc
 import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_damage
+import raid_framer_desktop.composeapp.generated.resources.attendance_best_cc
+import raid_framer_desktop.composeapp.generated.resources.attendance_best_dmg
+import raid_framer_desktop.composeapp.generated.resources.attendance_best_heals
 import raid_framer_desktop.composeapp.generated.resources.export_combat_pvp_heals
 import raid_framer_desktop.composeapp.generated.resources.summary_top_distresses
 import raid_framer_desktop.composeapp.generated.resources.summary_top_glider_gamers
@@ -542,6 +545,10 @@ val coherenceRecordingMs: Long,
     val factionCrystalWingsData: Map<String, Float>,
     val factionGliderDisablesData: Map<String, Float>,
     val factionProvokedData: Map<String, Float>,
+    // Best Attendance rankings (lifetime)
+    val bestAttendanceDmg: List<PlayerCard>,
+    val bestAttendanceHeals: List<PlayerCard>,
+    val bestAttendanceCC: List<PlayerCard>,
   )
 
   data class SpellDamage(val spell: String, val total: Double)
@@ -747,6 +754,10 @@ val coherenceRecordingMs: Long,
       factionCrystalWingsData  = PlayerCacheInteractor.factionCrystalWingsComparisonAll.value,
       factionGliderDisablesData = PlayerCacheInteractor.factionGliderDisablesComparisonAll.value,
       factionProvokedData      = PlayerCacheInteractor.factionProvokedComparisonAll.value,
+      // Best Attendance: top players by lifetime session count, sorted by stat
+      bestAttendanceDmg   = PlayerCacheInteractor.topDamage.value.take(25),
+      bestAttendanceHeals = PlayerCacheInteractor.topHeals.value.take(25),
+      bestAttendanceCC    = PlayerCacheInteractor.topCC.value.take(25),
     )
   }
 
@@ -1931,6 +1942,13 @@ val coherenceRecordingMs: Long,
       Triple(getString(Res.string.summary_haranya_builds), "\u2694", ColumnData.BuildData(data.buildCountsHaranya)),
       Triple(getString(Res.string.summary_nuia_builds),    "\u2694", ColumnData.BuildData(data.buildCountsNuia)),
       Triple(getString(Res.string.summary_pirate_builds),  "\u2694", ColumnData.BuildData(data.buildCountsPirate)),
+    )))
+
+    // Best Attendance: top players by session count, sorted by dmg/heals/cc
+    tripletBlocks.add(makeTriplet(listOf(
+      Triple(getString(Res.string.attendance_best_dmg), "\uD83C\uDFC6", ColumnData.CardData(data.bestAttendanceDmg, { it.sessionDamageTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.dpsOrange))),
+      Triple(getString(Res.string.attendance_best_heals), "\uD83C\uDFC6", ColumnData.CardData(data.bestAttendanceHeals, { it.sessionHealTotal.humanReadableAbbreviation() }, toAwtColor(RFColors.healsGreen))),
+      Triple(getString(Res.string.attendance_best_cc), "\uD83C\uDFC6", ColumnData.CardData(data.bestAttendanceCC, { it.sessionCCTotal.toString() }, toAwtColor(RFColors.ccCyan)))
     )))
 
     return tripletBlocks

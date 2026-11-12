@@ -83,6 +83,7 @@ fun OverlayContainer(wm: WindowManager) {
           type == OverlayType.POCKET_EDITOR ||
            type == OverlayType.SCREENSHOT_PREVIEW ||
             type == OverlayType.PLAYER_BROWSER ||
+            type == OverlayType.RAID ||
             type == OverlayType.SESSION_HISTORY,
         transparentBackground = type == OverlayType.ITEM_USE,
         onCloseRequest = { wm.closeWindow(type) }
