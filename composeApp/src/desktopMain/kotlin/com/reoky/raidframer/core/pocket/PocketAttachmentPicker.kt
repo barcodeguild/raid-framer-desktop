@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.pocket
 
 import com.reoky.raidframer.core.config.RFConfig
+import com.reoky.raidframer.core.helpers.showFileChooserTopmost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -28,7 +29,7 @@ object PocketAttachmentPicker {
       File(configuredGameDirectory, "ScreenShots")
     }
     if (screenshotsDirectory?.isDirectory == true) chooser.currentDirectory = screenshotsDirectory
-    if (chooser.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) return@withContext null
+    if (showFileChooserTopmost(chooser) != JFileChooser.APPROVE_OPTION) return@withContext null
     chooser.selectedFile?.toPath()
     } finally {
       visibleWindows.forEach { it.isVisible = true }

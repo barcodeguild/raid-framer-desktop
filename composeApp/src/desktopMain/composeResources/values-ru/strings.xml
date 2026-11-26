@@ -144,6 +144,32 @@
     <string name="settings_crash_recovery_title">Сессия прервана</string>
     <string name="settings_crash_recovery_message">Предыдущая сессия записи была прервана и отброшена.</string>
 
+    <!-- Recovery (Settings entry point, shown at the bottom next to Uninstall) -->
+    <string name="settings_recovery_description">Приложение работает нормально. Если вы хотите сбросить статистику за всё время и начать заново, пересоздайте внутреннюю базу данных в режиме восстановления. Резервная копия текущей базы сохраняется автоматически.</string>
+    <string name="settings_recovery_button">Восстановление</string>
+    <string name="settings_recovery_confirm_title">Войти в режим восстановления?</string>
+    <string name="settings_recovery_confirm_text">Raid Framer закроется и откроется в режиме восстановления, где внутреннюю базу данных можно безопасно сбросить. Ничего не удаляется — резервная копия сохраняется.</string>
+    <string name="settings_recovery_confirm_button">Перезапустить</string>
+
+    <!-- Recovery Mode (standalone window shown when the database cannot be opened) -->
+    <string name="recovery_title">Режим восстановления</string>
+    <string name="recovery_error_headline">Сбой миграции базы данных или повреждение базы данных — Raid Framer не смог открыть свои данные.</string>
+    <string name="recovery_error_reassurance">Сброс пересоздаёт внутреннюю базу данных и должен позволить приложению запуститься. Ничего не потеряется — старая база данных сначала переносится в резервную копию.</string>
+    <string name="recovery_manual_headline">Приложение работает нормально.</string>
+    <string name="recovery_manual_reassurance">Здесь можно пересоздать внутреннюю базу данных, чтобы сбросить статистику за всё время, сессии и настройки и начать заново. Сначала создаётся резервная копия текущей базы, ничего не теряется.</string>
+    <string name="recovery_error_detail_format">Подробности: %1$s</string>
+    <string name="recovery_reset_button">Сбросить базу</string>
+    <string name="recovery_launch_button">Запустить приложение</string>
+    <string name="recovery_view_log">Открыть журнал</string>
+    <string name="recovery_resetting">Сброс…</string>
+    <string name="recovery_reset_complete">База данных сброшена.</string>
+    <string name="recovery_backup_label">Резервная копия сохранена в:</string>
+    <string name="recovery_backup_hint">Старая база данных останется здесь на случай, если она понадобится позже.</string>
+    <string name="recovery_reset_failed_format">Не удалось выполнить сброс: %1$s</string>
+    <string name="recovery_confirm_title">Сбросить базу данных?</string>
+    <string name="recovery_confirm_text">База данных, журналы и лог будут перемещены в папку резервных копий, после чего будет создана новая база данных. Статистика и настройки начнутся заново.\n\nРезервная копия останется в папке .RaidFramer, чтобы данные можно было восстановить позже.</string>
+    <string name="recovery_confirm_button">Сбросить</string>
+
     <!-- Abort Session -->
     <string name="combat_stop_and_save">Сохранить и остановить</string>
     <string name="combat_abort_and_discard">Отменить и удалить</string>

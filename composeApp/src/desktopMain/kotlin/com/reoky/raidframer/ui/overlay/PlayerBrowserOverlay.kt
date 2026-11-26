@@ -57,6 +57,7 @@ import com.reoky.raidframer.core.helpers.FaIcon
 import com.reoky.raidframer.core.helpers.RFColors
 import com.reoky.raidframer.core.helpers.getFactionHighlightColor
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
+import com.reoky.raidframer.core.helpers.showCsvSaveChooser
 import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
 import com.reoky.raidframer.core.model.Faction
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
@@ -824,34 +825,4 @@ private fun buildExportSummary(
   conditions.forEach { parts.add("${it.statKey}${it.op}${it.value}") }
   val slug = parts.joinToString("_").replace(Regex("[^A-Za-z0-9_.-]"), "")
   return "player-browser_${stamp}_${slug.take(80)}.csv"
-}
-
-private fun showCsvSaveChooser(suggestedName: String, dialogTitle: String, onFileSelected: (File) -> Unit, onCancel: () -> Unit = {}) {
-  try {
-    SwingUtilities.invokeLater {
-      try {
-        val chooser = JFileChooser()
-            chooser.dialogTitle = dialogTitle
-        chooser.selectedFile = File(suggestedName)
-        chooser.setFileFilter(FileNameExtensionFilter("CSV (*.csv)", "csv"))
-        val parent = wm_parentWindow()
-        val result = chooser.showSaveDialog(parent)
-        if (result == JFileChooser.APPROVE_OPTION) {
-          var file = chooser.selectedFile
-          if (!file.name.endsWith(".csv", ignoreCase = true)) {
-            file = File(file.parentFile, "${file.nameWithoutExtension}.csv")
-          }
-          onFileSelected(file)
-        } else {
-          onCancel()
-        }
-      } catch (e: Exception) { onCancel() }
-    }
-  } catch (e: Exception) { onCancel() }
-}
-
-private fun wm_parentWindow(): java.awt.Component? {
-  return try {
-    java.awt.Window.getWindows().firstOrNull { it.isVisible && it is java.awt.Frame } as? java.awt.Component
-  } catch (e: Exception) { null }
 }

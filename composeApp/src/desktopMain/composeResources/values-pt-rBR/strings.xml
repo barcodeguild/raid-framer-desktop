@@ -144,6 +144,32 @@ O aplicativo notificará o addon in-game para encerrar antes de remover os arqui
     <string name="settings_crash_recovery_title">Sessão Interrompida</string>
     <string name="settings_crash_recovery_message">Uma sessão de gravação anterior foi interrompida e descartada.</string>
 
+    <!-- Recovery (Settings entry point, shown at the bottom next to Uninstall) -->
+    <string name="settings_recovery_description">O aplicativo está funcionando normalmente. Se quiser zerar as estatísticas de lifetime e começar de novo, você pode recriar o banco de dados interno pelo modo de recuperação. Um backup do banco atual é mantido automaticamente.</string>
+    <string name="settings_recovery_button">Recuperação</string>
+    <string name="settings_recovery_confirm_title">Entrar no modo de recuperação?</string>
+    <string name="settings_recovery_confirm_text">O Raid Framer será fechado e reaberto no modo de recuperação, onde o banco de dados interno pode ser redefinido com segurança. Nada é excluído — um backup é mantido.</string>
+    <string name="settings_recovery_confirm_button">Reiniciar</string>
+
+    <!-- Recovery Mode (standalone window shown when the database cannot be opened) -->
+    <string name="recovery_title">Modo de Recuperação</string>
+    <string name="recovery_error_headline">Uma migração do banco de dados falhou ou o banco de dados estava corrompido, então o Raid Framer não conseguiu abrir seus dados.</string>
+    <string name="recovery_error_reassurance">A redefinição recria o banco de dados interno e deve permitir que o aplicativo seja iniciado. Nada é perdido — o banco de dados antigo é movido para um backup primeiro.</string>
+    <string name="recovery_manual_headline">O aplicativo está funcionando normalmente.</string>
+    <string name="recovery_manual_reassurance">Aqui você pode recriar o banco de dados interno para zerar estatísticas de lifetime, sessões e configurações e começar de novo. O banco de dados atual é copiado primeiro, nada é perdido.</string>
+    <string name="recovery_error_detail_format">Detalhes: %1$s</string>
+    <string name="recovery_reset_button">Redefinir banco</string>
+    <string name="recovery_launch_button">Abrir aplicativo</string>
+    <string name="recovery_view_log">Ver registro</string>
+    <string name="recovery_resetting">Redefinindo…</string>
+    <string name="recovery_reset_complete">Banco de dados redefinido.</string>
+    <string name="recovery_backup_label">Backup salvo em:</string>
+    <string name="recovery_backup_hint">O banco de dados antigo fica aqui caso seja necessário mais tarde.</string>
+    <string name="recovery_reset_failed_format">Falha na redefinição: %1$s</string>
+    <string name="recovery_confirm_title">Redefinir banco de dados?</string>
+    <string name="recovery_confirm_text">O banco de dados, os diários e o registro serão movidos para uma pasta de backup e um novo banco de dados será criado. As estatísticas e as configurações começarão do zero.\n\nO backup permanece na pasta .RaidFramer, para que os dados possam ser recuperados mais tarde, se necessário.</string>
+    <string name="recovery_confirm_button">Redefinir</string>
+
     <!-- Abort Session -->
     <string name="combat_stop_and_save">Salvar &amp; Parar</string>
     <string name="combat_abort_and_discard">Cancelar &amp; Descartar</string>

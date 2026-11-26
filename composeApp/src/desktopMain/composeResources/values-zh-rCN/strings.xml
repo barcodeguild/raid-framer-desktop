@@ -144,6 +144,32 @@
     <string name="settings_crash_recovery_title">会话已中断</string>
     <string name="settings_crash_recovery_message">上一个录制会话已被中断并丢弃。</string>
 
+    <!-- Recovery (Settings entry point, shown at the bottom next to Uninstall) -->
+    <string name="settings_recovery_description">应用运行正常。如果想清零累计统计并重新开始，可以通过恢复模式重建内部数据库。系统会自动保留当前数据库的备份。</string>
+    <string name="settings_recovery_button">恢复</string>
+    <string name="settings_recovery_confirm_title">进入恢复模式？</string>
+    <string name="settings_recovery_confirm_text">Raid Framer 将关闭并在恢复模式下重新打开，你可以在这里安全地重置内部数据库。不会删除任何数据——备份会被保留。</string>
+    <string name="settings_recovery_confirm_button">重启</string>
+
+    <!-- Recovery Mode (standalone window shown when the database cannot be opened) -->
+    <string name="recovery_title">恢复模式</string>
+    <string name="recovery_error_headline">数据库迁移失败或数据库已损坏，Raid Framer 无法打开其数据。</string>
+    <string name="recovery_error_reassurance">重置会重建内部数据库，应当能让应用正常启动。不会丢失任何数据——旧数据库会先被移动到备份文件夹。</string>
+    <string name="recovery_manual_headline">应用运行正常。</string>
+    <string name="recovery_manual_reassurance">可以在此重建内部数据库，将累计统计、会话记录和设置清零并重新开始。重置前会先备份当前数据库，不会丢失任何数据。</string>
+    <string name="recovery_error_detail_format">详细信息：%1$s</string>
+    <string name="recovery_reset_button">重置数据库</string>
+    <string name="recovery_launch_button">启动应用</string>
+    <string name="recovery_view_log">查看日志</string>
+    <string name="recovery_resetting">正在重置…</string>
+    <string name="recovery_reset_complete">数据库重置完成。</string>
+    <string name="recovery_backup_label">备份已保存到：</string>
+    <string name="recovery_backup_hint">旧数据库会保存在这里，以备日后需要。</string>
+    <string name="recovery_reset_failed_format">重置失败：%1$s</string>
+    <string name="recovery_confirm_title">重置数据库？</string>
+    <string name="recovery_confirm_text">数据库、日志文件夹和日志将被移动到备份文件夹中，然后创建全新的数据库。累计统计和设置将重新开始。\n\n备份会保留在 .RaidFramer 文件夹中，以便日后需要时恢复数据。</string>
+    <string name="recovery_confirm_button">重置</string>
+
     <!-- Abort Session -->
     <string name="combat_stop_and_save">保存并停止</string>
     <string name="combat_abort_and_discard">中止并丢弃</string>

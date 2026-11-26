@@ -6,6 +6,7 @@ import java.nio.file.Path
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,7 @@ object PocketDraftCoordinator {
   private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
   private lateinit var dao: PocketDao
   private lateinit var repository: PocketRepository
+  private var isShutdown = false
 
   private val _activeDraftId = MutableStateFlow<String?>(null)
   val activeDraftId: StateFlow<String?> = _activeDraftId.asStateFlow()
@@ -33,11 +35,21 @@ object PocketDraftCoordinator {
   val entries: StateFlow<List<PocketEntry>> = _entries.asStateFlow()
 
   fun init(pocketDao: PocketDao) {
-    if (!::dao.isInitialized) {
+    if (!::dao.isInitialized && !isShutdown) {
       dao = pocketDao
       repository = PocketRepository(pocketDao)
       scope.launch { refreshEntries() }
     }
+  }
+
+  /**
+   * Stops the coordinator for good: cancels its scope (so a pending refresh cannot open
+   * the database again) and blocks further use. Called when the database bootstrap fails
+   * so recovery mode can actually release the database's file lock.
+   */
+  fun shutdown() {
+    isShutdown = true
+    scope.cancel()
   }
 
   suspend fun createDraft(title: String = "", markdown: String = ""): PocketEntry {
@@ -145,13 +157,13 @@ object PocketDraftCoordinator {
 
 
   suspend fun refreshEntries() {
-    if (::repository.isInitialized) {
+    if (::repository.isInitialized && !isShutdown) {
       _entries.value = repository.listEntries()
     }
   }
 
   suspend fun getEntriesByTag(normalizedTag: String, limit: Int = 12): List<PocketEntry> {
-    if (!::repository.isInitialized) return emptyList()
+    if (!::repository.isInitialized || isShutdown) return emptyList()
     return repository.listEntriesByTag(normalizedTag, limit)
   }
 }

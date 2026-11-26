@@ -38,7 +38,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.reoky.raidframer.core.config.RFConfig
 import com.reoky.raidframer.core.config.RenderingBackendConfig
 import org.jetbrains.skiko.SkikoProperties.renderApi
@@ -70,6 +69,9 @@ import com.reoky.raidframer.core.helpers.UpdateDownloaderHelper
 import com.reoky.raidframer.core.helpers.DownloadStatus
 import com.reoky.raidframer.core.helpers.rememberSectionPulse
 import com.reoky.raidframer.core.helpers.openMetaSpecs
+import com.reoky.raidframer.core.helpers.showFileChooserTopmost
+import com.reoky.raidframer.core.recovery.RecoveryRelauncher
+import com.reoky.raidframer.ui.dialog.RFDialog
 import com.reoky.raidframer.OverlayNav
 import com.reoky.raidframer.ui.LocalDragLock
 import com.reoky.raidframer.ui.OverlayType
@@ -213,6 +215,9 @@ fun SettingsOverlay(wm: WindowManager? = null) {
   val showUninstallConfirmDialog = remember { mutableStateOf(false) }
   val showUninstallingDialog = remember { mutableStateOf(false) }
   val showUninstallDoneDialog = remember { mutableStateOf(false) }
+  val showRecoveryConfirmDialog = remember { mutableStateOf(false) }
+  val showDistanceHelp = remember { mutableStateOf(false) }
+  val showAbortConfirmDialog = remember { mutableStateOf(false) }
   val uninstallScope = rememberCoroutineScope()
 
   // Auto-scroll to the update panel if opened from the update dialog
@@ -330,7 +335,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       CharacterDisplayPanel()
 
       if (config.lastSessionStart > 0) {
-        RecordingSessionPanel(config)
+        RecordingSessionPanel(config, onRequestAbortConfirm = { showAbortConfirmDialog.value = true })
       } else {
         CrashRecoveryBanner()
       }
@@ -339,7 +344,7 @@ fun SettingsOverlay(wm: WindowManager? = null) {
 
       CombatOverlaySettingsPanel()
 
-      PerformanceSettingsPanel(wm)
+      PerformanceSettingsPanel(wm, onShowDistanceHelp = { showDistanceHelp.value = true })
 
       RenderingBackendSettingsPanel()
 
@@ -351,6 +356,42 @@ fun SettingsOverlay(wm: WindowManager? = null) {
       SeedTableSettingsPanel(wm)
 
       VersionPanel()
+
+      // Recovery
+      Surface(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(10.dp),
+        color = RFColors.CardBackground,
+        elevation = 2.dp
+      ) {
+        Column(
+          modifier = Modifier
+            .border(1.dp, RFColors.CardBorder, RoundedCornerShape(10.dp))
+            .padding(16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          Text(
+            text = stringResource(Res.string.settings_recovery_description),
+            color = RFColors.TextSecondary,
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
+            textAlign = TextAlign.Center
+          )
+          Spacer(modifier = Modifier.height(12.dp))
+          Button(
+            onClick = { showRecoveryConfirmDialog.value = true },
+            colors = ButtonDefaults.buttonColors(RFColors.CardBorder)
+          ) {
+            Text(
+              text = stringResource(Res.string.settings_recovery_button),
+              color = RFColors.TextPrimary,
+              fontWeight = FontWeight.SemiBold
+            )
+          }
+        }
+      }
 
       // Uninstall :(
       Surface(
@@ -384,45 +425,46 @@ fun SettingsOverlay(wm: WindowManager? = null) {
     }
   }
 
+  if (showRecoveryConfirmDialog.value) {
+    RFDialog(
+      title = stringResource(Res.string.settings_recovery_confirm_title),
+      text = stringResource(Res.string.settings_recovery_confirm_text),
+      onDismissRequest = { showRecoveryConfirmDialog.value = false },
+      confirmLabel = stringResource(Res.string.settings_recovery_confirm_button),
+      dismissLabel = stringResource(Res.string.general_cancel),
+      onConfirm = {
+        showRecoveryConfirmDialog.value = false
+        RecoveryRelauncher.relaunchIntoRecovery()
+      }
+    )
+  }
+
   if (showUninstallConfirmDialog.value) {
-    AlertDialog(
+    RFDialog(
+      title = stringResource(Res.string.settings_uninstall_confirm_title),
+      text = stringResource(Res.string.settings_uninstall_confirm_text),
       onDismissRequest = { showUninstallConfirmDialog.value = false },
-      title = { Text(stringResource(Res.string.settings_uninstall_confirm_title), color = RFColors.TextPrimary) },
-      text = { Text(stringResource(Res.string.settings_uninstall_confirm_text), color = RFColors.TextSecondary) },
-      backgroundColor = RFColors.CardBackground,
-      shape = RoundedCornerShape(10.dp),
-      confirmButton = {
-        Button(
-          onClick = {
-            showUninstallConfirmDialog.value = false
-            showUninstallingDialog.value = true
-            uninstallScope.launch {
-              CompanionInteractor.uninstall()
-              showUninstallingDialog.value = false
-              showUninstallDoneDialog.value = true
-            }
-          },
-          colors = ButtonDefaults.buttonColors(Color(0xFFB71C1C))
-        ) {
-          Text(stringResource(Res.string.settings_uninstall_confirm_button), color = Color.White)
-        }
-      },
-      dismissButton = {
-        Button(
-          onClick = { showUninstallConfirmDialog.value = false },
-          colors = ButtonDefaults.buttonColors(RFColors.CardBorder)
-        ) {
-          Text(stringResource(Res.string.general_cancel), color = RFColors.TextPrimary)
+      confirmLabel = stringResource(Res.string.settings_uninstall_confirm_button),
+      confirmColor = Color(0xFFB71C1C),
+      dismissLabel = stringResource(Res.string.general_cancel),
+      onConfirm = {
+        showUninstallConfirmDialog.value = false
+        showUninstallingDialog.value = true
+        uninstallScope.launch {
+          CompanionInteractor.uninstall()
+          showUninstallingDialog.value = false
+          showUninstallDoneDialog.value = true
         }
       }
     )
   }
 
   if (showUninstallingDialog.value) {
-    AlertDialog(
+    RFDialog(
+      title = stringResource(Res.string.settings_uninstall_confirm_title),
       onDismissRequest = {},
-      title = { Text(stringResource(Res.string.settings_uninstall_confirm_title), color = RFColors.TextPrimary) },
-      text = {
+      dismissOnClickOutside = false,
+      content = {
         Row(verticalAlignment = Alignment.CenterVertically) {
           CircularProgressIndicator(
             modifier = Modifier.size(20.dp),
@@ -432,31 +474,43 @@ fun SettingsOverlay(wm: WindowManager? = null) {
           Spacer(modifier = Modifier.width(12.dp))
           Text(stringResource(Res.string.settings_uninstall_shutting_down), color = RFColors.TextSecondary)
         }
-      },
-      backgroundColor = RFColors.CardBackground,
-      shape = RoundedCornerShape(10.dp),
-      confirmButton = {},
-      dismissButton = {}
+      }
     )
   }
 
   if (showUninstallDoneDialog.value) {
-    AlertDialog(
+    RFDialog(
+      title = stringResource(Res.string.settings_uninstall_done_title),
+      text = stringResource(Res.string.settings_uninstall_done_text),
       onDismissRequest = {
         ProcessBuilder("control", "appwiz.cpl").start()
         exitProcess(0)
       },
-      title = { Text(stringResource(Res.string.settings_uninstall_done_title), color = RFColors.TextPrimary) },
-      text = { Text(stringResource(Res.string.settings_uninstall_done_text), color = RFColors.TextSecondary) },
-      backgroundColor = RFColors.CardBackground,
-      shape = RoundedCornerShape(10.dp),
-      confirmButton = {
-        Button(onClick = {
-          ProcessBuilder("control", "appwiz.cpl").start()
-          exitProcess(0)
-        }, colors = ButtonDefaults.buttonColors(RFColors.AccentRed)) {
-          Text(stringResource(Res.string.general_exit), color = Color.White)
-        }
+      confirmLabel = stringResource(Res.string.general_exit),
+      onConfirm = {
+        ProcessBuilder("control", "appwiz.cpl").start()
+        exitProcess(0)
+      }
+    )
+  }
+
+  // Distance help dialog (triggered from the performance panel)
+  if (showDistanceHelp.value) {
+    PerformanceDistanceHelpDialog(onDismiss = { showDistanceHelp.value = false })
+  }
+
+  // Abort session confirm (triggered from the recording session panel)
+  if (showAbortConfirmDialog.value) {
+    RFDialog(
+      title = stringResource(Res.string.session_abort_confirm_title),
+      text = stringResource(Res.string.session_abort_confirm_text),
+      onDismissRequest = { showAbortConfirmDialog.value = false },
+      confirmLabel = stringResource(Res.string.session_abort_confirm_button),
+      confirmColor = Color.Red.copy(alpha = 0.75f),
+      dismissLabel = stringResource(Res.string.general_cancel),
+      onConfirm = {
+        showAbortConfirmDialog.value = false
+        PlayerCacheInteractor.abortSession()
       }
     )
   }
@@ -991,10 +1045,9 @@ private fun CombatOverlaySettingsPanel() {
 }
 
 @Composable
-private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
+private fun PerformanceSettingsPanel(wm: WindowManager? = null, onShowDistanceHelp: () -> Unit = {}) {
   val config by RFConfig.state.collectAsState()
   val dragLock = LocalDragLock.current
-  var showDistanceHelp by remember { mutableStateOf(false) }
 
   SettingsSection(
     title = stringResource(Res.string.settings_performance_title),
@@ -1004,7 +1057,7 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
         text = stringResource(Res.string.settings_performance_distance_help),
         color = RFColors.AccentRed,
         fontSize = 11.sp,
-        modifier = Modifier.clickable { showDistanceHelp = true }
+        modifier = Modifier.clickable { onShowDistanceHelp() }
       )
     }
   ) {
@@ -1253,10 +1306,6 @@ private fun PerformanceSettingsPanel(wm: WindowManager? = null) {
 
   }
 
-  // Distance help dialog
-  if (showDistanceHelp) {
-    PerformanceDistanceHelpDialog(onDismiss = { showDistanceHelp = false })
-  }
 }
 
 @Composable
@@ -1431,55 +1480,29 @@ private fun PerformanceOption(
 
 @Composable
 private fun PerformanceDistanceHelpDialog(onDismiss: () -> Unit) {
-  Dialog(onDismissRequest = onDismiss) {
-    Surface(
-      shape = RoundedCornerShape(10.dp),
-      color = RFColors.CardBackground,
-      elevation = 8.dp,
-      modifier = Modifier.widthIn(max = 520.dp)
-    ) {
-      Column(
+  RFDialog(
+    title = stringResource(Res.string.performance_distance_help_title),
+    onDismissRequest = onDismiss,
+    content = {
+      // Game settings screenshot
+      Image(
+        painter = painterResource(Res.drawable.game_settings_distance_info),
+        contentDescription = "ArcheAge game settings showing combat info and distance filters",
         modifier = Modifier
-          .padding(16.dp)
-          .verticalScroll(rememberScrollState())
-      ) {
-        Text(
-          text = stringResource(Res.string.performance_distance_help_title),
-          color = RFColors.AccentRed,
-          fontSize = 16.sp,
-          fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Game settings screenshot
-        Image(
-          painter = painterResource(Res.drawable.game_settings_distance_info),
-          contentDescription = "ArcheAge game settings showing combat info and distance filters",
-          modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(6.dp))
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(
-          text = stringResource(Res.string.performance_distance_help_body),
-          color = RFColors.TextPrimary,
-          fontSize = 13.sp,
-          lineHeight = 19.sp
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-          Button(
-            onClick = onDismiss,
-            colors = ButtonDefaults.buttonColors(RFColors.AccentRed)
-          ) {
-            Text(stringResource(Res.string.general_ok), color = Color.White)
-          }
-        }
-      }
-    }
-  }
+          .fillMaxWidth()
+          .clip(RoundedCornerShape(6.dp))
+      )
+      Spacer(modifier = Modifier.height(12.dp))
+      Text(
+        text = stringResource(Res.string.performance_distance_help_body),
+        color = RFColors.TextPrimary,
+        fontSize = 13.sp,
+        lineHeight = 19.sp
+      )
+    },
+    confirmLabel = stringResource(Res.string.general_ok),
+    onConfirm = onDismiss
+  )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -2030,10 +2053,9 @@ private fun CrashRecoveryBanner() {
 }
 
 @Composable
-private fun RecordingSessionPanel(config: ConfigEntity) {
+private fun RecordingSessionPanel(config: ConfigEntity, onRequestAbortConfirm: () -> Unit = {}) {
   val mode = if (config.allowPVEDamage) "PvE" else "PvP"
   var elapsedSeconds by remember { mutableStateOf(0L) }
-  var showAbortConfirmDialog by remember { mutableStateOf(false) }
 
   LaunchedEffect(config.lastSessionStart) {
     while (config.lastSessionStart > 0) {
@@ -2069,7 +2091,7 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
         )
       }
       TextButton(
-        onClick = { showAbortConfirmDialog = true }
+        onClick = { onRequestAbortConfirm() }
       ) {
         Text(
           text = stringResource(Res.string.settings_recording_session_abort),
@@ -2092,55 +2114,6 @@ private fun RecordingSessionPanel(config: ConfigEntity) {
           fontWeight = FontWeight.SemiBold,
           fontSize = 13.sp
         )
-      }
-    }
-  }
-
-  if (showAbortConfirmDialog) {
-    Dialog(onDismissRequest = { showAbortConfirmDialog = false }) {
-      Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = Color.Black,
-        border = BorderStroke(1.dp, RFColors.CardBorder)
-      ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-          Text(
-            stringResource(Res.string.session_abort_confirm_title),
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-          )
-          Spacer(modifier = Modifier.height(6.dp))
-          Text(
-            stringResource(Res.string.session_abort_confirm_text),
-            color = Color.White,
-            fontSize = 14.sp,
-            lineHeight = 15.sp
-          )
-          Spacer(modifier = Modifier.height(12.dp))
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Button(
-              onClick = { showAbortConfirmDialog = false },
-              colors = ButtonDefaults.buttonColors(Color.White),
-              modifier = Modifier.padding(end = 8.dp)
-            ) {
-              Text(stringResource(Res.string.general_cancel), color = Color.Black, fontSize = 12.sp)
-            }
-            Button(
-              onClick = {
-                showAbortConfirmDialog = false
-                PlayerCacheInteractor.abortSession()
-              },
-              colors = ButtonDefaults.buttonColors(Color.Red.copy(alpha = 0.75f))
-            ) {
-              Text(stringResource(Res.string.session_abort_confirm_button), color = Color.White, fontSize = 12.sp)
-            }
-          }
-        }
       }
     }
   }
@@ -2461,7 +2434,7 @@ private fun chooseCustomExportBackground(
     val chooser = javax.swing.JFileChooser()
     chooser.dialogTitle = title
     chooser.fileFilter = FileNameExtensionFilter(filterDescription, "png")
-    if (chooser.showOpenDialog(null) != javax.swing.JFileChooser.APPROVE_OPTION) {
+    if (showFileChooserTopmost(chooser) != javax.swing.JFileChooser.APPROVE_OPTION) {
       onResult(null, null)
       return@Thread
     }

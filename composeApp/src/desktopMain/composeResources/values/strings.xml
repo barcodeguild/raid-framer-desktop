@@ -146,6 +146,33 @@ The app will notify the in-game addon to shut down before removing files.</strin
     <string name="settings_crash_recovery_title">Session Interrupted</string>
     <string name="settings_crash_recovery_message">A previous recording session was interrupted and has been discarded.</string>
 
+    <!-- Recovery (Settings entry point, shown at the bottom next to Uninstall) -->
+    <string name="settings_recovery_description">The app is working normally. If you ever want to reset lifetime stats and start fresh, you can repartition the internal database from recovery mode. A backup of the current database is kept automatically.</string>
+    <string name="settings_recovery_button">Recovery</string>
+    <string name="settings_recovery_confirm_title">Enter Recovery Mode?</string>
+    <string name="settings_recovery_confirm_text">Raid Framer will close and reopen in recovery mode, where the internal database can be reset safely. Nothing is deleted — a backup is kept.</string>
+    <string name="settings_recovery_confirm_button">Restart</string>
+
+    <!-- Recovery Mode (standalone window shown when the database cannot be opened) -->
+    <string name="recovery_title">Recovery Mode</string>
+    <string name="recovery_error_headline">A database migration failed or the database was corrupted, so Raid Framer could not open its data.</string>
+    <string name="recovery_error_reassurance">Resetting repartitions the internal database and should allow the app to launch. Nothing is lost — the old database is moved to a backup first.</string>
+    <string name="recovery_manual_headline">The app is working normally.</string>
+    <string name="recovery_manual_reassurance">You can repartition the internal database here to reset lifetime stats, sessions and settings and start fresh. The current database is backed up first, so nothing is lost.</string>
+    <string name="recovery_error_detail_format">Details: %1$s</string>
+    <string name="recovery_reset_button">Reset Database</string>
+    <string name="recovery_launch_button">Launch App</string>
+    <string name="recovery_view_log">View Log</string>
+    <string name="recovery_resetting">Resetting…</string>
+    <string name="recovery_reset_complete">Database reset complete.</string>
+    <string name="recovery_backup_label">Backup saved to:</string>
+    <string name="recovery_backup_hint">The old database is kept here in case it is needed later.</string>
+    <string name="recovery_reset_failed_format">Reset failed: %1$s</string>
+    <string name="recovery_reset_failed_lock_hint">The database file is still in use. Make sure no other copy of Raid Framer is running (check the system tray), then try again. If it still fails, restart the computer and try once more.</string>
+    <string name="recovery_confirm_title">Reset Database?</string>
+    <string name="recovery_confirm_text">The database, journals and log will be moved into a backup folder and a fresh database will be created. Lifetime stats and settings will start over.\n\nThe backup stays in the .RaidFramer folder, so the data can be recovered later if needed.</string>
+    <string name="recovery_confirm_button">Reset</string>
+
     <!-- Abort Session -->
     <string name="combat_stop_and_save">Save &amp; Stop</string>
     <string name="combat_abort_and_discard">Abort &amp; Discard</string>

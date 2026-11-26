@@ -63,4 +63,13 @@ object RFConfig {
     check(::repo.isInitialized) { ERMMAGEHRD }
     repo.awaitLoaded()
   }
+
+  /**
+   * Stops the repository for good so nothing can touch the database again. Called when
+   * the database bootstrap fails, so recovery mode can actually release the database's
+   * file lock. Safe to call before [init] or multiple times.
+   */
+  fun shutdown() {
+    if (::repo.isInitialized) repo.shutdown()
+  }
 }
