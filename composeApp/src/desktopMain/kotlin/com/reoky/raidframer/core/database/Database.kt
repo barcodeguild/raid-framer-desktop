@@ -1,7 +1,6 @@
 package com.reoky.raidframer.core.database
 
 import androidx.room.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.reoky.raidframer.AppGlobals
 import com.reoky.raidframer.core.interactor.LoggingInteractor
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +12,14 @@ import com.reoky.raidframer.core.helpers.getRaidFramerDirectory
  * Place to specify database options and settings and where the builder for the
  * database is created.
  */
+
+/**
+ * The app's SQLite driver. A singleton so recovery mode can reach
+ * [LeakGuardSQLiteDriver.closeUnreleasedConnections] — without it, Room's abandoned
+ * failed-open connection would keep the database file locked until the process exits.
+ */
+val appDatabaseDriver = LeakGuardSQLiteDriver()
+
 fun initialize(): AppDatabase {
 
   val TAG = "Core/Database.initialize()"
@@ -38,7 +45,7 @@ fun initialize(): AppDatabase {
   return Room.databaseBuilder<AppDatabase>(
     name = File(databaseFilePath).absolutePath,
   )
-    .setDriver(BundledSQLiteDriver())
+    .setDriver(appDatabaseDriver)
     .fallbackToDestructiveMigrationFrom(true, 1) // still developing, wipe from v1
     .addMigrations(MIGRATION_2_3) // added kill methods and basic migration for testing migrations to (2 -> 3 : 01/18/26)
     .addMigrations(MIGRATION_3_4) // added charm sounds conf entry (3 -> 4 : 01/19/26)
@@ -94,9 +101,10 @@ fun initialize(): AppDatabase {
     .addMigrations(MIGRATION_53_54) // 10/18/26 added ODE Songcraft triplet stats (Dissonance Quake, Critical Discord AoE, Shackle, Dissonance non-AoE, Critical Discord non-AoE, Battle Hymn)
     .addMigrations(MIGRATION_54_55) // 10/28/26 added nearbyShowInRaidOnly filter toggle
     .addMigrations(MIGRATION_55_56) // 11/03/26 added Stillness tracking, kill damage tracking, Sacred Dance placeholder
-    .fallbackToDestructiveMigration(true) // Wipes DB if no migration found
+    // Note: no blanket destructive fallbacks here. A missing migration path (or a
+    // version downgrade) must throw instead of silently wiping the database, so the
+    // failure reaches recovery mode where the data is backed up, not destroyed.
     //.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING) // WAL for better concurrency
-    .fallbackToDestructiveMigrationOnDowngrade(true)
     .setQueryCoroutineContext(Dispatchers.IO)
     .build()
 }

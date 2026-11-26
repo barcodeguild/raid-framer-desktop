@@ -175,7 +175,7 @@ class WindowManager(
   /*
    * Used when the user freaks out and doesn't know where their windows went. Ensures they are all back to default positions and foregrounded.
    */
-  fun resetAllWindowPositions() {
+  fun resetAllWindowPositions(toCorner: Boolean = false) {
     scope.launch {
       // Remember which windows were open so we can restore them (a reset should only move
       // windows, not change whether any specific overlay is open).
@@ -192,19 +192,22 @@ class WindowManager(
 
       delay(50)
 
-      // Reset each window to its default state
+      val corner = monitorWorkAreas().first().location
       OverlayType.entries.forEach { type ->
-        val defaultState = defaultWindowStateForTypeFor(type).copy(isVisible = wasVisible[type] == true)
+        val placement = if (toCorner) getWindowState(type).value.copy(
+          lastPositionXDp = corner.x.toFloat(), lastPositionYDp = corner.y.toFloat()
+        ) else defaultWindowStateForTypeFor(type)
+        val defaultState = placement.copy(isVisible = wasVisible[type] == true)
         windowStates[type]?.value = defaultState
 
         // Restore whatever was open before the reset (default state doesn't drive visibility)
         visibilityStates[type]?.value = wasVisible[type] == true
 
         // Persist to database
-        dao?.insert(defaultState)
+        saveState(defaultState)
       }
 
-      Log.info(TAG, "Reset all window positions to defaults upon user request.")
+      Log.info(TAG, "Reset all window positions (top-left corner: $toCorner).")
     }
   }
 

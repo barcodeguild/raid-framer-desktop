@@ -1,6 +1,7 @@
 package com.reoky.raidframer.core.interactor
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -66,6 +67,11 @@ object LoggingInteractor : Interactor() {
     } catch (e: Exception) {
       Log.error(TAG, "Failed to truncate log file: ${e.message}")
     }
+  }
+
+  /** Synchronously drains the queue to the log file. Used when a clean, immediate write matters. */
+  fun flush() {
+    runBlocking(Dispatchers.IO) { interact() }
   }
 
   override suspend fun interact() {

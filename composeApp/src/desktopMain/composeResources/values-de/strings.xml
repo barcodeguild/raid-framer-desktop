@@ -144,6 +144,32 @@ Die App wird das In-Game-Addon benachrichtigen, sich vor dem Entfernen der Datei
     <string name="settings_crash_recovery_title">Sitzung unterbrochen</string>
     <string name="settings_crash_recovery_message">Eine vorherige Aufnahmesitzung wurde unterbrochen und verworfen.</string>
 
+    <!-- Recovery (Settings entry point, shown at the bottom next to Uninstall) -->
+    <string name="settings_recovery_description">Die App funktioniert normal. Wenn Sie die Statistiken über die gesamte Spielzeit zurücksetzen und neu beginnen möchten, können Sie die interne Datenbank im Wiederherstellungsmodus neu erstellen. Ein Backup der aktuellen Datenbank wird automatisch angelegt.</string>
+    <string name="settings_recovery_button">Wiederherstellung</string>
+    <string name="settings_recovery_confirm_title">Wiederherstellungsmodus starten?</string>
+    <string name="settings_recovery_confirm_text">Raid Framer wird geschlossen und im Wiederherstellungsmodus neu geöffnet, wo die interne Datenbank sicher zurückgesetzt werden kann. Nichts wird gelöscht — ein Backup bleibt erhalten.</string>
+    <string name="settings_recovery_confirm_button">Neu starten</string>
+
+    <!-- Recovery Mode (standalone window shown when the database cannot be opened) -->
+    <string name="recovery_title">Wiederherstellungsmodus</string>
+    <string name="recovery_error_headline">Eine Datenbankmigration ist fehlgeschlagen oder die Datenbank war beschädigt, sodass Raid Framer seine Daten nicht öffnen konnte.</string>
+    <string name="recovery_error_reassurance">Das Zurücksetzen erstellt die interne Datenbank neu und sollte das Starten der App ermöglichen. Nichts geht verloren — die alte Datenbank wird zuvor in ein Backup verschoben.</string>
+    <string name="recovery_manual_headline">Die App funktioniert normal.</string>
+    <string name="recovery_manual_reassurance">Hier können Sie die interne Datenbank neu erstellen, um Statistiken über die gesamte Spielzeit, Sitzungen und Einstellungen zurückzusetzen und neu zu beginnen. Die aktuelle Datenbank wird zuerst gesichert, es geht nichts verloren.</string>
+    <string name="recovery_error_detail_format">Details: %1$s</string>
+    <string name="recovery_reset_button">Datenbank zurücksetzen</string>
+    <string name="recovery_launch_button">App starten</string>
+    <string name="recovery_view_log">Log ansehen</string>
+    <string name="recovery_resetting">Zurücksetzen…</string>
+    <string name="recovery_reset_complete">Datenbank zurückgesetzt.</string>
+    <string name="recovery_backup_label">Backup gespeichert unter:</string>
+    <string name="recovery_backup_hint">Die alte Datenbank bleibt hier erhalten, falls sie später benötigt wird.</string>
+    <string name="recovery_reset_failed_format">Zurücksetzen fehlgeschlagen: %1$s</string>
+    <string name="recovery_confirm_title">Datenbank zurücksetzen?</string>
+    <string name="recovery_confirm_text">Die Datenbank, die Journale und das Log werden in einen Backup-Ordner verschoben und eine neue Datenbank erstellt. Statistiken und Einstellungen beginnen von vorn.\n\nDas Backup bleibt im .RaidFramer-Ordner erhalten, falls die Daten später wiederhergestellt werden müssen.</string>
+    <string name="recovery_confirm_button">Zurücksetzen</string>
+
     <!-- Abort Session -->
     <string name="combat_stop_and_save">Speichern &amp; Stoppen</string>
     <string name="combat_abort_and_discard">Abbrechen &amp; Verwerfen</string>

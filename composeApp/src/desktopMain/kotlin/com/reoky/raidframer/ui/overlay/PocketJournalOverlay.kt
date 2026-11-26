@@ -38,9 +38,7 @@ import androidx.compose.material.Text
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TextButton as Material3TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,6 +69,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Popup
 import com.reoky.raidframer.ui.component.PocketEntryThumbnail
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.ui.dialog.RFDialog
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.core.pocket.PocketDraftCoordinator
 import com.reoky.raidframer.core.pocket.PocketEntry
@@ -206,27 +205,6 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
         }
       }
     }
-    if (datePickerOpen) {
-      val pickerState = rememberDatePickerState(
-        initialSelectedDateMillis = selectedDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
-      )
-      DatePickerDialog(
-        onDismissRequest = { datePickerOpen = false },
-        confirmButton = {
-          Material3TextButton(onClick = {
-            pickerState.selectedDateMillis?.let { millis ->
-              selectedDate = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-            }
-            datePickerOpen = false
-          }) { Text(stringResource(Res.string.pocket_journal_apply), color = RFColors.AccentRed) }
-        },
-        dismissButton = {
-          Material3TextButton(onClick = { datePickerOpen = false }) {
-            Text(stringResource(Res.string.pocket_journal_cancel), color = Color.White)
-          }
-        }
-      ) { DatePicker(state = pickerState) }
-    }
     activeTag?.let { tag ->
       Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
@@ -323,6 +301,23 @@ fun PocketJournalOverlay(wm: WindowManager? = null) {
         }
       }
     }
+  }
+  if (datePickerOpen) {
+    val pickerState = rememberDatePickerState(
+      initialSelectedDateMillis = selectedDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+    )
+    RFDialog(
+      onDismissRequest = { datePickerOpen = false },
+      confirmLabel = stringResource(Res.string.pocket_journal_apply),
+      dismissLabel = stringResource(Res.string.pocket_journal_cancel),
+      onConfirm = {
+        pickerState.selectedDateMillis?.let { millis ->
+          selectedDate = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+        }
+        datePickerOpen = false
+      },
+      content = { DatePicker(state = pickerState) }
+    )
   }
 }
 }

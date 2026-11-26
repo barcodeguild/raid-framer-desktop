@@ -5,6 +5,7 @@ import com.reoky.raidframer.core.database.RFDao
 import com.reoky.raidframer.core.interactor.Interactor
 import com.reoky.raidframer.core.interactor.Log
 import com.reoky.raidframer.core.helpers.getRaidFramerDirectory
+import com.reoky.raidframer.core.helpers.showFileChooserTopmost
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -135,7 +136,7 @@ object SeedTableInteractor : Interactor() {
         chooser.dialogTitle = "Export Seed Table"
         chooser.selectedFile = File("seedtable.rfst")
         chooser.setFileFilter(FileNameExtensionFilter("Raid Framer Seed Table (*.rfst)", "rfst"))
-        val result = chooser.showSaveDialog(null)
+        val result = showFileChooserTopmost(chooser)
         if (result == JFileChooser.APPROVE_OPTION) {
           var file = chooser.selectedFile
           if (!file.name.endsWith(".rfst", ignoreCase = true)) {
@@ -155,7 +156,7 @@ object SeedTableInteractor : Interactor() {
         val chooser = JFileChooser()
         chooser.dialogTitle = "Import Seed Table"
         chooser.setFileFilter(FileNameExtensionFilter("Raid Framer Seed Table (*.rfst)", "rfst"))
-        val result = chooser.showOpenDialog(null)
+        val result = showFileChooserTopmost(chooser)
         if (result == JFileChooser.APPROVE_OPTION) {
           onFileSelected(chooser.selectedFile)
         }

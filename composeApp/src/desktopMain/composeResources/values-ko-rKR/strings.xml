@@ -132,6 +132,32 @@
     <string name="settings_recording_session_stop">녹화 중지</string>
     <string name="settings_crash_recovery_title">세션 중단됨</string>
     <string name="settings_crash_recovery_message">이전 녹화 세션이 중단되어 삭제되었습니다.</string>
+
+    <!-- Recovery (Settings entry point, shown at the bottom next to Uninstall) -->
+    <string name="settings_recovery_description">앱이 정상적으로 작동 중입니다. 누적 통계를 초기화하고 새로 시작하고 싶다면 복구 모드에서 내부 데이터베이스를 다시 만들 수 있습니다. 현재 데이터베이스의 백업이 자동으로 유지됩니다.</string>
+    <string name="settings_recovery_button">복구</string>
+    <string name="settings_recovery_confirm_title">복구 모드에 진입하시겠습니까?</string>
+    <string name="settings_recovery_confirm_text">Raid Framer가 종료된 후 복구 모드로 다시 열립니다. 거기서 내부 데이터베이스를 안전하게 초기화할 수 있습니다. 아무것도 삭제되지 않으며 백업이 유지됩니다.</string>
+    <string name="settings_recovery_confirm_button">재시작</string>
+
+    <!-- Recovery Mode (standalone window shown when the database cannot be opened) -->
+    <string name="recovery_title">복구 모드</string>
+    <string name="recovery_error_headline">데이터베이스 마이그레이션에 실패했거나 데이터베이스가 손상되어 Raid Framer가 데이터를 열 수 없습니다.</string>
+    <string name="recovery_error_reassurance">초기화하면 내부 데이터베이스를 다시 만들어 앱이 정상적으로 실행되도록 합니다. 데이터는 사라지지 않습니다 — 기존 데이터베이스는 먼저 백업 폴더로 이동됩니다.</string>
+    <string name="recovery_manual_headline">앱이 정상적으로 작동 중입니다.</string>
+    <string name="recovery_manual_reassurance">여기서 내부 데이터베이스를 다시 만들어 누적 통계, 세션, 설정을 초기화하고 새로 시작할 수 있습니다. 현재 데이터베이스는 먼저 백업되므로 아무것도 사라지지 않습니다.</string>
+    <string name="recovery_error_detail_format">상세 정보: %1$s</string>
+    <string name="recovery_reset_button">데이터베이스 초기화</string>
+    <string name="recovery_launch_button">앱 실행</string>
+    <string name="recovery_view_log">로그 보기</string>
+    <string name="recovery_resetting">초기화 중…</string>
+    <string name="recovery_reset_complete">데이터베이스 초기화 완료.</string>
+    <string name="recovery_backup_label">백업 저장 위치:</string>
+    <string name="recovery_backup_hint">기존 데이터베이스는 나중에 필요할 경우를 대비해 여기에 보관됩니다.</string>
+    <string name="recovery_reset_failed_format">초기화 실패: %1$s</string>
+    <string name="recovery_confirm_title">데이터베이스를 초기화하시겠습니까?</string>
+    <string name="recovery_confirm_text">데이터베이스, 저널 폴더, 로그가 백업 폴더로 이동된 후 새 데이터베이스가 생성됩니다. 누적 통계와 설정은 새로 시작됩니다.\n\n백업은 .RaidFramer 폴더에 보관되므로 나중에 데이터를 복구할 수 있습니다.</string>
+    <string name="recovery_confirm_button">초기화</string>
     <string name="combat_stop_and_save">저장 후 중지</string>
     <string name="combat_abort_and_discard">중단하고 삭제</string>
     <string name="combat_save_and_exit_tooltip">저장 후 종료</string>

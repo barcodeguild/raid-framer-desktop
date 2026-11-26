@@ -96,6 +96,7 @@ import com.reoky.raidframer.core.pocket.PocketAttachmentRejection
 import com.reoky.raidframer.core.pocket.PocketAttachmentResult
 import com.reoky.raidframer.core.pocket.parsePocketMarkdown
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.ui.dialog.RFDialog
 import com.reoky.raidframer.core.database.PocketAttachmentEntity
 import com.reoky.raidframer.core.helpers.FontsHelper
 import com.reoky.raidframer.AppState
@@ -189,6 +190,7 @@ fun PocketEditorOverlay(wm: WindowManager? = null) {
     }
   }
 
+  Box(modifier = Modifier.fillMaxSize()) {
   Column(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.66f))) {
     val editorBaseTitle = stringResource(Res.string.pocket_editor_title)
     val editorTitle = if (title.isBlank()) editorBaseTitle else stringResource(Res.string.pocket_editor_title_format, title)
@@ -452,48 +454,40 @@ rightActions = {
         PocketMarkdownPreview(markdown, draft?.metadata?.markdownPath)
       }
     }
-    if (linkDialogOpen) {
-      AlertDialog(
-        onDismissRequest = { linkDialogOpen = false },
-        title = { Text(stringResource(Res.string.pocket_editor_insert_link_title), color = Color.White) },
-        text = {
-          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-              value = linkTitle,
-              onValueChange = { linkTitle = it },
-              label = { Text(stringResource(Res.string.pocket_editor_link_title_label), color = Color.White) },
-              textStyle = TextStyle(color = Color.White),
-              colors = editorFieldColors()
-            )
-            OutlinedTextField(
-              value = linkUrl,
-              onValueChange = { linkUrl = it },
-              label = { Text(stringResource(Res.string.pocket_editor_link_url_label), color = Color.White) },
-              textStyle = TextStyle(color = Color.White),
-              colors = editorFieldColors()
-            )
-          }
-        },
-        confirmButton = {
-          TextButton(onClick = {
-            if (linkUrl.isNotBlank()) markdownValue =
-              insertMarkdown(markdownValue, "[${linkTitle.ifBlank { linkUrl }}]($linkUrl)")
-            linkDialogOpen = false
-          }) { Text(stringResource(Res.string.pocket_editor_insert), color = RFColors.AccentRed) }
-        },
-        dismissButton = {
-          TextButton(onClick = { linkDialogOpen = false }) {
-            Text(
-              stringResource(Res.string.pocket_editor_cancel),
-              color = Color.White
-            )
-          }
-        },
-        backgroundColor = Color(0xFF202020),
-        contentColor = Color.White
-      )
-    }
   }
+  if (linkDialogOpen) {
+    RFDialog(
+      title = stringResource(Res.string.pocket_editor_insert_link_title),
+      onDismissRequest = { linkDialogOpen = false },
+      confirmLabel = stringResource(Res.string.pocket_editor_insert),
+      dismissLabel = stringResource(Res.string.pocket_editor_cancel),
+      onConfirm = {
+        if (linkUrl.isNotBlank()) {
+          markdownValue = insertMarkdown(markdownValue, "[${linkTitle.ifBlank { linkUrl }}]($linkUrl)")
+        }
+        linkDialogOpen = false
+      },
+      content = {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          OutlinedTextField(
+            value = linkTitle,
+            onValueChange = { linkTitle = it },
+            label = { Text(stringResource(Res.string.pocket_editor_link_title_label), color = Color.White) },
+            textStyle = TextStyle(color = Color.White),
+            colors = editorFieldColors()
+          )
+          OutlinedTextField(
+            value = linkUrl,
+            onValueChange = { linkUrl = it },
+            label = { Text(stringResource(Res.string.pocket_editor_link_url_label), color = Color.White) },
+            textStyle = TextStyle(color = Color.White),
+            colors = editorFieldColors()
+          )
+        }
+      }
+    )
+  }
+}
 }
 
 private enum class MarkdownAction { BOLD, ITALIC, STRIKE, CODE, HIGHLIGHT, BULLET, TASK, TABLE, EMOJI, LINK, IMAGE, CURRENT_TARGET, TARGET_GUILD, EVENT, RAID }

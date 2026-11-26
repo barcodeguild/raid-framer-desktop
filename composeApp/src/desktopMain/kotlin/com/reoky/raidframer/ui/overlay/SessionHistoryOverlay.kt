@@ -31,9 +31,7 @@ import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TextButton as Material3TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,6 +59,7 @@ import com.reoky.raidframer.core.database.SessionSummary
 import com.reoky.raidframer.core.definitions.SpecType
 import com.reoky.raidframer.core.definitions.sortedByDisplayOrder
 import com.reoky.raidframer.core.helpers.RFColors
+import com.reoky.raidframer.ui.dialog.RFDialog
 import com.reoky.raidframer.core.helpers.humanReadableAbbreviation
 import com.reoky.raidframer.core.helpers.skillTreeIconPainterFor
 import com.reoky.raidframer.core.helpers.showCsvSaveChooser
@@ -160,6 +159,7 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
   fun dateOf(millis: Long) = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
   fun matchesDate(end: Long) = selectedDate == null || dateOf(end) == selectedDate
 
+  Box(modifier = Modifier.fillMaxSize()) {
   Column(modifier = Modifier.fillMaxSize().background(Color(0xFF0E0E0E).copy(alpha = 0.97f))) {
     TitleBarComponent(
       title = historyTitleText,
@@ -201,29 +201,26 @@ fun SessionHistoryOverlay(wm: WindowManager?) {
       )
     }
 
-    if (datePickerOpen) {
-      val pickerState = rememberDatePickerState(
-        initialSelectedDateMillis = selectedDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
-      )
-      DatePickerDialog(
-        onDismissRequest = { datePickerOpen = false; dragLock.value = false },
-        confirmButton = {
-          Material3TextButton(onClick = {
-            pickerState.selectedDateMillis?.let { millis ->
-              selectedDate = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-            }
-            datePickerOpen = false
-            dragLock.value = false
-          }) { Text(applyText, color = RFColors.AccentRed) }
-        },
-        dismissButton = {
-          Material3TextButton(onClick = { datePickerOpen = false; dragLock.value = false }) {
-            Text(cancelText, color = Color.White)
-          }
-        }
-      ) { DatePicker(state = pickerState) }
-    }
   }
+  if (datePickerOpen) {
+    val pickerState = rememberDatePickerState(
+      initialSelectedDateMillis = selectedDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+    )
+    RFDialog(
+      onDismissRequest = { datePickerOpen = false; dragLock.value = false },
+      confirmLabel = applyText,
+      dismissLabel = cancelText,
+      onConfirm = {
+        pickerState.selectedDateMillis?.let { millis ->
+          selectedDate = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+        }
+        datePickerOpen = false
+        dragLock.value = false
+      },
+      content = { DatePicker(state = pickerState) }
+    )
+  }
+}
 }
 
 @Composable
