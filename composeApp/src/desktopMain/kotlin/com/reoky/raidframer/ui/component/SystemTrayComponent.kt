@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import raid_framer_desktop.composeapp.generated.resources.Res
 import raid_framer_desktop.composeapp.generated.resources.app_tray_reset_positions
+import raid_framer_desktop.composeapp.generated.resources.app_tray_move_to_corner
 import raid_framer_desktop.composeapp.generated.resources.app_tray_title
 import raid_framer_desktop.composeapp.generated.resources.general_about
 import raid_framer_desktop.composeapp.generated.resources.general_exit
@@ -90,6 +91,7 @@ fun ApplicationScope.SystemTrayComponent(
   val settingsStr = stringResource(Res.string.general_settings)
   val aboutStr = stringResource(Res.string.general_about)
   val resetStr = stringResource(Res.string.app_tray_reset_positions)
+  val cornerStr = stringResource(Res.string.app_tray_move_to_corner)
   val exitStr = stringResource(Res.string.general_exit)
   val dragonBreathsStr = stringResource(Res.string.tray_dragon_breaths)
   val pocketJournalStr = stringResource(Res.string.tray_pocket_journal)
@@ -131,7 +133,7 @@ fun ApplicationScope.SystemTrayComponent(
     val mouseY = pointer?.y ?: (screen.y + screen.height)
 
     // Dynamic height based on items shown
-    var itemCount = 12 // Take Screenshot, Copy Screenshot, Pocket Journal, Player Browser, Session History, Settings, Lua Options, About, Help, Reset, Exit, Close
+    var itemCount = 13 // Take Screenshot, Copy Screenshot, Pocket Journal, Player Browser, Session History, Settings, Lua Options, About, Help, Reset, Corner, Exit, Close
     if (isRecording) itemCount += 2 else itemCount += 1 // Save+Abort or New
     itemCount += 3 // Dragon Breaths, Raid Mgmt, Battle Summary
     if (config.performanceBattleGraphEnabled) itemCount += 1
@@ -264,6 +266,10 @@ fun ApplicationScope.SystemTrayComponent(
         TrayMenuItem(iconCode = "\uf0e2", text = resetStr) {
           menuVisible = false
           wm.resetAllWindowPositions()
+        }
+        TrayMenuItem(iconCode = "\uf047", text = cornerStr) {
+          menuVisible = false
+          wm.resetAllWindowPositions(toCorner = true)
         }
         TrayMenuItem(iconCode = "\uf011", text = exitStr) {
           menuVisible = false

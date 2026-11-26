@@ -39,7 +39,7 @@ import com.reoky.raidframer.ui.overlay.ScreenshotPreviewOverlay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.awt.GraphicsEnvironment
+import java.awt.Rectangle
 import java.awt.event.ComponentAdapter
 
 @Composable
@@ -56,6 +56,12 @@ fun OverlayContainer(wm: WindowManager) {
     val visible = wm.isVisible(type).value
     if (visible) {
       val state by wm.getWindowState(type)
+      val initialPosition = remember(type) {
+        val bounds = Rectangle(state.lastPositionXDp.toInt(), state.lastPositionYDp.toInt(),
+          state.lastWidthDp.toInt(), state.lastHeightDp.toInt())
+        val point = reachablePosition(bounds, monitorWorkAreas())
+        WindowPosition(Dp(point.x.toFloat()), Dp(point.y.toFloat()))
+      }
       val everythingVisible by AppState.isEverythingVisible.collectAsState()
       val resizable = remember { mutableStateOf(true) }
 
@@ -70,7 +76,7 @@ fun OverlayContainer(wm: WindowManager) {
       OverlayWindow(
         title = type.name,
         overlayType = type,
-        initialPosition = WindowPosition(Dp(state.lastPositionXDp), Dp(state.lastPositionYDp)),
+        initialPosition = initialPosition,
         initialSize = DpSize(Dp(state.lastWidthDp), Dp(state.lastHeightDp)),
         windowType = effectiveWindowType,
         isVisible = wm.visibilityStates[type] ?: mutableStateOf(false),
@@ -168,14 +174,15 @@ fun notifyWindowManagerStateChanged(
   window: ComposeWindow
 ) {
   try {
-    val correctedY = moveDownIfAboveVisibleMonitor(window)
-    val pos = window.locationOnScreen
+    if (!window.isShowing) return
+    val pos = reachablePosition(window.bounds, monitorWorkAreas())
+    if (pos != window.location) window.location = pos
     val size = window.size
     if (size.width > 0 && size.height > 0) {
       windowManager.updateWindowState(type) {
         copy(
           lastPositionXDp = pos.x.toFloat(),
-          lastPositionYDp = correctedY?.toFloat() ?: pos.y.toFloat(),
+          lastPositionYDp = pos.y.toFloat(),
           lastWidthDp = size.width.toFloat(),
           lastHeightDp = size.height.toFloat()
         )
@@ -188,24 +195,3 @@ fun notifyWindowManagerStateChanged(
   }
 }
 
-/**
- * Correct windows that are above the top of the monitor they are actually on.
- * A negative Y is valid when a secondary monitor is arranged above the primary one,
- * so the monitor is selected using the window center rather than the primary display.
- */
-private fun moveDownIfAboveVisibleMonitor(window: ComposeWindow): Int? {
-  val bounds = window.bounds
-  if (bounds.width <= 0 || bounds.height <= 0) return null
-
-  val center = java.awt.Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
-  val monitor = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-    .map { it.defaultConfiguration.bounds }
-    .firstOrNull { it.contains(center) }
-    ?: return null
-
-  if (bounds.y >= monitor.y) return null
-
-  val correctedY = monitor.y + 100
-  window.setLocation(bounds.x, correctedY)
-  return correctedY
-}

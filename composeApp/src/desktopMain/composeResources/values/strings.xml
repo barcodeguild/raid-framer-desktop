@@ -635,6 +635,7 @@ To reduce bias, the recorder must try to stay in range of the raid at all times.
     <!-- App / Tray Menu -->
     <string name="app_tray_title">.: Raid Framer :.</string>
     <string name="app_tray_reset_positions">Reset Window Positions</string>
+    <string name="app_tray_move_to_corner">Move All to Top Left</string>
     <string name="app_replay_viewing_format">You are viewing a replay of combat data from: %1$s
 
 Live monitoring is disabled while viewing replays.</string>

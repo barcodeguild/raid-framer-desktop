@@ -257,15 +257,15 @@ enum class OverlayWindowType {
 // Default positions and sizes for various overlay types
 fun defaultWindowStateForTypeFor(type: OverlayType): WindowStateEntity {
   return when (type) {
-    OverlayType.COMBAT -> WindowStateEntity(
+    OverlayType.COMBAT -> monitorWorkAreas().first().let { area -> WindowStateEntity(
       overlayType = type.name,
       windowType = OverlayWindowType.OVERLAY,
-      lastPositionXDp = 9f,
-      lastPositionYDp = 1031f,
+      lastPositionXDp = area.x + 9f,
+      lastPositionYDp = area.y + (area.height - 204f - 9f).coerceAtLeast(0f),
       lastWidthDp = 738f,
       lastHeightDp = 204f,
       isVisible = true
-    )
+    ) }
 
     OverlayType.PLAYER_CARD -> WindowStateEntity(
       overlayType = type.name,
